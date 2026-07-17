@@ -1,0 +1,13 @@
+package com.alexxlpz.crm_cbelleza;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class CrmCBellezaApplication {
+
+    static void main(String[] args) {
+        SpringApplication.run(CrmCBellezaApplication.class, args);
+    }
+
+}
