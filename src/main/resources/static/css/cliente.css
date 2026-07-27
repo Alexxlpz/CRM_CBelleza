@@ -1,0 +1,264 @@
+/* Client Centers list, details, and booking layouts */
+
+/* Search bar wrapper */
+.filter-search-bar {
+    margin-bottom: 30px;
+    padding: 20px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.filter-search-bar form {
+    display: flex;
+    width: 100%;
+    gap: 12px;
+}
+
+.filter-search-bar input {
+    flex: 1;
+}
+
+/* Centers Grid layout */
+.centers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+    margin-bottom: 40px;
+}
+
+.center-card {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    transition: var(--transition);
+}
+
+.center-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 40px rgba(197, 168, 128, 0.12);
+    border-color: var(--primary-light);
+}
+
+.center-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+
+.center-card-title {
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.center-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.center-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.center-meta-item i {
+    color: var(--primary-dark);
+    font-size: 16px;
+    width: 18px;
+}
+
+.center-card-footer {
+    margin-top: auto;
+}
+
+/* Center Details: Beautiful Hero Header & Booking Section */
+.center-hero-header {
+    margin-bottom: 30px;
+    padding: 40px;
+    text-align: center;
+    border-radius: var(--border-radius-lg);
+    background: linear-gradient(135deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.3) 100%);
+    border: 1px solid var(--card-border);
+    position: relative;
+    overflow: hidden;
+}
+
+@media (prefers-color-scheme: dark) {
+    .center-hero-header {
+        background: linear-gradient(135deg, rgba(32,27,24,0.7) 0%, rgba(32,27,24,0.3) 100%);
+    }
+}
+
+.hero-title {
+    font-size: 36px;
+    font-weight: 800;
+    margin-bottom: 24px;
+    color: var(--primary-dark);
+}
+
+.hero-meta-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 24px;
+    font-size: 14px;
+}
+
+.hero-meta-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    text-align: left;
+    background: rgba(197, 168, 128, 0.1);
+    padding: 12px 20px;
+    border-radius: var(--border-radius-md);
+    min-width: 220px;
+    flex: 1;
+}
+
+.hero-meta-item i {
+    color: var(--primary);
+    font-size: 20px;
+    margin-top: 2px;
+}
+
+.hero-meta-label {
+    font-weight: 700;
+    display: block;
+    margin-bottom: 4px;
+    color: var(--text-main);
+}
+
+.hero-meta-value {
+    color: var(--text-muted);
+}
+
+.booking-section {
+    padding: 40px;
+}
+
+.booking-section-title {
+    font-size: 24px;
+    border-bottom: 1px solid rgba(197, 168, 128, 0.15);
+    padding-bottom: 16px;
+    margin-bottom: 32px;
+    display: flex;
+    align-items: center;
+}
+
+.btn-large-submit {
+    width: 100%;
+    margin-top: 30px;
+    padding: 16px;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+@media (max-width: 768px) {
+    .center-hero-header { padding: 24px 16px; margin-bottom: 16px; }
+    .hero-title { font-size: 28px; }
+    .hero-meta-container { gap: 12px; }
+    .hero-meta-item { min-width: 100%; }
+    .booking-section { padding: 24px 16px; }
+    .booking-section-title { margin-bottom: 20px; font-size: 20px; }
+}
+
+/* Services Selection Catalog */
+.treatment-select-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 14px;
+    margin-bottom: 20px;
+}
+
+.treatment-select-card {
+    position: relative;
+    padding: 16px;
+    border-radius: var(--border-radius-md);
+    background: rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(197, 168, 128, 0.2);
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    text-align: left;
+}
+
+.treatment-select-card input[type="radio"] {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    accent-color: var(--primary-dark);
+    width: 18px;
+    height: 18px;
+}
+
+.treatment-select-card:hover {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: var(--primary);
+}
+
+.treatment-select-card:has(input[type="radio"]:checked) {
+    background: white;
+    border-color: var(--primary-dark);
+    box-shadow: var(--shadow-soft);
+    transform: translateY(-2px);
+}
+
+.treatment-card-title {
+    font-size: 14px;
+    font-weight: 700;
+    padding-right: 20px; /* Leave space for radio */
+}
+
+.treatment-card-desc {
+    font-size: 11px;
+    color: var(--text-muted);
+    line-height: 1.4;
+    flex: 1;
+}
+
+.treatment-card-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 4px;
+}
+
+.treatment-card-price {
+    font-weight: 700;
+    color: var(--primary-dark);
+    font-size: 14px;
+}
+
+.treatment-card-duration {
+    font-size: 11px;
+    color: var(--text-muted);
+    background: rgba(0,0,0,0.04);
+    padding: 2px 6px;
+    border-radius: 6px;
+}
+
+.guest-info-block {
+    background: rgba(224, 176, 176, 0.08);
+    border: 1px dashed rgba(224, 176, 176, 0.35);
+    padding: 20px;
+    border-radius: var(--border-radius-md);
+    margin-top: 10px;
+    margin-bottom: 20px;
+}
+
+.guest-info-block h4 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--secondary-dark);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+}

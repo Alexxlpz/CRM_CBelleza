@@ -4,13 +4,13 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "users")
+@Table(name = "products")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class User {
+public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -18,14 +18,11 @@ public class User {
     @Column(nullable = false)
     private String name;
 
-    private String email;
-    private String phone;
+    @Column(length = 1000)
+    private String description;
 
-    @Enumerated(EnumType.STRING)
+    private String category;
+    
     @Column(nullable = false)
-    private Role role;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "center_id")
-    private Center center;
+    private Double price;
 }

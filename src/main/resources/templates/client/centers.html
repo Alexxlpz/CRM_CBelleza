@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Centros de Belleza - BellaBelleza</title>
+    <!-- Lucide Icons CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.321.0/font/lucide.min.css">
+    <!-- Stylesheets -->
+    <!-- Leaflet CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/cliente.css">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <a href="/" class="back-arrow-btn" aria-label="Volver" style="margin-bottom: 0;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            </a>
+            <a href="/" class="nav-brand">
+                <i class="lucide-sparkles"></i>
+                <span>BellaBelleza</span>
+            </a>
+        </div>
+        <div class="nav-session-info">
+            <a href="/client/appointments" style="color:var(--text-main); font-weight:600; text-decoration:none; margin-right:8px">
+                <i class="lucide-calendar-days" style="vertical-align:middle; margin-right:2px"></i> Mis Citas
+            </a>
+            <a href="/logout" class="nav-logout"><i class="lucide-log-out"></i> Salir</a>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <main class="main-container">
+        
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1>Nuestros Centros de Belleza</h1>
+            <p>Elige el salón más conveniente y agenda tu experiencia de lujo</p>
+        </div>
+
+        <!-- Advanced Search Bar -->
+        <div class="filter-search-bar glass-panel" style="flex-direction: column; align-items: stretch;">
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <input type="text" id="searchName" class="form-control" placeholder="Buscar centro..." style="flex: 1; min-width: 0;">
+                
+                <button type="button" class="btn btn-secondary" style="padding: 0; width: 42px; height: 42px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;" onclick="toggleAdvancedSearch()" id="btnAdvSearch" aria-label="Filtros avanzados">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+                </button>
+                <button type="button" class="btn btn-secondary" style="padding: 0; width: 42px; height: 42px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;" onclick="toggleMap()" id="btnMapToggle" aria-label="Ver en mapa">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"></polygon><line x1="9" y1="3" x2="9" y2="21"></line><line x1="15" y1="3" x2="15" y2="21"></line></svg>
+                </button>
+                <button type="button" class="btn btn-primary" style="padding: 0; width: 42px; height: 42px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;" onclick="resetAndFetch()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                </button>
+            </div>
+            
+            <div id="advancedSearchPanel" style="display: none; margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(197, 168, 128, 0.2);">
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 200px;">
+                        <label class="form-label" style="font-size: 12px; margin-bottom: 4px;">Tipo de Tratamiento</label>
+                        <select id="searchTreatment" class="form-control">
+                            <option value="">Cualquier tipo</option>
+                            <option value="MANICURA_PEDICURA">Manicura y Pedicura</option>
+                            <option value="FACIAL">Tratamientos Faciales</option>
+                            <option value="CORPORAL">Tratamientos Corporales</option>
+                            <option value="MASAJES">Masajes</option>
+                            <option value="PELUQUERIA">Peluquería</option>
+                            <option value="DEPILACION">Depilación</option>
+                            <option value="OTRO">Otro</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Map Container (Hidden by default) -->
+        <div id="mapContainer" style="display: none; height: 500px; width: 100%; border-radius: 12px; margin-top: 20px; z-index: 1;"></div>
+
+        <!-- Centers Cards Grid (Populated by JS) -->
+        <div class="centers-grid" id="centersGrid">
+            <!-- Cards will be injected here -->
+        </div>
+
+        <!-- Infinite Scroll Trigger -->
+        <div id="infiniteScrollTrigger" style="text-align: center; padding: 20px; color: var(--text-muted);">
+            <i class="lucide-loader" style="animation: spin 1s linear infinite;"></i> Cargando centros cercanos...
+        </div>
+        
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 BellaBelleza CRM. Prototipo responsive.</p>
+    </footer>
+
+    <style>
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .hide-mobile { display: inline; }
+        @media (max-width: 500px) { .hide-mobile { display: none; } }
+    </style>
+
+    <script>
+        let userLat = null;
+        let userLon = null;
+        let currentPage = 0;
+        let isLoading = false;
+        let hasMore = true;
+        
+        const centersGrid = document.getElementById('centersGrid');
+        const trigger = document.getElementById('infiniteScrollTrigger');
+        const mapContainer = document.getElementById('mapContainer');
+        const btnMapToggle = document.getElementById('btnMapToggle');
+        
+        let isMapView = false;
+        let map = null;
+        let mapMarkers = [];
+
+        function toggleAdvancedSearch() {
+            const panel = document.getElementById('advancedSearchPanel');
+            const btn = document.getElementById('btnAdvSearch');
+            if (panel.style.display === 'none') {
+                panel.style.display = 'block';
+                btn.style.background = 'var(--primary)';
+                btn.style.color = 'white';
+            } else {
+                panel.style.display = 'none';
+                btn.style.background = 'transparent';
+                btn.style.color = 'var(--text-main)';
+            }
+        }
+
+        function toggleMap() {
+            isMapView = !isMapView;
+            if (isMapView) {
+                btnMapToggle.style.background = 'var(--primary)';
+                btnMapToggle.style.color = 'white';
+                centersGrid.style.display = 'none';
+                trigger.style.display = 'none';
+                mapContainer.style.display = 'block';
+                initMap();
+            } else {
+                btnMapToggle.style.background = 'transparent';
+                btnMapToggle.style.color = 'var(--text-main)';
+                mapContainer.style.display = 'none';
+                centersGrid.style.display = 'grid'; // Restore grid
+                resetAndFetch();
+            }
+        }
+
+        function initMap() {
+            if (map) {
+                map.invalidateSize();
+                fetchMapCenters();
+                return;
+            }
+            
+            // Default center (e.g. Madrid) or user location
+            const initLat = userLat || 40.4168;
+            const initLon = userLon || -3.7038;
+            
+            map = L.map('mapContainer').setView([initLat, initLon], 12);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+                maxZoom: 19
+            }).addTo(map);
+
+            if (userLat && userLon) {
+                L.marker([userLat, userLon], {
+                    icon: L.icon({
+                        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
+                        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                        iconSize: [25, 41], iconAnchor: [12, 41]
+                    })
+                }).addTo(map).bindPopup('Tu ubicación');
+            }
+
+            map.on('moveend', () => {
+                fetchMapCenters();
+            });
+
+            fetchMapCenters();
+        }
+
+        async function fetchMapCenters() {
+            if (!map) return;
+            const bounds = map.getBounds();
+            const name = document.getElementById('searchName').value;
+            const treatment = document.getElementById('searchTreatment').value;
+
+            const params = new URLSearchParams({
+                north: bounds.getNorth(),
+                south: bounds.getSouth(),
+                east: bounds.getEast(),
+                west: bounds.getWest()
+            });
+            if (name) params.append('searchName', name);
+            if (treatment) params.append('searchTreatment', treatment);
+
+            try {
+                const response = await fetch('/api/centers?' + params.toString());
+                const centers = await response.json();
+                
+                // Clear existing markers
+                mapMarkers.forEach(m => map.removeLayer(m));
+                mapMarkers = [];
+
+                centers.forEach(center => {
+                    if (center.latitude && center.longitude) {
+                        const marker = L.marker([center.latitude, center.longitude], {
+                            icon: L.icon({
+                                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-gold.png',
+                                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                                iconSize: [25, 41], iconAnchor: [12, 41]
+                            }),
+                            title: center.name // Show name on hover
+                        }).addTo(map);
+                        
+                        // Direct redirect to center details when clicking the marker
+                        marker.on('click', () => {
+                            window.location.href = `/client/centers/${center.id}`;
+                        });
+                        
+                        mapMarkers.push(marker);
+                    }
+                });
+            } catch(e) {
+                console.error("Error fetching map centers", e);
+            }
+        }
+
+        function resetAndFetch() {
+            if (isMapView) {
+                fetchMapCenters();
+                return;
+            }
+            currentPage = 0;
+            hasMore = true;
+            centersGrid.innerHTML = '';
+            trigger.style.display = 'block';
+            fetchCenters();
+        }
+
+        async function fetchCenters() {
+            if (isLoading || !hasMore) return;
+            isLoading = true;
+
+            const name = document.getElementById('searchName').value;
+            const treatment = document.getElementById('searchTreatment').value;
+
+            const params = new URLSearchParams({
+                page: currentPage,
+                size: 10
+            });
+            if (userLat) params.append('lat', userLat);
+            if (userLon) params.append('lon', userLon);
+            if (name) params.append('searchName', name);
+            if (treatment) params.append('searchTreatment', treatment);
+
+            try {
+                const response = await fetch('/api/centers?' + params.toString());
+                const centers = await response.json();
+
+                if (centers.length < 10) {
+                    hasMore = false;
+                    trigger.style.display = 'none';
+                }
+
+                if (centers.length === 0 && currentPage === 0) {
+                    centersGrid.innerHTML = `
+                        <div class="no-appointments-box glass-panel" style="grid-column: 1 / -1;">
+                            <i class="lucide-map-pin-off"></i>
+                            <p>No se encontraron centros de belleza que coincidan con tus criterios.</p>
+                        </div>
+                    `;
+                }
+
+                centers.forEach(center => {
+                    const distanceStr = center.distanceKm !== null ? 
+                        `<span style="background: rgba(197, 168, 128, 0.15); color: var(--primary-dark); padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 700;">A ${center.distanceKm.toFixed(1)} km</span>` : '';
+                    
+                    const card = document.createElement('div');
+                    card.className = 'center-card glass-panel';
+                    card.innerHTML = `
+                        <div class="center-card-header">
+                            <h2 class="center-card-title">${center.name}</h2>
+                            ${distanceStr || '<i class="lucide-map-pin" style="color:var(--primary-dark)"></i>'}
+                        </div>
+                        <div class="center-card-body">
+                            <div class="center-meta-item" style="align-items: flex-start;">
+                                <i class="lucide-navigation" style="margin-top: 3px;"></i>
+                                <div>
+                                    <span style="font-weight: 600; display: block; margin-bottom: 2px;">Dirección:</span>
+                                    <span>${center.address || 'N/A'}</span>
+                                </div>
+                            </div>
+                            <div class="center-meta-item" style="align-items: flex-start;">
+                                <i class="lucide-phone" style="margin-top: 3px;"></i>
+                                <div>
+                                    <span style="font-weight: 600; display: block; margin-bottom: 2px;">Número de teléfono:</span>
+                                    <span>${center.phone || 'N/A'}</span>
+                                </div>
+                            </div>
+                            <div class="center-meta-item" style="align-items: flex-start;">
+                                <i class="lucide-mail" style="margin-top: 3px;"></i>
+                                <div>
+                                    <span style="font-weight: 600; display: block; margin-bottom: 2px;">Dirección email:</span>
+                                    <span>${center.email || 'N/A'}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="center-card-footer">
+                            <a href="/client/centers/${center.id}" class="btn btn-primary" style="width: 100%;">
+                                <i class="lucide-calendar-plus"></i> Ver Tratamientos y Reservar
+                            </a>
+                        </div>
+                    `;
+                    centersGrid.appendChild(card);
+                });
+
+                currentPage++;
+            } catch (err) {
+                console.error("Error fetching centers:", err);
+            } finally {
+                isLoading = false;
+            }
+        }
+
+        // Intersection Observer for Infinite Scroll
+        const observer = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting && hasMore && !isLoading && !isMapView) {
+                fetchCenters();
+            }
+        }, { rootMargin: '100px' });
+
+        // Initialize Geolocation and Fetch
+        window.addEventListener('DOMContentLoaded', () => {
+            observer.observe(trigger);
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition((pos) => {
+                    userLat = pos.coords.latitude;
+                    userLon = pos.coords.longitude;
+                    if (currentPage === 0 && !isMapView) resetAndFetch();
+                }, (err) => {
+                    console.warn("Geolocation denied or error. Falling back to non-proximity search.", err);
+                    if (currentPage === 0 && !isMapView) resetAndFetch();
+                });
+            } else {
+                if (!isMapView) resetAndFetch();
+            }
+            
+            // Timeout to force fetch if user ignores permission prompt for too long (e.g., 3s)
+            setTimeout(() => {
+                if (currentPage === 0 && !isLoading && !isMapView) {
+                    resetAndFetch();
+                }
+            }, 3000);
+
+            // Live Search Event Listeners
+            let searchTimeout;
+            document.getElementById('searchName').addEventListener('input', () => {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    resetAndFetch();
+                }, 400); // Debounce to prevent too many requests while typing
+            });
+
+            document.getElementById('searchTreatment').addEventListener('change', () => {
+                resetAndFetch();
+            });
+        });
+    </script>
+</body>
+</html>

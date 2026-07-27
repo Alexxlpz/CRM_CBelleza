@@ -1,0 +1,136 @@
+/* Worker Dashboard & Actions Panel styles */
+
+.worker-dashboard-container {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.worker-welcome-banner {
+    padding: 30px;
+    background: linear-gradient(135deg, rgba(236, 220, 197, 0.3) 0%, rgba(224, 176, 176, 0.2) 100%);
+    border-radius: var(--border-radius-lg);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    text-align: center;
+}
+
+.worker-welcome-banner h2 {
+    font-size: 26px;
+    margin-bottom: 6px;
+}
+
+.worker-welcome-banner p {
+    color: var(--text-muted);
+    font-size: 14px;
+}
+
+/* Dashboard Action Cards Grid */
+.actions-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+}
+
+@media (max-width: 900px) {
+    .actions-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+}
+
+.action-card {
+    padding: 30px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 16px;
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.action-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--primary);
+    box-shadow: 0 16px 40px rgba(197, 168, 128, 0.12);
+}
+
+.action-card i {
+    font-size: 40px;
+    color: var(--primary-dark);
+}
+
+.action-card-title {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.action-card-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.action-card-badge {
+    background: var(--danger-bg);
+    color: var(--danger-text);
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+/* Treatments Page layout */
+.treatments-full-layout {
+    width: 100%;
+}
+
+.treatments-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+}
+
+.treatment-item-card {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.treatment-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 1px dashed rgba(197, 168, 128, 0.2);
+    padding-bottom: 8px;
+}
+
+.treatment-item-name {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.treatment-item-price {
+    font-weight: 700;
+    color: var(--primary-dark);
+}
+
+.treatment-item-desc {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.4;
+    flex: 1;
+}
+
+.treatment-item-meta {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: rgba(0,0,0,0.04);
+    padding: 2px 8px;
+    border-radius: 8px;
+    align-self: flex-start;
+}
+
+
+

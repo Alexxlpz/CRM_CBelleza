@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Control - BellaBelleza CRM</title>
+    <!-- Lucide Icons CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.321.0/font/lucide.min.css">
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/worker.css">
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <nav class="navbar">
+        <a href="/" class="nav-brand">
+            <i class="lucide-sparkles"></i>
+            <span>BellaBelleza</span>
+        </a>
+        <div class="nav-session-info">
+            <!-- Notification Bell -->
+            <div class="notifications-container">
+                <button type="button" class="bell-btn" onclick="toggleNotifications(event)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide-bell-svg"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg>
+                    <span class="bell-badge" th:if="${not #lists.isEmpty(notifications)}" th:text="${#lists.size(notifications)}">0</span>
+                </button>
+                <div class="notifications-dropdown" id="notificationsDropdown">
+                    <div class="notifications-header">Notificaciones de Gestión</div>
+                    <div class="notifications-body">
+                        <div class="notification-item" th:each="n : ${notifications}">
+                            <i class="lucide-alert-circle"></i>
+                            <span th:text="${n}">Alerta de prueba</span>
+                        </div>
+                        <div class="notification-empty" th:if="${#lists.isEmpty(notifications)}">
+                            <i class="lucide-bell-off"></i>
+                            <span>No hay notificaciones activas</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <a href="/logout" class="nav-logout"><i class="lucide-log-out"></i> Salir</a>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <main class="main-container">
+        
+        <div class="worker-dashboard-container">
+            <!-- Dashboard starts here -->
+            <!-- Quick Counters Row -->
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+                <div class="glass-panel" style="padding: 16px; text-align: center;">
+                    <div style="font-size: 24px; font-weight: 800; color: var(--primary-dark);" th:text="${todayAppointmentsCount}">0</div>
+                    <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-top: 4px;">Citas Hoy</div>
+                </div>
+                <div class="glass-panel" style="padding: 16px; text-align: center;">
+                    <div style="font-size: 24px; font-weight: 800; color: var(--primary-dark);" th:text="${tomorrowAppointmentsCount}">0</div>
+                    <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-top: 4px;">Citas Mañana</div>
+                </div>
+                <div class="glass-panel" style="padding: 16px; text-align: center;">
+                    <div style="font-size: 24px; font-weight: 800; color: var(--primary-dark);" th:text="${lowStockCount}">0</div>
+                    <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-top: 4px;">Stock Bajo</div>
+                </div>
+            </div>
+            
+            <!-- Action Cards Grid -->
+            <div class="actions-grid">
+                
+                <!-- Action 1: Agenda Calendar -->
+                <a href="/worker/calendar" class="action-card glass-panel">
+                    <i class="lucide-calendar-days"></i>
+                    <span class="action-card-title">Calendario de Agenda</span>
+                    <p class="action-card-desc">Consulta los horarios de reserva del salón en una cuadrícula diaria interactiva.</p>
+                    <span class="action-card-badge" th:if="${todayAppointmentsCount > 0}" th:text="${todayAppointmentsCount} + ' Citas Hoy'" style="background:var(--success-bg); color:var(--success-text)">1 Citas Hoy</span>
+                </a>
+                
+                <!-- Action 2: Stock adjustments -->
+                <a href="/worker/inventory" class="action-card glass-panel">
+                    <i class="lucide-package-open"></i>
+                    <span class="action-card-title">Gestión de Inventario</span>
+                    <p class="action-card-desc">Controla las existencias del salón. Añade nuevos productos y simula entradas/ventas (+1 / -1).</p>
+                    <span class="action-card-badge" th:if="${lowStockCount > 0}" th:text="${lowStockCount} + ' Alertas'" style="background:var(--warning-bg); color:var(--warning-text)">3</span>
+                </a>
+                
+                <!-- Action 3: Add new treatments -->
+                <a href="/worker/treatments" class="action-card glass-panel">
+                    <i class="lucide-clipboard-plus"></i>
+                    <span class="action-card-title">Añadir Tratamientos</span>
+                    <p class="action-card-desc">Crea y añade nuevos tratamientos específicos a la carta de servicios de este centro.</p>
+                </a>
+                
+            </div>
+            
+        </div>
+        
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 BellaBelleza CRM. Panel de gestión operativa.</p>
+    </footer>
+
+    <!-- Notifications script -->
+    <script>
+        function toggleNotifications(event) {
+            event.stopPropagation();
+            const dropdown = document.getElementById('notificationsDropdown');
+            dropdown.style.display = dropdown.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        document.addEventListener('click', function() {
+            const dropdown = document.getElementById('notificationsDropdown');
+            if (dropdown) dropdown.style.display = 'none';
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalles del Centro - BellaBelleza</title>
+    <!-- Lucide Icons CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.321.0/font/lucide.min.css">
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/cliente.css">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <a href="/client/centers" class="back-arrow-btn" aria-label="Volver a Centros de Belleza" style="margin-bottom: 0;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            </a>
+            <a href="/" class="nav-brand">
+                <i class="lucide-sparkles"></i>
+                <span>BellaBelleza</span>
+            </a>
+        </div>
+        <div class="nav-session-info">
+            <a href="/client/appointments" style="color:var(--text-main); font-weight:600; text-decoration:none; margin-right:8px">
+                <i class="lucide-calendar-days" style="vertical-align:middle; margin-right:2px"></i> Mis Citas
+            </a>
+            <a href="/logout" class="nav-logout"><i class="lucide-log-out"></i> Salir</a>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <main class="main-container">
+
+        <div class="center-hero-header glass-panel">
+            <h1 class="hero-title" th:text="${center.name}">Nombre del Centro</h1>
+            <div class="hero-meta-container">
+                <div class="hero-meta-item">
+                    <i class="lucide-map-pin"></i>
+                    <div>
+                        <span class="hero-meta-label">Dirección:</span>
+                        <span class="hero-meta-value" th:text="${center.address}">Dirección</span>
+                    </div>
+                </div>
+                <div class="hero-meta-item">
+                    <i class="lucide-phone"></i>
+                    <div>
+                        <span class="hero-meta-label">Teléfono:</span>
+                        <span class="hero-meta-value" th:text="${center.phone}">Teléfono</span>
+                    </div>
+                </div>
+                <div class="hero-meta-item">
+                    <i class="lucide-mail"></i>
+                    <div>
+                        <span class="hero-meta-label">Email:</span>
+                        <span class="hero-meta-value" th:text="${center.email}">Email</span>
+                    </div>
+                </div>
+                <div class="hero-meta-item">
+                    <i class="lucide-clock"></i>
+                    <div>
+                        <span class="hero-meta-label">Horario:</span>
+                        <span class="hero-meta-value">Lunes a Sábado: 09:00 - 20:00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <section class="glass-panel booking-section">
+            <h2 class="booking-section-title">
+                <i class="lucide-calendar-plus" style="margin-right: 8px; color: var(--primary-dark);"></i> 
+                Solicitar Cita de Estética
+            </h2>
+            
+            <form action="/client/booking" method="POST" class="role-form">
+                <input type="hidden" name="centerId" th:value="${center.id}">
+                
+                <!-- 1. Selectable Treatments list -->
+                <div class="form-group">
+                    <label class="form-label" style="font-size: 16px; margin-bottom: 16px; display: block;">1. Elige un servicio disponible</label>
+                    <div class="treatment-select-grid" th:if="${not #lists.isEmpty(treatments)}">
+                        <label class="treatment-select-card" th:each="t, iter : ${treatments}">
+                            <input type="radio" name="treatmentId" th:value="${t.id}" th:checked="${iter.index == 0}" required>
+                            <span class="treatment-card-title" th:text="${t.name}">Manicura</span>
+                            <span class="treatment-card-desc" th:text="${t.description}">Descripción del servicio...</span>
+                            <div class="treatment-card-meta">
+                                <span class="treatment-card-price" th:text="${t.price} + ' €'">0.00 €</span>
+                                <span class="treatment-card-duration" th:text="${t.duration} + ' min'">30 min</span>
+                            </div>
+                        </label>
+                    </div>
+                    <div th:if="${#lists.isEmpty(treatments)}" class="no-appointments-box">
+                        <i class="lucide-slash"></i>
+                        <p>Este centro no dispone de tratamientos activos en este momento.</p>
+                    </div>
+                </div>
+                
+                <!-- 3. DateTime picker -->
+                <div class="form-group" th:if="${not #lists.isEmpty(treatments)}" style="margin-top: 30px;">
+                    <label class="form-label" for="dateTime" style="font-size: 16px;">2. Elige Fecha y Hora</label>
+                    <input type="datetime-local" name="dateTime" id="dateTime" class="form-control" style="max-width: 300px;" required>
+                </div>
+                
+                <!-- 4. Guest info block if Guest simulation -->
+                <div class="guest-info-block" th:if="${sessionUserName == 'Invitado' and not #lists.isEmpty(treatments)}">
+                    <h4>3. Datos del Cliente</h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                        <div class="form-group" style="margin-bottom:0">
+                            <label class="form-label" for="guestName">Nombre Completo</label>
+                            <input type="text" name="guestName" id="guestName" class="form-control" placeholder="Escribe tu nombre y apellido..." required>
+                        </div>
+                        <div class="form-group" style="margin-bottom:0">
+                            <label class="form-label" for="guestPhone">Número de Teléfono</label>
+                            <input type="tel" name="guestPhone" id="guestPhone" class="form-control" placeholder="Ej. 600123456..." required>
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-large-submit" th:if="${not #lists.isEmpty(treatments)}">
+                    <i class="lucide-check-circle"></i> Confirmar y Reservar Cita
+                </button>
+            </form>
+        </section>
+        
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const dateTimeInput = document.getElementById('dateTime');
+            if(dateTimeInput) {
+                // Prevent typing invalid dates manually
+                dateTimeInput.addEventListener('change', function(e) {
+                    if(!this.value) return;
+                    const date = new Date(this.value);
+                    const day = date.getDay(); // 0 is Sunday
+                    const hour = date.getHours();
+                    
+                    if(day === 0) {
+                        alert("El centro cierra los domingos. Por favor, selecciona otro día.");
+                        this.value = '';
+                    } else if(hour < 9 || hour >= 20) {
+                        alert("El horario del centro es de 09:00 a 20:00. Por favor, selecciona una hora dentro de ese horario.");
+                        this.value = '';
+                    }
+                });
+            }
+        });
+    </script>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 BellaBelleza CRM. Prototipo responsive.</p>
+    </footer>
+
+    <!-- Script to set default datetime to tomorrow -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const tomorrow = new Date(now);
+            tomorrow.setDate(now.getDate() + 1);
+            tomorrow.setHours(10, 0, 0, 0); // 10:00 AM
+            
+            // Format to YYYY-MM-DDThh:mm
+            const year = tomorrow.getFullYear();
+            const month = String(tomorrow.getMonth() + 1).padStart(2, '0');
+            const day = String(tomorrow.getDate()).padStart(2, '0');
+            const hours = String(tomorrow.getHours()).padStart(2, '0');
+            const minutes = String(tomorrow.getMinutes()).padStart(2, '0');
+            
+            const tomorrowStr = `${year}-${month}-${day}T${hours}:${minutes}`;
+            const dtInput = document.getElementById('dateTime');
+            if (dtInput) {
+                dtInput.value = tomorrowStr;
+            }
+        });
+    </script>
+</body>
+</html>

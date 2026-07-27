@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tratamientos del Centro - BellaBelleza CRM</title>
+    <!-- Lucide Icons CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.321.0/font/lucide.min.css">
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/worker.css">
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <nav class="navbar">
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <a href="/worker/dashboard" class="back-arrow-btn" aria-label="Volver al panel principal" style="margin-bottom: 0;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            </a>
+            <a href="/" class="nav-brand">
+                <i class="lucide-sparkles"></i>
+                <span>BellaBelleza</span>
+            </a>
+        </div>
+        <div class="nav-session-info">
+            <!-- Notification Bell -->
+            <div class="notifications-container">
+                <button type="button" class="bell-btn" onclick="toggleNotifications(event)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide-bell-svg"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg>
+                    <span class="bell-badge" th:if="${not #lists.isEmpty(notifications)}" th:text="${#lists.size(notifications)}">0</span>
+                </button>
+                <div class="notifications-dropdown" id="notificationsDropdown">
+                    <div class="notifications-header">Notificaciones de Gestión</div>
+                    <div class="notifications-body">
+                        <div class="notification-item" th:each="n : ${notifications}">
+                            <i class="lucide-alert-circle"></i>
+                            <span th:text="${n}">Alerta de prueba</span>
+                        </div>
+                        <div class="notification-empty" th:if="${#lists.isEmpty(notifications)}">
+                            <i class="lucide-bell-off"></i>
+                            <span>No hay notificaciones activas</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <a href="/logout" class="nav-logout"><i class="lucide-log-out"></i> Salir</a>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <main class="main-container">
+
+        <!-- Page Header -->
+        <div class="page-header" style="flex-direction: row; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 24px;">
+            <div>
+                <h1>Carta de Tratamientos</h1>
+                <p th:text="'Servicios de estética activos en ' + ${sessionCenterName}">Servicios de estética activos en tu centro</p>
+            </div>
+            
+            <button type="button" class="btn btn-primary" onclick="openTreatmentSheet()">
+                <i class="lucide-plus-circle"></i> Añadir Tratamiento
+            </button>
+        </div>
+
+        <div class="treatments-full-layout">
+            <!-- Left Pane: Treatments List -->
+            <section style="width: 100%;">
+                <div class="treatments-list" th:if="${not #lists.isEmpty(treatments)}">
+                    <div class="treatment-item-card glass-panel" th:each="t : ${treatments}">
+                        <div class="treatment-item-header">
+                            <span class="treatment-item-name" th:text="${t.name}">Manicura</span>
+                            <span class="treatment-item-price" th:text="${t.price} + ' €'">0.00 €</span>
+                        </div>
+                        <p class="treatment-item-desc" th:text="${t.description}">Descripción del tratamiento...</p>
+                        <span class="treatment-item-meta" th:text="'Duración: ' + ${t.duration} + ' min'">30 min</span>
+                    </div>
+                </div>
+                
+                <div class="no-appointments-box glass-panel" th:if="${#lists.isEmpty(treatments)}">
+                    <i class="lucide-slash"></i>
+                    <p>No se han registrado tratamientos en este centro. Haz clic en el botón superior para añadir el primero.</p>
+                </div>
+            </section>
+        </div>
+
+        <!-- Add Treatment Sheet (Simulated sheet modal) -->
+        <div id="addTreatmentSheet" class="sheet-overlay" style="display:none" onclick="closeTreatmentSheetOnOverlay(event)">
+            <div class="sheet-content glass-panel" onclick="event.stopPropagation()">
+                <div class="sheet-header">
+                    <h2>Añadir Tratamiento</h2>
+                    <button type="button" class="sheet-close" onclick="closeTreatmentSheet()">&times;</button>
+                </div>
+                
+                <form action="/worker/treatments/add" method="POST" class="role-form">
+                    <div class="form-group">
+                        <label class="form-label" for="treatmentName">Nombre del Tratamiento</label>
+                        <input type="text" name="name" id="treatmentName" class="form-control" 
+                               placeholder="Ej. Pedicura Spa, Limpieza Facial..." required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="treatmentType">Categoría / Tipo</label>
+                        <select name="type" id="treatmentType" class="form-control" required>
+                            <option value="" disabled selected>Elige un tipo...</option>
+                            <option value="MANICURA_PEDICURA">Manicura y Pedicura</option>
+                            <option value="FACIAL">Tratamientos Faciales</option>
+                            <option value="CORPORAL">Tratamientos Corporales</option>
+                            <option value="MASAJES">Masajes</option>
+                            <option value="PELUQUERIA">Peluquería</option>
+                            <option value="DEPILACION">Depilación</option>
+                            <option value="OTRO">Otro</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="treatmentDesc">Descripción</label>
+                        <textarea name="description" id="treatmentDesc" class="form-control" 
+                                  placeholder="Detalla en qué consiste el servicio..." rows="3" style="resize:none" required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="treatmentPrice">Precio (€)</label>
+                        <input type="number" name="price" id="treatmentPrice" class="form-control" 
+                               placeholder="0.00" step="0.01" min="0" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="treatmentDuration">Duración (minutos)</label>
+                        <input type="number" name="duration" id="treatmentDuration" class="form-control" 
+                               value="45" min="5" required>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">
+                        <i class="lucide-plus"></i> Guardar Tratamiento
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 BellaBelleza CRM. Panel de gestión operativa.</p>
+    </footer>
+
+    <!-- Notifications script -->
+    <script>
+        function toggleNotifications(event) {
+            event.stopPropagation();
+            const dropdown = document.getElementById('notificationsDropdown');
+            dropdown.style.display = dropdown.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        document.addEventListener('click', function() {
+            const dropdown = document.getElementById('notificationsDropdown');
+            if (dropdown) dropdown.style.display = 'none';
+        });
+
+        function openTreatmentSheet() {
+            const sheet = document.getElementById('addTreatmentSheet');
+            sheet.style.display = 'flex';
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+            setTimeout(() => {
+                document.getElementById('treatmentName').focus();
+            }, 100);
+        }
+
+        function closeTreatmentSheet() {
+            const sheet = document.getElementById('addTreatmentSheet');
+            sheet.style.display = 'none';
+            document.body.style.overflow = 'auto'; // Restore background scrolling
+        }
+
+        function closeTreatmentSheetOnOverlay(event) {
+            if (event.target.id === 'addTreatmentSheet') {
+                closeTreatmentSheet();
+            }
+        }
+    </script>
+</body>
+</html>

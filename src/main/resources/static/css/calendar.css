@@ -1,0 +1,316 @@
+/* Monthly Calendar Grid & Agenda Detail styling */
+
+.calendar-split-layout {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 30px;
+    align-items: start;
+}
+
+@media (max-width: 900px) {
+    .calendar-split-layout {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+}
+
+/* Calendar Card Container */
+.calendar-card {
+    padding: 24px;
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.calendar-month-title {
+    font-size: 20px;
+    font-weight: 700;
+    text-transform: capitalize;
+}
+
+.calendar-nav-btn {
+    background: rgba(197, 168, 128, 0.15);
+    border: none;
+    color: var(--primary-dark);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+}
+.calendar-nav-btn:hover {
+    background: var(--primary-dark);
+    color: white;
+}
+
+/* Calendar Grid */
+.calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-weight: 700;
+    font-size: 11px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+}
+
+.calendar-days-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+}
+
+.calendar-day-cell {
+    aspect-ratio: 1 / 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--border-radius-sm);
+    background: rgba(255, 255, 255, 0.4);
+    border: 1px solid rgba(197, 168, 128, 0.1);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    position: relative;
+    transition: var(--transition);
+}
+
+.calendar-day-cell:hover {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: var(--primary);
+}
+
+.calendar-day-cell.other-month {
+    color: #c0b7b0;
+    background: rgba(0, 0, 0, 0.02);
+    border-color: transparent;
+    cursor: default;
+}
+.calendar-day-cell.other-month:hover {
+    background: rgba(0, 0, 0, 0.02);
+    border-color: transparent;
+}
+
+.calendar-day-cell.active-day {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%) !important;
+    color: white !important;
+    border-color: transparent !important;
+}
+
+.calendar-day-cell.today-day {
+    border: 2px solid var(--secondary-dark);
+    color: var(--secondary-dark);
+}
+
+.calendar-day-cell.pending-day-highlight {
+    background: rgba(236, 210, 155, 0.4);
+    border: 1.5px solid var(--warning);
+    color: var(--warning-text);
+}
+
+.calendar-day-cell.pending-day-highlight:hover {
+    background: rgba(236, 210, 155, 0.6);
+    border-color: var(--warning-text);
+}
+
+
+/* Appointment Dot indicators (Gold/Red for pending) */
+.calendar-dots-container {
+    position: absolute;
+    bottom: 5px;
+    display: flex;
+    gap: 3px;
+    justify-content: center;
+    align-items: center;
+}
+
+.calendar-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+}
+
+.calendar-dot.gold-dot {
+    background-color: var(--primary-dark);
+}
+
+.calendar-dot.red-dot {
+    background-color: var(--danger-text);
+}
+
+.calendar-day-cell.active-day .calendar-dot.gold-dot,
+.calendar-day-cell.active-day .calendar-dot.red-dot {
+    background-color: white;
+}
+
+/* Right Pane: Day agenda panel */
+.agenda-panel {
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    height: 100%;
+}
+
+.agenda-header {
+    border-bottom: 1px solid rgba(197, 168, 128, 0.15);
+    padding-bottom: 12px;
+}
+
+.agenda-header h3 {
+    font-size: 20px;
+}
+
+.agenda-header p {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+.agenda-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow-y: auto;
+    max-height: 440px;
+}
+
+.agenda-item-card {
+    padding: 18px;
+    border-radius: var(--border-radius-md);
+    background: rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(197, 168, 128, 0.15);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    text-align: left;
+    transition: var(--transition);
+}
+
+.agenda-item-card:hover {
+    background: white;
+    border-color: var(--primary-light);
+    transform: translateY(-1px);
+}
+
+/* Pending Requests Red Highlight styling */
+.agenda-item-card.pending-card {
+    background: rgba(217, 154, 154, 0.08);
+    border: 1px solid rgba(217, 154, 154, 0.35);
+}
+
+.agenda-item-card.pending-card:hover {
+    background: rgba(217, 154, 154, 0.12);
+    border-color: rgba(217, 154, 154, 0.5);
+}
+
+.agenda-item-time {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--primary-dark);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.agenda-item-card.pending-card .agenda-item-time {
+    color: var(--danger-text);
+}
+
+.agenda-item-treatment {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.agenda-item-detail {
+    font-size: 12px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.agenda-item-detail i {
+    width: 14px;
+    font-size: 14px;
+}
+
+/* In-calendar approval forms styling */
+.approval-message-box {
+    margin-top: 8px;
+    padding-top: 10px;
+    border-top: 1px dashed rgba(217, 154, 154, 0.3);
+}
+
+.approval-msg-input {
+    width: 100%;
+    padding: 8px 12px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 12px;
+    color: var(--text-main);
+    background: white;
+    border: 1px solid rgba(197, 168, 128, 0.25);
+    border-radius: var(--border-radius-sm);
+    outline: none;
+    resize: none;
+    margin-top: 6px;
+    margin-bottom: 10px;
+    transition: var(--transition);
+}
+
+.approval-msg-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(197, 168, 128, 0.1);
+}
+
+.agenda-card-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.agenda-card-actions form {
+    display: inline;
+}
+
+.btn-agenda-action {
+    padding: 6px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: var(--border-radius-sm);
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: var(--transition);
+    font-family: inherit;
+}
+
+.btn-agenda-action.approve {
+    background: var(--success-bg);
+    color: var(--success-text);
+    border-color: rgba(143, 168, 155, 0.3);
+}
+.btn-agenda-action.approve:hover {
+    background: var(--success);
+    color: white;
+}
+
+.btn-agenda-action.reject {
+    background: var(--danger-bg);
+    color: var(--danger-text);
+    border-color: rgba(217, 154, 154, 0.3);
+}
+.btn-agenda-action.reject:hover {
+    background: var(--danger);
+    color: white;
+}

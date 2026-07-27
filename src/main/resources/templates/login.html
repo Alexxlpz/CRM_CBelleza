@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión - BellaBelleza</title>
+    <!-- Lucide Icons CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.321.0/font/lucide.min.css">
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/home.css">
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <nav class="navbar">
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <a href="/" class="back-arrow-btn" aria-label="Volver a la página principal" style="margin-bottom: 0;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            </a>
+            <a href="/" class="nav-brand">
+                <i class="lucide-sparkles"></i>
+                <span>BellaBelleza</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <main class="main-container">
+        
+        <!-- Intuitive icon-only back arrow button -->
+        <a href="/" class="back-arrow-btn" aria-label="Volver atrás" title="Volver atrás">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        </a>
+
+        <div class="login-card glass-panel">
+            <div class="login-header">
+                <h2>Acceso Simulado</h2>
+                <p>Selecciona un perfil para ingresar a la plataforma</p>
+            </div>
+            
+            <form action="/select-session" method="POST" class="role-form" id="loginForm">
+                <input type="hidden" name="role" id="formRole" value="CLIENT">
+                <input type="hidden" name="userId" id="formUserId" value="">
+                
+                <div class="form-group">
+                    <label class="form-label" for="profileSelector">Seleccionar Perfil</label>
+                    <select id="profileSelector" class="form-control" onchange="updateLoginFormValues()" required>
+                        <option value="" disabled selected>Elige un usuario...</option>
+                        
+                        <optgroup label="Área de Clientes">
+                            <option th:each="client : ${clients}" 
+                                    th:value="'CLIENT:' + ${client.id}" 
+                                    th:text="${client.name} + ' (Cliente Registrado)'">
+                                Sofía Martínez
+                            </option>
+                            <option value="CLIENT:guest">Cliente Invitado (Sin Registro)</option>
+                        </optgroup>
+                        
+                        <optgroup label="Área de Colaboradores (Trabajadores)">
+                            <option th:each="worker : ${workers}" 
+                                    th:value="'WORKER:' + ${worker.id}" 
+                                    th:text="${worker.name} + ' (' + ${worker.center.name} + ')'">
+                                Carlos Mendoza (Centro Histórico)
+                            </option>
+                        </optgroup>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">
+                    <i class="lucide-log-in"></i> Iniciar Sesión
+                </button>
+            </form>
+        </div>
+        
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 BellaBelleza CRM. Prototipo funcional.</p>
+    </footer>
+
+    <!-- Script to handle selector values -->
+    <script>
+        function updateLoginFormValues() {
+            const selector = document.getElementById('profileSelector');
+            const roleInput = document.getElementById('formRole');
+            const userIdInput = document.getElementById('formUserId');
+            
+            const selectedVal = selector.value;
+            if (selectedVal) {
+                const parts = selectedVal.split(':');
+                const role = parts[0];
+                const idVal = parts[1];
+                
+                roleInput.value = role;
+                if (idVal === 'guest') {
+                    userIdInput.value = '';
+                } else {
+                    userIdInput.value = idVal;
+                }
+            }
+        }
+    </script>
+</body>
+</html>

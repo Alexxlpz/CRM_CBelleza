@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BellaBelleza - CRM de Centros de Belleza</title>
+    <!-- Lucide Icons CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.321.0/font/lucide.min.css">
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/home.css">
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <nav class="navbar">
+        <a href="/" class="nav-brand">
+            <i class="lucide-sparkles"></i>
+            <span>BellaBelleza</span>
+        </a>
+        <div class="nav-session-info" th:if="${sessionRole != null}">
+            <span class="session-badge">
+                <i class="lucide-user"></i>
+                <span th:text="${sessionRole == 'CLIENT' ? 'Cliente' : 'Colaborador'}">Cliente</span>
+                <span th:text="'(' + ${sessionUserName} + ')'"></span>
+            </span>
+            <a href="/logout" class="nav-logout"><i class="lucide-log-out"></i> Cerrar</a>
+        </div>
+        <div class="nav-session-info" th:if="${sessionRole == null}">
+            <a href="/login" class="btn btn-primary btn-sm">Iniciar Sesión</a>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <main class="main-container">
+        
+        <!-- Hero Section -->
+        <section class="landing-hero">
+            <h1 class="landing-logo">BellaBelleza</h1>
+            <p class="landing-subtitle">
+                La plataforma de gestión inteligente y reservas online para centros de estética, spas y salones de belleza de alta gama.
+            </p>
+            <div style="display: flex; gap: 16px;">
+                <a href="/login" class="btn btn-primary" th:if="${sessionRole == null}">
+                    <i class="lucide-log-in"></i> Acceso a la Plataforma
+                </a>
+                <a href="/client/centers" class="btn btn-primary" th:if="${sessionRole == 'CLIENT'}">
+                    <i class="lucide-map-pin"></i> Ver Centros & Reservar
+                </a>
+                <a href="/worker/dashboard" class="btn btn-primary" th:if="${sessionRole == 'WORKER'}">
+                    <i class="lucide-layout-dashboard"></i> Panel de Control
+                </a>
+            </div>
+        </section>
+
+        <!-- Feature Showcases -->
+        <section class="landing-features">
+            <div class="feature-box glass-panel">
+                <i class="lucide-calendar-heart"></i>
+                <h3>Reserva de Citas</h3>
+                <p>Facilita a tus clientes reservar tratamientos online en tiempo real, eligiendo centro, servicio y su especialista preferido.</p>
+            </div>
+            
+            <div class="feature-box glass-panel">
+                <i class="lucide-package-check"></i>
+                <h3>Gestión de Inventario</h3>
+                <p>Lleva el control absoluto del stock de tus productos, registra ventas o entradas de mercancía de manera ágil y visual.</p>
+            </div>
+            
+            <div class="feature-box glass-panel">
+                <i class="lucide-clipboard-list"></i>
+                <h3>Tratamientos Locales</h3>
+                <p>Personaliza la carta de servicios de cada salón de belleza de forma dinámica, adaptando precios y duraciones según el centro.</p>
+            </div>
+        </section>
+        
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 BellaBelleza CRM. Todos los derechos reservados. Diseñado para dispositivos móviles y de escritorio.</p>
+    </footer>
+</body>
+</html>

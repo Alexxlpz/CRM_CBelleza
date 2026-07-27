@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reservar Cita - BellaBelleza</title>
+    <!-- Lucide Icons CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.321.0/font/lucide.min.css">
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/iphone-mockup.css">
+    <link rel="stylesheet" href="/css/cliente.css">
+</head>
+<body class="simulated-desktop">
+    <div class="simulation-container">
+        <!-- Simulator Top Info -->
+        <div class="simulation-info">
+            <span>CRM BellaBelleza</span>
+            Prototipo iPhone 16 Pro Viewport
+        </div>
+        
+        <!-- Active Session Header (Floating control) -->
+        <div class="simulator-controls">
+            <div>
+                Rol: <span style="color: var(--primary-dark); font-weight: 700;">Cliente</span>
+                <span th:text="' (' + ${sessionUserName} + ')'"></span>
+            </div>
+            <a href="/logout"><i class="lucide-log-out" style="font-size:12px; vertical-align:middle;"></i> Cambiar</a>
+        </div>
+
+        <!-- iPhone Device Frame -->
+        <div class="iphone-device">
+            <!-- Dynamic Island Notch -->
+            <div class="dynamic-island"></div>
+            
+            <!-- Screen Viewport -->
+            <div class="iphone-screen">
+                <div class="app-screen">
+                    
+                    <!-- Screen Header -->
+                    <div class="app-header">
+                        <div>
+                            <h1>Nueva Cita</h1>
+                            <div class="app-header-subtitle">Completa los datos de tu reserva</div>
+                        </div>
+                    </div>
+                    
+                    <div class="client-container">
+                        <!-- Welcome Widget -->
+                        <div class="welcome-widget">
+                            <div class="welcome-info">
+                                <h3 th:text="'Hola, ' + ${sessionUserName} + '!'">Hola, Invitado!</h3>
+                                <p>Solicita tu día y hora para que un profesional lo confirme.</p>
+                            </div>
+                            <i class="lucide-sparkles" style="color: var(--primary-dark); font-size:24px"></i>
+                        </div>
+                        
+                        <!-- Booking Form -->
+                        <form action="/client/booking" method="POST" class="booking-form-card glass-panel">
+                            
+                            <!-- 1. Center selection -->
+                            <div class="form-group">
+                                <label class="form-label" for="centerId">Centro de Belleza</label>
+                                <select name="centerId" id="centerId" class="form-control" required>
+                                    <option value="" disabled selected>Selecciona un centro...</option>
+                                    <option th:each="center : ${centers}" 
+                                            th:value="${center.id}" 
+                                            th:text="${center.name} + ' (' + ${center.address} + ')'">
+                                        Centro Histórico
+                                    </option>
+                                </select>
+                            </div>
+                            
+                            <!-- 2. Service Catalog (Selectable cards) -->
+                            <div class="form-group">
+                                <label class="form-label">Selecciona el Servicio</label>
+                                <div class="service-grid">
+                                    <label class="service-card">
+                                        <input type="radio" name="service" value="Manicura Premium" required checked>
+                                        <i class="lucide-sparkles"></i>
+                                        <span class="service-card-name">Manicura Premium</span>
+                                        <span class="service-card-price">25,50 €</span>
+                                    </label>
+                                    
+                                    <label class="service-card">
+                                        <input type="radio" name="service" value="Tratamiento Facial">
+                                        <i class="lucide-smile"></i>
+                                        <span class="service-card-name">Tratamiento Facial</span>
+                                        <span class="service-card-price">40,00 €</span>
+                                    </label>
+                                    
+                                    <label class="service-card">
+                                        <input type="radio" name="service" value="Champú & Queratina">
+                                        <i class="lucide-scissors"></i>
+                                        <span class="service-card-name">Champú & Queratina</span>
+                                        <span class="service-card-price">18,00 €</span>
+                                    </label>
+                                    
+                                    <label class="service-card">
+                                        <input type="radio" name="service" value="Masaje Relajante">
+                                        <i class="lucide-heart"></i>
+                                        <span class="service-card-name">Masaje Relajante</span>
+                                        <span class="service-card-price">35,00 €</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <!-- 3. Professional / Worker selection -->
+                            <div class="form-group">
+                                <label class="form-label" for="workerId">Profesional</label>
+                                <select name="workerId" id="workerId" class="form-control" required>
+                                    <option value="" disabled selected>Elige un especialista...</option>
+                                    <option th:each="worker : ${workers}" 
+                                            th:value="${worker.id}" 
+                                            th:text="${worker.name} + ' (' + ${worker.center.name} + ')'">
+                                        Carlos Mendoza (Centro Histórico)
+                                    </option>
+                                </select>
+                            </div>
+                            
+                            <!-- 4. Date and Time -->
+                            <div class="form-group">
+                                <label class="form-label" for="dateTime">Fecha y Hora</label>
+                                <input type="datetime-local" name="dateTime" id="dateTime" class="form-control" required>
+                            </div>
+                            
+                            <!-- 5. Guest Information (Displays only if user is an unregistered guest) -->
+                            <div class="guest-info-section" th:if="${sessionUserName == 'Invitado'}">
+                                <div class="guest-info-title">
+                                    <i class="lucide-user-plus" style="font-size:12px; vertical-align:middle; margin-right:4px"></i>
+                                    Datos de Contacto
+                                </div>
+                                <div class="form-group" style="margin-bottom:8px">
+                                    <label class="form-label" for="guestName">Nombre Completo</label>
+                                    <input type="text" name="guestName" id="guestName" class="form-control" placeholder="Escribe tu nombre..." required>
+                                </div>
+                                <div class="form-group" style="margin-bottom:0">
+                                    <label class="form-label" for="guestPhone">Número de Teléfono</label>
+                                    <input type="tel" name="guestPhone" id="guestPhone" class="form-control" placeholder="Ej. 600123456..." required>
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary booking-btn">
+                                <i class="lucide-calendar-check-2"></i> Solicitar Cita
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <!-- Bottom Navigation Tab Bar -->
+                    <div class="bottom-nav">
+                        <a href="/client/booking" class="nav-item active">
+                            <i class="lucide-calendar-plus"></i>
+                            <span>Reservar</span>
+                        </a>
+                        <a href="/client/appointments" class="nav-item">
+                            <i class="lucide-calendar-days"></i>
+                            <span>Mis Citas</span>
+                        </a>
+                        <a href="/logout" class="nav-item">
+                            <i class="lucide-log-out"></i>
+                            <span>Salir</span>
+                        </a>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script to set default datetime to tomorrow -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const tomorrow = new Date(now);
+            tomorrow.setDate(now.getDate() + 1);
+            tomorrow.setHours(10, 0, 0, 0); // 10:00 AM
+            
+            // Format to YYYY-MM-DDThh:mm
+            const year = tomorrow.getFullYear();
+            const month = String(tomorrow.getMonth() + 1).padStart(2, '0');
+            const day = String(tomorrow.getDate()).padStart(2, '0');
+            const hours = String(tomorrow.getHours()).padStart(2, '0');
+            const minutes = String(tomorrow.getMinutes()).padStart(2, '0');
+            
+            const tomorrowStr = `${year}-${month}-${day}T${hours}:${minutes}`;
+            document.getElementById('dateTime').value = tomorrowStr;
+        });
+    </script>
+</body>
+</html>

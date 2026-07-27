@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agenda del Salón - BellaBelleza CRM</title>
+    <!-- Lucide Icons CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.321.0/font/lucide.min.css">
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/calendar.css">
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <nav class="navbar">
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <a href="/worker/dashboard" class="back-arrow-btn" aria-label="Volver al panel principal" style="margin-bottom: 0;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            </a>
+            <a href="/" class="nav-brand">
+                <i class="lucide-sparkles"></i>
+                <span>BellaBelleza</span>
+            </a>
+        </div>
+        <div class="nav-session-info">
+            <!-- Notification Bell -->
+            <div class="notifications-container">
+                <button type="button" class="bell-btn" onclick="toggleNotifications(event)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide-bell-svg"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg>
+                    <span class="bell-badge" th:if="${not #lists.isEmpty(notifications)}" th:text="${#lists.size(notifications)}">0</span>
+                </button>
+                <div class="notifications-dropdown" id="notificationsDropdown">
+                    <div class="notifications-header">Notificaciones de Gestión</div>
+                    <div class="notifications-body">
+                        <div class="notification-item" th:each="n : ${notifications}">
+                            <i class="lucide-alert-circle"></i>
+                            <span th:text="${n}">Alerta de prueba</span>
+                        </div>
+                        <div class="notification-empty" th:if="${#lists.isEmpty(notifications)}">
+                            <i class="lucide-bell-off"></i>
+                            <span>No hay notificaciones activas</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <a href="/logout" class="nav-logout"><i class="lucide-log-out"></i> Salir</a>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <main class="main-container">
+
+        <div class="page-header">
+            <h1>Agenda Mensual</h1>
+            <p>Consulta las citas agendadas y los detalles de los clientes por día</p>
+        </div>
+
+        <div class="calendar-split-layout">
+            
+            <!-- Left Pane: Monthly Calendar Grid -->
+            <section class="calendar-card glass-panel">
+                <div class="calendar-header">
+                    <h2 class="calendar-month-title" id="calendarMonthYear">Julio 2026</h2>
+                    <div style="display:flex; gap:8px">
+                        <button type="button" class="calendar-nav-btn" onclick="prevMonth()">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                        </button>
+                        <button type="button" class="calendar-nav-btn" onclick="nextMonth()">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="calendar-weekdays">
+                    <div>Lun</div>
+                    <div>Mar</div>
+                    <div>Mié</div>
+                    <div>Jue</div>
+                    <div>Vie</div>
+                    <div>Sáb</div>
+                    <div>Dom</div>
+                </div>
+                
+                <div class="calendar-days-grid" id="calendarDays">
+                    <!-- Dynamic rendering in JS -->
+                </div>
+            </section>
+            
+            <!-- Right Pane: Selected Day Agenda Details -->
+            <section class="agenda-panel glass-panel">
+                <div class="agenda-header">
+                    <h3 id="selectedDateTitle">Selecciona un día</h3>
+                    <p id="selectedDateCount">Citas programadas para la fecha elegida</p>
+                </div>
+                
+                <div class="agenda-list" id="agendaList">
+                    <div class="notification-empty">
+                        <i class="lucide-calendar-days"></i>
+                        <span>Haz clic en un día del calendario para ver las citas de esa jornada</span>
+                    </div>
+                </div>
+            </section>
+            
+        </div>
+        
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 BellaBelleza CRM. Prototipo responsive.</p>
+    </footer>
+
+    <!-- Inline appointments from Thymeleaf -->
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const appointmentsList = /*[[${appointments}]]*/ [];
+        /*]]>*/
+    </script>
+
+    <!-- Dynamic Calendar JS -->
+    <script>
+        let currentYear, currentMonth;
+        let selectedDayKey = null;
+
+        // Toggle Notifications Dropdown
+        function toggleNotifications(event) {
+            event.stopPropagation();
+            const dropdown = document.getElementById('notificationsDropdown');
+            dropdown.style.display = dropdown.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        document.addEventListener('click', function() {
+            const dropdown = document.getElementById('notificationsDropdown');
+            if (dropdown) dropdown.style.display = 'none';
+        });
+
+        // Initialize Calendar
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check for target date query parameter
+            const urlParams = new Date(new Date().getTime());
+            const queryParams = new URLSearchParams(window.location.search);
+            const targetDate = queryParams.get('date');
+
+            if (targetDate) {
+                const parts = targetDate.split('-');
+                currentYear = parseInt(parts[0]);
+                currentMonth = parseInt(parts[1]) - 1;
+                selectedDayKey = targetDate;
+                renderCalendar();
+                selectDay(parseInt(parts[2]), currentMonth, currentYear);
+            } else {
+                const today = new Date();
+                currentYear = today.getFullYear();
+                currentMonth = today.getMonth();
+                renderCalendar();
+                selectDay(today.getDate(), currentMonth, currentYear);
+            }
+        });
+
+        function renderCalendar() {
+            const months = [
+                "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+                "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+            ];
+            
+            document.getElementById('calendarMonthYear').innerText = `${months[currentMonth]} ${currentYear}`;
+            
+            const firstDayIndex = new Date(currentYear, currentMonth, 1).getDay(); // Sunday=0, Monday=1
+            // Convert to European standard (Monday=0, Sunday=6)
+            let startDay = firstDayIndex === 0 ? 6 : firstDayIndex - 1;
+            
+            const totalDays = new Date(currentYear, currentMonth + 1, 0).getDate();
+            const prevMonthDays = new Date(currentYear, currentMonth, 0).getDate();
+            
+            const grid = document.getElementById('calendarDays');
+            grid.innerHTML = '';
+            
+            // 1. Render previous month offset cells
+            for (let i = startDay; i > 0; i--) {
+                const cell = document.createElement('div');
+                cell.className = 'calendar-day-cell other-month';
+                cell.innerText = prevMonthDays - i + 1;
+                grid.appendChild(cell);
+            }
+            
+            // 2. Render current month cells
+            const today = new Date();
+            for (let day = 1; day <= totalDays; day++) {
+                const cell = document.createElement('div');
+                cell.className = 'calendar-day-cell';
+                cell.innerText = day;
+                
+                // Highlight today
+                if (day === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear()) {
+                    cell.classList.add('today-day');
+                }
+                
+                // Check status of appointments
+                const dateKey = formatDateKey(day, currentMonth, currentYear);
+                const dayApps = getAppointmentsForDate(dateKey);
+                
+                const hasConfirmed = dayApps.some(app => app.status === 'CONFIRMED');
+                const hasPending = dayApps.some(app => app.status === 'PENDING');
+                
+                if (hasConfirmed || hasPending) {
+                    const dotsContainer = document.createElement('div');
+                    dotsContainer.className = 'calendar-dots-container';
+                    
+                    if (hasConfirmed) {
+                        const dot = document.createElement('div');
+                        dot.className = 'calendar-dot gold-dot';
+                        dotsContainer.appendChild(dot);
+                    }
+                    if (hasPending) {
+                        const dot = document.createElement('div');
+                        dot.className = 'calendar-dot red-dot';
+                        dotsContainer.appendChild(dot);
+                        cell.classList.add('pending-day-highlight');
+                    }
+                    cell.appendChild(dotsContainer);
+                }
+                
+                // Active selection check
+                if (selectedDayKey === dateKey) {
+                    cell.classList.add('active-day');
+                }
+                
+                cell.onclick = () => selectDay(day, currentMonth, currentYear);
+                grid.appendChild(cell);
+            }
+            
+            // 3. Render next month offset cells to complete grid rows
+            const renderedCount = startDay + totalDays;
+            const remaining = (7 - (renderedCount % 7)) % 7;
+            for (let i = 1; i <= remaining; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'calendar-day-cell other-month';
+                cell.innerText = i;
+                grid.appendChild(cell);
+            }
+        }
+
+        function prevMonth() {
+            currentMonth--;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            renderCalendar();
+        }
+
+        function nextMonth() {
+            currentMonth++;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            renderCalendar();
+        }
+
+        function formatDateKey(day, month, year) {
+            const d = String(day).padStart(2, '0');
+            const m = String(month + 1).padStart(2, '0');
+            return `${year}-${m}-${d}`;
+        }
+
+        function getAppointmentsForDate(dateKey) {
+            return appointmentsList.filter(app => {
+                if (!app.dateTime) return false;
+                return app.dateTime.startsWith(dateKey);
+            }).sort((a, b) => a.dateTime.localeCompare(b.dateTime));
+        }
+
+        async function handleStatusChange(appId, action) {
+            const url = `/worker/appointments/${appId}/${action}`;
+            const messageInput = document.getElementById(`message-${appId}`);
+            const message = messageInput ? messageInput.value : '';
+
+            try {
+                const formData = new URLSearchParams();
+                formData.append('message', message);
+                
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: formData.toString()
+                });
+                
+                if (response.ok) {
+                    // Update eventsData array locally
+                    const app = eventsData.find(a => a.id === appId);
+                    if (app) {
+                        app.status = action === 'approve' ? 'CONFIRMED' : 'REJECTED';
+                        app.workerMessage = message;
+                    }
+                    
+                    // Re-render the grid (for colors/dots)
+                    renderCalendar();
+                    
+                    // Re-render the selected day details
+                    if (selectedDayKey) {
+                        const parts = selectedDayKey.split('-');
+                        selectDay(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
+                    }
+                } else {
+                    alert('Error al actualizar el estado de la cita.');
+                }
+            } catch (err) {
+                console.error('Fetch error:', err);
+                alert('Error de red al actualizar la cita.');
+            }
+        }
+
+        function selectDay(day, month, year) {
+            selectedDayKey = formatDateKey(day, month, year);
+            
+            // Redraw grid to update active classes
+            renderCalendar();
+            
+            // Format Title
+            const dateObj = new Date(year, month, day);
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const titleText = dateObj.toLocaleDateString('es-ES', options);
+            document.getElementById('selectedDateTitle').innerText = titleText.charAt(0).toUpperCase() + titleText.slice(1);
+            
+            // Populate list
+            const apps = getAppointmentsForDate(selectedDayKey);
+            const listContainer = document.getElementById('agendaList');
+            listContainer.innerHTML = '';
+            
+            // Text summary
+            const confirmedApps = apps.filter(app => app.status === 'CONFIRMED');
+            const pendingApps = apps.filter(app => app.status === 'PENDING');
+            document.getElementById('selectedDateCount').innerText = `${confirmedApps.length} confirmadas, ${pendingApps.length} solicitudes pendientes`;
+            
+            if (apps.length === 0) {
+                listContainer.innerHTML = `
+                    <div class="notification-empty">
+                        <i class="lucide-calendar-days"></i>
+                        <span>No hay citas programadas para esta jornada</span>
+                    </div>
+                `;
+                return;
+            }
+            
+            apps.forEach(app => {
+                const timeStr = app.dateTime.split('T')[1].substring(0, 5); // hh:mm
+                const clientName = app.client ? app.client.name : app.guestName;
+                const clientPhone = app.client ? app.client.phone : app.guestPhone;
+                const isGuest = app.client === null;
+                const isPending = app.status === 'PENDING';
+                const isRejected = app.status === 'REJECTED';
+                
+                const card = document.createElement('div');
+                card.className = `agenda-item-card ${isPending ? 'pending-card' : ''}`;
+                
+                let badgeClass = 'badge-confirmed';
+                let badgeText = 'Confirmada';
+                if (isPending) {
+                    badgeClass = 'badge-pending';
+                    badgeText = 'Solicitud';
+                } else if (isRejected) {
+                    badgeClass = 'badge-rejected';
+                    badgeText = 'Rechazada';
+                }
+
+                let formHtml = '';
+                if (isPending) {
+                    formHtml = `
+                        <div class="approval-message-box">
+                            <label class="form-label" style="font-size: 11px; margin-bottom: 2px">Escribir nota opcional (mensaje al cliente):</label>
+                            <textarea id="message-${app.id}" class="approval-msg-input" placeholder="Ej. Por favor ven 5 minutos antes o motivo de cancelación..." rows="2"></textarea>
+                            <div class="agenda-card-actions">
+                                <button type="button" class="btn-agenda-action reject" onclick="handleStatusChange(${app.id}, 'reject')">
+                                    <i class="lucide-x" style="vertical-align:middle; margin-right:2px"></i> Rechazar
+                                </button>
+                                <button type="button" class="btn-agenda-action approve" onclick="handleStatusChange(${app.id}, 'approve')">
+                                    <i class="lucide-check" style="vertical-align:middle; margin-right:2px"></i> Aceptar Cita
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                let messageHtml = '';
+                if (app.workerMessage) {
+                    messageHtml = `
+                        <div style="font-size:11px; font-weight:700; color:var(--primary-dark); margin-top:6px; padding-top:6px; border-top:1px dashed rgba(197, 168, 128, 0.15)">
+                            <i class="lucide-message-square" style="vertical-align:middle; margin-right:4px"></i> Nota: "${app.workerMessage}"
+                        </div>
+                    `;
+                }
+                
+                card.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px dashed rgba(197, 168, 128, 0.15); padding-bottom:8px; margin-bottom:4px">
+                        <div class="agenda-item-time">
+                            <i class="lucide-clock" style="font-size:14px"></i>
+                            <span>${timeStr} h</span>
+                        </div>
+                        <span class="badge ${badgeClass}">${badgeText}</span>
+                    </div>
+                    
+                    <div class="agenda-item-treatment">${app.treatment.name}</div>
+                    
+                    <div class="agenda-item-detail">
+                        <i class="lucide-user" style="color:var(--primary-dark)"></i>
+                        <strong>${clientName}</strong> ${isGuest ? '(Invitado)' : ''}
+                    </div>
+                    <div class="agenda-item-detail">
+                        <i class="lucide-phone" style="color:var(--primary-dark)"></i>
+                        <span>Teléfono: ${clientPhone}</span>
+                    </div>
+                    <div class="agenda-item-detail">
+                        <i class="lucide-sparkles" style="color:var(--primary-dark)"></i>
+                        <span>Estilista: ${app.worker.name}</span>
+                    </div>
+                    <div class="agenda-item-detail" style="margin-top:4px">
+                        <i class="lucide-badge-euro" style="color:var(--primary-dark)"></i>
+                        <span style="font-weight:700; color:var(--primary-dark)">${app.treatment.price.toFixed(2)} €</span>
+                        <span style="color:var(--text-muted); font-size:11px">(${app.treatment.duration} min)</span>
+                    </div>
+                    
+                    ${messageHtml}
+                    ${formHtml}
+                `;
+                listContainer.appendChild(card);
+            });
+
+            // Smooth scroll to selected day agenda on mobile
+            if (window.innerWidth <= 900) {
+                const titleElement = document.getElementById('selectedDateTitle');
+                if (titleElement) {
+                    titleElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+        }
+    </script>
+</body>
+</html>
