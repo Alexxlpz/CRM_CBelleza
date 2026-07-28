@@ -1,0 +1,58 @@
+:root {
+    /* Color Palette */
+    --primary: #c5a880;          /* Champagne Bronze (primary yellowish/gold color) */
+    --primary-light: #ecdcc5;
+    --primary-dark: #a3875f;
+    --secondary: #e0b0b0;        /* Rose Gold */
+    --secondary-dark: #b88a8a;
+    
+    --bg-gradient: linear-gradient(135deg, #faf6f2 0%, #f3e6dd 100%);
+    --text-main: #2b2825;
+    --text-muted: #7d726a;
+    
+    /* Glassmorphism */
+    --card-bg: rgba(255, 255, 255, 0.75);
+    --card-border: rgba(255, 255, 255, 0.5);
+    
+    /* Semantic Colors */
+    --success: #8fa89b;          /* Soft Sage Green */
+    --success-text: #2f4539;
+    --success-bg: rgba(143, 168, 155, 0.25);
+    
+    --danger: #d99a9a;           /* Soft Terracotta */
+    --danger-text: #592525;
+    --danger-bg: rgba(217, 154, 154, 0.25);
+    
+    --warning: #ecd29b;          /* Soft Gold/Ochre (color for pending alerts) */
+    --warning-text: #59451d;
+    --warning-bg: rgba(236, 210, 155, 0.25);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --primary: #c5a880;
+        --primary-light: #473928;
+        --primary-dark: #e8d3b8;
+        --secondary: #e0b0b0;
+        --secondary-dark: #f7d2d2;
+        
+        --bg-gradient: linear-gradient(135deg, #1c1815 0%, #120e0c 100%);
+        --text-main: #f5f0eb;
+        --text-muted: #b0a498;
+        
+        --card-bg: rgba(32, 27, 24, 0.75);
+        --card-border: rgba(197, 168, 128, 0.2);
+        
+        --success: #678a76;
+        --success-text: #c2eed5;
+        --success-bg: rgba(103, 138, 118, 0.2);
+        
+        --danger: #b86e6e;
+        --danger-text: #ffcfcf;
+        --danger-bg: rgba(184, 110, 110, 0.2);
+        
+        --warning: #cfa861;
+        --warning-text: #ffefcd;
+        --warning-bg: rgba(207, 168, 97, 0.2);
+    }
+}
