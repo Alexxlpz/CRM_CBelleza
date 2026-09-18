@@ -288,8 +288,8 @@
                 });
                 
                 if (response.ok) {
-                    // Update eventsData array locally
-                    const app = eventsData.find(a => a.id === appId);
+                    // Update appointmentsList array locally
+                    const app = appointmentsList.find(a => a.id === appId);
                     if (app) {
                         app.status = action === 'approve' ? 'CONFIRMED' : 'REJECTED';
                         app.workerMessage = message;

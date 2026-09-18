@@ -34,19 +34,22 @@
     <main class="main-container">
         
         <!-- Hero Section -->
-        <section class="landing-hero">
+        <section class="landing-hero glass-panel">
+            <div class="hero-badge">
+                <i class="lucide-sparkles"></i> Gestión Inteligente para Salones
+            </div>
             <h1 class="landing-logo">BellaBelleza</h1>
             <p class="landing-subtitle">
                 La plataforma de gestión inteligente y reservas online para centros de estética, spas y salones de belleza de alta gama.
             </p>
-            <div style="display: flex; gap: 16px;">
-                <a href="/login" class="btn btn-primary" th:if="${sessionRole == null}">
+            <div class="landing-cta-group">
+                <a href="/login" class="btn btn-primary btn-hero-cta" th:if="${sessionRole == null}">
                     <i class="lucide-log-in"></i> Acceso a la Plataforma
                 </a>
-                <a href="/client/centers" class="btn btn-primary" th:if="${sessionRole == 'CLIENT'}">
+                <a href="/client/centers" class="btn btn-primary btn-hero-cta" th:if="${sessionRole == 'CLIENT'}">
                     <i class="lucide-map-pin"></i> Ver Centros & Reservar
                 </a>
-                <a href="/worker/dashboard" class="btn btn-primary" th:if="${sessionRole == 'WORKER'}">
+                <a href="/worker/dashboard" class="btn btn-primary btn-hero-cta" th:if="${sessionRole == 'WORKER'}">
                     <i class="lucide-layout-dashboard"></i> Panel de Control
                 </a>
             </div>
@@ -55,19 +58,25 @@
         <!-- Feature Showcases -->
         <section class="landing-features">
             <div class="feature-box glass-panel">
-                <i class="lucide-calendar-heart"></i>
+                <div class="feature-icon-wrapper">
+                    <i class="lucide-calendar-heart"></i>
+                </div>
                 <h3>Reserva de Citas</h3>
                 <p>Facilita a tus clientes reservar tratamientos online en tiempo real, eligiendo centro, servicio y su especialista preferido.</p>
             </div>
             
             <div class="feature-box glass-panel">
-                <i class="lucide-package-check"></i>
+                <div class="feature-icon-wrapper">
+                    <i class="lucide-package-check"></i>
+                </div>
                 <h3>Gestión de Inventario</h3>
                 <p>Lleva el control absoluto del stock de tus productos, registra ventas o entradas de mercancía de manera ágil y visual.</p>
             </div>
             
             <div class="feature-box glass-panel">
-                <i class="lucide-clipboard-list"></i>
+                <div class="feature-icon-wrapper">
+                    <i class="lucide-clipboard-list"></i>
+                </div>
                 <h3>Tratamientos Locales</h3>
                 <p>Personaliza la carta de servicios de cada salón de belleza de forma dinámica, adaptando precios y duraciones según el centro.</p>
             </div>

@@ -13,15 +13,10 @@
 <body>
     <!-- Top Navigation Bar -->
     <nav class="navbar">
-        <div style="display: flex; align-items: center; gap: 16px;">
-            <a href="/" class="back-arrow-btn" aria-label="Volver a la página principal" style="margin-bottom: 0;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-            </a>
-            <a href="/" class="nav-brand">
-                <i class="lucide-sparkles"></i>
-                <span>BellaBelleza</span>
-            </a>
-        </div>
+        <a href="/" class="nav-brand">
+            <i class="lucide-sparkles"></i>
+            <span>BellaBelleza</span>
+        </a>
     </nav>
 
     <!-- Main Container -->
@@ -34,8 +29,11 @@
 
         <div class="login-card glass-panel">
             <div class="login-header">
-                <h2>Acceso Simulado</h2>
-                <p>Selecciona un perfil para ingresar a la plataforma</p>
+                <div class="login-icon-badge">
+                    <i class="lucide-user-check"></i>
+                </div>
+                <h2>Acceso a la Plataforma</h2>
+                <p>Selecciona un perfil para ingresar a BellaBelleza</p>
             </div>
             
             <form action="/select-session" method="POST" class="role-form" id="loginForm">
@@ -44,8 +42,8 @@
                 
                 <div class="form-group">
                     <label class="form-label" for="profileSelector">Seleccionar Perfil</label>
-                    <select id="profileSelector" class="form-control" onchange="updateLoginFormValues()" required>
-                        <option value="" disabled selected>Elige un usuario...</option>
+                    <select id="profileSelector" class="form-control login-select" onchange="updateLoginFormValues()" required>
+                        <option value="" disabled selected>Elige un usuario para continuar...</option>
                         
                         <optgroup label="Área de Clientes">
                             <option th:each="client : ${clients}" 
@@ -66,7 +64,7 @@
                     </select>
                 </div>
                 
-                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">
+                <button type="submit" class="btn btn-primary btn-login-submit">
                     <i class="lucide-log-in"></i> Iniciar Sesión
                 </button>
             </form>

@@ -58,8 +58,9 @@
                 <p th:text="'Servicios de estética activos en ' + ${sessionCenterName}">Servicios de estética activos en tu centro</p>
             </div>
             
-            <button type="button" class="btn btn-primary" onclick="openTreatmentSheet()">
-                <i class="lucide-plus-circle"></i> Añadir Tratamiento
+            <button type="button" class="btn btn-primary btn-add-treatment" onclick="openTreatmentSheet()" title="Añadir Tratamiento">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                <span class="btn-add-label">Añadir Tratamiento</span>
             </button>
         </div>
 
@@ -84,9 +85,15 @@
             </section>
         </div>
 
+        <!-- Mobile FAB Button -->
+        <button type="button" class="fab-add-btn" onclick="openTreatmentSheet()" aria-label="Añadir Tratamiento" title="Añadir Tratamiento">
+            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </button>
+
         <!-- Add Treatment Sheet (Simulated sheet modal) -->
         <div id="addTreatmentSheet" class="sheet-overlay" style="display:none" onclick="closeTreatmentSheetOnOverlay(event)">
             <div class="sheet-content glass-panel" onclick="event.stopPropagation()">
+                <div class="bottom-sheet-handle"></div>
                 <div class="sheet-header">
                     <h2>Añadir Tratamiento</h2>
                     <button type="button" class="sheet-close" onclick="closeTreatmentSheet()">&times;</button>
@@ -178,6 +185,80 @@
                 closeTreatmentSheet();
             }
         }
+
+        // Bottom Sheet Drag to Dismiss
+        function initBottomSheetDrag() {
+            document.querySelectorAll('.bottom-sheet-handle').forEach(handle => {
+                let startY = 0;
+                let currentDeltaY = 0;
+                let isDragging = false;
+                const modalCard = handle.closest('.sheet-content, .info-modal-card');
+                const overlay = handle.closest('.sheet-overlay, .info-modal-overlay');
+
+                if (!modalCard || !overlay) return;
+
+                function onStart(e) {
+                    startY = e.touches ? e.touches[0].clientY : e.clientY;
+                    isDragging = true;
+                    modalCard.style.transition = 'none';
+                    
+                    document.addEventListener('touchmove', onMove, { passive: false });
+                    document.addEventListener('touchend', onEnd);
+                    document.addEventListener('mousemove', onMove);
+                    document.addEventListener('mouseup', onEnd);
+                }
+
+                function onMove(e) {
+                    if (!isDragging) return;
+                    const currentY = e.touches ? e.touches[0].clientY : e.clientY;
+                    currentDeltaY = currentY - startY;
+
+                    if (currentDeltaY > 0) { // Dragging downwards
+                        if (e.cancelable) e.preventDefault();
+                        modalCard.style.transform = `translateY(${currentDeltaY}px)`;
+                        overlay.style.opacity = `${Math.max(0.1, 1 - currentDeltaY / 300)}`;
+                    }
+                }
+
+                function onEnd() {
+                    if (!isDragging) return;
+                    isDragging = false;
+
+                    document.removeEventListener('touchmove', onMove);
+                    document.removeEventListener('touchend', onEnd);
+                    document.removeEventListener('mousemove', onMove);
+                    document.removeEventListener('mouseup', onEnd);
+
+                    modalCard.style.transition = 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease';
+
+                    if (currentDeltaY > 70) {
+                        modalCard.style.transform = 'translateY(100%)';
+                        overlay.style.opacity = '0';
+                        setTimeout(() => {
+                            closeTreatmentSheet();
+                            modalCard.style.transform = '';
+                            modalCard.style.transition = '';
+                            overlay.style.opacity = '';
+                            currentDeltaY = 0;
+                        }, 220);
+                    } else {
+                        modalCard.style.transform = 'translateY(0)';
+                        overlay.style.opacity = '1';
+                        setTimeout(() => {
+                            modalCard.style.transition = '';
+                            currentDeltaY = 0;
+                        }, 250);
+                    }
+                }
+
+                handle.addEventListener('touchstart', onStart, { passive: true });
+                handle.addEventListener('mousedown', onStart);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initBottomSheetDrag();
+        });
     </script>
 </body>
 </html>

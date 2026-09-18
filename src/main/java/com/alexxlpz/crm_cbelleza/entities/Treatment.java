@@ -25,7 +25,7 @@ public class Treatment {
     private Double price;
 
     @Column(nullable = false)
-    private Integer duration; // in minutes
+    private Integer duration; // en minutos
 
     @Enumerated(EnumType.STRING)
     @Column(name = "treatment_type", nullable = false)

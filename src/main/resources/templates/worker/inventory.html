@@ -52,20 +52,30 @@
     <main class="main-container">
 
         <!-- Screen Header -->
-        <div class="page-header" style="flex-direction:row; justify-content:space-between; align-items:center; margin-bottom:24px">
+        <div class="page-header" style="flex-direction:row; justify-content:space-between; align-items:center; margin-bottom:20px">
             <div>
                 <h1>Gestión de Inventario</h1>
                 <p th:text="${#lists.size(inventoryItems)} + ' productos registrados en el stock del salón'">0 productos registrados</p>
             </div>
             
-            <button type="button" class="btn btn-primary" onclick="openProductSheet()">
-                <i class="lucide-package-plus"></i> Añadir Producto
+            <button type="button" class="btn btn-primary btn-add-product" onclick="openProductSheet()" title="Añadir Producto">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                <span class="btn-add-label">Añadir Producto</span>
             </button>
         </div>
 
+        <!-- Category Filter Bar -->
+        <div class="category-filter-bar">
+            <button type="button" class="category-pill active" onclick="filterCategory('all', this)">Todos</button>
+            <button type="button" class="category-pill" onclick="filterCategory('Rostro', this)">Rostro</button>
+            <button type="button" class="category-pill" onclick="filterCategory('Cabello', this)">Cabello</button>
+            <button type="button" class="category-pill" onclick="filterCategory('Uñas', this)">Uñas</button>
+            <button type="button" class="category-pill" onclick="filterCategory('Cuerpo', this)">Cuerpo</button>
+        </div>
+
         <!-- Inventory Grid -->
-        <div class="inventory-grid" th:if="${not #lists.isEmpty(inventoryItems)}">
-            <div class="inventory-card glass-panel" th:each="item : ${inventoryItems}">
+        <div class="inventory-grid" id="inventoryGrid" th:if="${not #lists.isEmpty(inventoryItems)}">
+            <div class="inventory-card glass-panel" th:each="item : ${inventoryItems}" th:data-category="${item.product.category}">
                 
                 <!-- Category image mapping -->
                 <img th:if="${item.product.category == 'Rostro'}" src="/images/face_serum.png" class="product-thumbnail" alt="Rostro">
@@ -100,8 +110,8 @@
                 <!-- Stock Direct Adjuster Panel (+1 / -1 buttons) -->
                 <div class="stock-adjust-panel">
                     <div class="stock-value-wrapper">
-                        <span style="font-size:11px; font-weight:600; color:var(--text-muted)">Stock:</span>
-                        <span th:text="${item.stock}">0</span>
+                        <span class="stock-label">Stock:</span>
+                        <span class="stock-count-val" th:text="${item.stock}">0</span>
                     </div>
                     
                     <!-- Plus and Minus Buttons -->
@@ -117,9 +127,9 @@
                     </div>
                     
                     <!-- Stock Alert Badges -->
-                    <span th:if="${item.stock == 0}" class="badge badge-rejected" style="font-size: 8px; padding: 2px 6px;">Agotado</span>
-                    <span th:if="${item.stock > 0 and item.stock <= 3}" class="badge badge-pending" style="font-size: 8px; padding: 2px 6px;">Bajo Stock</span>
-                    <span th:if="${item.stock > 3}" class="badge badge-confirmed" style="font-size: 8px; padding: 2px 6px;">Normal</span>
+                    <span th:if="${item.stock == 0}" class="badge badge-rejected badge-pill" style="font-size: 8px; padding: 2px 6px;">Agotado</span>
+                    <span th:if="${item.stock > 0 and item.stock <= 3}" class="badge badge-pending badge-pill" style="font-size: 8px; padding: 2px 6px;">Bajo Stock</span>
+                    <span th:if="${item.stock > 3}" class="badge badge-confirmed badge-pill" style="font-size: 8px; padding: 2px 6px;">Normal</span>
                 </div>
 
                 
@@ -131,10 +141,9 @@
             <div th:id="'detailModal_' + ${item.id}" class="info-modal-overlay" style="display:none"
                  th:onclick="'closeProductModalOnBackdrop(event, \'detailModal_\' + ' + ${item.id} + ')'">
                 <div class="info-modal-card" onclick="event.stopPropagation()">
+                    <div class="bottom-sheet-handle"></div>
                     <div class="info-modal-header">
                         <h3 th:text="${item.product.name}">Detalle del Producto</h3>
-                        <button type="button" class="info-modal-close" 
-                                th:onclick="'closeProductModal(\'detailModal_\' + ' + ${item.id} + ')'" aria-label="Cerrar">&times;</button>
                     </div>
                     <div class="info-modal-body">
                         <div class="info-modal-media">
@@ -174,12 +183,18 @@
             <i class="lucide-package-x"></i>
             <p>No hay existencias en stock. Comienza añadiendo productos desde el catálogo.</p>
         </div>
+
+        <!-- Mobile FAB Button -->
+        <button type="button" class="fab-add-btn" onclick="openProductSheet()" aria-label="Añadir Producto" title="Añadir Producto">
+            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </button>
         
     </main>
 
     <!-- Add Product Sheet dialog (Simulated sheet modal) -->
     <div id="addProductModal" class="sheet-overlay" style="display:none" onclick="closeProductSheetOnOverlay(event)">
         <div class="sheet-content glass-panel" onclick="event.stopPropagation()">
+            <div class="bottom-sheet-handle"></div>
             <div class="sheet-header">
                 <h3>Añadir al Inventario</h3>
                 <button type="button" class="sheet-close" 
@@ -275,6 +290,22 @@
             }
         }
 
+        function filterCategory(category, btnEl) {
+            const pills = document.querySelectorAll('.category-pill');
+            pills.forEach(p => p.classList.remove('active'));
+            if (btnEl) btnEl.classList.add('active');
+
+            const cards = document.querySelectorAll('#inventoryGrid .inventory-card');
+            cards.forEach(card => {
+                const cardCat = card.getAttribute('data-category');
+                if (category === 'all' || cardCat === category) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
         function toggleNotifications(event) {
             event.stopPropagation();
             const dropdown = document.getElementById('notificationsDropdown');
@@ -320,8 +351,83 @@
             }
         }
         
+        // Bottom Sheet Drag to Dismiss
+        function initBottomSheetDrag() {
+            document.querySelectorAll('.bottom-sheet-handle').forEach(handle => {
+                let startY = 0;
+                let currentDeltaY = 0;
+                let isDragging = false;
+                const modalCard = handle.closest('.sheet-content, .info-modal-card');
+                const overlay = handle.closest('.sheet-overlay, .info-modal-overlay');
+
+                if (!modalCard || !overlay) return;
+
+                function onStart(e) {
+                    startY = e.touches ? e.touches[0].clientY : e.clientY;
+                    isDragging = true;
+                    modalCard.style.transition = 'none';
+                    
+                    document.addEventListener('touchmove', onMove, { passive: false });
+                    document.addEventListener('touchend', onEnd);
+                    document.addEventListener('mousemove', onMove);
+                    document.addEventListener('mouseup', onEnd);
+                }
+
+                function onMove(e) {
+                    if (!isDragging) return;
+                    const currentY = e.touches ? e.touches[0].clientY : e.clientY;
+                    currentDeltaY = currentY - startY;
+
+                    if (currentDeltaY > 0) { // Dragging downwards
+                        if (e.cancelable) e.preventDefault();
+                        modalCard.style.transform = `translateY(${currentDeltaY}px)`;
+                        overlay.style.opacity = `${Math.max(0.1, 1 - currentDeltaY / 300)}`;
+                    }
+                }
+
+                function onEnd() {
+                    if (!isDragging) return;
+                    isDragging = false;
+
+                    document.removeEventListener('touchmove', onMove);
+                    document.removeEventListener('touchend', onEnd);
+                    document.removeEventListener('mousemove', onMove);
+                    document.removeEventListener('mouseup', onEnd);
+
+                    modalCard.style.transition = 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease';
+
+                    if (currentDeltaY > 70) {
+                        modalCard.style.transform = 'translateY(100%)';
+                        overlay.style.opacity = '0';
+                        setTimeout(() => {
+                            if (overlay.id === 'addProductModal') {
+                                closeProductSheet();
+                            } else if (overlay.id) {
+                                closeProductModal(overlay.id);
+                            }
+                            modalCard.style.transform = '';
+                            modalCard.style.transition = '';
+                            overlay.style.opacity = '';
+                            currentDeltaY = 0;
+                        }, 220);
+                    } else {
+                        modalCard.style.transform = 'translateY(0)';
+                        overlay.style.opacity = '1';
+                        setTimeout(() => {
+                            modalCard.style.transition = '';
+                            currentDeltaY = 0;
+                        }, 250);
+                    }
+                }
+
+                handle.addEventListener('touchstart', onStart, { passive: true });
+                handle.addEventListener('mousedown', onStart);
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             setAddMode('existing');
+            initBottomSheetDrag();
         });
 
         // AJAX Stock Adjuster
@@ -347,6 +453,11 @@
                     let newStock = Math.max(0, currentStock + change);
                     stockSpan.innerText = newStock;
                     
+                    // Add pulse animation
+                    stockSpan.classList.remove('pulsing');
+                    void stockSpan.offsetWidth; // trigger reflow
+                    stockSpan.classList.add('pulsing');
+                    
                     if (newStock === 0) {
                         decBtn.disabled = true;
                     } else {
@@ -361,13 +472,13 @@
                     badge.style.fontSize = '8px';
                     badge.style.padding = '2px 6px';
                     if (newStock === 0) {
-                        badge.className = 'badge badge-rejected';
+                        badge.className = 'badge badge-rejected badge-pill';
                         badge.innerText = 'Agotado';
                     } else if (newStock > 0 && newStock <= 3) {
-                        badge.className = 'badge badge-pending';
+                        badge.className = 'badge badge-pending badge-pill';
                         badge.innerText = 'Bajo Stock';
                     } else {
-                        badge.className = 'badge badge-confirmed';
+                        badge.className = 'badge badge-confirmed badge-pill';
                         badge.innerText = 'Normal';
                     }
                     badgeContainer.appendChild(badge);
