@@ -62,11 +62,11 @@
             <section class="calendar-card glass-panel">
                 <div class="calendar-header">
                     <h2 class="calendar-month-title" id="calendarMonthYear">Julio 2026</h2>
-                    <div style="display:flex; gap:8px">
-                        <button type="button" class="calendar-nav-btn" onclick="prevMonth()">
+                    <div class="calendar-header-nav">
+                        <button type="button" class="calendar-nav-btn" onclick="prevMonth()" aria-label="Mes anterior">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
                         </button>
-                        <button type="button" class="calendar-nav-btn" onclick="nextMonth()">
+                        <button type="button" class="calendar-nav-btn" onclick="nextMonth()" aria-label="Mes siguiente">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
                         </button>
                     </div>
@@ -226,7 +226,7 @@
                     cell.classList.add('active-day');
                 }
                 
-                cell.onclick = () => selectDay(day, currentMonth, currentYear);
+                cell.onclick = () => selectDay(day, currentMonth, currentYear, true);
                 grid.appendChild(cell);
             }
             
@@ -312,7 +312,7 @@
             }
         }
 
-        function selectDay(day, month, year) {
+        function selectDay(day, month, year, isUserClick = false) {
             selectedDayKey = formatDateKey(day, month, year);
             
             // Redraw grid to update active classes
@@ -427,8 +427,8 @@
                 listContainer.appendChild(card);
             });
 
-            // Smooth scroll to selected day agenda on mobile
-            if (window.innerWidth <= 900) {
+            // Smooth scroll to selected day agenda on mobile only on explicit user click
+            if (isUserClick && window.innerWidth <= 900) {
                 const titleElement = document.getElementById('selectedDateTitle');
                 if (titleElement) {
                     titleElement.scrollIntoView({ behavior: 'smooth', block: 'start' });

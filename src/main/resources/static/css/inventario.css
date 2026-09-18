@@ -27,6 +27,14 @@
     scrollbar-width: none; /* Firefox */
 }
 
+.inventory-page-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
 .category-filter-bar::-webkit-scrollbar {
     display: none; /* Chrome/Safari */
 }
@@ -69,6 +77,19 @@
 }
 
 @media (max-width: 768px) {
+    .inventory-page-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .inventory-page-header .btn-add-product {
+        width: 100%;
+    }
+
+    .inventory-page-header .btn-add-label {
+        flex: 1;
+    }
+
     .inventory-grid {
         grid-template-columns: 1fr;
         gap: 16px;
@@ -767,5 +788,4 @@
         font-size: 13px !important;
     }
 }
-
 
