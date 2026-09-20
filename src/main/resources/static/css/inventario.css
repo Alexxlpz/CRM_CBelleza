@@ -536,6 +536,7 @@
     touch-action: none;
     user-select: none;
     transition: background 0.2s ease;
+    visibility: hidden;
 }
 
 .bottom-sheet-handle:hover,
@@ -644,6 +645,11 @@
    MOBILE SPECIFIC OVERRIDES (< 600px): Bottom Sheets & Thumb Zone
    ------------------------------------------------------------- */
 @media (max-width: 600px) {
+
+    .bottom-sheet-handle {
+        visibility: visible;
+    }
+
     /* Show circular FAB in mobile only */
     .fab-add-btn {
         display: flex !important;

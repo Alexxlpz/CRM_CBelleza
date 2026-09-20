@@ -21,16 +21,20 @@ public class NotificationService {
         this.appointmentRepository = appointmentRepository;
     }
 
-    public List<String> getNotificationsForCenter(Long centerId) {
-        List<String> notifications = new ArrayList<>();
+    public List<NotificationItem> getNotificationsForCenter(Long centerId) {
+        List<NotificationItem> notifications = new ArrayList<>();
         if (centerId == null) return notifications;
 
         List<Inventory> inventoryItems = inventoryRepository.findByCenterId(centerId);
         for (Inventory item : inventoryItems) {
             if (item.getStock() == 0) {
-                notifications.add("¡Agotado! " + item.getProduct().getName() + " requiere reposición urgente.");
+                notifications.add(new NotificationItem(
+                        "¡Agotado! " + item.getProduct().getName() + " requiere reposición urgente.",
+                        "/worker/inventory"));
             } else if (item.getStock() <= 3) {
-                notifications.add("Stock bajo: Quedan " + item.getStock() + " ud de " + item.getProduct().getName() + ".");
+                notifications.add(new NotificationItem(
+                        "Stock bajo: Quedan " + item.getStock() + " ud de " + item.getProduct().getName() + ".",
+                        "/worker/inventory"));
             }
         }
 
@@ -40,10 +44,14 @@ public class NotificationService {
         int todayCount = 0;
         int tomorrowCount = 0;
         int pendingCount = 0;
+        LocalDate nearlyPendingDate = null;
 
         for (Appointment app : appointments) {
             if (app.getStatus() == AppointmentStatus.PENDING) {
                 pendingCount++;
+                if (nearlyPendingDate == null || app.getDateTime().toLocalDate().isBefore(nearlyPendingDate)) {
+                    nearlyPendingDate = app.getDateTime().toLocalDate();
+                }
             }
             LocalDate date = app.getDateTime().toLocalDate();
             if (date.isEqual(today) && app.getStatus() == AppointmentStatus.CONFIRMED) todayCount++;
@@ -51,15 +59,24 @@ public class NotificationService {
         }
 
         if (pendingCount > 0) {
-            notifications.add("Tienes " + pendingCount + " solicitud" + (pendingCount > 1 ? "es" : "") + " de cita pendiente" + (pendingCount > 1 ? "s" : "") + " de aprobación.");
+            notifications.add(new NotificationItem(
+                    "Tienes " + pendingCount + " solicitud" + (pendingCount > 1 ? "es" : "") + " de cita pendiente" + (pendingCount > 1 ? "s" : "") + " de aprobación.",
+                    "/worker/calendar?date=" + nearlyPendingDate));
         }
         if (todayCount > 0) {
-            notifications.add("Tienes " + todayCount + " cita" + (todayCount > 1 ? "s" : "") + " confirmada" + (todayCount > 1 ? "s" : "") + " para hoy.");
+            notifications.add(new NotificationItem(
+                    "Tienes " + todayCount + " cita" + (todayCount > 1 ? "s" : "") + " confirmada" + (todayCount > 1 ? "s" : "") + " para hoy.",
+                    "/worker/calendar?date=" + today));
         }
         if (tomorrowCount > 0) {
-            notifications.add("Tienes " + tomorrowCount + " cita" + (tomorrowCount > 1 ? "s" : "") + " confirmada" + (tomorrowCount > 1 ? "s" : "") + " para mañana.");
+            notifications.add(new NotificationItem(
+                    "Tienes " + tomorrowCount + " cita" + (tomorrowCount > 1 ? "s" : "") + " confirmada" + (tomorrowCount > 1 ? "s" : "") + " para mañana.",
+                    "/worker/calendar?date=" + tomorrow));
         }
 
         return notifications;
+    }
+
+    public record NotificationItem(String message, String url) {
     }
 }

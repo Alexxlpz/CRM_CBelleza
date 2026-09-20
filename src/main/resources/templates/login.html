@@ -11,13 +11,7 @@
     <link rel="stylesheet" href="/css/home.css">
 </head>
 <body>
-    <!-- Top Navigation Bar -->
-    <nav class="navbar">
-        <a href="/" class="nav-brand">
-            <i class="lucide-sparkles"></i>
-            <span>BellaBelleza</span>
-        </a>
-    </nav>
+    <div th:replace="~{fragments/navbar :: brand(false)}"></div>
 
     <!-- Main Container -->
     <main class="main-container">
@@ -73,9 +67,7 @@
     </main>
 
     <!-- Footer -->
-    <footer>
-        <p>&copy; 2026 BellaBelleza CRM. Prototipo funcional.</p>
-    </footer>
+    <div th:replace="~{fragments/footer :: footer('© 2026 BellaBelleza CRM. Prototipo funcional.')}"></div>
 
     <!-- Script to handle selector values -->
     <script>

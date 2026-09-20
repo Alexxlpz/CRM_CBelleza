@@ -11,24 +11,7 @@
     <link rel="stylesheet" href="/css/home.css">
 </head>
 <body>
-    <!-- Top Navigation Bar -->
-    <nav class="navbar">
-        <a href="/" class="nav-brand">
-            <i class="lucide-sparkles"></i>
-            <span>BellaBelleza</span>
-        </a>
-        <div class="nav-session-info" th:if="${sessionRole != null}">
-            <span class="session-badge">
-                <i class="lucide-user"></i>
-                <span th:text="${sessionRole == 'CLIENT' ? 'Cliente' : 'Colaborador'}">Cliente</span>
-                <span th:text="'(' + ${sessionUserName} + ')'"></span>
-            </span>
-            <a href="/logout" class="nav-logout"><i class="lucide-log-out"></i> Cerrar</a>
-        </div>
-        <div class="nav-session-info" th:if="${sessionRole == null}">
-            <a href="/login" class="btn btn-primary btn-sm">Iniciar Sesión</a>
-        </div>
-    </nav>
+    <div th:replace="~{fragments/navbar :: brand(true)}"></div>
 
     <!-- Main Container -->
     <main class="main-container">
@@ -56,37 +39,126 @@
         </section>
 
         <!-- Feature Showcases -->
-        <section class="landing-features">
-            <div class="feature-box glass-panel">
+        <section class="landing-features" aria-label="Funcionalidades principales">
+            <a class="feature-box glass-panel" href="#feature-bookings">
                 <div class="feature-icon-wrapper">
                     <i class="lucide-calendar-heart"></i>
                 </div>
                 <h3>Reserva de Citas</h3>
                 <p>Facilita a tus clientes reservar tratamientos online en tiempo real, eligiendo centro, servicio y su especialista preferido.</p>
-            </div>
+                <span class="feature-link-label">Descubrir más <i class="lucide-arrow-down"></i></span>
+            </a>
             
-            <div class="feature-box glass-panel">
+            <a class="feature-box glass-panel" href="#feature-inventory">
                 <div class="feature-icon-wrapper">
                     <i class="lucide-package-check"></i>
                 </div>
                 <h3>Gestión de Inventario</h3>
                 <p>Lleva el control absoluto del stock de tus productos, registra ventas o entradas de mercancía de manera ágil y visual.</p>
-            </div>
+                <span class="feature-link-label">Descubrir más <i class="lucide-arrow-down"></i></span>
+            </a>
             
-            <div class="feature-box glass-panel">
+            <a class="feature-box glass-panel" href="#feature-treatments">
                 <div class="feature-icon-wrapper">
                     <i class="lucide-clipboard-list"></i>
                 </div>
                 <h3>Tratamientos Locales</h3>
                 <p>Personaliza la carta de servicios de cada salón de belleza de forma dinámica, adaptando precios y duraciones según el centro.</p>
-            </div>
+                <span class="feature-link-label">Descubrir más <i class="lucide-arrow-down"></i></span>
+            </a>
+        </section>
+
+        <!-- Feature Information -->
+        <section class="landing-feature-details" aria-label="Información sobre las funcionalidades">
+            <article class="feature-detail glass-panel" id="feature-bookings">
+                <div class="feature-detail-media">
+                    <img src="/images/beauty_salon_hero.png" alt="Profesional preparando una cita en un salón de belleza">
+                    <div class="feature-detail-icon"><i class="lucide-calendar-heart"></i></div>
+                </div>
+                <div class="feature-detail-content">
+                    <span class="feature-detail-eyebrow">Para tus clientes</span>
+                    <h2>Reservas sencillas, agenda siempre organizada</h2>
+                    <p>Convierte la búsqueda de un tratamiento en una experiencia clara y rápida. Cada cliente puede descubrir un centro, consultar su disponibilidad y solicitar una cita sin llamadas ni esperas. El equipo recibe toda la información necesaria para preparar cada servicio y mantener la agenda organizada.</p>
+                    <div class="feature-detail-table-wrapper">
+                        <table class="feature-detail-table">
+                            <thead><tr><th>Momento</th><th>Qué ocurre</th><th>Beneficio</th></tr></thead>
+                            <tbody>
+                                <tr><td>1. Descubrir</td><td>Localiza el centro y revisa sus servicios.</td><td>Más visibilidad para tu salón.</td></tr>
+                                <tr><td>2. Elegir</td><td>Selecciona tratamiento, profesional y horario.</td><td>Menos llamadas y errores.</td></tr>
+                                <tr><td>3. Confirmar</td><td>El equipo recibe la solicitud en su agenda.</td><td>Una agenda centralizada.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <ul>
+                        <li><i class="lucide-check-circle-2"></i> Reservas online disponibles en cualquier momento</li>
+                        <li><i class="lucide-check-circle-2"></i> Selección de centro, tratamiento y profesional</li>
+                        <li><i class="lucide-check-circle-2"></i> Calendario centralizado para el equipo</li>
+                        <li><i class="lucide-check-circle-2"></i> Datos de contacto preparados para cada reserva</li>
+                        <li><i class="lucide-check-circle-2"></i> Consulta del estado de las citas por parte del cliente</li>
+                    </ul>
+                    <div class="feature-callout"><i class="lucide-lightbulb"></i><span>Una experiencia de reserva sencilla transmite confianza incluso antes de la primera visita.</span></div>
+                </div>
+            </article>
+
+            <article class="feature-detail feature-detail-reverse glass-panel" id="feature-inventory">
+                <div class="feature-detail-media">
+                    <img src="/images/face_serum.png" alt="Producto cosmético controlado desde el inventario">
+                    <div class="feature-detail-icon"><i class="lucide-package-check"></i></div>
+                </div>
+                <div class="feature-detail-content">
+                    <span class="feature-detail-eyebrow">Para la gestión diaria</span>
+                    <h2>Controla el stock antes de que falte</h2>
+                    <p>Ten una visión práctica de los productos que utiliza tu salón. Los avisos de stock bajo te permiten reponer a tiempo y mantener cada servicio preparado, desde cosmética facial hasta productos capilares y material de uso diario.</p>
+                    <div class="inventory-status-grid">
+                        <div><i class="lucide-circle-check"></i><strong>Disponible</strong><span>Stock controlado</span></div>
+                        <div><i class="lucide-triangle-alert"></i><strong>Stock bajo</strong><span>Reponer pronto</span></div>
+                        <div><i class="lucide-circle-x"></i><strong>Agotado</strong><span>Atención urgente</span></div>
+                    </div>
+                    <ul>
+                        <li><i class="lucide-check-circle-2"></i> Avisos visuales para productos con stock bajo</li>
+                        <li><i class="lucide-check-circle-2"></i> Altas y ajustes de productos de forma rápida</li>
+                        <li><i class="lucide-check-circle-2"></i> Inventario adaptado a cada salón</li>
+                        <li><i class="lucide-check-circle-2"></i> Consulta del nombre, categoría y cantidad de cada producto</li>
+                        <li><i class="lucide-check-circle-2"></i> Registro de entradas y salidas con controles rápidos</li>
+                    </ul>
+                    <div class="feature-callout"><i class="lucide-shield-check"></i><span>Evita cancelar servicios por falta de material y toma decisiones de compra con información actualizada.</span></div>
+                </div>
+            </article>
+
+            <article class="feature-detail glass-panel" id="feature-treatments">
+                <div class="feature-detail-media">
+                    <img src="/images/hair_oil.png" alt="Producto de cuidado capilar de un tratamiento de belleza">
+                    <div class="feature-detail-icon"><i class="lucide-clipboard-list"></i></div>
+                </div>
+                <div class="feature-detail-content">
+                    <span class="feature-detail-eyebrow">Una carta a tu medida</span>
+                    <h2>Define los tratamientos de cada centro</h2>
+                    <p>Crea una carta de servicios propia para cada salón y presenta una oferta coherente, atractiva y actualizada. Cada tratamiento puede explicar claramente qué incluye, cuánto dura, a qué categoría pertenece y cuál es su precio.</p>
+                    <div class="treatment-summary">
+                        <span><i class="lucide-clock-3"></i> Duración configurable</span>
+                        <span><i class="lucide-tag"></i> Precio visible</span>
+                        <span><i class="lucide-layers-3"></i> Categorías propias</span>
+                    </div>
+                    <div class="treatment-process">
+                        <div><span class="process-number">01</span><div><strong>Define</strong><small>Nombre y categoría del servicio</small></div></div>
+                        <div><span class="process-number">02</span><div><strong>Describe</strong><small>Explica la experiencia al cliente</small></div></div>
+                        <div><span class="process-number">03</span><div><strong>Publica</strong><small>Déjalo listo para reservar</small></div></div>
+                    </div>
+                    <ul>
+                        <li><i class="lucide-check-circle-2"></i> Servicios personalizados por centro</li>
+                        <li><i class="lucide-check-circle-2"></i> Precios y duraciones claramente definidos</li>
+                        <li><i class="lucide-check-circle-2"></i> Catálogo preparado para recibir reservas</li>
+                        <li><i class="lucide-check-circle-2"></i> Descripciones adaptadas al estilo de cada salón</li>
+                        <li><i class="lucide-check-circle-2"></i> Organización por categorías de belleza</li>
+                    </ul>
+                    <div class="feature-callout"><i class="lucide-sparkles"></i><span>Una carta de tratamientos bien explicada ayuda a que el cliente elija con seguridad.</span></div>
+                </div>
+            </article>
         </section>
         
     </main>
 
     <!-- Footer -->
-    <footer>
-        <p>&copy; 2026 BellaBelleza CRM. Todos los derechos reservados. Diseñado para dispositivos móviles y de escritorio.</p>
-    </footer>
+    <div th:replace="~{fragments/footer :: footer('© 2026 BellaBelleza CRM. Todos los derechos reservados. Diseñado para dispositivos móviles y de escritorio.')}"></div>
 </body>
 </html>

@@ -107,6 +107,22 @@ h1, h2, h3, h4, h5, h6 {
     gap: 4px;
     font-weight: 700;
 }
+
+.nav-context-link {
+    color: var(--text-main);
+    font-weight: 600;
+    text-decoration: none;
+    margin-right: 8px;
+}
+
+.nav-context-link i {
+    vertical-align: middle;
+    margin-right: 2px;
+}
+
+.nav-context-link:hover {
+    color: var(--primary-dark);
+}
 .nav-logout:hover {
     color: var(--danger-text);
 }
@@ -229,6 +245,7 @@ h1, h2, h3, h4, h5, h6 {
     text-align: left;
     background: #ffffff !important; /* Solid item background */
     transition: background 0.2s ease;
+    text-decoration: none;
 }
 
 .notification-item:hover {
@@ -596,4 +613,3 @@ footer {
     from { transform: translateY(100%); }
     to { transform: translateY(0); }
 }
-

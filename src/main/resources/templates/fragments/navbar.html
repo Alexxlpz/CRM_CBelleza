@@ -1,0 +1,61 @@
+<div xmlns:th="http://www.thymeleaf.org">
+    <nav class="navbar" th:fragment="brand(showSession)">
+        <a href="/" class="nav-brand">
+            <i class="lucide-sparkles"></i>
+            <span>BellaBelleza</span>
+        </a>
+        <div class="nav-session-info" th:if="${showSession and sessionRole != null}">
+            <span class="session-badge">
+                <i class="lucide-user"></i>
+                <span th:text="${sessionRole == 'CLIENT' ? 'Cliente' : 'Colaborador'}">Cliente</span>
+                <span th:text="'(' + ${sessionUserName} + ')'"></span>
+            </span>
+            <a href="/logout" class="nav-logout"><i class="lucide-log-out"></i> Cerrar</a>
+        </div>
+        <div class="nav-session-info" th:if="${showSession and sessionRole == null}">
+            <a href="/login" class="btn btn-primary btn-sm">Iniciar Sesión</a>
+        </div>
+    </nav>
+
+    <nav class="navbar" th:fragment="client(backUrl, backLabel)">
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <a th:if="${backUrl != null}" th:href="${backUrl}" class="back-arrow-btn"
+               th:aria-label="${backLabel}" style="margin-bottom: 0;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                     fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                     stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline></svg>
+            </a>
+            <a href="/" class="nav-brand">
+                <i class="lucide-sparkles"></i>
+                <span>BellaBelleza</span>
+            </a>
+        </div>
+        <div class="nav-session-info">
+            <a href="/client/appointments" class="nav-context-link">
+                <i class="lucide-calendar-days"></i> Mis Citas
+            </a>
+            <a href="/logout" class="nav-logout"><i class="lucide-log-out"></i> Salir</a>
+        </div>
+    </nav>
+
+    <nav class="navbar" th:fragment="worker(backUrl, backLabel, notifications)">
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <a th:if="${backUrl != null}" th:href="${backUrl}" class="back-arrow-btn"
+               th:aria-label="${backLabel}" style="margin-bottom: 0;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                     fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                     stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline></svg>
+            </a>
+            <a href="/" class="nav-brand">
+                <i class="lucide-sparkles"></i>
+                <span>BellaBelleza</span>
+            </a>
+        </div>
+        <div class="nav-session-info">
+            <div th:replace="~{fragments/notifications :: menu(${notifications})}"></div>
+            <a href="/logout" class="nav-logout"><i class="lucide-log-out"></i> Salir</a>
+        </div>
+    </nav>
+</div>
