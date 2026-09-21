@@ -4,10 +4,12 @@ import com.alexxlpz.crm_cbelleza.entities.Center;
 import com.alexxlpz.crm_cbelleza.entities.Treatment;
 import com.alexxlpz.crm_cbelleza.repositories.CenterRepository;
 import com.alexxlpz.crm_cbelleza.repositories.TreatmentRepository;
+import com.alexxlpz.crm_cbelleza.services.AppointmentService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -16,10 +18,32 @@ public class CenterApiController {
 
     private final CenterRepository centerRepository;
     private final TreatmentRepository treatmentRepository;
+    private final AppointmentService appointmentService;
 
-    public CenterApiController(CenterRepository centerRepository, TreatmentRepository treatmentRepository) {
+    public CenterApiController(CenterRepository centerRepository, TreatmentRepository treatmentRepository,
+                               AppointmentService appointmentService) {
         this.centerRepository = centerRepository;
         this.treatmentRepository = treatmentRepository;
+        this.appointmentService = appointmentService;
+    }
+
+    @GetMapping("/{id}/availability")
+    public Map<String, Object> getAvailability(@PathVariable Long id) {
+        List<String> occupied = appointmentService.getBookableAppointmentsByCenter(id).stream()
+                .flatMap(appointment -> {
+                    int slots = (int) Math.ceil(appointment.getTreatment().getDuration() / 30.0);
+                    return java.util.stream.IntStream.range(0, slots)
+                            .mapToObj(slot -> appointment.getDateTime().plusMinutes(slot * 30L).toString());
+                })
+                .toList();
+        return Map.of(
+                "slotMinutes", 30,
+                "workingDays", List.of(1, 2, 3, 4, 5),
+                "openHour", 9,
+                "closeHour", 20,
+                "closedDates", List.of(),
+                "occupied", occupied
+        );
     }
 
     public static class CenterDTO {

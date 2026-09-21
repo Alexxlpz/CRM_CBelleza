@@ -82,6 +82,31 @@
     <style>
         @keyframes spin { 100% { transform: rotate(360deg); } }
         .hide-mobile { display: inline; }
+        .center-confirm-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(31, 25, 20, 0.55);
+            backdrop-filter: blur(4px);
+        }
+        .center-confirm-dialog {
+            width: min(100%, 430px);
+            padding: 28px;
+            text-align: center;
+            animation: modalIn 0.2s ease-out;
+        }
+        .center-confirm-dialog h2 { margin: 0 0 10px; }
+        .center-confirm-dialog p { margin: 0 0 24px; color: var(--text-muted); }
+        .center-confirm-actions { display: flex; gap: 12px; justify-content: center; }
+        .center-confirm-actions button { flex: 1; }
+        @keyframes modalIn {
+            from { opacity: 0; transform: translateY(10px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
         @media (max-width: 500px) { .hide-mobile { display: none; } }
     </style>
 
@@ -131,6 +156,39 @@
                 centersGrid.style.display = 'grid'; // Restore grid
                 resetAndFetch();
             }
+        }
+
+        function confirmCenterAccess(center) {
+            return new Promise((resolve) => {
+                const modal = document.createElement('div');
+                modal.className = 'center-confirm-modal';
+                modal.setAttribute('role', 'dialog');
+                modal.setAttribute('aria-modal', 'true');
+                modal.innerHTML = `
+                    <div class="center-confirm-dialog glass-panel">
+                        <i class="lucide-map-pin" style="font-size: 34px; color: var(--primary-dark);"></i>
+                        <h2>Acceder al centro</h2>
+                        <p>¿Quieres acceder a <strong>${center.name}</strong>?</p>
+                        <div class="center-confirm-actions">
+                            <button type="button" class="btn btn-secondary" data-modal-cancel>Cancelar</button>
+                            <button type="button" class="btn btn-primary" data-modal-confirm>Continuar</button>
+                        </div>
+                    </div>
+                `;
+
+                const closeModal = (confirmed) => {
+                    modal.remove();
+                    resolve(confirmed);
+                };
+
+                modal.querySelector('[data-modal-cancel]').addEventListener('click', () => closeModal(false));
+                modal.querySelector('[data-modal-confirm]').addEventListener('click', () => closeModal(true));
+                modal.addEventListener('click', (event) => {
+                    if (event.target === modal) closeModal(false);
+                });
+                document.body.appendChild(modal);
+                modal.querySelector('[data-modal-confirm]').focus();
+            });
         }
 
         function initMap() {
@@ -201,9 +259,10 @@
                             title: center.name // Show name on hover
                         }).addTo(map);
                         
-                        // Direct redirect to center details when clicking the marker
-                        marker.on('click', () => {
-                            window.location.href = `/client/centers/${center.id}`;
+                        marker.on('click', async () => {
+                            if (await confirmCenterAccess(center)) {
+                                window.location.href = `/client/centers/${center.id}`;
+                            }
                         });
                         
                         mapMarkers.push(marker);

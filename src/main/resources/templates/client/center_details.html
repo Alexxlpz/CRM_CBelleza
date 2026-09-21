@@ -15,6 +15,15 @@
 
     <!-- Main Container -->
     <main class="main-container">
+        <div class="booking-error-modal" role="dialog" aria-modal="true"
+             aria-labelledby="bookingErrorTitle" th:if="${bookingError != null}">
+            <div class="booking-error-dialog glass-panel">
+                <i class="lucide-circle-alert booking-error-icon" aria-hidden="true"></i>
+                <h2 id="bookingErrorTitle">No se ha podido reservar</h2>
+                <p th:text="${bookingError}">No se ha podido crear la reserva.</p>
+                <button type="button" class="btn btn-primary" id="bookingErrorAccept">Aceptar</button>
+            </div>
+        </div>
 
         <div class="center-hero-header glass-panel">
             <h1 class="hero-title" th:text="${center.name}">Nombre del Centro</h1>
@@ -64,7 +73,7 @@
                     <label class="form-label" style="font-size: 16px; margin-bottom: 16px; display: block;">1. Elige un servicio disponible</label>
                     <div class="treatment-select-grid" th:if="${not #lists.isEmpty(treatments)}">
                         <label class="treatment-select-card" th:each="t, iter : ${treatments}">
-                            <input type="radio" name="treatmentId" th:value="${t.id}" th:checked="${iter.index == 0}" required>
+                            <input type="radio" name="treatmentId" th:value="${t.id}" th:attr="data-duration=${t.duration}" th:checked="${iter.index == 0}" required>
                             <span class="treatment-card-title" th:text="${t.name}">Manicura</span>
                             <span class="treatment-card-desc" th:text="${t.description}">Descripción del servicio...</span>
                             <div class="treatment-card-meta">
@@ -81,8 +90,45 @@
                 
                 <!-- 3. DateTime picker -->
                 <div class="form-group" th:if="${not #lists.isEmpty(treatments)}" style="margin-top: 30px;">
-                    <label class="form-label" for="dateTime" style="font-size: 16px;">2. Elige Fecha y Hora</label>
-                    <input type="datetime-local" name="dateTime" id="dateTime" class="form-control" style="max-width: 300px;" required>
+                    <label class="form-label" for="datepickerTrigger" style="font-size: 16px;">2. Elige Fecha y Hora</label>
+                    <div class="booking-datetime">
+                        <div class="datepicker" id="datepicker">
+                            <button type="button" class="form-control datepicker-trigger"
+                                    id="datepickerTrigger" aria-haspopup="dialog"
+                                    aria-expanded="false" aria-controls="calendarPopover">
+                                <span id="datepickerValue">Elige una fecha</span>
+                                <span aria-hidden="true">▣</span>
+                            </button>
+                            <div class="calendar-popover" id="calendarPopover" role="dialog"
+                                 aria-label="Calendario de disponibilidad" hidden>
+                                <div class="calendar-header">
+                                    <button type="button" id="previousMonth" aria-label="Mes anterior">&lsaquo;</button>
+                                    <strong id="calendarMonth">—</strong>
+                                    <button type="button" id="nextMonth" aria-label="Mes siguiente">&rsaquo;</button>
+                                </div>
+                                <div class="calendar-weekdays">
+                                    <span>L</span><span>M</span><span>X</span><span>J</span><span>V</span><span>S</span><span>D</span>
+                                </div>
+                                <div class="calendar-days" id="calendarDays"></div>
+                                <small id="availabilityMessage" class="availability-message">
+                                    Consultando disponibilidad...
+                                </small>
+                            </div>
+                        </div>
+                        <div class="timepicker" id="timepicker">
+                            <button type="button" class="form-control timepicker-trigger"
+                                    id="timepickerTrigger" aria-haspopup="listbox"
+                                    aria-expanded="false" disabled>
+                                <span id="timepickerValue">Selecciona una hora</span>
+                                <span aria-hidden="true">▾</span>
+                            </button>
+                            <div class="timepicker-popover" id="timepickerPopover"
+                                 role="listbox" aria-label="Horas disponibles" hidden>
+                                <div class="timepicker-options" id="timepickerOptions"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <input type="hidden" name="dateTime" id="dateTime" required>
                 </div>
                 
                 <!-- 4. Guest info block if Guest simulation -->
@@ -108,53 +154,246 @@
         
     </main>
 
+    <style>
+        .booking-error-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(31, 25, 20, .55);
+            backdrop-filter: blur(4px);
+        }
+        .booking-error-dialog {
+            width: min(100%, 430px);
+            padding: 28px;
+            text-align: center;
+            animation: bookingModalIn .2s ease-out;
+        }
+        .booking-error-icon { font-size: 34px; color: #b9736f; }
+        .booking-error-dialog h2 { margin: 12px 0 10px; }
+        .booking-error-dialog p { margin: 0 0 24px; color: var(--text-muted); }
+        .booking-error-dialog button { min-width: 130px; }
+        @keyframes bookingModalIn {
+            from { opacity: 0; transform: translateY(10px) scale(.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .booking-datetime { display: grid; grid-template-columns: 1.2fr .8fr; gap: 8px; }
+        .datepicker { position: relative; }
+        .datepicker-trigger { display: flex; justify-content: space-between; align-items: center; width: 100%; cursor: pointer; background: #fff; }
+        .timepicker { position: relative; }
+        .timepicker-trigger { display: flex; justify-content: space-between; align-items: center; width: 100%; cursor: pointer; background: #fff; }
+        .timepicker-trigger:disabled { cursor: not-allowed; opacity: .65; }
+        .calendar-popover { position: absolute; top: calc(100% + 6px); left: 0; z-index: 60; width: 262px; padding: 10px; background: #fff; border: 1px solid rgba(197, 168, 128, .45); border-radius: 10px; box-shadow: 0 12px 28px rgba(60, 45, 30, .18); }
+        .calendar-popover[hidden] { display: none; }
+        .timepicker-popover { position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 60; max-height: 220px; overflow-y: auto; padding: 8px; background: #fff; border: 1px solid rgba(197, 168, 128, .45); border-radius: 10px; box-shadow: 0 12px 28px rgba(60, 45, 30, .18); }
+        .timepicker-popover[hidden] { display: none; }
+        .timepicker-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+        .time-option { border: 1px solid rgba(197, 168, 128, .35); border-radius: 6px; padding: 7px 4px; background: #fff; color: var(--text-color); cursor: pointer; font-size: 13px; }
+        .time-option:hover, .time-option:focus-visible { background: rgba(197, 168, 128, .2); outline: none; }
+        .time-option.is-occupied, .time-option.is-past { color: #b8afa5; background: #f7f4f1; cursor: not-allowed; text-decoration: line-through; }
+        .time-option.is-selected { background: var(--primary); border-color: var(--primary); color: #fff; }
+        .calendar-header, .calendar-weekdays, .calendar-days { display: grid; grid-template-columns: repeat(7, 1fr); align-items: center; text-align: center; gap: 2px; }
+        .calendar-header { grid-template-columns: 30px 1fr 30px; margin-bottom: 8px; }
+        .calendar-header button { border: 0; background: transparent; font-size: 20px; cursor: pointer; }
+        .calendar-days button { border: 1px solid transparent; border-radius: 6px; min-height: 30px; background: transparent; cursor: pointer; }
+        .calendar-days button.is-past, .calendar-days button.is-closed, .calendar-days button.is-full { color: #b8afa5; cursor: not-allowed; }
+        .calendar-days button.is-closed { text-decoration: line-through; }
+        .calendar-days button.is-full { background: rgba(185, 115, 111, .1); }
+        .calendar-days button.selected { background: var(--primary); color: #fff; }
+        .calendar-days button.is-today { border-color: var(--primary-dark); }
+        .availability-message { display: block; margin-top: 8px; font-size: 12px; color: var(--text-muted); }
+        .availability-message.is-error { color: #b9736f; }
+        @media (max-width: 520px) { .booking-datetime { grid-template-columns: 1fr; } }
+    </style>
+
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const dateTimeInput = document.getElementById('dateTime');
-            if(dateTimeInput) {
-                // Prevent typing invalid dates manually
-                dateTimeInput.addEventListener('change', function(e) {
-                    if(!this.value) return;
-                    const date = new Date(this.value);
-                    const day = date.getDay(); // 0 is Sunday
-                    const hour = date.getHours();
-                    
-                    if(day === 0) {
-                        alert("El centro cierra los domingos. Por favor, selecciona otro día.");
-                        this.value = '';
-                    } else if(hour < 9 || hour >= 20) {
-                        alert("El horario del centro es de 09:00 a 20:00. Por favor, selecciona una hora dentro de ese horario.");
-                        this.value = '';
-                    }
+        document.addEventListener('DOMContentLoaded', function () {
+            const bookingErrorAccept = document.getElementById('bookingErrorAccept');
+            if (bookingErrorAccept) {
+                bookingErrorAccept.addEventListener('click', function () {
+                    const modal = document.querySelector('.booking-error-modal');
+                    if (modal) modal.remove();
+                });
+                bookingErrorAccept.focus();
+            }
+
+            const centerId = document.querySelector('input[name="centerId"]').value;
+            const dateInput = document.getElementById('dateTime');
+            const trigger = document.getElementById('datepickerTrigger');
+            const triggerValue = document.getElementById('datepickerValue');
+            const popover = document.getElementById('calendarPopover');
+            const calendarDays = document.getElementById('calendarDays');
+            const calendarMonth = document.getElementById('calendarMonth');
+            const message = document.getElementById('availabilityMessage');
+            const previousMonth = document.getElementById('previousMonth');
+            const nextMonth = document.getElementById('nextMonth');
+            const timeTrigger = document.getElementById('timepickerTrigger');
+            const timeValue = document.getElementById('timepickerValue');
+            const timePopover = document.getElementById('timepickerPopover');
+            const timeOptions = document.getElementById('timepickerOptions');
+            const form = dateInput.form;
+            const treatmentInputs = document.querySelectorAll('input[name="treatmentId"]');
+            if (!trigger) return;
+            const fallback = { slotMinutes: 30, workingDays: [1, 2, 3, 4, 5], openHour: 9, closeHour: 20, closedDates: new Set() };
+            const today = new Date(); today.setHours(0, 0, 0, 0);
+            const firstMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+            const lastMonth = new Date(today.getFullYear(), today.getMonth() + 6, 1);
+            let month = new Date(firstMonth);
+            let selectedDate = '';
+            let config = fallback;
+            let occupied = new Map();
+            let serviceDuration = Number(document.querySelector('input[name="treatmentId"]:checked')?.dataset.duration) || 30;
+
+            function key(date) { return date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0'); }
+            function dayOfWeek(date) { return date.getDay() === 0 ? 7 : date.getDay(); }
+            function timeLabel(minutes) { return String(Math.floor(minutes / 60)).padStart(2, '0') + ':' + String(minutes % 60).padStart(2, '0'); }
+            function setMessage(text, error) { message.textContent = text; message.classList.toggle('is-error', !!error); }
+            function requiredSlots() { return Math.ceil(serviceDuration / config.slotMinutes); }
+            function slots(day) {
+                const taken = occupied.get(day) || new Set(), result = [];
+                for (let minutes = config.openHour * 60; minutes < config.closeHour * 60; minutes += config.slotMinutes) {
+                    const value = timeLabel(minutes);
+                    result.push({ value: value, taken: taken.has(value), past: new Date(day + 'T' + value + ':00') <= new Date() });
+                }
+                return result;
+            }
+            function canFit(day, index, availableSlots) {
+                const required = requiredSlots();
+                if (index + required > availableSlots.length) return false;
+                return availableSlots.slice(index, index + required).every(function (slot) {
+                    return !slot.taken && !slot.past;
                 });
             }
+            function state(date) {
+                if (date < today) return 'past';
+                const day = key(date);
+                if (!config.workingDays.includes(dayOfWeek(date)) || config.closedDates.has(day)) return 'closed';
+                const availableSlots = slots(day);
+                return availableSlots.some(function (slot, index) { return canFit(day, index, availableSlots); }) ? 'free' : 'full';
+            }
+            function renderTimes(day) {
+                timeOptions.innerHTML = '';
+                const availableSlots = slots(day);
+                availableSlots.forEach(function (slot, index) {
+                    const option = document.createElement('button');
+                    option.type = 'button';
+                    option.className = 'time-option';
+                    const fits = canFit(day, index, availableSlots);
+                    option.textContent = slot.value + (slot.taken ? ' (ocupada)' : slot.past ? ' (no disponible)' : !fits ? ' (sin tiempo suficiente)' : '');
+                    option.setAttribute('role', 'option');
+                    if (slot.taken || slot.past || !fits) {
+                        option.disabled = true;
+                        option.classList.add(slot.taken ? 'is-occupied' : 'is-past');
+                    } else {
+                        option.addEventListener('click', function () {
+                            dateInput.value = day + 'T' + slot.value;
+                            timeValue.textContent = slot.value;
+                            timeOptions.querySelectorAll('.time-option').forEach(function (item) {
+                                item.classList.remove('is-selected');
+                            });
+                            option.classList.add('is-selected');
+                            timePopover.hidden = true;
+                            timeTrigger.setAttribute('aria-expanded', 'false');
+                        });
+                    }
+                    timeOptions.appendChild(option);
+                });
+                timeTrigger.disabled = !availableSlots.some(function (slot, index) { return canFit(day, index, availableSlots); });
+                timeValue.textContent = timeTrigger.disabled ? 'No hay horas disponibles' : 'Selecciona una hora';
+            }
+            function render() {
+                calendarDays.innerHTML = '';
+                calendarMonth.textContent = month.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+                const offset = (new Date(month.getFullYear(), month.getMonth(), 1).getDay() + 6) % 7;
+                for (let i = 0; i < offset; i++) calendarDays.appendChild(document.createElement('span'));
+                const total = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
+                for (let number = 1; number <= total; number++) {
+                    const date = new Date(month.getFullYear(), month.getMonth(), number), day = key(date), currentState = state(date);
+                    const button = document.createElement('button');
+                    button.type = 'button'; button.textContent = number; button.dataset.date = day;
+                    button.className = 'is-' + currentState; button.disabled = currentState !== 'free';
+                    if (day === key(today)) button.classList.add('is-today');
+                    if (day === selectedDate) button.classList.add('selected');
+                    button.addEventListener('click', function () { selectDate(day); });
+                    calendarDays.appendChild(button);
+                }
+                previousMonth.disabled = month <= firstMonth;
+                nextMonth.disabled = month >= lastMonth;
+            }
+            function selectDate(day) {
+                selectedDate = day;
+                const date = new Date(day + 'T00:00:00');
+                triggerValue.textContent = date.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+                dateInput.value = '';
+                renderTimes(day);
+                render();
+                popover.hidden = true; trigger.setAttribute('aria-expanded', 'false');
+            }
+            trigger.addEventListener('click', function () {
+                popover.hidden = !popover.hidden; trigger.setAttribute('aria-expanded', String(!popover.hidden));
+                if (!popover.hidden) render();
+            });
+            document.addEventListener('click', function (event) {
+                if (!popover.hidden && !popover.contains(event.target) && !trigger.contains(event.target)) {
+                    popover.hidden = true; trigger.setAttribute('aria-expanded', 'false');
+                }
+            });
+            previousMonth.addEventListener('click', function () { month = new Date(month.getFullYear(), month.getMonth() - 1, 1); render(); });
+            nextMonth.addEventListener('click', function () { month = new Date(month.getFullYear(), month.getMonth() + 1, 1); render(); });
+            treatmentInputs.forEach(function (input) {
+                input.addEventListener('change', function () {
+                    serviceDuration = Number(this.dataset.duration) || 30;
+                    selectedDate = '';
+                    dateInput.value = '';
+                    triggerValue.textContent = 'Elige una fecha';
+                    timeOptions.innerHTML = '';
+                    timeValue.textContent = 'Selecciona una hora';
+                    timeTrigger.disabled = true;
+                    timePopover.hidden = true;
+                    render();
+                    setMessage('Disponibilidad actualizada para un servicio de ' + serviceDuration + ' minutos.');
+                });
+            });
+            timeTrigger.addEventListener('click', function () {
+                if (timeTrigger.disabled) return;
+                timePopover.hidden = !timePopover.hidden;
+                timeTrigger.setAttribute('aria-expanded', String(!timePopover.hidden));
+            });
+            form.addEventListener('submit', function (event) {
+                if (!dateInput.value) {
+                    event.preventDefault();
+                    setMessage('Selecciona una fecha y una hora disponibles.', true);
+                    trigger.focus();
+                }
+            });
+            document.addEventListener('click', function (event) {
+                if (!timePopover.hidden && !timePopover.contains(event.target) && !timeTrigger.contains(event.target)) {
+                    timePopover.hidden = true;
+                    timeTrigger.setAttribute('aria-expanded', 'false');
+                }
+            });
+            fetch('/api/centers/' + encodeURIComponent(centerId) + '/availability', { headers: { Accept: 'application/json' } })
+                .then(function (response) { if (!response.ok) throw new Error('HTTP ' + response.status); return response.json(); })
+                .then(function (data) {
+                    config = { slotMinutes: Number(data.slotMinutes) || fallback.slotMinutes, workingDays: data.workingDays || fallback.workingDays, openHour: Number(data.openHour), closeHour: Number(data.closeHour), closedDates: new Set(data.closedDates || []) };
+                    occupied = new Map();
+                    (data.occupied || []).forEach(function (value) {
+                        const day = value.slice(0, 10), time = value.slice(11, 16);
+                        if (!occupied.has(day)) occupied.set(day, new Set());
+                        occupied.get(day).add(time);
+                    });
+                    setMessage('Selecciona un día y una hora disponibles.'); render();
+                })
+                .catch(function (error) { setMessage('No se pudo cargar la disponibilidad.', true); console.error(error); render(); });
+            render();
         });
     </script>
 
     <!-- Footer -->
     <div th:replace="~{fragments/footer :: footer('© 2026 BellaBelleza CRM. Prototipo responsive.')}"></div>
 
-    <!-- Script to set default datetime to tomorrow -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const now = new Date();
-            const tomorrow = new Date(now);
-            tomorrow.setDate(now.getDate() + 1);
-            tomorrow.setHours(10, 0, 0, 0); // 10:00 AM
-            
-            // Format to YYYY-MM-DDThh:mm
-            const year = tomorrow.getFullYear();
-            const month = String(tomorrow.getMonth() + 1).padStart(2, '0');
-            const day = String(tomorrow.getDate()).padStart(2, '0');
-            const hours = String(tomorrow.getHours()).padStart(2, '0');
-            const minutes = String(tomorrow.getMinutes()).padStart(2, '0');
-            
-            const tomorrowStr = `${year}-${month}-${day}T${hours}:${minutes}`;
-            const dtInput = document.getElementById('dateTime');
-            if (dtInput) {
-                dtInput.value = tomorrowStr;
-            }
-        });
-    </script>
 </body>
 </html>

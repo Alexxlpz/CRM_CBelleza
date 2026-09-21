@@ -9,9 +9,12 @@ import com.alexxlpz.crm_cbelleza.repositories.AppointmentRepository;
 import com.alexxlpz.crm_cbelleza.repositories.CenterRepository;
 import com.alexxlpz.crm_cbelleza.repositories.TreatmentRepository;
 import com.alexxlpz.crm_cbelleza.repositories.UserRepository;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.DayOfWeek;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -28,18 +31,25 @@ public class AppointmentService {
         this.userRepository = userRepository;
     }
 
+    @Transactional
     public void createBooking(Long centerId, Long treatmentId, LocalDateTime dateTime, Long clientUserId, String guestName, String guestPhone) {
-        java.time.DayOfWeek day = dateTime.getDayOfWeek();
-        if (day == java.time.DayOfWeek.SUNDAY) {
-            throw new IllegalArgumentException("El centro está cerrado los domingos");
+        if (dateTime.isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("No se puede reservar una fecha pasada");
         }
-        int hour = dateTime.getHour();
-        if (hour < 9 || hour >= 20) {
-            throw new IllegalArgumentException("El horario del centro es de 09:00 a 20:00");
-        }
-
         Center center = centerRepository.findById(centerId).orElseThrow(() -> new IllegalArgumentException("Invalid center ID"));
         Treatment treatment = treatmentRepository.findById(treatmentId).orElseThrow(() -> new IllegalArgumentException("Invalid treatment ID"));
+        if (!isWithinOpeningHours(dateTime, treatment.getDuration())) {
+            throw new IllegalArgumentException("El servicio no cabe completo dentro del horario del centro");
+        }
+        LocalDateTime end = dateTime.plusMinutes(treatment.getDuration());
+        boolean occupied = appointmentRepository.findByCenterIdAndStatusIn(
+                        centerId, Arrays.asList(AppointmentStatus.PENDING, AppointmentStatus.CONFIRMED))
+                .stream()
+                .anyMatch(appointment -> dateTime.isBefore(appointment.getDateTime().plusMinutes(appointment.getTreatment().getDuration()))
+                        && end.isAfter(appointment.getDateTime()));
+        if (occupied) {
+            throw new IllegalArgumentException("Esa hora ya está ocupada");
+        }
 
         User client = null;
         if (clientUserId != null) {
@@ -61,6 +71,25 @@ public class AppointmentService {
         }
 
         appointmentRepository.save(appointment);
+    }
+
+    public List<Appointment> getBookableAppointmentsByCenter(Long centerId) {
+        return appointmentRepository.findByCenterIdAndStatusInAndDateTimeAfterOrderByDateTimeAsc(
+                centerId,
+                Arrays.asList(AppointmentStatus.PENDING, AppointmentStatus.CONFIRMED),
+                LocalDateTime.now());
+    }
+
+    private boolean isWithinOpeningHours(LocalDateTime dateTime, int durationMinutes) {
+        DayOfWeek day = dateTime.getDayOfWeek();
+        int minutes = dateTime.getHour() * 60 + dateTime.getMinute();
+        return day != DayOfWeek.SATURDAY
+                && day != DayOfWeek.SUNDAY
+                && dateTime.getSecond() == 0
+                && dateTime.getNano() == 0
+                && minutes >= 9 * 60
+                && minutes + durationMinutes <= 20 * 60
+                && dateTime.getMinute() % 30 == 0;
     }
 
     public List<Appointment> getClientAppointments(Long clientUserId, String guestPhone) {
