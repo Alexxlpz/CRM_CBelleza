@@ -43,7 +43,7 @@ public class AppointmentService {
         }
         LocalDateTime end = dateTime.plusMinutes(treatment.getDuration());
         boolean occupied = appointmentRepository.findByCenterIdAndStatusIn(
-                        centerId, Arrays.asList(AppointmentStatus.PENDING, AppointmentStatus.CONFIRMED))
+                        centerId, List.of(AppointmentStatus.CONFIRMED))
                 .stream()
                 .anyMatch(appointment -> dateTime.isBefore(appointment.getDateTime().plusMinutes(appointment.getTreatment().getDuration()))
                         && end.isAfter(appointment.getDateTime()));
@@ -61,6 +61,7 @@ public class AppointmentService {
                 .treatment(treatment)
                 .center(center)
                 .status(AppointmentStatus.PENDING)
+                .workerMessage("")
                 .build();
 
         if (client != null) {
@@ -76,7 +77,7 @@ public class AppointmentService {
     public List<Appointment> getBookableAppointmentsByCenter(Long centerId) {
         return appointmentRepository.findByCenterIdAndStatusInAndDateTimeAfterOrderByDateTimeAsc(
                 centerId,
-                Arrays.asList(AppointmentStatus.PENDING, AppointmentStatus.CONFIRMED),
+                List.of(AppointmentStatus.CONFIRMED),
                 LocalDateTime.now());
     }
 
