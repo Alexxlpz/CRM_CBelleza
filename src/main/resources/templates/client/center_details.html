@@ -155,6 +155,7 @@
     </main>
 
     <style>
+        :root { --text-color: #4a4038; }
         .booking-error-modal {
             position: fixed;
             inset: 0;
@@ -234,9 +235,9 @@
             const timeValue = document.getElementById('timepickerValue');
             const timePopover = document.getElementById('timepickerPopover');
             const timeOptions = document.getElementById('timepickerOptions');
-            const form = dateInput.form;
             const treatmentInputs = document.querySelectorAll('input[name="treatmentId"]');
-            if (!trigger) return;
+            if (!trigger || !dateInput) return;
+            const form = dateInput.form;
             const fallback = { slotMinutes: 30, workingDays: [1, 2, 3, 4, 5], openHour: 9, closeHour: 20, closedDates: new Set() };
             const today = new Date(); today.setHours(0, 0, 0, 0);
             const firstMonth = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -254,7 +255,8 @@
             function requiredSlots() { return Math.ceil(serviceDuration / config.slotMinutes); }
             function slots(day) {
                 const taken = occupied.get(day) || new Set(), result = [];
-                for (let minutes = config.openHour * 60; minutes < config.closeHour * 60; minutes += config.slotMinutes) {
+                const lastStart = (config.closeHour * 60) - (requiredSlots() * config.slotMinutes);
+                for (let minutes = config.openHour * 60; minutes <= lastStart; minutes += config.slotMinutes) {
                     const value = timeLabel(minutes);
                     result.push({ value: value, taken: taken.has(value), past: new Date(day + 'T' + value + ':00') <= new Date() });
                 }
@@ -262,6 +264,10 @@
             }
             function canFit(day, index, availableSlots) {
                 const required = requiredSlots();
+                if (index === availableSlots.length - 1) {
+                    const slot = availableSlots[index];
+                    return !slot.taken && !slot.past;
+                }
                 if (index + required > availableSlots.length) return false;
                 return availableSlots.slice(index, index + required).every(function (slot) {
                     return !slot.taken && !slot.past;

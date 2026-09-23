@@ -31,8 +31,9 @@
             <div style="display: flex; gap: 8px; align-items: center;">
                 <input type="text" id="searchName" class="form-control" placeholder="Buscar centro..." style="flex: 1; min-width: 0;">
                 
-                <button type="button" class="btn btn-secondary" style="padding: 0; width: 42px; height: 42px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;" onclick="toggleAdvancedSearch()" id="btnAdvSearch" aria-label="Filtros avanzados">
+                <button type="button" class="btn btn-secondary filter-button" style="padding: 0; width: 42px; height: 42px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;" onclick="toggleAdvancedSearch()" id="btnAdvSearch" aria-label="Filtros avanzados">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+                    <span id="treatmentBadge" class="bell-badge" style="display: none;"></span>
                 </button>
                 <button type="button" class="btn btn-secondary" style="padding: 0; width: 42px; height: 42px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;" onclick="toggleMap()" id="btnMapToggle" aria-label="Ver en mapa">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"></polygon><line x1="9" y1="3" x2="9" y2="21"></line><line x1="15" y1="3" x2="15" y2="21"></line></svg>
@@ -82,6 +83,28 @@
     <style>
         @keyframes spin { 100% { transform: rotate(360deg); } }
         .hide-mobile { display: inline; }
+        .filter-button {
+            position: relative;
+        }
+        .filter-button .bell-badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            min-width: 16px;
+            height: 16px;
+            padding: 0 4px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            background: var(--primary-dark);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 700;
+            line-height: 1;
+            z-index: 1;
+        }
         .center-confirm-modal {
             position: fixed;
             inset: 0;
@@ -121,7 +144,8 @@
         const trigger = document.getElementById('infiniteScrollTrigger');
         const mapContainer = document.getElementById('mapContainer');
         const btnMapToggle = document.getElementById('btnMapToggle');
-        
+        const treatmentBadge = document.getElementById('treatmentBadge');
+
         let isMapView = false;
         let map = null;
         let mapMarkers = [];
@@ -285,6 +309,11 @@
             fetchCenters();
         }
 
+        function updateTreatmentBadge() {
+            const treatment = document.getElementById('searchTreatment');
+            treatmentBadge.style.display = treatment.value !== '' ? 'inline-block' : 'none';
+        }
+
         async function fetchCenters() {
             if (isLoading || !hasMore) return;
             isLoading = true;
@@ -410,6 +439,7 @@
             });
 
             document.getElementById('searchTreatment').addEventListener('change', () => {
+                updateTreatmentBadge();
                 resetAndFetch();
             });
         });
