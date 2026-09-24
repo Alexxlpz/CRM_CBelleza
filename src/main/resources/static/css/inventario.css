@@ -17,55 +17,12 @@
     100% { transform: scale(1); }
 }
 
-/* Category Filter Bar */
-.category-filter-bar {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-    overflow-x: auto;
-    padding-bottom: 6px;
-    scrollbar-width: none; /* Firefox */
-}
-
 .inventory-page-header {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
     gap: 16px;
     margin-bottom: 20px;
-}
-
-.category-filter-bar::-webkit-scrollbar {
-    display: none; /* Chrome/Safari */
-}
-
-.category-pill {
-    background: rgba(255, 255, 255, 0.6);
-    border: 1px solid rgba(197, 168, 128, 0.25);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    color: var(--text-muted, #7a736e);
-    padding: 8px 18px;
-    border-radius: 30px;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
-}
-
-.category-pill:hover {
-    background: rgba(197, 168, 128, 0.15);
-    color: var(--primary-dark, #a38258);
-    transform: translateY(-1px);
-}
-
-.category-pill.active {
-    background: linear-gradient(135deg, #c5a880 0%, #a38258 100%);
-    color: #ffffff;
-    border-color: transparent;
-    box-shadow: 0 4px 14px rgba(197, 168, 128, 0.35);
 }
 
 /* Inventory Grid */
@@ -165,6 +122,8 @@
     font-weight: 800;
     color: var(--primary-dark, #a38258);
     font-size: 16px;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
 }
 
 .product-category {

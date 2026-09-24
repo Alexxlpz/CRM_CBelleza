@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static java.util.stream.IntStream.range;
+
 @RestController
 @RequestMapping("/api/centers")
 public class CenterApiController {
@@ -32,7 +34,7 @@ public class CenterApiController {
         List<String> occupied = appointmentService.getBookableAppointmentsByCenter(id).stream()
                 .flatMap(appointment -> {
                     int slots = (int) Math.ceil(appointment.getTreatment().getDuration() / 30.0);
-                    return java.util.stream.IntStream.range(0, slots)
+                    return range(0, slots)
                             .mapToObj(slot -> appointment.getDateTime().plusMinutes(slot * 30L).toString());
                 })
                 .toList();

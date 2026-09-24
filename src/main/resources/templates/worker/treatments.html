@@ -36,7 +36,7 @@
                     <div class="treatment-item-card glass-panel" th:each="t : ${treatments}">
                         <div class="treatment-item-header">
                             <span class="treatment-item-name" th:text="${t.name}">Manicura</span>
-                            <span class="treatment-item-price" th:text="${t.price} + ' €'">0.00 €</span>
+                            <span class="treatment-item-price" th:text="${t.price} + ' €'">0.00 €</span>
                         </div>
                         <p class="treatment-item-desc" th:text="${t.description}">Descripción del tratamiento...</p>
                         <span class="treatment-item-meta" th:text="'Duración: ' + ${t.duration} + ' min'">30 min</span>

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,13 +11,14 @@
     <link rel="stylesheet" href="/css/common.css">
     <link rel="stylesheet" href="/css/cliente.css">
 </head>
+
 <body>
     <div th:replace="~{fragments/navbar :: client('/client/centers', 'Volver a Centros de Belleza')}"></div>
 
     <!-- Main Container -->
     <main class="main-container">
-        <div class="booking-error-modal" role="dialog" aria-modal="true"
-             aria-labelledby="bookingErrorTitle" th:if="${bookingError != null}">
+        <div class="booking-error-modal" role="dialog" aria-modal="true" aria-labelledby="bookingErrorTitle"
+            th:if="${bookingError != null}">
             <div class="booking-error-dialog glass-panel">
                 <i class="lucide-circle-alert booking-error-icon" aria-hidden="true"></i>
                 <h2 id="bookingErrorTitle">No se ha podido reservar</h2>
@@ -58,26 +60,29 @@
                 </div>
             </div>
         </div>
-        
+
         <section class="glass-panel booking-section">
             <h2 class="booking-section-title">
-                <i class="lucide-calendar-plus" style="margin-right: 8px; color: var(--primary-dark);"></i> 
+                <i class="lucide-calendar-plus" style="margin-right: 8px; color: var(--primary-dark);"></i>
                 Solicitar Cita de Estética
             </h2>
-            
+
             <form action="/client/booking" method="POST" class="role-form">
                 <input type="hidden" name="centerId" th:value="${center.id}">
-                
+
                 <!-- 1. Selectable Treatments list -->
                 <div class="form-group">
-                    <label class="form-label" style="font-size: 16px; margin-bottom: 16px; display: block;">1. Elige un servicio disponible</label>
+                    <label class="form-label" style="font-size: 16px; margin-bottom: 16px; display: block;">1. Elige un
+                        servicio disponible</label>
                     <div class="treatment-select-grid" th:if="${not #lists.isEmpty(treatments)}">
                         <label class="treatment-select-card" th:each="t, iter : ${treatments}">
-                            <input type="radio" name="treatmentId" th:value="${t.id}" th:attr="data-duration=${t.duration}" th:checked="${iter.index == 0}" required>
+                            <input type="radio" name="treatmentId" th:value="${t.id}"
+                                th:attr="data-duration=${t.duration}" th:checked="${iter.index == 0}" required>
                             <span class="treatment-card-title" th:text="${t.name}">Manicura</span>
-                            <span class="treatment-card-desc" th:text="${t.description}">Descripción del servicio...</span>
+                            <span class="treatment-card-desc" th:text="${t.description}">Descripción del
+                                servicio...</span>
                             <div class="treatment-card-meta">
-                                <span class="treatment-card-price" th:text="${t.price} + ' €'">0.00 €</span>
+                                <span class="treatment-card-price" th:text="${t.price} + ' €'">0.00 €</span>
                                 <span class="treatment-card-duration" th:text="${t.duration} + ' min'">30 min</span>
                             </div>
                         </label>
@@ -87,20 +92,20 @@
                         <p>Este centro no dispone de tratamientos activos en este momento.</p>
                     </div>
                 </div>
-                
+
                 <!-- 3. DateTime picker -->
                 <div class="form-group" th:if="${not #lists.isEmpty(treatments)}" style="margin-top: 30px;">
-                    <label class="form-label" for="datepickerTrigger" style="font-size: 16px;">2. Elige Fecha y Hora</label>
+                    <label class="form-label" for="datepickerTrigger" style="font-size: 16px;">2. Elige Fecha y
+                        Hora</label>
                     <div class="booking-datetime">
                         <div class="datepicker" id="datepicker">
-                            <button type="button" class="form-control datepicker-trigger"
-                                    id="datepickerTrigger" aria-haspopup="dialog"
-                                    aria-expanded="false" aria-controls="calendarPopover">
+                            <button type="button" class="form-control datepicker-trigger" id="datepickerTrigger"
+                                aria-haspopup="dialog" aria-expanded="false" aria-controls="calendarPopover">
                                 <span id="datepickerValue">Elige una fecha</span>
                                 <span aria-hidden="true">▾</span>
                             </button>
                             <div class="calendar-popover" id="calendarPopover" role="dialog"
-                                 aria-label="Calendario de disponibilidad" hidden>
+                                aria-label="Calendario de disponibilidad" hidden>
                                 <div class="calendar-header">
                                     <button type="button" id="previousMonth" aria-label="Mes anterior">&lsaquo;</button>
                                     <strong id="calendarMonth">—</strong>
@@ -116,46 +121,52 @@
                             </div>
                         </div>
                         <div class="timepicker" id="timepicker">
-                            <button type="button" class="form-control timepicker-trigger"
-                                    id="timepickerTrigger" aria-haspopup="listbox"
-                                    aria-expanded="false" disabled>
+                            <button type="button" class="form-control timepicker-trigger" id="timepickerTrigger"
+                                aria-haspopup="listbox" aria-expanded="false" disabled>
                                 <span id="timepickerValue">Selecciona una hora</span>
                                 <span aria-hidden="true">▾</span>
                             </button>
-                            <div class="timepicker-popover" id="timepickerPopover"
-                                 role="listbox" aria-label="Horas disponibles" hidden>
+                            <div class="timepicker-popover" id="timepickerPopover" role="listbox"
+                                aria-label="Horas disponibles" hidden>
                                 <div class="timepicker-options" id="timepickerOptions"></div>
                             </div>
                         </div>
                     </div>
                     <input type="hidden" name="dateTime" id="dateTime" required>
                 </div>
-                
+
                 <!-- 4. Guest info block if Guest simulation -->
-                <div class="guest-info-block" th:if="${sessionUserName == 'Invitado' and not #lists.isEmpty(treatments)}">
+                <div class="guest-info-block"
+                    th:if="${sessionUserName == 'Invitado' and not #lists.isEmpty(treatments)}">
                     <h4>3. Datos del Cliente</h4>
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
                         <div class="form-group" style="margin-bottom:0">
                             <label class="form-label" for="guestName">Nombre Completo</label>
-                            <input type="text" name="guestName" id="guestName" class="form-control" placeholder="Escribe tu nombre y apellido..." required>
+                            <input type="text" name="guestName" id="guestName" class="form-control"
+                                placeholder="Escribe tu nombre y apellido..." required>
                         </div>
                         <div class="form-group" style="margin-bottom:0">
                             <label class="form-label" for="guestPhone">Número de Teléfono</label>
-                            <input type="tel" name="guestPhone" id="guestPhone" class="form-control" placeholder="Ej. 600123456..." required>
+                            <input type="tel" name="guestPhone" id="guestPhone" class="form-control"
+                                placeholder="Ej. 600123456..." required>
                         </div>
                     </div>
                 </div>
-                
-                <button type="submit" class="btn btn-primary btn-large-submit" th:if="${not #lists.isEmpty(treatments)}">
+
+                <button type="submit" class="btn btn-primary btn-large-submit"
+                    th:if="${not #lists.isEmpty(treatments)}">
                     <i class="lucide-check-circle"></i> Confirmar y Reservar Cita
                 </button>
             </form>
         </section>
-        
+
     </main>
 
     <style>
-        :root { --text-color: #4a4038; }
+        :root {
+            --text-color: #4a4038;
+        }
+
         .booking-error-modal {
             position: fixed;
             inset: 0;
@@ -167,47 +178,225 @@
             background: rgba(31, 25, 20, .55);
             backdrop-filter: blur(4px);
         }
+
         .booking-error-dialog {
             width: min(100%, 430px);
             padding: 28px;
             text-align: center;
             animation: bookingModalIn .2s ease-out;
         }
-        .booking-error-icon { font-size: 34px; color: #b9736f; }
-        .booking-error-dialog h2 { margin: 12px 0 10px; }
-        .booking-error-dialog p { margin: 0 0 24px; color: var(--text-muted); }
-        .booking-error-dialog button { min-width: 130px; }
-        @keyframes bookingModalIn {
-            from { opacity: 0; transform: translateY(10px) scale(.98); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
+
+        .booking-error-icon {
+            font-size: 34px;
+            color: #b9736f;
         }
-        .booking-datetime { display: grid; grid-template-columns: 1.2fr .8fr; gap: 8px; }
-        .datepicker { position: relative; }
-        .datepicker-trigger { display: flex; justify-content: space-between; align-items: center; width: 100%; cursor: pointer; background: #fff; }
-        .timepicker { position: relative; }
-        .timepicker-trigger { display: flex; justify-content: space-between; align-items: center; width: 100%; cursor: pointer; background: #fff; }
-        .timepicker-trigger:disabled { cursor: not-allowed; opacity: .65; }
-        .calendar-popover { position: absolute; top: calc(100% + 6px); left: 0; z-index: 60; width: 262px; padding: 10px; background: #fff; border: 1px solid rgba(197, 168, 128, .45); border-radius: 10px; box-shadow: 0 12px 28px rgba(60, 45, 30, .18); }
-        .calendar-popover[hidden] { display: none; }
-        .timepicker-popover { position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 60; max-height: 220px; overflow-y: auto; padding: 8px; background: #fff; border: 1px solid rgba(197, 168, 128, .45); border-radius: 10px; box-shadow: 0 12px 28px rgba(60, 45, 30, .18); }
-        .timepicker-popover[hidden] { display: none; }
-        .timepicker-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
-        .time-option { border: 1px solid rgba(197, 168, 128, .35); border-radius: 6px; padding: 7px 4px; background: #fff; color: var(--text-color); cursor: pointer; font-size: 13px; }
-        .time-option:hover, .time-option:focus-visible { background: rgba(197, 168, 128, .2); outline: none; }
-        .time-option.is-occupied, .time-option.is-past { color: #b8afa5; background: #f7f4f1; cursor: not-allowed; text-decoration: line-through; }
-        .time-option.is-selected { background: var(--primary); border-color: var(--primary); color: #fff; }
-        .calendar-header, .calendar-weekdays, .calendar-days { display: grid; grid-template-columns: repeat(7, 1fr); align-items: center; text-align: center; gap: 2px; }
-        .calendar-header { grid-template-columns: 30px 1fr 30px; margin-bottom: 8px; }
-        .calendar-header button { border: 0; background: transparent; font-size: 20px; cursor: pointer; }
-        .calendar-days button { border: 1px solid transparent; border-radius: 6px; min-height: 30px; background: transparent; cursor: pointer; }
-        .calendar-days button.is-past, .calendar-days button.is-closed, .calendar-days button.is-full { color: #b8afa5; cursor: not-allowed; }
-        .calendar-days button.is-closed { text-decoration: line-through; }
-        .calendar-days button.is-full { background: rgba(185, 115, 111, .1); }
-        .calendar-days button.selected { background: var(--primary); color: #fff; }
-        .calendar-days button.is-today { border-color: var(--primary-dark); }
-        .availability-message { display: block; margin-top: 8px; font-size: 12px; color: var(--text-muted); }
-        .availability-message.is-error { color: #b9736f; }
-        @media (max-width: 520px) { .booking-datetime { grid-template-columns: 1fr; } }
+
+        .booking-error-dialog h2 {
+            margin: 12px 0 10px;
+        }
+
+        .booking-error-dialog p {
+            margin: 0 0 24px;
+            color: var(--text-muted);
+        }
+
+        .booking-error-dialog button {
+            min-width: 130px;
+        }
+
+        @keyframes bookingModalIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px) scale(.98);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .booking-datetime {
+            display: grid;
+            grid-template-columns: 1.2fr .8fr;
+            gap: 8px;
+        }
+
+        .datepicker {
+            position: relative;
+        }
+
+        .datepicker-trigger {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            cursor: pointer;
+            background: #fff;
+        }
+
+        .timepicker {
+            position: relative;
+        }
+
+        .timepicker-trigger {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            cursor: pointer;
+            background: #fff;
+        }
+
+        .timepicker-trigger:disabled {
+            cursor: not-allowed;
+            opacity: .65;
+        }
+
+        .calendar-popover {
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            z-index: 60;
+            width: 262px;
+            padding: 10px;
+            background: #fff;
+            border: 1px solid rgba(197, 168, 128, .45);
+            border-radius: 10px;
+            box-shadow: 0 12px 28px rgba(60, 45, 30, .18);
+        }
+
+        .calendar-popover[hidden] {
+            display: none;
+        }
+
+        .timepicker-popover {
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            right: 0;
+            z-index: 60;
+            max-height: 220px;
+            overflow-y: auto;
+            padding: 8px;
+            background: #fff;
+            border: 1px solid rgba(197, 168, 128, .45);
+            border-radius: 10px;
+            box-shadow: 0 12px 28px rgba(60, 45, 30, .18);
+        }
+
+        .timepicker-popover[hidden] {
+            display: none;
+        }
+
+        .timepicker-options {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 6px;
+        }
+
+        .time-option {
+            border: 1px solid rgba(197, 168, 128, .35);
+            border-radius: 6px;
+            padding: 7px 4px;
+            background: #fff;
+            color: var(--text-color);
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .time-option:hover,
+        .time-option:focus-visible {
+            background: rgba(197, 168, 128, .2);
+            outline: none;
+        }
+
+        .time-option.is-occupied,
+        .time-option.is-past,
+        .time-option.is-no-fit {
+            color: #b8afa5;
+            background: #f7f4f1;
+            cursor: not-allowed;
+            text-decoration: line-through;
+        }
+
+        .time-option.is-selected {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: #fff;
+        }
+
+        .calendar-header,
+        .calendar-weekdays,
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            align-items: center;
+            text-align: center;
+            gap: 2px;
+        }
+
+        .calendar-header {
+            grid-template-columns: 30px 1fr 30px;
+            margin-bottom: 8px;
+        }
+
+        .calendar-header button {
+            border: 0;
+            background: transparent;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .calendar-days button {
+            border: 1px solid transparent;
+            border-radius: 6px;
+            min-height: 30px;
+            background: transparent;
+            cursor: pointer;
+        }
+
+        .calendar-days button.is-past,
+        .calendar-days button.is-closed,
+        .calendar-days button.is-full {
+            color: #b8afa5;
+            cursor: not-allowed;
+        }
+
+        .calendar-days button.is-closed {
+            text-decoration: line-through;
+        }
+
+        .calendar-days button.is-full {
+            background: rgba(185, 115, 111, .15);
+            color: #b9736f;
+        }
+
+        .calendar-days button.selected {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .calendar-days button.is-today {
+            border-color: var(--primary-dark);
+        }
+
+        .availability-message {
+            display: block;
+            margin-top: 8px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .availability-message.is-error {
+            color: #b9736f;
+        }
+
+        @media (max-width: 520px) {
+            .booking-datetime {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 
     <script>
@@ -255,44 +444,72 @@
             function requiredSlots() { return Math.ceil(serviceDuration / config.slotMinutes); }
             function slots(day) {
                 const taken = occupied.get(day) || new Set(), result = [];
-                const lastStart = (config.closeHour * 60) - (requiredSlots() * config.slotMinutes);
-                for (let minutes = config.openHour * 60; minutes <= lastStart; minutes += config.slotMinutes) {
+                for (let minutes = config.openHour * 60; minutes < config.closeHour * 60; minutes += config.slotMinutes) {
                     const value = timeLabel(minutes);
-                    result.push({ value: value, taken: taken.has(value), past: new Date(day + 'T' + value + ':00') <= new Date() });
+                    result.push({
+                        value: value,
+                        taken: taken.has(value),
+                        past: new Date(day + 'T' + value + ':00') <= new Date()
+                    });
                 }
                 return result;
             }
             function canFit(day, index, availableSlots) {
                 const required = requiredSlots();
-                if (index === availableSlots.length - 1) {
-                    const slot = availableSlots[index];
-                    return !slot.taken && !slot.past;
+                console.log('Available slots: ' + slotsToString(availableSlots));
+                console.log('Checking if can fit', required, 'slots starting at index', index, 'on day', day);
+                if (index + required > availableSlots.length) {
+                    console.log('Can fit:', false);
+                    return false;
                 }
-                if (index + required > availableSlots.length) return false;
-                return availableSlots.slice(index, index + required).every(function (slot) {
+                const isAvailable = availableSlots.slice(index, index + required).every(function (slot) {
                     return !slot.taken && !slot.past;
                 });
+                console.log('Can fit:', isAvailable);
+                return isAvailable;
             }
+
+            function slotsToString(availableSlots) {
+                return availableSlots.map(function (slot) {
+                    return slot.value + (slot.taken ? ' (ocupada)' : slot.past ? ' (no disponible)' : '');
+                }).join(', ');
+            }
+
             function state(date) {
                 if (date < today) return 'past';
                 const day = key(date);
                 if (!config.workingDays.includes(dayOfWeek(date)) || config.closedDates.has(day)) return 'closed';
-                const availableSlots = slots(day);
-                return availableSlots.some(function (slot, index) { return canFit(day, index, availableSlots); }) ? 'free' : 'full';
+                const allSlots = slots(day);
+                const hasFreeSlot = allSlots.some(function (slot, index) { return canFit(day, index, allSlots); });
+                return hasFreeSlot ? 'free' : 'full';
             }
             function renderTimes(day) {
                 timeOptions.innerHTML = '';
-                const availableSlots = slots(day);
-                availableSlots.forEach(function (slot, index) {
+                const allSlots = slots(day);
+                const required = requiredSlots();
+                // Solo slots de inicio que permiten completar el tratamiento antes del cierre
+                const startSlots = allSlots.filter(function (slot, index) {
+                    return index + required <= allSlots.length;
+                });
+                const visibleSlots = startSlots.filter(function (slot) { return !slot.past; });
+
+                if (visibleSlots.length === 0) {
+                    timeTrigger.disabled = true;
+                    timeValue.textContent = 'No quedan horas disponibles hoy';
+                    return;
+                }
+
+                visibleSlots.forEach(function (slot) {
+                    const originalIndex = allSlots.indexOf(slot);
+                    const fits = canFit(day, originalIndex, allSlots);
                     const option = document.createElement('button');
                     option.type = 'button';
                     option.className = 'time-option';
-                    const fits = canFit(day, index, availableSlots);
-                    option.textContent = slot.value + (slot.taken ? ' (ocupada)' : slot.past ? ' (no disponible)' : !fits ? ' (sin tiempo suficiente)' : '');
+                    option.textContent = slot.value + (slot.taken ? ' (ocupada)' : !fits ? ' (sin tiempo suficiente)' : '');
                     option.setAttribute('role', 'option');
-                    if (slot.taken || slot.past || !fits) {
+                    if (slot.taken || !fits) {
                         option.disabled = true;
-                        option.classList.add(slot.taken ? 'is-occupied' : 'is-past');
+                        option.classList.add(slot.taken ? 'is-occupied' : 'is-no-fit');
                     } else {
                         option.addEventListener('click', function () {
                             dateInput.value = day + 'T' + slot.value;
@@ -307,7 +524,10 @@
                     }
                     timeOptions.appendChild(option);
                 });
-                timeTrigger.disabled = !availableSlots.some(function (slot, index) { return canFit(day, index, availableSlots); });
+                const hasValidSlot = visibleSlots.some(function (slot) {
+                    return canFit(day, allSlots.indexOf(slot), allSlots);
+                });
+                timeTrigger.disabled = !hasValidSlot;
                 timeValue.textContent = timeTrigger.disabled ? 'No hay horas disponibles' : 'Selecciona una hora';
             }
             function render() {
@@ -321,6 +541,7 @@
                     const button = document.createElement('button');
                     button.type = 'button'; button.textContent = number; button.dataset.date = day;
                     button.className = 'is-' + currentState; button.disabled = currentState !== 'free';
+                    if (currentState === 'full') button.title = 'Día completo: no hay horas disponibles';
                     if (day === key(today)) button.classList.add('is-today');
                     if (day === selectedDate) button.classList.add('selected');
                     button.addEventListener('click', function () { selectDate(day); });
@@ -330,8 +551,9 @@
                 nextMonth.disabled = month >= lastMonth;
             }
             function selectDate(day) {
-                selectedDate = day;
                 const date = new Date(day + 'T00:00:00');
+                if (state(date) !== 'free') return;
+                selectedDate = day;
                 triggerValue.textContent = date.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
                 dateInput.value = '';
                 renderTimes(day);
@@ -386,6 +608,7 @@
                 .then(function (data) {
                     config = { slotMinutes: Number(data.slotMinutes) || fallback.slotMinutes, workingDays: data.workingDays || fallback.workingDays, openHour: Number(data.openHour), closeHour: Number(data.closeHour), closedDates: new Set(data.closedDates || []) };
                     occupied = new Map();
+                    console.log('los dias ocupados segun el fetch son: ' + data.occupied);
                     (data.occupied || []).forEach(function (value) {
                         const day = value.slice(0, 10), time = value.slice(11, 16);
                         if (!occupied.has(day)) occupied.set(day, new Set());
@@ -402,4 +625,5 @@
     <div th:replace="~{fragments/footer :: footer('© 2026 BellaBelleza CRM. Prototipo responsive.')}"></div>
 
 </body>
+
 </html>

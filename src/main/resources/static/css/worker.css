@@ -241,7 +241,8 @@
 .treatment-item-header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: baseline;
+    gap: 12px;
     border-bottom: 1px dashed rgba(197, 168, 128, 0.3);
     padding-bottom: 10px;
 }
@@ -251,6 +252,9 @@
     font-size: 18px;
     font-weight: 700;
     color: var(--text-main, #2b2825);
+    flex: 1;
+    min-width: 0;
+    word-break: break-word;
 }
 
 .treatment-item-price {
@@ -258,6 +262,10 @@
     font-size: 17px;
     font-weight: 800;
     color: var(--primary-dark, #a38258);
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+    text-align: right;
+    display: inline-block;
 }
 
 .treatment-item-desc {
@@ -306,7 +314,24 @@
     }
 
     .treatment-item-card {
-        padding: 18px;
+        padding: 16px 14px;
+    }
+
+    .treatment-item-header {
+        gap: 10px;
+        align-items: baseline;
+    }
+
+    .treatment-item-name {
+        font-size: 16px;
+        min-width: 0;
+        flex: 1;
+    }
+
+    .treatment-item-price {
+        font-size: 15px !important;
+        white-space: nowrap !important;
+        flex-shrink: 0 !important;
     }
 
     .btn-add-treatment {
@@ -358,6 +383,26 @@
 
     #addTreatmentSheet .sheet-close {
         display: none !important;
+    }
+}
+
+@media (max-width: 380px) {
+    .treatment-item-card {
+        padding: 14px 10px;
+    }
+
+    .treatment-item-header {
+        gap: 8px;
+    }
+
+    .treatment-item-name {
+        font-size: 14.5px;
+    }
+
+    .treatment-item-price {
+        font-size: 13.5px !important;
+        white-space: nowrap !important;
+        flex-shrink: 0 !important;
     }
 }
 

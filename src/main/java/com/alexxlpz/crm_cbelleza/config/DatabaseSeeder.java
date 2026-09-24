@@ -243,44 +243,213 @@ public class DatabaseSeeder implements CommandLineRunner {
         inventoryRepository.save(Inventory.builder().center(c3).product(p8).stock(8).build());
 
         // 6. Seed Appointments
-        // Today + 2 hours (Confirmed in Center 1)
+        // Helper: base dates with clean midnight to avoid leftover seconds/nanos
+        LocalDateTime today = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
+        LocalDateTime tomorrow = today.plusDays(1);
+        LocalDateTime dayAfter = today.plusDays(2);
+        // Find next working weekday (skip weekends) for day+3
+        LocalDateTime day3 = today.plusDays(3);
+        while (day3.getDayOfWeek() == java.time.DayOfWeek.SATURDAY || day3.getDayOfWeek() == java.time.DayOfWeek.SUNDAY) {
+            day3 = day3.plusDays(1);
+        }
+        LocalDateTime day5 = today.plusDays(5);
+        while (day5.getDayOfWeek() == java.time.DayOfWeek.SATURDAY || day5.getDayOfWeek() == java.time.DayOfWeek.SUNDAY) {
+            day5 = day5.plusDays(1);
+        }
+        LocalDateTime day7 = today.plusDays(7);
+        while (day7.getDayOfWeek() == java.time.DayOfWeek.SATURDAY || day7.getDayOfWeek() == java.time.DayOfWeek.SUNDAY) {
+            day7 = day7.plusDays(1);
+        }
+
+        // ──────────────────────────────────────────────────────────────────
+        // CENTER 1 — "Belleza Centro Histórico"
+        // ──────────────────────────────────────────────────────────────────
+
+        // ── TODAY: 2 confirmed appointments ──
         appointmentRepository.save(Appointment.builder()
-                .dateTime(LocalDateTime.now().plusHours(2))
-                .treatment(t1_1) // Manicura Premium
-                .center(c1)
-                .client(client1)
-                .worker(w1)
+                .dateTime(today.withHour(11).withMinute(0))
+                .treatment(t1_1) // Manicura Premium (45 min → 2 slots)
+                .center(c1).client(client1).worker(w1)
+                .status(AppointmentStatus.CONFIRMED)
+                .build());
+        appointmentRepository.save(Appointment.builder()
+                .dateTime(today.withHour(15).withMinute(30))
+                .treatment(t1_2) // Facial Hidratante (60 min → 2 slots)
+                .center(c1).client(client2).worker(w1)
                 .status(AppointmentStatus.CONFIRMED)
                 .build());
 
-        // Tomorrow at 10:00 (Pending in Center 1)
+        // ── TOMORROW: heavily booked day (test near-full blocking) ──
         appointmentRepository.save(Appointment.builder()
-                .dateTime(LocalDateTime.now().plusDays(1).withHour(10).withMinute(0).withSecond(0))
-                .treatment(t1_2) // Tratamiento Facial
-                .center(c1)
-                .client(client2)
-                .worker(w1)
-                .status(AppointmentStatus.PENDING)
+                .dateTime(tomorrow.withHour(9).withMinute(0))
+                .treatment(t1_2) // Facial (60 min → 2 slots: 09:00, 09:30)
+                .center(c1).client(client1).worker(w1)
+                .status(AppointmentStatus.CONFIRMED)
+                .build());
+        appointmentRepository.save(Appointment.builder()
+                .dateTime(tomorrow.withHour(10).withMinute(0))
+                .treatment(t1_3) // Masaje Relajante (50 min → 2 slots: 10:00, 10:30)
+                .center(c1).client(client2).worker(w1)
+                .status(AppointmentStatus.CONFIRMED)
+                .build());
+        appointmentRepository.save(Appointment.builder()
+                .dateTime(tomorrow.withHour(11).withMinute(0))
+                .treatment(t1_1) // Manicura (45 min → 2 slots: 11:00, 11:30)
+                .center(c1).client(client1).worker(w1)
+                .status(AppointmentStatus.CONFIRMED)
+                .build());
+        appointmentRepository.save(Appointment.builder()
+                .dateTime(tomorrow.withHour(12).withMinute(0))
+                .treatment(t1_2) // Facial (60 min → 2 slots: 12:00, 12:30)
+                .center(c1).guestName("María López").guestPhone("611222333").worker(w1)
+                .status(AppointmentStatus.CONFIRMED)
+                .build());
+        appointmentRepository.save(Appointment.builder()
+                .dateTime(tomorrow.withHour(13).withMinute(0))
+                .treatment(t1_1) // Manicura (45 min → 2 slots: 13:00, 13:30)
+                .center(c1).client(client2).worker(w1)
+                .status(AppointmentStatus.CONFIRMED)
+                .build());
+        appointmentRepository.save(Appointment.builder()
+                .dateTime(tomorrow.withHour(14).withMinute(0))
+                .treatment(t1_3) // Masaje (50 min → 2 slots: 14:00, 14:30)
+                .center(c1).guestName("Pedro García").guestPhone("611333444").worker(w1)
+                .status(AppointmentStatus.CONFIRMED)
+                .build());
+        appointmentRepository.save(Appointment.builder()
+                .dateTime(tomorrow.withHour(15).withMinute(0))
+                .treatment(t1_2) // Facial (60 min → 2 slots: 15:00, 15:30)
+                .center(c1).client(client1).worker(w1)
+                .status(AppointmentStatus.CONFIRMED)
+                .build());
+        appointmentRepository.save(Appointment.builder()
+                .dateTime(tomorrow.withHour(16).withMinute(0))
+                .treatment(t1_1) // Manicura (45 min → 2 slots: 16:00, 16:30)
+                .center(c1).client(client2).worker(w1)
+                .status(AppointmentStatus.CONFIRMED)
+                .build());
+        appointmentRepository.save(Appointment.builder()
+                .dateTime(tomorrow.withHour(17).withMinute(0))
+                .treatment(t1_3) // Masaje (50 min → 2 slots: 17:00, 17:30)
+                .center(c1).guestName("Ana Ruiz").guestPhone("611444555").worker(w1)
+                .status(AppointmentStatus.CONFIRMED)
+                .build());
+        appointmentRepository.save(Appointment.builder()
+                .dateTime(tomorrow.withHour(18).withMinute(0))
+                .treatment(t1_2) // Facial (60 min → 2 slots: 18:00, 18:30)
+                .center(c1).client(client1).worker(w1)
+                .status(AppointmentStatus.CONFIRMED)
+                .build());
+        appointmentRepository.save(Appointment.builder()
+                .dateTime(tomorrow.withHour(19).withMinute(0))
+                .treatment(t1_1) // Manicura (45 min → 2 slots: 19:00, 19:30)
+                .center(c1).client(client2).worker(w1)
+                .status(AppointmentStatus.CONFIRMED)
                 .build());
 
-        // Tomorrow at 16:30 (Pending in Center 1 - Guest User)
+        // ── DAY AFTER TOMORROW: some gaps to test partial blocking ──
         appointmentRepository.save(Appointment.builder()
-                .dateTime(LocalDateTime.now().plusDays(1).withHour(16).withMinute(30).withSecond(0))
-                .treatment(t1_3) // Masaje Relajante
-                .center(c1)
-                .guestName("Juan Pérez")
-                .guestPhone("611777888")
-                .worker(w1)
+                .dateTime(dayAfter.withHour(9).withMinute(0))
+                .treatment(t1_1) // Manicura (2 slots: 09:00, 09:30)
+                .center(c1).client(client1).worker(w1)
+                .status(AppointmentStatus.CONFIRMED)
+                .build());
+        appointmentRepository.save(Appointment.builder()
+                .dateTime(dayAfter.withHour(10).withMinute(30))
+                .treatment(t1_2) // Facial (2 slots: 10:30, 11:00)
+                .center(c1).client(client2).worker(w1)
+                .status(AppointmentStatus.CONFIRMED)
+                .build());
+        appointmentRepository.save(Appointment.builder()
+                .dateTime(dayAfter.withHour(14).withMinute(0))
+                .treatment(t1_3) // Masaje (2 slots: 14:00, 14:30)
+                .center(c1).guestName("Juan Pérez").guestPhone("611777888").worker(w1)
                 .status(AppointmentStatus.PENDING)
                 .build());
-
-        // Today + 4 hours (Confirmed in Center 2)
         appointmentRepository.save(Appointment.builder()
-                .dateTime(LocalDateTime.now().plusHours(4))
-                .treatment(t2_1) // Champú & Queratina
-                .center(c2)
-                .client(client2)
-                .worker(w2)
+                .dateTime(dayAfter.withHour(16).withMinute(0))
+                .treatment(t1_1) // Manicura (2 slots: 16:00, 16:30)
+                .center(c1).client(client1).worker(w1)
+                .status(AppointmentStatus.CONFIRMED)
+                .build());
+
+        // ── DAY+3: a REJECTED appointment (should NOT block) + one confirmed ──
+        appointmentRepository.save(Appointment.builder()
+                .dateTime(day3.withHour(10).withMinute(0))
+                .treatment(t1_2) // Facial
+                .center(c1).client(client2).worker(w1)
+                .status(AppointmentStatus.REJECTED)
+                .build());
+        appointmentRepository.save(Appointment.builder()
+                .dateTime(day3.withHour(12).withMinute(30))
+                .treatment(t1_1) // Manicura (2 slots: 12:30, 13:00)
+                .center(c1).client(client1).worker(w1)
+                .status(AppointmentStatus.CONFIRMED)
+                .build());
+
+        // ── DAY+5: light booking ──
+        appointmentRepository.save(Appointment.builder()
+                .dateTime(day5.withHour(17).withMinute(0))
+                .treatment(t1_3) // Masaje (2 slots: 17:00, 17:30)
+                .center(c1).client(client2).worker(w1)
+                .status(AppointmentStatus.CONFIRMED)
+                .build());
+
+        // ──────────────────────────────────────────────────────────────────
+        // CENTER 2 — "Belleza Plaza Norte"
+        // ──────────────────────────────────────────────────────────────────
+
+        // ── TODAY: 1 confirmed ──
+        appointmentRepository.save(Appointment.builder()
+                .dateTime(today.withHour(10).withMinute(0))
+                .treatment(t2_1) // Champú & Queratina (30 min → 1 slot)
+                .center(c2).client(client2).worker(w2)
+                .status(AppointmentStatus.CONFIRMED)
+                .build());
+
+        // ── TOMORROW: 3 appointments ──
+        appointmentRepository.save(Appointment.builder()
+                .dateTime(tomorrow.withHour(9).withMinute(30))
+                .treatment(t2_2) // Corte & Estilo (45 min → 2 slots: 09:30, 10:00)
+                .center(c2).client(client1).worker(w2)
+                .status(AppointmentStatus.CONFIRMED)
+                .build());
+        appointmentRepository.save(Appointment.builder()
+                .dateTime(tomorrow.withHour(11).withMinute(0))
+                .treatment(t2_1) // Champú (30 min → 1 slot: 11:00)
+                .center(c2).client(client2).worker(w2)
+                .status(AppointmentStatus.CONFIRMED)
+                .build());
+        appointmentRepository.save(Appointment.builder()
+                .dateTime(tomorrow.withHour(15).withMinute(0))
+                .treatment(t2_2) // Corte & Estilo (45 min → 2 slots: 15:00, 15:30)
+                .center(c2).guestName("Laura Sánchez").guestPhone("622111222").worker(w2)
+                .status(AppointmentStatus.CONFIRMED)
+                .build());
+
+        // ── DAY+7: far future booking ──
+        appointmentRepository.save(Appointment.builder()
+                .dateTime(day7.withHour(13).withMinute(0))
+                .treatment(t2_1) // Champú (1 slot: 13:00)
+                .center(c2).client(client1).worker(w2)
+                .status(AppointmentStatus.CONFIRMED)
+                .build());
+
+        // ──────────────────────────────────────────────────────────────────
+        // CENTER 3 — "Belleza Las Condes"
+        // ──────────────────────────────────────────────────────────────────
+
+        // ── TOMORROW: 2 appointments ──
+        appointmentRepository.save(Appointment.builder()
+                .dateTime(tomorrow.withHour(10).withMinute(0))
+                .treatment(t3_1) // Manicura (45 min → 2 slots: 10:00, 10:30)
+                .center(c3).client(client1).worker(w3)
+                .status(AppointmentStatus.CONFIRMED)
+                .build());
+        appointmentRepository.save(Appointment.builder()
+                .dateTime(tomorrow.withHour(14).withMinute(30))
+                .treatment(t3_2) // Masaje (50 min → 2 slots: 14:30, 15:00)
+                .center(c3).client(client2).worker(w3)
                 .status(AppointmentStatus.CONFIRMED)
                 .build());
     }

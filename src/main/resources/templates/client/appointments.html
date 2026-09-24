@@ -21,6 +21,22 @@
             <p>Estado y agenda de tus citas en BellaBelleza</p>
         </div>
 
+        <div class="category-filter-bar">
+            <button type="button" class="category-pill active" onclick="filterAppointments('all', this)">
+                <i class="lucide-sparkles"></i> Todos
+            </button>
+            <button type="button" class="category-pill" onclick="filterAppointments('CONFIRMADA', this)">
+                <i class="lucide-smile"></i> Confirmadas
+            </button>
+            <button type="button" class="category-pill" onclick="filterAppointments('PENDIENTE', this)">
+                <i class="lucide-heart-handshake"></i> Pendientes
+            </button>
+            <button type="button" class="category-pill" onclick="filterAppointments('RECHAZADA', this)">
+                <i class="lucide-scissors"></i> Rechazadas
+            </button>
+        </div>
+
+
         <!-- Phone search widget (for anonymous guests) -->
         <div class="guest-search-panel glass-panel" th:if="${sessionUserName == 'Invitado'}">
             <h3>Buscar Reservas por Número de Teléfono</h3>
@@ -96,4 +112,32 @@
     <!-- Footer -->
     <div th:replace="~{fragments/footer :: footer('© 2026 BellaBelleza CRM. Prototipo responsive.')}"></div>
 </body>
+
+    <script>
+        function filterAppointments(filter, button) {
+            // Remove 'active' class from all buttons
+            const buttons = document.querySelectorAll('.category-pill');
+            buttons.forEach(btn => btn.classList.remove('active'));
+
+            // Add 'active' class to the clicked button
+            button.classList.add('active');
+
+            // Get all appointment cards
+            const cards = document.querySelectorAll('.appointment-card');
+
+            // Show/hide cards based on the filter
+            cards.forEach(card => {
+                const statusBadge = card.querySelector('.badge');
+                if (filter === 'all') {
+                    card.style.display = 'block';
+                } else if (statusBadge && statusBadge.textContent.trim().toLowerCase() === filter.toLowerCase()) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+        }
+    </script>
+
 </html>

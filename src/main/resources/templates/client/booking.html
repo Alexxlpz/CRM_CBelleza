@@ -459,10 +459,9 @@
 
             let free = 0;
             slotsForDay(dateInput.value).forEach(function (slot) {
-                const blocked = slot.taken || slot.past;
-                const label = slot.taken ? slot.value + ' (ocupada)'
-                    : slot.past ? slot.value + ' (no disponible)'
-                        : slot.value;
+                if (slot.past) return;
+                const blocked = slot.taken;
+                const label = slot.taken ? slot.value + ' (ocupada)' : slot.value;
                 const option = new Option(label, slot.value);
                 option.disabled = blocked;
                 if (!blocked) free++;

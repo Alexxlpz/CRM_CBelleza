@@ -229,12 +229,15 @@
     justify-content: space-between;
     align-items: center;
     margin-top: 4px;
+    gap: 8px;
 }
 
 .treatment-card-price {
     font-weight: 700;
     color: var(--primary-dark);
     font-size: 14px;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
 }
 
 .treatment-card-duration {
