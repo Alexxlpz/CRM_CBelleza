@@ -53,7 +53,8 @@ h1, h2, h3, h4, h5, h6 {
     position: sticky;
     top: 0;
     z-index: 1050;
-    padding: 16px 40px; /* Wider spacing on PC */
+    padding: 6px 36px; /* Margen vertical mínimo para que el logo aproveche toda la altura */
+    min-height: 72px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -62,11 +63,12 @@ h1, h2, h3, h4, h5, h6 {
 .nav-left-group {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 12px;
 }
 
 .nav-left-group .back-arrow-btn {
     margin-bottom: 0;
+    flex-shrink: 0;
 }
 
 .nav-brand {
@@ -75,9 +77,12 @@ h1, h2, h3, h4, h5, h6 {
     font-weight: 700;
     color: var(--text-main);
     text-decoration: none;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 10px;
+    padding: 0;
+    margin: 0;
+    line-height: 1;
     transition: var(--transition);
 }
 
@@ -87,6 +92,19 @@ h1, h2, h3, h4, h5, h6 {
 
 .nav-brand i {
     color: var(--primary-dark);
+}
+
+.nav-brand img {
+    height: 66px;
+    max-height: 68px;
+    width: auto;
+    display: block;
+    object-fit: contain;
+    transition: transform 0.2s ease;
+}
+
+.nav-brand:hover img {
+    transform: scale(1.02);
 }
 
 .nav-session-info {
@@ -300,13 +318,25 @@ h1, h2, h3, h4, h5, h6 {
 
 @media (max-width: 768px) {
     .navbar {
-        padding: 14px 12px;
+        padding: 6px 14px;
+        min-height: 58px;
+    }
+    .nav-brand img {
+        height: 48px;
+        max-height: 50px;
     }
     .nav-brand {
         font-size: 18px;
     }
+    .nav-left-group {
+        gap: 8px;
+    }
+    .nav-left-group .back-arrow-btn {
+        width: 34px;
+        height: 34px;
+    }
     .main-container {
-        padding: 24px 16px;
+        padding: 20px 14px;
     }
     .nav-session-info {
         gap: 8px;

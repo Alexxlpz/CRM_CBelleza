@@ -1,8 +1,7 @@
 <div xmlns:th="http://www.thymeleaf.org">
     <nav class="navbar" th:fragment="brand(showSession)">
         <a href="/" class="nav-brand">
-            <i class="lucide-sparkles"></i>
-            <span>BellaBelleza</span>
+            <img th:src="@{/images/big_icon.png}" alt="Coquota Logo">
         </a>
         <div class="nav-session-info" th:if="${showSession and sessionRole != null}">
             <span class="session-badge">
@@ -27,8 +26,7 @@
                     <polyline points="12 19 5 12 12 5"></polyline></svg>
             </a>
             <a href="/" class="nav-brand">
-                <i class="lucide-sparkles"></i>
-                <span>BellaBelleza</span>
+                <img th:src="@{/images/big_icon.png}" alt="Coquota Logo">
             </a>
         </div>
         <div class="nav-session-info">
@@ -49,8 +47,7 @@
                     <polyline points="12 19 5 12 12 5"></polyline></svg>
             </a>
             <a href="/" class="nav-brand">
-                <i class="lucide-sparkles"></i>
-                <span>BellaBelleza</span>
+                <img th:src="@{/images/big_icon.png}" alt="Coquota Logo">
             </a>
         </div>
         <div class="nav-session-info">
