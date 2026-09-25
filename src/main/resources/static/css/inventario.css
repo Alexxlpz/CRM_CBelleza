@@ -484,7 +484,7 @@
 }
 
 .bottom-sheet-handle {
-    display: block !important;
+    display: none;
     width: 48px;
     height: 6px;
     background: rgba(197, 168, 128, 0.45);
@@ -495,7 +495,6 @@
     touch-action: none;
     user-select: none;
     transition: background 0.2s ease;
-    visibility: hidden;
 }
 
 .bottom-sheet-handle:hover,
@@ -504,35 +503,46 @@
     background: var(--primary-dark, #a38258);
 }
 
-/* Modal Overlay Styling for Add Product Sheet */
-.sheet-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(43, 40, 37, 0.55);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    z-index: 10000;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 24px;
-    animation: fadeInModal 0.25s ease-out;
-}
+/* Side Sheet Styling for Add Product Sheet (Desktop Drawer) */
+@media (min-width: 601px) {
+    #addProductModal.sheet-overlay,
+    .sheet-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(43, 40, 37, 0.45);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        z-index: 10000;
+        display: flex;
+        justify-content: flex-end; /* Align sheet to the right on desktop */
+        align-items: stretch;
+        padding: 0;
+        animation: fadeInOverlay 0.3s ease;
+    }
 
-.sheet-content {
-    width: 100%;
-    max-width: 500px;
-    max-height: 90vh;
-    overflow-y: auto;
-    padding: 28px;
-    background: #ffffff !important;
-    border-radius: var(--border-radius-lg, 24px);
-    box-shadow: 0 30px 70px rgba(0,0,0,0.3);
-    border: 1px solid rgba(197, 168, 128, 0.35);
-    animation: scaleUpModal 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    #addProductModal .sheet-content,
+    .sheet-content {
+        width: 480px;
+        max-width: 90vw;
+        height: 100%;
+        max-height: 100vh;
+        overflow-y: auto;
+        padding: 36px 30px;
+        background: #ffffff !important;
+        border-top-left-radius: var(--border-radius-lg, 24px) !important;
+        border-bottom-left-radius: var(--border-radius-lg, 24px) !important;
+        border-top-right-radius: 0 !important;
+        border-bottom-right-radius: 0 !important;
+        border-right: none !important;
+        border-top: none !important;
+        border-bottom: none !important;
+        border-left: 1px solid rgba(197, 168, 128, 0.35) !important;
+        box-shadow: -15px 0 45px rgba(43, 40, 37, 0.15);
+        animation: slideInRight 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
 }
 
 .sheet-header {
@@ -631,31 +641,37 @@
     .sheet-overlay {
         padding: 0 !important;
         align-items: flex-end !important;
+        justify-content: center !important;
     }
 
+    #addProductModal .sheet-content,
     .info-modal-card,
     .sheet-content {
+        background: #ffffff !important;
         max-width: 100% !important;
         width: 100% !important;
+        height: auto !important;
         border-bottom-left-radius: 0 !important;
         border-bottom-right-radius: 0 !important;
         border-top-left-radius: 28px !important;
         border-top-right-radius: 28px !important;
         max-height: 85vh !important;
-        padding-bottom: max(24px, env(safe-area-inset-bottom)) !important;
+        padding: 8px 22px max(24px, env(safe-area-inset-bottom)) 22px !important;
         animation: slideInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
         border-left: none !important;
         border-right: none !important;
         border-bottom: none !important;
+        border-top: 1px solid rgba(197, 168, 128, 0.35) !important;
     }
 
     .bottom-sheet-handle {
         display: block !important;
-        width: 44px;
-        height: 5px;
-        background: rgba(197, 168, 128, 0.4);
-        border-radius: 3px;
-        margin: 12px auto 6px auto;
+        visibility: visible !important;
+        width: 58px !important;
+        height: 6px !important;
+        background: rgba(197, 168, 128, 0.45) !important;
+        border-radius: 4px !important;
+        margin: 4px auto 14px auto !important;
         flex-shrink: 0;
     }
 

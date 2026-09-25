@@ -299,6 +299,7 @@
 
 /* Bottom Sheet Handle & FAB Styles */
 .bottom-sheet-handle {
+    display: none;
     width: 48px;
     height: 6px;
     background: rgba(197, 168, 128, 0.45);
@@ -317,8 +318,41 @@
     display: none;
 }
 
+/* Add Treatment Side Sheet (Desktop) */
+@media (min-width: 601px) {
+    #addTreatmentSheet.sheet-overlay {
+        padding: 0;
+        display: flex;
+        justify-content: flex-end;
+        align-items: stretch;
+    }
+
+    #addTreatmentSheet .sheet-content {
+        background: #ffffff !important;
+        border-top-left-radius: var(--border-radius-lg, 24px) !important;
+        border-bottom-left-radius: var(--border-radius-lg, 24px) !important;
+        border-top-right-radius: 0 !important;
+        border-bottom-right-radius: 0 !important;
+        border-right: none !important;
+        border-top: none !important;
+        border-bottom: none !important;
+        border-left: 1px solid rgba(197, 168, 128, 0.35) !important;
+    }
+}
+
 /* Responsive Overrides (< 600px) */
 @media (max-width: 600px) {
+    .bottom-sheet-handle {
+        display: block !important;
+        visibility: visible !important;
+        width: 58px !important;
+        height: 6px !important;
+        background: rgba(197, 168, 128, 0.45) !important;
+        border-radius: 4px !important;
+        margin: 4px auto 14px auto !important;
+        flex-shrink: 0;
+    }
+
     .treatments-list {
         grid-template-columns: 1fr;
         gap: 14px;
@@ -377,19 +411,26 @@
     #addTreatmentSheet.sheet-overlay {
         padding: 0 !important;
         align-items: flex-end !important;
+        justify-content: center !important;
     }
 
     #addTreatmentSheet .sheet-content {
+        background: #ffffff !important;
         max-width: 100% !important;
         width: 100% !important;
+        height: auto !important;
         border-bottom-left-radius: 0 !important;
         border-bottom-right-radius: 0 !important;
         border-top-left-radius: 28px !important;
         border-top-right-radius: 28px !important;
-        padding: 12px 24px 32px 24px !important;
-        max-height: 85vh;
+        border-left: none !important;
+        border-right: none !important;
+        border-bottom: none !important;
+        border-top: 1px solid rgba(197, 168, 128, 0.35) !important;
+        padding: 8px 22px 32px 22px !important;
+        max-height: 85vh !important;
         overflow-y: auto;
-        animation: slideInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        animation: slideInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
     }
 
     #addTreatmentSheet .sheet-close {
