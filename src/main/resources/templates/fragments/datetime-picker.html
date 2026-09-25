@@ -1,0 +1,44 @@
+<div xmlns:th="http://www.thymeleaf.org">
+    <!-- Reusable Datetime Picker Component (Datepicker popover + Timepicker popover + Hidden dateTime input) -->
+    <div th:fragment="picker" class="booking-datetime-picker-wrapper">
+        <div class="booking-datetime">
+            <!-- Date Picker -->
+            <div class="datepicker" id="datepicker">
+                <button type="button" class="form-control datepicker-trigger" id="datepickerTrigger"
+                    aria-haspopup="dialog" aria-expanded="false" aria-controls="calendarPopover">
+                    <span id="datepickerValue" class="datepicker-value">Elige una fecha</span>
+                    <span aria-hidden="true">▾</span>
+                </button>
+                <div class="calendar-popover" id="calendarPopover" role="dialog"
+                    aria-label="Calendario de disponibilidad" hidden>
+                    <div class="calendar-header">
+                        <button type="button" id="previousMonth" aria-label="Mes anterior">&lsaquo;</button>
+                        <strong id="calendarMonth">—</strong>
+                        <button type="button" id="nextMonth" aria-label="Mes siguiente">&rsaquo;</button>
+                    </div>
+                    <div class="calendar-weekdays">
+                        <span>L</span><span>M</span><span>X</span><span>J</span><span>V</span><span>S</span><span>D</span>
+                    </div>
+                    <div class="calendar-days" id="calendarDays"></div>
+                    <small id="availabilityMessage" class="availability-message">
+                        Consultando disponibilidad...
+                    </small>
+                </div>
+            </div>
+
+            <!-- Time Picker -->
+            <div class="timepicker" id="timepicker">
+                <button type="button" class="form-control timepicker-trigger" id="timepickerTrigger"
+                    aria-haspopup="listbox" aria-expanded="false" disabled>
+                    <span id="timepickerValue">Selecciona una hora</span>
+                    <span aria-hidden="true">▾</span>
+                </button>
+                <div class="timepicker-popover" id="timepickerPopover" role="listbox"
+                    aria-label="Horas disponibles" hidden>
+                    <div class="timepicker-options" id="timepickerOptions"></div>
+                </div>
+            </div>
+        </div>
+        <input type="hidden" name="dateTime" id="dateTime" required>
+    </div>
+</div>

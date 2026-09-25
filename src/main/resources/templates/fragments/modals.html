@@ -1,0 +1,13 @@
+<div xmlns:th="http://www.thymeleaf.org">
+    <!-- Booking Error Modal Dialog -->
+    <div class="booking-error-modal" role="dialog" aria-modal="true" aria-labelledby="bookingErrorTitle"
+         th:fragment="bookingError(error)"
+         th:if="${error != null}">
+        <div class="booking-error-dialog glass-panel">
+            <i class="lucide-circle-alert booking-error-icon" aria-hidden="true"></i>
+            <h2 id="bookingErrorTitle">No se ha podido reservar</h2>
+            <p th:text="${error}">No se ha podido crear la reserva.</p>
+            <button type="button" class="btn btn-primary" id="bookingErrorAccept">Aceptar</button>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,36 @@
+<div xmlns:th="http://www.thymeleaf.org">
+    <!-- Center Hero Banner Component -->
+    <div class="center-hero-header glass-panel" th:fragment="hero(center)">
+        <h1 class="hero-title" th:text="${center.name}">Nombre del Centro</h1>
+        <div class="hero-meta-container">
+            <div class="hero-meta-item">
+                <i class="lucide-map-pin"></i>
+                <div>
+                    <span class="hero-meta-label">Dirección:</span>
+                    <span class="hero-meta-value" th:text="${center.address}">Dirección</span>
+                </div>
+            </div>
+            <div class="hero-meta-item">
+                <i class="lucide-phone"></i>
+                <div>
+                    <span class="hero-meta-label">Teléfono:</span>
+                    <span class="hero-meta-value" th:text="${center.phone}">Teléfono</span>
+                </div>
+            </div>
+            <div class="hero-meta-item">
+                <i class="lucide-mail"></i>
+                <div>
+                    <span class="hero-meta-label">Email:</span>
+                    <span class="hero-meta-value" th:text="${center.email}">Email</span>
+                </div>
+            </div>
+            <div class="hero-meta-item">
+                <i class="lucide-clock"></i>
+                <div>
+                    <span class="hero-meta-label">Horario:</span>
+                    <span class="hero-meta-value">Lunes a Sábado: 09:00 - 20:00</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

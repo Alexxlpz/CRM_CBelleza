@@ -59,6 +59,16 @@ h1, h2, h3, h4, h5, h6 {
     align-items: center;
 }
 
+.nav-left-group {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.nav-left-group .back-arrow-btn {
+    margin-bottom: 0;
+}
+
 .nav-brand {
     font-family: 'Playfair Display', serif;
     font-size: 26px;

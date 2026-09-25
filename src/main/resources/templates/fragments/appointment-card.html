@@ -1,0 +1,46 @@
+<div xmlns:th="http://www.thymeleaf.org">
+    <!-- Reusable Appointment Card Component -->
+    <div class="appointment-card glass-panel" th:fragment="card(app)">
+        <div class="appointment-card-header">
+            <span class="appointment-service" th:text="${app.treatment.name}">Tratamiento</span>
+            
+            <span th:if="${app.status == T(com.alexxlpz.crm_cbelleza.entities.AppointmentStatus).PENDING}" 
+                  class="badge badge-pending">Pendiente</span>
+            <span th:if="${app.status == T(com.alexxlpz.crm_cbelleza.entities.AppointmentStatus).CONFIRMED}" 
+                  class="badge badge-confirmed">Confirmada</span>
+            <span th:if="${app.status == T(com.alexxlpz.crm_cbelleza.entities.AppointmentStatus).REJECTED}" 
+                  class="badge badge-rejected">Rechazada</span>
+        </div>
+        
+        <div class="appointment-card-body">
+            <div class="appointment-detail-item">
+                <i class="lucide-map-pin"></i>
+                <span th:text="${app.center.name}">Centro Histórico</span>
+            </div>
+            <div class="appointment-detail-item">
+                <i class="lucide-calendar"></i>
+                <span th:text="${#temporals.format(app.dateTime, 'dd/MM/yyyy HH:mm')}">18/07/2026 10:00</span>
+            </div>
+            <div class="appointment-detail-item">
+                <i class="lucide-user-cog"></i>
+                <span th:text="'Profesional: ' + (${app.worker != null} ? ${app.worker.name} : 'Sin asignar')">Elena Rostova</span>
+            </div>
+            <div class="appointment-detail-item">
+                <i class="lucide-dollar-sign"></i>
+                <span th:text="'Precio: ' + ${app.treatment.price} + ' € (' + ${app.treatment.duration} + ' min)'">25.00 €</span>
+            </div>
+            
+            <!-- Guest info if guest search -->
+            <div class="appointment-client-info" th:if="${app.guestName != null}">
+                <i class="lucide-user"></i>
+                <span th:text="'Reserva de: ' + ${app.guestName} + ' (' + ${app.guestPhone} + ')'">Invitado</span>
+            </div>
+
+            <!-- Worker message feedback display -->
+            <div class="appointment-worker-note" 
+                 th:if="${app.workerMessage != null && !#strings.isEmpty(app.workerMessage)}">
+                <i class="lucide-message-square"></i> Nota del salón: "<span th:text="${app.workerMessage}">Mensaje</span>"
+            </div>
+        </div>
+    </div>
+</div>

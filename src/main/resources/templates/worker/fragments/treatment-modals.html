@@ -1,0 +1,57 @@
+<div xmlns:th="http://www.thymeleaf.org">
+    <!-- Add Treatment Bottom Sheet Modal Component -->
+    <div id="addTreatmentSheet" class="sheet-overlay" style="display:none" onclick="closeTreatmentSheetOnOverlay(event)"
+         th:fragment="addTreatmentSheet">
+        <div class="sheet-content glass-panel" onclick="event.stopPropagation()">
+            <div class="bottom-sheet-handle"></div>
+            <div class="sheet-header">
+                <h2>Añadir Tratamiento</h2>
+                <button type="button" class="sheet-close" onclick="closeTreatmentSheet()">&times;</button>
+            </div>
+            
+            <form action="/worker/treatments/add" method="POST" class="role-form">
+                <div class="form-group">
+                    <label class="form-label" for="treatmentName">Nombre del Tratamiento</label>
+                    <input type="text" name="name" id="treatmentName" class="form-control" 
+                           placeholder="Ej. Pedicura Spa, Limpieza Facial..." required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="treatmentType">Categoría / Tipo</label>
+                    <select name="type" id="treatmentType" class="form-control" required>
+                        <option value="" disabled selected>Elige un tipo...</option>
+                        <option value="MANICURA_PEDICURA">Manicura y Pedicura</option>
+                        <option value="FACIAL">Tratamientos Faciales</option>
+                        <option value="CORPORAL">Tratamientos Corporales</option>
+                        <option value="MASAJES">Masajes</option>
+                        <option value="PELUQUERIA">Peluquería</option>
+                        <option value="DEPILACION">Depilación</option>
+                        <option value="OTRO">Otro</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="treatmentDesc">Descripción</label>
+                    <textarea name="description" id="treatmentDesc" class="form-control form-textarea-fixed" 
+                              placeholder="Detalla en qué consiste el servicio..." rows="3" required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="treatmentPrice">Precio (€)</label>
+                    <input type="number" name="price" id="treatmentPrice" class="form-control" 
+                           placeholder="0.00" step="0.01" min="0" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="treatmentDuration">Duración (minutos)</label>
+                    <input type="number" name="duration" id="treatmentDuration" class="form-control" 
+                           value="45" min="5" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-full-width">
+                    <i class="lucide-plus"></i> Guardar Tratamiento
+                </button>
+            </form>
+        </div>
+    </div>
+</div>

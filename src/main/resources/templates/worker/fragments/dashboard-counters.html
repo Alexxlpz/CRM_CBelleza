@@ -1,0 +1,17 @@
+<div xmlns:th="http://www.thymeleaf.org">
+    <!-- Worker Dashboard Quick Metrics Counters Row -->
+    <div class="quick-counters-grid" th:fragment="counters(todayCount, tomorrowCount, lowStockCount)">
+        <div class="glass-panel counter-card">
+            <div class="counter-value" th:text="${todayCount}">0</div>
+            <div class="counter-label">Citas Hoy</div>
+        </div>
+        <div class="glass-panel counter-card">
+            <div class="counter-value" th:text="${tomorrowCount}">0</div>
+            <div class="counter-label">Citas Mañana</div>
+        </div>
+        <div class="glass-panel counter-card">
+            <div class="counter-value" th:text="${lowStockCount}">0</div>
+            <div class="counter-label">Stock Bajo</div>
+        </div>
+    </div>
+</div>

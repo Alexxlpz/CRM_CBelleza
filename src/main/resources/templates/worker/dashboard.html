@@ -17,22 +17,8 @@
     <main class="main-container">
         
         <div class="worker-dashboard-container">
-            <!-- Dashboard starts here -->
-            <!-- Quick Counters Row -->
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
-                <div class="glass-panel" style="padding: 16px; text-align: center;">
-                    <div style="font-size: 24px; font-weight: 800; color: var(--primary-dark);" th:text="${todayAppointmentsCount}">0</div>
-                    <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-top: 4px;">Citas Hoy</div>
-                </div>
-                <div class="glass-panel" style="padding: 16px; text-align: center;">
-                    <div style="font-size: 24px; font-weight: 800; color: var(--primary-dark);" th:text="${tomorrowAppointmentsCount}">0</div>
-                    <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-top: 4px;">Citas Mañana</div>
-                </div>
-                <div class="glass-panel" style="padding: 16px; text-align: center;">
-                    <div style="font-size: 24px; font-weight: 800; color: var(--primary-dark);" th:text="${lowStockCount}">0</div>
-                    <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-top: 4px;">Stock Bajo</div>
-                </div>
-            </div>
+            <!-- Quick Counters Row Component -->
+            <div th:replace="~{worker/fragments/dashboard-counters :: counters(${todayAppointmentsCount}, ${tomorrowAppointmentsCount}, ${lowStockCount})}"></div>
             
             <!-- Action Cards Grid -->
             <div class="actions-grid">
@@ -42,7 +28,7 @@
                     <i class="lucide-calendar-days"></i>
                     <span class="action-card-title">Calendario de Agenda</span>
                     <p class="action-card-desc">Consulta los horarios de reserva del salón en una cuadrícula diaria interactiva.</p>
-                    <span class="action-card-badge" th:if="${todayAppointmentsCount > 0}" th:text="${todayAppointmentsCount} + ' Citas Hoy'" style="background:var(--success-bg); color:var(--success-text)">1 Citas Hoy</span>
+                    <span class="action-card-badge badge-success" th:if="${todayAppointmentsCount > 0}" th:text="${todayAppointmentsCount} + ' Citas Hoy'">1 Citas Hoy</span>
                 </a>
                 
                 <!-- Action 2: Stock adjustments -->
@@ -50,7 +36,7 @@
                     <i class="lucide-package-open"></i>
                     <span class="action-card-title">Gestión de Inventario</span>
                     <p class="action-card-desc">Controla las existencias del salón. Añade nuevos productos y simula entradas/ventas (+1 / -1).</p>
-                    <span class="action-card-badge" th:if="${lowStockCount > 0}" th:text="${lowStockCount} + ' Alertas'" style="background:var(--warning-bg); color:var(--warning-text)">3</span>
+                    <span class="action-card-badge badge-warning" th:if="${lowStockCount > 0}" th:text="${lowStockCount} + ' Alertas'">3</span>
                 </a>
                 
                 <!-- Action 3: Add new treatments -->

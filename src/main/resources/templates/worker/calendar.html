@@ -319,14 +319,14 @@
                 if (isPending) {
                     formHtml = `
                         <div class="approval-message-box">
-                            <label class="form-label" style="font-size: 11px; margin-bottom: 2px">Escribir nota opcional (mensaje al cliente):</label>
+                            <label class="form-label agenda-note-label">Escribir nota opcional (mensaje al cliente):</label>
                             <textarea id="message-${app.id}" class="approval-msg-input" placeholder="Ej. Por favor ven 5 minutos antes o motivo de cancelación..." rows="2"></textarea>
                             <div class="agenda-card-actions">
                                 <button type="button" class="btn-agenda-action reject" onclick="handleStatusChange(${app.id}, 'reject')">
-                                    <i class="lucide-x" style="vertical-align:middle; margin-right:2px"></i> Rechazar
+                                    <i class="lucide-x agenda-action-icon"></i> Rechazar
                                 </button>
                                 <button type="button" class="btn-agenda-action approve" onclick="handleStatusChange(${app.id}, 'approve')">
-                                    <i class="lucide-check" style="vertical-align:middle; margin-right:2px"></i> Aceptar Cita
+                                    <i class="lucide-check agenda-action-icon"></i> Aceptar Cita
                                 </button>
                             </div>
                         </div>
@@ -336,16 +336,16 @@
                 let messageHtml = '';
                 if (app.workerMessage) {
                     messageHtml = `
-                        <div style="font-size:11px; font-weight:700; color:var(--primary-dark); margin-top:6px; padding-top:6px; border-top:1px dashed rgba(197, 168, 128, 0.15)">
-                            <i class="lucide-message-square" style="vertical-align:middle; margin-right:4px"></i> Nota: "${app.workerMessage}"
+                        <div class="agenda-worker-note">
+                            <i class="lucide-message-square"></i> Nota: "${app.workerMessage}"
                         </div>
                     `;
                 }
                 
                 card.innerHTML = `
-                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px dashed rgba(197, 168, 128, 0.15); padding-bottom:8px; margin-bottom:4px">
+                    <div class="agenda-card-top">
                         <div class="agenda-item-time">
-                            <i class="lucide-clock" style="font-size:14px"></i>
+                            <i class="lucide-clock"></i>
                             <span>${timeStr} h</span>
                         </div>
                         <span class="badge ${badgeClass}">${badgeText}</span>
@@ -354,21 +354,21 @@
                     <div class="agenda-item-treatment">${app.treatment.name}</div>
                     
                     <div class="agenda-item-detail">
-                        <i class="lucide-user" style="color:var(--primary-dark)"></i>
+                        <i class="lucide-user"></i>
                         <strong>${clientName}</strong> ${isGuest ? '(Invitado)' : ''}
                     </div>
                     <div class="agenda-item-detail">
-                        <i class="lucide-phone" style="color:var(--primary-dark)"></i>
+                        <i class="lucide-phone"></i>
                         <span>Teléfono: ${clientPhone}</span>
                     </div>
                     <div class="agenda-item-detail">
-                        <i class="lucide-sparkles" style="color:var(--primary-dark)"></i>
+                        <i class="lucide-sparkles"></i>
                         <span>Estilista: ${app.worker ? app.worker.name : 'Pendiente de asignación'}</span>
                     </div>
-                    <div class="agenda-item-detail" style="margin-top:4px">
-                        <i class="lucide-badge-euro" style="color:var(--primary-dark)"></i>
-                        <span style="font-weight:700; color:var(--primary-dark)">${app.treatment.price.toFixed(2)} €</span>
-                        <span style="color:var(--text-muted); font-size:11px">(${app.treatment.duration} min)</span>
+                    <div class="agenda-item-detail agenda-detail-margin">
+                        <i class="lucide-badge-euro"></i>
+                        <span class="agenda-price-text">${app.treatment.price.toFixed(2)} €</span>
+                        <span class="agenda-duration-text">(${app.treatment.duration} min)</span>
                     </div>
                     
                     ${messageHtml}

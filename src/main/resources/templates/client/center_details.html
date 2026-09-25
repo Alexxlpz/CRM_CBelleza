@@ -9,6 +9,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.321.0/font/lucide.min.css">
     <!-- Stylesheets -->
     <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/modals.css">
+    <link rel="stylesheet" href="/css/datepicker.css">
     <link rel="stylesheet" href="/css/cliente.css">
 </head>
 
@@ -17,49 +19,11 @@
 
     <!-- Main Container -->
     <main class="main-container">
-        <div class="booking-error-modal" role="dialog" aria-modal="true" aria-labelledby="bookingErrorTitle"
-            th:if="${bookingError != null}">
-            <div class="booking-error-dialog glass-panel">
-                <i class="lucide-circle-alert booking-error-icon" aria-hidden="true"></i>
-                <h2 id="bookingErrorTitle">No se ha podido reservar</h2>
-                <p th:text="${bookingError}">No se ha podido crear la reserva.</p>
-                <button type="button" class="btn btn-primary" id="bookingErrorAccept">Aceptar</button>
-            </div>
-        </div>
+        <!-- Error Modal Component -->
+        <div th:replace="~{fragments/modals :: bookingError(${bookingError})}"></div>
 
-        <div class="center-hero-header glass-panel">
-            <h1 class="hero-title" th:text="${center.name}">Nombre del Centro</h1>
-            <div class="hero-meta-container">
-                <div class="hero-meta-item">
-                    <i class="lucide-map-pin"></i>
-                    <div>
-                        <span class="hero-meta-label">Dirección:</span>
-                        <span class="hero-meta-value" th:text="${center.address}">Dirección</span>
-                    </div>
-                </div>
-                <div class="hero-meta-item">
-                    <i class="lucide-phone"></i>
-                    <div>
-                        <span class="hero-meta-label">Teléfono:</span>
-                        <span class="hero-meta-value" th:text="${center.phone}">Teléfono</span>
-                    </div>
-                </div>
-                <div class="hero-meta-item">
-                    <i class="lucide-mail"></i>
-                    <div>
-                        <span class="hero-meta-label">Email:</span>
-                        <span class="hero-meta-value" th:text="${center.email}">Email</span>
-                    </div>
-                </div>
-                <div class="hero-meta-item">
-                    <i class="lucide-clock"></i>
-                    <div>
-                        <span class="hero-meta-label">Horario:</span>
-                        <span class="hero-meta-value">Lunes a Sábado: 09:00 - 20:00</span>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <!-- Center Hero Header Component -->
+        <div th:replace="~{client/fragments/center-hero :: hero(${center})}"></div>
 
         <section class="glass-panel booking-section">
             <h2 class="booking-section-title">
@@ -72,8 +36,7 @@
 
                 <!-- 1. Selectable Treatments list -->
                 <div class="form-group">
-                    <label class="form-label" style="font-size: 16px; margin-bottom: 16px; display: block;">1. Elige un
-                        servicio disponible</label>
+                    <label class="form-label booking-step-label">1. Elige un servicio disponible</label>
                     <div class="treatment-select-grid" th:if="${not #lists.isEmpty(treatments)}">
                         <label class="treatment-select-card" th:each="t, iter : ${treatments}">
                             <input type="radio" name="treatmentId" th:value="${t.id}"
@@ -93,59 +56,23 @@
                     </div>
                 </div>
 
-                <!-- 3. DateTime picker -->
-                <div class="form-group" th:if="${not #lists.isEmpty(treatments)}" style="margin-top: 30px;">
-                    <label class="form-label" for="datepickerTrigger" style="font-size: 16px;">2. Elige Fecha y
-                        Hora</label>
-                    <div class="booking-datetime">
-                        <div class="datepicker" id="datepicker">
-                            <button type="button" class="form-control datepicker-trigger" id="datepickerTrigger"
-                                aria-haspopup="dialog" aria-expanded="false" aria-controls="calendarPopover">
-                                <span id="datepickerValue">Elige una fecha</span>
-                                <span aria-hidden="true">▾</span>
-                            </button>
-                            <div class="calendar-popover" id="calendarPopover" role="dialog"
-                                aria-label="Calendario de disponibilidad" hidden>
-                                <div class="calendar-header">
-                                    <button type="button" id="previousMonth" aria-label="Mes anterior">&lsaquo;</button>
-                                    <strong id="calendarMonth">—</strong>
-                                    <button type="button" id="nextMonth" aria-label="Mes siguiente">&rsaquo;</button>
-                                </div>
-                                <div class="calendar-weekdays">
-                                    <span>L</span><span>M</span><span>X</span><span>J</span><span>V</span><span>S</span><span>D</span>
-                                </div>
-                                <div class="calendar-days" id="calendarDays"></div>
-                                <small id="availabilityMessage" class="availability-message">
-                                    Consultando disponibilidad...
-                                </small>
-                            </div>
-                        </div>
-                        <div class="timepicker" id="timepicker">
-                            <button type="button" class="form-control timepicker-trigger" id="timepickerTrigger"
-                                aria-haspopup="listbox" aria-expanded="false" disabled>
-                                <span id="timepickerValue">Selecciona una hora</span>
-                                <span aria-hidden="true">▾</span>
-                            </button>
-                            <div class="timepicker-popover" id="timepickerPopover" role="listbox"
-                                aria-label="Horas disponibles" hidden>
-                                <div class="timepicker-options" id="timepickerOptions"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <input type="hidden" name="dateTime" id="dateTime" required>
+                <!-- 2. DateTime picker Component -->
+                <div class="form-group booking-datetime-group" th:if="${not #lists.isEmpty(treatments)}">
+                    <label class="form-label booking-step-label" for="datepickerTrigger">2. Elige Fecha y Hora</label>
+                    <div id="datepickerTrigger" th:replace="~{fragments/datetime-picker :: picker}"></div>
                 </div>
 
-                <!-- 4. Guest info block if Guest simulation -->
+                <!-- 3. Guest info block if Guest simulation -->
                 <div class="guest-info-block"
                     th:if="${sessionUserName == 'Invitado' and not #lists.isEmpty(treatments)}">
                     <h4>3. Datos del Cliente</h4>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
-                        <div class="form-group" style="margin-bottom:0">
+                    <div class="guest-inputs-grid">
+                        <div class="form-group">
                             <label class="form-label" for="guestName">Nombre Completo</label>
                             <input type="text" name="guestName" id="guestName" class="form-control"
                                 placeholder="Escribe tu nombre y apellido..." required>
                         </div>
-                        <div class="form-group" style="margin-bottom:0">
+                        <div class="form-group">
                             <label class="form-label" for="guestPhone">Número de Teléfono</label>
                             <input type="tel" name="guestPhone" id="guestPhone" class="form-control"
                                 placeholder="Ej. 600123456..." required>
@@ -162,242 +89,6 @@
 
     </main>
 
-    <style>
-        :root {
-            --text-color: #4a4038;
-        }
-
-        .booking-error-modal {
-            position: fixed;
-            inset: 0;
-            z-index: 2000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            background: rgba(31, 25, 20, .55);
-            backdrop-filter: blur(4px);
-        }
-
-        .booking-error-dialog {
-            width: min(100%, 430px);
-            padding: 28px;
-            text-align: center;
-            animation: bookingModalIn .2s ease-out;
-        }
-
-        .booking-error-icon {
-            font-size: 34px;
-            color: #b9736f;
-        }
-
-        .booking-error-dialog h2 {
-            margin: 12px 0 10px;
-        }
-
-        .booking-error-dialog p {
-            margin: 0 0 24px;
-            color: var(--text-muted);
-        }
-
-        .booking-error-dialog button {
-            min-width: 130px;
-        }
-
-        @keyframes bookingModalIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px) scale(.98);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-
-        .booking-datetime {
-            display: grid;
-            grid-template-columns: 1.2fr .8fr;
-            gap: 8px;
-        }
-
-        .datepicker {
-            position: relative;
-        }
-
-        .datepicker-trigger {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-            cursor: pointer;
-            background: #fff;
-        }
-
-        .timepicker {
-            position: relative;
-        }
-
-        .timepicker-trigger {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-            cursor: pointer;
-            background: #fff;
-        }
-
-        .timepicker-trigger:disabled {
-            cursor: not-allowed;
-            opacity: .65;
-        }
-
-        .calendar-popover {
-            position: absolute;
-            top: calc(100% + 6px);
-            left: 0;
-            z-index: 60;
-            width: 262px;
-            padding: 10px;
-            background: #fff;
-            border: 1px solid rgba(197, 168, 128, .45);
-            border-radius: 10px;
-            box-shadow: 0 12px 28px rgba(60, 45, 30, .18);
-        }
-
-        .calendar-popover[hidden] {
-            display: none;
-        }
-
-        .timepicker-popover {
-            position: absolute;
-            top: calc(100% + 6px);
-            left: 0;
-            right: 0;
-            z-index: 60;
-            max-height: 220px;
-            overflow-y: auto;
-            padding: 8px;
-            background: #fff;
-            border: 1px solid rgba(197, 168, 128, .45);
-            border-radius: 10px;
-            box-shadow: 0 12px 28px rgba(60, 45, 30, .18);
-        }
-
-        .timepicker-popover[hidden] {
-            display: none;
-        }
-
-        .timepicker-options {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 6px;
-        }
-
-        .time-option {
-            border: 1px solid rgba(197, 168, 128, .35);
-            border-radius: 6px;
-            padding: 7px 4px;
-            background: #fff;
-            color: var(--text-color);
-            cursor: pointer;
-            font-size: 13px;
-        }
-
-        .time-option:hover,
-        .time-option:focus-visible {
-            background: rgba(197, 168, 128, .2);
-            outline: none;
-        }
-
-        .time-option.is-occupied,
-        .time-option.is-past,
-        .time-option.is-no-fit {
-            color: #b8afa5;
-            background: #f7f4f1;
-            cursor: not-allowed;
-            text-decoration: line-through;
-        }
-
-        .time-option.is-selected {
-            background: var(--primary);
-            border-color: var(--primary);
-            color: #fff;
-        }
-
-        .calendar-header,
-        .calendar-weekdays,
-        .calendar-days {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            align-items: center;
-            text-align: center;
-            gap: 2px;
-        }
-
-        .calendar-header {
-            grid-template-columns: 30px 1fr 30px;
-            margin-bottom: 8px;
-        }
-
-        .calendar-header button {
-            border: 0;
-            background: transparent;
-            font-size: 20px;
-            cursor: pointer;
-        }
-
-        .calendar-days button {
-            border: 1px solid transparent;
-            border-radius: 6px;
-            min-height: 30px;
-            background: transparent;
-            cursor: pointer;
-        }
-
-        .calendar-days button.is-past,
-        .calendar-days button.is-closed,
-        .calendar-days button.is-full {
-            color: #b8afa5;
-            cursor: not-allowed;
-        }
-
-        .calendar-days button.is-closed {
-            text-decoration: line-through;
-        }
-
-        .calendar-days button.is-full {
-            background: rgba(185, 115, 111, .15);
-            color: #b9736f;
-        }
-
-        .calendar-days button.selected {
-            background: var(--primary);
-            color: #fff;
-        }
-
-        .calendar-days button.is-today {
-            border-color: var(--primary-dark);
-        }
-
-        .availability-message {
-            display: block;
-            margin-top: 8px;
-            font-size: 12px;
-            color: var(--text-muted);
-        }
-
-        .availability-message.is-error {
-            color: #b9736f;
-        }
-
-        @media (max-width: 520px) {
-            .booking-datetime {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {

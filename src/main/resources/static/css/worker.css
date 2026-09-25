@@ -162,6 +162,17 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
+.action-card-badge.badge-success {
+    background: var(--success-bg);
+    color: var(--success-text);
+}
+
+.action-card-badge.badge-warning {
+    background: var(--warning-bg);
+    color: var(--warning-text);
+}
+
+
 @media (max-width: 900px) {
     .metrics-row {
         grid-template-columns: repeat(3, 1fr);
@@ -405,6 +416,57 @@
         flex-shrink: 0 !important;
     }
 }
+
+/* Quick Counters Component (Dashboard) */
+.quick-counters-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.counter-card {
+    padding: 16px;
+    text-align: center;
+}
+
+.counter-value {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--primary-dark);
+}
+
+.counter-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-top: 4px;
+}
+
+/* Treatments page utilities */
+.treatments-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.treatments-section {
+    width: 100%;
+}
+
+.form-textarea-fixed {
+    resize: none;
+}
+
+.btn-full-width {
+    width: 100%;
+    margin-top: 10px;
+}
+
 
 
 

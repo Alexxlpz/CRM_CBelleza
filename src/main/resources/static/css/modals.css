@@ -1,0 +1,118 @@
+/* ==========================================================================
+   Modals & Dialogs Styles
+   Reusable modals (error alerts, confirmations, prompts)
+   ========================================================================== */
+
+/* Booking Error Modal */
+.booking-error-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(31, 25, 20, 0.55);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.booking-error-dialog {
+    width: min(100%, 430px);
+    padding: 28px;
+    text-align: center;
+    animation: modalSlideIn 0.2s ease-out;
+}
+
+.booking-error-icon {
+    font-size: 34px;
+    color: #b9736f;
+}
+
+.booking-error-dialog h2 {
+    margin: 12px 0 10px;
+}
+
+.booking-error-dialog p {
+    margin: 0 0 24px;
+    color: var(--text-muted);
+}
+
+.booking-error-dialog button {
+    min-width: 130px;
+}
+
+/* Center Confirm Modal */
+.center-confirm-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(31, 25, 20, 0.55);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.center-confirm-dialog {
+    width: min(100%, 430px);
+    padding: 28px;
+    text-align: center;
+    animation: modalSlideIn 0.2s ease-out;
+}
+
+.center-confirm-dialog h2 {
+    margin: 0 0 10px;
+}
+
+.center-confirm-dialog p {
+    margin: 0 0 24px;
+    color: var(--text-muted);
+}
+
+.center-confirm-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.center-confirm-actions button {
+    flex: 1;
+}
+
+/* Animations */
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Alias for backward compatibility */
+@keyframes bookingModalIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes modalIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}

@@ -92,56 +92,17 @@
                     </div>
                     
                     <!-- Stock Alert Badges -->
-                    <span th:if="${item.stock == 0}" class="badge badge-rejected badge-pill" style="font-size: 8px; padding: 2px 6px;">Agotado</span>
-                    <span th:if="${item.stock > 0 and item.stock <= 3}" class="badge badge-pending badge-pill" style="font-size: 8px; padding: 2px 6px;">Bajo Stock</span>
-                    <span th:if="${item.stock > 3}" class="badge badge-confirmed badge-pill" style="font-size: 8px; padding: 2px 6px;">Normal</span>
+                    <span th:if="${item.stock == 0}" class="badge badge-rejected badge-pill badge-micro">Agotado</span>
+                    <span th:if="${item.stock > 0 and item.stock <= 3}" class="badge badge-pending badge-pill badge-micro">Bajo Stock</span>
+                    <span th:if="${item.stock > 3}" class="badge badge-confirmed badge-pill badge-micro">Normal</span>
                 </div>
 
                 
             </div>
         </div>
 
-        <!-- Product Info Modals (Rendered outside grid to ensure clean full-screen overlay) -->
-        <div th:each="item : ${inventoryItems}">
-            <div th:id="'detailModal_' + ${item.id}" class="info-modal-overlay" style="display:none"
-                 th:onclick="'closeProductModalOnBackdrop(event, \'detailModal_\' + ' + ${item.id} + ')'">
-                <div class="info-modal-card" onclick="event.stopPropagation()">
-                    <div class="bottom-sheet-handle"></div>
-                    <div class="info-modal-header">
-                        <h3 th:text="${item.product.name}">Detalle del Producto</h3>
-                    </div>
-                    <div class="info-modal-body">
-                        <div class="info-modal-media">
-                            <img th:if="${item.product.category == 'Rostro'}" src="/images/face_serum.png" alt="Rostro">
-                            <img th:if="${item.product.category == 'Cabello'}" src="/images/hair_oil.png" alt="Cabello">
-                            <img th:if="${item.product.category != 'Rostro' and item.product.category != 'Cabello'}" src="/images/beauty_salon_hero.png" alt="Otros">
-                        </div>
-                        <div class="info-modal-details">
-                            <div class="info-detail-row">
-                                <span class="info-detail-label">Categoría</span>
-                                <span class="product-category" th:text="${item.product.category}">Categoría</span>
-                            </div>
-                            <div class="info-detail-row">
-                                <span class="info-detail-label">Precio Unitario</span>
-                                <span class="info-detail-price" th:text="${item.product.price} + ' €'">0.00 €</span>
-                            </div>
-                            <div class="info-detail-row">
-                                <span class="info-detail-label">Stock en Centro</span>
-                                <span class="info-detail-stock" th:text="${item.stock} + ' unidades'">0 ud</span>
-                            </div>
-                            <div class="info-detail-box">
-                                <span class="info-detail-label">Descripción del Producto</span>
-                                <p th:text="${item.product.description}">Descripción detallada...</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="info-modal-footer">
-                        <button type="button" class="btn btn-secondary" 
-                                th:onclick="'closeProductModal(\'detailModal_\' + ' + ${item.id} + ')'">Cerrar</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <!-- Product Info Modals Component -->
+        <div th:replace="~{worker/fragments/inventory-modals :: productDetailModals(${inventoryItems})}"></div>
 
         <!-- Empty state -->
         <div class="no-appointments-box glass-panel" th:if="${#lists.isEmpty(inventoryItems)}">
@@ -156,80 +117,8 @@
         
     </main>
 
-    <!-- Add Product Sheet dialog (Simulated sheet modal) -->
-    <div id="addProductModal" class="sheet-overlay" style="display:none" onclick="closeProductSheetOnOverlay(event)">
-        <div class="sheet-content glass-panel" onclick="event.stopPropagation()">
-            <div class="bottom-sheet-handle"></div>
-            <div class="sheet-header">
-                <h3>Añadir al Inventario</h3>
-                <button type="button" class="sheet-close" 
-                        onclick="closeProductSheet()">&times;</button>
-            </div>
-            
-            <form action="/worker/inventory/add" method="POST" class="role-form">
-                <input type="hidden" name="mode" id="input-mode" value="existing">
-                
-                <!-- Catalog vs New Tabs -->
-                <div class="form-mode-tabs">
-                    <div id="tab-existing" class="form-mode-tab active" onclick="setAddMode('existing')">Elegir del Catálogo</div>
-                    <div id="tab-new" class="form-mode-tab" onclick="setAddMode('new')">Crear Nuevo Producto</div>
-                </div>
-                
-                <!-- Group 1: Choose from global catalog -->
-                <div id="group-existing" class="mode-content active">
-                    <div class="form-group">
-                        <label class="form-label" for="productId">Buscar Producto en Catálogo</label>
-                        <select name="productId" id="productId" class="form-control">
-                            <option value="" disabled selected>Elige un producto creado previamente...</option>
-                            <option th:each="prod : ${catalogProducts}" 
-                                    th:value="${prod.id}" 
-                                    th:text="${prod.name} + ' (' + ${prod.category} + ' - ' + ${prod.price} + '€)'">
-                                Champú de Queratina
-                            </option>
-                        </select>
-                        <span style="font-size:11px; color:var(--text-muted); margin-top:6px; display:block">
-                            *Se muestran productos globales que no están en stock en tu salón actual (incluso si tienen stock 0 en el catálogo general).
-                        </span>
-                    </div>
-                </div>
-                
-                <!-- Group 2: Create brand new product catalog entry -->
-                <div id="group-new" class="mode-content">
-                    <div class="form-group">
-                        <label class="form-label" for="name">Nombre del Producto</label>
-                        <input type="text" name="name" id="name" class="form-control" placeholder="Ej. Sérum Reparador Noche...">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="description">Descripción</label>
-                        <textarea name="description" id="description" class="form-control" placeholder="Escribe detalles del producto..." rows="2" style="resize:none"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="category">Categoría</label>
-                        <select name="category" id="category" class="form-control">
-                            <option value="Rostro">Rostro</option>
-                            <option value="Cabello">Cabello</option>
-                            <option value="Uñas">Uñas</option>
-                            <option value="Cuerpo">Cuerpo</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="price">Precio de Venta (€)</label>
-                        <input type="number" name="price" id="price" class="form-control" placeholder="0.00" step="0.01" min="0">
-                    </div>
-                </div>
-                
-                <!-- Initial Stock -->
-                <div class="form-group">
-                    <label class="form-label" for="stock">Stock Inicial</label>
-                    <input type="number" name="stock" id="stock" class="form-control" value="5" min="0" required>
-                </div>
-                
-                <button type="submit" class="btn btn-primary" style="width:100%">
-                    <i class="lucide-plus"></i> Guardar y Añadir a Stock
-                </button>
-            </form>
-        </div>
-    </div>
+    <!-- Add Product Sheet Modal Component -->
+    <div th:replace="~{worker/fragments/inventory-modals :: addProductSheet(${catalogProducts})}"></div>
 
     <div th:replace="~{fragments/footer :: footer('© 2026 BellaBelleza CRM. Panel de gestión operativa.')}"></div>
 
