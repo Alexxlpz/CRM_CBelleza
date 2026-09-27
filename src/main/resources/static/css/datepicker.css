@@ -141,8 +141,8 @@
 }
 
 .calendar-days button:focus-visible {
-    outline: 2px solid var(--primary-dark);
-    outline-offset: 1px;
+    outline: none;
+    box-shadow: var(--focus-ring-primary-dark);
 }
 
 .calendar-days button.is-today {
@@ -266,10 +266,14 @@
     transition: var(--transition, all 0.2s ease);
 }
 
-.time-option:hover,
+.time-option:hover {
+    background: rgba(197, 168, 128, 0.2);
+}
+
 .time-option:focus-visible {
     background: rgba(197, 168, 128, 0.2);
     outline: none;
+    box-shadow: var(--focus-ring);
 }
 
 .time-option.is-occupied,

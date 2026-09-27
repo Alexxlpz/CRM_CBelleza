@@ -3,6 +3,7 @@ package com.alexxlpz.crm_cbelleza.config;
 import com.alexxlpz.crm_cbelleza.entities.*;
 import com.alexxlpz.crm_cbelleza.repositories.*;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -16,76 +17,108 @@ public class DatabaseSeeder implements CommandLineRunner {
     private final InventoryRepository inventoryRepository;
     private final AppointmentRepository appointmentRepository;
     private final TreatmentRepository treatmentRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public DatabaseSeeder(CenterRepository centerRepository,
                           UserRepository userRepository,
                           ProductRepository productRepository,
                           InventoryRepository inventoryRepository,
                           AppointmentRepository appointmentRepository,
-                          TreatmentRepository treatmentRepository) {
+                          TreatmentRepository treatmentRepository,
+                          PasswordEncoder passwordEncoder) {
         this.centerRepository = centerRepository;
         this.userRepository = userRepository;
         this.productRepository = productRepository;
         this.inventoryRepository = inventoryRepository;
         this.appointmentRepository = appointmentRepository;
         this.treatmentRepository = treatmentRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     public void run(String... args) throws Exception {
         if (centerRepository.count() > 0) {
-            return; // Already seeded
+            return; // Already seeded (e.g. from init.sql in PostgreSQL)
         }
 
         // 1. Seed Centers
         Center c1 = Center.builder()
-                .name("Belleza Centro Histórico")
-                .address("Calle Mayor 45, Madrid")
-                .phone("910111222")
+                .name("BellaBelleza Centro Histórico")
+                .address("Calle Mayor 45, 28013 Madrid")
+                .phone("+34 910 111 222")
                 .email("centro@cbelleza.com")
                 .latitude(40.4168)
                 .longitude(-3.7038)
                 .build();
         Center c2 = Center.builder()
-                .name("Belleza Plaza Norte")
-                .address("Av. de la Ilustración 12, Madrid")
-                .phone("910222333")
+                .name("BellaBelleza Plaza Norte")
+                .address("Av. de la Ilustración 12, 28034 Madrid")
+                .phone("+34 910 222 333")
                 .email("plazanorte@cbelleza.com")
                 .latitude(40.5401)
                 .longitude(-3.6143)
                 .build();
         Center c3 = Center.builder()
-                .name("Belleza Las Condes")
+                .name("BellaBelleza Sarrià-Sant Gervasi")
+                .address("Carrer Major de Sarrià 88, 08017 Barcelona")
+                .phone("+34 932 444 555")
+                .email("barcelona@cbelleza.com")
+                .latitude(41.3984)
+                .longitude(2.1221)
+                .build();
+        Center c4 = Center.builder()
+                .name("BellaBelleza Las Condes")
                 .address("Av. Las Condes 8900, Santiago")
-                .phone("220333444")
+                .phone("+56 2 2033 3444")
                 .email("lascondes@cbelleza.com")
                 .latitude(-33.4000)
                 .longitude(-70.5667)
                 .build();
-        centerRepository.saveAll(Arrays.asList(c1, c2, c3));
+        centerRepository.saveAll(Arrays.asList(c1, c2, c3, c4));
 
-        // 2. Seed Users (Workers & Clients)
+        // 2. Seed Users with Encrypted Passwords (default demo password: "password123")
+        String defaultHashedPassword = passwordEncoder.encode("password123");
+
         // Workers
         User w1 = User.builder()
                 .name("Carlos Mendoza")
                 .email("carlos@cbelleza.com")
                 .phone("600333444")
+                .password(defaultHashedPassword)
                 .role(Role.WORKER)
                 .center(c1)
                 .build();
         User w2 = User.builder()
+                .name("Lucía Romero")
+                .email("lucia.romero@cbelleza.com")
+                .phone("600333555")
+                .password(defaultHashedPassword)
+                .role(Role.WORKER)
+                .center(c1)
+                .build();
+        User w3 = User.builder()
                 .name("Elena Rostova")
                 .email("elena@cbelleza.com")
                 .phone("600444555")
+                .password(defaultHashedPassword)
                 .role(Role.WORKER)
                 .center(c2)
                 .build();
-        User w3 = User.builder()
+        User w4 = User.builder()
+                .name("Marco Bellini")
+                .email("marco@cbelleza.com")
+                .phone("600444666")
+                .password(defaultHashedPassword)
+                .role(Role.WORKER)
+                .center(c3)
+                .build();
+        User w5 = User.builder()
                 .name("Ana Valdés")
                 .email("ana@cbelleza.com")
                 .phone("600555666")
+                .password(defaultHashedPassword)
                 .role(Role.WORKER)
-                .center(c3)
+                .center(c4)
                 .build();
 
         // Clients
@@ -93,161 +126,257 @@ public class DatabaseSeeder implements CommandLineRunner {
                 .name("Sofía Martínez")
                 .email("sofia@gmail.com")
                 .phone("600111222")
+                .password(defaultHashedPassword)
                 .role(Role.CLIENT)
                 .build();
         User client2 = User.builder()
                 .name("Lucía Gómez")
                 .email("lucia@gmail.com")
                 .phone("600222333")
+                .password(defaultHashedPassword)
+                .role(Role.CLIENT)
+                .build();
+        User client3 = User.builder()
+                .name("Valentina Silva")
+                .email("valentina.silva@gmail.com")
+                .phone("600333111")
+                .password(defaultHashedPassword)
+                .role(Role.CLIENT)
+                .build();
+        User client4 = User.builder()
+                .name("Javier Navarro")
+                .email("javier.navarro@gmail.com")
+                .phone("600444222")
+                .password(defaultHashedPassword)
+                .role(Role.CLIENT)
+                .build();
+        User client5 = User.builder()
+                .name("Carmen Morales")
+                .email("carmen.morales@gmail.com")
+                .phone("600555333")
+                .password(defaultHashedPassword)
                 .role(Role.CLIENT)
                 .build();
 
-        userRepository.saveAll(Arrays.asList(w1, w2, w3, client1, client2));
+        userRepository.saveAll(Arrays.asList(w1, w2, w3, w4, w5, client1, client2, client3, client4, client5));
 
-        // 3. Seed Center-Specific Treatments
-        // Center 1
+        // 3. Seed Center-Specific Treatments (all TreatmentType values)
+        // Center 1 (Madrid Centro Histórico)
         Treatment t1_1 = Treatment.builder()
-                .name("Manicura Premium")
-                .description("Limpieza de cutículas, limado de uñas, exfoliación de manos y esmaltado de larga duración.")
-                .price(25.50)
-                .duration(45)
+                .name("Manicura Rusa & Semipermanente")
+                .description("Limpieza profunda de cutículas con torno, nivelación con base rubber y esmaltado de alta duración.")
+                .price(32.00)
+                .duration(50)
                 .type(TreatmentType.MANICURA_PEDICURA)
                 .center(c1)
                 .build();
         Treatment t1_2 = Treatment.builder()
-                .name("Tratamiento Facial Hidratante")
+                .name("Tratamiento Facial Ácido Hialurónico")
                 .description("Limpieza profunda con vapor, exfoliación suave, mascarilla hidratante de ácido hialurónico y masaje facial.")
-                .price(40.00)
+                .price(48.00)
                 .duration(60)
                 .type(TreatmentType.FACIAL)
                 .center(c1)
                 .build();
         Treatment t1_3 = Treatment.builder()
-                .name("Masaje Relajante con Aromaterapia")
-                .description("Masaje corporal completo de intensidad media utilizando aceites esenciales de lavanda y manzanilla.")
-                .price(35.00)
-                .duration(50)
+                .name("Masaje Relajante Aromaterapia")
+                .description("Masaje corporal completo de intensidad media utilizando aceites esenciales botánicos de lavanda y manzanilla.")
+                .price(42.00)
+                .duration(55)
                 .type(TreatmentType.MASAJES)
                 .center(c1)
                 .build();
+        Treatment t1_4 = Treatment.builder()
+                .name("Exfoliación con Sales del Mar Muerto")
+                .description("Renovación celular corporal completa con sales minerales y envoltura hidratante de karité.")
+                .price(45.00)
+                .duration(45)
+                .type(TreatmentType.CORPORAL)
+                .center(c1)
+                .build();
+        Treatment t1_5 = Treatment.builder()
+                .name("Depilación Láser Diodo Facial y Axilas")
+                .description("Tratamiento indoloro con cabezal frío para eliminación duradera del vello.")
+                .price(35.00)
+                .duration(30)
+                .type(TreatmentType.DEPILACION)
+                .center(c1)
+                .build();
+        Treatment t1_6 = Treatment.builder()
+                .name("Corte de Autor & Peinado Glam")
+                .description("Asesoría visagista personalizada, lavado nutritivo y peinado con secado profesional.")
+                .price(28.00)
+                .duration(45)
+                .type(TreatmentType.PELUQUERIA)
+                .center(c1)
+                .build();
 
-        // Center 2
+        // Center 2 (Madrid Plaza Norte)
         Treatment t2_1 = Treatment.builder()
                 .name("Champú & Queratina Orgánica")
                 .description("Lavado capilar con champú reparador y aplicación de tratamiento de queratina para reducir el encrespamiento.")
-                .price(18.00)
-                .duration(30)
+                .price(38.00)
+                .duration(45)
                 .type(TreatmentType.PELUQUERIA)
                 .center(c2)
                 .build();
         Treatment t2_2 = Treatment.builder()
-                .name("Corte de Pelo & Estilo")
-                .description("Corte moderno según preferencias del cliente, secado y peinado final con productos de fijación orgánica.")
-                .price(22.00)
-                .duration(45)
+                .name("Balayage Luminoso & Matiz Gloss")
+                .description("Técnica de aclarado degradado a mano alzada con baño de brillo nutritivo.")
+                .price(95.00)
+                .duration(120)
                 .type(TreatmentType.PELUQUERIA)
                 .center(c2)
                 .build();
-
-        // Center 3
-        Treatment t3_1 = Treatment.builder()
-                .name("Manicura Premium")
-                .description("Cuidado de uñas y cutículas completo con exfoliación y crema hidratante aroma floral.")
-                .price(25.50)
-                .duration(45)
+        Treatment t2_3 = Treatment.builder()
+                .name("Higiene Facial Punta de Diamante")
+                .description("Microdermoabrasión suave para eliminar impurezas, puntos negros y afinar la textura.")
+                .price(52.00)
+                .duration(60)
+                .type(TreatmentType.FACIAL)
+                .center(c2)
+                .build();
+        Treatment t2_4 = Treatment.builder()
+                .name("Pedicura Spa Rejuvenecedora")
+                .description("Baño de sales, torno podal, exfoliación de talones y masaje circulatorio relajante.")
+                .price(38.00)
+                .duration(50)
                 .type(TreatmentType.MANICURA_PEDICURA)
+                .center(c2)
+                .build();
+        Treatment t2_5 = Treatment.builder()
+                .name("Depilación Láser Piernas Completas")
+                .description("Sesión de alta potencia con tecnología de última generación para piernas suaves.")
+                .price(65.00)
+                .duration(50)
+                .type(TreatmentType.DEPILACION)
+                .center(c2)
+                .build();
+
+        // Center 3 (Barcelona Sarrià)
+        Treatment t3_1 = Treatment.builder()
+                .name("Maderoterapia Reductora & Drenante")
+                .description("Técnica holística con utensilios de madera de cedro para remodelar y reducir retención.")
+                .price(58.00)
+                .duration(60)
+                .type(TreatmentType.CORPORAL)
                 .center(c3)
                 .build();
         Treatment t3_2 = Treatment.builder()
-                .name("Masaje Relajante con Aromaterapia")
-                .description("Masaje de espalda y hombros para liberar tensiones acumuladas.")
-                .price(35.00)
+                .name("Glow Facial Vitamina C Pura")
+                .description("Cóctel antioxidante e iluminador para pieles apagadas o expuestas al estrés urbano.")
+                .price(50.00)
+                .duration(55)
+                .type(TreatmentType.FACIAL)
+                .center(c3)
+                .build();
+        Treatment t3_3 = Treatment.builder()
+                .name("Masaje Descontracturante Profundo")
+                .description("Terapia muscular focalizada en espalda, cuello y hombros para disolver nudos de tensión.")
+                .price(48.00)
                 .duration(50)
                 .type(TreatmentType.MASAJES)
                 .center(c3)
                 .build();
+        Treatment t3_4 = Treatment.builder()
+                .name("Diseño de Cejas con Hilo & Henna")
+                .description("Diseño de mirada de precisión con hilo de algodón orgánico y tinte natural de henna.")
+                .price(24.00)
+                .duration(30)
+                .type(TreatmentType.DEPILACION)
+                .center(c3)
+                .build();
 
-        treatmentRepository.saveAll(Arrays.asList(t1_1, t1_2, t1_3, t2_1, t2_2, t3_1, t3_2));
+        // Center 4 (Santiago Las Condes)
+        Treatment t4_1 = Treatment.builder()
+                .name("Manicura Spa de Lujo")
+                .description("Cuidado de uñas y cutículas completo con exfoliación y crema hidratante aroma floral.")
+                .price(28.50)
+                .duration(45)
+                .type(TreatmentType.MANICURA_PEDICURA)
+                .center(c4)
+                .build();
+        Treatment t4_2 = Treatment.builder()
+                .name("Masaje Balinés con Pindas Calientes")
+                .description("Masaje de espalda y hombros para liberar tensiones acumuladas con sacos herbales calientes.")
+                .price(65.00)
+                .duration(75)
+                .type(TreatmentType.MASAJES)
+                .center(c4)
+                .build();
+        Treatment t4_3 = Treatment.builder()
+                .name("Tratamiento Capilar Botox & Brillo")
+                .description("Relleno de fibra capilar dañada con colágeno vegetal y ácido hialurónico.")
+                .price(44.00)
+                .duration(60)
+                .type(TreatmentType.PELUQUERIA)
+                .center(c4)
+                .build();
+
+        treatmentRepository.saveAll(Arrays.asList(
+                t1_1, t1_2, t1_3, t1_4, t1_5, t1_6,
+                t2_1, t2_2, t2_3, t2_4, t2_5,
+                t3_1, t3_2, t3_3, t3_4,
+                t4_1, t4_2, t4_3
+        ));
 
         // 4. Seed Global Product Catalog
-        Product p1 = Product.builder()
-                .name("Sérum Facial Vitamina C")
-                .description("Sérum facial antioxidante con vitamina C pura para iluminar, reducir manchas y rejuvenecer la piel.")
-                .category("Rostro")
-                .price(25.50)
-                .build();
-        Product p2 = Product.builder()
-                .name("Champú de Queratina Orgánica")
-                .description("Champú reparador intensivo con queratina y aceite de argán. Libre de sulfatos y parabenos.")
-                .category("Cabello")
-                .price(18.00)
-                .build();
-        Product p3 = Product.builder()
-                .name("Aceite de Argán Orgánico")
-                .description("Aceite 100% puro prensado en frío para nutrir profundamente el cabello seco y la piel del cuerpo.")
-                .category("Cabello")
-                .price(29.90)
-                .build();
-        Product p4 = Product.builder()
-                .name("Mascarilla de Arcilla Verde")
-                .description("Mascarilla purificante facial para pieles grasas o mixtas. Controla el sebo y reduce poros.")
-                .category("Rostro")
-                .price(15.00)
-                .build();
-        Product p5 = Product.builder()
-                .name("Esmalte de Uñas OPI Rojo Cereza")
-                .description("Esmalte de uñas premium de larga duración, color rojo cereza brillante con acabado espejo.")
-                .category("Uñas")
-                .price(12.50)
-                .build();
-        Product p6 = Product.builder()
-                .name("Crema Hidratante de Noche")
-                .description("Crema nutritiva de noche enriquecida con ácido hialurónico, colágeno y manteca de karité.")
-                .category("Rostro")
-                .price(32.00)
-                .build();
-        Product p7 = Product.builder()
-                .name("Crema Exfoliante Corporal")
-                .description("Exfoliante suave con microesferas de albaricoque y extracto de aloe vera para renovar la piel.")
-                .category("Cuerpo")
-                .price(19.90)
-                .build();
-        Product p8 = Product.builder()
-                .name("Aceite Esencial de Lavanda")
-                .description("Aceite esencial puro para aromaterapia, masajes relajantes y reducción del estrés.")
-                .category("Cuerpo")
-                .price(14.50)
-                .build();
+        Product p1 = Product.builder().name("Sérum Facial Vitamina C Pura 15%").description("Sérum facial antioxidante con vitamina C pura para iluminar, reducir manchas y rejuvenecer la piel.").category("Rostro").price(28.50).build();
+        Product p2 = Product.builder().name("Crema Hidratante de Noche con Ácido Hialurónico").description("Crema nutritiva de noche enriquecida con ácido hialurónico, colágeno y manteca de karité.").category("Rostro").price(34.00).build();
+        Product p3 = Product.builder().name("Mascarilla Facial Purificante de Arcilla Verde").description("Mascarilla purificante facial para pieles grasas o mixtas. Controla el sebo y reduce poros.").category("Rostro").price(16.50).build();
+        Product p4 = Product.builder().name("Tónico Facial Calmante con Agua de Rosas").description("Bruma refrescante e hidratante para equilibrar el pH tras la limpieza.").category("Rostro").price(18.00).build();
+        Product p5 = Product.builder().name("Champú Reparador de Queratina y Argán").description("Champú reparador intensivo con queratina y aceite de argán. Libre de sulfatos y parabenos.").category("Cabello").price(21.00).build();
+        Product p6 = Product.builder().name("Mascarilla Capilar Nutrición Intensa").description("Tratamiento intensivo con manteca de murumuru y aceite de coco virgen.").category("Cabello").price(24.50).build();
+        Product p7 = Product.builder().name("Aceite de Argán 100% Puro Prensado en Frío").description("Aceite 100% puro prensado en frío para nutrir profundamente el cabello seco y la piel del cuerpo.").category("Cabello").price(29.90).build();
+        Product p8 = Product.builder().name("Sérum Protector Térmico & Escudo Anti-Frizz").description("Protector térmico hasta 230°C con acabado sedoso no graso.").category("Cabello").price(22.00).build();
+        Product p9 = Product.builder().name("Exfoliante Corporal con Sales del Mar Muerto").description("Exfoliante suave con microesferas de albaricoque y extracto de aloe vera para renovar la piel.").category("Cuerpo").price(22.50).build();
+        Product p10 = Product.builder().name("Aceite Esencial Puro de Lavanda Francesa").description("Aceite esencial puro para aromaterapia, masajes relajantes y reducción del estrés.").category("Cuerpo").price(16.00).build();
+        Product p11 = Product.builder().name("Loción Reafirmante con Cafeína y Té Verde").description("Crema corporal drenante y tonificante de rápida absorción.").category("Cuerpo").price(26.00).build();
+        Product p12 = Product.builder().name("Esmalte OPI Rojo Borgoña Larga Duración").description("Esmalte de uñas premium de larga duración, color rojo cereza brillante con acabado espejo.").category("Uñas").price(13.50).build();
+        Product p13 = Product.builder().name("Aceite Nutritivo para Cutículas con Vitamina E").description("Tratamiento hidratante con gotero para uñas flexibles y cutículas suaves.").category("Uñas").price(11.00).build();
+        Product p14 = Product.builder().name("Base Fortalecedora con Calcio y Queratina").description("Tratamiento endurecedor para uñas finas, quebradizas o desvitalizadas.").category("Uñas").price(12.00).build();
 
-        productRepository.saveAll(Arrays.asList(p1, p2, p3, p4, p5, p6, p7, p8));
+        productRepository.saveAll(Arrays.asList(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14));
 
         // 5. Seed Inventory for Centers
         // Center 1
-        inventoryRepository.save(Inventory.builder().center(c1).product(p1).stock(12).build());
+        inventoryRepository.save(Inventory.builder().center(c1).product(p1).stock(14).build());
         inventoryRepository.save(Inventory.builder().center(c1).product(p2).stock(8).build());
-        inventoryRepository.save(Inventory.builder().center(c1).product(p3).stock(0).build());
-        inventoryRepository.save(Inventory.builder().center(c1).product(p5).stock(15).build());
-        inventoryRepository.save(Inventory.builder().center(c1).product(p6).stock(4).build());
+        inventoryRepository.save(Inventory.builder().center(c1).product(p3).stock(0).build()); // out of stock
+        inventoryRepository.save(Inventory.builder().center(c1).product(p5).stock(18).build());
+        inventoryRepository.save(Inventory.builder().center(c1).product(p7).stock(2).build());  // low stock warning
+        inventoryRepository.save(Inventory.builder().center(c1).product(p9).stock(12).build());
+        inventoryRepository.save(Inventory.builder().center(c1).product(p12).stock(25).build());
+        inventoryRepository.save(Inventory.builder().center(c1).product(p13).stock(15).build());
 
         // Center 2
-        inventoryRepository.save(Inventory.builder().center(c2).product(p1).stock(5).build());
-        inventoryRepository.save(Inventory.builder().center(c2).product(p3).stock(10).build());
-        inventoryRepository.save(Inventory.builder().center(c2).product(p4).stock(12).build());
+        inventoryRepository.save(Inventory.builder().center(c2).product(p1).stock(6).build());
         inventoryRepository.save(Inventory.builder().center(c2).product(p5).stock(20).build());
-        inventoryRepository.save(Inventory.builder().center(c2).product(p7).stock(2).build());
+        inventoryRepository.save(Inventory.builder().center(c2).product(p6).stock(12).build());
+        inventoryRepository.save(Inventory.builder().center(c2).product(p7).stock(10).build());
+        inventoryRepository.save(Inventory.builder().center(c2).product(p8).stock(16).build());
+        inventoryRepository.save(Inventory.builder().center(c2).product(p12).stock(18).build());
+        inventoryRepository.save(Inventory.builder().center(c2).product(p14).stock(5).build());
 
         // Center 3
-        inventoryRepository.save(Inventory.builder().center(c3).product(p2).stock(15).build());
-        inventoryRepository.save(Inventory.builder().center(c3).product(p3).stock(5).build());
-        inventoryRepository.save(Inventory.builder().center(c3).product(p6).stock(10).build());
-        inventoryRepository.save(Inventory.builder().center(c3).product(p8).stock(8).build());
+        inventoryRepository.save(Inventory.builder().center(c3).product(p1).stock(10).build());
+        inventoryRepository.save(Inventory.builder().center(c3).product(p2).stock(7).build());
+        inventoryRepository.save(Inventory.builder().center(c3).product(p9).stock(15).build());
+        inventoryRepository.save(Inventory.builder().center(c3).product(p10).stock(8).build());
+        inventoryRepository.save(Inventory.builder().center(c3).product(p11).stock(14).build());
+        inventoryRepository.save(Inventory.builder().center(c3).product(p13).stock(11).build());
+
+        // Center 4
+        inventoryRepository.save(Inventory.builder().center(c4).product(p5).stock(12).build());
+        inventoryRepository.save(Inventory.builder().center(c4).product(p7).stock(6).build());
+        inventoryRepository.save(Inventory.builder().center(c4).product(p10).stock(10).build());
+        inventoryRepository.save(Inventory.builder().center(c4).product(p12).stock(22).build());
+        inventoryRepository.save(Inventory.builder().center(c4).product(p14).stock(9).build());
 
         // 6. Seed Appointments
-        // Helper: base dates with clean midnight to avoid leftover seconds/nanos
         LocalDateTime today = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
         LocalDateTime tomorrow = today.plusDays(1);
         LocalDateTime dayAfter = today.plusDays(2);
-        // Find next working weekday (skip weekends) for day+3
         LocalDateTime day3 = today.plusDays(3);
         while (day3.getDayOfWeek() == java.time.DayOfWeek.SATURDAY || day3.getDayOfWeek() == java.time.DayOfWeek.SUNDAY) {
             day3 = day3.plusDays(1);
@@ -256,201 +385,42 @@ public class DatabaseSeeder implements CommandLineRunner {
         while (day5.getDayOfWeek() == java.time.DayOfWeek.SATURDAY || day5.getDayOfWeek() == java.time.DayOfWeek.SUNDAY) {
             day5 = day5.plusDays(1);
         }
-        LocalDateTime day7 = today.plusDays(7);
-        while (day7.getDayOfWeek() == java.time.DayOfWeek.SATURDAY || day7.getDayOfWeek() == java.time.DayOfWeek.SUNDAY) {
-            day7 = day7.plusDays(1);
-        }
 
-        // ──────────────────────────────────────────────────────────────────
-        // CENTER 1 — "Belleza Centro Histórico"
-        // ──────────────────────────────────────────────────────────────────
+        // Center 1 Appointments
+        appointmentRepository.save(Appointment.builder().dateTime(today.withHour(11).withMinute(0)).treatment(t1_1).center(c1).client(client1).worker(w1).status(AppointmentStatus.CONFIRMED).workerMessage("Cliente habitual, prefiere base rubber tono nude.").build());
+        appointmentRepository.save(Appointment.builder().dateTime(today.withHour(15).withMinute(30)).treatment(t1_2).center(c1).client(client2).worker(w1).status(AppointmentStatus.CONFIRMED).workerMessage("Piel sensible, usar tónico de rosas sin alcohol.").build());
 
-        // ── TODAY: 2 confirmed appointments ──
-        appointmentRepository.save(Appointment.builder()
-                .dateTime(today.withHour(11).withMinute(0))
-                .treatment(t1_1) // Manicura Premium (45 min → 2 slots)
-                .center(c1).client(client1).worker(w1)
-                .status(AppointmentStatus.CONFIRMED)
-                .build());
-        appointmentRepository.save(Appointment.builder()
-                .dateTime(today.withHour(15).withMinute(30))
-                .treatment(t1_2) // Facial Hidratante (60 min → 2 slots)
-                .center(c1).client(client2).worker(w1)
-                .status(AppointmentStatus.CONFIRMED)
-                .build());
+        appointmentRepository.save(Appointment.builder().dateTime(tomorrow.withHour(9).withMinute(0)).treatment(t1_2).center(c1).client(client1).worker(w1).status(AppointmentStatus.CONFIRMED).build());
+        appointmentRepository.save(Appointment.builder().dateTime(tomorrow.withHour(10).withMinute(0)).treatment(t1_3).center(c1).client(client2).worker(w1).status(AppointmentStatus.CONFIRMED).build());
+        appointmentRepository.save(Appointment.builder().dateTime(tomorrow.withHour(11).withMinute(0)).treatment(t1_1).center(c1).client(client1).worker(w1).status(AppointmentStatus.CONFIRMED).build());
+        appointmentRepository.save(Appointment.builder().dateTime(tomorrow.withHour(12).withMinute(0)).treatment(t1_2).center(c1).guestName("María López").guestPhone("611222333").worker(w1).status(AppointmentStatus.CONFIRMED).workerMessage("Reserva invitado vía web.").build());
+        appointmentRepository.save(Appointment.builder().dateTime(tomorrow.withHour(13).withMinute(0)).treatment(t1_1).center(c1).client(client2).worker(w1).status(AppointmentStatus.CONFIRMED).build());
+        appointmentRepository.save(Appointment.builder().dateTime(tomorrow.withHour(14).withMinute(0)).treatment(t1_3).center(c1).guestName("Pedro García").guestPhone("611333444").worker(w1).status(AppointmentStatus.CONFIRMED).build());
+        appointmentRepository.save(Appointment.builder().dateTime(tomorrow.withHour(15).withMinute(0)).treatment(t1_2).center(c1).client(client1).worker(w1).status(AppointmentStatus.CONFIRMED).build());
+        appointmentRepository.save(Appointment.builder().dateTime(tomorrow.withHour(16).withMinute(0)).treatment(t1_1).center(c1).client(client2).worker(w1).status(AppointmentStatus.CONFIRMED).build());
+        appointmentRepository.save(Appointment.builder().dateTime(tomorrow.withHour(17).withMinute(0)).treatment(t1_3).center(c1).guestName("Ana Ruiz").guestPhone("611444555").worker(w1).status(AppointmentStatus.CONFIRMED).build());
+        appointmentRepository.save(Appointment.builder().dateTime(tomorrow.withHour(18).withMinute(0)).treatment(t1_2).center(c1).client(client1).worker(w1).status(AppointmentStatus.CONFIRMED).build());
 
-        // ── TOMORROW: heavily booked day (test near-full blocking) ──
-        appointmentRepository.save(Appointment.builder()
-                .dateTime(tomorrow.withHour(9).withMinute(0))
-                .treatment(t1_2) // Facial (60 min → 2 slots: 09:00, 09:30)
-                .center(c1).client(client1).worker(w1)
-                .status(AppointmentStatus.CONFIRMED)
-                .build());
-        appointmentRepository.save(Appointment.builder()
-                .dateTime(tomorrow.withHour(10).withMinute(0))
-                .treatment(t1_3) // Masaje Relajante (50 min → 2 slots: 10:00, 10:30)
-                .center(c1).client(client2).worker(w1)
-                .status(AppointmentStatus.CONFIRMED)
-                .build());
-        appointmentRepository.save(Appointment.builder()
-                .dateTime(tomorrow.withHour(11).withMinute(0))
-                .treatment(t1_1) // Manicura (45 min → 2 slots: 11:00, 11:30)
-                .center(c1).client(client1).worker(w1)
-                .status(AppointmentStatus.CONFIRMED)
-                .build());
-        appointmentRepository.save(Appointment.builder()
-                .dateTime(tomorrow.withHour(12).withMinute(0))
-                .treatment(t1_2) // Facial (60 min → 2 slots: 12:00, 12:30)
-                .center(c1).guestName("María López").guestPhone("611222333").worker(w1)
-                .status(AppointmentStatus.CONFIRMED)
-                .build());
-        appointmentRepository.save(Appointment.builder()
-                .dateTime(tomorrow.withHour(13).withMinute(0))
-                .treatment(t1_1) // Manicura (45 min → 2 slots: 13:00, 13:30)
-                .center(c1).client(client2).worker(w1)
-                .status(AppointmentStatus.CONFIRMED)
-                .build());
-        appointmentRepository.save(Appointment.builder()
-                .dateTime(tomorrow.withHour(14).withMinute(0))
-                .treatment(t1_3) // Masaje (50 min → 2 slots: 14:00, 14:30)
-                .center(c1).guestName("Pedro García").guestPhone("611333444").worker(w1)
-                .status(AppointmentStatus.CONFIRMED)
-                .build());
-        appointmentRepository.save(Appointment.builder()
-                .dateTime(tomorrow.withHour(15).withMinute(0))
-                .treatment(t1_2) // Facial (60 min → 2 slots: 15:00, 15:30)
-                .center(c1).client(client1).worker(w1)
-                .status(AppointmentStatus.CONFIRMED)
-                .build());
-        appointmentRepository.save(Appointment.builder()
-                .dateTime(tomorrow.withHour(16).withMinute(0))
-                .treatment(t1_1) // Manicura (45 min → 2 slots: 16:00, 16:30)
-                .center(c1).client(client2).worker(w1)
-                .status(AppointmentStatus.CONFIRMED)
-                .build());
-        appointmentRepository.save(Appointment.builder()
-                .dateTime(tomorrow.withHour(17).withMinute(0))
-                .treatment(t1_3) // Masaje (50 min → 2 slots: 17:00, 17:30)
-                .center(c1).guestName("Ana Ruiz").guestPhone("611444555").worker(w1)
-                .status(AppointmentStatus.CONFIRMED)
-                .build());
-        appointmentRepository.save(Appointment.builder()
-                .dateTime(tomorrow.withHour(18).withMinute(0))
-                .treatment(t1_2) // Facial (60 min → 2 slots: 18:00, 18:30)
-                .center(c1).client(client1).worker(w1)
-                .status(AppointmentStatus.CONFIRMED)
-                .build());
-        appointmentRepository.save(Appointment.builder()
-                .dateTime(tomorrow.withHour(19).withMinute(0))
-                .treatment(t1_1) // Manicura (45 min → 2 slots: 19:00, 19:30)
-                .center(c1).client(client2).worker(w1)
-                .status(AppointmentStatus.CONFIRMED)
-                .build());
+        appointmentRepository.save(Appointment.builder().dateTime(dayAfter.withHour(9).withMinute(0)).treatment(t1_1).center(c1).client(client1).worker(w1).status(AppointmentStatus.CONFIRMED).build());
+        appointmentRepository.save(Appointment.builder().dateTime(dayAfter.withHour(10).withMinute(30)).treatment(t1_2).center(c1).client(client2).worker(w1).status(AppointmentStatus.CONFIRMED).build());
+        appointmentRepository.save(Appointment.builder().dateTime(dayAfter.withHour(14).withMinute(0)).treatment(t1_3).center(c1).guestName("Juan Pérez").guestPhone("611777888").worker(w1).status(AppointmentStatus.PENDING).workerMessage("Pendiente de confirmación telefónica.").build());
+        appointmentRepository.save(Appointment.builder().dateTime(dayAfter.withHour(16).withMinute(0)).treatment(t1_1).center(c1).client(client1).worker(w1).status(AppointmentStatus.CONFIRMED).build());
 
-        // ── DAY AFTER TOMORROW: some gaps to test partial blocking ──
-        appointmentRepository.save(Appointment.builder()
-                .dateTime(dayAfter.withHour(9).withMinute(0))
-                .treatment(t1_1) // Manicura (2 slots: 09:00, 09:30)
-                .center(c1).client(client1).worker(w1)
-                .status(AppointmentStatus.CONFIRMED)
-                .build());
-        appointmentRepository.save(Appointment.builder()
-                .dateTime(dayAfter.withHour(10).withMinute(30))
-                .treatment(t1_2) // Facial (2 slots: 10:30, 11:00)
-                .center(c1).client(client2).worker(w1)
-                .status(AppointmentStatus.CONFIRMED)
-                .build());
-        appointmentRepository.save(Appointment.builder()
-                .dateTime(dayAfter.withHour(14).withMinute(0))
-                .treatment(t1_3) // Masaje (2 slots: 14:00, 14:30)
-                .center(c1).guestName("Juan Pérez").guestPhone("611777888").worker(w1)
-                .status(AppointmentStatus.PENDING)
-                .build());
-        appointmentRepository.save(Appointment.builder()
-                .dateTime(dayAfter.withHour(16).withMinute(0))
-                .treatment(t1_1) // Manicura (2 slots: 16:00, 16:30)
-                .center(c1).client(client1).worker(w1)
-                .status(AppointmentStatus.CONFIRMED)
-                .build());
+        appointmentRepository.save(Appointment.builder().dateTime(day3.withHour(10).withMinute(0)).treatment(t1_2).center(c1).client(client2).worker(w1).status(AppointmentStatus.REJECTED).workerMessage("Horario no disponible por mantenimiento en cabina.").build());
+        appointmentRepository.save(Appointment.builder().dateTime(day3.withHour(12).withMinute(30)).treatment(t1_1).center(c1).client(client1).worker(w1).status(AppointmentStatus.CONFIRMED).build());
 
-        // ── DAY+3: a REJECTED appointment (should NOT block) + one confirmed ──
-        appointmentRepository.save(Appointment.builder()
-                .dateTime(day3.withHour(10).withMinute(0))
-                .treatment(t1_2) // Facial
-                .center(c1).client(client2).worker(w1)
-                .status(AppointmentStatus.REJECTED)
-                .build());
-        appointmentRepository.save(Appointment.builder()
-                .dateTime(day3.withHour(12).withMinute(30))
-                .treatment(t1_1) // Manicura (2 slots: 12:30, 13:00)
-                .center(c1).client(client1).worker(w1)
-                .status(AppointmentStatus.CONFIRMED)
-                .build());
+        // Center 2 Appointments
+        appointmentRepository.save(Appointment.builder().dateTime(today.withHour(10).withMinute(0)).treatment(t2_1).center(c2).client(client2).worker(w3).status(AppointmentStatus.CONFIRMED).build());
+        appointmentRepository.save(Appointment.builder().dateTime(tomorrow.withHour(9).withMinute(30)).treatment(t2_2).center(c2).client(client1).worker(w3).status(AppointmentStatus.CONFIRMED).workerMessage("Solicita asesoramiento de corte.").build());
+        appointmentRepository.save(Appointment.builder().dateTime(tomorrow.withHour(11).withMinute(0)).treatment(t2_1).center(c2).client(client2).worker(w3).status(AppointmentStatus.CONFIRMED).build());
+        appointmentRepository.save(Appointment.builder().dateTime(tomorrow.withHour(15).withMinute(0)).treatment(t2_2).center(c2).guestName("Laura Sánchez").guestPhone("622111222").worker(w3).status(AppointmentStatus.CONFIRMED).build());
 
-        // ── DAY+5: light booking ──
-        appointmentRepository.save(Appointment.builder()
-                .dateTime(day5.withHour(17).withMinute(0))
-                .treatment(t1_3) // Masaje (2 slots: 17:00, 17:30)
-                .center(c1).client(client2).worker(w1)
-                .status(AppointmentStatus.CONFIRMED)
-                .build());
+        // Center 3 Appointments
+        appointmentRepository.save(Appointment.builder().dateTime(tomorrow.withHour(10).withMinute(30)).treatment(t3_1).center(c3).client(client3).worker(w4).status(AppointmentStatus.CONFIRMED).workerMessage("Primera sesión bono de 5 maderoterapia.").build());
+        appointmentRepository.save(Appointment.builder().dateTime(tomorrow.withHour(16).withMinute(0)).treatment(t3_2).center(c3).client(client4).worker(w4).status(AppointmentStatus.CONFIRMED).build());
 
-        // ──────────────────────────────────────────────────────────────────
-        // CENTER 2 — "Belleza Plaza Norte"
-        // ──────────────────────────────────────────────────────────────────
-
-        // ── TODAY: 1 confirmed ──
-        appointmentRepository.save(Appointment.builder()
-                .dateTime(today.withHour(10).withMinute(0))
-                .treatment(t2_1) // Champú & Queratina (30 min → 1 slot)
-                .center(c2).client(client2).worker(w2)
-                .status(AppointmentStatus.CONFIRMED)
-                .build());
-
-        // ── TOMORROW: 3 appointments ──
-        appointmentRepository.save(Appointment.builder()
-                .dateTime(tomorrow.withHour(9).withMinute(30))
-                .treatment(t2_2) // Corte & Estilo (45 min → 2 slots: 09:30, 10:00)
-                .center(c2).client(client1).worker(w2)
-                .status(AppointmentStatus.CONFIRMED)
-                .build());
-        appointmentRepository.save(Appointment.builder()
-                .dateTime(tomorrow.withHour(11).withMinute(0))
-                .treatment(t2_1) // Champú (30 min → 1 slot: 11:00)
-                .center(c2).client(client2).worker(w2)
-                .status(AppointmentStatus.CONFIRMED)
-                .build());
-        appointmentRepository.save(Appointment.builder()
-                .dateTime(tomorrow.withHour(15).withMinute(0))
-                .treatment(t2_2) // Corte & Estilo (45 min → 2 slots: 15:00, 15:30)
-                .center(c2).guestName("Laura Sánchez").guestPhone("622111222").worker(w2)
-                .status(AppointmentStatus.CONFIRMED)
-                .build());
-
-        // ── DAY+7: far future booking ──
-        appointmentRepository.save(Appointment.builder()
-                .dateTime(day7.withHour(13).withMinute(0))
-                .treatment(t2_1) // Champú (1 slot: 13:00)
-                .center(c2).client(client1).worker(w2)
-                .status(AppointmentStatus.CONFIRMED)
-                .build());
-
-        // ──────────────────────────────────────────────────────────────────
-        // CENTER 3 — "Belleza Las Condes"
-        // ──────────────────────────────────────────────────────────────────
-
-        // ── TOMORROW: 2 appointments ──
-        appointmentRepository.save(Appointment.builder()
-                .dateTime(tomorrow.withHour(10).withMinute(0))
-                .treatment(t3_1) // Manicura (45 min → 2 slots: 10:00, 10:30)
-                .center(c3).client(client1).worker(w3)
-                .status(AppointmentStatus.CONFIRMED)
-                .build());
-        appointmentRepository.save(Appointment.builder()
-                .dateTime(tomorrow.withHour(14).withMinute(30))
-                .treatment(t3_2) // Masaje (50 min → 2 slots: 14:30, 15:00)
-                .center(c3).client(client2).worker(w3)
-                .status(AppointmentStatus.CONFIRMED)
-                .build());
+        // Center 4 Appointments
+        appointmentRepository.save(Appointment.builder().dateTime(tomorrow.withHour(10).withMinute(0)).treatment(t4_1).center(c4).client(client1).worker(w5).status(AppointmentStatus.CONFIRMED).build());
+        appointmentRepository.save(Appointment.builder().dateTime(tomorrow.withHour(14).withMinute(30)).treatment(t4_2).center(c4).client(client2).worker(w5).status(AppointmentStatus.CONFIRMED).build());
     }
 }

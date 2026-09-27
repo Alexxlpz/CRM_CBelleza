@@ -162,6 +162,11 @@
     box-shadow: 0 16px 36px rgba(197, 168, 128, 0.48) !important;
 }
 
+.btn-hero-cta:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring), 0 10px 28px rgba(197, 168, 128, 0.38) !important;
+}
+
 .btn-hero-cta:active {
     transform: scale(0.97);
 }

@@ -26,6 +26,10 @@
     --warning: #ecd29b;          /* Soft Gold/Ochre (color for pending alerts) */
     --warning-text: #59451d;
     --warning-bg: rgba(236, 210, 155, 0.25);
+
+    /* Focus Ring - Contained strictly within the element perimeter (inset) */
+    --focus-ring: inset 0 0 0 2px var(--primary-dark), inset 0 0 0 3px rgba(255, 255, 255, 0.5);
+    --focus-ring-primary-dark: inset 0 0 0 2px var(--primary-dark), inset 0 0 0 3px rgba(255, 255, 255, 0.5);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -54,5 +58,9 @@
         --warning: #cfa861;
         --warning-text: #ffefcd;
         --warning-bg: rgba(207, 168, 97, 0.2);
+
+        /* Focus Ring in Dark Mode - Contained strictly within perimeter */
+        --focus-ring: inset 0 0 0 2px var(--primary), inset 0 0 0 3px rgba(0, 0, 0, 0.5);
+        --focus-ring-primary-dark: inset 0 0 0 2px var(--primary-dark), inset 0 0 0 3px rgba(0, 0, 0, 0.5);
     }
 }

@@ -402,6 +402,11 @@
         transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
+    .fab-add-btn:focus-visible {
+        outline: none;
+        box-shadow: var(--focus-ring), 0 8px 24px rgba(163, 130, 88, 0.45);
+    }
+
     .fab-add-btn:active {
         transform: scale(0.92);
         box-shadow: 0 4px 14px rgba(163, 130, 88, 0.3);

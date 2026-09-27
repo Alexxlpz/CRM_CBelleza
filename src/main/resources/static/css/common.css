@@ -13,10 +13,11 @@
 }
 
 /* Base resets & Strict NO Horizontal Scroll rule */
-* {
+*, *::before, *::after {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    -webkit-tap-highlight-color: transparent !important;
 }
 
 html, body {
@@ -24,6 +25,18 @@ html, body {
     overflow-x: clip; /* Enforce zero horizontal scroll while preserving sticky */
     position: relative;
     scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent !important;
+}
+
+/* Ensure all clickable components never show the native mobile tap highlight box */
+a, button, input, select, textarea, label, [role="button"], .btn {
+    -webkit-tap-highlight-color: transparent !important;
+}
+
+/* Clean click/tap: avoid lingering focus rings when tapped with finger or mouse */
+:focus:not(:focus-visible) {
+    outline: none !important;
+    box-shadow: none !important;
 }
 
 body {
@@ -181,6 +194,11 @@ h1, h2, h3, h4, h5, h6 {
     background: rgba(197, 168, 128, 0.25);
     color: var(--primary-dark);
     transform: scale(1.05);
+}
+
+.bell-btn:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
 }
 
 .bell-btn i {
@@ -381,8 +399,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .btn:focus-visible, a:focus-visible, button:focus-visible, input:focus-visible {
-    outline: 2px solid var(--primary);
-    outline-offset: 3px;
+    outline: none;
+    box-shadow: var(--focus-ring);
 }
 
 .btn-primary {
@@ -556,6 +574,11 @@ footer {
     transform: translateX(-3px);
     outline: none;
     box-shadow: 0 4px 12px rgba(197, 168, 128, 0.15);
+}
+
+.back-arrow-btn:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
 }
 
 .back-arrow-btn i, .back-arrow-btn svg {
@@ -746,8 +769,8 @@ footer {
 }
 
 .category-pill:focus-visible {
-    outline: 2px solid var(--primary-dark);
-    outline-offset: 2px;
+    outline: none;
+    box-shadow: var(--focus-ring-primary-dark);
 }
 
 .category-pill.active {

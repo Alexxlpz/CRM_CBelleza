@@ -75,6 +75,11 @@
     box-shadow: 0 6px 16px rgba(163, 130, 88, 0.3);
 }
 
+.calendar-nav-btn:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+}
+
 .calendar-nav-btn:active {
     transform: scale(0.94);
 }
