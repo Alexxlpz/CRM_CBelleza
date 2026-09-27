@@ -43,7 +43,7 @@ public class DatabaseSeeder implements CommandLineRunner {
 
         // 1. Seed Centers
         Center c1 = Center.builder()
-                .name("BellaBelleza Centro Histórico")
+                .name("Cuquora Centro Histórico")
                 .address("Calle Mayor 45, 28013 Madrid")
                 .phone("+34 910 111 222")
                 .email("centro@cbelleza.com")
@@ -51,7 +51,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                 .longitude(-3.7038)
                 .build();
         Center c2 = Center.builder()
-                .name("BellaBelleza Plaza Norte")
+                .name("Cuquora Plaza Norte")
                 .address("Av. de la Ilustración 12, 28034 Madrid")
                 .phone("+34 910 222 333")
                 .email("plazanorte@cbelleza.com")
@@ -59,7 +59,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                 .longitude(-3.6143)
                 .build();
         Center c3 = Center.builder()
-                .name("BellaBelleza Sarrià-Sant Gervasi")
+                .name("Cuquora Sarrià-Sant Gervasi")
                 .address("Carrer Major de Sarrià 88, 08017 Barcelona")
                 .phone("+34 932 444 555")
                 .email("barcelona@cbelleza.com")
@@ -67,7 +67,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                 .longitude(2.1221)
                 .build();
         Center c4 = Center.builder()
-                .name("BellaBelleza Las Condes")
+                .name("Cuquora Las Condes")
                 .address("Av. Las Condes 8900, Santiago")
                 .phone("+56 2 2033 3444")
                 .email("lascondes@cbelleza.com")

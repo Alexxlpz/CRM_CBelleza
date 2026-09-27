@@ -3,93 +3,169 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iniciar Sesión - BellaBelleza</title>
+    <title>Iniciar Sesión - Cuquora CRM</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/icons/favicon.ico">
     <!-- Lucide Icons CDN -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.321.0/font/lucide.min.css">
     <!-- Stylesheets -->
     <link rel="stylesheet" href="/css/common.css">
     <link rel="stylesheet" href="/css/home.css">
 </head>
-<body>
+<body class="auth-page">
     <div th:replace="~{fragments/navbar :: brand(false)}"></div>
 
-    <!-- Main Container -->
-    <main class="main-container">
-        
-        <!-- Intuitive icon-only back arrow button -->
-        <a href="/" class="back-arrow-btn" aria-label="Volver atrás" title="Volver atrás">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-        </a>
+    <!-- Main Content -->
+    <main class="auth-container">
+        <div class="auth-card">
+            
+            <!-- Brand & Heading -->
+            <div class="auth-header">
+                <h2>Iniciar sesión</h2>
+                <p>Ingresa a tu cuenta para gestionar citas, servicios y tratamientos</p>
+            </div>
 
-        <div class="login-card glass-panel">
-            <div class="login-header">
-                <div class="login-icon-badge">
-                    <i class="lucide-user-check"></i>
-                </div>
-                <h2>Acceso a la Plataforma</h2>
-                <p>Selecciona un perfil para ingresar a BellaBelleza</p>
+            <!-- Error Notification -->
+            <div class="auth-alert auth-alert-danger" th:if="${errorMessage != null or param.error != null}">
+                <span th:text="${errorMessage != null ? errorMessage : 'Credenciales no válidas. Revisa tu correo o usuario y contraseña.'}">
+                    Credenciales no válidas. Revisa tu correo o usuario y contraseña.
+                </span>
+            </div>
+
+            <!-- Success Notification -->
+            <div class="auth-alert auth-alert-success" th:if="${successMessage != null or param.logout != null}">
+                <span th:text="${successMessage != null ? successMessage : 'Has cerrado sesión correctamente.'}">
+                    Has cerrado sesión correctamente.
+                </span>
             </div>
             
-            <form action="/select-session" method="POST" class="role-form" id="loginForm">
-                <input type="hidden" name="role" id="formRole" value="CLIENT">
-                <input type="hidden" name="userId" id="formUserId" value="">
+            <!-- Credentials Form -->
+            <form action="/login" method="POST" id="loginForm" autocomplete="on">
                 
+                <!-- Identifier: Email or Username -->
                 <div class="form-group">
-                    <label class="form-label" for="profileSelector">Seleccionar Perfil</label>
-                    <select id="profileSelector" class="form-control login-select" onchange="updateLoginFormValues()" required>
-                        <option value="" disabled selected>Elige un usuario para continuar...</option>
-                        
-                        <optgroup label="Área de Clientes">
-                            <option th:each="client : ${clients}" 
-                                    th:value="'CLIENT:' + ${client.id}" 
-                                    th:text="${client.name} + ' (Cliente Registrado)'">
-                                Sofía Martínez
-                            </option>
-                            <option value="CLIENT:guest">Cliente Invitado (Sin Registro)</option>
-                        </optgroup>
-                        
-                        <optgroup label="Área de Colaboradores (Trabajadores)">
-                            <option th:each="worker : ${workers}" 
-                                    th:value="'WORKER:' + ${worker.id}" 
-                                    th:text="${worker.name} + ' (' + ${worker.center.name} + ')'">
-                                Carlos Mendoza (Centro Histórico)
-                            </option>
-                        </optgroup>
-                    </select>
+                    <label for="identifierInput" class="form-label">Correo electrónico o usuario</label>
+                    <input type="text" 
+                           id="identifierInput" 
+                           name="identifier" 
+                           class="form-control"
+                           required 
+                           autofocus 
+                           autocomplete="username" 
+                           placeholder="ejemplo@cbelleza.com"
+                           th:value="${identifier != null ? identifier : param.identifier}">
+                </div>
+
+                <!-- Password -->
+                <div class="form-group">
+                    <div class="label-row">
+                        <label for="passwordInput" class="form-label">Contraseña</label>
+                        <a href="javascript:void(0)" onclick="openRecoveryModal()" class="forgot-link">
+                            ¿Olvidaste tu contraseña?
+                        </a>
+                    </div>
+                    <div class="password-wrapper">
+                        <input type="password" 
+                               id="passwordInput" 
+                               name="password" 
+                               class="form-control"
+                               required 
+                               autocomplete="current-password" 
+                               placeholder="Tu contraseña">
+                        <button type="button" 
+                                class="password-toggle-btn" 
+                                id="togglePasswordBtn" 
+                                onclick="togglePasswordVisibility()" 
+                                title="Mostrar u ocultar contraseña"
+                                aria-label="Mostrar u ocultar contraseña">
+                            <i class="lucide-eye" id="togglePasswordIcon"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Remember Me -->
+                <div class="form-options">
+                    <label class="remember-label">
+                        <input type="checkbox" name="rememberMe" value="true" checked>
+                        <span>Recordar mi sesión</span>
+                    </label>
                 </div>
                 
-                <button type="submit" class="btn btn-primary btn-login-submit">
-                    <i class="lucide-log-in"></i> Iniciar Sesión
+                <!-- Submit Button -->
+                <button type="submit" class="btn btn-primary btn-auth-submit" id="submitBtn">
+                    Iniciar sesión
                 </button>
             </form>
+
+            <!-- Guest / Alternative Link -->
+            <div class="auth-footer-links">
+                <p>¿Solo deseas agendar una cita? <a th:href="@{/select-session(role='CLIENT')}">Reservar como invitado</a></p>
+            </div>
+
+            <!-- ========================================================================= -->
+            <!-- [DEBUG] BOTÓN ACCESO AL SELECTOR ANTIGUO                                  -->
+            <!-- Para desactivar o quitar en producción, simplemente comenta o borra:     -->
+            <div class="debug-selector-wrapper">
+                <a th:href="@{/login-selector}" class="btn-debug-selector" title="Acceso al selector de perfiles anterior (Modo depuración)">
+                    <i class="lucide-bug"></i>
+                    <span>Acceso al Selector Antiguo (Debug)</span>
+                </a>
+            </div>
+            <!-- ========================================================================= -->
+
         </div>
-        
     </main>
 
-    <!-- Footer -->
-    <div th:replace="~{fragments/footer :: footer('© 2026 BellaBelleza CRM. Prototipo funcional.')}"></div>
+    <!-- Recovery Help Modal -->
+    <div id="recoveryModal" class="custom-modal-overlay" style="display: none;">
+        <div class="custom-modal-content glass-panel" style="max-width: 420px; text-align: left; padding: 26px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                <h3 style="font-size: 18px; font-weight: 700; color: var(--text-main); margin: 0;">
+                    Recuperación de contraseña
+                </h3>
+                <button type="button" onclick="closeRecoveryModal()" style="background: none; border: none; font-size: 22px; cursor: pointer; color: var(--text-muted);">&times;</button>
+            </div>
+            <p style="font-size: 14px; color: var(--text-muted); line-height: 1.5; margin-bottom: 16px;">
+                Para restablecer tu acceso a <strong>Cuquora</strong>, contacta con la administración de tu centro de belleza habitual o con soporte técnico.
+            </p>
+            <button type="button" class="btn btn-primary" onclick="closeRecoveryModal()" style="width: 100%; height: 40px; font-weight: 600;">
+                Entendido
+            </button>
+        </div>
+    </div>
 
-    <!-- Script to handle selector values -->
+    <!-- Footer -->
+    <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Software de gestión para centros de estética.')}"></div>
+
+    <!-- Interactive Script -->
     <script>
-        function updateLoginFormValues() {
-            const selector = document.getElementById('profileSelector');
-            const roleInput = document.getElementById('formRole');
-            const userIdInput = document.getElementById('formUserId');
+        function togglePasswordVisibility() {
+            const passwordInput = document.getElementById('passwordInput');
+            const toggleIcon = document.getElementById('togglePasswordIcon');
             
-            const selectedVal = selector.value;
-            if (selectedVal) {
-                const parts = selectedVal.split(':');
-                const role = parts[0];
-                const idVal = parts[1];
-                
-                roleInput.value = role;
-                if (idVal === 'guest') {
-                    userIdInput.value = '';
-                } else {
-                    userIdInput.value = idVal;
-                }
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.className = 'lucide-eye-off';
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.className = 'lucide-eye';
             }
         }
+
+        function openRecoveryModal() {
+            document.getElementById('recoveryModal').style.display = 'flex';
+        }
+
+        function closeRecoveryModal() {
+            document.getElementById('recoveryModal').style.display = 'none';
+        }
+
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('recoveryModal');
+            if (event.target === modal) {
+                closeRecoveryModal();
+            }
+        });
     </script>
 </body>
 </html>

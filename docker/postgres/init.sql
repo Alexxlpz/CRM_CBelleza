@@ -77,26 +77,26 @@ CREATE INDEX IF NOT EXISTS idx_inventories_product ON inventories(product_id);
 
 -- Centers
 INSERT INTO centers (id, name, address, phone, email, latitude, longitude) VALUES
-(1, 'BellaBelleza Centro Histórico', 'Calle Mayor 45, 28013 Madrid', '+34 910 111 222', 'centro@cbelleza.com', 40.4168, -3.7038),
-(2, 'BellaBelleza Plaza Norte', 'Av. de la Ilustración 12, 28034 Madrid', '+34 910 222 333', 'plazanorte@cbelleza.com', 40.5401, -3.6143),
-(3, 'BellaBelleza Sarrià-Sant Gervasi', 'Carrer Major de Sarrià 88, 08017 Barcelona', '+34 932 444 555', 'barcelona@cbelleza.com', 41.3984, 2.1221),
-(4, 'BellaBelleza Las Condes', 'Av. Las Condes 8900, Santiago', '+56 2 2033 3444', 'lascondes@cbelleza.com', -33.4000, -70.5667)
+(1, 'Cuquora Centro Histórico', 'Calle Mayor 45, 28013 Madrid', '+34 910 111 222', 'centro@cbelleza.com', 40.4168, -3.7038),
+(2, 'Cuquora Plaza Norte', 'Av. de la Ilustración 12, 28034 Madrid', '+34 910 222 333', 'plazanorte@cbelleza.com', 40.5401, -3.6143),
+(3, 'Cuquora Sarrià-Sant Gervasi', 'Carrer Major de Sarrià 88, 08017 Barcelona', '+34 932 444 555', 'barcelona@cbelleza.com', 41.3984, 2.1221),
+(4, 'Cuquora Las Condes', 'Av. Las Condes 8900, Santiago', '+56 2 2033 3444', 'lascondes@cbelleza.com', -33.4000, -70.5667)
 ON CONFLICT (id) DO NOTHING;
 
 -- Users (Workers & Clients with BCrypt hashed password for 'password123')
 INSERT INTO users (id, name, email, phone, password, role, center_id) VALUES
 -- Workers
-(1, 'Carlos Mendoza', 'carlos@cbelleza.com', '600333444', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'WORKER', 1),
-(2, 'Lucía Romero', 'lucia.romero@cbelleza.com', '600333555', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'WORKER', 1),
-(3, 'Elena Rostova', 'elena@cbelleza.com', '600444555', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'WORKER', 2),
-(4, 'Marco Bellini', 'marco@cbelleza.com', '600444666', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'WORKER', 3),
-(5, 'Ana Valdés', 'ana@cbelleza.com', '600555666', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'WORKER', 4),
+(1, 'Carlos Mendoza', 'carlos@cbelleza.com', '600333444', '$2a$10$bSyjQnxRmehvXMA6zC5lUuB.6cwpfZ/yXUN7OS9vlK4C6SQUzSxYC', 'WORKER', 1),
+(2, 'Lucía Romero', 'lucia.romero@cbelleza.com', '600333555', '$2a$10$bSyjQnxRmehvXMA6zC5lUuB.6cwpfZ/yXUN7OS9vlK4C6SQUzSxYC', 'WORKER', 1),
+(3, 'Elena Rostova', 'elena@cbelleza.com', '600444555', '$2a$10$bSyjQnxRmehvXMA6zC5lUuB.6cwpfZ/yXUN7OS9vlK4C6SQUzSxYC', 'WORKER', 2),
+(4, 'Marco Bellini', 'marco@cbelleza.com', '600444666', '$2a$10$bSyjQnxRmehvXMA6zC5lUuB.6cwpfZ/yXUN7OS9vlK4C6SQUzSxYC', 'WORKER', 3),
+(5, 'Ana Valdés', 'ana@cbelleza.com', '600555666', '$2a$10$bSyjQnxRmehvXMA6zC5lUuB.6cwpfZ/yXUN7OS9vlK4C6SQUzSxYC', 'WORKER', 4),
 -- Clients
-(6, 'Sofía Martínez', 'sofia@gmail.com', '600111222', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'CLIENT', NULL),
-(7, 'Lucía Gómez', 'lucia@gmail.com', '600222333', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'CLIENT', NULL),
-(8, 'Valentina Silva', 'valentina.silva@gmail.com', '600333111', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'CLIENT', NULL),
-(9, 'Javier Navarro', 'javier.navarro@gmail.com', '600444222', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'CLIENT', NULL),
-(10, 'Carmen Morales', 'carmen.morales@gmail.com', '600555333', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'CLIENT', NULL)
+(6, 'Sofía Martínez', 'sofia@gmail.com', '600111222', '$2a$10$bSyjQnxRmehvXMA6zC5lUuB.6cwpfZ/yXUN7OS9vlK4C6SQUzSxYC', 'CLIENT', NULL),
+(7, 'Lucía Gómez', 'lucia@gmail.com', '600222333', '$2a$10$bSyjQnxRmehvXMA6zC5lUuB.6cwpfZ/yXUN7OS9vlK4C6SQUzSxYC', 'CLIENT', NULL),
+(8, 'Valentina Silva', 'valentina.silva@gmail.com', '600333111', '$2a$10$bSyjQnxRmehvXMA6zC5lUuB.6cwpfZ/yXUN7OS9vlK4C6SQUzSxYC', 'CLIENT', NULL),
+(9, 'Javier Navarro', 'javier.navarro@gmail.com', '600444222', '$2a$10$bSyjQnxRmehvXMA6zC5lUuB.6cwpfZ/yXUN7OS9vlK4C6SQUzSxYC', 'CLIENT', NULL),
+(10, 'Carmen Morales', 'carmen.morales@gmail.com', '600555333', '$2a$10$bSyjQnxRmehvXMA6zC5lUuB.6cwpfZ/yXUN7OS9vlK4C6SQUzSxYC', 'CLIENT', NULL)
 ON CONFLICT (id) DO NOTHING;
 
 -- Treatments (Comprehensive catalog for all treatment types)

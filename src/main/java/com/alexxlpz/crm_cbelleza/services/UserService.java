@@ -24,12 +24,16 @@ public class UserService {
         return userRepository.findByCenterIdAndRole(centerId, Role.WORKER);
     }
 
-    public Optional<User> authenticate(String email, String rawPassword) {
-        if (email == null || rawPassword == null) {
+    public Optional<User> authenticate(String identifier, String rawPassword) {
+        if (identifier == null || rawPassword == null) {
             return Optional.empty();
         }
-        return userRepository.findByEmailIgnoreCase(email.trim())
-                .filter(user -> user.getPassword() != null && passwordEncoder.matches(rawPassword, user.getPassword()));
+        String cleanIdentifier = identifier.trim();
+        Optional<User> userOpt = userRepository.findByEmailIgnoreCase(cleanIdentifier);
+        if (userOpt.isEmpty()) {
+            userOpt = userRepository.findByNameIgnoreCase(cleanIdentifier);
+        }
+        return userOpt.filter(user -> user.getPassword() != null && passwordEncoder.matches(rawPassword, user.getPassword()));
     }
 
     public Optional<User> findByEmail(String email) {

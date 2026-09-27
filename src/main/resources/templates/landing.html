@@ -3,494 +3,521 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BellaBelleza - Gestión Inteligente de Salones & Spa</title>
-    <!-- Lucide Icons CDN (Font + JS) -->
+    <title>Cuquora CRM - Software de Gestión para Centros de Estética y Spas</title>
+    <!-- Lucide Icons CDN -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.321.0/font/lucide.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
     <!-- Stylesheets -->
     <link rel="stylesheet" href="/css/common.css">
     <link rel="stylesheet" href="/css/home.css">
 </head>
-<body>
-    <!-- Scroll Progress Indicator -->
-    <div class="scroll-progress-bar" id="scrollProgress"></div>
-
+<body class="landing-page-view">
     <div th:replace="~{fragments/navbar :: brand(true)}"></div>
 
+    <!-- Desktop Floating Left Rail: Large White Animated Index Docked to Left -->
+    <aside class="desktop-left-rail" id="desktopIndexRail" aria-label="Navegación de secciones">
+        <div class="rail-header">
+            <span class="rail-eyebrow">CUQUORA</span>
+            <h4 class="rail-title">Contenido</h4>
+        </div>
+        <nav class="rail-nav">
+            <a href="#flujo" class="rail-link active" data-target="flujo">
+                <span class="rail-num">01</span>
+                <span class="rail-text">Flujo Operativo</span>
+            </a>
+            <a href="#citas-online" class="rail-link" data-target="citas-online">
+                <span class="rail-num">02</span>
+                <span class="rail-text">Gestión de Agenda</span>
+            </a>
+            <a href="#inventario" class="rail-link" data-target="inventario">
+                <span class="rail-num">03</span>
+                <span class="rail-text">Control de Stock</span>
+            </a>
+            <a href="#centro-servicios" class="rail-link" data-target="centro-servicios">
+                <span class="rail-num">04</span>
+                <span class="rail-text">Centro y Servicios</span>
+            </a>
+            <a href="#roles" class="rail-link" data-target="roles">
+                <span class="rail-num">05</span>
+                <span class="rail-text">Solución por Perfil</span>
+            </a>
+            <a href="#faq" class="rail-link" data-target="faq">
+                <span class="rail-num">06</span>
+                <span class="rail-text">Preguntas Frecuentes</span>
+            </a>
+        </nav>
+    </aside>
+
     <!-- Main Container -->
-    <main class="main-container">
+    <main class="main-container landing-main-container">
         
-        <!-- Hero Section -->
-        <section class="landing-hero glass-panel">
-            <div class="hero-badge">
-                <i class="lucide-sparkles"></i> Software All-in-One de Alta Estética
-            </div>
-            <h1 class="landing-logo">BellaBelleza</h1>
+        <!-- Hero Section: Centered Presentation -->
+        <section class="landing-hero">
+            <span class="hero-tag">Plataforma de Operaciones para Belleza y Bienestar</span>
+            <h1 class="landing-logo">Cuquora</h1>
             <p class="landing-subtitle">
-                La suite digital integral para centros de estética, salones de autor y spas premium. Automatiza tu agenda sin solapamientos, controla tu stock en tiempo real y ofrece una experiencia memorable a cada cliente.
+                El software de gestión integral para centros de estética, salones y spas. Automatiza tu agenda de citas online 24/7, supervisa el inventario de cabina en tiempo real, coordina a tus especialistas y ofrece una experiencia sin fricciones a cada cliente.
             </p>
             <div class="landing-cta-group">
                 <a href="/login" class="btn btn-primary btn-hero-cta" th:if="${sessionRole == null}">
-                    <i class="lucide-log-in"></i> Iniciar Sesión en la Plataforma
+                    Iniciar sesión
                 </a>
                 <a href="/client/centers" class="btn btn-primary btn-hero-cta" th:if="${sessionRole == 'CLIENT'}">
-                    <i class="lucide-map-pin"></i> Explorar Centros & Reservar
+                    Explorar centros y reservar
                 </a>
                 <a href="/worker/dashboard" class="btn btn-primary btn-hero-cta" th:if="${sessionRole == 'WORKER'}">
-                    <i class="lucide-layout-dashboard"></i> Acceder a Mi Panel de Control
+                    Acceder a mi panel de control
                 </a>
+            </div>
+            <div class="hero-trust-row">
+                <span><i class="lucide-shield-check"></i> Privacidad y RGPD 100% garantizado</span>
+                <span><i class="lucide-check"></i> Citas online 24/7</span>
+                <span><i class="lucide-check"></i> Gestión integral de cabinas</span>
             </div>
         </section>
 
-        <!-- Feature Showcases (Upper Cards) -->
-        <section class="landing-features" aria-label="Funcionalidades principales">
-            
-            <!-- Card 1: Reservas -->
-            <a class="feature-box glass-panel reveal reveal-delay-1" href="#feature-bookings">
-                <span class="feature-badge-top badge-rose">24/7 Online</span>
-                <div class="feature-icon-wrapper" title="Agenda Inteligente con franjas exactas">
-                    <!-- Icono descriptivo de calendario con reloj de cita -->
-                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="feature-icon-svg" aria-hidden="true">
-                        <path d="M21 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3.5"/>
-                        <path d="M16 2v4"/>
-                        <path d="M8 2v4"/>
-                        <path d="M3 10h18"/>
-                        <circle cx="16" cy="16" r="6"/>
-                        <polyline points="16 14 16 16 18 17"/>
-                    </svg>
-                </div>
-                <h3>Reserva de Citas Inteligente</h3>
-                <p>Agenda inteligente con tramos de 30 minutos. Calcula huecos según la duración del tratamiento, bloquea citas al instante y oculta horas pasadas.</p>
-                
-                <!-- Cuadros informativos interactivos -->
-                <div class="feature-tiles-grid">
-                    <div class="feature-tile">
-                        <i class="lucide-timer"></i>
-                        <div class="tile-info">
-                            <strong>30 Min</strong>
-                            <small>Tramos exactos</small>
-                        </div>
-                    </div>
-                    <div class="feature-tile">
-                        <i class="lucide-shield-ban"></i>
-                        <div class="tile-info">
-                            <strong>0 Solap.</strong>
-                            <small>Bloqueo dinámico</small>
-                        </div>
-                    </div>
-                    <div class="feature-tile">
-                        <i class="lucide-clock"></i>
-                        <div class="tile-info">
-                            <strong>Auto-oculta</strong>
-                            <small>Horas pasadas</small>
-                        </div>
-                    </div>
-                    <div class="feature-tile">
-                        <i class="lucide-user-check"></i>
-                        <div class="tile-info">
-                            <strong>Invitados</strong>
-                            <small>O registrados</small>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="feature-card-pills">
-                    <span>Cero Solapamientos</span>
-                    <span>Auto-bloqueo Horario</span>
-                    <span>Multi-Especialista</span>
-                </div>
-                <span class="feature-link-label">Ver cómo funciona <i class="lucide-arrow-down"></i></span>
-            </a>
-            
-            <!-- Card 2: Inventario -->
-            <a class="feature-box glass-panel reveal reveal-delay-2" href="#feature-inventory">
-                <span class="feature-badge-top badge-sage">Tiempo Real</span>
-                <div class="feature-icon-wrapper" title="Control de stock con trazabilidad">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="feature-icon-svg" aria-hidden="true">
-                        <path d="m16 16 2 2 4-4"/>
-                        <path d="M21 10V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l2-1.14"/>
-                        <path d="m7.5 4.27 9 5.15"/>
-                        <polyline points="3.29 7 12 12 20.71 7"/>
-                        <line x1="12" x2="12" y1="22" y2="12"/>
-                    </svg>
-                </div>
-                <h3>Control de Stock & Almacén</h3>
-                <p>Supervisa suministros cosméticos y productos en cabina. Semáforo preventivo de stock bajo para reponer a tiempo y evitar cancelaciones de servicios.</p>
-                
-                <!-- Cuadros informativos interactivos -->
-                <div class="feature-tiles-grid">
-                    <div class="feature-tile">
-                        <i class="lucide-traffic-cone"></i>
-                        <div class="tile-info">
-                            <strong>Semáforo</strong>
-                            <small>3 niveles alerta</small>
-                        </div>
-                    </div>
-                    <div class="feature-tile">
-                        <i class="lucide-store"></i>
-                        <div class="tile-info">
-                            <strong>3 Centros</strong>
-                            <small>Stock por local</small>
-                        </div>
-                    </div>
-                    <div class="feature-tile">
-                        <i class="lucide-boxes"></i>
-                        <div class="tile-info">
-                            <strong>4 Áreas</strong>
-                            <small>Rostro, cabello...</small>
-                        </div>
-                    </div>
-                    <div class="feature-tile">
-                        <i class="lucide-refresh-cw"></i>
-                        <div class="tile-info">
-                            <strong>1 Clic</strong>
-                            <small>Ajustes de stock</small>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="feature-card-pills">
-                    <span>Semáforo Visual</span>
-                    <span>Multi-Centro</span>
-                    <span>Alertas Preventivas</span>
-                </div>
-                <span class="feature-link-label">Ver gestión de stock <i class="lucide-arrow-down"></i></span>
-            </a>
-            
-            <!-- Card 3: Tratamientos -->
-            <a class="feature-box glass-panel reveal reveal-delay-3" href="#feature-treatments">
-                <span class="feature-badge-top badge-gold">A Medida</span>
-                <div class="feature-icon-wrapper" title="Catálogo de servicios y estética">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="feature-icon-svg" aria-hidden="true">
-                        <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
-                        <path d="M5 3v4"/>
-                        <path d="M19 17v4"/>
-                        <path d="M3 5h4"/>
-                        <path d="M17 19h4"/>
-                    </svg>
-                </div>
-                <h3>Catálogo de Tratamientos</h3>
-                <p>Personaliza la carta de servicios para cada salón: tiempos exactos, tarifas individuales y descripciones para inspirar confianza en cada reserva.</p>
-                
-                <!-- Cuadros informativos interactivos -->
-                <div class="feature-tiles-grid">
-                    <div class="feature-tile">
-                        <i class="lucide-sliders"></i>
-                        <div class="tile-info">
-                            <strong>30 - 90m</strong>
-                            <small>Tiempos a medida</small>
-                        </div>
-                    </div>
-                    <div class="feature-tile">
-                        <i class="lucide-tag"></i>
-                        <div class="tile-info">
-                            <strong>Tarifas</strong>
-                            <small>Precios por centro</small>
-                        </div>
-                    </div>
-                    <div class="feature-tile">
-                        <i class="lucide-sparkles"></i>
-                        <div class="tile-info">
-                            <strong>Catálogo</strong>
-                            <small>Explicado y visual</small>
-                        </div>
-                    </div>
-                    <div class="feature-tile">
-                        <i class="lucide-git-branch"></i>
-                        <div class="tile-info">
-                            <strong>3 Fases</strong>
-                            <small>Define y publica</small>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="feature-card-pills">
-                    <span>Tiempos Flexibles</span>
-                    <span>Tarifas por Salón</span>
-                    <span>Organización Facial/Capilar</span>
-                </div>
-                <span class="feature-link-label">Ver catálogo y flujo <i class="lucide-arrow-down"></i></span>
-            </a>
-
+        <!-- Social Proof / Business Metrics Bar: Highlighting Operational Efficiency -->
+        <section class="metrics-bar" aria-label="Métricas de eficiencia y rendimiento">
+            <div class="metric-item">
+                <span class="metric-value">+82%</span>
+                <span class="metric-label">Puntualidad y citas confirmadas</span>
+            </div>
+            <div class="metric-divider"></div>
+            <div class="metric-item">
+                <span class="metric-value">24/7</span>
+                <span class="metric-label">Reservas online automatizadas</span>
+            </div>
+            <div class="metric-divider"></div>
+            <div class="metric-item">
+                <span class="metric-value">98.6%</span>
+                <span class="metric-label">Eficiencia operativa global</span>
+            </div>
+            <div class="metric-divider"></div>
+            <div class="metric-item">
+                <span class="metric-value">0</span>
+                <span class="metric-label">Solapamientos en cabina</span>
+            </div>
         </section>
 
-        <!-- Feature Detailed Breakdown (Lower Sections) -->
-        <section class="landing-feature-details" aria-label="Información sobre las funcionalidades">
-            
-            <!-- Detalle 1: Citas -->
-            <article class="feature-detail glass-panel reveal" id="feature-bookings">
-                <div class="feature-detail-media">
-                    <img src="/images/beauty_salon_hero.png" alt="Profesional preparando una cita en un salón de belleza de alta gama">
-                </div>
-                <div class="feature-detail-content">
-                    <span class="feature-detail-eyebrow"><i class="lucide-sparkle"></i> Experiencia de Reserva Impecable</span>
-                    <h2>Agenda inteligente sin llamadas ni solapamientos</h2>
-                    <p>
-                        El sistema de reservas de BellaBelleza evalúa dinámicamente la duración de cada tratamiento (30, 45, 60 o 90 min) y reserva con precisión matemática los bloques de 30 minutos necesarios, impidiendo reservas dobles y eliminando confusiones.
-                    </p>
+        <!-- Operational Workflow Pipeline (4 Steps) -->
+        <section class="saas-section" id="flujo" aria-label="Flujo operativo del sistema">
+            <div class="section-header-block">
+                <span class="eyebrow">Flujo operativo sincronizado</span>
+                <h2>Cómo funciona Cuquora en tu día a día</h2>
+                <p>Una arquitectura unificada para que la reserva del cliente, la disponibilidad de cabinas y el inventario de insumos funcionen en perfecta coordinación.</p>
+            </div>
 
-                    <!-- Demostración interactiva visual de horas -->
-                    <div class="slots-demo-container">
-                        <div class="slots-demo-title">
-                            <i class="lucide-clock"></i> Visualización en Tiempo Real de Estados de Hora:
-                        </div>
-                        <div class="slots-demo-grid">
-                            <div class="slot-demo-pill free">
-                                <strong>10:00</strong>
-                                <small>🟢 Libre (1 clic)</small>
-                            </div>
-                            <div class="slot-demo-pill occupied">
-                                <strong>11:30</strong>
-                                <small>🔴 Ocupada</small>
-                            </div>
-                            <div class="slot-demo-pill past">
-                                <strong>09:00</strong>
-                                <small>⚪ Hora Pasada</small>
-                            </div>
-                            <div class="slot-demo-pill insufficient">
-                                <strong>19:30</strong>
-                                <small>🟡 Sin tiempo</small>
-                            </div>
-                        </div>
+            <div class="saas-pipeline-grid">
+                <div class="pipeline-step">
+                    <div class="pipeline-step-header">
+                        <span class="pipeline-step-num">01</span>
+                        <span class="pipeline-step-tag">Cliente</span>
                     </div>
-
-                    <!-- Tabla comparativa -->
-                    <div class="feature-detail-table-wrapper">
-                        <table class="feature-detail-table">
-                            <thead>
-                                <tr>
-                                    <th>Fase</th>
-                                    <th>Acción del Cliente / Sistema</th>
-                                    <th>Beneficio para el Salón</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>1. Descubrir</td>
-                                    <td>Filtra centros por cercanía en mapa interactivo y carta de estética.</td>
-                                    <td>Mayor atracción de nuevos clientes.</td>
-                                </tr>
-                                <tr>
-                                    <td>2. Seleccionar</td>
-                                    <td>Visualiza solo horas libres y futuras en bloques de 30 minutos.</td>
-                                    <td>Cero citas en horarios ya transcurridos.</td>
-                                </tr>
-                                <tr>
-                                    <td>3. Confirmar</td>
-                                    <td>El equipo recibe la cita y puede confirmarla o dejar notas personalizadas.</td>
-                                    <td>Agenda 100% coordinada y sin estrés.</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <ul>
-                        <li><i class="lucide-check-circle-2"></i> Ocultación automática de horas que ya han pasado en el día de hoy</li>
-                        <li><i class="lucide-check-circle-2"></i> Bloqueo de días completos con indicador visual claro y sin confusiones</li>
-                        <li><i class="lucide-check-circle-2"></i> Admisión de clientes registrados o citas rápidas para invitados</li>
-                        <li><i class="lucide-check-circle-2"></i> Mensajería directa entre especialista y cliente para cada servicio</li>
-                    </ul>
-
-                    <div class="feature-callout">
-                        <i class="lucide-gem"></i>
-                        <span>Un proceso de reserva fluido y sin fricciones eleva la percepción de tu marca desde el primer contacto digital.</span>
+                    <h3>Reserva Online 24/7</h3>
+                    <p>El cliente selecciona centro, servicio y especialista. La plataforma muestra tarifas transparentes, duraciones estimadas y turnos disponibles en tiempo real, desde cualquier dispositivo móvil o web.</p>
+                    <div class="pipeline-step-footer">
+                        <span>Sin llamadas telefónicas</span>
                     </div>
                 </div>
-            </article>
 
-            <!-- Detalle 2: Inventario -->
-            <article class="feature-detail feature-detail-reverse glass-panel reveal" id="feature-inventory">
-                <div class="feature-detail-media">
-                    <img src="/images/face_serum.png" alt="Cosméticos y productos profesionales de alta gama gestionados en inventario">
-                </div>
-                <div class="feature-detail-content">
-                    <span class="feature-detail-eyebrow"><i class="lucide-boxes"></i> Logística & Suministros</span>
-                    <h2>Abastecimiento predictivo: nunca pares un tratamiento</h2>
-                    <p>
-                        Mantén una visibilidad milimétrica de los insumos en cada cabina y almacén. Gracias al semáforo de existencias en tiempo real, tu equipo detecta qué productos requieren reposición antes de que afecten a la atención del cliente.
-                    </p>
-
-                    <!-- Semáforo visual -->
-                    <div class="inventory-status-grid">
-                        <div class="status-ok">
-                            <i class="lucide-check-circle" style="color: #4a755d;"></i>
-                            <strong>Stock Óptimo (+5 uds)</strong>
-                            <span>Garantiza citas sin interrupciones</span>
-                        </div>
-                        <div class="status-warn">
-                            <i class="lucide-alert-triangle" style="color: #a37a28;"></i>
-                            <strong>Stock de Seguridad (1-4 uds)</strong>
-                            <span>Alerta para emitir orden de compra</span>
-                        </div>
-                        <div class="status-danger">
-                            <i class="lucide-alert-octagon" style="color: #925858;"></i>
-                            <strong>Agotado Crítico (0 uds)</strong>
-                            <span>Requiere reposición inmediata</span>
-                        </div>
+                <div class="pipeline-step">
+                    <div class="pipeline-step-header">
+                        <span class="pipeline-step-num">02</span>
+                        <span class="pipeline-step-tag">Motor</span>
                     </div>
-
-                    <!-- Métricas KPIs -->
-                    <div class="kpi-row">
-                        <div class="kpi-card">
-                            <span class="kpi-number">0%</span>
-                            <span class="kpi-label">Cancelaciones por falta de stock</span>
-                        </div>
-                        <div class="kpi-card">
-                            <span class="kpi-number">3 Salones</span>
-                            <span class="kpi-label">Sincronizados en una base unificada</span>
-                        </div>
-                        <div class="kpi-card">
-                            <span class="kpi-number">1 Clic</span>
-                            <span class="kpi-label">Para registrar entradas y salidas</span>
-                        </div>
-                    </div>
-
-                    <ul>
-                        <li><i class="lucide-check-circle-2"></i> Clasificación por categorías: Rostro, Cabello, Cuerpo y Uñas</li>
-                        <li><i class="lucide-check-circle-2"></i> Filtro por centro para que cada responsable gestione su propio local</li>
-                        <li><i class="lucide-check-circle-2"></i> Modal rápido de reabastecimiento directo con validación de cantidad</li>
-                    </ul>
-
-                    <div class="feature-callout">
-                        <i class="lucide-shield-check"></i>
-                        <span>Elimina el desabastecimiento imprevisto y optimiza el capital invertido en cosmética profesional.</span>
+                    <h3>Bloqueo Dinámico</h3>
+                    <p>El algoritmo valida la duración exacta del servicio (30 a 90 minutos) y comprueba la disponibilidad simultánea de especialista y cabina, bloqueando el intervalo y descartando horas pasadas.</p>
+                    <div class="pipeline-step-footer">
+                        <span>Cero dobles reservas</span>
                     </div>
                 </div>
-            </article>
 
-            <!-- Detalle 3: Tratamientos -->
-            <article class="feature-detail glass-panel reveal" id="feature-treatments">
-                <div class="feature-detail-media">
-                    <img src="/images/hair_oil.png" alt="Tratamiento de aceite orgánico y peluquería en salón de estética">
-                </div>
-                <div class="feature-detail-content">
-                    <span class="feature-detail-eyebrow"><i class="lucide-sparkles"></i> Carta de Servicios Personalizada</span>
-                    <h2>Carta de tratamientos a la medida de cada centro</h2>
-                    <p>
-                        Cada salón posee su propia identidad, equipamiento y especialistas. Configura tratamientos diferenciados por centro con precios claros, tiempos de servicio y explicaciones detalladas que orienten la decisión del cliente.
-                    </p>
-
-                    <!-- Píldoras de Categorías -->
-                    <div class="treatment-categories-grid">
-                        <span class="treatment-cat-pill"><i class="lucide-smile"></i> Facial & Antiedad</span>
-                        <span class="treatment-cat-pill"><i class="lucide-heart-handshake"></i> Masajes & Aromaterapia</span>
-                        <span class="treatment-cat-pill"><i class="lucide-scissors"></i> Peluquería & Queratina</span>
-                        <span class="treatment-cat-pill"><i class="lucide-hand"></i> Manicura & Pedicura Spa</span>
+                <div class="pipeline-step">
+                    <div class="pipeline-step-header">
+                        <span class="pipeline-step-num">03</span>
+                        <span class="pipeline-step-tag">Cabina</span>
                     </div>
-
-                    <!-- Stepper del Proceso -->
-                    <div class="treatment-process">
-                        <div>
-                            <span class="process-number">01</span>
-                            <div>
-                                <strong>Configura el Servicio</strong>
-                                <small>Duración exacta (30, 45, 60m) y precio</small>
-                            </div>
-                        </div>
-                        <div>
-                            <span class="process-number">02</span>
-                            <div>
-                                <strong>Asigna al Centro</strong>
-                                <small>Vinculado a los especialistas del salón</small>
-                            </div>
-                        </div>
-                        <div>
-                            <span class="process-number">03</span>
-                            <div>
-                                <strong>Reserva Lista</strong>
-                                <small>El cliente reserva el bloque necesario</small>
-                            </div>
-                        </div>
-                    </div>
-
-                    <ul>
-                        <li><i class="lucide-check-circle-2"></i> Ajuste independiente de precios y duraciones según el centro elegido</li>
-                        <li><i class="lucide-check-circle-2"></i> Descripciones ricas de cada técnica, insumo utilizado y beneficios</li>
-                        <li><i class="lucide-check-circle-2"></i> Integración transparente con el motor de cálculo de franjas horarias</li>
-                    </ul>
-
-                    <div class="feature-callout">
-                        <i class="lucide-award"></i>
-                        <span>Una propuesta de servicios transparente y cuidada incrementa la recurrencia y satisfacción de tus clientes.</span>
+                    <h3>Atención y Ficha Técnica</h3>
+                    <p>El especialista accede desde su móvil o tablet a las notas clínicas del paciente, revisa sensibilidades dérmicas, tratamientos previos y anota observaciones específicas de la sesión realizada.</p>
+                    <div class="pipeline-step-footer">
+                        <span>Historial centralizado</span>
                     </div>
                 </div>
-            </article>
 
+                <div class="pipeline-step">
+                    <div class="pipeline-step-header">
+                        <span class="pipeline-step-num">04</span>
+                        <span class="pipeline-step-tag">Almacén</span>
+                    </div>
+                    <h3>Trazabilidad de Insumos</h3>
+                    <p>Los consumibles utilizados se descuentan del almacén correspondiente. El semáforo de existencias mínimas emite alertas antes de que se produzca una rotura de stock en cabina.</p>
+                    <div class="pipeline-step-footer">
+                        <span>Control de mermas</span>
+                    </div>
+                </div>
+            </div>
         </section>
-        
+
+        <!-- Deep Dive 1: Agenda & Citas -->
+        <section class="saas-detail-section" id="citas-online">
+            <div class="saas-detail-media">
+                <img src="/images/beauty_salon_hero.png" alt="Instalaciones profesionales de un centro de estética">
+            </div>
+            <div class="saas-detail-content">
+                <span class="eyebrow">Gestión de agenda y turnos</span>
+                <h2>Optimiza los tiempos de cabina y reduce cancelaciones</h2>
+                <p>
+                    El motor de asignación calcula de manera matemática la duración requerida para cada servicio (desde manicuras de 50 minutos hasta tratamientos dérmicos profundos de 60 minutos). La agenda bloquea únicamente los tramos necesarios, garantizando puntualidad y cero retrasos.
+                </p>
+                <ul class="saas-check-list">
+                    <li><strong>Filtrado dinámico de franjas horarias:</strong> Ocultación automática de intervalos que ya han transcurrido en el día en curso.</li>
+                    <li><strong>Asignación por especialista cualificado:</strong> Cada tratamiento se vincula únicamente a los terapeutas autorizados para realizarlo.</li>
+                    <li><strong>Reserva directa sin cuenta obligatoria:</strong> Los clientes nuevos pueden agendar en segundos como invitados con sus datos de contacto.</li>
+                    <li><strong>Panel diario para terapeutas:</strong> Vista cronológica para que cada especialista prepare su cabina con anticipación.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Deep Dive 2: Inventario -->
+        <section class="saas-detail-section saas-detail-reverse" id="inventario">
+            <div class="saas-detail-media">
+                <img src="/images/face_serum.png" alt="Productos profesionales y cosméticos organizados en inventario">
+            </div>
+            <div class="saas-detail-content">
+                <span class="eyebrow">Inventario profesional y logística</span>
+                <h2>Supervisa los suministros de cabina sin roturas de stock</h2>
+                <p>
+                    Quedarse sin producto a mitad de un tratamiento interrumpe el servicio y perjudica la imagen del negocio. Cuquora diferencia con exactitud los insumos de cabina de los productos retail destinados a la venta al público, alertando a tiempo ante cualquier disminución.
+                </p>
+                <ul class="saas-check-list">
+                    <li><strong>Semáforo preventivo de existencias:</strong> Estados visuales claros para niveles óptimos, stock de reposición urgente y agotado.</li>
+                    <li><strong>Ajustes rápidos en un clic:</strong> Incremento y deducción de existencias con registro inmediato de movimientos.</li>
+                    <li><strong>Categorización completa:</strong> Organización sistemática por rostro, capilar, cuerpo, uñas y aparatología.</li>
+                    <li><strong>Gestión independiente por almacén:</strong> Cada centro mantiene su propio stock aislado, evitando confusiones entre sedes.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Example Center & Services Showcase: CENTRO EJEMPLO -->
+        <section class="saas-section" id="centro-servicios" aria-label="CENTRO EJEMPLO y catálogo de servicios">
+            <div class="section-header-block">
+                <span class="eyebrow">Estructura Demostrativa</span>
+                <h2>Estructura de CENTRO EJEMPLO y Catálogo de Servicios</h2>
+                <p>Configuración ilustrativa para centros de estética, salones y spas. Cada centro parametriza sus cabinas físicas, especialistas asignados y catálogo de tratamientos con duraciones exactas y tarifas transparentes.</p>
+            </div>
+
+            <div class="example-center-card">
+                <!-- Center Header -->
+                <div class="example-center-header">
+                    <div class="example-center-main">
+                        <span class="example-center-pill">Modelo Demostrativo</span>
+                        <h3>CENTRO EJEMPLO</h3>
+                        <p class="example-center-loc"><i class="lucide-map-pin"></i> Plantilla demostrativa de servicios para centros de estética y bienestar</p>
+                    </div>
+                    <div class="example-center-badges">
+                        <div class="center-badge-item">
+                            <span class="badge-num">4</span>
+                            <span class="badge-txt">Cabinas físicas</span>
+                        </div>
+                        <div class="center-badge-item">
+                            <span class="badge-num">3</span>
+                            <span class="badge-txt">Especialistas</span>
+                        </div>
+                        <div class="center-badge-item">
+                            <span class="badge-num">L-S</span>
+                            <span class="badge-txt">09:30 - 20:30</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Services Categories Grid -->
+                <div class="example-services-grid">
+                    
+                    <!-- Category 1 -->
+                    <div class="service-category-column">
+                        <div class="category-header">
+                            <i class="lucide-sparkles"></i>
+                            <h4>Tratamientos Faciales</h4>
+                        </div>
+                        <div class="service-row-card">
+                            <div class="service-title-row">
+                                <span class="service-name">Limpieza Facial Profunda</span>
+                                <span class="service-price">45,00 €</span>
+                            </div>
+                            <div class="service-meta-row">
+                                <span class="service-duration"><i class="lucide-clock"></i> 60 min</span>
+                                <span class="service-assign">Cabina 1 · Laura Gómez</span>
+                            </div>
+                            <p class="service-desc">Extracción de impurezas, vapor de ozono y mascarilla calmante purificante.</p>
+                        </div>
+
+                        <div class="service-row-card">
+                            <div class="service-title-row">
+                                <span class="service-name">Higiene con Punta de Diamante</span>
+                                <span class="service-price">38,00 €</span>
+                            </div>
+                            <div class="service-meta-row">
+                                <span class="service-duration"><i class="lucide-clock"></i> 45 min</span>
+                                <span class="service-assign">Cabina 1 · Laura Gómez</span>
+                            </div>
+                            <p class="service-desc">Microdermoabrasión para renovación celular e hidratación profunda.</p>
+                        </div>
+
+                        <div class="service-row-card">
+                            <div class="service-title-row">
+                                <span class="service-name">Tratamiento Antiedad Global</span>
+                                <span class="service-price">55,00 €</span>
+                            </div>
+                            <div class="service-meta-row">
+                                <span class="service-duration"><i class="lucide-clock"></i> 60 min</span>
+                                <span class="service-assign">Cabina 2 · Elena Ruiz</span>
+                            </div>
+                            <p class="service-desc">Ampolla de ácido hialurónico, estimulación dérmica y velo de colágeno.</p>
+                        </div>
+                    </div>
+
+                    <!-- Category 2 -->
+                    <div class="service-category-column">
+                        <div class="category-header">
+                            <i class="lucide-heart-pulse"></i>
+                            <h4>Masajes y Bienestar</h4>
+                        </div>
+                        <div class="service-row-card">
+                            <div class="service-title-row">
+                                <span class="service-name">Masaje Relajante con Aromaterapia</span>
+                                <span class="service-price">50,00 €</span>
+                            </div>
+                            <div class="service-meta-row">
+                                <span class="service-duration"><i class="lucide-clock"></i> 50 min</span>
+                                <span class="service-assign">Cabina 3 · Carlos Martínez</span>
+                            </div>
+                            <p class="service-desc">Ritual corporal con aceites esenciales botánicos de lavanda y romero.</p>
+                        </div>
+
+                        <div class="service-row-card">
+                            <div class="service-title-row">
+                                <span class="service-name">Drenaje Linfático Manual</span>
+                                <span class="service-price">60,00 €</span>
+                            </div>
+                            <div class="service-meta-row">
+                                <span class="service-duration"><i class="lucide-clock"></i> 60 min</span>
+                                <span class="service-assign">Cabina 3 · Carlos Martínez</span>
+                            </div>
+                            <p class="service-desc">Técnica circulatoria descongestiva para reducción de retención de líquidos.</p>
+                        </div>
+
+                        <div class="service-row-card">
+                            <div class="service-title-row">
+                                <span class="service-name">Masaje Descontracturante</span>
+                                <span class="service-price">42,00 €</span>
+                            </div>
+                            <div class="service-meta-row">
+                                <span class="service-duration"><i class="lucide-clock"></i> 40 min</span>
+                                <span class="service-assign">Cabina 3 · Carlos Martínez</span>
+                            </div>
+                            <p class="service-desc">Presión profunda en espalda y cervicales con bálsamo térmico.</p>
+                        </div>
+                    </div>
+
+                    <!-- Category 3 -->
+                    <div class="service-category-column">
+                        <div class="category-header">
+                            <i class="lucide-flower-2"></i>
+                            <h4>Manicura, Pedicura & Estética</h4>
+                        </div>
+                        <div class="service-row-card">
+                            <div class="service-title-row">
+                                <span class="service-name">Manicura Spa con Exfoliación</span>
+                                <span class="service-price">28,00 €</span>
+                            </div>
+                            <div class="service-meta-row">
+                                <span class="service-duration"><i class="lucide-clock"></i> 45 min</span>
+                                <span class="service-assign">Cabina 4 · Elena Ruiz</span>
+                            </div>
+                            <p class="service-desc">Cuidado de cutículas, peeling de albaricoque y esmaltado semipermanente.</p>
+                        </div>
+
+                        <div class="service-row-card">
+                            <div class="service-title-row">
+                                <span class="service-name">Pedicura Spa con Parafina</span>
+                                <span class="service-price">35,00 €</span>
+                            </div>
+                            <div class="service-meta-row">
+                                <span class="service-duration"><i class="lucide-clock"></i> 55 min</span>
+                                <span class="service-assign">Cabina 4 · Elena Ruiz</span>
+                            </div>
+                            <p class="service-desc">Tratamiento intensivo con baño de parafina nutritiva y masaje de pies.</p>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Bottom operational notice -->
+                <div class="example-center-footer">
+                    <span class="footer-note">
+                        <i class="lucide-info"></i>
+                        Cada tratamiento tiene asignados sus tiempos reales de atención y consumibles de cabina, permitiendo al sistema calcular intervalos precisos en la agenda y registrar mermas automáticamente.
+                    </span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Role-Based Solutions (AgendaPro & Clientify style) -->
+        <section class="saas-section" id="roles" aria-label="Solución adaptada por perfiles de usuario">
+            <div class="section-header-block">
+                <span class="eyebrow">Solución adaptada por perfil</span>
+                <h2>Una herramienta pensada para todo el equipo</h2>
+                <p>Cuquora ofrece interfaces y permisos optimizados según las responsabilidades de cada miembro en el negocio.</p>
+            </div>
+
+            <div class="saas-roles-grid">
+                <div class="role-box">
+                    <div class="role-box-header">
+                        <div class="role-avatar-badge">D</div>
+                        <div>
+                            <h3>Directores y Propietarios</h3>
+                            <span class="role-subtitle">Control integral del negocio</span>
+                        </div>
+                    </div>
+                    <ul class="role-features-list">
+                        <li>Supervisión de agendas multi-centro desde un único acceso.</li>
+                        <li>Auditoría continua de existencias de almacén y avisos de stock mínimo.</li>
+                        <li>Configuración de cartas de servicios, duraciones y asignación de personal.</li>
+                        <li>Reducción verificable de inasistencias gracias a reservas transparentes.</li>
+                    </ul>
+                </div>
+
+                <div class="role-box">
+                    <div class="role-box-header">
+                        <div class="role-avatar-badge">E</div>
+                        <div>
+                            <h3>Especialistas y Terapeutas</h3>
+                            <span class="role-subtitle">Eficiencia y enfoque en cabina</span>
+                        </div>
+                    </div>
+                    <ul class="role-features-list">
+                        <li>Agenda cronológica personal visible en cualquier smartphone o tablet.</li>
+                        <li>Notas clínicas del paciente con alergias, fórmulas y preferencias registradas.</li>
+                        <li>Tiempos de preparación de cabina respetados sin prisas ni solapes.</li>
+                        <li>Gestión rápida del estado de las citas en tiempo real.</li>
+                    </ul>
+                </div>
+
+                <div class="role-box">
+                    <div class="role-box-header">
+                        <div class="role-avatar-badge">C</div>
+                        <div>
+                            <h3>Clientes y Pacientes</h3>
+                            <span class="role-subtitle">Autonomía y comodidad de reserva</span>
+                        </div>
+                    </div>
+                    <ul class="role-features-list">
+                        <li>Agendamiento online 24/7 en menos de 2 minutos sin llamar por teléfono.</li>
+                        <li>Elección libre de profesional favorito, horario exacto y centro cercano.</li>
+                        <li>Opción de reserva ágil como invitado o con cuenta para ver historial.</li>
+                        <li>Precios y duraciones detallados de cada servicio antes de confirmar.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Operational FAQs (Real SaaS details) -->
+        <section class="saas-section" id="faq" aria-label="Preguntas frecuentes">
+            <div class="section-header-block">
+                <span class="eyebrow">Resolución de dudas</span>
+                <h2>Preguntas frecuentes sobre la plataforma</h2>
+                <p>Respuestas claras a las dudas operativas más comunes sobre reservas, inventario y seguridad del sistema.</p>
+            </div>
+
+            <div class="saas-faq-list">
+                <div class="faq-item">
+                    <h3 class="faq-question">¿Cómo evita el sistema los solapamientos de citas en una misma cabina o con un mismo especialista?</h3>
+                    <p class="faq-answer">
+                        Nuestro motor de agendamiento valida en tiempo real la disponibilidad en base de datos. Cada tratamiento tiene asignada una duración específica (de 30 a 90 minutos). Al seleccionar una hora, el sistema bloquea matemáticamente todos los tramos que componen la sesión para el especialista y cabina asignados, impidiendo cualquier doble reserva simultánea.
+                    </p>
+                </div>
+
+                <div class="faq-item">
+                    <h3 class="faq-question">¿Es obligatorio que los clientes descarguen una app o creen una cuenta para reservar?</h3>
+                    <p class="faq-answer">
+                        No. Cuquora es 100% web responsiva y funciona de forma fluida en cualquier navegador móvil, tablet u ordenador de escritorio. Además, los clientes pueden reservar citas como invitados facilitando únicamente su nombre, teléfono y correo electrónico de contacto para la cita.
+                    </p>
+                </div>
+
+                <div class="faq-item">
+                    <h3 class="faq-question">¿Cómo se gestiona el inventario cuando se tienen múltiples sucursales?</h3>
+                    <p class="faq-answer">
+                        Cada centro dispone de su propio almacén aislado. Las existencias, los umbrales de stock mínimo y las alertas preventivas se gestionan de manera independiente por sede, evitando confusiones y permitiendo a cada encargado supervisar exclusivamente los insumos de su salón.
+                    </p>
+                </div>
+
+                <div class="faq-item">
+                    <h3 class="faq-question">¿Qué información puede consultar un terapeuta antes de recibir al cliente en cabina?</h3>
+                    <p class="faq-answer">
+                        Los especialistas tienen acceso al historial de citas previas del cliente y a las notas técnicas registradas en visitas anteriores, donde se especifican sensibilidades dérmicas, tratamientos realizados, preferencias o recomendaciones de cuidado domiciliario.
+                    </p>
+                </div>
+
+                <div class="faq-item">
+                    <h3 class="faq-question">¿Cómo ayuda Cuquora a reducir las cancelaciones y tiempos muertos?</h3>
+                    <p class="faq-answer">
+                        Al permitir que el cliente escoja el tramo exacto que mejor se acomoda a su horario y confirmar de inmediato los detalles de su cita, la tasa de puntualidad aumenta sensiblemente. Asimismo, el cálculo exacto de duraciones evita desfases entre servicios consecutivos.
+                    </p>
+                </div>
+            </div>
+        </section>
+
     </main>
 
     <!-- Footer -->
-    <div th:replace="~{fragments/footer :: footer('© 2026 BellaBelleza CRM. Suite digital para salones y spas de estética. Diseño adaptativo de alta gama.')}"></div>
+    <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Software de gestión para centros de estética, salones y spas.')}"></div>
 
-    <!-- Interactive Smooth Scroll & Reveal Script -->
+    <!-- ScrollSpy Script for Dynamic Animated Left Rail -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // 1. Scroll Progress Bar
-            const progressBar = document.getElementById('scrollProgress');
-            window.addEventListener('scroll', function () {
-                const scrollTop = window.scrollY || document.documentElement.scrollTop;
-                const docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-                const scrollPercent = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
-                if (progressBar) {
-                    progressBar.style.width = scrollPercent + '%';
+            const navLinks = document.querySelectorAll('.rail-link');
+            const sections = [];
+
+            navLinks.forEach(link => {
+                const targetId = link.getAttribute('data-target');
+                const section = document.getElementById(targetId);
+                if (section) {
+                    sections.push({ id: targetId, el: section, link: link });
                 }
-            }, { passive: true });
 
-            // 2. IntersectionObserver for Reveal Animations on Scroll
-            const reveals = document.querySelectorAll('.reveal');
-            if ('IntersectionObserver' in window) {
-                const observer = new IntersectionObserver(function (entries, obs) {
-                    entries.forEach(function (entry) {
-                        if (entry.isIntersecting) {
-                            entry.target.classList.add('is-visible');
-                            obs.unobserve(entry.target);
-                        }
-                    });
-                }, {
-                    threshold: 0.15,
-                    rootMargin: '0px 0px -40px 0px'
-                });
-
-                reveals.forEach(function (el) {
-                    observer.observe(el);
-                });
-            } else {
-                reveals.forEach(function (el) {
-                    el.classList.add('is-visible');
-                });
-            }
-
-            // 3. Satisfying Smooth Scroll to In-Page Anchors
-            document.querySelectorAll('a[href^="#"]').forEach(function (anchor) {
-                anchor.addEventListener('click', function (e) {
-                    const targetId = this.getAttribute('href');
-                    if (targetId && targetId !== '#') {
-                        const targetElement = document.querySelector(targetId);
-                        if (targetElement) {
-                            e.preventDefault();
-                            targetElement.scrollIntoView({
-                                behavior: 'smooth',
-                                block: 'start'
-                            });
-                        }
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    if (section) {
+                        const targetTop = section.getBoundingClientRect().top + window.pageYOffset - 90;
+                        window.scrollTo({ top: targetTop, behavior: 'smooth' });
                     }
                 });
             });
 
-            // 4. Initialize Lucide Vector Icons across all pages
-            if (window.lucide) {
-                document.querySelectorAll('i[class*="lucide-"]').forEach(function (el) {
-                    el.classList.forEach(function (cls) {
-                        if (cls.startsWith('lucide-') && !el.hasAttribute('data-lucide')) {
-                            el.setAttribute('data-lucide', cls.replace('lucide-', ''));
-                        }
-                    });
-                });
-                lucide.createIcons();
+            function updateScrollSpy() {
+                const scrollPosition = window.scrollY + 180;
+                let activeFound = false;
+
+                for (let i = sections.length - 1; i >= 0; i--) {
+                    const item = sections[i];
+                    const top = item.el.offsetTop;
+                    if (scrollPosition >= top) {
+                        navLinks.forEach(l => l.classList.remove('active'));
+                        item.link.classList.add('active');
+                        activeFound = true;
+                        break;
+                    }
+                }
+
+                if (!activeFound && navLinks.length > 0) {
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    navLinks[0].classList.add('active');
+                }
             }
+
+            window.addEventListener('scroll', updateScrollSpy, { passive: true });
+            updateScrollSpy();
         });
     </script>
+
 </body>
 </html>
-
