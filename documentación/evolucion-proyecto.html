@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuquora CRM - Evolución del Proyecto y Registro de Commits</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+</head>
+<body>
+
+    <!-- Header / Navbar Principal -->
+    <header class="doc-navbar">
+        <a href="index.html" class="brand-wrapper">
+            <img src="images/icon.png" alt="Logo Cuquora" class="brand-logo-img">
+            <div class="brand-titles">
+                <span class="brand-name">Cuquora<span>CRM</span></span>
+                <span class="brand-subtitle">Evolución & Commits</span>
+            </div>
+        </a>
+        <nav>
+            <ul class="nav-links">
+                <li class="nav-link-item"><a href="index.html">Portal General</a></li>
+                <li class="nav-link-item"><a href="guia-roles.html">Guía por Roles</a></li>
+                <li class="nav-link-item"><a href="manual-acciones.html">Manual de Acciones</a></li>
+                <li class="nav-link-item active"><a href="evolucion-proyecto.html">Evolución & Commits</a></li>
+            </ul>
+        </nav>
+        <div>
+            <span class="nav-badge-app">Historial de Desarrollo</span>
+        </div>
+    </header>
+
+    <!-- Layout Principal -->
+    <div class="doc-layout">
+
+        <!-- Sidebar Izquierdo -->
+        <aside class="doc-sidebar">
+            <div class="sidebar-group">
+                <div class="sidebar-title">Fases de Evolución</div>
+                <ul class="sidebar-nav">
+                    <li><a href="#origen-figma" class="active">Del Diseño en Figma al Código</a></li>
+                    <li><a href="#timeline-commits">Línea de Tiempo de Commits</a></li>
+                    <li><a href="#fase-1">Fase 1: Prototipo & Beta Inicial</a></li>
+                    <li><a href="#fase-2">Fase 2: Lógica de Negocio y CRUD</a></li>
+                    <li><a href="#fase-3">Fase 3: Disponibilidad y Geoposicionamiento</a></li>
+                    <li><a href="#fase-4">Fase 4: Abstracción UI & Pulido de Figma</a></li>
+                    <li><a href="#fase-5">Fase 5: Docker, PostgreSQL & Seguridad</a></li>
+                    <li><a href="#retos-superados">Retos Técnicos Superados</a></li>
+                    <li><a href="#roadmap">Hoja de Ruta Futura</a></li>
+                </ul>
+            </div>
+
+            <div class="sidebar-group">
+                <div class="sidebar-title">Otros Documentos</div>
+                <ul class="sidebar-nav">
+                    <li><a href="guia-roles.html">📖 Guía de Uso por Roles</a></li>
+                    <li><a href="manual-acciones.html">⚡ Manual de Acciones & APIs</a></li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Área de Contenido -->
+        <main class="doc-content">
+
+            <!-- Hero Section -->
+            <section class="doc-hero" id="origen-figma">
+                <span class="doc-tag">Crónica Técnica del Proyecto</span>
+                <h1>Evolución del Proyecto: De Figma a Producción</h1>
+                <p>
+                    Esta crónica reconstruye el proceso de maduración de <strong>Cuquora CRM</strong> a través de sus fases de diseño y de su historial verificado de <strong>commits de Git</strong>. Documenta cómo una maqueta conceptual concebida en Figma se convirtió de manera iterativa en una solución SaaS multisede robusta, responsiva, accesible y contenerizada en Docker con PostgreSQL.
+                </p>
+                <div class="hero-meta-row">
+                    <div class="hero-meta-item">
+                        <span>Periodo de Desarrollo:</span>
+                        <strong>Julio 2026 – Septiembre 2026</strong>
+                    </div>
+                    <div class="hero-meta-item">
+                        <span>Commits Registrados:</span>
+                        <strong>15 Hitos Principales</strong>
+                    </div>
+                    <div class="hero-meta-item">
+                        <span>Metodología:</span>
+                        <strong>Diseño UI/UX iterativo + Refactorización continua</strong>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Del Diseño en Figma al Código -->
+            <section class="doc-section">
+                <div class="section-header">
+                    <div class="section-header-title">
+                        <div class="section-icon">🎨</div>
+                        <div>
+                            <h2>El Origen: Arquitectura Visual concebida en Figma</h2>
+                            <p style="margin: 0; font-size: 0.95rem;">Fundamentos de diseño y traslación de los componentes de alta fidelidad</p>
+                        </div>
+                    </div>
+                </div>
+
+                <p>
+                    El proyecto Cuquora CRM nació de una necesidad crítica en el sector de la estética: los sistemas de gestión tradicionales suelen ser fríos, complejos y poco estéticos. Desde la fase de ideación en <strong>Figma</strong>, se planteó un sistema de diseño propio (Design System) inspirado en el bienestar, el lujo y la ergonomía táctil:
+                </p>
+
+                <div class="grid-3">
+                    <div class="card-feature">
+                        <span class="card-badge badge-worker">Paleta Cálida Lux</span>
+                        <h4 style="margin-top: 0.5rem;">Champagne & Rose Gold</h4>
+                        <p style="font-size: 0.88rem;">
+                            Combinación de tonos bronce champán (<code>#c5a880</code>) y oro rosa (<code>#e0b0b0</code>) que transmiten calma, exclusividad y profesionalidad, contrastados sobre fondos slate oscuro y crema luminoso.
+                        </p>
+                    </div>
+
+                    <div class="card-feature">
+                        <span class="card-badge badge-client">Estilo Visual</span>
+                        <h4 style="margin-top: 0.5rem;">Glassmorphism Sofisticado</h4>
+                        <p style="font-size: 0.88rem;">
+                            Tarjetas con desenfoque de fondo (<code>backdrop-filter: blur(12px)</code>), bordes con reflejos translúcidos sutiles y sombras etéreas que separan los planos de información sin recargar la vista.
+                        </p>
+                    </div>
+
+                    <div class="card-feature">
+                        <span class="card-badge badge-admin">Ergonomía Táctil</span>
+                        <h4 style="margin-top: 0.5rem;">Mobile-First & Modales</h4>
+                        <p style="font-size: 0.88rem;">
+                            Píldoras de filtrado táctiles ("filter pills"), selectores de turnos adaptados a la zona del pulgar y modales con alturas máximas y scroll suave pensados tanto para móvil como para escritorio.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="callout callout-info" style="margin-top: 1.5rem;">
+                    <div class="callout-icon">📐</div>
+                    <div class="callout-content">
+                        <strong>Transición de Prototipo a Plantillas Thymeleaf:</strong>
+                        <p>Los componentes diseñados en Figma (tarjetas de citas, contadores de dashboard, semáforos de existencias y selector de franjas horarias) se trasladaron inicialmente en código estático HTML y fueron evolucionando progresivamente hacia componentes reutilizables (<code>th:fragment</code>) y módulos CSS limpios.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TIMELINE COMPLETO DE COMMITS -->
+            <section class="doc-section" id="timeline-commits">
+                <div class="section-header">
+                    <div class="section-header-title">
+                        <div class="section-icon">📜</div>
+                        <div>
+                            <h2>Línea de Tiempo de Commits y Evolución Técnica</h2>
+                            <p style="margin: 0; font-size: 0.95rem;">Registro cronológico pormenorizado extraído directamente del repositorio Git</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="timeline">
+
+                    <!-- Commit 1 -->
+                    <div class="timeline-item" id="fase-1">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="commit-hash">6a8c20e</span>
+                                <span class="commit-date">📅 17 de Julio, 2026</span>
+                                <span class="commit-author">👤 Alejandro López Ortega</span>
+                            </div>
+                            <h4>initial-commit — Génesis de la Arquitectura</h4>
+                            <p>
+                                Creación del esqueleto inicial del proyecto Spring Boot 3 con Maven, Thymeleaf como motor de renderizado del lado del servidor, configuración de base de datos en memoria H2 y dependencias principales de Spring Data JPA.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Commit 2 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="commit-hash">db55a29</span>
+                                <span class="commit-date">📅 27 de Julio, 2026</span>
+                                <span class="commit-author">👤 Alejandro López Ortega</span>
+                            </div>
+                            <h4>beta 1 commit — Primera Demo con Usuarios</h4>
+                            <p>
+                                <em>"This version is a demo, letting see the customer how the application work"</em>. Primera materialización funcional del prototipo de Figma. Permitió presentar a clientes reales el concepto visual del centro de belleza, la navegación inicial y la estructura de pantallas para cliente y empleado.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Commit 3 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="commit-hash">67e56f1</span>
+                                <span class="commit-date">📅 28 de Julio, 2026</span>
+                                <span class="commit-author">👤 Alejandro López Ortega</span>
+                            </div>
+                            <h4>beta 2 commit — Perfeccionamiento de la Demostración</h4>
+                            <p>
+                                Segunda iteración de la versión demostrativa. Refinamiento en el paso de parámetros entre vistas y primeros ajustes en la experiencia de navegación responsive.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Commit 4 -->
+                    <div class="timeline-item" id="fase-2">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="commit-hash">93e8bc2</span>
+                                <span class="commit-date">📅 18 de Septiembre, 2026</span>
+                                <span class="commit-author">👤 Alejandro López Ortega</span>
+                            </div>
+                            <h4>refactor: update UI elements and improve accessibility across multiple pages</h4>
+                            <p>
+                                Auditoría de accesibilidad y contrastes según directrices WCAG: ajuste de proporciones de color, introducción de etiquetas <code>aria-*</code>, jerarquía semántica <code>h1-h3</code> y optimización de controles interactivos para dispositivos táctiles.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Commit 5 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="commit-hash">8f41dbd</span>
+                                <span class="commit-date">📅 18 de Septiembre, 2026</span>
+                                <span class="commit-author">👤 Alejandro López Ortega</span>
+                            </div>
+                            <h4>feat: implement appointment and inventory services with CRUD operations</h4>
+                            <p>
+                                Paso fundamental de maqueta visual a lógica de negocio persistente. Creación de los servicios <code>AppointmentService</code> e <code>InventoryService</code>, implementación de operaciones CRUD completas y repositorios JPA para citas e inventarios.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Commit 6 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="commit-hash">4aa0da2</span>
+                                <span class="commit-date">📅 20 de Septiembre, 2026</span>
+                                <span class="commit-author">👤 alejandro</span>
+                            </div>
+                            <h4>- more information for landing page - notification now clickables - deleted the scroll button in desk view</h4>
+                            <p>
+                                Enriquecimiento informativo de la página pública con valor operativo de la plataforma. Transformación de las notificaciones de la cabecera en elementos clicables interactivos y supresión del botón de scroll redundante en monitores de escritorio.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Commit 7 -->
+                    <div class="timeline-item" id="fase-3">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="commit-hash">a36529e</span>
+                                <span class="commit-date">📅 21 de Septiembre, 2026</span>
+                                <span class="commit-author">👤 alejandro</span>
+                            </div>
+                            <h4>feat: enhance appointment booking with availability checks and error handling</h4>
+                            <p>
+                                Implementación del algoritmo matemático de comprobación de disponibilidad horaria: validación de horas pasadas, cálculo de slots según duración del tratamiento y detección de colisiones de agenda. <em>(Se documentó un caso límite en el flujo de reserva que condujo al siguiente parche)</em>.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Commit 8 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="commit-hash">0695d97</span>
+                                <span class="commit-date">📅 21 de Septiembre, 2026</span>
+                                <span class="commit-author">👤 alejandro</span>
+                            </div>
+                            <h4>feat: improve appointment handling with enhanced worker message checks and UI updates</h4>
+                            <p>
+                                Resolución de la gestión de turnos: el especialista puede rechazar o aprobar la cita adjuntando observaciones técnicas (<code>workerMessage</code>) para informar de manera transparente al cliente sobre su sesión.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Commit 9 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="commit-hash">7c20322</span>
+                                <span class="commit-date">📅 23 de Septiembre, 2026</span>
+                                <span class="commit-author">👤 alejandro</span>
+                            </div>
+                            <h4>feat: enhance center details and search functionality with treatment badge and improved UI elements</h4>
+                            <p>
+                                Incorporación del endpoint REST espacial con cálculo Haversine (<code>/api/centers</code>), presentación de insignias temáticas en tratamientos (manicura, facial, masajes) y enriquecimiento del layout de detalles del centro.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Commit 10 -->
+                    <div class="timeline-item" id="fase-4">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="commit-hash">4b2c0a8</span>
+                                <span class="commit-date">📅 24 de Septiembre, 2026</span>
+                                <span class="commit-author">👤 Alejandro López Ortega</span>
+                            </div>
+                            <h4>Refinamiento Integral de Calendario, Precios y Filter Pills</h4>
+                            <p>
+                                <strong>Hito clave en fidelidad de diseño:</strong>
+                            </p>
+                            <ul style="margin-left: 1.5rem; font-size: 0.88rem; color: var(--text-secondary);">
+                                <li>Corrección de los bloques de calendario diario: cálculo fidedigno de si un turno está libre u ocupado.</li>
+                                <li>Solución al bug visual de desbordamiento de precios en versión móvil cuando las cifras requerían más espacio.</li>
+                                <li>Generalización del componente CSS de píldoras de filtrado ("filter pills"), unificando su comportamiento tanto en Inventario como en "Mis Citas".</li>
+                                <li>Rediseño estético de la pantalla principal para mayor impacto visual.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Commit 11 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="commit-hash">b136a71</span>
+                                <span class="commit-date">📅 25 de Septiembre, 2026</span>
+                                <span class="commit-author">👤 Alejandro López Ortega</span>
+                            </div>
+                            <h4>Modularización de CSS y Abstracción de Componentes</h4>
+                            <p>
+                                Gran refactorización de código limpio: eliminación de bloques CSS incrustados en HTML hacia archivos especializados (<code>colors.css</code>, <code>common.css</code>, <code>modals.css</code>, etc.) y encapsulación de fragmentos Thymeleaf reutilizables.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Commit 12 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="commit-hash">e9a5df3</span>
+                                <span class="commit-date">📅 25 de Septiembre, 2026</span>
+                                <span class="commit-author">👤 Alejandro López Ortega</span>
+                            </div>
+                            <h4>Unificación y Simetría de Modales (Tratamientos y Productos)</h4>
+                            <p>
+                                Se rediseñaron los modales de "Añadir Tratamiento" y "Añadir Producto" bajo una arquitectura de maquetación idéntica. Se optimizó su comportamiento en pantalla completa para ofrecer una experiencia de usuario de escritorio simétrica, placentera y sin saltos visuales.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Commit 13 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="commit-hash">89a95a5</span>
+                                <span class="commit-date">📅 25 de Septiembre, 2026</span>
+                                <span class="commit-author">👤 Alejandro López Ortega</span>
+                            </div>
+                            <h4>logo added to the web application — Identidad de Marca</h4>
+                            <p>
+                                Integración oficial del logotipo e imagotipo corporativo en formato SVG y PNG, icono de favoritos (favicon) y presencia de marca unificada en todas las cabeceras.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Commit 14 -->
+                    <div class="timeline-item" id="fase-5">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="commit-hash">165ec65</span>
+                                <span class="commit-date">📅 27 de Septiembre, 2026</span>
+                                <span class="commit-author">👤 Alejandro López Ortega</span>
+                            </div>
+                            <h4>dockerization, PostgreSQL & Password Field</h4>
+                            <p>
+                                Salto a la infraestructura empresarial: creación del <code>Dockerfile</code> y <code>docker-compose.yml</code>, configuración para base de datos <strong>PostgreSQL 16</strong> con script de arranque <code>init.sql</code>, y adición del campo <code>password</code> en la entidad <code>User</code> con soporte para contraseñas cifradas.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Commit 15 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="commit-hash">84a93d0</span>
+                                <span class="commit-date">📅 27 de Septiembre, 2026</span>
+                                <span class="commit-author">👤 Alejandro López Ortega</span>
+                            </div>
+                            <h4>login, login-debug created & rediseño de landing.html</h4>
+                            <p>
+                                Culminación de la arquitectura actual: creación de la pantalla formal de Login (<code>login.html</code>) con encriptación BCrypt, panel de conmutación rápida para desarrollo (<code>login-selector.html</code>) y rediseño completo de <code>landing.html</code> con estética SaaS de alta gama, pipeline de 4 pasos y barra lateral flotante con seguimiento dinámico de secciones (ScrollSpy).
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- RETOS TÉCNICOS SUPERADOS -->
+            <section class="doc-section" id="retos-superados">
+                <div class="section-header">
+                    <div class="section-header-title">
+                        <div class="section-icon">🏆</div>
+                        <div>
+                            <h2>Retos Técnicos Superados Durante el Proyecto</h2>
+                            <p style="margin: 0; font-size: 0.95rem;">Complejidades algorítmicas, arquitectónicas y visuales resueltas</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="card-feature">
+                        <h4>1. Algoritmo de Turnos Continuos y Multi-Slot</h4>
+                        <p>
+                            Un tratamiento no dura siempre 30 minutos: los hay de 45, 60 o 90 minutos. El sistema no podía limitarse a comprobar un punto en el tiempo; debía verificar que todo el intervalo <code>[inicio, inicio + duracion]</code> estuviera libre de citas confirmadas y cupiera dentro del horario laboral (09:00 - 20:00).
+                        </p>
+                    </div>
+
+                    <div class="card-feature">
+                        <h4>2. Coexistencia H2 / PostgreSQL sin Discrepancias</h4>
+                        <p>
+                            El proyecto debía ser capaz de arrancar en local de forma inmediata para el desarrollador (usando H2 en memoria y <code>DatabaseSeeder.java</code>) o levantarse en producción con Docker Compose sobre PostgreSQL 16 utilizando <code>init.sql</code>, manteniendo sincronizados exactamente los mismos datos de demostración y cifrado de contraseñas.
+                        </p>
+                    </div>
+
+                    <div class="card-feature">
+                        <h4>3. Respeto al Diseño Figma en Pantallas Pequeñas</h4>
+                        <p>
+                            En el prototipo de Figma los precios y duraciones lucían impecables en pantallas amplias. Sin embargo, en dispositivos móviles estrechos (&lt; 380px), las etiquetas de precio rompían la línea visual. Se rediseñó la rejilla flexible con <code>flex-wrap: nowrap</code> y tamaños relativos <code>clamp()</code> para garantizar una presentación nítida en cualquier smartphone.
+                        </p>
+                    </div>
+
+                    <div class="card-feature">
+                        <h4>4. Dualidad de Reserva: Cliente Autenticado vs Invitado</h4>
+                        <p>
+                            Obligar al registro previo provoca hasta un 40% de abandonos de reservas. El sistema implementó una arquitectura flexible donde una cita puede vincularse a un usuario registrado (<code>client_id</code>) o a un cliente invitado (<code>guestName</code> y <code>guestPhone</code>), permitiendo a este último consultar sus citas mediante su número de teléfono.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ROADMAP FUTURO -->
+            <section class="doc-section" id="roadmap">
+                <div class="section-header">
+                    <div class="section-header-title">
+                        <div class="section-icon">🚀</div>
+                        <div>
+                            <h2>Hoja de Ruta Futura (Próximas Iteraciones)</h2>
+                            <p style="margin: 0; font-size: 0.95rem;">Líneas de evolución previstas para el ecosistema Cuquora CRM</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step-list">
+                    <div class="step-card">
+                        <div class="step-num">1</div>
+                        <div class="step-body">
+                            <h4>Pasarela de Pagos Online (Stripe / Redsys)</h4>
+                            <p>Cobro de señal o pago íntegro por adelantado al momento de reservar online, reduciendo las tasas de inasistencia (no-show) prácticamente a cero.</p>
+                        </div>
+                    </div>
+
+                    <div class="step-card">
+                        <div class="step-num">2</div>
+                        <div class="step-body">
+                            <h4>Recordatorios Automatizados vía WhatsApp Business & SMS</h4>
+                            <p>Envío de recordatorio interactivo 24 horas antes del turno con opción de reconfirmación en 1 clic.</p>
+                        </div>
+                    </div>
+
+                    <div class="step-card">
+                        <div class="step-num">3</div>
+                        <div class="step-body">
+                            <h4>Panel Analítico y Liquidación de Especialistas</h4>
+                            <p>Gráficos de facturación por cabina, rendimiento por profesional, comisiones y predicción de reposición de cosméticos mediante algoritmos de aprendizaje.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Footer Global -->
+    <footer class="doc-footer">
+        <ul class="footer-nav">
+            <li><a href="index.html">Portal General</a></li>
+            <li><a href="guia-roles.html">Guía de Uso por Roles</a></li>
+            <li><a href="manual-acciones.html">Manual de Acciones</a></li>
+            <li><a href="evolucion-proyecto.html">Evolución & Commits</a></li>
+        </ul>
+        <p>© 2026 Cuquora CRM — Plataforma de Gestión para Centros de Estética y Bienestar.</p>
+    </footer>
+
+</body>
+</html>

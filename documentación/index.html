@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuquora CRM - Portal de Documentación Oficial</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+</head>
+<body>
+
+    <!-- Header / Navbar Principal -->
+    <header class="doc-navbar">
+        <a href="index.html" class="brand-wrapper">
+            <img src="images/icon.png" alt="Logo Cuquora" class="brand-logo-img">
+            <div class="brand-titles">
+                <span class="brand-name">Cuquora<span>CRM</span></span>
+                <span class="brand-subtitle">Documentación Técnica & Operativa</span>
+            </div>
+        </a>
+        <nav>
+            <ul class="nav-links">
+                <li class="nav-link-item active"><a href="index.html">Portal General</a></li>
+                <li class="nav-link-item"><a href="guia-roles.html">Guía por Roles</a></li>
+                <li class="nav-link-item"><a href="manual-acciones.html">Manual de Acciones</a></li>
+                <li class="nav-link-item"><a href="evolucion-proyecto.html">Evolución & Commits</a></li>
+            </ul>
+        </nav>
+        <div>
+            <span class="nav-badge-app">v1.2.0 • Producción</span>
+        </div>
+    </header>
+
+    <!-- Layout Principal -->
+    <div class="doc-layout">
+
+        <!-- Sidebar Izquierdo -->
+        <aside class="doc-sidebar">
+            <div class="sidebar-group">
+                <div class="sidebar-title">Contenido del Portal</div>
+                <ul class="sidebar-nav">
+                    <li><a href="#introduccion" class="active">Visión General</a></li>
+                    <li><a href="#modulos-documentacion">Módulos Documentales</a></li>
+                    <li><a href="#arquitectura">Arquitectura Técnica</a></li>
+                    <li><a href="#modelo-datos">Modelo de Dominio</a></li>
+                    <li><a href="#sedes-soportadas">Sedes del Negocio</a></li>
+                    <li><a href="#despliegue-rapido">Guía de Puesta en Marcha</a></li>
+                    <li><a href="#credenciales-prueba">Credenciales Demo</a></li>
+                </ul>
+            </div>
+
+            <div class="sidebar-group">
+                <div class="sidebar-title">Documentos Especializados</div>
+                <ul class="sidebar-nav">
+                    <li><a href="guia-roles.html">📖 Guía de Uso por Roles</a></li>
+                    <li><a href="manual-acciones.html">⚡ Manual de Acciones & APIs</a></li>
+                    <li><a href="evolucion-proyecto.html">🚀 Historia de Commits & Figma</a></li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Área de Contenido -->
+        <main class="doc-content">
+
+            <!-- Hero Section -->
+            <section class="doc-hero" id="introduccion">
+                <span class="doc-tag">Software de Gestión Integral para Centros de Estética y Spas</span>
+                <h1>Cuquora CRM — Plataforma de Operaciones</h1>
+                <p>
+                    Bienvenido al centro de documentación oficial de <strong>Cuquora CRM</strong>. Este espacio centraliza el conocimiento operativo y técnico del sistema: flujos de usuario diferenciados por rol, catálogo exhaustivo de acciones del sistema, arquitectura del software y el registro pormenorizado de la evolución del proyecto desde sus primeros bocetos en Figma hasta su versión contenerizada actual.
+                </p>
+                <div class="hero-meta-row">
+                    <div class="hero-meta-item">
+                        <span>Tecnología:</span>
+                        <strong>Spring Boot 3 + PostgreSQL + Docker</strong>
+                    </div>
+                    <div class="hero-meta-item">
+                        <span>Interfaz:</span>
+                        <strong>Thymeleaf + CSS3 Lux Glassmorphism</strong>
+                    </div>
+                    <div class="hero-meta-item">
+                        <span>Seguridad:</span>
+                        <strong>BCrypt Encryption + Session Guard</strong>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tres Grandes Módulos Documentales -->
+            <section class="doc-section" id="modulos-documentacion">
+                <div class="section-header">
+                    <div class="section-header-title">
+                        <div class="section-icon">📚</div>
+                        <div>
+                            <h2>Documentación Requerida del Sistema</h2>
+                            <p style="margin: 0; font-size: 0.95rem;">Explora los tres pilares de conocimiento técnico y funcional desarrollados para la plataforma:</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid-3">
+                    <!-- Tarjeta 1: Guía de Roles -->
+                    <div class="card-feature">
+                        <div class="card-feature-header">
+                            <span class="card-badge badge-client">Experiencia de Usuario</span>
+                        </div>
+                        <h3>1. Guía de Uso por Roles</h3>
+                        <p>
+                            Manual práctico ilustrado paso a paso con los flujos de interacción para <strong>Clientes</strong> (reserva de citas, consulta de estado), <strong>Especialistas/Trabajadores</strong> (agenda de cabina, control de existencias, tratamiento de citas) y <strong>Directores</strong>.
+                        </p>
+                        <a href="guia-roles.html" style="font-weight: 600; display: inline-flex; align-items: center; gap: 0.4rem;">
+                            Acceder a la Guía por Roles →
+                        </a>
+                    </div>
+
+                    <!-- Tarjeta 2: Manual de Acciones -->
+                    <div class="card-feature">
+                        <div class="card-feature-header">
+                            <span class="card-badge badge-worker">Matriz Funcional</span>
+                        </div>
+                        <h3>2. Manual de Acciones</h3>
+                        <p>
+                            Catálogo exhaustivo de todas las operaciones y endpoints disponibles en el sistema. Incluye la matriz de permisos por usuario, parámetros HTTP, reglas de negocio anti-solapamiento y control de errores en tiempo real.
+                        </p>
+                        <a href="manual-acciones.html" style="font-weight: 600; display: inline-flex; align-items: center; gap: 0.4rem;">
+                            Consultar Manual de Acciones →
+                        </a>
+                    </div>
+
+                    <!-- Tarjeta 3: Evolución del Proyecto -->
+                    <div class="card-feature">
+                        <div class="card-feature-header">
+                            <span class="card-badge badge-admin">Historial de Desarrollo</span>
+                        </div>
+                        <h3>3. Evolución del Proyecto</h3>
+                        <p>
+                            Crónica detallada del proceso de desarrollo apoyada en los <strong>commits de Git</strong> y el paso de los prototipos de <strong>Figma</strong> al código: hitos Beta 1 y Beta 2, modularización de CSS, algoritmo de citas y dockerización.
+                        </p>
+                        <a href="evolucion-proyecto.html" style="font-weight: 600; display: inline-flex; align-items: center; gap: 0.4rem;">
+                            Ver Historial de Commits & Figma →
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Arquitectura Técnica -->
+            <section class="doc-section" id="arquitectura">
+                <div class="section-header">
+                    <div class="section-header-title">
+                        <div class="section-icon">⚙️</div>
+                        <div>
+                            <h2>Arquitectura del Sistema</h2>
+                            <p style="margin: 0; font-size: 0.95rem;">Diseño modular en capas desacopladas siguiendo las mejores prácticas de Spring Boot</p>
+                        </div>
+                    </div>
+                </div>
+
+                <p>
+                    Cuquora CRM implementa una arquitectura monolítica modular diseñada para alta cohesión y bajo acoplamiento. Se compone de un motor Spring Boot 3.3 ejecutándose sobre Java 17/21, persistencia relacional con JPA/Hibernate, motor de plantillas server-side Thymeleaf enriquecido con componentes interactivos JavaScript y estilos CSS desacoplados.
+                </p>
+
+                <div class="table-responsive">
+                    <table class="doc-table">
+                        <thead>
+                            <tr>
+                                <th>Capa Arquitectónica</th>
+                                <th>Componentes Principales</th>
+                                <th>Responsabilidad y Tecnologías</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Presentación / Vistas</strong></td>
+                                <td><code>Thymeleaf</code>, HTML5 Semántico, CSS3 Vanilla modular</td>
+                                <td>Renderizado dinámico de vistas responsivas, modales unificados, selector de franjas horarias y layout adaptativo.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Controladores Web & API</strong></td>
+                                <td><code>BaseController</code>, <code>AppointmentController</code>, <code>InventoryController</code>, <code>CenterApiController</code></td>
+                                <td>Gestión de peticiones HTTP, validación de parámetros, orquestación de sesión HTTP y exposición de endpoints REST JSON con cálculo geográfico Haversine.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Lógica de Negocio (Servicios)</strong></td>
+                                <td><code>AppointmentService</code>, <code>InventoryService</code>, <code>TreatmentService</code>, <code>UserService</code>, <code>NotificationService</code></td>
+                                <td>Validación matemática de disponibilidad de cabinas (intervalos de 30 min), prevención de roturas de stock, emisión de alertas proactivas y encriptación de contraseñas.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Acceso a Datos (Repositorios)</strong></td>
+                                <td><code>Spring Data JPA</code>, <code>CrudRepository</code> / <code>JpaRepository</code></td>
+                                <td>Consultas JPQL optimizadas para búsqueda espacial, filtrado por centro, ordenación cronológica y transacciones atómicas (<code>@Transactional</code>).</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Persistencia & Datos</strong></td>
+                                <td><code>PostgreSQL 16</code> (Producción / Docker) o <code>H2 Database</code> (Desarrollo)</td>
+                                <td>Esquema relacional íntegro con claves foráneas en cascada, unicidad de stock por producto/centro y script automatizado <code>init.sql</code>.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="callout callout-info">
+                    <div class="callout-icon">💡</div>
+                    <div class="callout-content">
+                        <strong>Principio de Aislamiento por Sede:</strong>
+                        <p>Cada centro de belleza dispone de su propio almacén de inventario y sus propios tratamientos asignados. El catálogo de productos es global, pero las existencias, umbrales y alertas se calculan de manera independiente por cada sede física.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Modelo de Dominio -->
+            <section class="doc-section" id="modelo-datos">
+                <div class="section-header">
+                    <div class="section-header-title">
+                        <div class="section-icon">🗄️</div>
+                        <div>
+                            <h2>Modelo de Dominio y Entidades</h2>
+                            <p style="margin: 0; font-size: 0.95rem;">Estructura relacional de base de datos que sustenta la plataforma</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="card-feature">
+                        <h4>🏢 Center (Centros de Belleza)</h4>
+                        <p>Representa una sede física. Contiene nombre, dirección física, teléfono, email de contacto y coordenadas geográficas (latitud y longitud) para el cálculo de distancia en tiempo real.</p>
+                    </div>
+                    <div class="card-feature">
+                        <h4>👤 User & Role (Usuarios y Roles)</h4>
+                        <p>Entidad de usuarios del sistema. Posee nombre, email único, teléfono, contraseña cifrada en BCrypt y asignación a un <code>Role</code> (<code>CLIENT</code> o <code>WORKER</code>). Los trabajadores se vinculan a un <code>Center</code>.</p>
+                    </div>
+                    <div class="card-feature">
+                        <h4>💆 Treatment (Catálogo de Servicios)</h4>
+                        <p>Tratamientos ofrecidos por cada centro. Incluye nombre, descripción, tarifa (€), duración estimada en minutos (30, 45, 60, 90) y tipología (<code>FACIAL</code>, <code>MASAJES</code>, <code>MANICURA_PEDICURA</code>, <code>CORPORAL</code>, etc.).</p>
+                    </div>
+                    <div class="card-feature">
+                        <h4>📦 Product & Inventory (Insumos y Stock)</h4>
+                        <p><code>Product</code> es el catálogo maestro (nombre, descripción, categoría, PVP). <code>Inventory</code> gestiona las existencias en cada sede con restricción de unicidad <code>(center_id, product_id)</code>.</p>
+                    </div>
+                    <div class="card-feature" style="grid-column: span 2;">
+                        <h4>📅 Appointment (Citas y Reservas)</h4>
+                        <p>Registra el turno acordado. Vincula un <code>dateTime</code> (fecha y hora exacta), un <code>treatment</code>, un <code>center</code>, el <code>client</code> (o datos de invitado <code>guestName</code>/<code>guestPhone</code>), el <code>worker</code> asignado, su estado (<code>PENDING</code>, <code>CONFIRMED</code>, <code>REJECTED</code>) y el <code>workerMessage</code> para feedback médico-estético.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sedes Demostrativas -->
+            <section class="doc-section" id="sedes-soportadas">
+                <div class="section-header">
+                    <div class="section-header-title">
+                        <div class="section-icon">📍</div>
+                        <div>
+                            <h2>Sedes Desplegadas en el Sistema</h2>
+                            <p style="margin: 0; font-size: 0.95rem;">Centros precargados en la base de datos para demostración inmediata</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid-4">
+                    <div class="card-feature">
+                        <span class="card-badge badge-client">Madrid Capital</span>
+                        <h4 style="margin-top: 0.5rem;">Cuquora Centro Histórico</h4>
+                        <p style="font-size: 0.85rem; margin-bottom: 0.5rem;">Calle Mayor 45, Madrid</p>
+                        <p style="font-size: 0.8rem; color: var(--text-muted);">Especialidad en manicura rusa, faciales con ácido hialurónico y aromaterapia.</p>
+                    </div>
+                    <div class="card-feature">
+                        <span class="card-badge badge-client">Madrid Norte</span>
+                        <h4 style="margin-top: 0.5rem;">Cuquora Plaza Norte</h4>
+                        <p style="font-size: 0.85rem; margin-bottom: 0.5rem;">Av. de la Ilustración 12, Madrid</p>
+                        <p style="font-size: 0.8rem; color: var(--text-muted);">Centro especializado en peluquería de autor, balayage y depilación láser.</p>
+                    </div>
+                    <div class="card-feature">
+                        <span class="card-badge badge-client">Barcelona</span>
+                        <h4 style="margin-top: 0.5rem;">Cuquora Sarrià</h4>
+                        <p style="font-size: 0.85rem; margin-bottom: 0.5rem;">Carrer Major de Sarrià 88, BCN</p>
+                        <p style="font-size: 0.8rem; color: var(--text-muted);">Cabinas de bienestar holístico, maderoterapia y diseño de cejas con henna.</p>
+                    </div>
+                    <div class="card-feature">
+                        <span class="card-badge badge-client">Internacional</span>
+                        <h4 style="margin-top: 0.5rem;">Cuquora Las Condes</h4>
+                        <p style="font-size: 0.85rem; margin-bottom: 0.5rem;">Av. Las Condes 8900, Santiago</p>
+                        <p style="font-size: 0.8rem; color: var(--text-muted);">Sede spa de lujo con rituales balineses y tratamientos capilares con botox.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Despliegue Rápido -->
+            <section class="doc-section" id="despliegue-rapido">
+                <div class="section-header">
+                    <div class="section-header-title">
+                        <div class="section-icon">🚀</div>
+                        <div>
+                            <h2>Puesta en Marcha del Proyecto</h2>
+                            <p style="margin: 0; font-size: 0.95rem;">Instrucciones para levantar la aplicación en entorno local o mediante Docker</p>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>Opción A: Ejecución con Docker Compose (Recomendada con PostgreSQL)</h3>
+                <p>Levanta el servidor web Spring Boot y la base de datos PostgreSQL 16 con los datos iniciales de <code>init.sql</code> ya sembrados:</p>
+                <pre><code># Clonar el repositorio y situarse en la raíz del proyecto
+cd CRM_CBelleza
+
+# Construir y levantar los contenedores en segundo plano
+docker-compose up --build -d
+
+# Visualizar logs del servicio web
+docker-compose logs -f app</code></pre>
+                <p>La aplicación estará accesible en: <code>http://localhost:8080</code></p>
+
+                <h3 style="margin-top: 2rem;">Opción B: Ejecución Local con Maven y Java 17+</h3>
+                <pre><code># En Windows PowerShell
+./mvnw.cmd spring-boot:run
+
+# En Linux / macOS
+./mvnw spring-boot:run</code></pre>
+                <p>
+                    Al arrancar localmente sin variables de entorno de PostgreSQL, Spring Boot arrancará con su base de datos en memoria H2 y ejecutará automáticamente <code>DatabaseSeeder.java</code>, precargando los centros, usuarios, citas, catálogo y stock.
+                </p>
+            </section>
+
+            <!-- Credenciales de Prueba -->
+            <section class="doc-section" id="credenciales-prueba">
+                <div class="section-header">
+                    <div class="section-header-title">
+                        <div class="section-icon">🔑</div>
+                        <div>
+                            <h2>Cuentas y Credenciales de Prueba (Demo)</h2>
+                            <p style="margin: 0; font-size: 0.95rem;">Usuarios precargados en el sistema para probar los diferentes perfiles</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="callout callout-warning">
+                    <div class="callout-icon">🔐</div>
+                    <div class="callout-content">
+                        <strong>Contraseña Universal de Demostración:</strong>
+                        <p>Todas las cuentas de prueba tienen asignada por defecto la contraseña: <code>password123</code> (encriptada con BCrypt en la base de datos).</p>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="doc-table">
+                        <thead>
+                            <tr>
+                                <th>Nombre Completo</th>
+                                <th>Email / Identificador</th>
+                                <th>Rol en el Sistema</th>
+                                <th>Centro Asignado</th>
+                                <th>Contraseña</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Carlos Mendoza</strong></td>
+                                <td><code>carlos@cbelleza.com</code></td>
+                                <td><span class="card-badge badge-worker">WORKER</span></td>
+                                <td>Cuquora Centro Histórico (Madrid)</td>
+                                <td><code>password123</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Lucía Romero</strong></td>
+                                <td><code>lucia.romero@cbelleza.com</code></td>
+                                <td><span class="card-badge badge-worker">WORKER</span></td>
+                                <td>Cuquora Centro Histórico (Madrid)</td>
+                                <td><code>password123</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Elena Rostova</strong></td>
+                                <td><code>elena@cbelleza.com</code></td>
+                                <td><span class="card-badge badge-worker">WORKER</span></td>
+                                <td>Cuquora Plaza Norte (Madrid)</td>
+                                <td><code>password123</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Marco Bellini</strong></td>
+                                <td><code>marco@cbelleza.com</code></td>
+                                <td><span class="card-badge badge-worker">WORKER</span></td>
+                                <td>Cuquora Sarrià (Barcelona)</td>
+                                <td><code>password123</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Ana Valdés</strong></td>
+                                <td><code>ana@cbelleza.com</code></td>
+                                <td><span class="card-badge badge-worker">WORKER</span></td>
+                                <td>Cuquora Las Condes (Santiago)</td>
+                                <td><code>password123</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Sofía Martínez</strong></td>
+                                <td><code>sofia@gmail.com</code></td>
+                                <td><span class="card-badge badge-client">CLIENT</span></td>
+                                <td>N/A (Cliente Registrada)</td>
+                                <td><code>password123</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Lucía Gómez</strong></td>
+                                <td><code>lucia@gmail.com</code></td>
+                                <td><span class="card-badge badge-client">CLIENT</span></td>
+                                <td>N/A (Cliente Registrada)</td>
+                                <td><code>password123</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Invitado (Sin cuenta)</strong></td>
+                                <td><em>Cualquier teléfono (ej: 611222333)</em></td>
+                                <td><span class="card-badge badge-guest">INVITADO</span></td>
+                                <td>Acceso directo a reservas</td>
+                                <td><em>No requerida</em></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="callout callout-success">
+                    <div class="callout-icon">⚡</div>
+                    <div class="callout-content">
+                        <strong>Selector Rápido de Sesión (/login-selector):</strong>
+                        <p>Para agilizar presentaciones y auditorías de código, el sistema incorpora la ruta <a href="/login-selector" target="_blank"><code>/login-selector</code></a>, que permite conmutar la sesión activa a cualquier usuario o centro con un solo clic.</p>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Footer Global -->
+    <footer class="doc-footer">
+        <ul class="footer-nav">
+            <li><a href="index.html">Portal General</a></li>
+            <li><a href="guia-roles.html">Guía de Uso por Roles</a></li>
+            <li><a href="manual-acciones.html">Manual de Acciones</a></li>
+            <li><a href="evolucion-proyecto.html">Evolución & Commits</a></li>
+        </ul>
+        <p>© 2026 Cuquora CRM — Plataforma de Gestión para Centros de Estética y Bienestar.</p>
+        <p style="font-size: 0.8rem; color: var(--text-muted);">Documentación generada en HTML autónomo y portable para el repositorio CRM_CBelleza.</p>
+    </footer>
+
+</body>
+</html>

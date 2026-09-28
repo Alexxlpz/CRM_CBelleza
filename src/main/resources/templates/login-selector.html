@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selector de Perfiles (Debug) - Cuquora CRM</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/icons/favicon.ico">
+    <!-- Lucide Icons CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.321.0/font/lucide.min.css">
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/home.css">
+</head>
+<body class="auth-page">
+    <div th:replace="~{fragments/navbar :: brand(false)}"></div>
+
+    <!-- Main Content -->
+    <main class="auth-container">
+        <div class="auth-card">
+            
+            <!-- Heading -->
+            <div class="auth-header">
+                <h2>Selector de perfiles</h2>
+                <p>Modo de depuración: selecciona un usuario para ingresar directamente</p>
+            </div>
+            
+            <!-- Direct Profile Selection Form -->
+            <form action="/select-session" method="POST" id="loginForm">
+                <input type="hidden" name="role" id="formRole" value="CLIENT">
+                <input type="hidden" name="userId" id="formUserId" value="">
+                
+                <div class="form-group">
+                    <label class="form-label" for="profileSelector">Seleccionar usuario o rol</label>
+                    <select id="profileSelector" class="form-control" onchange="updateLoginFormValues()" required>
+                        <option value="" disabled selected>Elige un perfil para continuar...</option>
+                        
+                        <optgroup label="Clientes">
+                            <option th:each="client : ${clients}" 
+                                    th:value="'CLIENT:' + ${client.id}" 
+                                    th:text="${client.name} + ' (Cliente registrado)'">
+                                Sofía Martínez
+                            </option>
+                            <option value="CLIENT:guest">Invitado (Sin registro)</option>
+                        </optgroup>
+                        
+                        <optgroup label="Colaboradores (Personal)">
+                            <option th:each="worker : ${workers}" 
+                                    th:value="'WORKER:' + ${worker.id}" 
+                                    th:text="${worker.name} + ' — ' + ${worker.center.name}">
+                                Carlos Mendoza — Centro Histórico
+                            </option>
+                        </optgroup>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-auth-submit">
+                    Ingresar con perfil seleccionado
+                </button>
+            </form>
+
+            <!-- Link back to standard credentials login -->
+            <div class="auth-footer-links">
+                <p><a href="/login">← Volver al inicio de sesión con credenciales</a></p>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Entorno de desarrollo.')}"></div>
+
+    <!-- Script to handle selector values -->
+    <script>
+        function updateLoginFormValues() {
+            const selector = document.getElementById('profileSelector');
+            const roleInput = document.getElementById('formRole');
+            const userIdInput = document.getElementById('formUserId');
+            
+            const selectedVal = selector.value;
+            if (selectedVal) {
+                const parts = selectedVal.split(':');
+                const role = parts[0];
+                const idVal = parts[1];
+                
+                roleInput.value = role;
+                if (idVal === 'guest') {
+                    userIdInput.value = '';
+                } else {
+                    userIdInput.value = idVal;
+                }
+            }
+        }
+    </script>
+</body>
+</html>
