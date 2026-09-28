@@ -27,6 +27,7 @@
 
             <!-- Error Notification -->
             <div class="auth-alert auth-alert-danger" th:if="${errorMessage != null or param.error != null}">
+                <i class="lucide-alert-circle"></i>
                 <span th:text="${errorMessage != null ? errorMessage : 'Credenciales no válidas. Revisa tu correo o usuario y contraseña.'}">
                     Credenciales no válidas. Revisa tu correo o usuario y contraseña.
                 </span>
@@ -34,6 +35,7 @@
 
             <!-- Success Notification -->
             <div class="auth-alert auth-alert-success" th:if="${successMessage != null or param.logout != null}">
+                <i class="lucide-check-circle-2"></i>
                 <span th:text="${successMessage != null ? successMessage : 'Has cerrado sesión correctamente.'}">
                     Has cerrado sesión correctamente.
                 </span>
@@ -93,14 +95,20 @@
                 
                 <!-- Submit Button -->
                 <button type="submit" class="btn btn-primary btn-auth-submit" id="submitBtn">
-                    Iniciar sesión
+                    <i class="lucide-log-in"></i>
+                    <span>Iniciar sesión</span>
                 </button>
             </form>
 
-            <!-- Guest / Alternative Link -->
-            <div class="auth-footer-links">
-                <p>¿Solo deseas agendar una cita? <a th:href="@{/select-session(role='CLIENT')}">Reservar como invitado</a></p>
+            <!-- Alternative Action / Guest Reservation -->
+            <div class="auth-divider">
+                <span>o si lo prefieres</span>
             </div>
+            
+            <a th:href="@{/select-session(role='CLIENT')}" class="btn-guest-action">
+                <i class="lucide-calendar-plus"></i>
+                <span>Reservar cita como invitado</span>
+            </a>
 
             <!-- ========================================================================= -->
             <!-- [DEBUG] BOTÓN ACCESO AL SELECTOR ANTIGUO                                  -->
@@ -113,22 +121,28 @@
             </div>
             <!-- ========================================================================= -->
 
+            <!-- Trust Row from Landing page -->
+            <div class="auth-trust-row">
+                <span><i class="lucide-shield-check"></i> Conexión SSL segura</span>
+                <span><i class="lucide-check"></i> Privacidad RGPD</span>
+            </div>
+
         </div>
     </main>
 
     <!-- Recovery Help Modal -->
     <div id="recoveryModal" class="custom-modal-overlay" style="display: none;">
-        <div class="custom-modal-content glass-panel" style="max-width: 420px; text-align: left; padding: 26px;">
+        <div class="custom-modal-content glass-panel" style="max-width: 440px; text-align: left; padding: 28px; border-radius: 20px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-                <h3 style="font-size: 18px; font-weight: 700; color: var(--text-main); margin: 0;">
+                <h3 style="font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; color: var(--text-main); margin: 0;">
                     Recuperación de contraseña
                 </h3>
-                <button type="button" onclick="closeRecoveryModal()" style="background: none; border: none; font-size: 22px; cursor: pointer; color: var(--text-muted);">&times;</button>
+                <button type="button" onclick="closeRecoveryModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-muted); line-height: 1;">&times;</button>
             </div>
-            <p style="font-size: 14px; color: var(--text-muted); line-height: 1.5; margin-bottom: 16px;">
+            <p style="font-size: 14px; color: var(--text-muted); line-height: 1.6; margin-bottom: 20px;">
                 Para restablecer tu acceso a <strong>Cuquora</strong>, contacta con la administración de tu centro de belleza habitual o con soporte técnico.
             </p>
-            <button type="button" class="btn btn-primary" onclick="closeRecoveryModal()" style="width: 100%; height: 40px; font-weight: 600;">
+            <button type="button" class="btn btn-primary" onclick="closeRecoveryModal()" style="width: 100%; height: 44px; font-weight: 700; border-radius: 12px;">
                 Entendido
             </button>
         </div>
