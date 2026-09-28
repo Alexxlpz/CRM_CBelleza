@@ -11,8 +11,9 @@
             </span>
             <a href="/logout" class="nav-logout"><i class="lucide-log-out"></i> Cerrar</a>
         </div>
-        <div class="nav-session-info" th:if="${showSession and sessionRole == null}">
-            <a href="/login" class="btn btn-primary btn-sm">Iniciar Sesión</a>
+        <div class="nav-session-info nav-auth-duo" th:if="${showSession and sessionRole == null}">
+            <a href="/login" class="nav-auth-btn nav-auth-login">Iniciar Sesión</a>
+            <a href="/register" class="nav-auth-btn nav-auth-register">Registrarse</a>
         </div>
     </nav>
 

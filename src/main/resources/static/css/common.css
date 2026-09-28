@@ -128,6 +128,70 @@ h1, h2, h3, h4, h5, h6 {
     font-weight: 600;
 }
 
+/* Navbar Auth Button Duo (Harmonious & Grouped) */
+.nav-auth-duo {
+    gap: 8px !important;
+}
+
+.nav-auth-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 38px;
+    padding: 0 18px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 13.5px;
+    font-weight: 700;
+    border-radius: 20px;
+    text-decoration: none;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    white-space: nowrap;
+    letter-spacing: 0.1px;
+}
+
+.nav-auth-login {
+    background: linear-gradient(135deg, var(--primary, #c5a880) 0%, var(--primary-dark, #a38258) 100%);
+    border: 1px solid transparent;
+    color: #ffffff !important;
+    box-shadow: 0 4px 14px rgba(197, 168, 128, 0.32);
+}
+
+.nav-auth-login:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(197, 168, 128, 0.45);
+    filter: brightness(1.03);
+}
+
+.nav-auth-register {
+    background: #ffffff;
+    border: 1px solid rgba(197, 168, 128, 0.45);
+    color: var(--text-main, #2b2825);
+    box-shadow: 0 2px 8px rgba(197, 168, 128, 0.08);
+}
+
+.nav-auth-register:hover {
+    background: #faf6f0;
+    border-color: var(--primary-dark, #a38258);
+    color: var(--primary-dark, #a38258);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(197, 168, 128, 0.18);
+}
+
+.nav-auth-btn:active {
+    transform: scale(0.97);
+}
+
+@media (max-width: 600px) {
+    .nav-auth-duo {
+        gap: 6px !important;
+    }
+    .nav-auth-btn {
+        height: 34px;
+        padding: 0 12px;
+        font-size: 12.5px;
+    }
+}
+
 .session-badge {
     background: rgba(197, 168, 128, 0.15);
     color: var(--primary-dark);

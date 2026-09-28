@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Cuenta - Cuquora CRM</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/icons/favicon.ico">
+    <!-- Lucide Icons CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.321.0/font/lucide.min.css">
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/home.css">
+</head>
+<body class="auth-page">
+    <div th:replace="~{fragments/navbar :: brand(false)}"></div>
+
+    <!-- Main Content -->
+    <main class="auth-container">
+        <div class="auth-card">
+            
+            <!-- Brand & Heading -->
+            <div class="auth-header">
+                <h2>Crear cuenta</h2>
+                <p>Únete a Cuquora para reservar citas y disfrutar de tratamientos exclusivos</p>
+            </div>
+
+            <!-- Error Notification -->
+            <div class="auth-alert auth-alert-danger" th:if="${errorMessage != null}">
+                <i class="lucide-alert-circle"></i>
+                <span th:text="${errorMessage}">
+                    Ha ocurrido un error al crear tu cuenta.
+                </span>
+            </div>
+            
+            <!-- Registration Form -->
+            <form action="/register" method="POST" id="registerForm" autocomplete="on">
+                
+                <!-- Name -->
+                <div class="form-group">
+                    <label for="nameInput" class="form-label">Nombre y apellidos</label>
+                    <input type="text" 
+                           id="nameInput" 
+                           name="name" 
+                           class="form-control"
+                           required 
+                           autofocus 
+                           autocomplete="name" 
+                           placeholder="Ej. Laura Gómez"
+                           th:value="${name}">
+                </div>
+
+                <!-- Email -->
+                <div class="form-group">
+                    <label for="emailInput" class="form-label">Correo electrónico</label>
+                    <input type="email" 
+                           id="emailInput" 
+                           name="email" 
+                           class="form-control"
+                           required 
+                           autocomplete="email" 
+                           placeholder="ejemplo@cbelleza.com"
+                           th:value="${email}">
+                </div>
+
+                <!-- Phone -->
+                <div class="form-group">
+                    <label for="phoneInput" class="form-label">Teléfono de contacto</label>
+                    <input type="tel" 
+                           id="phoneInput" 
+                           name="phone" 
+                           class="form-control"
+                           autocomplete="tel" 
+                           placeholder="+34 600 000 000"
+                           th:value="${phone}">
+                </div>
+
+                <!-- Password -->
+                <div class="form-group">
+                    <label for="passwordInput" class="form-label">Contraseña</label>
+                    <div class="password-wrapper">
+                        <input type="password" 
+                               id="passwordInput" 
+                               name="password" 
+                               class="form-control"
+                               required 
+                               autocomplete="new-password" 
+                               placeholder="Mínimo 6 caracteres"
+                               minlength="6">
+                        <button type="button" 
+                                class="password-toggle-btn" 
+                                id="togglePasswordBtn1" 
+                                onclick="togglePasswordVisibility('passwordInput', 'togglePasswordIcon1')" 
+                                title="Mostrar u ocultar contraseña"
+                                aria-label="Mostrar u ocultar contraseña">
+                            <i class="lucide-eye" id="togglePasswordIcon1"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Confirm Password -->
+                <div class="form-group">
+                    <label for="confirmPasswordInput" class="form-label">Confirmar contraseña</label>
+                    <div class="password-wrapper">
+                        <input type="password" 
+                               id="confirmPasswordInput" 
+                               name="confirmPassword" 
+                               class="form-control"
+                               required 
+                               autocomplete="new-password" 
+                               placeholder="Repite tu contraseña"
+                               minlength="6">
+                        <button type="button" 
+                                class="password-toggle-btn" 
+                                id="togglePasswordBtn2" 
+                                onclick="togglePasswordVisibility('confirmPasswordInput', 'togglePasswordIcon2')" 
+                                title="Mostrar u ocultar contraseña"
+                                aria-label="Mostrar u ocultar contraseña">
+                            <i class="lucide-eye" id="togglePasswordIcon2"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Submit Button -->
+                <button type="submit" class="btn btn-primary btn-auth-submit" id="submitBtn">
+                    <i class="lucide-user-plus"></i>
+                    <span>Crear mi cuenta</span>
+                </button>
+            </form>
+
+            <!-- Already have an account? Section with button to login -->
+            <div class="auth-divider">
+                <span>¿Ya tienes cuenta?</span>
+            </div>
+            
+            <a href="/login" class="btn-guest-action">
+                <i class="lucide-log-in"></i>
+                <span>Iniciar sesión con mi cuenta</span>
+            </a>
+
+            <!-- Trust Row from Landing page -->
+            <div class="auth-trust-row">
+                <span><i class="lucide-shield-check"></i> Conexión SSL segura</span>
+                <span><i class="lucide-check"></i> Privacidad RGPD garantizada</span>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Software de gestión para centros de estética.')}"></div>
+
+    <!-- Interactive Script -->
+    <script>
+        function togglePasswordVisibility(inputId, iconId) {
+            const passwordInput = document.getElementById(inputId);
+            const toggleIcon = document.getElementById(iconId);
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.className = 'lucide-eye-off';
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.className = 'lucide-eye';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -2018,24 +2018,30 @@ html {
 }
 
 .btn-hero-secondary {
-    padding: 14px 28px !important;
+    padding: 15px 32px !important;
     font-size: 15px !important;
-    font-weight: 600 !important;
-    border-radius: 12px !important;
-    background: #ffffff !important;
+    font-weight: 700 !important;
+    border-radius: 30px !important;
+    background: rgba(255, 255, 255, 0.85) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
     color: var(--text-main, #2b2825) !important;
-    border: 1px solid #dcd4c9 !important;
+    border: 1px solid rgba(197, 168, 128, 0.45) !important;
     text-decoration: none !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    transition: all 0.2s ease !important;
+    gap: 8px !important;
+    box-shadow: 0 4px 16px rgba(197, 168, 128, 0.12) !important;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
 .btn-hero-secondary:hover {
-    background: #f7f3ed !important;
-    border-color: #c9bea8 !important;
-    transform: translateY(-1px);
+    background: rgba(250, 244, 237, 0.95) !important;
+    border-color: var(--primary-dark, #a38258) !important;
+    color: var(--primary-dark, #a38258) !important;
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 10px 24px rgba(197, 168, 128, 0.25) !important;
 }
 
 /* Metrics / Proof Bar */

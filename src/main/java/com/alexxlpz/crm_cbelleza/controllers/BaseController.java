@@ -43,6 +43,71 @@ public class BaseController {
         return "landing";
     }
 
+    @GetMapping("/register")
+    public String registerPage(HttpSession session, Model model) {
+        String activeRole = (String) session.getAttribute("sessionRole");
+        if (activeRole != null) {
+            if ("CLIENT".equals(activeRole)) return "redirect:/client/centers";
+            if ("WORKER".equals(activeRole)) return "redirect:/worker/dashboard";
+        }
+        return "register";
+    }
+
+    @PostMapping("/register")
+    public String registerSubmit(@RequestParam("name") String name,
+                                 @RequestParam("email") String email,
+                                 @RequestParam(value = "phone", required = false) String phone,
+                                 @RequestParam("password") String password,
+                                 @RequestParam("confirmPassword") String confirmPassword,
+                                 HttpSession session,
+                                 RedirectAttributes redirectAttributes) {
+
+        if (name == null || name.trim().isEmpty() ||
+            email == null || email.trim().isEmpty() ||
+            password == null || password.trim().isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Por favor, completa todos los campos requeridos.");
+            redirectAttributes.addFlashAttribute("name", name);
+            redirectAttributes.addFlashAttribute("email", email);
+            redirectAttributes.addFlashAttribute("phone", phone);
+            return "redirect:/register";
+        }
+
+        if (password.length() < 6) {
+            redirectAttributes.addFlashAttribute("errorMessage", "La contraseña debe tener al menos 6 caracteres.");
+            redirectAttributes.addFlashAttribute("name", name);
+            redirectAttributes.addFlashAttribute("email", email);
+            redirectAttributes.addFlashAttribute("phone", phone);
+            return "redirect:/register";
+        }
+
+        if (!password.equals(confirmPassword)) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Las contraseñas no coinciden. Por favor, revísalas.");
+            redirectAttributes.addFlashAttribute("name", name);
+            redirectAttributes.addFlashAttribute("email", email);
+            redirectAttributes.addFlashAttribute("phone", phone);
+            return "redirect:/register";
+        }
+
+        String cleanEmail = email.trim().toLowerCase();
+        if (userService.findByEmail(cleanEmail).isPresent()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Este correo electrónico ya está registrado. Por favor, inicia sesión.");
+            redirectAttributes.addFlashAttribute("name", name);
+            redirectAttributes.addFlashAttribute("phone", phone);
+            return "redirect:/register";
+        }
+
+        User newUser = userService.registerUser(name.trim(), cleanEmail, phone != null && !phone.trim().isEmpty() ? phone.trim() : null, password, Role.CLIENT, null);
+
+        // Iniciar sesión automáticamente para el nuevo cliente
+        session.setAttribute("sessionRole", "CLIENT");
+        session.setAttribute("sessionUserId", newUser.getId());
+        session.setAttribute("sessionUserName", newUser.getName());
+        session.removeAttribute("sessionCenterId");
+        session.removeAttribute("sessionCenterName");
+
+        return "redirect:/client/centers";
+    }
+
     @GetMapping("/login")
     public String loginPage(@RequestParam(value = "error", required = false) String error,
                             @RequestParam(value = "logout", required = false) String logout,
