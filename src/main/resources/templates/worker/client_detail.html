@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.321.0/font/lucide.min.css">
     <!-- Stylesheets -->
     <link rel="stylesheet" href="/css/common.css">
-    <link rel="stylesheet" href="/css/worker.css">
     <link rel="stylesheet" href="/css/clients.css">
 </head>
 <body>
@@ -35,13 +34,13 @@
         <div class="client-profile-header-card">
             <div class="profile-identity">
                 <div class="profile-avatar-large"
-                     th:text="${isGuest ? #strings.substring(guestName, 0, 1) : #strings.substring(client.name, 0, 1)}">
+                     th:text="${isGuest ? (guestName != null and !guestName.isEmpty() ? #strings.substring(guestName, 0, 1) : 'I') : (client != null and client.name != null and !client.name.isEmpty() ? #strings.substring(client.name, 0, 1) : 'C')}">
                     M
                 </div>
                 <div>
-                    <h1 class="profile-title" th:text="${isGuest ? guestName : client.name}">María López</h1>
+                    <h1 class="profile-title" th:text="${isGuest ? guestName : (client != null ? client.name : '')}">María López</h1>
                     <div class="profile-contact-chips">
-                        <span class="profile-chip" th:if="${!isGuest and client.phone != null and !client.phone.isEmpty()}">
+                        <span class="profile-chip" th:if="${!isGuest and client != null and client.phone != null and !client.phone.isEmpty()}">
                             <i class="lucide-phone"></i>
                             <span th:text="${client.phone}">+34 600 111 222</span>
                         </span>
@@ -49,7 +48,7 @@
                             <i class="lucide-phone"></i>
                             <span th:text="${guestPhone}">+34 600 111 222</span>
                         </span>
-                        <span class="profile-chip" th:if="${!isGuest and client.email != null and !client.email.isEmpty()}">
+                        <span class="profile-chip" th:if="${!isGuest and client != null and client.email != null and !client.email.isEmpty()}">
                             <i class="lucide-mail"></i>
                             <span th:text="${client.email}">cliente@email.com</span>
                         </span>
@@ -94,7 +93,7 @@
                 </div>
 
                 <!-- Dynamic Form based on Center Template -->
-                <form th:action="${isGuest ? '/worker/clients/guest/card' : '/worker/clients/' + client.id + '/card'}"
+                <form th:action="${isGuest ? '/worker/clients/guest/card' : (client != null ? '/worker/clients/' + client.id + '/card' : '#')}"
                       method="post" class="ficha-form">
 
                     <!-- Hidden fields for guest if applicable -->
@@ -103,7 +102,7 @@
 
                     <div class="field-group" th:each="field : ${fields}">
                         <label class="field-label" th:for="${field.id}">
-                            <i class="lucide-file-text"></i>
+                            <i th:class="${field.type == 'number' ? 'lucide-hash' : (field.type == 'textarea' ? 'lucide-align-left' : 'lucide-file-text')}"></i>
                             <span th:text="${field.label}">Tipo de Piel / Cabello</span>
                         </label>
 
@@ -114,6 +113,16 @@
                                th:name="${field.id}"
                                class="field-input"
                                th:placeholder="${field.placeholder != null and !field.placeholder.isEmpty() ? field.placeholder : 'Escribe aquí...'}"
+                               th:value="${cardData[field.id]}">
+
+                        <!-- Number Input -->
+                        <input th:if="${field.type == 'number'}"
+                               type="number"
+                               step="any"
+                               th:id="${field.id}"
+                               th:name="${field.id}"
+                               class="field-input"
+                               th:placeholder="${field.placeholder != null and !field.placeholder.isEmpty() ? field.placeholder : '0'}"
                                th:value="${cardData[field.id]}">
 
                         <!-- Textarea -->

@@ -52,18 +52,51 @@
     gap: 12px;
 }
 
+.clients-action-group .btn-create-client,
+.clients-action-group .btn-template-config {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 44px;
+    min-height: 44px;
+    min-width: 190px;
+    padding: 0 20px;
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 700;
+    line-height: 1;
+    text-decoration: none;
+    box-sizing: border-box;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.clients-action-group .btn-create-client i,
+.clients-action-group .btn-template-config i {
+    font-size: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .btn-template-config {
     display: inline-flex;
-    align-items: end;
+    align-items: center;
+    justify-content: center;
     gap: 8px;
     padding: 11px 18px;
     border-radius: 12px;
     background: rgba(197, 168, 128, 0.14);
     border: 1px solid rgba(197, 168, 128, 0.3);
     color: var(--primary-dark, #a3875f);
+    font-family: inherit;
     font-size: 13.5px;
     font-weight: 700;
+    line-height: 1.4;
     text-decoration: none;
+    box-sizing: border-box;
     transition: var(--transition, all 0.25s ease);
 }
 
@@ -746,18 +779,22 @@
 .btn-create-client {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
     padding: 11px 20px;
     border-radius: 12px;
     background: linear-gradient(135deg, var(--primary, #c5a880) 0%, var(--primary-dark, #a3875f) 100%);
     color: #ffffff;
+    font-family: inherit;
     font-size: 13.5px;
     font-weight: 700;
+    line-height: 1.4;
     text-decoration: none;
-    border: none;
+    border: 1px solid transparent;
     cursor: pointer;
+    box-sizing: border-box;
     box-shadow: 0 4px 14px rgba(163, 135, 95, 0.25);
-    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, background 0.25s ease;
 }
 
 .btn-create-client:hover {
@@ -913,8 +950,13 @@
         grid-template-columns: 1fr 1fr;
         gap: 8px;
     }
+    .clients-action-group .btn-create-client,
+    .clients-action-group .btn-template-config,
     .btn-create-client, .btn-template-config {
         width: 100%;
+        min-width: 0;
+        height: auto;
+        min-height: 42px;
         justify-content: center;
         padding: 10px 8px;
         font-size: 12px;

@@ -193,18 +193,18 @@ INSERT INTO appointments (id, date_time, treatment_id, center_id, client_id, gue
 (3, CURRENT_DATE + INTERVAL '1 day' + TIME '09:00:00', 2, 1, 6, NULL, NULL, 1, 'CONFIRMED', NULL),
 (4, CURRENT_DATE + INTERVAL '1 day' + TIME '10:00:00', 3, 1, 7, NULL, NULL, 1, 'CONFIRMED', NULL),
 (5, CURRENT_DATE + INTERVAL '1 day' + TIME '11:00:00', 1, 1, 6, NULL, NULL, 1, 'CONFIRMED', NULL),
-(6, CURRENT_DATE + INTERVAL '1 day' + TIME '12:00:00', 2, 1, NULL, 'María López', '611222333', 1, 'CONFIRMED', 'Reserva invitado vía web.'),
+(6, CURRENT_DATE + INTERVAL '1 day' + TIME '12:00:00', 2, 1, 8, NULL, NULL, 1, 'CONFIRMED', 'Reserva confirmada.'),
 (7, CURRENT_DATE + INTERVAL '1 day' + TIME '13:00:00', 1, 1, 7, NULL, NULL, 1, 'CONFIRMED', NULL),
-(8, CURRENT_DATE + INTERVAL '1 day' + TIME '14:00:00', 3, 1, NULL, 'Pedro García', '611333444', 1, 'CONFIRMED', NULL),
+(8, CURRENT_DATE + INTERVAL '1 day' + TIME '14:00:00', 3, 1, 9, NULL, NULL, 1, 'CONFIRMED', NULL),
 (9, CURRENT_DATE + INTERVAL '1 day' + TIME '15:00:00', 2, 1, 6, NULL, NULL, 1, 'CONFIRMED', NULL),
 (10, CURRENT_DATE + INTERVAL '1 day' + TIME '16:00:00', 1, 1, 7, NULL, NULL, 1, 'CONFIRMED', NULL),
-(11, CURRENT_DATE + INTERVAL '1 day' + TIME '17:00:00', 3, 1, NULL, 'Ana Ruiz', '611444555', 1, 'CONFIRMED', NULL),
+(11, CURRENT_DATE + INTERVAL '1 day' + TIME '17:00:00', 3, 1, 10, NULL, NULL, 1, 'CONFIRMED', NULL),
 (12, CURRENT_DATE + INTERVAL '1 day' + TIME '18:00:00', 2, 1, 6, NULL, NULL, 1, 'CONFIRMED', NULL),
 
 -- Center 1 (Day + 2 - Pending and Confirmed)
 (13, CURRENT_DATE + INTERVAL '2 days' + TIME '09:00:00', 1, 1, 6, NULL, NULL, 1, 'CONFIRMED', NULL),
 (14, CURRENT_DATE + INTERVAL '2 days' + TIME '10:30:00', 2, 1, 7, NULL, NULL, 1, 'CONFIRMED', NULL),
-(15, CURRENT_DATE + INTERVAL '2 days' + TIME '14:00:00', 3, 1, NULL, 'Juan Pérez', '611777888', 1, 'PENDING', 'Pendiente de confirmación telefónica.'),
+(15, CURRENT_DATE + INTERVAL '2 days' + TIME '14:00:00', 3, 1, 8, NULL, NULL, 1, 'PENDING', 'Pendiente de confirmación telefónica.'),
 (16, CURRENT_DATE + INTERVAL '2 days' + TIME '16:00:00', 1, 1, 6, NULL, NULL, 1, 'CONFIRMED', NULL),
 
 -- Center 1 (Day + 3 - Includes Rejected)
@@ -215,7 +215,7 @@ INSERT INTO appointments (id, date_time, treatment_id, center_id, client_id, gue
 (19, CURRENT_DATE + TIME '10:00:00', 7, 2, 7, NULL, NULL, 3, 'CONFIRMED', NULL),
 (20, CURRENT_DATE + INTERVAL '1 day' + TIME '09:30:00', 8, 2, 6, NULL, NULL, 3, 'CONFIRMED', 'Solicita asesoramiento de corte.'),
 (21, CURRENT_DATE + INTERVAL '1 day' + TIME '11:00:00', 7, 2, 7, NULL, NULL, 3, 'CONFIRMED', NULL),
-(22, CURRENT_DATE + INTERVAL '1 day' + TIME '15:00:00', 8, 2, NULL, 'Laura Sánchez', '622111222', 3, 'CONFIRMED', NULL),
+(22, CURRENT_DATE + INTERVAL '1 day' + TIME '15:00:00', 8, 2, 9, NULL, NULL, 3, 'CONFIRMED', NULL),
 
 -- Center 3 (Barcelona Sarrià)
 (23, CURRENT_DATE + INTERVAL '1 day' + TIME '10:30:00', 12, 3, 8, NULL, NULL, 4, 'CONFIRMED', 'Primera sesión bono de 5 maderoterapia.'),

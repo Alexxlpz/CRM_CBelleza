@@ -42,7 +42,12 @@ public class DatabaseSeeder implements CommandLineRunner {
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional
     public void run(String... args) throws Exception {
+        // Eliminar a todos los clientes invitados (citas y fichas huérfanas) de la base de datos
+        clientCardRepository.deleteGuestCards();
+        appointmentRepository.deleteGuestAppointments();
+
         if (centerRepository.count() > 0) {
             return; // Already seeded (e.g. from init.sql in PostgreSQL)
         }
@@ -399,17 +404,17 @@ public class DatabaseSeeder implements CommandLineRunner {
         appointmentRepository.save(Appointment.builder().dateTime(tomorrow.withHour(9).withMinute(0)).treatment(t1_2).center(c1).client(client1).worker(w1).status(AppointmentStatus.CONFIRMED).build());
         appointmentRepository.save(Appointment.builder().dateTime(tomorrow.withHour(10).withMinute(0)).treatment(t1_3).center(c1).client(client2).worker(w1).status(AppointmentStatus.CONFIRMED).build());
         appointmentRepository.save(Appointment.builder().dateTime(tomorrow.withHour(11).withMinute(0)).treatment(t1_1).center(c1).client(client1).worker(w1).status(AppointmentStatus.CONFIRMED).build());
-        appointmentRepository.save(Appointment.builder().dateTime(tomorrow.withHour(12).withMinute(0)).treatment(t1_2).center(c1).guestName("María López").guestPhone("611222333").worker(w1).status(AppointmentStatus.CONFIRMED).workerMessage("Reserva invitado vía web.").build());
+        appointmentRepository.save(Appointment.builder().dateTime(tomorrow.withHour(12).withMinute(0)).treatment(t1_2).center(c1).client(client3).worker(w1).status(AppointmentStatus.CONFIRMED).workerMessage("Reserva confirmada.").build());
         appointmentRepository.save(Appointment.builder().dateTime(tomorrow.withHour(13).withMinute(0)).treatment(t1_1).center(c1).client(client2).worker(w1).status(AppointmentStatus.CONFIRMED).build());
-        appointmentRepository.save(Appointment.builder().dateTime(tomorrow.withHour(14).withMinute(0)).treatment(t1_3).center(c1).guestName("Pedro García").guestPhone("611333444").worker(w1).status(AppointmentStatus.CONFIRMED).build());
+        appointmentRepository.save(Appointment.builder().dateTime(tomorrow.withHour(14).withMinute(0)).treatment(t1_3).center(c1).client(client4).worker(w1).status(AppointmentStatus.CONFIRMED).build());
         appointmentRepository.save(Appointment.builder().dateTime(tomorrow.withHour(15).withMinute(0)).treatment(t1_2).center(c1).client(client1).worker(w1).status(AppointmentStatus.CONFIRMED).build());
         appointmentRepository.save(Appointment.builder().dateTime(tomorrow.withHour(16).withMinute(0)).treatment(t1_1).center(c1).client(client2).worker(w1).status(AppointmentStatus.CONFIRMED).build());
-        appointmentRepository.save(Appointment.builder().dateTime(tomorrow.withHour(17).withMinute(0)).treatment(t1_3).center(c1).guestName("Ana Ruiz").guestPhone("611444555").worker(w1).status(AppointmentStatus.CONFIRMED).build());
+        appointmentRepository.save(Appointment.builder().dateTime(tomorrow.withHour(17).withMinute(0)).treatment(t1_3).center(c1).client(client5).worker(w1).status(AppointmentStatus.CONFIRMED).build());
         appointmentRepository.save(Appointment.builder().dateTime(tomorrow.withHour(18).withMinute(0)).treatment(t1_2).center(c1).client(client1).worker(w1).status(AppointmentStatus.CONFIRMED).build());
 
         appointmentRepository.save(Appointment.builder().dateTime(dayAfter.withHour(9).withMinute(0)).treatment(t1_1).center(c1).client(client1).worker(w1).status(AppointmentStatus.CONFIRMED).build());
         appointmentRepository.save(Appointment.builder().dateTime(dayAfter.withHour(10).withMinute(30)).treatment(t1_2).center(c1).client(client2).worker(w1).status(AppointmentStatus.CONFIRMED).build());
-        appointmentRepository.save(Appointment.builder().dateTime(dayAfter.withHour(14).withMinute(0)).treatment(t1_3).center(c1).guestName("Juan Pérez").guestPhone("611777888").worker(w1).status(AppointmentStatus.PENDING).workerMessage("Pendiente de confirmación telefónica.").build());
+        appointmentRepository.save(Appointment.builder().dateTime(dayAfter.withHour(14).withMinute(0)).treatment(t1_3).center(c1).client(client3).worker(w1).status(AppointmentStatus.PENDING).workerMessage("Pendiente de confirmación telefónica.").build());
         appointmentRepository.save(Appointment.builder().dateTime(dayAfter.withHour(16).withMinute(0)).treatment(t1_1).center(c1).client(client1).worker(w1).status(AppointmentStatus.CONFIRMED).build());
 
         appointmentRepository.save(Appointment.builder().dateTime(day3.withHour(10).withMinute(0)).treatment(t1_2).center(c1).client(client2).worker(w1).status(AppointmentStatus.REJECTED).workerMessage("Horario no disponible por mantenimiento en cabina.").build());
@@ -419,7 +424,7 @@ public class DatabaseSeeder implements CommandLineRunner {
         appointmentRepository.save(Appointment.builder().dateTime(today.withHour(10).withMinute(0)).treatment(t2_1).center(c2).client(client2).worker(w3).status(AppointmentStatus.CONFIRMED).build());
         appointmentRepository.save(Appointment.builder().dateTime(tomorrow.withHour(9).withMinute(30)).treatment(t2_2).center(c2).client(client1).worker(w3).status(AppointmentStatus.CONFIRMED).workerMessage("Solicita asesoramiento de corte.").build());
         appointmentRepository.save(Appointment.builder().dateTime(tomorrow.withHour(11).withMinute(0)).treatment(t2_1).center(c2).client(client2).worker(w3).status(AppointmentStatus.CONFIRMED).build());
-        appointmentRepository.save(Appointment.builder().dateTime(tomorrow.withHour(15).withMinute(0)).treatment(t2_2).center(c2).guestName("Laura Sánchez").guestPhone("622111222").worker(w3).status(AppointmentStatus.CONFIRMED).build());
+        appointmentRepository.save(Appointment.builder().dateTime(tomorrow.withHour(15).withMinute(0)).treatment(t2_2).center(c2).client(client4).worker(w3).status(AppointmentStatus.CONFIRMED).build());
 
         // Center 3 Appointments
         appointmentRepository.save(Appointment.builder().dateTime(tomorrow.withHour(10).withMinute(30)).treatment(t3_1).center(c3).client(client3).worker(w4).status(AppointmentStatus.CONFIRMED).workerMessage("Primera sesión bono de 5 maderoterapia.").build());
@@ -455,8 +460,6 @@ public class DatabaseSeeder implements CommandLineRunner {
         clientCardRepository.save(ClientCard.builder()
                 .center(c1)
                 .client(client1)
-                .guestName(client1.getName())
-                .guestPhone(client1.getPhone())
                 .dataJson(client1CardData)
                 .updatedAt(LocalDateTime.now().minusDays(1))
                 .updatedBy(w1)

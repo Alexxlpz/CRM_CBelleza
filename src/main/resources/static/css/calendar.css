@@ -691,3 +691,48 @@
     font-size: 11px;
 }
 
+/* Badge New Client in Agenda Cards */
+.badge-new-client {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: linear-gradient(135deg, rgba(197, 168, 128, 0.28) 0%, rgba(224, 176, 176, 0.2) 100%);
+    border: 1px solid var(--primary, #c5a880);
+    color: var(--primary-dark, #876233);
+    font-size: 11px;
+    font-weight: 800;
+    padding: 3px 9px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    box-shadow: 0 2px 8px rgba(197, 168, 128, 0.18);
+}
+
+/* Ficha del Cliente Link Button */
+.btn-template-config {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 11px 18px;
+    border-radius: 12px;
+    background: rgba(197, 168, 128, 0.14);
+    border: 1px solid rgba(197, 168, 128, 0.3);
+    color: var(--primary-dark, #a3875f);
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 700;
+    line-height: 1.4;
+    text-decoration: none;
+    box-sizing: border-box;
+    transition: var(--transition, all 0.25s ease);
+}
+
+.btn-template-config:hover {
+    background: var(--primary, #c5a880);
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(163, 135, 95, 0.25);
+    transform: translateY(-1px);
+}
+
+

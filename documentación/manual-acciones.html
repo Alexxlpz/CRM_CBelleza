@@ -272,11 +272,11 @@
                 <div class="card-feature" style="margin-bottom: 1.5rem;">
                     <div class="card-feature-header">
                         <span class="http-post">POST</span>
-                        <strong style="font-size: 1.1rem; color: var(--text-primary);">/login</strong>
+                        <strong>/login</strong>
                         <span class="card-badge badge-guest">Público</span>
                     </div>
                     <p>Valida las credenciales de acceso contra la base de datos utilizando el algoritmo de cifrado irreversible <strong>BCrypt</strong>.</p>
-                    <ul style="margin-left: 1.5rem; font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.8rem;">
+                    <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.9rem; margin-bottom: 0.8rem;">
                         <li><strong>Parámetros enviados:</strong> <code>identifier</code> (email o nombre de usuario), <code>password</code> (contraseña en texto claro), <code>rememberMe</code> (opcional).</li>
                         <li><strong>Lógica de negocio:</strong> Busca el usuario primero por email insensible a mayúsculas; si no lo encuentra, busca por nombre. Compara la contraseña usando <code>passwordEncoder.matches(...)</code>.</li>
                         <li><strong>Resultado con éxito (Rol CLIENT):</strong> Inyecta <code>sessionRole="CLIENT"</code>, <code>sessionUserId</code> y <code>sessionUserName</code>. Redirige a <code>/client/centers</code>.</li>
@@ -288,7 +288,7 @@
                 <div class="card-feature" style="margin-bottom: 1.5rem;">
                     <div class="card-feature-header">
                         <span class="http-get">GET</span>
-                        <strong style="font-size: 1.1rem; color: var(--text-primary);">/logout</strong>
+                        <strong>/logout</strong>
                         <span class="card-badge badge-worker">Autenticado</span>
                     </div>
                     <p>Invalida de inmediato la <code>HttpSession</code> en el contenedor de servlets y limpia cualquier atributo de usuario o centro. Redirige a <code>/home</code>.</p>
@@ -297,7 +297,7 @@
                 <div class="card-feature">
                     <div class="card-feature-header">
                         <span class="http-get">GET</span> <span class="http-post">POST</span>
-                        <strong style="font-size: 1.1rem; color: var(--text-primary);">/select-session</strong>
+                        <strong>/select-session</strong>
                         <span class="card-badge badge-admin">Herramienta Demo</span>
                     </div>
                     <p>Permite conmutar la sesión activa a cualquier usuario o sede sin requerir contraseña. Parámetros: <code>role</code> (CLIENT/WORKER), <code>userId</code> (opcional) y <code>centerId</code> (opcional).</p>
@@ -319,7 +319,7 @@
                 <div class="card-feature" style="margin-bottom: 1.5rem;">
                     <div class="card-feature-header">
                         <span class="http-get">GET</span>
-                        <strong style="font-size: 1.1rem; color: var(--text-primary);">/client/centers</strong>
+                        <strong>/client/centers</strong>
                         <span class="card-badge badge-client">CLIENT / INVITADO</span>
                     </div>
                     <p>Devuelve la vista de exploración de sedes. Acepta el parámetro opcional <code>searchLocation</code> para filtrar centros cuya dirección o nombre coincidan parcialmente con el término de búsqueda.</p>
@@ -328,7 +328,7 @@
                 <div class="card-feature" style="margin-bottom: 1.5rem;">
                     <div class="card-feature-header">
                         <span class="http-get">GET</span>
-                        <strong style="font-size: 1.1rem; color: var(--text-primary);">/client/centers/{id}</strong>
+                        <strong>/client/centers/{id}</strong>
                         <span class="card-badge badge-client">CLIENT / INVITADO</span>
                     </div>
                     <p>Obtiene la ficha técnica completa del centro especificado por <code>{id}</code>: tratamientos ofrecidos por esa sede con duraciones y precios, y terapeutas autorizados que prestan servicio en sus instalaciones.</p>
@@ -337,13 +337,13 @@
                 <div class="card-feature" style="margin-bottom: 1.5rem;">
                     <div class="card-feature-header">
                         <span class="http-post">POST</span>
-                        <strong style="font-size: 1.1rem; color: var(--text-primary);">/client/booking</strong>
-                        <span class="card-badge badge-client">CLIENT / INVITADO</span>
+                        <strong>/client/booking</strong>
+                        <span class="card-badge badge-client">CLIENT (Autenticado)</span>
                     </div>
                     <p>Crea una nueva solicitud de cita sujeta a estrictas validaciones matemáticas de negocio:</p>
-                    <ul style="margin-left: 1.5rem; font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.8rem;">
+                    <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.9rem; margin-bottom: 0.8rem;">
                         <li><strong>Parámetros requeridos:</strong> <code>centerId</code> (ID de la sede), <code>treatmentId</code> (ID del tratamiento), <code>dateTime</code> (fecha y hora en formato ISO-8601).</li>
-                        <li><strong>Parámetros para invitado:</strong> <code>guestName</code> (nombre del cliente) y <code>guestPhone</code> (teléfono móvil de contacto).</li>
+                        <li><strong>Requisito de identidad:</strong> Cuenta de cliente registrada y autenticada en sesión (<code>sessionUserId</code>). El flujo de invitados ha sido revocado para garantizar fichas técnicas íntegras.</li>
                         <li><strong>Comportamiento transaccional (<code>@Transactional</code>):</strong>
                             <ol style="margin-left: 1.25rem; margin-top: 0.4rem;">
                                 <li>Rechaza fechas pasadas: <code>dateTime.isBefore(LocalDateTime.now())</code>.</li>
@@ -352,7 +352,7 @@
                                 <li>Comprueba solapamientos: verifica si existe alguna cita confirmada en esa sede cuyo tramo <code>[inicio, fin]</code> intersequen con el tramo solicitado.</li>
                             </ol>
                         </li>
-                        <li><strong>Resultado exitoso:</strong> Se persiste la entidad <code>Appointment</code> con estado <code>PENDING</code> y redirige a <code>/client/appointments</code>.</li>
+                        <li><strong>Resultado exitoso:</strong> Se persiste la entidad <code>Appointment</code> vinculada al usuario con estado <code>PENDING</code> y redirige a <code>/client/appointments</code>.</li>
                         <li><strong>En caso de conflicto:</strong> Captura <code>IllegalArgumentException</code> y redirige con mensaje flash <code>bookingError</code> a la ficha del centro.</li>
                     </ul>
                 </div>
@@ -360,10 +360,10 @@
                 <div class="card-feature">
                     <div class="card-feature-header">
                         <span class="http-get">GET</span>
-                        <strong style="font-size: 1.1rem; color: var(--text-primary);">/client/appointments</strong>
-                        <span class="card-badge badge-client">CLIENT / INVITADO</span>
+                        <strong>/client/appointments</strong>
+                        <span class="card-badge badge-client">CLIENT (Autenticado)</span>
                     </div>
-                    <p>Obtiene las citas del cliente. Si el usuario está autenticado, recupera todas sus citas mediante <code>findByClientIdOrderByDateTimeDesc</code>. Si es invitado, consulta por su teléfono mediante <code>findByGuestPhoneOrderByDateTimeDesc</code>.</p>
+                    <p>Obtiene y renderiza el historial cronológico de citas del cliente autenticado en sesión mediante la consulta <code>findByClientIdOrderByDateTimeDesc</code>.</p>
                 </div>
             </section>
 
@@ -382,7 +382,7 @@
                 <div class="card-feature" style="margin-bottom: 1.5rem;">
                     <div class="card-feature-header">
                         <span class="http-get">GET</span>
-                        <strong style="font-size: 1.1rem; color: var(--text-primary);">/worker/dashboard</strong>
+                        <strong>/worker/dashboard</strong>
                         <span class="card-badge badge-worker">WORKER</span>
                     </div>
                     <p>Calcula y proyecta las métricas de la jornada del centro: total de citas para hoy, citas de mañana, solicitudes pendientes de aprobación y recuento de productos con stock crítico (≤ 3 unidades).</p>
@@ -391,7 +391,7 @@
                 <div class="card-feature" style="margin-bottom: 1.5rem;">
                     <div class="card-feature-header">
                         <span class="http-post">POST</span>
-                        <strong style="font-size: 1.1rem; color: var(--text-primary);">/worker/appointments/{id}/approve</strong>
+                        <strong>/worker/appointments/{id}/approve</strong>
                         <span class="card-badge badge-worker">WORKER</span>
                     </div>
                     <p>
@@ -402,7 +402,7 @@
                 <div class="card-feature" style="margin-bottom: 1.5rem;">
                     <div class="card-feature-header">
                         <span class="http-post">POST</span>
-                        <strong style="font-size: 1.1rem; color: var(--text-primary);">/worker/appointments/{id}/reject</strong>
+                        <strong>/worker/appointments/{id}/reject</strong>
                         <span class="card-badge badge-worker">WORKER</span>
                     </div>
                     <p>
@@ -413,7 +413,7 @@
                 <div class="card-feature" style="margin-bottom: 1.5rem;">
                     <div class="card-feature-header">
                         <span class="http-post">POST</span>
-                        <strong style="font-size: 1.1rem; color: var(--text-primary);">/worker/inventory/{id}/adjust-stock</strong>
+                        <strong>/worker/inventory/{id}/adjust-stock</strong>
                         <span class="card-badge badge-worker">WORKER</span>
                     </div>
                     <p>
@@ -424,13 +424,13 @@
                 <div class="card-feature" style="margin-bottom: 1.5rem;">
                     <div class="card-feature-header">
                         <span class="http-post">POST</span>
-                        <strong style="font-size: 1.1rem; color: var(--text-primary);">/worker/inventory/add</strong>
+                        <strong>/worker/inventory/add</strong>
                         <span class="card-badge badge-worker">WORKER</span>
                     </div>
                     <p>
                         Soporta dos modalidades de abastecimiento:
                     </p>
-                    <ul style="margin-left: 1.5rem; font-size: 0.9rem; color: var(--text-secondary);">
+                    <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.9rem;">
                         <li><strong>Modo Existente (<code>mode="existing"</code>):</strong> Vincula al inventario del centro un producto del catálogo global indicando su stock inicial. Si ya existía, suma las unidades recibidas.</li>
                         <li><strong>Modo Nuevo (<code>mode="new"</code>):</strong> Registra un producto inédito en el catálogo (nombre, descripción, categoría, PVP) y genera simultáneamente su registro en el inventario del centro con el stock especificado.</li>
                     </ul>
@@ -439,11 +439,44 @@
                 <div class="card-feature">
                     <div class="card-feature-header">
                         <span class="http-post">POST</span>
-                        <strong style="font-size: 1.1rem; color: var(--text-primary);">/worker/treatments/add</strong>
+                        <strong>/worker/treatments/add</strong>
                         <span class="card-badge badge-worker">WORKER</span>
                     </div>
                     <p>
                         Da de alta un nuevo tratamiento en el centro asignado. Parámetros: <code>name</code>, <code>description</code>, <code>price</code>, <code>duration</code> (en minutos) y <code>type</code> (valor del enumerado <code>TreatmentType</code>).
+                    </p>
+                </div>
+
+                <div class="card-feature" style="margin-bottom: 1.5rem;">
+                    <div class="card-feature-header">
+                        <span class="http-get">GET</span>
+                        <strong>/worker/clients</strong>
+                        <span class="card-badge badge-worker">WORKER</span>
+                    </div>
+                    <p>
+                        Consulta la cartera de clientes de la sede. Permite búsqueda en tiempo real por nombre, teléfono o email (<code>?search=...</code>) e integra botones para alta de cliente y acceso a la configuración de la plantilla de ficha.
+                    </p>
+                </div>
+
+                <div class="card-feature" style="margin-bottom: 1.5rem;">
+                    <div class="card-feature-header">
+                        <span class="http-get">GET</span> / <span class="http-post">POST</span>
+                        <strong>/worker/clients/{clientId}</strong>
+                        <span class="card-badge badge-worker">WORKER</span>
+                    </div>
+                    <p>
+                        Visualiza y actualiza la <strong>ficha técnica clínica del cliente</strong>. Carga dinámicamente los campos definidos en la plantilla del centro y renderiza los inputs adecuados según el tipo (texto, textarea, select, número, etc.). Al hacer <code>POST</code>, serializa y persiste las respuestas en formato JSON en la entidad <code>ClientCard</code>.
+                    </p>
+                </div>
+
+                <div class="card-feature">
+                    <div class="card-feature-header">
+                        <span class="http-get">GET</span> / <span class="http-post">POST</span>
+                        <strong>/worker/clients/template</strong>
+                        <span class="card-badge badge-worker">WORKER</span>
+                    </div>
+                    <p>
+                        Editor visual de la <strong>plantilla de ficha técnica</strong> del centro. Permite a los especialistas añadir, renombrar, reordenar y configurar los tipos de datos requeridos a sus clientes. Soporta tipos <code>text</code>, <code>textarea</code>, <code>select</code>, <code>checkbox</code>, <code>date</code> y el nuevo tipo <code>number</code>. Persiste la estructura normalizada en <code>ClientCardTemplate</code>.
                     </p>
                 </div>
             </section>
@@ -463,7 +496,7 @@
                 <div class="card-feature" style="margin-bottom: 1.5rem;">
                     <div class="card-feature-header">
                         <span class="http-get">GET</span>
-                        <strong style="font-size: 1.1rem; color: var(--text-primary);">/api/centers/{id}/availability</strong>
+                        <strong>/api/centers/{id}/availability</strong>
                         <span class="card-badge badge-guest">JSON REST</span>
                     </div>
                     <p>
@@ -487,7 +520,7 @@
                 <div class="card-feature">
                     <div class="card-feature-header">
                         <span class="http-get">GET</span>
-                        <strong style="font-size: 1.1rem; color: var(--text-primary);">/api/centers</strong>
+                        <strong>/api/centers</strong>
                         <span class="card-badge badge-guest">JSON REST</span>
                     </div>
                     <p>

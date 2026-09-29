@@ -195,21 +195,19 @@ public class BaseController {
                                 HttpSession session) {
         
         if ("CLIENT".equals(role)) {
-            session.setAttribute("sessionRole", "CLIENT");
             if (userId != null) {
                 User client = userRepository.findById(userId).orElse(null);
-                if (client != null) {
+                if (client != null && client.getRole() == Role.CLIENT) {
+                    session.setAttribute("sessionRole", "CLIENT");
                     session.setAttribute("sessionUserId", client.getId());
                     session.setAttribute("sessionUserName", client.getName());
+                    session.removeAttribute("sessionCenterId");
+                    session.removeAttribute("sessionCenterName");
+                    return "redirect:/client/centers";
                 }
-            } else {
-                // Anonymous Guest Client mode
-                session.setAttribute("sessionUserId", null);
-                session.setAttribute("sessionUserName", "Invitado");
             }
-            session.removeAttribute("sessionCenterId");
-            session.removeAttribute("sessionCenterName");
-            return "redirect:/client/centers";
+            // Guest mode has been removed: clients must have an account
+            return "redirect:/login";
             
         } else if ("WORKER".equals(role)) {
             session.setAttribute("sessionRole", "WORKER");

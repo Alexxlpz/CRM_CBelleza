@@ -50,8 +50,9 @@ public class AppointmentController {
     public String listCenters(@RequestParam(value = "searchLocation", required = false) String searchLocation,
                               Model model, HttpSession session) {
         String role = (String) session.getAttribute("sessionRole");
-        if (role == null) {
-            return "redirect:/home";
+        Long clientUserId = (Long) session.getAttribute("sessionUserId");
+        if (!"CLIENT".equals(role) || clientUserId == null) {
+            return "redirect:/login";
         }
 
         List<Center> centers = centerService.getCentersFilteredByLocation(searchLocation);
@@ -70,8 +71,9 @@ public class AppointmentController {
     @GetMapping("/client/centers/{id}")
     public String centerDetails(@PathVariable("id") Long id, Model model, HttpSession session) {
         String role = (String) session.getAttribute("sessionRole");
-        if (role == null) {
-            return "redirect:/home";
+        Long clientUserId = (Long) session.getAttribute("sessionUserId");
+        if (!"CLIENT".equals(role) || clientUserId == null) {
+            return "redirect:/login";
         }
 
         Center center = centerService.getCenterById(id);
@@ -92,18 +94,18 @@ public class AppointmentController {
     public String createBooking(@RequestParam("centerId") Long centerId,
                                 @RequestParam("treatmentId") Long treatmentId,
                                 @RequestParam("dateTime") String dateTimeStr,
-                                @RequestParam(value = "guestName", required = false) String guestName,
-                                @RequestParam(value = "guestPhone", required = false) String guestPhone,
                                 HttpSession session,
                                 RedirectAttributes redirectAttributes) {
 
+        String role = (String) session.getAttribute("sessionRole");
         Long clientUserId = (Long) session.getAttribute("sessionUserId");
-        if (clientUserId == null && guestPhone != null) {
-            session.setAttribute("sessionGuestPhone", guestPhone);
+        if (!"CLIENT".equals(role) || clientUserId == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Debes iniciar sesión con tu cuenta de cliente para reservar una cita.");
+            return "redirect:/login";
         }
 
         try {
-            appointmentService.createBooking(centerId, treatmentId, java.time.LocalDateTime.parse(dateTimeStr), clientUserId, guestName, guestPhone);
+            appointmentService.createBooking(centerId, treatmentId, java.time.LocalDateTime.parse(dateTimeStr), clientUserId, null, null);
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("bookingError",
                     e.getMessage() != null ? e.getMessage() : "No se ha podido crear la reserva.");
@@ -115,20 +117,14 @@ public class AppointmentController {
 
     // Client View: List Client Appointments
     @GetMapping("/client/appointments")
-    public String clientAppointments(@RequestParam(value = "searchPhone", required = false) String searchPhone,
-                                     Model model, HttpSession session) {
+    public String clientAppointments(Model model, HttpSession session) {
         String role = (String) session.getAttribute("sessionRole");
-        if (role == null) {
-            return "redirect:/home";
-        }
-
         Long clientUserId = (Long) session.getAttribute("sessionUserId");
-        String phone = searchPhone != null ? searchPhone : (String) session.getAttribute("sessionGuestPhone");
-
-        List<Appointment> appointments = appointmentService.getClientAppointments(clientUserId, phone);
-        if (clientUserId == null && phone != null && !phone.trim().isEmpty()) {
-            model.addAttribute("currentSearchPhone", phone);
+        if (!"CLIENT".equals(role) || clientUserId == null) {
+            return "redirect:/login";
         }
+
+        List<Appointment> appointments = appointmentService.getClientAppointments(clientUserId, null);
 
         model.addAttribute("appointments", appointments);
         model.addAttribute("sessionRole", role);

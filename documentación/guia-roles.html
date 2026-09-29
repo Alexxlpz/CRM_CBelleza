@@ -85,14 +85,14 @@
                         <div class="section-icon">💆‍♀️</div>
                         <div>
                             <h2>1. Rol: Cliente y Usuario Final</h2>
-                            <p style="margin: 0; font-size: 0.95rem;">Flujo completo de reserva y seguimiento de citas para clientes registrados e invitados</p>
+                            <p style="margin: 0; font-size: 0.95rem;">Flujo completo de reserva y seguimiento de citas para clientes con cuenta registrada</p>
                         </div>
                     </div>
-                    <span class="card-badge badge-client">Perfil CLIENT / INVITADO</span>
+                    <span class="card-badge badge-client">Perfil CLIENT</span>
                 </div>
 
                 <p>
-                    El cliente disfruta de una experiencia fluida sin fricciones. No es obligatorio crear una cuenta previamente para agendar: puede reservar de inmediato como <strong>Invitado</strong> facilitando su teléfono y nombre, o <strong>iniciar sesión</strong> para acceder a su historial centralizado.
+                    El cliente disfruta de una experiencia moderna, segura y fluida. Para garantizar la integridad de las fichas clínicas, preferencias estéticas y trazabilidad de turnos, el sistema <strong>requiere disponer de una cuenta de usuario</strong> (creación inmediata en <code>/register</code> con contraseña cifrada en BCrypt), permitiéndole gestionar sus reservas desde cualquier dispositivo.
                 </p>
 
                 <div class="step-list">
@@ -115,7 +115,7 @@
                             <p>
                                 Al entrar a la ficha del centro, se presenta un banner corporativo con la información del salón y la lista categorizada de tratamientos disponibles:
                             </p>
-                            <ul style="margin-left: 1.5rem; margin-bottom: 0.8rem; color: var(--text-secondary);">
+                            <ul class="text-secondary" style="margin-left: 1.5rem; margin-bottom: 0.8rem;">
                                 <li><strong>Nombre y Descripción:</strong> Especifica los beneficios cosméticos y el procedimiento (ej. <em>"Manicura Rusa & Semipermanente"</em>).</li>
                                 <li><strong>Duración estimada:</strong> 30, 45, 60, 75 o 120 minutos (clave para el cálculo de turnos).</li>
                                 <li><strong>Tarifa clara en Euros (€):</strong> Precios transparentes sin costes ocultos.</li>
@@ -132,7 +132,7 @@
                             <p>
                                 Al pulsar en <strong>"Reservar"</strong> sobre cualquier tratamiento:
                             </p>
-                            <ol style="margin-left: 1.5rem; margin-bottom: 0.8rem; color: var(--text-secondary);">
+                            <ol class="text-secondary" style="margin-left: 1.5rem; margin-bottom: 0.8rem;">
                                 <li>Se abre el modal interactivo con el calendario de fechas disponibles.</li>
                                 <li>El sistema contacta con el motor de disponibilidad (<code>/api/centers/{id}/availability</code>) y calcula los slots de 30 minutos.</li>
                                 <li>Los intervalos que ya han sido confirmados por otros clientes o los tramos fuera del horario laboral (09:00 a 20:00) quedan deshabilitados automáticamente.</li>
@@ -145,9 +145,9 @@
                     <div class="step-card">
                         <div class="step-num">4</div>
                         <div class="step-body">
-                            <h4>Confirmación con Cuenta o como Invitado</h4>
+                            <h4>Confirmación con Cuenta Registrada</h4>
                             <p>
-                                Si el cliente ha iniciado sesión, su nombre y teléfono se asocian de forma automática a la cita. Si accede como invitado sin registrar, introduce su <strong>Nombre Completo</strong> y <strong>Teléfono Móvil</strong>. Al pulsar <strong>"Confirmar Reserva"</strong>, la solicitud ingresa al sistema con estado <span class="card-badge badge-admin">PENDIENTE</span>.
+                                El cliente autenticado confirma la reserva asociando automáticamente su identidad (<code>sessionUserId</code>). Al pulsar <strong>"Confirmar Reserva"</strong>, la solicitud ingresa al sistema con estado <span class="card-badge badge-admin">PENDIENTE</span> para la revisión del especialista del centro.
                             </p>
                         </div>
                     </div>
@@ -160,9 +160,9 @@
                             <p>
                                 En esta pantalla, el cliente consulta todas sus reservas activas e históricas:
                             </p>
-                            <ul style="margin-left: 1.5rem; color: var(--text-secondary);">
+                            <ul class="text-secondary" style="margin-left: 1.5rem;">
                                 <li><strong>Filtros rápidos (Filter Pills):</strong> Puede alternar entre <em>"Todas"</em>, <em>"Pendientes"</em>, <em>"Confirmadas"</em> o <em>"Rechazadas"</em>.</li>
-                                <li><strong>Buscador por teléfono:</strong> Para clientes invitados, una barra de búsqueda permite ingresar el número de teléfono para recuperar de inmediato todas las reservas asociadas a ese móvil.</li>
+                                <li><strong>Identificación unificada:</strong> Visualización directa del estado del turno en tiempo real sin necesidad de introducir teléfonos manuales.</li>
                                 <li><strong>Notas del especialista:</strong> Si la cita fue confirmada o rechazada, el cliente puede leer la nota personalizada dejada por el terapeuta (ej. <em>"Cliente habitual, usar esmalte hipoalergénico"</em>).</li>
                             </ul>
                         </div>
@@ -203,7 +203,7 @@
                         </div>
                         <h4>1. Panel de Control (/worker/dashboard)</h4>
                         <p>El terapeuta inicia su jornada con 4 métricas en tiempo real:</p>
-                        <ul style="margin-left: 1.25rem; font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 0.8rem;">
+                        <ul class="text-secondary" style="margin-left: 1.25rem; font-size: 0.88rem; margin-bottom: 0.8rem;">
                             <li><strong>Citas de Hoy:</strong> Número de clientes citados en el día en curso.</li>
                             <li><strong>Citas de Mañana:</strong> Previsión de carga de trabajo del día siguiente.</li>
                             <li><strong>Pendientes de Aprobación:</strong> Solicitudes online que requieren validación.</li>
@@ -218,10 +218,10 @@
                         </div>
                         <h4>2. Calendario de Turnos (/worker/calendar)</h4>
                         <p>Visualización interactiva de la jornada de trabajo:</p>
-                        <ul style="margin-left: 1.25rem; font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 0.8rem;">
+                        <ul class="text-secondary" style="margin-left: 1.25rem; font-size: 0.88rem; margin-bottom: 0.8rem;">
                             <li><strong>Selector de fecha:</strong> Navegación por días mediante pestañas táctiles.</li>
                             <li><strong>Franjas horarias ocupadas:</strong> Bloques con hora de inicio y fin.</li>
-                            <li><strong>Ficha de cita:</strong> Nombre del cliente/invitado, teléfono de contacto, servicio requerido y notas anteriores.</li>
+                            <li><strong>Ficha de cita:</strong> Nombre del cliente registrado, teléfono de contacto, servicio requerido y notas anteriores.</li>
                         </ul>
                     </div>
 
@@ -232,7 +232,7 @@
                         </div>
                         <h4>3. Aprobar y Rechazar Citas</h4>
                         <p>Control riguroso de cada solicitud de turno:</p>
-                        <ul style="margin-left: 1.25rem; font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 0.8rem;">
+                        <ul class="text-secondary" style="margin-left: 1.25rem; font-size: 0.88rem; margin-bottom: 0.8rem;">
                             <li><strong>Aprobar Cita:</strong> El trabajador se autoasigna como especialista responsable de la cita e introduce opcionalmente una nota de preparación. La cita pasa a estado <span class="card-badge badge-client">CONFIRMADA</span>.</li>
                             <li><strong>Rechazar Cita:</strong> En caso de indisponibilidad física o mantenimiento de cabina, pulsa "Rechazar" y detalla el motivo para información del cliente.</li>
                         </ul>
@@ -245,7 +245,7 @@
                         </div>
                         <h4>4. Inventario de Productos (/worker/inventory)</h4>
                         <p>Supervisión y abastecimiento sin roturas:</p>
-                        <ul style="margin-left: 1.25rem; font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 0.8rem;">
+                        <ul class="text-secondary" style="margin-left: 1.25rem; font-size: 0.88rem; margin-bottom: 0.8rem;">
                             <li><strong>Semáforos de stock:</strong> Estado Óptimo (verde), Bajo Stock ≤ 3 uds (amarillo) y Agotado = 0 uds (rojo).</li>
                             <li><strong>Ajustes en 1 clic:</strong> Botones <code>+</code> y <code>-</code> para registrar consumos de cabina en tiempo real.</li>
                             <li><strong>Modal de Añadir Producto:</strong> Permite incorporar existencias de productos ya catalogados o crear un producto nuevo.</li>
@@ -260,7 +260,7 @@
                         <p>
                             El trabajador puede auditar las tarifas y duraciones de los servicios que se ofrecen en su sede física. Si el centro incorpora una nueva técnica o aparatología, dispone del botón <strong>"Añadir Tratamiento"</strong> que abre un modal ergonómico idéntico al de inventario:
                         </p>
-                        <ul style="margin-left: 1.5rem; color: var(--text-secondary);">
+                        <ul class="text-secondary" style="margin-left: 1.5rem;">
                             <li><strong>Nombre y Descripción:</strong> Procedimiento técnico y beneficios.</li>
                             <li><strong>Precio (€) y Duración (minutos):</strong> Determina el tiempo exacto que reservará el algoritmo.</li>
                             <li><strong>Tipología:</strong> Selector con las categorías autorizadas (<code>FACIAL</code>, <code>CORPORAL</code>, <code>DEPILACION</code>, <code>MANICURA_PEDICURA</code>, <code>MASAJES</code>, <code>PELUQUERIA</code>).</li>
@@ -353,7 +353,7 @@
                             </tr>
                             <tr>
                                 <td><strong>Nivel de Autenticación</strong></td>
-                                <td>Opcional (reserva libre como invitado con teléfono).</td>
+                                <td>Obligatoria (registro con email, teléfono y contraseña BCrypt).</td>
                                 <td>Obligatoria (email/nombre y contraseña encriptada).</td>
                                 <td>Obligatoria con privilegios de gestión de centro.</td>
                             </tr>

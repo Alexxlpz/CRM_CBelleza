@@ -163,22 +163,6 @@
                             </small>
                         </div>
 
-                        <!-- 5. Guest Information (Displays only if user is an unregistered guest) -->
-                        <div class="guest-info-section" th:if="${sessionUserName == 'Invitado'}">
-                            <div class="guest-info-title">
-                                <i class="lucide-user-plus" style="font-size:12px; vertical-align:middle; margin-right:4px"></i>
-                                Datos de Contacto
-                            </div>
-                            <div class="form-group" style="margin-bottom:8px">
-                                <label class="form-label" for="guestName">Nombre Completo</label>
-                                <input type="text" name="guestName" id="guestName" class="form-control" placeholder="Escribe tu nombre..." required>
-                            </div>
-                            <div class="form-group" style="margin-bottom:0">
-                                <label class="form-label" for="guestPhone">Número de Teléfono</label>
-                                <input type="tel" name="guestPhone" id="guestPhone" class="form-control" placeholder="Ej. 600123456..." required>
-                            </div>
-                        </div>
-
                         <button type="submit" class="btn btn-primary booking-btn">
                             <i class="lucide-calendar-check-2"></i> Solicitar Cita
                         </button>

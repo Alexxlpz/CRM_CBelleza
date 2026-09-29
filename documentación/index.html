@@ -27,7 +27,7 @@
             </ul>
         </nav>
         <div>
-            <span class="nav-badge-app">v1.2.0 • Producción</span>
+            <span class="nav-badge-app">v1.3.0 • Producción</span>
         </div>
     </header>
 
@@ -42,6 +42,8 @@
                     <li><a href="#introduccion" class="active">Visión General</a></li>
                     <li><a href="#modulos-documentacion">Módulos Documentales</a></li>
                     <li><a href="#arquitectura">Arquitectura Técnica</a></li>
+                    <li><a href="#reparto-css">Modularización CSS</a></li>
+                    <li><a href="#auditoria-solid">Auditoría SOLID</a></li>
                     <li><a href="#modelo-datos">Modelo de Dominio</a></li>
                     <li><a href="#sedes-soportadas">Sedes del Negocio</a></li>
                     <li><a href="#despliegue-rapido">Guía de Puesta en Marcha</a></li>
@@ -206,6 +208,173 @@
                 </div>
             </section>
 
+            <!-- Arquitectura y Reparto Modular de Hojas de Estilo CSS -->
+            <section class="doc-section" id="reparto-css">
+                <div class="section-header">
+                    <div class="section-header-title">
+                        <div class="section-icon">🎨</div>
+                        <div>
+                            <h2>Modularización y Reparto de CSS por Vista</h2>
+                            <p style="margin: 0; font-size: 0.95rem;">Estrategia de desacoplamiento de estilos para optimizar rendimiento y eliminar redundancias</p>
+                        </div>
+                    </div>
+                </div>
+
+                <p>
+                    Originalmente, la aplicación concentraba estilos en archivos monolíticos (como <code>home.css</code> de más de 72 KB con estilos de landing y autenticación mezclados) y cargaba hojas de estilo cruzadas innecesarias en vistas secundarias. Se llevó a cabo una reorganización integral para que cada plantilla HTML importe única y exclusivamente los estilos que consume:
+                </p>
+
+                <div class="table-responsive">
+                    <table class="doc-table">
+                        <thead>
+                            <tr>
+                                <th>Archivo CSS</th>
+                                <th>Propósito y Dominio</th>
+                                <th>Vistas que lo Importan</th>
+                                <th>Optimización Realizada</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>common.css</code></td>
+                                <td>Design System global, variables CSS (colores champagne/lux, fuentes Playfair y Plus Jakarta Sans), navbar y pie de página.</td>
+                                <td>Todas las vistas HTML</td>
+                                <td>Capa base inmutable y compartida con cero estilos específicos de página.</td>
+                            </tr>
+                            <tr>
+                                <td><code>auth.css</code></td>
+                                <td>Tarjetas de autenticación glassmorphism (<code>.auth-card</code>), inputs, alternador de contraseña, selectores de rol y alertas de error/éxito.</td>
+                                <td><code>login.html</code>, <code>register.html</code>, <code>login-selector.html</code></td>
+                                <td><strong>Nuevo archivo extraído:</strong> Se retiraron ~500 líneas de <code>home.css</code>, reduciendo drásticamente la carga de red en autenticación.</td>
+                            </tr>
+                            <tr>
+                                <td><code>home.css</code></td>
+                                <td>Landing page comercial estilo SaaS (Hero, pipeline de 4 pasos, tarjetas interactivas de cabinas y monitor de agenda en tiempo real).</td>
+                                <td><code>landing.html</code></td>
+                                <td>Depurado: exclusivo para la página de inicio comercial, eliminando estilos de autenticación que no le correspondían.</td>
+                            </tr>
+                            <tr>
+                                <td><code>treatments.css</code></td>
+                                <td>Catálogo de tratamientos de cabina (<code>.treatment-item-card</code>), botón flotante (FAB) móvil y transformación a Bottom-Sheet.</td>
+                                <td><code>worker/treatments.html</code></td>
+                                <td><strong>Nuevo archivo extraído:</strong> Desacoplado de <code>worker.css</code>, evitando que el dashboard descargue código de modales de servicios.</td>
+                            </tr>
+                            <tr>
+                                <td><code>worker.css</code></td>
+                                <td>Panel principal del empleado: banner de bienvenida, métricas clave, rejilla de accesos rápidos y contadores analíticos.</td>
+                                <td><code>worker/dashboard.html</code></td>
+                                <td>Eliminación de bloques duplicados de <code>.action-card</code> y exclusión de las vistas de clientes que no lo usaban.</td>
+                            </tr>
+                            <tr>
+                                <td><code>calendar.css</code></td>
+                                <td>Rejilla interactiva mensual de citas, selección de día, filtros de estado y tarjetas de agenda con feedback.</td>
+                                <td><code>worker/calendar.html</code></td>
+                                <td>Autosuficiente: absorbió los badges y botones necesarios, <strong>eliminando la dependencia de <code>clients.css</code> (24 KB)</strong>.</td>
+                            </tr>
+                            <tr>
+                                <td><code>clients.css</code></td>
+                                <td>Cartera de clientes, tarjetas de contacto, fichas técnicas dinámicas y editor visual de la plantilla de ficha del centro.</td>
+                                <td><code>worker/clients.html</code>, <code>client_detail.html</code>, <code>client_card_template.html</code></td>
+                                <td>Eliminada la importación residual de <code>worker.css</code> en estas tres pantallas.</td>
+                            </tr>
+                            <tr>
+                                <td><code>cliente.css</code> / <code>citas.css</code></td>
+                                <td>Portal de reservas de cliente, selección de centro, mapas y consulta de historial de citas confirmadas.</td>
+                                <td><code>client/centers.html</code>, <code>center_details.html</code>, <code>booking.html</code>, <code>appointments.html</code></td>
+                                <td>Mantenidos independientes y combinados con <code>modals.css</code> y <code>datepicker.css</code> según necesidad real.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Auditoría de Principios SOLID -->
+            <section class="doc-section" id="auditoria-solid">
+                <div class="section-header">
+                    <div class="section-header-title">
+                        <div class="section-icon">📐</div>
+                        <div>
+                            <h2>Auditoría Arquitectónica de Principios SOLID</h2>
+                            <p style="margin: 0; font-size: 0.95rem;">Evaluación del diseño orientado a objetos del backend Java / Spring Boot</p>
+                        </div>
+                    </div>
+                </div>
+
+                <p>
+                    Se ha completado una inspección rigurosa del código fuente del backend frente a los 5 principios fundamentales de diseño de software (<strong>SOLID</strong>), detectando los siguientes puntos de fricción arquitectónica y sus planes de refactorización recomendados:
+                </p>
+
+                <div class="grid-2">
+                    <div class="card-feature">
+                        <span class="card-badge badge-admin">S — Single Responsibility</span>
+                        <h4 style="margin-top: 0.5rem;">Responsabilidad Única</h4>
+                        <p style="font-size: 0.88rem;"><strong>Hallazgos:</strong></p>
+                        <ul class="text-muted" style="font-size: 0.85rem; padding-left: 1.2rem;">
+                            <li><code>BaseController</code> orquesta landing comercial, validación de registro de usuarios, autenticación en sesión HTTP y simulador de depuración.</li>
+                            <li><code>ClientCardService</code> procesa serialización JSON de plantillas, operaciones CRUD de fichas y consolidación analítica de clientes a partir del histórico.</li>
+                            <li><code>AppointmentService</code> mezcla validación de horarios y persistencia con mapeo manual de entidades a <code>AppointmentCalendarDTO</code>.</li>
+                        </ul>
+                        <div class="callout callout-warning" style="margin-top: 0.75rem; font-size: 0.8rem;">
+                            <strong>Remediación:</strong> Separar en <code>LandingController</code>, <code>AuthController</code> y <code>DevSessionController</code>; extraer <code>AppointmentMapper</code> y desacoplar <code>ClientCardTemplateService</code>.
+                        </div>
+                    </div>
+
+                    <div class="card-feature">
+                        <span class="card-badge badge-admin">O — Open/Closed</span>
+                        <h4 style="margin-top: 0.5rem;">Abierto para Extensión / Cerrado para Modificación</h4>
+                        <p style="font-size: 0.88rem;"><strong>Hallazgos:</strong></p>
+                        <ul class="text-muted" style="font-size: 0.85rem; padding-left: 1.2rem;">
+                            <li>Bifurcaciones <code>if/else</code> basadas en Strings (<code>"CLIENT"</code> vs <code>"WORKER"</code>) en controladores; agregar un rol (ej. <code>ADMIN</code>) obliga a modificar código existente en múltiples clases.</li>
+                            <li>Horarios laborales (L-V 09:00 - 20:00, slots de 30 min) hardcodeados en el método privado <code>isWithinOpeningHours</code> de <code>AppointmentService</code>.</li>
+                            <li>Reglas de notificación (stock &le; 3, citas pendientes) centralizadas en un solo método rígido en <code>NotificationService</code>.</li>
+                        </ul>
+                        <div class="callout callout-warning" style="margin-top: 0.75rem; font-size: 0.8rem;">
+                            <strong>Remediación:</strong> Implementar patrón <em>Strategy</em> con interfaz <code>NotificationProvider</code>, extraer <code>SchedulePolicy</code> asociada a la entidad <code>Center</code> y gestionar roles con Spring Security <code>GrantedAuthority</code>.
+                        </div>
+                    </div>
+
+                    <div class="card-feature">
+                        <span class="card-badge badge-worker">L — Liskov Substitution</span>
+                        <h4 style="margin-top: 0.5rem;">Sustitución de Liskov</h4>
+                        <p style="font-size: 0.88rem;"><strong>Hallazgos:</strong></p>
+                        <ul class="text-muted" style="font-size: 0.85rem; padding-left: 1.2rem;">
+                            <li>Inyección de identidades fijas en la simulación de sesión de <code>BaseController</code> (asignación estática de ID <code>3L</code> sin validar existencia previa en BD).</li>
+                            <li><code>ClientSummaryDTO</code> modelaba indistintamente clientes registrados y fichas sin usuario, obligando a verificaciones defensivas <code>!= null</code> para prevenir <code>NullPointerException</code>.</li>
+                        </ul>
+                        <div class="callout callout-info" style="margin-top: 0.75rem; font-size: 0.8rem;">
+                            <strong>Remediación:</strong> Emplear un contexto de sesión fuertemente tipado (<code>UserSessionPrincipal</code>) con invariantes garantizados.
+                        </div>
+                    </div>
+
+                    <div class="card-feature">
+                        <span class="card-badge badge-worker">I — Interface Segregation</span>
+                        <h4 style="margin-top: 0.5rem;">Segregación de Interfaces</h4>
+                        <p style="font-size: 0.88rem;"><strong>Hallazgos:</strong></p>
+                        <ul class="text-muted" style="font-size: 0.85rem; padding-left: 1.2rem;">
+                            <li>Ausencia de interfaces en los servicios de negocio (<code>AppointmentService</code>, <code>ClientCardService</code>, etc.); los controladores se acoplan a la clase concreta completa.</li>
+                            <li>Interfaces amplias en repositorios: <code>AppointmentRepository</code> agrupa 14 métodos con propósitos muy distintos (operativa de reserva, analítica, agenda y borrado masivo).</li>
+                        </ul>
+                        <div class="callout callout-info" style="margin-top: 0.75rem; font-size: 0.8rem;">
+                            <strong>Remediación:</strong> Descomponer servicios en interfaces orientadas al caso de uso: <code>AppointmentBookingService</code>, <code>AppointmentScheduleQueryService</code> y <code>AppointmentManagementService</code>.
+                        </div>
+                    </div>
+
+                    <div class="card-feature" style="grid-column: span 2;">
+                        <span class="card-badge badge-client">D — Dependency Inversion</span>
+                        <h4 style="margin-top: 0.5rem;">Inversión de Dependencias</h4>
+                        <p style="font-size: 0.88rem;"><strong>Hallazgos:</strong></p>
+                        <ul class="text-muted" style="font-size: 0.85rem; padding-left: 1.2rem;">
+                            <li>Los controladores dependen directamente de implementaciones concretas en vez de abstracciones o contratos (<code>IAppointmentService</code>, <code>IUserService</code>).</li>
+                            <li><code>ClientCardController</code> inyecta y consulta directamente <code>ClientCardRepository</code>, saltándose por completo la capa de servicio (bypass arquitectónico).</li>
+                            <li><code>ClientCardService</code> instancia directamente <code>new ObjectMapper()</code> en lugar de inyectar el bean administrado por el contenedor IoC de Spring.</li>
+                        </ul>
+                        <div class="callout callout-warning" style="margin-top: 0.75rem; font-size: 0.8rem;">
+                            <strong>Remediación:</strong> Inyectar <code>ObjectMapper</code> a través del constructor, encapsular los repositorios exclusivamente dentro de servicios y desacoplar controladores mediante interfaces.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <!-- Modelo de Dominio -->
             <section class="doc-section" id="modelo-datos">
                 <div class="section-header">
@@ -235,9 +404,13 @@
                         <h4>📦 Product & Inventory (Insumos y Stock)</h4>
                         <p><code>Product</code> es el catálogo maestro (nombre, descripción, categoría, PVP). <code>Inventory</code> gestiona las existencias en cada sede con restricción de unicidad <code>(center_id, product_id)</code>.</p>
                     </div>
-                    <div class="card-feature" style="grid-column: span 2;">
+                    <div class="card-feature">
+                        <h4>📋 ClientCard & Template (Fichas Técnicas Dinámicas)</h4>
+                        <p>Motor de fichas técnicas personalizadas por centro. <code>ClientCardTemplate</code> almacena en JSON la estructura de campos configurables (soportando tipos <code>text</code>, <code>textarea</code>, <code>select</code>, <code>checkbox</code>, <code>date</code> y el nuevo tipo <code>number</code>). <code>ClientCard</code> almacena las respuestas y notas técnicas del especialista por cliente.</p>
+                    </div>
+                    <div class="card-feature">
                         <h4>📅 Appointment (Citas y Reservas)</h4>
-                        <p>Registra el turno acordado. Vincula un <code>dateTime</code> (fecha y hora exacta), un <code>treatment</code>, un <code>center</code>, el <code>client</code> (o datos de invitado <code>guestName</code>/<code>guestPhone</code>), el <code>worker</code> asignado, su estado (<code>PENDING</code>, <code>CONFIRMED</code>, <code>REJECTED</code>) y el <code>workerMessage</code> para feedback médico-estético.</p>
+                        <p>Registra el turno acordado. Vincula un <code>dateTime</code> (fecha y hora exacta), un <code>treatment</code>, un <code>center</code> y obligatoriamente un <code>client</code> registrado (cuenta de usuario activa), el <code>worker</code> asignado, su estado (<code>PENDING</code>, <code>CONFIRMED</code>, <code>REJECTED</code>) y el <code>workerMessage</code> para feedback médico-estético. <em>Nota: El flujo de clientes invitados ha sido suprimido para garantizar trazabilidad e integridad técnica de las fichas.</em></p>
                     </div>
                 </div>
             </section>
@@ -259,25 +432,25 @@
                         <span class="card-badge badge-client">Madrid Capital</span>
                         <h4 style="margin-top: 0.5rem;">Cuquora Centro Histórico</h4>
                         <p style="font-size: 0.85rem; margin-bottom: 0.5rem;">Calle Mayor 45, Madrid</p>
-                        <p style="font-size: 0.8rem; color: var(--text-muted);">Especialidad en manicura rusa, faciales con ácido hialurónico y aromaterapia.</p>
+                        <p class="text-muted" style="font-size: 0.8rem;">Especialidad en manicura rusa, faciales con ácido hialurónico y aromaterapia.</p>
                     </div>
                     <div class="card-feature">
                         <span class="card-badge badge-client">Madrid Norte</span>
                         <h4 style="margin-top: 0.5rem;">Cuquora Plaza Norte</h4>
                         <p style="font-size: 0.85rem; margin-bottom: 0.5rem;">Av. de la Ilustración 12, Madrid</p>
-                        <p style="font-size: 0.8rem; color: var(--text-muted);">Centro especializado en peluquería de autor, balayage y depilación láser.</p>
+                        <p class="text-muted" style="font-size: 0.8rem;">Centro especializado en peluquería de autor, balayage y depilación láser.</p>
                     </div>
                     <div class="card-feature">
                         <span class="card-badge badge-client">Barcelona</span>
                         <h4 style="margin-top: 0.5rem;">Cuquora Sarrià</h4>
                         <p style="font-size: 0.85rem; margin-bottom: 0.5rem;">Carrer Major de Sarrià 88, BCN</p>
-                        <p style="font-size: 0.8rem; color: var(--text-muted);">Cabinas de bienestar holístico, maderoterapia y diseño de cejas con henna.</p>
+                        <p class="text-muted" style="font-size: 0.8rem;">Cabinas de bienestar holístico, maderoterapia y diseño de cejas con henna.</p>
                     </div>
                     <div class="card-feature">
                         <span class="card-badge badge-client">Internacional</span>
                         <h4 style="margin-top: 0.5rem;">Cuquora Las Condes</h4>
                         <p style="font-size: 0.85rem; margin-bottom: 0.5rem;">Av. Las Condes 8900, Santiago</p>
-                        <p style="font-size: 0.8rem; color: var(--text-muted);">Sede spa de lujo con rituales balineses y tratamientos capilares con botox.</p>
+                        <p class="text-muted" style="font-size: 0.8rem;">Sede spa de lujo con rituales balineses y tratamientos capilares con botox.</p>
                     </div>
                 </div>
             </section>
@@ -430,7 +603,7 @@ docker-compose logs -f app</code></pre>
             <li><a href="evolucion-proyecto.html">Evolución & Commits</a></li>
         </ul>
         <p>© 2026 Cuquora CRM — Plataforma de Gestión para Centros de Estética y Bienestar.</p>
-        <p style="font-size: 0.8rem; color: var(--text-muted);">Documentación generada en HTML autónomo y portable para el repositorio CRM_CBelleza.</p>
+        <p class="text-muted" style="font-size: 0.8rem;">Documentación generada en HTML autónomo y portable para el repositorio CRM_CBelleza.</p>
     </footer>
 
 </body>

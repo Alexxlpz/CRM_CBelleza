@@ -20,18 +20,21 @@ public class ClientCardService {
     private final CenterRepository centerRepository;
     private final UserRepository userRepository;
     private final AppointmentRepository appointmentRepository;
+    private final UserService userService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public ClientCardService(ClientCardRepository clientCardRepository,
                              ClientCardTemplateRepository templateRepository,
                              CenterRepository centerRepository,
                              UserRepository userRepository,
-                             AppointmentRepository appointmentRepository) {
+                             AppointmentRepository appointmentRepository,
+                             UserService userService) {
         this.clientCardRepository = clientCardRepository;
         this.templateRepository = templateRepository;
         this.centerRepository = centerRepository;
         this.userRepository = userRepository;
         this.appointmentRepository = appointmentRepository;
+        this.userService = userService;
     }
 
     private static final String DEFAULT_FIELDS_JSON = """
@@ -153,18 +156,14 @@ public class ClientCardService {
     public List<ClientSummaryDTO> getClientsForCenter(Long centerId, String searchQuery) {
         List<Appointment> appointments = appointmentRepository.findByCenterIdOrderByDateTimeDesc(centerId);
 
-        // Group appointments by unique client identifier (clientId or guestPhone)
+        // Group appointments by registered client
         Map<String, List<Appointment>> clientAppointmentsMap = new LinkedHashMap<>();
 
         for (Appointment app : appointments) {
-            String key;
-            if (app.getClient() != null) {
-                key = "user_" + app.getClient().getId();
-            } else if (app.getGuestPhone() != null && !app.getGuestPhone().trim().isEmpty()) {
-                key = "guest_" + app.getGuestPhone().trim();
-            } else {
-                continue;
+            if (app.getClient() == null) {
+                continue; // Ignore any orphan guest appointments
             }
+            String key = "user_" + app.getClient().getId();
             clientAppointmentsMap.computeIfAbsent(key, k -> new ArrayList<>()).add(app);
         }
 
@@ -258,16 +257,19 @@ public class ClientCardService {
         // Include manually registered clients who don't have appointments yet
         List<ClientCard> allCards = clientCardRepository.findByCenterId(centerId);
         for (ClientCard card : allCards) {
-            String key = card.getClient() != null ? "user_" + card.getClient().getId() : (card.getGuestPhone() != null ? "guest_" + card.getGuestPhone().trim() : null);
-            if (key == null || clientAppointmentsMap.containsKey(key)) {
+            if (card.getClient() == null) {
+                continue; // Ignore any orphan guest cards
+            }
+            String key = "user_" + card.getClient().getId();
+            if (clientAppointmentsMap.containsKey(key)) {
                 continue; // Already included from appointment processing
             }
 
-            Long clientId = card.getClient() != null ? card.getClient().getId() : null;
-            String name = card.getClient() != null ? card.getClient().getName() : (card.getGuestName() != null ? card.getGuestName() : "Cliente");
-            String phone = card.getClient() != null ? card.getClient().getPhone() : (card.getGuestPhone() != null ? card.getGuestPhone() : "");
-            String email = card.getClient() != null && card.getClient().getEmail() != null ? card.getClient().getEmail() : "";
-            boolean isGuest = card.getClient() == null;
+            Long clientId = card.getClient().getId();
+            String name = card.getClient().getName();
+            String phone = card.getClient().getPhone() != null ? card.getClient().getPhone() : "";
+            String email = card.getClient().getEmail() != null ? card.getClient().getEmail() : "";
+            boolean isGuest = false;
 
             if (searchQuery != null && !searchQuery.trim().isEmpty()) {
                 String q = searchQuery.trim().toLowerCase();
@@ -320,33 +322,25 @@ public class ClientCardService {
             existingUserOpt = userRepository.findByEmail(cleanEmail);
         }
 
-        ClientCard card;
-        String redirectUrl;
-
+        User clientUser;
         if (existingUserOpt.isPresent() && existingUserOpt.get().getRole() == Role.CLIENT) {
-            User existingClient = existingUserOpt.get();
-            card = clientCardRepository.findByCenterIdAndClientId(centerId, existingClient.getId())
-                    .orElseGet(() -> ClientCard.builder()
-                            .center(center)
-                            .client(existingClient)
-                            .guestName(existingClient.getName())
-                            .guestPhone(existingClient.getPhone())
-                            .dataJson("{}")
-                            .updatedAt(LocalDateTime.now())
-                            .build());
-            redirectUrl = "/worker/clients/" + existingClient.getId();
+            clientUser = existingUserOpt.get();
         } else {
-            card = clientCardRepository.findByCenterIdAndGuestPhone(centerId, cleanPhone)
-                    .orElseGet(() -> ClientCard.builder()
-                            .center(center)
-                            .guestName(cleanName)
-                            .guestPhone(cleanPhone)
-                            .dataJson("{}")
-                            .updatedAt(LocalDateTime.now())
-                            .build());
-            card.setGuestName(cleanName);
-            redirectUrl = "/worker/clients/guest?phone=" + java.net.URLEncoder.encode(cleanPhone, java.nio.charset.StandardCharsets.UTF_8);
+            String autoEmail = cleanEmail != null ? cleanEmail : "cliente_" + cleanPhone.replaceAll("[^0-9]", "") + "@cbelleza.local";
+            if (userRepository.findByEmailIgnoreCase(autoEmail).isPresent()) {
+                autoEmail = "cliente_" + System.currentTimeMillis() + "@cbelleza.local";
+            }
+            clientUser = userService.registerUser(cleanName, autoEmail, cleanPhone, "password123", Role.CLIENT, null);
         }
+
+        ClientCard card = clientCardRepository.findByCenterIdAndClientId(centerId, clientUser.getId())
+                .orElseGet(() -> ClientCard.builder()
+                        .center(center)
+                        .client(clientUser)
+                        .dataJson("{}")
+                        .updatedAt(LocalDateTime.now())
+                        .build());
+        String redirectUrl = "/worker/clients/" + clientUser.getId();
 
         if (initialNotes != null && !initialNotes.trim().isEmpty()) {
             Map<String, String> data = parseCardData(card.getDataJson());

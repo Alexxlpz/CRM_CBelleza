@@ -37,19 +37,6 @@
         </div>
 
 
-        <!-- Phone search widget (for anonymous guests) -->
-        <div class="guest-search-panel glass-panel" th:if="${sessionUserName == 'Invitado'}">
-            <h3>Buscar Reservas por Número de Teléfono</h3>
-            <form action="/client/appointments" method="GET">
-                <input type="tel" name="searchPhone" class="form-control" 
-                       placeholder="Ingresa el teléfono utilizado para reservar..." 
-                       th:value="${currentSearchPhone}" required>
-                <button type="submit" class="btn btn-primary">
-                    <i class="lucide-search"></i> <span>Buscar</span>
-                </button>
-            </form>
-        </div>
-
         <!-- Appointments Cards Grid -->
         <div class="appointments-grid" th:if="${not #lists.isEmpty(appointments)}">
             <th:block th:each="app : ${appointments}">
@@ -60,9 +47,7 @@
         <!-- Empty state -->
         <div class="no-appointments-box glass-panel" th:if="${#lists.isEmpty(appointments)}">
             <i class="lucide-calendar-off"></i>
-            <p th:if="${sessionUserName != 'Invitado'}">No posees citas registradas.</p>
-            <p th:if="${sessionUserName == 'Invitado' and currentSearchPhone == null}">Ingresa tu número de teléfono de contacto arriba para consultar tus reservas.</p>
-            <p th:if="${sessionUserName == 'Invitado' and currentSearchPhone != null}">No se encontraron reservas asociadas al teléfono especificado.</p>
+            <p>No posees citas registradas en tu historial.</p>
         </div>
         
     </main>

@@ -53,25 +53,20 @@ public class AppointmentService {
             throw new IllegalArgumentException("Esa hora ya está ocupada");
         }
 
-        User client = null;
-        if (clientUserId != null) {
-            client = userRepository.findById(clientUserId).orElse(null);
+        if (clientUserId == null) {
+            throw new IllegalArgumentException("Es necesario disponer de una cuenta de cliente registrada para reservar una cita");
         }
+        User client = userRepository.findById(clientUserId)
+                .orElseThrow(() -> new IllegalArgumentException("Cliente no encontrado en el sistema"));
 
         Appointment appointment = Appointment.builder()
                 .dateTime(dateTime)
                 .treatment(treatment)
                 .center(center)
+                .client(client)
                 .status(AppointmentStatus.PENDING)
                 .workerMessage("")
                 .build();
-
-        if (client != null) {
-            appointment.setClient(client);
-        } else {
-            appointment.setGuestName(guestName);
-            appointment.setGuestPhone(guestPhone);
-        }
 
         appointmentRepository.save(appointment);
     }

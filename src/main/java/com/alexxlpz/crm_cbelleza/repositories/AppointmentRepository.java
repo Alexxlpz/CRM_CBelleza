@@ -26,4 +26,9 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
     List<Appointment> findByCenterIdAndClientIdOrderByDateTimeDesc(Long centerId, Long clientId);
     List<Appointment> findByCenterIdAndGuestPhoneOrderByDateTimeDesc(Long centerId, String guestPhone);
+
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.transaction.annotation.Transactional
+    @org.springframework.data.jpa.repository.Query("DELETE FROM Appointment a WHERE a.client IS NULL")
+    void deleteGuestAppointments();
 }

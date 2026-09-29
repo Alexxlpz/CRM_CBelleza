@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.321.0/font/lucide.min.css">
     <!-- Stylesheets -->
     <link rel="stylesheet" href="/css/common.css">
-    <link rel="stylesheet" href="/css/home.css">
+    <link rel="stylesheet" href="/css/auth.css">
 </head>
 <body class="auth-page">
     <div th:replace="~{fragments/navbar :: brand(false)}"></div>
@@ -104,16 +104,6 @@
             <div class="auth-footer-links" style="margin-top: 18px; padding-top: 14px;">
                 <p>¿No tienes una cuenta? <a href="/register">Regístrate aquí</a></p>
             </div>
-
-            <!-- Alternative Action / Guest Reservation -->
-            <div class="auth-divider">
-                <span>o si lo prefieres</span>
-            </div>
-            
-            <a th:href="@{/select-session(role='CLIENT')}" class="btn-guest-action">
-                <i class="lucide-calendar-plus"></i>
-                <span>Reservar cita como invitado</span>
-            </a>
 
             <!-- ========================================================================= -->
             <!-- [DEBUG] BOTÓN ACCESO AL SELECTOR ANTIGUO                                  -->

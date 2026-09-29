@@ -11,4 +11,9 @@ public interface ClientCardRepository extends JpaRepository<ClientCard, Long> {
     Optional<ClientCard> findByCenterIdAndClientId(Long centerId, Long clientId);
     Optional<ClientCard> findByCenterIdAndGuestPhone(Long centerId, String guestPhone);
     List<ClientCard> findByCenterId(Long centerId);
+
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.transaction.annotation.Transactional
+    @org.springframework.data.jpa.repository.Query("DELETE FROM ClientCard c WHERE c.client IS NULL")
+    void deleteGuestCards();
 }
