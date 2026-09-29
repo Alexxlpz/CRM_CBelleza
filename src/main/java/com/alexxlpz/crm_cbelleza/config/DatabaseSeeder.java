@@ -18,6 +18,8 @@ public class DatabaseSeeder implements CommandLineRunner {
     private final AppointmentRepository appointmentRepository;
     private final TreatmentRepository treatmentRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ClientCardTemplateRepository clientCardTemplateRepository;
+    private final ClientCardRepository clientCardRepository;
 
     public DatabaseSeeder(CenterRepository centerRepository,
                           UserRepository userRepository,
@@ -25,7 +27,9 @@ public class DatabaseSeeder implements CommandLineRunner {
                           InventoryRepository inventoryRepository,
                           AppointmentRepository appointmentRepository,
                           TreatmentRepository treatmentRepository,
-                          PasswordEncoder passwordEncoder) {
+                          PasswordEncoder passwordEncoder,
+                          ClientCardTemplateRepository clientCardTemplateRepository,
+                          ClientCardRepository clientCardRepository) {
         this.centerRepository = centerRepository;
         this.userRepository = userRepository;
         this.productRepository = productRepository;
@@ -33,6 +37,8 @@ public class DatabaseSeeder implements CommandLineRunner {
         this.appointmentRepository = appointmentRepository;
         this.treatmentRepository = treatmentRepository;
         this.passwordEncoder = passwordEncoder;
+        this.clientCardTemplateRepository = clientCardTemplateRepository;
+        this.clientCardRepository = clientCardRepository;
     }
 
     @Override
@@ -422,5 +428,38 @@ public class DatabaseSeeder implements CommandLineRunner {
         // Center 4 Appointments
         appointmentRepository.save(Appointment.builder().dateTime(tomorrow.withHour(10).withMinute(0)).treatment(t4_1).center(c4).client(client1).worker(w5).status(AppointmentStatus.CONFIRMED).build());
         appointmentRepository.save(Appointment.builder().dateTime(tomorrow.withHour(14).withMinute(30)).treatment(t4_2).center(c4).client(client2).worker(w5).status(AppointmentStatus.CONFIRMED).build());
+
+        // 7. Seed Client Card Templates
+        String defaultTemplateJson = """
+            [
+              {"id":"tipo_piel_cabello","label":"Tipo de Piel / Cabello","type":"text","placeholder":"Ej. Piel mixta / Cabello fino teñido","required":false},
+              {"id":"alergias_sensibilidades","label":"Alergias o Sensibilidades","type":"text","placeholder":"Ej. Alergia al amoníaco, látex, fragancias","required":false},
+              {"id":"tratamientos_habituales","label":"Coloración / Tratamientos habituales","type":"text","placeholder":"Ej. Tinte 6.34, Mechas balayage, etc.","required":false},
+              {"id":"observaciones_preferencias","label":"Observaciones y Preferencias Técnicas","type":"textarea","placeholder":"Preferencias de temperatura de lavado, notas del especialista, etc.","required":false}
+            ]
+            """;
+        clientCardTemplateRepository.save(ClientCardTemplate.builder().center(c1).fieldsJson(defaultTemplateJson).build());
+        clientCardTemplateRepository.save(ClientCardTemplate.builder().center(c2).fieldsJson(defaultTemplateJson).build());
+        clientCardTemplateRepository.save(ClientCardTemplate.builder().center(c3).fieldsJson(defaultTemplateJson).build());
+        clientCardTemplateRepository.save(ClientCardTemplate.builder().center(c4).fieldsJson(defaultTemplateJson).build());
+
+        // 8. Seed Sample Client Card for client1 at Center 1
+        String client1CardData = """
+            {
+              "tipo_piel_cabello":"Piel normal sensible. Cabello castaño claro con mechas balayage.",
+              "alergias_sensibilidades":"Sensibilidad a tintes con alto contenido en amoníaco.",
+              "tratamientos_habituales":"Manicura semipermanente base rubber tono nude y mechas anuales.",
+              "observaciones_preferencias":"Prefiere citas por la mañana. Le gusta el café con leche de avena."
+            }
+            """;
+        clientCardRepository.save(ClientCard.builder()
+                .center(c1)
+                .client(client1)
+                .guestName(client1.getName())
+                .guestPhone(client1.getPhone())
+                .dataJson(client1CardData)
+                .updatedAt(LocalDateTime.now().minusDays(1))
+                .updatedBy(w1)
+                .build());
     }
 }

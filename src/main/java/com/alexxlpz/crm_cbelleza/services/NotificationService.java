@@ -4,21 +4,28 @@ import com.alexxlpz.crm_cbelleza.entities.Appointment;
 import com.alexxlpz.crm_cbelleza.entities.AppointmentStatus;
 import com.alexxlpz.crm_cbelleza.entities.Inventory;
 import com.alexxlpz.crm_cbelleza.repositories.AppointmentRepository;
+import com.alexxlpz.crm_cbelleza.repositories.ClientCardRepository;
 import com.alexxlpz.crm_cbelleza.repositories.InventoryRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class NotificationService {
     private final InventoryRepository inventoryRepository;
     private final AppointmentRepository appointmentRepository;
+    private final ClientCardRepository clientCardRepository;
 
-    public NotificationService(InventoryRepository inventoryRepository, AppointmentRepository appointmentRepository) {
+    public NotificationService(InventoryRepository inventoryRepository,
+                               AppointmentRepository appointmentRepository,
+                               ClientCardRepository clientCardRepository) {
         this.inventoryRepository = inventoryRepository;
         this.appointmentRepository = appointmentRepository;
+        this.clientCardRepository = clientCardRepository;
     }
 
     public List<NotificationItem> getNotificationsForCenter(Long centerId) {
@@ -72,6 +79,53 @@ public class NotificationService {
             notifications.add(new NotificationItem(
                     "Tienes " + tomorrowCount + " cita" + (tomorrowCount > 1 ? "s" : "") + " confirmada" + (tomorrowCount > 1 ? "s" : "") + " para mañana.",
                     "/worker/calendar?date=" + tomorrow));
+        }
+
+        // Pending client cards alert
+        Set<String> inspectedClients = new HashSet<>();
+        int pendingCardsCount = 0;
+        String samplePendingClientName = null;
+        String samplePendingUrl = "/worker/clients";
+
+        for (Appointment app : appointments) {
+            if (app.getStatus() == AppointmentStatus.CONFIRMED && !app.getDateTime().toLocalDate().isAfter(today)) {
+                String clientKey = app.getClient() != null ? "user_" + app.getClient().getId() : "guest_" + app.getGuestPhone();
+                if (inspectedClients.add(clientKey)) {
+                    boolean hasCardData = false;
+                    if (app.getClient() != null) {
+                        var card = clientCardRepository.findByCenterIdAndClientId(centerId, app.getClient().getId());
+                        if (card.isPresent() && card.get().getDataJson() != null && !card.get().getDataJson().trim().isEmpty() && !card.get().getDataJson().equals("{}")) {
+                            hasCardData = true;
+                        }
+                        if (!hasCardData) {
+                            pendingCardsCount++;
+                            if (samplePendingClientName == null) {
+                                samplePendingClientName = app.getClient().getName();
+                                samplePendingUrl = "/worker/clients/" + app.getClient().getId();
+                            }
+                        }
+                    } else if (app.getGuestPhone() != null && !app.getGuestPhone().trim().isEmpty()) {
+                        var card = clientCardRepository.findByCenterIdAndGuestPhone(centerId, app.getGuestPhone().trim());
+                        if (card.isPresent() && card.get().getDataJson() != null && !card.get().getDataJson().trim().isEmpty() && !card.get().getDataJson().equals("{}")) {
+                            hasCardData = true;
+                        }
+                        if (!hasCardData) {
+                            pendingCardsCount++;
+                            if (samplePendingClientName == null) {
+                                samplePendingClientName = app.getGuestName() != null ? app.getGuestName() : "Invitado";
+                                samplePendingUrl = "/worker/clients/guest?phone=" + app.getGuestPhone().trim();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (pendingCardsCount > 0) {
+            String msg = pendingCardsCount == 1
+                    ? "Ficha pendiente: Recuerda rellenar la ficha de " + samplePendingClientName + " tras su cita."
+                    : "Tienes " + pendingCardsCount + " fichas de clientes pendientes de rellenar tras sus citas.";
+            notifications.add(new NotificationItem(msg, samplePendingUrl));
         }
 
         return notifications;

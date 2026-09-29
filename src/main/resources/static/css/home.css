@@ -2599,119 +2599,197 @@ html {
 /* DESKTOP ANIMATED LEFT RAIL & EXAMPLE CENTER SHOWCASE                      */
 /* ========================================================================= */
 
-/* Large White Animated Desktop Left Rail - Docked to Left Edge */
+/* ========================================================================= */
+/* DESKTOP FULL-HEIGHT LUXURY INTERACTIVE LEFT RAIL                         */
+/* ========================================================================= */
+
 .desktop-left-rail {
     display: none;
 }
 
 @media (min-width: 1200px) {
     .desktop-left-rail {
-        display: block;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
         position: fixed;
         left: 0;
-        top: 120px;
-        width: 220px;
-        background: #ffffff;
-        border: 1px solid #e7ded3;
-        border-left: none;
-        border-radius: 0 16px 16px 0;
-        padding: 24px 16px;
-        box-shadow: 4px 10px 30px rgba(43, 40, 37, 0.08);
-        z-index: 95;
+        top: 72px;
+        bottom: 0;
+        height: calc(100vh - 72px);
+        height: calc(100dvh - 72px);
+        width: 255px;
+        background: rgba(255, 255, 255, 0.82);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border: none;
+        border-right: 1px solid rgba(197, 168, 128, 0.25);
+        border-radius: 0;
+        padding: 32px 16px 24px 16px;
+        box-shadow: 4px 0 30px rgba(197, 168, 128, 0.08);
+        z-index: 1000;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .desktop-left-rail::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    .desktop-left-rail::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .desktop-left-rail::-webkit-scrollbar-thumb {
+        background: rgba(197, 168, 128, 0.3);
+        border-radius: 4px;
+    }
+
+    .desktop-left-rail::-webkit-scrollbar-thumb:hover {
+        background: var(--primary-dark, #a3875f);
     }
 
     .landing-main-container {
-        margin-left: auto !important;
+        margin-left: max(275px, calc((100vw - 1040px) / 2)) !important;
         margin-right: auto !important;
-        max-width: min(980px, calc(100vw - 480px)) !important;
-        padding-left: 20px;
-        padding-right: 20px;
-    }
-}
-
-@media (min-width: 1540px) {
-    .landing-main-container {
         max-width: 1040px !important;
-        margin-left: auto !important;
-        margin-right: auto !important;
+        padding-left: 24px;
+        padding-right: 24px;
     }
 }
 
 .rail-header {
-    margin-bottom: 16px;
-    padding: 0 8px 12px 8px;
-    border-bottom: 1px solid #f2ebe2;
-}
-
-.rail-eyebrow {
-    font-size: 11px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: var(--primary-dark, #a3875f);
-    display: block;
-    margin-bottom: 2px;
+    margin-bottom: 20px;
+    padding: 0 8px 16px 8px;
+    border-bottom: 1px solid rgba(197, 168, 128, 0.18);
 }
 
 .rail-title {
-    font-size: 17px;
-    font-weight: 700;
-    color: #2b2825;
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--text-main, #2b2825);
     margin: 0;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    letter-spacing: -0.3px;
+    line-height: 1.2;
 }
 
 .rail-nav {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
+    width: 100%;
 }
 
 .rail-link {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 12px 14px;
+    gap: 10px;
+    padding: 11px 12px;
     border-radius: 12px;
     text-decoration: none;
-    color: #69625b;
-    font-size: 14px;
+    color: var(--text-muted, #7d726a);
+    font-size: 13.5px;
     font-weight: 600;
     transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     position: relative;
     border-left: 3px solid transparent;
+    background: transparent;
 }
 
 .rail-link:hover {
-    background: #faf5ee;
-    color: #8c6735;
+    background: rgba(197, 168, 128, 0.1);
+    color: var(--primary-dark, #a3875f);
     transform: translateX(3px);
 }
 
+.rail-link:hover .rail-chevron {
+    opacity: 0.6;
+    transform: translateX(0);
+}
+
 .rail-link.active {
-    background: linear-gradient(135deg, #fcf8f3 0%, #f4eae0 100%);
-    color: #876233;
+    background: linear-gradient(135deg, rgba(197, 168, 128, 0.18) 0%, rgba(224, 176, 176, 0.10) 100%);
+    color: var(--text-main, #2b2825);
     font-weight: 700;
-    border-left: 3px solid #a3875f;
+    border-left: 3px solid var(--primary-dark, #a3875f);
     transform: translateX(4px);
-    box-shadow: 0 3px 12px rgba(163, 135, 95, 0.16);
+    box-shadow: 0 4px 16px rgba(163, 135, 95, 0.10), inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 .rail-num {
-    font-size: 12px;
+    width: 24px;
+    height: 24px;
+    border-radius: 7px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
     font-weight: 800;
-    color: #b5aba0;
+    background: rgba(197, 168, 128, 0.12);
+    color: var(--primary-dark, #a3875f);
     font-family: 'Plus Jakarta Sans', sans-serif;
-    transition: color 0.25s ease;
+    transition: all 0.25s ease;
+    flex-shrink: 0;
 }
 
 .rail-link.active .rail-num {
-    color: #a3875f;
+    background: linear-gradient(135deg, #c5a880 0%, #a3875f 100%);
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(163, 135, 95, 0.35);
 }
 
 .rail-text {
     flex-grow: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
+
+.rail-chevron {
+    opacity: 0;
+    transform: translateX(-4px);
+    transition: all 0.25s ease;
+    color: var(--primary-dark, #a3875f);
+    flex-shrink: 0;
+}
+
+.rail-link.active .rail-chevron {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+@media (prefers-color-scheme: dark) {
+    .desktop-left-rail {
+        background: rgba(28, 24, 21, 0.85);
+        border-right: 1px solid rgba(197, 168, 128, 0.16);
+        box-shadow: 4px 0 30px rgba(0, 0, 0, 0.35);
+    }
+
+    .rail-header {
+        border-bottom-color: rgba(197, 168, 128, 0.12);
+    }
+
+    .rail-title {
+        color: #f5f0eb;
+    }
+
+    .rail-link {
+        color: #b0a498;
+    }
+
+    .rail-link:hover {
+        background: rgba(197, 168, 128, 0.12);
+        color: #ecdcc5;
+    }
+
+    .rail-link.active {
+        background: linear-gradient(135deg, rgba(197, 168, 128, 0.22) 0%, rgba(224, 176, 176, 0.12) 100%);
+        color: #f5f0eb;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+}
+
 
 /* Example Center Showcase Section */
 .example-center-card {

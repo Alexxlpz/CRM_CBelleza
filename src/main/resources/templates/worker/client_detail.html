@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ficha de Cliente - Cuquora CRM</title>
+    <!-- Lucide Icons CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.321.0/font/lucide.min.css">
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/worker.css">
+    <link rel="stylesheet" href="/css/clients.css">
+</head>
+<body>
+    <div th:replace="~{fragments/navbar :: worker('/worker/clients', 'Volver a lista de clientes', ${notifications})}"></div>
+
+    <!-- Main Container -->
+    <main class="main-container">
+
+        <!-- Flash Success Message -->
+        <div class="alert-success-banner" th:if="${successMessage}">
+            <i class="lucide-check-circle"></i>
+            <span th:text="${successMessage}">Ficha técnica guardada con éxito.</span>
+        </div>
+
+        <!-- Top Navigation Back Pill -->
+        <div class="page-top-nav">
+            <a href="/worker/clients" class="btn-back-pill" onclick="if (document.referrer && (document.referrer.includes('/worker/clients') || document.referrer.includes('/worker/calendar'))) { window.location.href = document.referrer; return false; }">
+                <i class="lucide-arrow-left"></i>
+                <span>Volver</span>
+            </a>
+        </div>
+
+        <!-- Client Profile Header Card -->
+        <div class="client-profile-header-card">
+            <div class="profile-identity">
+                <div class="profile-avatar-large"
+                     th:text="${isGuest ? #strings.substring(guestName, 0, 1) : #strings.substring(client.name, 0, 1)}">
+                    M
+                </div>
+                <div>
+                    <h1 class="profile-title" th:text="${isGuest ? guestName : client.name}">María López</h1>
+                    <div class="profile-contact-chips">
+                        <span class="profile-chip" th:if="${!isGuest and client.phone != null and !client.phone.isEmpty()}">
+                            <i class="lucide-phone"></i>
+                            <span th:text="${client.phone}">+34 600 111 222</span>
+                        </span>
+                        <span class="profile-chip" th:if="${isGuest and guestPhone != null and !guestPhone.isEmpty()}">
+                            <i class="lucide-phone"></i>
+                            <span th:text="${guestPhone}">+34 600 111 222</span>
+                        </span>
+                        <span class="profile-chip" th:if="${!isGuest and client.email != null and !client.email.isEmpty()}">
+                            <i class="lucide-mail"></i>
+                            <span th:text="${client.email}">cliente@email.com</span>
+                        </span>
+                        <span class="client-sub-badge registered" th:if="${!isGuest}">
+                            <i class="lucide-shield-check"></i> Registrado
+                        </span>
+                        <span class="client-sub-badge guest" th:if="${isGuest}">
+                            <i class="lucide-user-check"></i> Invitado
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="profile-header-actions">
+                <a href="/worker/clients/template" class="btn-template-config">
+                    <i class="lucide-sliders"></i>
+                    <span>Configurar Plantilla</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Split Layout: Ficha + Historial de Citas -->
+        <div class="client-detail-layout">
+
+            <!-- Left Column: Ficha Técnica Personalizada -->
+            <section class="card-panel">
+                <div class="panel-header-row">
+                    <div>
+                        <h2 class="panel-title">Ficha Técnica</h2>
+                        <span class="card-meta-stamp" th:if="${card != null and card.updatedAt != null}">
+                            <i class="lucide-clock"></i>
+                            <span>Última edición: <strong th:text="${#temporals.format(card.updatedAt, 'dd/MM/yyyy HH:mm')}">28/09/2026</strong></span>
+                            <span th:if="${card.updatedBy != null}" th:text="'por ' + ${card.updatedBy.name}"></span>
+                        </span>
+                    </div>
+                    <span class="badge-card-status filled" th:if="${card != null and card.dataJson != null and !card.dataJson.equals('{}')}">
+                        <i class="lucide-check-circle-2"></i> Activa
+                    </span>
+                    <span class="badge-card-status pending" th:if="${card == null or card.dataJson == null or card.dataJson.equals('{}')}">
+                        <i class="lucide-alert-circle"></i> Por completar
+                    </span>
+                </div>
+
+                <!-- Dynamic Form based on Center Template -->
+                <form th:action="${isGuest ? '/worker/clients/guest/card' : '/worker/clients/' + client.id + '/card'}"
+                      method="post" class="ficha-form">
+
+                    <!-- Hidden fields for guest if applicable -->
+                    <input type="hidden" name="guestPhone" th:if="${isGuest}" th:value="${guestPhone}">
+                    <input type="hidden" name="guestName" th:if="${isGuest}" th:value="${guestName}">
+
+                    <div class="field-group" th:each="field : ${fields}">
+                        <label class="field-label" th:for="${field.id}">
+                            <i class="lucide-file-text"></i>
+                            <span th:text="${field.label}">Tipo de Piel / Cabello</span>
+                        </label>
+
+                        <!-- Text Input -->
+                        <input th:if="${field.type == 'text'}"
+                               type="text"
+                               th:id="${field.id}"
+                               th:name="${field.id}"
+                               class="field-input"
+                               th:placeholder="${field.placeholder != null and !field.placeholder.isEmpty() ? field.placeholder : 'Escribe aquí...'}"
+                               th:value="${cardData[field.id]}">
+
+                        <!-- Textarea -->
+                        <textarea th:if="${field.type == 'textarea'}"
+                                  th:id="${field.id}"
+                                  th:name="${field.id}"
+                                  class="field-textarea"
+                                  rows="3"
+                                  th:placeholder="${field.placeholder != null and !field.placeholder.isEmpty() ? field.placeholder : 'Escribe observaciones aquí...'}"
+                                  th:text="${cardData[field.id]}"></textarea>
+
+                        <!-- Select -->
+                        <select th:if="${field.type == 'select'}"
+                                th:id="${field.id}"
+                                th:name="${field.id}"
+                                class="field-select">
+                            <option value="">-- Seleccionar --</option>
+                            <option th:each="opt : ${#strings.arraySplit(field.options, ',')}"
+                                    th:value="${#strings.trim(opt)}"
+                                    th:text="${#strings.trim(opt)}"
+                                    th:selected="${cardData[field.id] == #strings.trim(opt)}">
+                            </option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn-save-ficha">
+                        <i class="lucide-save"></i>
+                        <span>Guardar Ficha del Cliente</span>
+                    </button>
+                </form>
+            </section>
+
+            <!-- Right Column: Historial de Citas en este Centro -->
+            <section class="card-panel">
+                <div class="panel-header-row">
+                    <h2 class="panel-title">Historial de Citas</h2>
+                    <span class="client-appointments-count"
+                          th:text="${appointments != null ? appointments.size() : 0} + ' citas en este centro'">
+                        2 citas
+                    </span>
+                </div>
+
+                <div class="history-list" th:if="${appointments != null and !appointments.isEmpty()}">
+                    <div class="history-item" th:each="app : ${appointments}">
+                        <div class="history-top">
+                            <span class="history-date">
+                                <i class="lucide-calendar-days"></i>
+                                <span th:text="${#temporals.format(app.dateTime, 'dd/MM/yyyy HH:mm')}">14/07/2026 10:30</span>
+                            </span>
+                            <span class="badge badge-confirmed" th:if="${app.status.name() == 'CONFIRMED'}">Confirmada</span>
+                            <span class="badge badge-pending" th:if="${app.status.name() == 'PENDING'}">Solicitud</span>
+                            <span class="badge badge-rejected" th:if="${app.status.name() == 'REJECTED'}">Rechazada</span>
+                        </div>
+
+                        <div class="history-treatment" th:text="${app.treatment.name}">Corte y Peinado</div>
+
+                        <div class="history-details-row">
+                            <span class="history-worker">
+                                <i class="lucide-user"></i>
+                                <span th:text="${app.worker != null ? app.worker.name : 'Sin asignar'}">Laura Gómez</span>
+                            </span>
+                            <span>
+                                <strong th:text="${#numbers.formatDecimal(app.treatment.price, 1, 2) + ' €'}">35.00 €</strong>
+                                <span th:text="'(' + ${app.treatment.duration} + ' min)'">(45 min)</span>
+                            </span>
+                        </div>
+
+                        <div class="agenda-worker-note" th:if="${app.workerMessage != null and !app.workerMessage.isEmpty()}" style="margin-top: 8px;">
+                            <i class="lucide-message-square"></i>
+                            <span th:text="${app.workerMessage}"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="notification-empty" th:if="${appointments == null or appointments.isEmpty()}" style="padding: 24px;">
+                    <i class="lucide-calendar-x"></i>
+                    <span>No hay citas registradas para este cliente en este centro.</span>
+                </div>
+            </section>
+
+        </div>
+
+    </main>
+
+    <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Panel de gestión operativa.')}"></div>
+
+</body>
+</html>

@@ -9,6 +9,7 @@
     <!-- Stylesheets -->
     <link rel="stylesheet" href="/css/common.css">
     <link rel="stylesheet" href="/css/calendar.css">
+    <link rel="stylesheet" href="/css/clients.css">
 </head>
 <body>
     <div th:replace="~{fragments/navbar :: worker('/worker/dashboard', 'Volver al panel principal', ${notifications})}"></div>
@@ -342,13 +343,26 @@
                     `;
                 }
                 
+                const newClientBadge = app.isNewClient ? `<span class="badge-new-client"><i class="lucide-sparkles"></i> Nuevo Cliente</span>` : '';
+                const clientCardUrl = app.client ? `/worker/clients/${app.client.id}` : `/worker/clients/guest?phone=${encodeURIComponent(clientPhone)}`;
+                const fichaButtonHtml = app.status === 'CONFIRMED' ? `
+                    <div style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed rgba(197, 168, 128, 0.25); display: flex; justify-content: flex-end;">
+                        <a href="${clientCardUrl}" class="btn-template-config" style="padding: 6px 12px; font-size: 12px; border-radius: 8px;">
+                            <i class="lucide-file-text"></i> Ficha del Cliente
+                        </a>
+                    </div>
+                ` : '';
+
                 card.innerHTML = `
                     <div class="agenda-card-top">
                         <div class="agenda-item-time">
                             <i class="lucide-clock"></i>
                             <span>${timeStr} h</span>
                         </div>
-                        <span class="badge ${badgeClass}">${badgeText}</span>
+                        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                            ${newClientBadge}
+                            <span class="badge ${badgeClass}">${badgeText}</span>
+                        </div>
                     </div>
                     
                     <div class="agenda-item-treatment">${app.treatment.name}</div>
@@ -370,7 +384,8 @@
                         <span class="agenda-price-text">${app.treatment.price.toFixed(2)} €</span>
                         <span class="agenda-duration-text">(${app.treatment.duration} min)</span>
                     </div>
-                    
+
+                    ${fichaButtonHtml}
                     ${messageHtml}
                     ${formHtml}
                 `;

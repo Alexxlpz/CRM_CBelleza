@@ -16,6 +16,8 @@ import java.time.LocalDateTime;
 import java.time.DayOfWeek;
 import java.util.Arrays;
 import java.util.List;
+import java.util.ArrayList;
+import com.alexxlpz.crm_cbelleza.dto.AppointmentCalendarDTO;
 
 @Service
 public class AppointmentService {
@@ -103,7 +105,87 @@ public class AppointmentService {
     }
     
     public List<Appointment> getAppointmentsByCenter(Long centerId) {
-        return appointmentRepository.findByCenterIdOrderByDateTimeDesc(centerId);
+        List<Appointment> list = appointmentRepository.findByCenterIdOrderByDateTimeDesc(centerId);
+        for (Appointment app : list) {
+            app.setIsNewClient(isFirstVisitForCenter(app));
+        }
+        return list;
+    }
+
+    public List<AppointmentCalendarDTO> getCalendarAppointmentsByCenter(Long centerId) {
+        List<Appointment> list = appointmentRepository.findByCenterIdOrderByDateTimeDesc(centerId);
+        List<AppointmentCalendarDTO> dtos = new ArrayList<>();
+        for (Appointment app : list) {
+            boolean isNew = isFirstVisitForCenter(app);
+            app.setIsNewClient(isNew);
+
+            AppointmentCalendarDTO.ClientDTO clientDTO = null;
+            if (app.getClient() != null) {
+                clientDTO = AppointmentCalendarDTO.ClientDTO.builder()
+                        .id(app.getClient().getId())
+                        .name(app.getClient().getName())
+                        .phone(app.getClient().getPhone())
+                        .build();
+            }
+
+            AppointmentCalendarDTO.WorkerDTO workerDTO = null;
+            if (app.getWorker() != null) {
+                workerDTO = AppointmentCalendarDTO.WorkerDTO.builder()
+                        .id(app.getWorker().getId())
+                        .name(app.getWorker().getName())
+                        .build();
+            }
+
+            AppointmentCalendarDTO.TreatmentDTO treatmentDTO = null;
+            if (app.getTreatment() != null) {
+                treatmentDTO = AppointmentCalendarDTO.TreatmentDTO.builder()
+                        .id(app.getTreatment().getId())
+                        .name(app.getTreatment().getName())
+                        .price(app.getTreatment().getPrice())
+                        .duration(app.getTreatment().getDuration())
+                        .build();
+            }
+
+            dtos.add(AppointmentCalendarDTO.builder()
+                    .id(app.getId())
+                    .dateTime(app.getDateTime() != null ? app.getDateTime().toString() : null)
+                    .status(app.getStatus() != null ? app.getStatus().name() : null)
+                    .workerMessage(app.getWorkerMessage())
+                    .isNewClient(isNew)
+                    .guestName(app.getGuestName())
+                    .guestPhone(app.getGuestPhone())
+                    .client(clientDTO)
+                    .worker(workerDTO)
+                    .treatment(treatmentDTO)
+                    .build());
+        }
+        return dtos;
+    }
+
+    public boolean isFirstVisitForCenter(Appointment app) {
+        if (app == null || app.getCenter() == null) return false;
+        Long centerId = app.getCenter().getId();
+        LocalDateTime dt = app.getDateTime() != null ? app.getDateTime() : LocalDateTime.now();
+
+        if (app.getClient() != null) {
+            long priorCount = appointmentRepository.countByCenterIdAndClientIdAndStatusAndDateTimeBefore(
+                    centerId, app.getClient().getId(), AppointmentStatus.CONFIRMED, dt);
+            return priorCount == 0;
+        } else if (app.getGuestPhone() != null && !app.getGuestPhone().trim().isEmpty()) {
+            long priorCount = appointmentRepository.countByCenterIdAndGuestPhoneAndStatusAndDateTimeBefore(
+                    centerId, app.getGuestPhone().trim(), AppointmentStatus.CONFIRMED, dt);
+            return priorCount == 0;
+        }
+        return true;
+    }
+
+    public boolean hasConfirmedAppointment(Long centerId, Long clientId, String guestPhone) {
+        if (clientId != null) {
+            return appointmentRepository.existsByCenterIdAndClientIdAndStatus(centerId, clientId, AppointmentStatus.CONFIRMED);
+        } else if (guestPhone != null && !guestPhone.trim().isEmpty()) {
+            return appointmentRepository.existsByCenterIdAndGuestPhoneAndStatus(centerId, guestPhone.trim(), AppointmentStatus.CONFIRMED);
+        }
+        return false;
     }
 
     public void approveAppointment(Long id, String message, Long workerId) {

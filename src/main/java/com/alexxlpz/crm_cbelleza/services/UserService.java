@@ -24,6 +24,14 @@ public class UserService {
         return userRepository.findByCenterIdAndRole(centerId, Role.WORKER);
     }
 
+    public Optional<User> findById(Long id) {
+        return id != null ? userRepository.findById(id) : Optional.empty();
+    }
+
+    public User getUserById(Long id) {
+        return id != null ? userRepository.findById(id).orElse(null) : null;
+    }
+
     public Optional<User> authenticate(String identifier, String rawPassword) {
         if (identifier == null || rawPassword == null) {
             return Optional.empty();

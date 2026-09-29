@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
+import com.alexxlpz.crm_cbelleza.dto.AppointmentCalendarDTO;
 
 @Controller
 public class AppointmentController {
@@ -146,7 +147,7 @@ public class AppointmentController {
             return "redirect:/home";
         }
 
-        List<Appointment> appointments = appointmentService.getAppointmentsByCenter(centerId);
+        List<AppointmentCalendarDTO> appointments = appointmentService.getCalendarAppointmentsByCenter(centerId);
         
         model.addAttribute("appointments", appointments);
         model.addAttribute("sessionRole", role);

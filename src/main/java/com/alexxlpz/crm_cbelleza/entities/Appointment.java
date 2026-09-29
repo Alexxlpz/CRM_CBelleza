@@ -1,5 +1,6 @@
 package com.alexxlpz.crm_cbelleza.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -11,6 +12,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Appointment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,15 +23,18 @@ public class Appointment {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "treatment_id", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "center"})
     private Treatment treatment;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "center_id", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Center center;
 
     // For registered clients (nullable)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "client_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "password"})
     private User client;
 
     // For unregistered guest clients (nullable)
@@ -42,6 +47,7 @@ public class Appointment {
     // Assigned worker (nullable for new appointments)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "worker_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "password"})
     private User worker;
 
     @Enumerated(EnumType.STRING)
@@ -50,4 +56,7 @@ public class Appointment {
 
     @Column(name = "worker_message", length = 500)
     private String workerMessage;
+
+    @Transient
+    private Boolean isNewClient;
 }

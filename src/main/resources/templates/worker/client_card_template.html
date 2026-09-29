@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuración de Ficha - Cuquora CRM</title>
+    <!-- Lucide Icons CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.321.0/font/lucide.min.css">
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/worker.css">
+    <link rel="stylesheet" href="/css/clients.css">
+</head>
+<body>
+    <div th:replace="~{fragments/navbar :: worker('/worker/clients', 'Volver a lista de clientes', ${notifications})}"></div>
+
+    <!-- Main Container -->
+    <main class="main-container">
+
+        <!-- Top Navigation Back Pill -->
+        <div class="page-top-nav">
+            <a href="/worker/clients" class="btn-back-pill" onclick="if (document.referrer && document.referrer.includes('/worker/')) { window.location.href = document.referrer; return false; }">
+                <i class="lucide-arrow-left"></i>
+                <span>Volver a Cartera de Clientes</span>
+            </a>
+        </div>
+
+        <div class="page-header">
+            <h1>Configuración de Plantilla de Ficha</h1>
+            <p>Define las variables y preguntas personalizadas que tu centro guardará en la ficha de cada cliente</p>
+        </div>
+
+        <!-- Flash Success Message -->
+        <div class="alert-success-banner" th:if="${successMessage}">
+            <i class="lucide-check-circle"></i>
+            <span th:text="${successMessage}">Estructura de la ficha actualizada con éxito.</span>
+        </div>
+
+        <section class="card-panel" style="max-width: 900px; margin: 0 auto 40px auto;">
+            <div class="panel-header-row">
+                <div>
+                    <h2 class="panel-title">Campos de la Ficha del Centro</h2>
+                    <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">
+                        Los campos que configures aquí se aplicarán automáticamente a las fichas de todos los clientes de tu salón.
+                    </p>
+                </div>
+            </div>
+
+            <form action="/worker/clients/template" method="post" id="templateForm">
+
+                <div class="template-fields-list" id="fieldsContainer">
+                    <div class="template-field-row" th:each="field, stat : ${fields}">
+                        <div>
+                            <label class="field-label">Nombre del Campo / Pregunta</label>
+                            <input type="text" name="fieldLabels" class="field-input" required
+                                   th:value="${field.label}" placeholder="Ej. Tipo de Piel, Alergias, etc.">
+                            <input type="hidden" name="fieldIds" th:value="${field.id}">
+                        </div>
+
+                        <div>
+                            <label class="field-label">Tipo de Dato</label>
+                            <select name="fieldTypes" class="field-select">
+                                <option value="text" th:selected="${field.type == 'text'}">Texto Corto</option>
+                                <option value="textarea" th:selected="${field.type == 'textarea'}">Área de Texto (Notas)</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="field-label">Texto de Ayuda / Placeholder</label>
+                            <input type="text" name="fieldPlaceholders" class="field-input"
+                                   th:value="${field.placeholder}" placeholder="Ej. Sensible, atópica...">
+                        </div>
+
+                        <div style="align-self: flex-end;">
+                            <button type="button" class="btn-remove-field" onclick="removeFieldRow(this)" title="Eliminar este campo">
+                                <i class="lucide-trash-2"></i>
+                                <span>Eliminar</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 24px; flex-wrap: wrap; gap: 16px;">
+                    <button type="button" class="btn-add-field" onclick="addFieldRow()">
+                        <i class="lucide-plus"></i>
+                        <span>+ Añadir Otra Variable a la Ficha</span>
+                    </button>
+
+                    <button type="submit" class="btn-save-ficha" style="margin-top: 0;">
+                        <i class="lucide-check"></i>
+                        <span>Guardar Plantilla del Centro</span>
+                    </button>
+                </div>
+
+            </form>
+        </section>
+
+    </main>
+
+    <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Panel de gestión operativa.')}"></div>
+
+    <!-- Script for Dynamic Field Rows -->
+    <script>
+        function addFieldRow() {
+            const container = document.getElementById('fieldsContainer');
+            const row = document.createElement('div');
+            row.className = 'template-field-row';
+            row.innerHTML = `
+                <div>
+                    <label class="field-label">Nombre del Campo / Pregunta</label>
+                    <input type="text" name="fieldLabels" class="field-input" required placeholder="Ej. Sensibilidad al amoníaco">
+                    <input type="hidden" name="fieldIds" value="">
+                </div>
+                <div>
+                    <label class="field-label">Tipo de Dato</label>
+                    <select name="fieldTypes" class="field-select">
+                        <option value="text">Texto Corto</option>
+                        <option value="textarea">Área de Texto (Notas)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="field-label">Texto de Ayuda / Placeholder</label>
+                    <input type="text" name="fieldPlaceholders" class="field-input" placeholder="Ej. Alta / Media / Ninguna">
+                </div>
+                <div style="align-self: flex-end;">
+                    <button type="button" class="btn-remove-field" onclick="removeFieldRow(this)" title="Eliminar este campo">
+                        <i class="lucide-trash-2"></i>
+                        <span>Eliminar</span>
+                    </button>
+                </div>
+            `;
+            container.appendChild(row);
+        }
+
+        function removeFieldRow(btn) {
+            const rows = document.querySelectorAll('.template-field-row');
+            if (rows.length <= 1) {
+                alert('La plantilla debe contener al menos una variable.');
+                return;
+            }
+            const row = btn.closest('.template-field-row');
+            if (row) {
+                row.remove();
+            }
+        }
+    </script>
+
+</body>
+</html>
