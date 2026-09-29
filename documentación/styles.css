@@ -494,6 +494,11 @@ a:hover {
     margin-bottom: 0.85rem;
 }
 
+.card-feature-header strong {
+    font-size: 1.1rem;
+    color: var(--text-primary);
+}
+
 .card-badge {
     font-size: 0.7rem;
     text-transform: uppercase;
@@ -829,3 +834,17 @@ pre code {
 .footer-nav a:hover {
     color: var(--primary);
 }
+
+/* Utilidades de Color de Texto */
+.text-primary {
+    color: var(--text-primary) !important;
+}
+
+.text-secondary {
+    color: var(--text-secondary) !important;
+}
+
+.text-muted {
+    color: var(--text-muted) !important;
+}
+

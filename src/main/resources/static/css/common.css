@@ -528,6 +528,20 @@ h1, h2, h3, h4, h5, h6 {
     color: var(--danger-text);
 }
 
+.badge-completed {
+    background-color: rgba(100, 116, 139, 0.2);
+    color: #334155;
+    border: 1px solid rgba(100, 116, 139, 0.35);
+}
+
+@media (prefers-color-scheme: dark) {
+    .badge-completed {
+        background-color: rgba(148, 163, 184, 0.2);
+        color: #e2e8f0;
+        border: 1px solid rgba(148, 163, 184, 0.35);
+    }
+}
+
 /* Forms */
 .form-group {
     margin-bottom: 20px;

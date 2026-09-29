@@ -91,6 +91,7 @@ public class AppointmentService {
     }
 
     public List<Appointment> getClientAppointments(Long clientUserId, String guestPhone) {
+        appointmentRepository.updatePastConfirmedToCompleted(LocalDateTime.now());
         if (clientUserId != null) {
             return appointmentRepository.findByClientIdOrderByDateTimeDesc(clientUserId);
         } else if (guestPhone != null && !guestPhone.trim().isEmpty()) {
@@ -100,6 +101,7 @@ public class AppointmentService {
     }
     
     public List<Appointment> getAppointmentsByCenter(Long centerId) {
+        appointmentRepository.updatePastConfirmedToCompleted(LocalDateTime.now());
         List<Appointment> list = appointmentRepository.findByCenterIdOrderByDateTimeDesc(centerId);
         for (Appointment app : list) {
             app.setIsNewClient(isFirstVisitForCenter(app));
@@ -108,6 +110,7 @@ public class AppointmentService {
     }
 
     public List<AppointmentCalendarDTO> getCalendarAppointmentsByCenter(Long centerId) {
+        appointmentRepository.updatePastConfirmedToCompleted(LocalDateTime.now());
         List<Appointment> list = appointmentRepository.findByCenterIdOrderByDateTimeDesc(centerId);
         List<AppointmentCalendarDTO> dtos = new ArrayList<>();
         for (Appointment app : list) {
@@ -163,12 +166,12 @@ public class AppointmentService {
         LocalDateTime dt = app.getDateTime() != null ? app.getDateTime() : LocalDateTime.now();
 
         if (app.getClient() != null) {
-            long priorCount = appointmentRepository.countByCenterIdAndClientIdAndStatusAndDateTimeBefore(
-                    centerId, app.getClient().getId(), AppointmentStatus.CONFIRMED, dt);
+            long priorCount = appointmentRepository.countByCenterIdAndClientIdAndStatusInAndDateTimeBefore(
+                    centerId, app.getClient().getId(), List.of(AppointmentStatus.CONFIRMED, AppointmentStatus.COMPLETED), dt);
             return priorCount == 0;
         } else if (app.getGuestPhone() != null && !app.getGuestPhone().trim().isEmpty()) {
-            long priorCount = appointmentRepository.countByCenterIdAndGuestPhoneAndStatusAndDateTimeBefore(
-                    centerId, app.getGuestPhone().trim(), AppointmentStatus.CONFIRMED, dt);
+            long priorCount = appointmentRepository.countByCenterIdAndGuestPhoneAndStatusInAndDateTimeBefore(
+                    centerId, app.getGuestPhone().trim(), List.of(AppointmentStatus.CONFIRMED, AppointmentStatus.COMPLETED), dt);
             return priorCount == 0;
         }
         return true;
@@ -176,9 +179,11 @@ public class AppointmentService {
 
     public boolean hasConfirmedAppointment(Long centerId, Long clientId, String guestPhone) {
         if (clientId != null) {
-            return appointmentRepository.existsByCenterIdAndClientIdAndStatus(centerId, clientId, AppointmentStatus.CONFIRMED);
+            return appointmentRepository.existsByCenterIdAndClientIdAndStatusIn(
+                    centerId, clientId, List.of(AppointmentStatus.CONFIRMED, AppointmentStatus.COMPLETED));
         } else if (guestPhone != null && !guestPhone.trim().isEmpty()) {
-            return appointmentRepository.existsByCenterIdAndGuestPhoneAndStatus(centerId, guestPhone.trim(), AppointmentStatus.CONFIRMED);
+            return appointmentRepository.existsByCenterIdAndGuestPhoneAndStatusIn(
+                    centerId, guestPhone.trim(), List.of(AppointmentStatus.CONFIRMED, AppointmentStatus.COMPLETED));
         }
         return false;
     }

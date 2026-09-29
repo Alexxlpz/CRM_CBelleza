@@ -59,4 +59,26 @@ public class Appointment {
 
     @Transient
     private Boolean isNewClient;
+
+    @PostLoad
+    public void updateStatusIfCompleted() {
+        if (this.status == AppointmentStatus.CONFIRMED && this.dateTime != null && this.dateTime.isBefore(LocalDateTime.now())) {
+            this.status = AppointmentStatus.COMPLETED;
+        }
+    }
+
+    public AppointmentStatus getStatus() {
+        if (this.status == AppointmentStatus.CONFIRMED && this.dateTime != null && this.dateTime.isBefore(LocalDateTime.now())) {
+            return AppointmentStatus.COMPLETED;
+        }
+        return this.status;
+    }
+
+    public void setStatus(AppointmentStatus status) {
+        if (status == AppointmentStatus.CONFIRMED && this.dateTime != null && this.dateTime.isBefore(LocalDateTime.now())) {
+            this.status = AppointmentStatus.COMPLETED;
+        } else {
+            this.status = status;
+        }
+    }
 }

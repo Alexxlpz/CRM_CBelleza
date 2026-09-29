@@ -152,8 +152,9 @@ public class ClientCardService {
         }
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public List<ClientSummaryDTO> getClientsForCenter(Long centerId, String searchQuery) {
+        appointmentRepository.updatePastConfirmedToCompleted(LocalDateTime.now());
         List<Appointment> appointments = appointmentRepository.findByCenterIdOrderByDateTimeDesc(centerId);
 
         // Group appointments by registered client
@@ -228,17 +229,19 @@ public class ClientCardService {
                 }
             }
 
-            // Requirement: Only consider someone a client (with ficha) if they have at least one CONFIRMED appointment or already filled card
-            boolean hasConfirmed = apps.stream().anyMatch(a -> a.getStatus() == AppointmentStatus.CONFIRMED);
-            if (!hasConfirmed && !hasFilledCard) {
+            // Requirement: Only consider someone a client (with ficha) if they have at least one CONFIRMED/COMPLETED appointment or already filled card
+            boolean hasValidAppointment = apps.stream().anyMatch(a -> a.getStatus() == AppointmentStatus.CONFIRMED || a.getStatus() == AppointmentStatus.COMPLETED);
+            if (!hasValidAppointment && !hasFilledCard) {
                 continue;
             }
 
-            int confirmedCount = (int) apps.stream().filter(a -> a.getStatus() == AppointmentStatus.CONFIRMED).count();
-            Appointment latestConfirmedApp = apps.stream()
-                    .filter(a -> a.getStatus() == AppointmentStatus.CONFIRMED)
+            int validAppointmentsCount = (int) apps.stream().filter(a -> a.getStatus() == AppointmentStatus.CONFIRMED || a.getStatus() == AppointmentStatus.COMPLETED).count();
+            
+            // Requisito: En cada carta de cliente poner la última cita completada
+            Appointment latestCompletedApp = apps.stream()
+                    .filter(a -> a.getStatus() == AppointmentStatus.COMPLETED)
                     .findFirst()
-                    .orElse(latestApp);
+                    .orElse(null);
 
             result.add(ClientSummaryDTO.builder()
                     .id(clientId)
@@ -246,8 +249,8 @@ public class ClientCardService {
                     .phone(phone)
                     .email(email)
                     .isGuest(isGuest)
-                    .totalAppointments(confirmedCount > 0 ? confirmedCount : apps.size())
-                    .lastAppointmentDate(latestConfirmedApp.getDateTime())
+                    .totalAppointments(validAppointmentsCount > 0 ? validAppointmentsCount : apps.size())
+                    .lastAppointmentDate(latestCompletedApp != null ? latestCompletedApp.getDateTime() : null)
                     .hasFilledCard(hasFilledCard)
                     .cardUpdatedAt(cardUpdatedAt)
                     .cardUpdatedByName(cardUpdatedByName)
@@ -373,8 +376,9 @@ public class ClientCardService {
         return redirectUrl;
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public List<Appointment> getClientAppointmentsInCenter(Long centerId, Long clientId, String guestPhone) {
+        appointmentRepository.updatePastConfirmedToCompleted(LocalDateTime.now());
         if (clientId != null) {
             return appointmentRepository.findByCenterIdAndClientIdOrderByDateTimeDesc(centerId, clientId);
         } else if (guestPhone != null && !guestPhone.trim().isEmpty()) {

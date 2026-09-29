@@ -173,6 +173,7 @@
                                 <span th:text="${#temporals.format(app.dateTime, 'dd/MM/yyyy HH:mm')}">14/07/2026 10:30</span>
                             </span>
                             <span class="badge badge-confirmed" th:if="${app.status.name() == 'CONFIRMED'}">Confirmada</span>
+                            <span class="badge badge-completed" th:if="${app.status.name() == 'COMPLETED'}">Completada</span>
                             <span class="badge badge-pending" th:if="${app.status.name() == 'PENDING'}">Solicitud</span>
                             <span class="badge badge-rejected" th:if="${app.status.name() == 'REJECTED'}">Rechazada</span>
                         </div>

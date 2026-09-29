@@ -151,13 +151,14 @@
                 const dayApps = getAppointmentsForDate(dateKey);
                 
                 const hasConfirmed = dayApps.some(app => app.status === 'CONFIRMED');
+                const hasCompleted = dayApps.some(app => app.status === 'COMPLETED');
                 const hasPending = dayApps.some(app => app.status === 'PENDING');
                 
-                if (hasConfirmed || hasPending) {
+                if (hasConfirmed || hasCompleted || hasPending) {
                     const dotsContainer = document.createElement('div');
                     dotsContainer.className = 'calendar-dots-container';
                     
-                    if (hasConfirmed) {
+                    if (hasConfirmed || hasCompleted) {
                         const dot = document.createElement('div');
                         dot.className = 'calendar-dot gold-dot';
                         dotsContainer.appendChild(dot);
@@ -281,8 +282,14 @@
             
             // Text summary
             const confirmedApps = apps.filter(app => app.status === 'CONFIRMED');
+            const completedApps = apps.filter(app => app.status === 'COMPLETED');
             const pendingApps = apps.filter(app => app.status === 'PENDING');
-            document.getElementById('selectedDateCount').innerText = `${confirmedApps.length} confirmadas, ${pendingApps.length} solicitudes pendientes`;
+            let countSummary = `${confirmedApps.length} confirmadas`;
+            if (completedApps.length > 0) {
+                countSummary += `, ${completedApps.length} completadas`;
+            }
+            countSummary += `, ${pendingApps.length} solicitudes pendientes`;
+            document.getElementById('selectedDateCount').innerText = countSummary;
             
             if (apps.length === 0) {
                 listContainer.innerHTML = `
@@ -313,6 +320,9 @@
                 } else if (isRejected) {
                     badgeClass = 'badge-rejected';
                     badgeText = 'Rechazada';
+                } else if (app.status === 'COMPLETED') {
+                    badgeClass = 'badge-completed';
+                    badgeText = 'Completada';
                 }
 
                 let formHtml = '';
@@ -344,7 +354,7 @@
                 
                 const newClientBadge = app.isNewClient ? `<span class="badge-new-client"><i class="lucide-sparkles"></i> Nuevo Cliente</span>` : '';
                 const clientCardUrl = app.client ? `/worker/clients/${app.client.id}` : `/worker/clients/guest?phone=${encodeURIComponent(clientPhone)}`;
-                const fichaButtonHtml = app.status === 'CONFIRMED' ? `
+                const fichaButtonHtml = (app.status === 'CONFIRMED' || app.status === 'COMPLETED') ? `
                     <div style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed rgba(197, 168, 128, 0.25); display: flex; justify-content: flex-end;">
                         <a href="${clientCardUrl}" class="btn-template-config" style="padding: 6px 12px; font-size: 12px; border-radius: 8px;">
                             <i class="lucide-file-text"></i> Ficha del Cliente

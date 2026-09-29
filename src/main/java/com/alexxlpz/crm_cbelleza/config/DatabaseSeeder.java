@@ -397,7 +397,11 @@ public class DatabaseSeeder implements CommandLineRunner {
             day5 = day5.plusDays(1);
         }
 
-        // Center 1 Appointments
+        // Center 1 Appointments (Past completed & upcoming)
+        appointmentRepository.save(Appointment.builder().dateTime(today.minusDays(7).withHour(10).withMinute(0)).treatment(t1_1).center(c1).client(client1).worker(w1).status(AppointmentStatus.COMPLETED).workerMessage("Manicura realizada con éxito.").build());
+        appointmentRepository.save(Appointment.builder().dateTime(today.minusDays(3).withHour(16).withMinute(30)).treatment(t1_2).center(c1).client(client2).worker(w1).status(AppointmentStatus.COMPLETED).workerMessage("Tratamiento facial completado.").build());
+        appointmentRepository.save(Appointment.builder().dateTime(today.minusDays(10).withHour(12).withMinute(0)).treatment(t1_3).center(c1).client(client5).worker(w1).status(AppointmentStatus.COMPLETED).workerMessage("Sesión finalizada a satisfacción.").build());
+
         appointmentRepository.save(Appointment.builder().dateTime(today.withHour(11).withMinute(0)).treatment(t1_1).center(c1).client(client1).worker(w1).status(AppointmentStatus.CONFIRMED).workerMessage("Cliente habitual, prefiere base rubber tono nude.").build());
         appointmentRepository.save(Appointment.builder().dateTime(today.withHour(15).withMinute(30)).treatment(t1_2).center(c1).client(client2).worker(w1).status(AppointmentStatus.CONFIRMED).workerMessage("Piel sensible, usar tónico de rosas sin alcohol.").build());
 

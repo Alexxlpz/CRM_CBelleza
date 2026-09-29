@@ -59,8 +59,8 @@ public class InventoryController {
         for (Appointment app : allAppointments) {
             if (app.getStatus() == AppointmentStatus.PENDING) pendingAppointments++;
             LocalDate appDate = app.getDateTime().toLocalDate();
-            if (appDate.isEqual(today) && app.getStatus() == AppointmentStatus.CONFIRMED) todayAppointments++;
-            if (appDate.isEqual(tomorrow) && app.getStatus() == AppointmentStatus.CONFIRMED) tomorrowAppointments++;
+            if (appDate.isEqual(today) && (app.getStatus() == AppointmentStatus.CONFIRMED || app.getStatus() == AppointmentStatus.COMPLETED)) todayAppointments++;
+            if (appDate.isEqual(tomorrow) && (app.getStatus() == AppointmentStatus.CONFIRMED || app.getStatus() == AppointmentStatus.COMPLETED)) tomorrowAppointments++;
         }
 
         for (Inventory inv : allInventory) {

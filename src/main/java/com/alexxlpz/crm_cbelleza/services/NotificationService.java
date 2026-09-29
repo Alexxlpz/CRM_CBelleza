@@ -9,6 +9,7 @@ import com.alexxlpz.crm_cbelleza.repositories.InventoryRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -45,6 +46,7 @@ public class NotificationService {
             }
         }
 
+        appointmentRepository.updatePastConfirmedToCompleted(LocalDateTime.now());
         List<Appointment> appointments = appointmentRepository.findByCenterIdOrderByDateTimeDesc(centerId);
         LocalDate today = LocalDate.now();
         LocalDate tomorrow = today.plusDays(1);
@@ -88,7 +90,7 @@ public class NotificationService {
         String samplePendingUrl = "/worker/clients";
 
         for (Appointment app : appointments) {
-            if (app.getStatus() == AppointmentStatus.CONFIRMED && !app.getDateTime().toLocalDate().isAfter(today)) {
+            if ((app.getStatus() == AppointmentStatus.CONFIRMED || app.getStatus() == AppointmentStatus.COMPLETED) && !app.getDateTime().toLocalDate().isAfter(today)) {
                 String clientKey = app.getClient() != null ? "user_" + app.getClient().getId() : "guest_" + app.getGuestPhone();
                 if (inspectedClients.add(clientKey)) {
                     boolean hasCardData = false;

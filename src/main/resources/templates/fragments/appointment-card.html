@@ -8,6 +8,8 @@
                   class="badge badge-pending">Pendiente</span>
             <span th:if="${app.status == T(com.alexxlpz.crm_cbelleza.entities.AppointmentStatus).CONFIRMED}" 
                   class="badge badge-confirmed">Confirmada</span>
+            <span th:if="${app.status == T(com.alexxlpz.crm_cbelleza.entities.AppointmentStatus).COMPLETED}" 
+                  class="badge badge-completed">Completada</span>
             <span th:if="${app.status == T(com.alexxlpz.crm_cbelleza.entities.AppointmentStatus).REJECTED}" 
                   class="badge badge-rejected">Rechazada</span>
         </div>
