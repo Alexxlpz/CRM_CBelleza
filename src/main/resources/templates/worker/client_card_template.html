@@ -16,9 +16,9 @@
     <!-- Main Container -->
     <main class="main-container">
 
-        <!-- Top Navigation Back Pill -->
+        <!-- Top Navigation Back Pill: Siempre vuelve directamente a la cartera de clientes sin bucles -->
         <div class="page-top-nav">
-            <a href="/worker/clients" class="btn-back-pill">
+            <a href="/worker/clients" class="btn-back-pill" id="btnBackPill">
                 <i class="lucide-arrow-left"></i>
                 <span>Volver a Cartera de Clientes</span>
             </a>
@@ -30,9 +30,9 @@
         </div>
 
         <!-- Flash Success Message -->
-        <div class="alert-success-banner" th:if="${successMessage}">
+        <div class="alert-success-banner" id="saveSuccessBanner" th:style="${successMessage != null ? 'display: flex;' : 'display: none;'}">
             <i class="lucide-check-circle"></i>
-            <span th:text="${successMessage}">Estructura de la ficha actualizada con éxito.</span>
+            <span id="saveSuccessMessageText" th:text="${successMessage != null ? successMessage : 'Estructura de la ficha actualizada con éxito.'}">Estructura de la ficha actualizada con éxito.</span>
         </div>
 
         <section class="card-panel" style="max-width: 900px; margin: 0 auto 40px auto;">
@@ -45,7 +45,8 @@
                 </div>
             </div>
 
-            <form action="/worker/clients/template" method="post" id="templateForm">
+            <form action="/worker/clients/template" method="post" id="templateForm" autocomplete="off">
+                <input type="hidden" name="redirectAfter" id="redirectAfterInput" value="">
 
                 <div class="template-fields-list" id="fieldsContainer">
                     <div class="template-field-row" th:each="field, stat : ${fields}">
@@ -86,21 +87,303 @@
                         <span>+ Añadir Otra Variable a la Ficha</span>
                     </button>
 
-                    <button type="submit" class="btn-save-ficha" style="margin-top: 0;">
+                    <button type="submit" class="btn-save-ficha" id="btnSaveTemplate" style="margin-top: 0;">
                         <i class="lucide-check"></i>
                         <span>Guardar Plantilla del Centro</span>
                     </button>
                 </div>
 
+                <script id="realTemplateJson" type="application/json" th:text="${template != null ? template.fieldsJson : '[]'}"></script>
             </form>
         </section>
 
     </main>
 
+    <!-- Modal: Confirmación de Cambios sin Guardar -->
+    <div class="modal-backdrop" id="unsavedChangesModal" style="display: none;" onclick="handleUnsavedModalBackdrop(event)">
+        <div class="modal-card modal-unsaved-card">
+            <h2 class="modal-title modal-unsaved-title">¿Guardar cambios antes de salir?</h2>
+            <p class="modal-unsaved-desc">
+                Has realizado modificaciones en la estructura de la plantilla de ficha del centro. Si sales ahora sin guardar, se perderán las variables y ajustes configurados.
+            </p>
+
+            <div class="modal-unsaved-actions">
+                <button type="button" class="btn-save-and-exit" id="btnSaveAndExit">
+                    <i class="lucide-save"></i>
+                    <span>Guardar y salir</span>
+                </button>
+                <button type="button" class="btn-discard-and-exit" id="btnDiscardAndExit">
+                    <i class="lucide-log-out"></i>
+                    <span>Salir sin guardar</span>
+                </button>
+                <button type="button" class="btn-stay-editing" id="btnStayEditing">
+                    <i class="lucide-edit-3"></i>
+                    <span>Seguir editando</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Panel de gestión operativa.')}"></div>
 
-    <!-- Script for Dynamic Field Rows -->
+    <!-- Script for Dynamic Field Rows and Unsaved Changes Protection -->
     <script>
+        const CLIENTS_LIST_URL = '/worker/clients';
+
+        // 1. Normalize history stack entry on load
+        if (window.history.replaceState) {
+            window.history.replaceState({ page: 'client_card_template' }, document.title, window.location.href);
+        }
+
+        const templateForm = document.getElementById('templateForm');
+        let isFormSubmitting = false;
+
+        function getFormSnapshot() {
+            if (!templateForm) return '';
+            const rows = document.querySelectorAll('.template-field-row');
+            const data = [];
+            rows.forEach(row => {
+                const label = (row.querySelector('input[name="fieldLabels"]')?.value || '').trim();
+                const type = (row.querySelector('select[name="fieldTypes"]')?.value || '').trim();
+                const placeholder = (row.querySelector('input[name="fieldPlaceholders"]')?.value || '').trim();
+                const id = (row.querySelector('input[name="fieldIds"]')?.value || '').trim();
+                data.push({ id, label, type, placeholder });
+            });
+            return JSON.stringify(data);
+        }
+
+        let initialSnapshot = getFormSnapshot();
+        let guardPushed = false;
+
+        function isFormDirty() {
+            if (isFormSubmitting) return false;
+            return getFormSnapshot() !== initialSnapshot;
+        }
+
+        // Arm the browser/mobile back guard when form becomes dirty
+        function checkAndArmGuard() {
+            if (isFormDirty() && !guardPushed) {
+                window.history.pushState({ unsavedGuard: true }, document.title, window.location.href);
+                guardPushed = true;
+            }
+        }
+
+        templateForm?.addEventListener('input', checkAndArmGuard);
+        templateForm?.addEventListener('change', checkAndArmGuard);
+
+        // Ensure template strictly displays real database configuration, never stale browser-cached fields
+        window.addEventListener('pageshow', function(event) {
+            const perfNav = window.performance && window.performance.getEntriesByType && window.performance.getEntriesByType("navigation")[0];
+            const isBackForward = event.persisted || (perfNav && perfNav.type === 'back_forward');
+
+            if (isBackForward) {
+                window.location.reload();
+            }
+        });
+
+        const unsavedModal = document.getElementById('unsavedChangesModal');
+
+        function openUnsavedModal() {
+            if (unsavedModal) {
+                unsavedModal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeUnsavedModal() {
+            if (unsavedModal) {
+                unsavedModal.style.display = 'none';
+                document.body.style.overflow = '';
+            }
+        }
+
+        function handleUnsavedModalBackdrop(event) {
+            if (event.target && event.target.id === 'unsavedChangesModal') {
+                closeUnsavedModal();
+                if (isFormDirty() && !guardPushed) {
+                    window.history.pushState({ unsavedGuard: true }, document.title, window.location.href);
+                    guardPushed = true;
+                }
+            }
+        }
+
+        function exitToClientsList() {
+            isFormSubmitting = true;
+            closeUnsavedModal();
+
+            const isCurrentStateGuard = !!(window.history.state && window.history.state.unsavedGuard);
+            const isSameOriginReferrer = document.referrer && document.referrer.startsWith(window.location.origin);
+            const minLength = isCurrentStateGuard ? 2 : 1;
+            const canPopStack = isSameOriginReferrer && (window.history.length > minLength);
+
+            if (canPopStack) {
+                if (isCurrentStateGuard) {
+                    window.history.go(-2);
+                } else {
+                    window.history.back();
+                }
+            } else {
+                window.location.replace(CLIENTS_LIST_URL);
+            }
+        }
+
+        // Top Back Pill click handler - pops this screen completely from the history stack
+        const btnBackPill = document.getElementById('btnBackPill');
+        if (btnBackPill) {
+            btnBackPill.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (isFormDirty()) {
+                    openUnsavedModal();
+                } else {
+                    exitToClientsList();
+                }
+            });
+        }
+
+        // Intercept any internal navigation links (navbar, footer, etc.)
+        document.querySelectorAll('a[href]').forEach(link => {
+            if (link.id === 'btnBackPill') return;
+            const href = link.getAttribute('href');
+            if (!href || href.startsWith('#') || href.startsWith('javascript:')) return;
+
+            link.addEventListener('click', function(e) {
+                if (isFormDirty() && !isFormSubmitting) {
+                    e.preventDefault();
+                    openUnsavedModal();
+                }
+            });
+        });
+
+        // Mobile Back (hardware button / swipe gesture) and Browser Back Interception
+        window.addEventListener('popstate', function(event) {
+            if (isFormSubmitting) return;
+
+            // If modal is already showing and user presses mobile back: close it gracefully!
+            if (unsavedModal && unsavedModal.style.display === 'flex') {
+                closeUnsavedModal();
+                window.history.pushState({ unsavedGuard: true }, document.title, window.location.href);
+                guardPushed = true;
+                return;
+            }
+
+            // If form is dirty: show our custom modal!
+            if (isFormDirty()) {
+                guardPushed = false; // state was just popped by the back action
+                openUnsavedModal();
+            } else {
+                // If form is clean: pop this screen off the stack completely!
+                guardPushed = false;
+                exitToClientsList();
+            }
+        });
+
+        // Browser Close Tab / Refresh (beforeunload native prompt)
+        window.addEventListener('beforeunload', function(e) {
+            if (isFormDirty() && !isFormSubmitting) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+
+        function showSuccessBanner(message) {
+            const banner = document.getElementById('saveSuccessBanner');
+            const msgSpan = document.getElementById('saveSuccessMessageText');
+            if (banner && msgSpan) {
+                msgSpan.textContent = message;
+                banner.style.display = 'flex';
+            }
+        }
+
+        // Form Submit: Save asynchronously without reloading page or polluting browser history
+        templateForm?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnSaveTemplate');
+            const originalHtml = btn ? btn.innerHTML : '';
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="lucide-loader-2" style="display: inline-block; animation: spin 0.8s linear infinite;"></i> <span>Guardando...</span>';
+            }
+
+            try {
+                const formData = new FormData(templateForm);
+                const bodyParams = new URLSearchParams(formData);
+                const res = await fetch(templateForm.action, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: bodyParams
+                });
+
+                if (res.ok) {
+                    initialSnapshot = getFormSnapshot(); // reset dirty state
+                    guardPushed = !!(window.history.state && window.history.state.unsavedGuard);
+                    showSuccessBanner('Estructura de la ficha del centro actualizada con éxito.');
+                    if (btn) {
+                        btn.innerHTML = '<i class="lucide-check-circle"></i> <span>¡Plantilla guardada con éxito!</span>';
+                        setTimeout(() => {
+                            btn.disabled = false;
+                            btn.innerHTML = originalHtml;
+                        }, 2000);
+                    }
+                } else {
+                    throw new Error('Error al guardar plantilla');
+                }
+            } catch (err) {
+                console.warn('Fallback a envío clásico:', err);
+                isFormSubmitting = true;
+                templateForm.submit();
+            }
+        });
+
+        // Modal Action 1: "Guardar y salir"
+        document.getElementById('btnSaveAndExit')?.addEventListener('click', async function() {
+            isFormSubmitting = true;
+            const btn = document.getElementById('btnSaveAndExit');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="lucide-loader-2" style="display: inline-block; animation: spin 0.8s linear infinite;"></i> <span>Guardando...</span>';
+            }
+
+            try {
+                const formData = new FormData(templateForm);
+                formData.set('redirectAfter', CLIENTS_LIST_URL);
+                const bodyParams = new URLSearchParams(formData);
+                await fetch(templateForm.action, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: bodyParams
+                });
+            } catch (err) {
+                console.error('Error al guardar y salir:', err);
+            }
+            exitToClientsList();
+        });
+
+        // Modal Action 2: "Salir sin guardar"
+        document.getElementById('btnDiscardAndExit')?.addEventListener('click', function() {
+            exitToClientsList();
+        });
+
+        // Modal Action 3: "Seguir editando"
+        document.getElementById('btnStayEditing')?.addEventListener('click', function() {
+            closeUnsavedModal();
+            if (isFormDirty() && !guardPushed) {
+                window.history.pushState({ unsavedGuard: true }, document.title, window.location.href);
+                guardPushed = true;
+            }
+        });
+
+        // Escape key closes modal
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && unsavedModal && unsavedModal.style.display === 'flex') {
+                closeUnsavedModal();
+                if (isFormDirty() && !guardPushed) {
+                    window.history.pushState({ unsavedGuard: true }, document.title, window.location.href);
+                    guardPushed = true;
+                }
+            }
+        });
+
+        // Dynamic field row functions
         function addFieldRow() {
             const container = document.getElementById('fieldsContainer');
             const row = document.createElement('div');
@@ -131,6 +414,7 @@
                 </div>
             `;
             container.appendChild(row);
+            checkAndArmGuard();
         }
 
         function removeFieldRow(btn) {
@@ -142,6 +426,7 @@
             const row = btn.closest('.template-field-row');
             if (row) {
                 row.remove();
+                checkAndArmGuard();
             }
         }
     </script>

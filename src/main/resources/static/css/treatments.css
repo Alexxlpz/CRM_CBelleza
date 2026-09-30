@@ -59,8 +59,8 @@
 }
 
 .treatment-item-name {
-    font-family: 'Playfair Display', serif;
-    font-size: 18px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 17px;
     font-weight: 700;
     color: var(--text-main, #2b2825);
     flex: 1;

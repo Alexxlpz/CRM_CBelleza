@@ -119,11 +119,11 @@
 }
 
 .auth-header h2 {
-    font-family: 'Playfair Display', serif;
-    font-size: 29px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 28px;
     font-weight: 800;
     color: var(--text-main, #2b2825);
-    letter-spacing: -0.4px;
+    letter-spacing: -0.5px;
     background: linear-gradient(135deg, #2b2825 0%, #8a6a42 60%, #c5a880 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;

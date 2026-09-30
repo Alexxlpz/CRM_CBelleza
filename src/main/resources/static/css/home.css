@@ -116,12 +116,12 @@
 }
 
 .landing-logo {
-    font-size: 68px;
+    font-size: 64px;
     margin-bottom: 14px;
-    font-family: 'Playfair Display', serif;
+    font-family: 'Plus Jakarta Sans', sans-serif;
     font-weight: 800;
     color: var(--text-main, #2b2825);
-    letter-spacing: -1.2px;
+    letter-spacing: -1.5px;
     background: linear-gradient(135deg, #2b2825 0%, #8a6a42 60%, #c5a880 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -361,8 +361,8 @@
 }
 
 .feature-box h3 {
-    font-family: 'Playfair Display', serif;
-    font-size: 21px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 19px;
     margin-bottom: 10px;
     font-weight: 700;
     color: var(--text-main, #2b2825);
@@ -746,7 +746,7 @@
 }
 
 .kpi-number {
-    font-family: 'Playfair Display', serif;
+    font-family: 'Plus Jakarta Sans', sans-serif;
     font-size: 26px;
     font-weight: 800;
     color: var(--primary-dark, #a38258);
@@ -1069,12 +1069,12 @@ html {
 }
 
 .login-header h2 {
-    font-family: 'Playfair Display', serif;
+    font-family: 'Plus Jakarta Sans', sans-serif;
     font-size: 28px;
     font-weight: 800;
     color: var(--text-main, #2b2825);
     margin-bottom: 8px;
-    letter-spacing: -0.3px;
+    letter-spacing: -0.4px;
 }
 
 .login-header p {
@@ -2164,12 +2164,12 @@ html {
 }
 
 .rail-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 24px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 22px;
     font-weight: 800;
     color: var(--text-main, #2b2825);
     margin: 0;
-    letter-spacing: -0.3px;
+    letter-spacing: -0.4px;
     line-height: 1.2;
 }
 

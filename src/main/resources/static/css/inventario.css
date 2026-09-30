@@ -100,8 +100,8 @@
 }
 
 .product-name {
-    font-family: 'Playfair Display', serif;
-    font-size: 18px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 17px;
     font-weight: 700;
     color: var(--text-main, #2b2825);
     white-space: nowrap;
@@ -378,8 +378,8 @@
 }
 
 .info-modal-header h3 {
-    font-family: 'Playfair Display', serif;
-    font-size: 22px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 20px;
     font-weight: 700;
     color: var(--text-main);
     margin: 0;
@@ -560,8 +560,8 @@
 }
 
 .sheet-header h3 {
-    font-family: 'Playfair Display', serif;
-    font-size: 22px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 20px;
     font-weight: 700;
     margin: 0;
     color: var(--text-main);

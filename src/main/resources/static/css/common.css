@@ -1,5 +1,5 @@
 @import url('colors.css');
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
 
 :root {
     /* Shadows & Borders (Non-color layout variables) */
@@ -51,10 +51,10 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6 {
-    font-family: 'Playfair Display', serif;
-    font-weight: 600;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700;
     color: var(--text-main);
-    letter-spacing: -0.2px;
+    letter-spacing: -0.3px;
 }
 
 /* Navbar Component */
@@ -85,11 +85,12 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .nav-brand {
-    font-family: 'Playfair Display', serif;
-    font-size: 26px;
-    font-weight: 700;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 24px;
+    font-weight: 800;
     color: var(--text-main);
     text-decoration: none;
+    letter-spacing: -0.5px;
     display: inline-flex;
     align-items: center;
     gap: 10px;
@@ -722,7 +723,7 @@ footer {
 .sheet-header h3 {
     font-size: 24px;
     margin: 0;
-    font-family: 'Playfair Display', serif;
+    font-family: 'Plus Jakarta Sans', sans-serif;
     font-weight: 700;
     color: var(--text-main);
 }

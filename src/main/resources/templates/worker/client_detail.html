@@ -17,16 +17,16 @@
     <main class="main-container">
 
         <!-- Flash Success Message -->
-        <div class="alert-success-banner" th:if="${successMessage}">
+        <div class="alert-success-banner" id="saveSuccessBanner" th:style="${successMessage != null ? 'display: flex;' : 'display: none;'}">
             <i class="lucide-check-circle"></i>
-            <span th:text="${successMessage}">Ficha técnica guardada con éxito.</span>
+            <span id="saveSuccessMessageText" th:text="${successMessage != null ? successMessage : 'Ficha técnica guardada con éxito.'}">Ficha técnica guardada con éxito.</span>
         </div>
 
-        <!-- Top Navigation Back Pill -->
+        <!-- Top Navigation Back Pill: Siempre vuelve directamente al listado de clientes sin bucles -->
         <div class="page-top-nav">
-            <a href="/worker/clients" class="btn-back-pill" onclick="if (document.referrer && (document.referrer.includes('/worker/clients') || document.referrer.includes('/worker/calendar'))) { window.location.href = document.referrer; return false; }">
+            <a href="/worker/clients" class="btn-back-pill" id="btnBackPill">
                 <i class="lucide-arrow-left"></i>
-                <span>Volver</span>
+                <span>Volver a Clientes</span>
             </a>
         </div>
 
@@ -78,10 +78,15 @@
                 <div class="panel-header-row">
                     <div>
                         <h2 class="panel-title">Ficha Técnica</h2>
-                        <span class="card-meta-stamp" th:if="${card != null and card.updatedAt != null}">
+                        <span class="card-meta-stamp" id="cardMetaStamp">
                             <i class="lucide-clock"></i>
-                            <span>Última edición: <strong th:text="${#temporals.format(card.updatedAt, 'dd/MM/yyyy HH:mm')}">28/09/2026</strong></span>
-                            <span th:if="${card.updatedBy != null}" th:text="'por ' + ${card.updatedBy.name}"></span>
+                            <span class="card-meta-text" th:if="${card != null and card.updatedAt != null}">
+                                Última edición: <strong th:text="${#temporals.format(card.updatedAt, 'dd/MM/yyyy HH:mm')}">28/09/2026</strong>
+                                <span th:if="${card.updatedBy != null}" th:text="'por ' + ${card.updatedBy.name}"></span>
+                            </span>
+                            <span class="card-meta-text" th:if="${card == null or card.updatedAt == null}">
+                                Ficha nueva sin guardar
+                            </span>
                         </span>
                     </div>
                     <span class="badge-card-status filled" th:if="${card != null and card.dataJson != null and !card.dataJson.equals('{}')}">
@@ -94,11 +99,12 @@
 
                 <!-- Dynamic Form based on Center Template -->
                 <form th:action="${isGuest ? '/worker/clients/guest/card' : (client != null ? '/worker/clients/' + client.id + '/card' : '#')}"
-                      method="post" class="ficha-form">
+                      method="post" class="ficha-form" id="fichaForm" autocomplete="off">
 
-                    <!-- Hidden fields for guest if applicable -->
+                    <!-- Hidden fields for guest and navigation redirect if applicable -->
                     <input type="hidden" name="guestPhone" th:if="${isGuest}" th:value="${guestPhone}">
                     <input type="hidden" name="guestName" th:if="${isGuest}" th:value="${guestName}">
+                    <input type="hidden" name="redirectAfter" id="redirectAfterInput" value="">
 
                     <div class="field-group" th:each="field : ${fields}">
                         <label class="field-label" th:for="${field.id}">
@@ -106,14 +112,15 @@
                             <span th:text="${field.label}">Tipo de Piel / Cabello</span>
                         </label>
 
-                        <!-- Text Input -->
-                        <input th:if="${field.type == 'text'}"
-                               type="text"
-                               th:id="${field.id}"
-                               th:name="${field.id}"
-                               class="field-input"
-                               th:placeholder="${field.placeholder != null and !field.placeholder.isEmpty() ? field.placeholder : 'Escribe aquí...'}"
-                               th:value="${cardData[field.id]}">
+                        <!-- Text Field (auto-expanding multiline so no text or line is cut in half) -->
+                        <textarea th:if="${field.type == 'text'}"
+                                  th:id="${field.id}"
+                                  th:name="${field.id}"
+                                  class="field-textarea field-textarea-auto"
+                                  rows="1"
+                                  th:placeholder="${field.placeholder != null and !field.placeholder.isEmpty() ? field.placeholder : 'Escribe aquí...'}"
+                                  th:data-real-value="${cardData[field.id] != null ? cardData[field.id] : ''}"
+                                  th:text="${cardData[field.id]}"></textarea>
 
                         <!-- Number Input -->
                         <input th:if="${field.type == 'number'}"
@@ -123,22 +130,25 @@
                                th:name="${field.id}"
                                class="field-input"
                                th:placeholder="${field.placeholder != null and !field.placeholder.isEmpty() ? field.placeholder : '0'}"
+                               th:data-real-value="${cardData[field.id] != null ? cardData[field.id] : ''}"
                                th:value="${cardData[field.id]}">
 
-                        <!-- Textarea -->
+                        <!-- Textarea (auto-expanding multiline notes so all content is 100% visible at a glance) -->
                         <textarea th:if="${field.type == 'textarea'}"
                                   th:id="${field.id}"
                                   th:name="${field.id}"
-                                  class="field-textarea"
-                                  rows="3"
+                                  class="field-textarea field-textarea-auto"
+                                  rows="2"
                                   th:placeholder="${field.placeholder != null and !field.placeholder.isEmpty() ? field.placeholder : 'Escribe observaciones aquí...'}"
+                                  th:data-real-value="${cardData[field.id] != null ? cardData[field.id] : ''}"
                                   th:text="${cardData[field.id]}"></textarea>
 
                         <!-- Select -->
                         <select th:if="${field.type == 'select'}"
                                 th:id="${field.id}"
                                 th:name="${field.id}"
-                                class="field-select">
+                                class="field-select"
+                                th:data-real-value="${cardData[field.id] != null ? cardData[field.id] : ''}">
                             <option value="">-- Seleccionar --</option>
                             <option th:each="opt : ${#strings.arraySplit(field.options, ',')}"
                                     th:value="${#strings.trim(opt)}"
@@ -146,9 +156,19 @@
                                     th:selected="${cardData[field.id] == #strings.trim(opt)}">
                             </option>
                         </select>
+
+                        <!-- Fallback for other custom text types -->
+                        <textarea th:if="${field.type != 'text' and field.type != 'number' and field.type != 'textarea' and field.type != 'select'}"
+                                  th:id="${field.id}"
+                                  th:name="${field.id}"
+                                  class="field-textarea field-textarea-auto"
+                                  rows="1"
+                                  th:placeholder="${field.placeholder != null and !field.placeholder.isEmpty() ? field.placeholder : 'Escribe aquí...'}"
+                                  th:data-real-value="${cardData[field.id] != null ? cardData[field.id] : ''}"
+                                  th:text="${cardData[field.id]}"></textarea>
                     </div>
 
-                    <button type="submit" class="btn-save-ficha">
+                    <button type="submit" class="btn-save-ficha" id="btnSaveFicha">
                         <i class="lucide-save"></i>
                         <span>Guardar Ficha del Cliente</span>
                     </button>
@@ -208,7 +228,368 @@
 
     </main>
 
+    <!-- Modal: Confirmación de Cambios sin Guardar -->
+    <div class="modal-backdrop" id="unsavedChangesModal" style="display: none;" onclick="handleUnsavedModalBackdrop(event)">
+        <div class="modal-card modal-unsaved-card">
+            <h2 class="modal-title modal-unsaved-title">¿Guardar cambios antes de salir?</h2>
+            <p class="modal-unsaved-desc">
+                Has realizado modificaciones en la ficha técnica de este cliente. Si sales ahora sin guardar, se perderán las notas y cambios introducidos.
+            </p>
+
+            <div class="modal-unsaved-actions">
+                <button type="button" class="btn-save-and-exit" id="btnSaveAndExit">
+                    <i class="lucide-save"></i>
+                    <span>Guardar y salir</span>
+                </button>
+                <button type="button" class="btn-discard-and-exit" id="btnDiscardAndExit">
+                    <i class="lucide-log-out"></i>
+                    <span>Salir sin guardar</span>
+                </button>
+                <button type="button" class="btn-stay-editing" id="btnStayEditing">
+                    <i class="lucide-edit-3"></i>
+                    <span>Seguir editando</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Panel de gestión operativa.')}"></div>
+
+    <!-- Auto-expand textareas, Non-looping Navigation, and History Stack Optimization -->
+    <script>
+        const CLIENTS_LIST_URL = '/worker/clients';
+
+        // 1. Ensure only ONE client detail entry exists in history stack (normalize on load)
+        if (window.history.replaceState) {
+            window.history.replaceState({ page: 'client_detail' }, document.title, window.location.href);
+        }
+
+        // 2. Auto-expand textareas so all content is 100% visible
+        function autoResizeAllTextareas() {
+            document.querySelectorAll('.field-textarea-auto').forEach(textarea => {
+                textarea.style.height = 'auto';
+                const newHeight = Math.max(textarea.scrollHeight + 4, 46);
+                textarea.style.height = newHeight + 'px';
+            });
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', autoResizeAllTextareas);
+        } else {
+            autoResizeAllTextareas();
+        }
+
+        window.addEventListener('load', autoResizeAllTextareas);
+        window.addEventListener('resize', autoResizeAllTextareas);
+        if (document.fonts && document.fonts.ready) {
+            document.fonts.ready.then(autoResizeAllTextareas);
+        }
+
+        document.querySelectorAll('.field-textarea-auto').forEach(textarea => {
+            textarea.addEventListener('input', function() {
+                this.style.height = 'auto';
+                const newHeight = Math.max(this.scrollHeight + 4, 46);
+                this.style.height = newHeight + 'px';
+            });
+        });
+
+        // 3. Dirty Form Tracking & Mobile/Browser Back Button Guard
+        const fichaForm = document.getElementById('fichaForm');
+        let isFormSubmitting = false;
+        let guardPushed = false;
+
+        function getRealServerValue(el) {
+            return el.getAttribute('data-real-value') ?? '';
+        }
+
+        function resetToRealServerValues() {
+            if (!fichaForm) return;
+            const elements = fichaForm.querySelectorAll('input:not([type="hidden"]), textarea, select');
+            elements.forEach(el => {
+                const realVal = getRealServerValue(el);
+                if (el.value !== realVal) {
+                    el.value = realVal;
+                }
+            });
+            // Auto-resize textareas to fit the real restored content
+            document.querySelectorAll('.field-textarea-auto').forEach(ta => {
+                ta.style.height = 'auto';
+                ta.style.height = Math.max(ta.scrollHeight + 4, 46) + 'px';
+            });
+        }
+
+        function isFormDirty() {
+            if (!fichaForm || isFormSubmitting) return false;
+            const elements = fichaForm.querySelectorAll('input:not([type="hidden"]), textarea, select');
+            for (const el of elements) {
+                const realVal = getRealServerValue(el);
+                if ((el.value || '').trim() !== realVal.trim()) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function updateRealValues() {
+            if (!fichaForm) return;
+            const elements = fichaForm.querySelectorAll('input:not([type="hidden"]), textarea, select');
+            elements.forEach(el => {
+                el.setAttribute('data-real-value', el.value);
+            });
+        }
+
+        // Arm the browser/mobile back guard when form becomes dirty
+        function checkAndArmGuard() {
+            if (isFormDirty() && !guardPushed) {
+                window.history.pushState({ unsavedGuard: true }, document.title, window.location.href);
+                guardPushed = true;
+            }
+        }
+
+        fichaForm?.addEventListener('input', checkAndArmGuard);
+        fichaForm?.addEventListener('change', checkAndArmGuard);
+
+        // Ensure form strictly displays real database information, never stale/discarded unsubmitted data
+        window.addEventListener('pageshow', function(event) {
+            const perfNav = window.performance && window.performance.getEntriesByType && window.performance.getEntriesByType("navigation")[0];
+            const isBackForward = event.persisted || (perfNav && perfNav.type === 'back_forward');
+
+            if (isBackForward) {
+                // Navigated via Back/Forward button: reload from server to guarantee 100% real database state
+                window.location.reload();
+            } else {
+                resetToRealServerValues();
+            }
+        });
+
+        const unsavedModal = document.getElementById('unsavedChangesModal');
+
+        function openUnsavedModal() {
+            if (unsavedModal) {
+                unsavedModal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeUnsavedModal() {
+            if (unsavedModal) {
+                unsavedModal.style.display = 'none';
+                document.body.style.overflow = '';
+            }
+        }
+
+        function handleUnsavedModalBackdrop(event) {
+            if (event.target && event.target.id === 'unsavedChangesModal') {
+                closeUnsavedModal();
+                if (isFormDirty() && !guardPushed) {
+                    window.history.pushState({ unsavedGuard: true }, document.title, window.location.href);
+                    guardPushed = true;
+                }
+            }
+        }
+
+        function exitToClientsList() {
+            isFormSubmitting = true;
+            closeUnsavedModal();
+
+            const isCurrentStateGuard = !!(window.history.state && window.history.state.unsavedGuard);
+            const isSameOriginReferrer = document.referrer && document.referrer.startsWith(window.location.origin);
+            const minLength = isCurrentStateGuard ? 2 : 1;
+            const canPopStack = isSameOriginReferrer && (window.history.length > minLength);
+
+            if (canPopStack) {
+                if (isCurrentStateGuard) {
+                    window.history.go(-2);
+                } else {
+                    window.history.back();
+                }
+            } else {
+                window.location.replace(CLIENTS_LIST_URL);
+            }
+        }
+
+        // Top Back Pill click handler - pops this screen completely from the history stack
+        const btnBackPill = document.getElementById('btnBackPill');
+        if (btnBackPill) {
+            btnBackPill.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (isFormDirty()) {
+                    openUnsavedModal();
+                } else {
+                    exitToClientsList();
+                }
+            });
+        }
+
+        // Intercept any internal navigation links (navbar, template config button, footer links, etc.)
+        document.querySelectorAll('a[href]').forEach(link => {
+            if (link.id === 'btnBackPill') return;
+            const href = link.getAttribute('href');
+            if (!href || href.startsWith('#') || href.startsWith('javascript:')) return;
+
+            link.addEventListener('click', function(e) {
+                if (isFormDirty() && !isFormSubmitting) {
+                    e.preventDefault();
+                    openUnsavedModal();
+                }
+            });
+        });
+
+        // 4. Mobile Back (hardware button / swipe gesture) and Browser Back Interception
+        window.addEventListener('popstate', function(event) {
+            if (isFormSubmitting) return;
+
+            // If modal is already showing and user presses mobile back: close it gracefully!
+            if (unsavedModal && unsavedModal.style.display === 'flex') {
+                closeUnsavedModal();
+                window.history.pushState({ unsavedGuard: true }, document.title, window.location.href);
+                guardPushed = true;
+                return;
+            }
+
+            // If form is dirty: show our custom modal!
+            if (isFormDirty()) {
+                guardPushed = false; // state was just popped by the back action
+                openUnsavedModal();
+            } else {
+                // If form is clean: pop this screen off the stack completely!
+                guardPushed = false;
+                exitToClientsList();
+            }
+        });
+
+        // Browser Close Tab / Refresh (beforeunload native prompt for total tab close)
+        window.addEventListener('beforeunload', function(e) {
+            if (isFormDirty() && !isFormSubmitting) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+
+        function showSuccessBanner(message) {
+            const banner = document.getElementById('saveSuccessBanner');
+            const msgSpan = document.getElementById('saveSuccessMessageText');
+            if (banner && msgSpan) {
+                msgSpan.textContent = message;
+                banner.style.display = 'flex';
+            }
+        }
+
+        function updateLastEditedTimestamp() {
+            const metaText = document.querySelector('.card-meta-text');
+            if (metaText) {
+                const now = new Date();
+                const d = String(now.getDate()).padStart(2, '0');
+                const m = String(now.getMonth() + 1).padStart(2, '0');
+                const y = now.getFullYear();
+                const hh = String(now.getHours()).padStart(2, '0');
+                const mm = String(now.getMinutes()).padStart(2, '0');
+                metaText.innerHTML = `Última edición: <strong>${d}/${m}/${y} ${hh}:${mm}</strong> (guardado ahora)`;
+            }
+            const statusBadge = document.querySelector('.badge-card-status');
+            if (statusBadge) {
+                statusBadge.className = 'badge-card-status filled';
+                statusBadge.innerHTML = '<i class="lucide-check-circle-2"></i> Activa';
+            }
+        }
+
+        // Form Submit: Save asynchronously without reloading page or polluting browser history
+        fichaForm?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnSaveFicha');
+            const originalHtml = btn ? btn.innerHTML : '';
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="lucide-loader-2" style="display: inline-block; animation: spin 0.8s linear infinite;"></i> <span>Guardando...</span>';
+            }
+
+            try {
+                const formData = new FormData(fichaForm);
+                const bodyParams = new URLSearchParams(formData);
+                const res = await fetch(fichaForm.action, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: bodyParams
+                });
+
+                if (res.ok) {
+                    updateRealValues(); // updates data-real-value to the newly saved values
+                    guardPushed = !!(window.history.state && window.history.state.unsavedGuard);
+                    showSuccessBanner('Ficha técnica del cliente guardada con éxito.');
+                    updateLastEditedTimestamp();
+                    if (btn) {
+                        btn.innerHTML = '<i class="lucide-check-circle"></i> <span>¡Guardado con éxito!</span>';
+                        setTimeout(() => {
+                            btn.disabled = false;
+                            btn.innerHTML = originalHtml;
+                        }, 2000);
+                    }
+                } else {
+                    throw new Error('Error al guardar');
+                }
+            } catch (err) {
+                console.warn('Fallback a envío clásico:', err);
+                isFormSubmitting = true;
+                fichaForm.submit();
+            }
+        });
+
+        // Modal Action 1: "Guardar y salir"
+        document.getElementById('btnSaveAndExit')?.addEventListener('click', async function() {
+            isFormSubmitting = true;
+            const btn = document.getElementById('btnSaveAndExit');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="lucide-loader-2" style="display: inline-block; animation: spin 0.8s linear infinite;"></i> <span>Guardando...</span>';
+            }
+
+            try {
+                const formData = new FormData(fichaForm);
+                formData.set('redirectAfter', CLIENTS_LIST_URL);
+                const bodyParams = new URLSearchParams(formData);
+                await fetch(fichaForm.action, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: bodyParams
+                });
+            } catch (err) {
+                console.error('Error al guardar y salir:', err);
+            }
+            exitToClientsList();
+        });
+
+        // Modal Action 2: "Salir sin guardar"
+        document.getElementById('btnDiscardAndExit')?.addEventListener('click', function() {
+            exitToClientsList();
+        });
+
+        // Modal Action 3: "Seguir editando"
+        document.getElementById('btnStayEditing')?.addEventListener('click', function() {
+            closeUnsavedModal();
+            if (isFormDirty() && !guardPushed) {
+                window.history.pushState({ unsavedGuard: true }, document.title, window.location.href);
+                guardPushed = true;
+            }
+        });
+
+        fichaForm?.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('btnSaveFicha')?.click();
+            }
+        });
+
+        // Escape key closes modal
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && unsavedModal && unsavedModal.style.display === 'flex') {
+                closeUnsavedModal();
+                if (isFormDirty() && !guardPushed) {
+                    window.history.pushState({ unsavedGuard: true }, document.title, window.location.href);
+                    guardPushed = true;
+                }
+            }
+        });
+    </script>
 
 </body>
 </html>

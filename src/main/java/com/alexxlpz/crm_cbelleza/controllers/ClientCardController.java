@@ -172,13 +172,18 @@ public class ClientCardController {
 
         Map<String, String> fieldValues = new LinkedHashMap<>();
         allParams.forEach((k, v) -> {
-            if (!k.startsWith("_") && !k.equals("clientId")) {
+            if (!k.startsWith("_") && !k.equals("clientId") && !k.equals("redirectAfter")) {
                 fieldValues.put(k, v);
             }
         });
 
         clientCardService.updateCardData(centerId, clientId, null, null, fieldValues, worker);
         redirectAttributes.addFlashAttribute("successMessage", "Ficha técnica del cliente guardada con éxito.");
+
+        String redirectAfter = allParams.get("redirectAfter");
+        if (redirectAfter != null && !redirectAfter.trim().isEmpty() && redirectAfter.startsWith("/worker/")) {
+            return "redirect:" + redirectAfter;
+        }
 
         return "redirect:/worker/clients/" + clientId;
     }
@@ -207,13 +212,18 @@ public class ClientCardController {
 
         Map<String, String> fieldValues = new LinkedHashMap<>();
         allParams.forEach((k, v) -> {
-            if (!k.startsWith("_") && !k.equals("guestPhone") && !k.equals("guestName")) {
+            if (!k.startsWith("_") && !k.equals("guestPhone") && !k.equals("guestName") && !k.equals("redirectAfter")) {
                 fieldValues.put(k, v);
             }
         });
 
         clientCardService.updateCardData(centerId, null, guestPhone, guestName, fieldValues, worker);
         redirectAttributes.addFlashAttribute("successMessage", "Ficha técnica del cliente guardada con éxito.");
+
+        String redirectAfter = allParams.get("redirectAfter");
+        if (redirectAfter != null && !redirectAfter.trim().isEmpty() && redirectAfter.startsWith("/worker/")) {
+            return "redirect:" + redirectAfter;
+        }
 
         return "redirect:/worker/clients/guest?phone=" + URLEncoder.encode(guestPhone, StandardCharsets.UTF_8);
     }
@@ -254,6 +264,7 @@ public class ClientCardController {
         ClientCardTemplate template = clientCardService.getOrCreateTemplateForCenter(centerId);
         List<ClientCardFieldDTO> fields = clientCardService.parseTemplateFields(template.getFieldsJson());
 
+        model.addAttribute("template", template);
         model.addAttribute("fields", fields);
         model.addAttribute("sessionRole", session.getAttribute("sessionRole"));
         model.addAttribute("sessionUserName", session.getAttribute("sessionUserName"));
@@ -269,6 +280,7 @@ public class ClientCardController {
                                @RequestParam("fieldLabels") List<String> fieldLabels,
                                @RequestParam("fieldTypes") List<String> fieldTypes,
                                @RequestParam(value = "fieldPlaceholders", required = false) List<String> fieldPlaceholders,
+                               @RequestParam(value = "redirectAfter", required = false) String redirectAfter,
                                HttpSession session,
                                RedirectAttributes redirectAttributes) {
         if (!isWorkerSessionValid(session)) {
@@ -299,6 +311,10 @@ public class ClientCardController {
 
         clientCardService.saveTemplateFields(centerId, fields);
         redirectAttributes.addFlashAttribute("successMessage", "Estructura de la ficha del centro actualizada con éxito.");
+
+        if (redirectAfter != null && !redirectAfter.trim().isEmpty() && redirectAfter.startsWith("/worker/")) {
+            return "redirect:" + redirectAfter;
+        }
 
         return "redirect:/worker/clients/template";
     }

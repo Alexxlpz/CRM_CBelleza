@@ -20,8 +20,9 @@
 .worker-welcome-banner h2 {
     font-size: 26px;
     margin-bottom: 6px;
-    font-family: 'Playfair Display', serif;
+    font-family: 'Plus Jakarta Sans', sans-serif;
     font-weight: 700;
+    letter-spacing: -0.4px;
 }
 
 .worker-welcome-banner p {
@@ -119,10 +120,11 @@
 }
 
 .action-card-title {
-    font-family: 'Playfair Display', serif;
+    font-family: 'Plus Jakarta Sans', sans-serif;
     font-size: 20px;
     font-weight: 700;
     color: var(--text-main, #2b2825);
+    letter-spacing: -0.3px;
 }
 
 .action-card-desc {
