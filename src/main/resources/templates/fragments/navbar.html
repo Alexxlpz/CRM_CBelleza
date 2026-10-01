@@ -1,17 +1,37 @@
 <div xmlns:th="http://www.thymeleaf.org">
+    <!-- Generic Global Navbar for the entire application -->
     <nav class="navbar" th:fragment="brand(showSession)">
-        <a href="/" class="nav-brand">
-            <img th:src="@{/images/big_icon.png}" alt="Cuquora Logo">
-        </a>
-        <div class="nav-session-info" th:if="${showSession and sessionRole != null}">
-            <span class="session-badge">
-                <i class="lucide-user"></i>
-                <span th:text="${sessionRole == 'CLIENT' ? 'Cliente' : 'Colaborador'}">Cliente</span>
-                <span th:text="'(' + ${sessionUserName} + ')'"></span>
-            </span>
-            <a href="/logout" class="nav-logout"><i class="lucide-log-out"></i> Cerrar</a>
+        <div class="nav-left-group">
+            <a href="/home" class="nav-brand">
+                <img th:src="@{/images/big_icon.png}" alt="Cuquora Logo">
+            </a>
+            <div class="nav-links-menu">
+                <a href="/home" class="nav-menu-link" th:classappend="${activePage == 'home'} ? ' active' : ''">Inicio</a>
+                <a href="/centers" class="nav-menu-link" th:classappend="${activePage == 'centers'} ? ' active' : ''">Centros</a>
+                <a href="/features" class="nav-menu-link" th:classappend="${activePage == 'features'} ? ' active' : ''">Funcionalidades</a>
+                <a href="/register-center" class="nav-menu-link" th:classappend="${activePage == 'register-center'} ? ' active' : ''">Registra tu Centro</a>
+                <a href="/contact" class="nav-menu-link" th:classappend="${activePage == 'contact'} ? ' active' : ''">Contacto</a>
+            </div>
         </div>
-        <div class="nav-session-info nav-auth-duo" th:if="${showSession and sessionRole == null}">
+
+        <div class="nav-session-info" th:if="${sessionRole != null}">
+            <a href="/client/appointments" class="nav-auth-btn nav-auth-register" th:if="${sessionRole == 'CLIENT'}">
+                <i class="lucide-calendar-days"></i> Mis Citas
+            </a>
+            <a href="/client/profile" class="nav-auth-btn nav-auth-register" th:if="${sessionRole == 'CLIENT'}">
+                <i class="lucide-user"></i> Mi Perfil
+            </a>
+
+            <a href="/worker/dashboard" class="nav-auth-btn nav-auth-register" th:if="${sessionRole == 'WORKER'}">
+                <i class="lucide-layout-dashboard"></i> Mi Panel
+            </a>
+            <a href="/worker/center" class="nav-auth-btn nav-auth-register" th:if="${sessionRole == 'WORKER'}">
+                <i class="lucide-store"></i> Mi Centro
+            </a>
+
+            <a href="/logout" class="nav-logout"><i class="lucide-log-out"></i> Cerrar sesión</a>
+        </div>
+        <div class="nav-session-info nav-auth-duo" th:if="${sessionRole == null and (showSession == null or showSession != false)}">
             <a href="/login" class="nav-auth-btn nav-auth-login">Iniciar Sesión</a>
             <a href="/register" class="nav-auth-btn nav-auth-register">Registrarse</a>
         </div>
@@ -20,41 +40,50 @@
 
     <nav class="navbar" th:fragment="client(backUrl, backLabel)">
         <div class="nav-left-group">
-<!--            <a th:if="${backUrl != null}" th:href="${backUrl}" class="back-arrow-btn"-->
-<!--               th:aria-label="${backLabel}">-->
-<!--                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"-->
-<!--                     fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"-->
-<!--                     stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line>-->
-<!--                    <polyline points="12 19 5 12 12 5"></polyline></svg>-->
-<!--            </a>-->
-            <a href="/" class="nav-brand">
+            <a href="/home" class="nav-brand">
                 <img th:src="@{/images/big_icon.png}" alt="Cuquora Logo">
             </a>
+            <div class="nav-links-menu">
+                <a href="/home" class="nav-menu-link" th:classappend="${activePage == 'home'} ? ' active' : ''">Inicio</a>
+                <a href="/centers" class="nav-menu-link" th:classappend="${activePage == 'centers'} ? ' active' : ''">Centros</a>
+                <a href="/features" class="nav-menu-link" th:classappend="${activePage == 'features'} ? ' active' : ''">Funcionalidades</a>
+                <a href="/register-center" class="nav-menu-link" th:classappend="${activePage == 'register-center'} ? ' active' : ''">Registra tu Centro</a>
+                <a href="/contact" class="nav-menu-link" th:classappend="${activePage == 'contact'} ? ' active' : ''">Contacto</a>
+            </div>
         </div>
         <div class="nav-session-info">
-            <a href="/client/appointments" class="nav-context-link">
+            <a href="/client/appointments" class="nav-auth-btn nav-auth-register">
                 <i class="lucide-calendar-days"></i> Mis Citas
             </a>
-            <a href="/logout" class="nav-logout"><i class="lucide-log-out"></i> Salir</a>
+            <a href="/client/profile" class="nav-auth-btn nav-auth-register">
+                <i class="lucide-user"></i> Mi Perfil
+            </a>
+            <a href="/logout" class="nav-logout"><i class="lucide-log-out"></i> Cerrar sesión</a>
         </div>
     </nav>
 
     <nav class="navbar" th:fragment="worker(backUrl, backLabel, notifications)">
         <div class="nav-left-group">
-<!--            <a th:if="${backUrl != null}" th:href="${backUrl}" class="back-arrow-btn"-->
-<!--               th:aria-label="${backLabel}">-->
-<!--                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"-->
-<!--                     fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"-->
-<!--                     stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line>-->
-<!--                    <polyline points="12 19 5 12 12 5"></polyline></svg>-->
-<!--            </a>-->
-            <a href="/" class="nav-brand">
-                <img th:src="@{/images/big_icon.png}" alt="Coquota Logo">
+            <a href="/home" class="nav-brand">
+                <img th:src="@{/images/big_icon.png}" alt="Cuquora Logo">
             </a>
+            <div class="nav-links-menu">
+                <a href="/home" class="nav-menu-link" th:classappend="${activePage == 'home'} ? ' active' : ''">Inicio</a>
+                <a href="/centers" class="nav-menu-link" th:classappend="${activePage == 'centers'} ? ' active' : ''">Centros</a>
+                <a href="/features" class="nav-menu-link" th:classappend="${activePage == 'features'} ? ' active' : ''">Funcionalidades</a>
+                <a href="/register-center" class="nav-menu-link" th:classappend="${activePage == 'register-center'} ? ' active' : ''">Registra tu Centro</a>
+                <a href="/contact" class="nav-menu-link" th:classappend="${activePage == 'contact'} ? ' active' : ''">Contacto</a>
+            </div>
         </div>
         <div class="nav-session-info">
-            <div th:replace="~{fragments/notifications :: menu(${notifications})}"></div>
-            <a href="/logout" class="nav-logout"><i class="lucide-log-out"></i> Salir</a>
+            <div th:if="${notifications != null}" th:replace="~{fragments/notifications :: menu(${notifications})}"></div>
+            <a href="/worker/dashboard" class="nav-auth-btn nav-auth-register">
+                <i class="lucide-layout-dashboard"></i> Mi Panel
+            </a>
+            <a href="/worker/center" class="nav-auth-btn nav-auth-register">
+                <i class="lucide-store"></i> Mi Centro
+            </a>
+            <a href="/logout" class="nav-logout"><i class="lucide-log-out"></i> Cerrar sesión</a>
         </div>
     </nav>
 </div>

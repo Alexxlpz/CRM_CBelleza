@@ -61,4 +61,21 @@ public class UserService {
                 .build();
         return userRepository.save(user);
     }
+
+    public User updateUserProfile(Long userId, String name, String phone, String newPassword) {
+        User user = getUserById(userId);
+        if (user != null) {
+            if (name != null && !name.trim().isEmpty()) {
+                user.setName(name.trim());
+            }
+            if (phone != null) {
+                user.setPhone(phone.trim().isEmpty() ? null : phone.trim());
+            }
+            if (newPassword != null && !newPassword.trim().isEmpty()) {
+                user.setPassword(passwordEncoder.encode(newPassword.trim()));
+            }
+            return userRepository.save(user);
+        }
+        return null;
+    }
 }

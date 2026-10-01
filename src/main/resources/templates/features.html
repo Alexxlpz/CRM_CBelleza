@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Funcionalidades y Módulos de Gestión - Cuquora CRM</title>
+    <!-- Lucide Icons CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.321.0/font/lucide.min.css">
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/home.css">
+    <style>
+        .public-page-container {
+            max-width: 1160px;
+            margin: 0 auto;
+            padding: 40px 24px 80px 24px;
+            width: 100%;
+        }
+        .features-hero {
+            text-align: center;
+            margin-bottom: 56px;
+        }
+        .features-hero .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(197, 168, 128, 0.16);
+            color: var(--primary-dark, #a38258);
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            margin-bottom: 14px;
+        }
+        .features-hero h1 {
+            font-size: 40px;
+            font-weight: 800;
+            color: var(--text-main, #2b2825);
+            margin-bottom: 14px;
+            letter-spacing: -0.6px;
+        }
+        .features-hero p {
+            font-size: 16.5px;
+            color: var(--text-muted, #7a736e);
+            max-width: 720px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        .feature-detail-card {
+            background: #ffffff;
+            border: 1px solid rgba(197, 168, 128, 0.3);
+            border-radius: var(--border-radius-lg, 24px);
+            padding: 38px 40px;
+            margin-bottom: 34px;
+            box-shadow: 0 8px 26px rgba(197, 168, 128, 0.08);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        .feature-detail-card:hover {
+            box-shadow: 0 14px 36px rgba(197, 168, 128, 0.16);
+            border-color: var(--primary, #c5a880);
+        }
+        .feature-detail-card.reverse {
+            direction: rtl;
+        }
+        .feature-detail-card.reverse .feature-info-col,
+        .feature-detail-card.reverse .feature-visual-col {
+            direction: ltr;
+        }
+        .feature-badge-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11.5px;
+            font-weight: 800;
+            color: var(--primary-dark, #a38258);
+            background: rgba(197, 168, 128, 0.14);
+            padding: 4px 12px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+        .feature-info-col h2 {
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--text-main, #2b2825);
+            margin-bottom: 12px;
+            letter-spacing: -0.4px;
+        }
+        .feature-info-col p {
+            font-size: 14.5px;
+            color: #6a635b;
+            line-height: 1.65;
+            margin-bottom: 20px;
+        }
+        .feature-points-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .feature-points-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 13.5px;
+            color: #4b453e;
+            line-height: 1.5;
+        }
+        .feature-points-list li i {
+            color: #2e7d32;
+            font-size: 16px;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+        .feature-visual-col {
+            background: linear-gradient(135deg, #fbf8f4 0%, #f6ece1 100%);
+            border: 1px solid rgba(197, 168, 128, 0.25);
+            border-radius: var(--border-radius-md, 18px);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .feature-interactive-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .feature-bubble-card {
+            background: #ffffff;
+            border: 1px solid rgba(197, 168, 128, 0.28);
+            border-radius: 14px;
+            padding: 16px 18px;
+            box-shadow: 0 3px 12px rgba(197, 168, 128, 0.08);
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            transition: all 0.25s ease;
+        }
+        .feature-bubble-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--primary, #c5a880);
+            box-shadow: 0 6px 18px rgba(197, 168, 128, 0.16);
+        }
+        .bubble-emoji-badge {
+            font-size: 24px;
+            line-height: 1;
+            padding: 10px;
+            border-radius: 12px;
+            background: rgba(197, 168, 128, 0.14);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .bubble-content h4 {
+            font-size: 14.5px;
+            font-weight: 800;
+            color: var(--text-main, #2b2825);
+            margin: 0 0 4px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .bubble-content p {
+            font-size: 12.5px;
+            color: var(--text-muted, #7a736e);
+            margin: 0;
+            line-height: 1.45;
+        }
+        .status-pill {
+            display: inline-block;
+            font-size: 10.5px;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+        .status-pill.success {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        .status-pill.warning {
+            background: #fff3e0;
+            color: #e65100;
+        }
+        .status-pill.info {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+        @media (max-width: 900px) {
+            .feature-detail-card {
+                grid-template-columns: 1fr;
+                padding: 26px 20px;
+                gap: 24px;
+            }
+            .feature-detail-card.reverse {
+                direction: ltr;
+            }
+            .features-hero h1 {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body class="landing-page-view">
+    <!-- Navbar -->
+    <div th:replace="~{fragments/navbar :: brand(true)}"></div>
+
+    <main class="public-page-container">
+        <!-- Hero Header -->
+        <header class="features-hero">
+            <h1>Todo lo que tu centro de belleza necesita para operar con excelencia</h1>
+            <p>Cuquora unifica la agenda de citas 24/7, el control de cabinas y terapeutas, el historial clínico-estético, el inventario de insumos y la facturación en una plataforma web ágil y multidispositivo.</p>
+        </header>
+
+        <!-- Feature 1: Agenda y Reservas -->
+        <div class="feature-detail-card">
+            <div class="feature-info-col">
+                <span class="feature-badge-chip"><i class="lucide-calendar-days"></i> Motor de Reservas 24/7</span>
+                <h2>Gestión de Agenda con Bloqueo Dinámico</h2>
+                <p>Automatiza los turnos disponibles según la duración exacta de cada tratamiento (de 30 a 90 minutos). El sistema sincroniza en tiempo real la disponibilidad simultánea de cabina y especialista cualificado para evitar retrasos y dobles reservas.</p>
+                <ul class="feature-points-list">
+                    <li><i class="lucide-check-circle-2"></i> Reservas online fluidas desde el móvil para clientes sin llamadas telefónicas.</li>
+                    <li><i class="lucide-check-circle-2"></i> Bloqueo matemático de tramos sin posibilidad de solapamiento físico en cabinas.</li>
+                    <li><i class="lucide-check-circle-2"></i> Descarte automático de intervalos ya transcurridos durante la jornada actual.</li>
+                    <li><i class="lucide-check-circle-2"></i> Gestión completa de estados de cita: Pendiente, Confirmada, Completada y Cancelada.</li>
+                </ul>
+            </div>
+            <div class="feature-visual-col">
+                <div class="feature-interactive-stack">
+                    <div class="feature-bubble-card">
+                        <div class="bubble-emoji-badge">📅</div>
+                        <div class="bubble-content">
+                            <h4>Agenda de Citas Inteligente <span class="status-pill success">Activa 24/7</span></h4>
+                            <p>Turnos cronometrados con precisión de 30 a 90 min según el tratamiento contratado.</p>
+                        </div>
+                    </div>
+                    <div class="feature-bubble-card">
+                        <div class="bubble-emoji-badge">⏰</div>
+                        <div class="bubble-content">
+                            <h4>Asignación de Cabinas <span class="status-pill info">Sin solapamiento</span></h4>
+                            <p>Validación matemática simultánea del terapeuta y el box asignado en cada centro.</p>
+                        </div>
+                    </div>
+                    <div class="feature-bubble-card">
+                        <div class="bubble-emoji-badge">📲</div>
+                        <div class="bubble-content">
+                            <h4>Portal del Cliente <span class="status-pill success">Autoservicio</span></h4>
+                            <p>Consulta de citas activas, reagendamiento y notificaciones inmediatas de reserva.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feature 2: Fichas Técnicas e Historial Dérmico -->
+        <div class="feature-detail-card reverse">
+            <div class="feature-info-col">
+                <span class="feature-badge-chip"><i class="lucide-file-heart"></i> Historial Clínico-Estético</span>
+                <h2>Fichas Técnicas y Notas de Cabina</h2>
+                <p>Tus terapeutas acceden al instante al expediente dermatológico del paciente antes de comenzar el tratamiento: alertas visibles de intolerancias, registro de principios activos aplicados y notas privadas de cabina por cada sesión.</p>
+                <ul class="feature-points-list">
+                    <li><i class="lucide-check-circle-2"></i> Alertas destacadas de alergias a productos (látex, tintes, retinol, AHA, etc.).</li>
+                    <li><i class="lucide-check-circle-2"></i> Registro de fórmulas químicas, tonalidades de coloración y principios activos.</li>
+                    <li><i class="lucide-check-circle-2"></i> Historial clínico fechado con anotaciones privadas de los especialistas.</li>
+                    <li><i class="lucide-check-circle-2"></i> Cumplimiento riguroso de normativas RGPD y confidencialidad de datos.</li>
+                </ul>
+            </div>
+            <div class="feature-visual-col">
+                <div class="feature-interactive-stack">
+                    <div class="feature-bubble-card">
+                        <div class="bubble-emoji-badge">📋</div>
+                        <div class="bubble-content">
+                            <h4>Expediente del Cliente <span class="status-pill info">RGPD Seguro</span></h4>
+                            <p>Historial unificado de tratamientos, diagnósticos y notas privadas de cabina.</p>
+                        </div>
+                    </div>
+                    <div class="feature-bubble-card">
+                        <div class="bubble-emoji-badge">⚠️</div>
+                        <div class="bubble-content">
+                            <h4>Alerta de Alergias <span class="status-pill warning">Detección Previa</span></h4>
+                            <p>Avisos preventivos visibles antes de abrir el servicio para máxima seguridad del cliente.</p>
+                        </div>
+                    </div>
+                    <div class="feature-bubble-card">
+                        <div class="bubble-emoji-badge">🧪</div>
+                        <div class="bubble-content">
+                            <h4>Fórmulas y Principios <span class="status-pill success">Dosificación</span></h4>
+                            <p>Registro exacto de mezclas, tintes, concentraciones y aparatología empleada.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feature 3: Inventario y Control de Insumos -->
+        <div class="feature-detail-card">
+            <div class="feature-info-col">
+                <span class="feature-badge-chip"><i class="lucide-package-check"></i> Control de Stock</span>
+                <h2>Insumos de Cabina y Venta Retail</h2>
+                <p>Evita interrupciones en cabina por falta de producto. Cuquora diferencia los consumibles de uso interno del catálogo destinado a venta directa al cliente, con semáforo de existencias mínimas y control de mermas.</p>
+                <ul class="feature-points-list">
+                    <li><i class="lucide-check-circle-2"></i> Doble inventario: consumibles de uso profesional vs. productos de venta retail.</li>
+                    <li><i class="lucide-check-circle-2"></i> Semáforo preventivo de stock mínimo con avisos tempranos de reposición.</li>
+                    <li><i class="lucide-check-circle-2"></i> Ajustes rápidos de existencias en un solo clic con registro de mermas y entradas.</li>
+                    <li><i class="lucide-check-circle-2"></i> Almacenes aislados y categorización por rostro, cuerpo, capilar y uñas.</li>
+                </ul>
+            </div>
+            <div class="feature-visual-col">
+                <div class="feature-interactive-stack">
+                    <div class="feature-bubble-card">
+                        <div class="bubble-emoji-badge">🧴</div>
+                        <div class="bubble-content">
+                            <h4>Insumos vs Retail <span class="status-pill info">Doble Catálogo</span></h4>
+                            <p>Control diferenciado de cosméticos profesionales y productos comerciales para venta.</p>
+                        </div>
+                    </div>
+                    <div class="feature-bubble-card">
+                        <div class="bubble-emoji-badge">🚨</div>
+                        <div class="bubble-content">
+                            <h4>Semáforo de Reposición <span class="status-pill warning">Avisos Tempranos</span></h4>
+                            <p>Alertas automáticas antes de que un producto crítico se agote en cabina.</p>
+                        </div>
+                    </div>
+                    <div class="feature-bubble-card">
+                        <div class="bubble-emoji-badge">📦</div>
+                        <div class="bubble-content">
+                            <h4>Control de Mermas <span class="status-pill success">Trazabilidad</span></h4>
+                            <p>Registro instantáneo de entradas de proveedor, roturas y caducidades en 1 clic.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feature 4: Directorio de Centros y Geolocalización -->
+        <div class="feature-detail-card reverse">
+            <div class="feature-info-col">
+                <span class="feature-badge-chip"><i class="lucide-map-pin"></i> Proximidad y Mapa</span>
+                <h2>Directorio Geolocalizado con Mapa Interactivo</h2>
+                <p>Permite a los usuarios descubrir centros de belleza cercanos a su ubicación en tiempo real. Incorpora visualización en mapa Leaflet interactivo, cálculo de distancia exacta y filtros según el tipo de servicio estético deseado.</p>
+                <ul class="feature-points-list">
+                    <li><i class="lucide-check-circle-2"></i> Mapa Leaflet interactivo con pines personalizados y navegación fluida.</li>
+                    <li><i class="lucide-check-circle-2"></i> Cálculo en tiempo real de la distancia en km según la ubicación del usuario.</li>
+                    <li><i class="lucide-check-circle-2"></i> Filtros especializados: Manicura, Facial, Corporal, Masajes, Peluquería y Depilación.</li>
+                    <li><i class="lucide-check-circle-2"></i> Fichas completas de centro con teléfono, dirección y acceso directo a reserva.</li>
+                </ul>
+            </div>
+            <div class="feature-visual-col">
+                <div class="feature-interactive-stack">
+                    <div class="feature-bubble-card">
+                        <div class="bubble-emoji-badge">🗺️</div>
+                        <div class="bubble-content">
+                            <h4>Mapa Interactivo GPS <span class="status-pill success">Geolocalización</span></h4>
+                            <p>Visualización sobre mapa con pines interactivos y selector de ubicación directa.</p>
+                        </div>
+                    </div>
+                    <div class="feature-bubble-card">
+                        <div class="bubble-emoji-badge">📍</div>
+                        <div class="bubble-content">
+                            <h4>Cálculo de Distancia <span class="status-pill info">Cercanía</span></h4>
+                            <p>Muestra los salones más próximos ordenados por distancia en kilómetros.</p>
+                        </div>
+                    </div>
+                    <div class="feature-bubble-card">
+                        <div class="bubble-emoji-badge">💆‍♀️</div>
+                        <div class="bubble-content">
+                            <h4>Filtro de Tratamientos <span class="status-pill success">Especialidades</span></h4>
+                            <p>Búsqueda segmentada por estética facial, peluquería, manicura, masajes y depilación.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feature 5: Personal, Roles y TPV -->
+        <div class="feature-detail-card">
+            <div class="feature-info-col">
+                <span class="feature-badge-chip"><i class="lucide-users"></i> Equipo y Facturación</span>
+                <h2>Gestión de Personal y Cobro de Servicios (TPV)</h2>
+                <p>Coordina la jornada de tus terapeutas según sus especialidades homologadas y gestiona los cobros en recepción con emisión de tickets y comprobantes, garantizando el control total de la actividad económica de tu centro.</p>
+                <ul class="feature-points-list">
+                    <li><i class="lucide-check-circle-2"></i> Asignación de servicios únicamente a especialistas certificados para ese tratamiento.</li>
+                    <li><i class="lucide-check-circle-2"></i> Vistas cronológicas para terapeutas y panel administrativo para directores.</li>
+                    <li><i class="lucide-check-circle-2"></i> Registro rápido de cobros en recepción (tarjeta y efectivo) y emisión de tickets.</li>
+                    <li><i class="lucide-check-circle-2"></i> Historial de liquidación y seguimiento de volumen de negocio por salón.</li>
+                </ul>
+            </div>
+            <div class="feature-visual-col">
+                <div class="feature-interactive-stack">
+                    <div class="feature-bubble-card">
+                        <div class="bubble-emoji-badge">👥</div>
+                        <div class="bubble-content">
+                            <h4>Roles y Especialistas <span class="status-pill info">Permisos</span></h4>
+                            <p>Paneles personalizados para directores, especialistas de cabina y clientes.</p>
+                        </div>
+                    </div>
+                    <div class="feature-bubble-card">
+                        <div class="bubble-emoji-badge">💳</div>
+                        <div class="bubble-content">
+                            <h4>Cobro Ágil en Recepción <span class="status-pill success">TPV</span></h4>
+                            <p>Registro de pagos por servicio en efectivo o tarjeta con ticket de compra.</p>
+                        </div>
+                    </div>
+                    <div class="feature-bubble-card">
+                        <div class="bubble-emoji-badge">📊</div>
+                        <div class="bubble-content">
+                            <h4>Métricas y Rendimiento <span class="status-pill success">Facturación</span></h4>
+                            <p>Seguimiento de ocupación de cabinas, citas realizadas y rendimiento del salón.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Callout Banner -->
+        <div class="center-lead-box" style="margin-top: 50px;">
+            <div class="lead-box-content">
+                <span class="lead-box-badge"><i class="lucide-sparkles"></i> Diseñado para salones exigentes</span>
+                <h3>Empieza a digitalizar tu centro de estética hoy mismo</h3>
+                <p>Regístrate como usuario para explorar el sistema o solicita el alta de tu empresa para someter tu centro al proceso de certificación oficial.</p>
+            </div>
+            <div class="lead-box-action">
+                <a href="/register-center" class="btn btn-primary btn-hero-cta">
+                    <i class="lucide-sparkles"></i> Solicitar Alta de Centro
+                </a>
+                <span class="lead-support-note"><i class="lucide-check"></i> Sin permanencias ni complicaciones</span>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Software de gestión para centros de estética, salones y spas.')}"></div>
+</body>
+</html>

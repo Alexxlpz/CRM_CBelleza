@@ -47,31 +47,24 @@ public class AppointmentController {
 
     // Client View: List Centers with location filter
     @GetMapping("/client/centers")
-    public String listCenters(@RequestParam(value = "searchLocation", required = false) String searchLocation,
-                              Model model, HttpSession session) {
-        String role = (String) session.getAttribute("sessionRole");
-        Long clientUserId = (Long) session.getAttribute("sessionUserId");
-        if (!"CLIENT".equals(role) || clientUserId == null) {
-            return "redirect:/login";
-        }
-
-        List<Center> centers = centerService.getCentersFilteredByLocation(searchLocation);
+    public String listCenters(@RequestParam(value = "searchLocation", required = false) String searchLocation) {
         if (searchLocation != null && !searchLocation.trim().isEmpty()) {
-            model.addAttribute("currentSearchLocation", searchLocation);
+            return "redirect:/centers?searchLocation=" + searchLocation;
         }
-
-        model.addAttribute("centers", centers);
-        model.addAttribute("sessionRole", role);
-        model.addAttribute("sessionUserName", session.getAttribute("sessionUserName"));
-
-        return "client/centers";
+        return "redirect:/centers";
     }
 
     // Client View: Center Details and Booking Trigger
     @GetMapping("/client/centers/{id}")
-    public String centerDetails(@PathVariable("id") Long id, Model model, HttpSession session) {
+    public String centerDetails(@PathVariable("id") Long id, Model model, HttpSession session, RedirectAttributes redirectAttributes) {
         String role = (String) session.getAttribute("sessionRole");
         Long clientUserId = (Long) session.getAttribute("sessionUserId");
+
+        if ("WORKER".equals(role)) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Has iniciado sesión como trabajador. Solo los clientes pueden acceder a los centros.");
+            return "redirect:/centers";
+        }
+
         if (!"CLIENT".equals(role) || clientUserId == null) {
             return "redirect:/login";
         }
@@ -85,6 +78,7 @@ public class AppointmentController {
         model.addAttribute("workers", workers);
         model.addAttribute("sessionRole", role);
         model.addAttribute("sessionUserName", session.getAttribute("sessionUserName"));
+        model.addAttribute("activePage", "centers");
 
         return "client/center_details";
     }
@@ -99,6 +93,12 @@ public class AppointmentController {
 
         String role = (String) session.getAttribute("sessionRole");
         Long clientUserId = (Long) session.getAttribute("sessionUserId");
+
+        if ("WORKER".equals(role)) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Has iniciado sesión como trabajador. Solo los clientes pueden reservar citas.");
+            return "redirect:/centers";
+        }
+
         if (!"CLIENT".equals(role) || clientUserId == null) {
             redirectAttributes.addFlashAttribute("errorMessage", "Debes iniciar sesión con tu cuenta de cliente para reservar una cita.");
             return "redirect:/login";
@@ -117,9 +117,15 @@ public class AppointmentController {
 
     // Client View: List Client Appointments
     @GetMapping("/client/appointments")
-    public String clientAppointments(Model model, HttpSession session) {
+    public String clientAppointments(Model model, HttpSession session, RedirectAttributes redirectAttributes) {
         String role = (String) session.getAttribute("sessionRole");
         Long clientUserId = (Long) session.getAttribute("sessionUserId");
+
+        if ("WORKER".equals(role)) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Has iniciado sesión como trabajador. Solo los clientes pueden acceder al historial de reservas.");
+            return "redirect:/worker/dashboard";
+        }
+
         if (!"CLIENT".equals(role) || clientUserId == null) {
             return "redirect:/login";
         }
@@ -129,6 +135,7 @@ public class AppointmentController {
         model.addAttribute("appointments", appointments);
         model.addAttribute("sessionRole", role);
         model.addAttribute("sessionUserName", session.getAttribute("sessionUserName"));
+        model.addAttribute("activePage", "appointments");
 
         return "client/appointments";
     }

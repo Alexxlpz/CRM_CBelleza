@@ -68,7 +68,7 @@
                 <a href="/register" class="btn btn-hero-secondary" th:if="${sessionRole == null}">
                     Registrarse
                 </a>
-                <a href="/client/centers" class="btn btn-primary btn-hero-cta" th:if="${sessionRole == 'CLIENT'}">
+                <a href="/centers" class="btn btn-primary btn-hero-cta" th:if="${sessionRole == 'CLIENT'}">
                     Explorar centros y reservar
                 </a>
                 <a href="/worker/dashboard" class="btn btn-primary btn-hero-cta" th:if="${sessionRole == 'WORKER'}">

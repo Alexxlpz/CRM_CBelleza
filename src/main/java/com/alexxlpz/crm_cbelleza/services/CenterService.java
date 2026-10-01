@@ -30,4 +30,30 @@ public class CenterService {
     public Center getCenterById(Long id) {
         return centerRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid center ID: " + id));
     }
+
+    public Center updateCenter(Long centerId, String name, String address, String phone, String email, Double latitude, Double longitude) {
+        Center center = getCenterById(centerId);
+        if (center != null) {
+            if (name != null && !name.trim().isEmpty()) {
+                center.setName(name.trim());
+            }
+            if (address != null) {
+                center.setAddress(address.trim());
+            }
+            if (phone != null) {
+                center.setPhone(phone.trim());
+            }
+            if (email != null) {
+                center.setEmail(email.trim());
+            }
+            if (latitude != null) {
+                center.setLatitude(latitude);
+            }
+            if (longitude != null) {
+                center.setLongitude(longitude);
+            }
+            return centerRepository.save(center);
+        }
+        return null;
+    }
 }

@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alta y Certificación de Centro - Cuquora CRM</title>
+    <!-- Lucide Icons CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.321.0/font/lucide.min.css">
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/home.css">
+    <style>
+        .public-page-container {
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 40px 24px 80px 24px;
+            width: 100%;
+        }
+        .register-center-hero {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .register-center-hero .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(197, 168, 128, 0.16);
+            color: var(--primary-dark, #a38258);
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            margin-bottom: 14px;
+        }
+        .register-center-hero h1 {
+            font-size: 38px;
+            font-weight: 800;
+            color: var(--text-main, #2b2825);
+            margin-bottom: 12px;
+            letter-spacing: -0.6px;
+        }
+        .register-center-hero p {
+            font-size: 16px;
+            color: var(--text-muted, #7a736e);
+            max-width: 680px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        .reg-center-form-card {
+            background: #ffffff;
+            border: 1px solid rgba(197, 168, 128, 0.35);
+            border-radius: var(--border-radius-lg, 24px);
+            padding: 42px 48px;
+            box-shadow: 0 12px 36px rgba(197, 168, 128, 0.12);
+            margin-top: 36px;
+        }
+        .form-grid-two {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .form-group-item {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        .form-group-item label {
+            font-size: 13.5px;
+            font-weight: 700;
+            color: var(--text-main, #2b2825);
+        }
+        .form-group-item .field-input,
+        .form-group-item .field-select,
+        .form-group-item textarea {
+            padding: 12px 16px;
+            border: 1px solid rgba(197, 168, 128, 0.4);
+            border-radius: 12px;
+            font-size: 14.5px;
+            font-family: inherit;
+            color: var(--text-main);
+            background: #faf7f2;
+            transition: all 0.25s ease;
+            outline: none;
+        }
+        .form-group-item .field-input:focus,
+        .form-group-item .field-select:focus,
+        .form-group-item textarea:focus {
+            background: #ffffff;
+            border-color: var(--primary, #c5a880);
+            box-shadow: 0 0 0 4px rgba(197, 168, 128, 0.18);
+        }
+        .specialties-checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 10px;
+            background: #faf7f2;
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(197, 168, 128, 0.3);
+            margin-bottom: 22px;
+        }
+        .checkbox-chip {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #4f473e;
+            cursor: pointer;
+        }
+        .checkbox-chip input {
+            accent-color: var(--primary-dark, #a38258);
+            width: 16px;
+            height: 16px;
+        }
+        .alert-success-box {
+            background: #e8f5e9;
+            border: 1px solid #a5d6a7;
+            color: #1b5e20;
+            padding: 18px 24px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            font-size: 14.5px;
+            font-weight: 600;
+            margin-bottom: 28px;
+            box-shadow: 0 4px 14px rgba(46, 125, 50, 0.1);
+        }
+        .alert-success-box i {
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+        .submit-cert-btn {
+            background: linear-gradient(135deg, var(--primary, #c5a880) 0%, var(--primary-dark, #a38258) 100%);
+            border: none;
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 800;
+            padding: 14px 32px;
+            border-radius: 28px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            transition: all 0.25s ease;
+            box-shadow: 0 6px 20px rgba(197, 168, 128, 0.35);
+        }
+        .submit-cert-btn:hover {
+            filter: brightness(1.05);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 26px rgba(197, 168, 128, 0.45);
+        }
+        @media (max-width: 768px) {
+            .reg-center-form-card {
+                padding: 26px 20px;
+            }
+            .form-grid-two {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+            .register-center-hero h1 {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body class="landing-page-view">
+    <!-- Navbar -->
+    <div th:replace="~{fragments/navbar :: brand(true)}"></div>
+
+    <main class="public-page-container">
+        <!-- Hero Header -->
+        <header class="register-center-hero">
+            <h1>Registra tu Centro en Cuquora</h1>
+            <p>Suma tu centro a nuestra red profesional. Para garantizar un ecosistema exclusivo, sin intrusismo y con la máxima seguridad para los clientes, cada solicitud es auditada y certificada manualmente por nuestro equipo.</p>
+        </header>
+
+        <!-- 3 Steps Diagram -->
+        <div class="registration-steps-grid">
+            <div class="reg-step-card">
+                <div class="reg-step-badge">Paso 1</div>
+                <h3>1. Envío de Solicitud</h3>
+                <p>Facilita los datos de tu empresa (CIF/NIF), responsable, dirección del local y especialidades de servicio.</p>
+            </div>
+            <div class="reg-step-card">
+                <div class="reg-step-badge">Paso 2</div>
+                <h3>2. Auditoría Manual</h3>
+                <p>Verificamos que el negocio sea un centro real con titulación y habilitación sanitaria o estética legal.</p>
+            </div>
+            <div class="reg-step-card">
+                <div class="reg-step-badge">Paso 3</div>
+                <h3>3. Activación y Sello</h3>
+                <p>Recibes tu credencial de Centro Certificado, acceso al CRM y presencia destacada en el directorio de reservas.</p>
+            </div>
+        </div>
+
+        <!-- Success Alert Flash Message -->
+        <div class="alert-success-box" th:if="${successMessage != null}">
+            <i class="lucide-check-circle-2"></i>
+            <span th:text="${successMessage}">¡Solicitud enviada con éxito!</span>
+        </div>
+
+        <!-- Registration Form Card -->
+        <div class="reg-center-form-card">
+            <div style="margin-bottom: 26px; border-bottom: 1px solid #f2ebe2; padding-bottom: 16px;">
+                <h2 style="font-size: 22px; font-weight: 800; color: var(--text-main); margin-bottom: 4px;">Formulario de Solicitud de Certificación</h2>
+                <p style="font-size: 13.5px; color: var(--text-muted);">Completa los datos de tu centro para que nuestro equipo inicie la validación.</p>
+            </div>
+
+            <form action="/register-center" method="post">
+                <div class="form-grid-two">
+                    <div class="form-group-item">
+                        <label for="centerName">Nombre Comercial del Centro *</label>
+                        <input type="text" id="centerName" name="centerName" class="field-input" placeholder="Ej: Salón Bellas Artes, Spa Zen..." required>
+                    </div>
+                    <div class="form-group-item">
+                        <label for="cif">CIF / NIF de la Empresa o Autónomo *</label>
+                        <input type="text" id="cif" name="cif" class="field-input" placeholder="Ej: B12345678 o 12345678Z" required>
+                    </div>
+                </div>
+
+                <div class="form-grid-two">
+                    <div class="form-group-item">
+                        <label for="contactName">Nombre del Titular o Responsable *</label>
+                        <input type="text" id="contactName" name="contactName" class="field-input" placeholder="Nombre y Apellidos" required>
+                    </div>
+                    <div class="form-group-item">
+                        <label for="phone">Teléfono de Contacto Profesional *</label>
+                        <input type="tel" id="phone" name="phone" class="field-input" placeholder="+34 600 000 000" required>
+                    </div>
+                </div>
+
+                <div class="form-grid-two">
+                    <div class="form-group-item">
+                        <label for="email">Correo Electrónico de Contacto *</label>
+                        <input type="email" id="email" name="email" class="field-input" placeholder="info@tucentro.com" required>
+                    </div>
+                    <div class="form-group-item">
+                        <label for="city">Ciudad y Código Postal *</label>
+                        <input type="text" id="city" name="city" class="field-input" placeholder="Ej: Madrid, 28001" required>
+                    </div>
+                </div>
+
+                <div class="form-group-item">
+                    <label>Especialidades y Servicios que ofrecéis:</label>
+                    <div class="specialties-checkbox-grid">
+                        <label class="checkbox-chip">
+                            <input type="checkbox" name="specialties" value="ESTETICA_FACIAL"> Estética Facial y Corporal
+                        </label>
+                        <label class="checkbox-chip">
+                            <input type="checkbox" name="specialties" value="PELUQUERIA"> Peluquería y Coloración
+                        </label>
+                        <label class="checkbox-chip">
+                            <input type="checkbox" name="specialties" value="MANICURA_PEDICURA"> Manicura y Uñas
+                        </label>
+                        <label class="checkbox-chip">
+                            <input type="checkbox" name="specialties" value="SPA_MASAJES"> Spa y Masajes
+                        </label>
+                        <label class="checkbox-chip">
+                            <input type="checkbox" name="specialties" value="MEDICINA_ESTETICA"> Medicina Estética
+                        </label>
+                        <label class="checkbox-chip">
+                            <input type="checkbox" name="specialties" value="DEPILACION"> Depilación Láser / Cera
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group-item">
+                    <label for="notes">Información Adicional (Enlace web, Instagram o detalles):</label>
+                    <textarea id="notes" name="notes" rows="3" placeholder="Cuéntanos brevemente sobre tus instalaciones, número de cabinas o equipo..."></textarea>
+                </div>
+
+                <div style="margin-bottom: 24px;">
+                    <label class="checkbox-chip" style="font-size: 12.5px; color: #706860;">
+                        <input type="checkbox" required>
+                        <span>Confirmo que los datos aportados corresponden a un centro de belleza con actividad legal en vigor y autorizo la verificación manual por el equipo de Cuquora.</span>
+                    </label>
+                </div>
+
+                <button type="submit" class="submit-cert-btn">
+                    <i class="lucide-sparkles"></i>
+                    <span>Enviar Solicitud de Certificación</span>
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Software de gestión para centros de estética, salones y spas.')}"></div>
+</body>
+</html>

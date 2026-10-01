@@ -2,6 +2,7 @@ package com.alexxlpz.crm_cbelleza.controllers;
 
 import com.alexxlpz.crm_cbelleza.entities.*;
 import com.alexxlpz.crm_cbelleza.repositories.*;
+import com.alexxlpz.crm_cbelleza.services.CenterService;
 import com.alexxlpz.crm_cbelleza.services.UserService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
@@ -17,18 +18,20 @@ public class BaseController {
     private final CenterRepository centerRepository;
     private final UserRepository userRepository;
     private final UserService userService;
+    private final CenterService centerService;
 
-    public BaseController(CenterRepository centerRepository, UserRepository userRepository, UserService userService) {
+    public BaseController(CenterRepository centerRepository, UserRepository userRepository, UserService userService, CenterService centerService) {
         this.centerRepository = centerRepository;
         this.userRepository = userRepository;
         this.userService = userService;
+        this.centerService = centerService;
     }
 
     @GetMapping("/")
     public String index(HttpSession session) {
         String role = (String) session.getAttribute("sessionRole");
         if ("CLIENT".equals(role)) {
-            return "redirect:/client/centers";
+            return "redirect:/centers";
         } else if ("WORKER".equals(role)) {
             return "redirect:/worker/dashboard";
         }
@@ -37,17 +40,84 @@ public class BaseController {
 
     @GetMapping("/home")
     public String landing(HttpSession session, Model model) {
-        // Pass current session info for dynamic layouts
         model.addAttribute("sessionRole", session.getAttribute("sessionRole"));
         model.addAttribute("sessionUserName", session.getAttribute("sessionUserName"));
+        model.addAttribute("activePage", "home");
         return "landing";
+    }
+
+    @GetMapping("/centers")
+    public String publicCenters(@RequestParam(value = "searchLocation", required = false) String searchLocation,
+                                HttpSession session, Model model) {
+        model.addAttribute("sessionRole", session.getAttribute("sessionRole"));
+        model.addAttribute("sessionUserName", session.getAttribute("sessionUserName"));
+        model.addAttribute("activePage", "centers");
+
+        List<Center> centers = centerService.getCentersFilteredByLocation(searchLocation);
+        if (searchLocation != null && !searchLocation.trim().isEmpty()) {
+            model.addAttribute("currentSearchLocation", searchLocation);
+        }
+        model.addAttribute("centers", centers);
+        return "centers";
+    }
+
+    @GetMapping({"/features", "/funcionalidades"})
+    public String features(HttpSession session, Model model) {
+        model.addAttribute("sessionRole", session.getAttribute("sessionRole"));
+        model.addAttribute("sessionUserName", session.getAttribute("sessionUserName"));
+        model.addAttribute("activePage", "features");
+        return "features";
+    }
+
+    @GetMapping({"/register-center", "/alta-centro"})
+    public String registerCenter(HttpSession session, Model model) {
+        model.addAttribute("sessionRole", session.getAttribute("sessionRole"));
+        model.addAttribute("sessionUserName", session.getAttribute("sessionUserName"));
+        model.addAttribute("activePage", "register-center");
+        return "register-center";
+    }
+
+    @PostMapping({"/register-center", "/alta-centro"})
+    public String registerCenterSubmit(@RequestParam("centerName") String centerName,
+                                       @RequestParam("cif") String cif,
+                                       @RequestParam("contactName") String contactName,
+                                       @RequestParam("phone") String phone,
+                                       @RequestParam("email") String email,
+                                       @RequestParam(value = "city", required = false) String city,
+                                       @RequestParam(value = "specialties", required = false) List<String> specialties,
+                                       @RequestParam(value = "notes", required = false) String notes,
+                                       RedirectAttributes redirectAttributes) {
+        redirectAttributes.addFlashAttribute("successMessage",
+                "¡Solicitud enviada con éxito! Nuestro departamento de acreditación revisará los datos de " + centerName +
+                " y se pondrá en contacto contigo en un plazo máximo de 24 horas para verificar y certificar tu centro.");
+        return "redirect:/register-center";
+    }
+
+    @GetMapping({"/contact", "/contacto"})
+    public String contact(HttpSession session, Model model) {
+        model.addAttribute("sessionRole", session.getAttribute("sessionRole"));
+        model.addAttribute("sessionUserName", session.getAttribute("sessionUserName"));
+        model.addAttribute("activePage", "contact");
+        return "contact";
+    }
+
+    @PostMapping({"/contact", "/contacto"})
+    public String contactSubmit(@RequestParam("name") String name,
+                                @RequestParam("email") String email,
+                                @RequestParam(value = "phone", required = false) String phone,
+                                @RequestParam("subject") String subject,
+                                @RequestParam("message") String message,
+                                RedirectAttributes redirectAttributes) {
+        redirectAttributes.addFlashAttribute("successMessage",
+                "Gracias por contactar con nosotros, " + name + ". Hemos recibido tu mensaje y te responderemos a la mayor brevedad posible.");
+        return "redirect:/contact";
     }
 
     @GetMapping("/register")
     public String registerPage(HttpSession session, Model model) {
         String activeRole = (String) session.getAttribute("sessionRole");
         if (activeRole != null) {
-            if ("CLIENT".equals(activeRole)) return "redirect:/client/centers";
+            if ("CLIENT".equals(activeRole)) return "redirect:/centers";
             if ("WORKER".equals(activeRole)) return "redirect:/worker/dashboard";
         }
         return "register";
@@ -105,7 +175,7 @@ public class BaseController {
         session.removeAttribute("sessionCenterId");
         session.removeAttribute("sessionCenterName");
 
-        return "redirect:/client/centers";
+        return "redirect:/centers";
     }
 
     @GetMapping("/login")
@@ -115,7 +185,7 @@ public class BaseController {
                             HttpSession session) {
         String activeRole = (String) session.getAttribute("sessionRole");
         if (activeRole != null) {
-            if ("CLIENT".equals(activeRole)) return "redirect:/client/centers";
+            if ("CLIENT".equals(activeRole)) return "redirect:/centers";
             if ("WORKER".equals(activeRole)) return "redirect:/worker/dashboard";
         }
 
@@ -156,7 +226,7 @@ public class BaseController {
             session.setAttribute("sessionUserName", user.getName());
             session.removeAttribute("sessionCenterId");
             session.removeAttribute("sessionCenterName");
-            return "redirect:/client/centers";
+            return "redirect:/centers";
         } else if (user.getRole() == Role.WORKER) {
             session.setAttribute("sessionRole", "WORKER");
             session.setAttribute("sessionUserId", user.getId());
@@ -175,7 +245,7 @@ public class BaseController {
     public String loginSelectorPage(Model model, HttpSession session) {
         String activeRole = (String) session.getAttribute("sessionRole");
         if (activeRole != null) {
-            if ("CLIENT".equals(activeRole)) return "redirect:/client/centers";
+            if ("CLIENT".equals(activeRole)) return "redirect:/centers";
             if ("WORKER".equals(activeRole)) return "redirect:/worker/dashboard";
         }
 
@@ -203,7 +273,7 @@ public class BaseController {
                     session.setAttribute("sessionUserName", client.getName());
                     session.removeAttribute("sessionCenterId");
                     session.removeAttribute("sessionCenterName");
-                    return "redirect:/client/centers";
+                    return "redirect:/centers";
                 }
             }
             // Guest mode has been removed: clients must have an account
