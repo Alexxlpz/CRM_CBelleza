@@ -85,8 +85,34 @@
         let currentYear, currentMonth;
         let selectedDayKey = null;
 
+        function updateRealtimeStatuses() {
+            let hasChanges = false;
+            const now = new Date();
+            appointmentsList.forEach(app => {
+                if (app.status === 'CONFIRMED' && app.dateTime) {
+                    const duration = (app.treatment && app.treatment.duration) ? app.treatment.duration : 60;
+                    const startTime = new Date(app.dateTime);
+                    const endTime = new Date(startTime.getTime() + duration * 60000);
+                    if (now >= endTime) {
+                        app.status = 'COMPLETED';
+                        hasChanges = true;
+                    }
+                }
+            });
+            if (hasChanges) {
+                renderCalendar();
+                if (selectedDayKey) {
+                    const parts = selectedDayKey.split('-');
+                    selectDay(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
+                }
+            }
+        }
+
         // Initialize Calendar
         document.addEventListener('DOMContentLoaded', function() {
+            updateRealtimeStatuses();
+            setInterval(updateRealtimeStatuses, 15000);
+
             // Check for target date query parameter
             const urlParams = new Date(new Date().getTime());
             const queryParams = new URLSearchParams(window.location.search);

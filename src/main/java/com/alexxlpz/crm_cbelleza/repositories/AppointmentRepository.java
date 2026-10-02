@@ -31,10 +31,26 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     List<Appointment> findByCenterIdAndClientIdOrderByDateTimeDesc(Long centerId, Long clientId);
     List<Appointment> findByCenterIdAndGuestPhoneOrderByDateTimeDesc(Long centerId, String guestPhone);
 
-    @org.springframework.data.jpa.repository.Modifying
-    @org.springframework.transaction.annotation.Transactional
-    @org.springframework.data.jpa.repository.Query("UPDATE Appointment a SET a.status = com.alexxlpz.crm_cbelleza.entities.AppointmentStatus.COMPLETED WHERE a.status = com.alexxlpz.crm_cbelleza.entities.AppointmentStatus.CONFIRMED AND a.dateTime < :now")
-    int updatePastConfirmedToCompleted(@org.springframework.data.repository.query.Param("now") LocalDateTime now);
+    List<Appointment> findByStatusAndDateTimeBefore(AppointmentStatus status, LocalDateTime dateTime);
+
+    default int updatePastConfirmedToCompleted(LocalDateTime now) {
+        List<Appointment> confirmed = findByStatusAndDateTimeBefore(AppointmentStatus.CONFIRMED, now);
+        List<Appointment> toUpdate = new java.util.ArrayList<>();
+        for (Appointment a : confirmed) {
+            int duration = (a.getTreatment() != null && a.getTreatment().getDuration() != null && a.getTreatment().getDuration() > 0)
+                    ? a.getTreatment().getDuration()
+                    : 60;
+            LocalDateTime endTime = a.getDateTime().plusMinutes(duration);
+            if (!now.isBefore(endTime)) {
+                a.setStatus(AppointmentStatus.COMPLETED);
+                toUpdate.add(a);
+            }
+        }
+        if (!toUpdate.isEmpty()) {
+            saveAll(toUpdate);
+        }
+        return toUpdate.size();
+    }
 
     @org.springframework.data.jpa.repository.Modifying
     @org.springframework.transaction.annotation.Transactional

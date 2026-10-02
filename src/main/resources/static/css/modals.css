@@ -57,19 +57,29 @@
 }
 
 .center-confirm-dialog {
-    width: min(100%, 430px);
-    padding: 28px;
+    width: min(100%, 440px);
+    padding: 32px 28px;
     text-align: center;
-    animation: modalSlideIn 0.2s ease-out;
+    background: #ffffff !important;
+    border: 1px solid rgba(197, 168, 128, 0.35);
+    border-radius: 20px;
+    box-shadow: 0 20px 48px rgba(35, 28, 22, 0.25), 0 2px 8px rgba(197, 168, 128, 0.12);
+    animation: modalSlideIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .center-confirm-dialog h2 {
-    margin: 0 0 10px;
+    margin: 0 0 12px;
+    font-size: 21px;
+    font-weight: 800;
+    color: var(--text-main, #2b2825);
+    letter-spacing: -0.3px;
 }
 
 .center-confirm-dialog p {
     margin: 0 0 24px;
-    color: var(--text-muted);
+    font-size: 14.5px;
+    color: var(--text-muted, #7a736e);
+    line-height: 1.6;
 }
 
 .center-confirm-actions {

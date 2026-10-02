@@ -60,25 +60,49 @@ public class Appointment {
     @Transient
     private Boolean isNewClient;
 
+    public LocalDateTime getEndDateTime() {
+        if (this.dateTime == null) {
+            return null;
+        }
+        int durationMinutes = 60;
+        try {
+            if (this.treatment != null && this.treatment.getDuration() != null && this.treatment.getDuration() > 0) {
+                durationMinutes = this.treatment.getDuration();
+            }
+        } catch (Exception ignored) {
+            // Safe fallback if proxy initialization is unavailable
+        }
+        return this.dateTime.plusMinutes(durationMinutes);
+    }
+
     @PostLoad
     public void updateStatusIfCompleted() {
-        if (this.status == AppointmentStatus.CONFIRMED && this.dateTime != null && this.dateTime.isBefore(LocalDateTime.now())) {
-            this.status = AppointmentStatus.COMPLETED;
+        if (this.status == AppointmentStatus.CONFIRMED && this.dateTime != null) {
+            LocalDateTime end = getEndDateTime();
+            if (end != null && !LocalDateTime.now().isBefore(end)) {
+                this.status = AppointmentStatus.COMPLETED;
+            }
         }
     }
 
     public AppointmentStatus getStatus() {
-        if (this.status == AppointmentStatus.CONFIRMED && this.dateTime != null && this.dateTime.isBefore(LocalDateTime.now())) {
-            return AppointmentStatus.COMPLETED;
+        if (this.status == AppointmentStatus.CONFIRMED && this.dateTime != null) {
+            LocalDateTime end = getEndDateTime();
+            if (end != null && !LocalDateTime.now().isBefore(end)) {
+                return AppointmentStatus.COMPLETED;
+            }
         }
         return this.status;
     }
 
     public void setStatus(AppointmentStatus status) {
-        if (status == AppointmentStatus.CONFIRMED && this.dateTime != null && this.dateTime.isBefore(LocalDateTime.now())) {
-            this.status = AppointmentStatus.COMPLETED;
-        } else {
-            this.status = status;
+        if (status == AppointmentStatus.CONFIRMED && this.dateTime != null) {
+            LocalDateTime end = getEndDateTime();
+            if (end != null && !LocalDateTime.now().isBefore(end)) {
+                this.status = AppointmentStatus.COMPLETED;
+                return;
+            }
         }
+        this.status = status;
     }
 }

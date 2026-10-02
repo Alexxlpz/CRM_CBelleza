@@ -3,6 +3,7 @@ package com.alexxlpz.crm_cbelleza.controllers;
 import com.alexxlpz.crm_cbelleza.entities.*;
 import com.alexxlpz.crm_cbelleza.repositories.*;
 import com.alexxlpz.crm_cbelleza.services.CenterService;
+import com.alexxlpz.crm_cbelleza.services.EmailService;
 import com.alexxlpz.crm_cbelleza.services.UserService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
@@ -19,12 +20,14 @@ public class BaseController {
     private final UserRepository userRepository;
     private final UserService userService;
     private final CenterService centerService;
+    private final EmailService emailService;
 
-    public BaseController(CenterRepository centerRepository, UserRepository userRepository, UserService userService, CenterService centerService) {
+    public BaseController(CenterRepository centerRepository, UserRepository userRepository, UserService userService, CenterService centerService, EmailService emailService) {
         this.centerRepository = centerRepository;
         this.userRepository = userRepository;
         this.userService = userService;
         this.centerService = centerService;
+        this.emailService = emailService;
     }
 
     @GetMapping("/")
@@ -108,6 +111,7 @@ public class BaseController {
                                 @RequestParam("subject") String subject,
                                 @RequestParam("message") String message,
                                 RedirectAttributes redirectAttributes) {
+        emailService.sendContactInquiryAsync(name, email, phone, subject, message);
         redirectAttributes.addFlashAttribute("successMessage",
                 "Gracias por contactar con nosotros, " + name + ". Hemos recibido tu mensaje y te responderemos a la mayor brevedad posible.");
         return "redirect:/contact";

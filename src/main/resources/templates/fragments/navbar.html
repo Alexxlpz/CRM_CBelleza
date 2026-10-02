@@ -1,89 +1,345 @@
 <div xmlns:th="http://www.thymeleaf.org">
     <!-- Generic Global Navbar for the entire application -->
-    <nav class="navbar" th:fragment="brand(showSession)">
-        <div class="nav-left-group">
-            <a href="/home" class="nav-brand">
-                <img th:src="@{/images/big_icon.png}" alt="Cuquora Logo">
-            </a>
-            <div class="nav-links-menu">
-                <a href="/home" class="nav-menu-link" th:classappend="${activePage == 'home'} ? ' active' : ''">Inicio</a>
-                <a href="/centers" class="nav-menu-link" th:classappend="${activePage == 'centers'} ? ' active' : ''">Centros</a>
-                <a href="/features" class="nav-menu-link" th:classappend="${activePage == 'features'} ? ' active' : ''">Funcionalidades</a>
-                <a href="/register-center" class="nav-menu-link" th:classappend="${activePage == 'register-center'} ? ' active' : ''">Registra tu Centro</a>
-                <a href="/contact" class="nav-menu-link" th:classappend="${activePage == 'contact'} ? ' active' : ''">Contacto</a>
+    <th:block th:fragment="brand(showSession)">
+        <nav class="navbar">
+            <div class="nav-left-group">
+                <a href="/home" class="nav-brand">
+                    <img th:src="@{/images/big_icon.png}" alt="Cuquora Logo">
+                </a>
+                <div class="nav-links-menu">
+                    <a href="/home" class="nav-menu-link" th:classappend="${activePage == 'home'} ? ' active' : ''">Inicio</a>
+                    <a href="/centers" class="nav-menu-link" th:classappend="${activePage == 'centers'} ? ' active' : ''">Centros</a>
+                    <a href="/features" class="nav-menu-link" th:classappend="${activePage == 'features'} ? ' active' : ''">Funcionalidades</a>
+                    <a href="/register-center" class="nav-menu-link" th:classappend="${activePage == 'register-center'} ? ' active' : ''">Registra tu Centro</a>
+                    <a href="/contact" class="nav-menu-link" th:classappend="${activePage == 'contact'} ? ' active' : ''">Contacto</a>
+                </div>
             </div>
-        </div>
 
-        <div class="nav-session-info" th:if="${sessionRole != null}">
-            <a href="/client/appointments" class="nav-auth-btn nav-auth-register" th:if="${sessionRole == 'CLIENT'}">
-                <i class="lucide-calendar-days"></i> Mis Citas
-            </a>
-            <a href="/client/profile" class="nav-auth-btn nav-auth-register" th:if="${sessionRole == 'CLIENT'}">
-                <i class="lucide-user"></i> Mi Perfil
-            </a>
+            <div class="nav-right-group">
+                <div class="nav-session-info" th:if="${sessionRole != null}">
+                    <a href="/client/appointments" class="nav-auth-btn nav-auth-register" th:if="${sessionRole == 'CLIENT'}">
+                        <i class="lucide-calendar-days"></i> Mis Citas
+                    </a>
+                    <a href="/client/profile" class="nav-auth-btn nav-auth-register" th:if="${sessionRole == 'CLIENT'}">
+                        <i class="lucide-user"></i> Mi Perfil
+                    </a>
 
-            <a href="/worker/dashboard" class="nav-auth-btn nav-auth-register" th:if="${sessionRole == 'WORKER'}">
-                <i class="lucide-layout-dashboard"></i> Mi Panel
-            </a>
-            <a href="/worker/center" class="nav-auth-btn nav-auth-register" th:if="${sessionRole == 'WORKER'}">
-                <i class="lucide-store"></i> Mi Centro
-            </a>
+                    <a href="/worker/dashboard" class="nav-auth-btn nav-auth-register" th:if="${sessionRole == 'WORKER'}">
+                        <i class="lucide-layout-dashboard"></i> Mi Panel
+                    </a>
+                    <a href="/worker/center" class="nav-auth-btn nav-auth-register" th:if="${sessionRole == 'WORKER'}">
+                        <i class="lucide-store"></i> Mi Centro
+                    </a>
 
-            <a href="/logout" class="nav-logout"><i class="lucide-log-out"></i> Cerrar sesión</a>
-        </div>
-        <div class="nav-session-info nav-auth-duo" th:if="${sessionRole == null and (showSession == null or showSession != false)}">
-            <a href="/login" class="nav-auth-btn nav-auth-login">Iniciar Sesión</a>
-            <a href="/register" class="nav-auth-btn nav-auth-register">Registrarse</a>
-        </div>
-    </nav>
+                    <a href="/logout" class="nav-logout"><i class="lucide-log-out"></i> Cerrar sesión</a>
+                </div>
+                <div class="nav-session-info nav-auth-duo" th:if="${sessionRole == null and (showSession == null or showSession != false)}">
+                    <a href="/login" class="nav-auth-btn nav-auth-login">Iniciar Sesión</a>
+                    <a href="/register" class="nav-auth-btn nav-auth-register">Registrarse</a>
+                </div>
 
-
-    <nav class="navbar" th:fragment="client(backUrl, backLabel)">
-        <div class="nav-left-group">
-            <a href="/home" class="nav-brand">
-                <img th:src="@{/images/big_icon.png}" alt="Cuquora Logo">
-            </a>
-            <div class="nav-links-menu">
-                <a href="/home" class="nav-menu-link" th:classappend="${activePage == 'home'} ? ' active' : ''">Inicio</a>
-                <a href="/centers" class="nav-menu-link" th:classappend="${activePage == 'centers'} ? ' active' : ''">Centros</a>
-                <a href="/features" class="nav-menu-link" th:classappend="${activePage == 'features'} ? ' active' : ''">Funcionalidades</a>
-                <a href="/register-center" class="nav-menu-link" th:classappend="${activePage == 'register-center'} ? ' active' : ''">Registra tu Centro</a>
-                <a href="/contact" class="nav-menu-link" th:classappend="${activePage == 'contact'} ? ' active' : ''">Contacto</a>
+                <!-- Hamburger Button (AgendaPro Mobile Pattern) -->
+                <button type="button" class="mobile-nav-toggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobileNavDrawer">
+                    <span class="hamburger-box">
+                        <span class="hamburger-line"></span>
+                        <span class="hamburger-line"></span>
+                        <span class="hamburger-line"></span>
+                    </span>
+                </button>
             </div>
-        </div>
-        <div class="nav-session-info">
-            <a href="/client/appointments" class="nav-auth-btn nav-auth-register">
-                <i class="lucide-calendar-days"></i> Mis Citas
-            </a>
-            <a href="/client/profile" class="nav-auth-btn nav-auth-register">
-                <i class="lucide-user"></i> Mi Perfil
-            </a>
-            <a href="/logout" class="nav-logout"><i class="lucide-log-out"></i> Cerrar sesión</a>
-        </div>
-    </nav>
+        </nav>
 
-    <nav class="navbar" th:fragment="worker(backUrl, backLabel, notifications)">
-        <div class="nav-left-group">
-            <a href="/home" class="nav-brand">
-                <img th:src="@{/images/big_icon.png}" alt="Cuquora Logo">
-            </a>
-            <div class="nav-links-menu">
-                <a href="/home" class="nav-menu-link" th:classappend="${activePage == 'home'} ? ' active' : ''">Inicio</a>
-                <a href="/centers" class="nav-menu-link" th:classappend="${activePage == 'centers'} ? ' active' : ''">Centros</a>
-                <a href="/features" class="nav-menu-link" th:classappend="${activePage == 'features'} ? ' active' : ''">Funcionalidades</a>
-                <a href="/register-center" class="nav-menu-link" th:classappend="${activePage == 'register-center'} ? ' active' : ''">Registra tu Centro</a>
-                <a href="/contact" class="nav-menu-link" th:classappend="${activePage == 'contact'} ? ' active' : ''">Contacto</a>
+        <th:block th:replace="~{fragments/navbar :: mobileDrawer(${showSession}, ${sessionRole})}"></th:block>
+    </th:block>
+
+
+    <th:block th:fragment="client(backUrl, backLabel)">
+        <nav class="navbar">
+            <div class="nav-left-group">
+                <a th:if="${backUrl != null}" th:href="${backUrl}" class="back-arrow-btn" th:title="${backLabel != null ? backLabel : 'Volver'}">
+                    <i class="lucide-chevron-left"></i>
+                </a>
+                <a href="/home" class="nav-brand">
+                    <img th:src="@{/images/big_icon.png}" alt="Cuquora Logo">
+                </a>
+                <div class="nav-links-menu">
+                    <a href="/home" class="nav-menu-link" th:classappend="${activePage == 'home'} ? ' active' : ''">Inicio</a>
+                    <a href="/centers" class="nav-menu-link" th:classappend="${activePage == 'centers'} ? ' active' : ''">Centros</a>
+                    <a href="/features" class="nav-menu-link" th:classappend="${activePage == 'features'} ? ' active' : ''">Funcionalidades</a>
+                    <a href="/register-center" class="nav-menu-link" th:classappend="${activePage == 'register-center'} ? ' active' : ''">Registra tu Centro</a>
+                    <a href="/contact" class="nav-menu-link" th:classappend="${activePage == 'contact'} ? ' active' : ''">Contacto</a>
+                </div>
             </div>
-        </div>
-        <div class="nav-session-info">
-            <div th:if="${notifications != null}" th:replace="~{fragments/notifications :: menu(${notifications})}"></div>
-            <a href="/worker/dashboard" class="nav-auth-btn nav-auth-register">
-                <i class="lucide-layout-dashboard"></i> Mi Panel
-            </a>
-            <a href="/worker/center" class="nav-auth-btn nav-auth-register">
-                <i class="lucide-store"></i> Mi Centro
-            </a>
-            <a href="/logout" class="nav-logout"><i class="lucide-log-out"></i> Cerrar sesión</a>
-        </div>
-    </nav>
+            <div class="nav-right-group">
+                <div class="nav-session-info">
+                    <a href="/client/appointments" class="nav-auth-btn nav-auth-register">
+                        <i class="lucide-calendar-days"></i> Mis Citas
+                    </a>
+                    <a href="/client/profile" class="nav-auth-btn nav-auth-register">
+                        <i class="lucide-user"></i> Mi Perfil
+                    </a>
+                    <a href="/logout" class="nav-logout"><i class="lucide-log-out"></i> Cerrar sesión</a>
+                </div>
+
+                <!-- Hamburger Button (AgendaPro Mobile Pattern) -->
+                <button type="button" class="mobile-nav-toggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobileNavDrawer">
+                    <span class="hamburger-box">
+                        <span class="hamburger-line"></span>
+                        <span class="hamburger-line"></span>
+                        <span class="hamburger-line"></span>
+                    </span>
+                </button>
+            </div>
+        </nav>
+
+        <th:block th:replace="~{fragments/navbar :: mobileDrawer(true, 'CLIENT')}"></th:block>
+    </th:block>
+
+
+    <th:block th:fragment="worker(backUrl, backLabel, notifications)">
+        <nav class="navbar">
+            <div class="nav-left-group">
+                <a th:if="${backUrl != null}" th:href="${backUrl}" class="back-arrow-btn" th:title="${backLabel != null ? backLabel : 'Volver'}">
+                    <i class="lucide-chevron-left"></i>
+                </a>
+                <a href="/home" class="nav-brand">
+                    <img th:src="@{/images/big_icon.png}" alt="Cuquora Logo">
+                </a>
+                <div class="nav-links-menu">
+                    <a href="/home" class="nav-menu-link" th:classappend="${activePage == 'home'} ? ' active' : ''">Inicio</a>
+                    <a href="/centers" class="nav-menu-link" th:classappend="${activePage == 'centers'} ? ' active' : ''">Centros</a>
+                    <a href="/features" class="nav-menu-link" th:classappend="${activePage == 'features'} ? ' active' : ''">Funcionalidades</a>
+                    <a href="/register-center" class="nav-menu-link" th:classappend="${activePage == 'register-center'} ? ' active' : ''">Registra tu Centro</a>
+                    <a href="/contact" class="nav-menu-link" th:classappend="${activePage == 'contact'} ? ' active' : ''">Contacto</a>
+                </div>
+            </div>
+            <div class="nav-right-group">
+                <div class="nav-session-info">
+                    <div th:if="${notifications != null}" th:replace="~{fragments/notifications :: menu(${notifications})}"></div>
+                    <a href="/worker/dashboard" class="nav-auth-btn nav-auth-register">
+                        <i class="lucide-layout-dashboard"></i> Mi Panel
+                    </a>
+                    <a href="/worker/center" class="nav-auth-btn nav-auth-register">
+                        <i class="lucide-store"></i> Mi Centro
+                    </a>
+                    <a href="/logout" class="nav-logout"><i class="lucide-log-out"></i> Cerrar sesión</a>
+                </div>
+
+                <!-- Hamburger Button (AgendaPro Mobile Pattern) -->
+                <button type="button" class="mobile-nav-toggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobileNavDrawer">
+                    <span class="hamburger-box">
+                        <span class="hamburger-line"></span>
+                        <span class="hamburger-line"></span>
+                        <span class="hamburger-line"></span>
+                    </span>
+                </button>
+            </div>
+        </nav>
+
+        <th:block th:replace="~{fragments/navbar :: mobileDrawer(true, 'WORKER')}"></th:block>
+    </th:block>
+
+    <!-- Subfragment: Offcanvas Mobile Drawer and Backdrop (AgendaPro Style) -->
+    <th:block th:fragment="mobileDrawer(showSession, role)">
+        <div class="mobile-nav-backdrop" id="mobileNavBackdrop"></div>
+        <aside class="mobile-nav-drawer" id="mobileNavDrawer" aria-hidden="true">
+            <div class="mobile-drawer-header">
+                <a href="/home" class="mobile-drawer-brand">
+                    <img th:src="@{/images/big_icon.png}" alt="Cuquora Logo">
+                </a>
+                <button type="button" class="mobile-drawer-close" id="mobileDrawerClose" aria-label="Cerrar menú">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="mobile-drawer-body">
+                <!-- Navigation Section -->
+                <div class="mobile-drawer-section">
+                    <div class="mobile-drawer-label">Navegación</div>
+                    <nav class="mobile-drawer-nav">
+                        <a href="/home" class="mobile-drawer-link" th:classappend="${activePage == 'home'} ? ' active' : ''">
+                            <span class="mobile-link-text">Inicio</span>
+                            <svg class="mobile-link-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        </a>
+                        <a href="/centers" class="mobile-drawer-link" th:classappend="${activePage == 'centers'} ? ' active' : ''">
+                            <span class="mobile-link-text">Centros</span>
+                            <svg class="mobile-link-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        </a>
+                        <a href="/features" class="mobile-drawer-link" th:classappend="${activePage == 'features'} ? ' active' : ''">
+                            <span class="mobile-link-text">Funcionalidades</span>
+                            <svg class="mobile-link-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        </a>
+                        <a href="/register-center" class="mobile-drawer-link" th:classappend="${activePage == 'register-center'} ? ' active' : ''">
+                            <span class="mobile-link-text">Registra tu Centro</span>
+                            <svg class="mobile-link-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        </a>
+                        <a href="/contact" class="mobile-drawer-link" th:classappend="${activePage == 'contact'} ? ' active' : ''">
+                            <span class="mobile-link-text">Contacto</span>
+                            <svg class="mobile-link-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        </a>
+                    </nav>
+                </div>
+
+                <div class="mobile-drawer-divider"></div>
+
+                <!-- Session / Actions Section -->
+                <div class="mobile-drawer-section">
+                    <div class="mobile-drawer-label" th:if="${role != null}">Mi Cuenta</div>
+                    <div class="mobile-drawer-label" th:if="${role == null and (showSession == null or showSession != false)}">Acceso a la Plataforma</div>
+
+                    <!-- Client Session -->
+                    <div class="mobile-drawer-nav" th:if="${role == 'CLIENT'}">
+                        <div class="mobile-user-badge client-badge">
+                            <i class="lucide-user-check"></i> Modo Cliente
+                        </div>
+                        <a href="/client/appointments" class="mobile-drawer-link">
+                            <span class="mobile-link-text">Mis Citas</span>
+                            <svg class="mobile-link-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        </a>
+                        <a href="/client/profile" class="mobile-drawer-link">
+                            <span class="mobile-link-text">Mi Perfil</span>
+                            <svg class="mobile-link-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        </a>
+                        <a href="/logout" class="mobile-drawer-link mobile-link-danger">
+                            <span class="mobile-link-text">Cerrar sesión</span>
+                            <svg class="mobile-link-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        </a>
+                    </div>
+
+                    <!-- Worker Session -->
+                    <div class="mobile-drawer-nav" th:if="${role == 'WORKER'}">
+                        <div class="mobile-user-badge worker-badge">
+                            <i class="lucide-sparkles"></i> Profesional / Centro
+                        </div>
+                        <a href="/worker/dashboard" class="mobile-drawer-link">
+                            <span class="mobile-link-text">Mi Panel</span>
+                            <svg class="mobile-link-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        </a>
+                        <a href="/worker/center" class="mobile-drawer-link">
+                            <span class="mobile-link-text">Mi Centro</span>
+                            <svg class="mobile-link-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        </a>
+                        <a href="/logout" class="mobile-drawer-link mobile-link-danger">
+                            <span class="mobile-link-text">Cerrar sesión</span>
+                            <svg class="mobile-link-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        </a>
+                    </div>
+
+                    <!-- Unauthenticated Guests (AgendaPro Style Conversion CTAs) -->
+                    <div class="mobile-drawer-actions" th:if="${role == null and (showSession == null or showSession != false)}">
+                        <a href="/register" class="mobile-btn-primary">
+                            <i class="lucide-user-plus"></i> Registrarse Gratis
+                        </a>
+                        <a href="/login" class="mobile-btn-outline">
+                            <i class="lucide-log-in"></i> Iniciar Sesión
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mobile-drawer-footer">
+                <p class="mobile-footer-text">Cuquora CRM • Cuidado y Belleza</p>
+                <span class="mobile-footer-sub">Software para Salones y Spas</span>
+            </div>
+        </aside>
+
+        <!-- Inline self-initializing script for instant mobile responsiveness -->
+        <script>
+            (function() {
+                function initMobileNav() {
+                    var toggleBtn = document.getElementById('mobileNavToggle');
+                    var drawer = document.getElementById('mobileNavDrawer');
+                    var backdrop = document.getElementById('mobileNavBackdrop');
+                    var closeBtn = document.getElementById('mobileDrawerClose');
+
+                    if (!drawer || !backdrop) return;
+
+                    // Reparent to document.body so navbar's backdrop-filter doesn't clip or trap fixed elements
+                    if (drawer.parentElement !== document.body) {
+                        document.body.appendChild(backdrop);
+                        document.body.appendChild(drawer);
+                    }
+
+                    function openDrawer() {
+                        drawer.classList.add('is-open');
+                        backdrop.classList.add('is-open');
+                        drawer.setAttribute('aria-hidden', 'false');
+                        if (toggleBtn) {
+                            toggleBtn.setAttribute('aria-expanded', 'true');
+                            toggleBtn.classList.add('is-active');
+                        }
+                        document.body.classList.add('mobile-nav-locked');
+                    }
+
+                    function closeDrawer() {
+                        drawer.classList.remove('is-open');
+                        backdrop.classList.remove('is-open');
+                        drawer.setAttribute('aria-hidden', 'true');
+                        if (toggleBtn) {
+                            toggleBtn.setAttribute('aria-expanded', 'false');
+                            toggleBtn.classList.remove('is-active');
+                        }
+                        document.body.classList.remove('mobile-nav-locked');
+                    }
+
+                    if (toggleBtn && !toggleBtn.__cuquoraBound) {
+                        toggleBtn.__cuquoraBound = true;
+                        toggleBtn.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            if (drawer.classList.contains('is-open')) {
+                                closeDrawer();
+                            } else {
+                                openDrawer();
+                            }
+                        });
+                    }
+
+                    if (closeBtn && !closeBtn.__cuquoraBound) {
+                        closeBtn.__cuquoraBound = true;
+                        closeBtn.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            closeDrawer();
+                        });
+                    }
+
+                    if (backdrop && !backdrop.__cuquoraBound) {
+                        backdrop.__cuquoraBound = true;
+                        backdrop.addEventListener('click', function() {
+                            closeDrawer();
+                        });
+                    }
+
+                    if (!window.__cuquoraKeyBound) {
+                        window.__cuquoraKeyBound = true;
+                        document.addEventListener('keydown', function(e) {
+                            if (e.key === 'Escape' && drawer.classList.contains('is-open')) {
+                                closeDrawer();
+                            }
+                        });
+                    }
+
+                    var navLinks = drawer.querySelectorAll('a');
+                    navLinks.forEach(function(link) {
+                        if (!link.__cuquoraBound) {
+                            link.__cuquoraBound = true;
+                            link.addEventListener('click', function() {
+                                closeDrawer();
+                            });
+                        }
+                    });
+                }
+
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', initMobileNav);
+                } else {
+                    initMobileNav();
+                }
+            })();
+        </script>
+    </th:block>
 </div>

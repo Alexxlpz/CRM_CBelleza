@@ -15,6 +15,8 @@
             margin: 0 auto;
             padding: 40px 24px 80px 24px;
             width: 100%;
+            box-sizing: border-box;
+            overflow-x: hidden;
         }
         .features-hero {
             text-align: center;
@@ -40,6 +42,8 @@
             color: var(--text-main, #2b2825);
             margin-bottom: 14px;
             letter-spacing: -0.6px;
+            overflow-wrap: break-word;
+            word-break: break-word;
         }
         .features-hero p {
             font-size: 16.5px;
@@ -47,7 +51,10 @@
             max-width: 720px;
             margin: 0 auto;
             line-height: 1.6;
+            overflow-wrap: break-word;
         }
+
+        /* Feature Card: White Container */
         .feature-detail-card {
             background: #ffffff;
             border: 1px solid rgba(197, 168, 128, 0.3);
@@ -56,48 +63,52 @@
             margin-bottom: 34px;
             box-shadow: 0 8px 26px rgba(197, 168, 128, 0.08);
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
             gap: 40px;
             align-items: center;
             transition: all 0.3s ease;
+            box-sizing: border-box;
+            width: 100%;
+            max-width: 100%;
+            overflow: hidden; /* Ensures all inner contents remain strictly bounded within the white card */
         }
         .feature-detail-card:hover {
             box-shadow: 0 14px 36px rgba(197, 168, 128, 0.16);
             border-color: var(--primary, #c5a880);
         }
-        .feature-detail-card.reverse {
-            direction: rtl;
+
+        /* Reverse layout on desktop using modern order instead of direction:rtl */
+        @media (min-width: 901px) {
+            .feature-detail-card.reverse .feature-info-col {
+                order: 2;
+            }
+            .feature-detail-card.reverse .feature-visual-col {
+                order: 1;
+            }
         }
-        .feature-detail-card.reverse .feature-info-col,
-        .feature-detail-card.reverse .feature-visual-col {
-            direction: ltr;
+
+        .feature-info-col {
+            width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
         }
-        .feature-badge-chip {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 11.5px;
-            font-weight: 800;
-            color: var(--primary-dark, #a38258);
-            background: rgba(197, 168, 128, 0.14);
-            padding: 4px 12px;
-            border-radius: 20px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 12px;
-        }
+
         .feature-info-col h2 {
             font-size: 26px;
             font-weight: 800;
             color: var(--text-main, #2b2825);
             margin-bottom: 12px;
             letter-spacing: -0.4px;
+            overflow-wrap: break-word;
+            word-break: break-word;
         }
         .feature-info-col p {
             font-size: 14.5px;
             color: #6a635b;
             line-height: 1.65;
             margin-bottom: 20px;
+            overflow-wrap: break-word;
+            word-break: break-word;
         }
         .feature-points-list {
             list-style: none;
@@ -106,6 +117,7 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
+            width: 100%;
         }
         .feature-points-list li {
             display: flex;
@@ -114,6 +126,9 @@
             font-size: 13.5px;
             color: #4b453e;
             line-height: 1.5;
+            min-width: 0;
+            overflow-wrap: break-word;
+            word-break: break-word;
         }
         .feature-points-list li i {
             color: #2e7d32;
@@ -121,30 +136,39 @@
             margin-top: 2px;
             flex-shrink: 0;
         }
+
         .feature-visual-col {
             background: linear-gradient(135deg, #fbf8f4 0%, #f6ece1 100%);
             border: 1px solid rgba(197, 168, 128, 0.25);
             border-radius: var(--border-radius-md, 18px);
-            padding: 30px;
+            padding: 26px;
             display: flex;
             flex-direction: column;
             gap: 16px;
+            width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
         }
         .feature-interactive-stack {
             display: flex;
             flex-direction: column;
             gap: 14px;
+            width: 100%;
+            min-width: 0;
         }
         .feature-bubble-card {
             background: #ffffff;
             border: 1px solid rgba(197, 168, 128, 0.28);
             border-radius: 14px;
-            padding: 16px 18px;
+            padding: 14px 16px;
             box-shadow: 0 3px 12px rgba(197, 168, 128, 0.08);
             display: flex;
             align-items: flex-start;
-            gap: 14px;
+            gap: 12px;
             transition: all 0.25s ease;
+            width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
         }
         .feature-bubble-card:hover {
             transform: translateY(-2px);
@@ -152,39 +176,53 @@
             box-shadow: 0 6px 18px rgba(197, 168, 128, 0.16);
         }
         .bubble-emoji-badge {
-            font-size: 24px;
+            font-size: 22px;
             line-height: 1;
-            padding: 10px;
-            border-radius: 12px;
+            padding: 8px;
+            border-radius: 10px;
             background: rgba(197, 168, 128, 0.14);
             display: flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
         }
+        .bubble-content {
+            flex: 1;
+            min-width: 0;
+            overflow-wrap: break-word;
+            word-break: break-word;
+        }
         .bubble-content h4 {
-            font-size: 14.5px;
+            font-size: 14px;
             font-weight: 800;
             color: var(--text-main, #2b2825);
             margin: 0 0 4px 0;
             display: flex;
             align-items: center;
-            gap: 8px;
+            flex-wrap: wrap; /* Allows text and status pill to wrap gracefully on narrow screens */
+            gap: 6px;
+            row-gap: 4px;
+            overflow-wrap: break-word;
+            word-break: break-word;
         }
         .bubble-content p {
             font-size: 12.5px;
             color: var(--text-muted, #7a736e);
             margin: 0;
             line-height: 1.45;
+            overflow-wrap: break-word;
+            word-break: break-word;
         }
         .status-pill {
             display: inline-block;
-            font-size: 10.5px;
+            font-size: 10px;
             font-weight: 800;
-            padding: 2px 8px;
+            padding: 2px 7px;
             border-radius: 12px;
             text-transform: uppercase;
             letter-spacing: 0.4px;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
         .status-pill.success {
             background: #e8f5e9;
@@ -198,17 +236,151 @@
             background: #e3f2fd;
             color: #1565c0;
         }
+
+        /* Mobile & Tablet Responsiveness */
         @media (max-width: 900px) {
-            .feature-detail-card {
-                grid-template-columns: 1fr;
-                padding: 26px 20px;
-                gap: 24px;
+            .public-page-container {
+                padding: 30px 20px 60px 20px;
             }
-            .feature-detail-card.reverse {
-                direction: ltr;
+            .features-hero {
+                margin-bottom: 38px;
             }
             .features-hero h1 {
-                font-size: 28px;
+                font-size: clamp(24px, 5.5vw, 32px);
+                line-height: 1.25;
+            }
+            .features-hero p {
+                font-size: 15px;
+                line-height: 1.55;
+            }
+            .feature-detail-card {
+                display: flex;
+                flex-direction: column;
+                padding: 30px 26px;
+                gap: 24px;
+                border-radius: 22px;
+                margin-bottom: 28px;
+            }
+            .feature-info-col {
+                order: 1 !important;
+                width: 100%;
+                min-width: 0;
+            }
+            .feature-visual-col {
+                order: 2 !important;
+                width: 100%;
+                min-width: 0;
+                padding: 22px 20px;
+                border-radius: 16px;
+                gap: 14px;
+            }
+            .feature-info-col h2 {
+                font-size: clamp(20px, 4.8vw, 24px);
+                line-height: 1.35;
+                margin-bottom: 12px;
+            }
+            .feature-info-col p {
+                font-size: 14.5px;
+                line-height: 1.6;
+                margin-bottom: 18px;
+            }
+            .feature-points-list {
+                gap: 12px;
+            }
+            .feature-points-list li {
+                font-size: 13.5px;
+                line-height: 1.5;
+            }
+            .feature-bubble-card {
+                padding: 15px 16px;
+                gap: 12px;
+            }
+            .bubble-emoji-badge {
+                font-size: 20px;
+                padding: 8px;
+            }
+            .bubble-content h4 {
+                font-size: 14px;
+            }
+            .bubble-content p {
+                font-size: 12.5px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .public-page-container {
+                padding: 20px 16px 48px 16px;
+            }
+            .feature-detail-card {
+                padding: 26px 22px;
+                border-radius: 20px;
+                gap: 20px;
+                margin-bottom: 22px;
+            }
+            .feature-visual-col {
+                padding: 18px 16px;
+                border-radius: 14px;
+                gap: 12px;
+            }
+            .feature-interactive-stack {
+                gap: 12px;
+            }
+            .feature-info-col h2 {
+                font-size: 21px;
+                line-height: 1.35;
+                margin-bottom: 10px;
+            }
+            .feature-info-col p {
+                font-size: 13.5px;
+                line-height: 1.55;
+                margin-bottom: 16px;
+            }
+            .feature-points-list {
+                gap: 10px;
+            }
+            .feature-points-list li {
+                font-size: 13px;
+                line-height: 1.45;
+            }
+            .feature-bubble-card {
+                padding: 13px 14px;
+                gap: 10px;
+                border-radius: 12px;
+            }
+            .bubble-emoji-badge {
+                font-size: 19px;
+                padding: 7px;
+                border-radius: 9px;
+            }
+            .bubble-content h4 {
+                font-size: 13.5px;
+                line-height: 1.35;
+            }
+            .bubble-content p {
+                font-size: 12px;
+                line-height: 1.45;
+            }
+            .features-hero h1 {
+                font-size: 23px;
+            }
+            .features-hero p {
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .public-page-container {
+                padding: 16px 12px 40px 12px;
+            }
+            .feature-detail-card {
+                padding: 22px 18px;
+                border-radius: 18px;
+            }
+            .feature-visual-col {
+                padding: 15px 14px;
+            }
+            .feature-bubble-card {
+                padding: 11px 12px;
             }
         }
     </style>
@@ -227,7 +399,6 @@
         <!-- Feature 1: Agenda y Reservas -->
         <div class="feature-detail-card">
             <div class="feature-info-col">
-                <span class="feature-badge-chip"><i class="lucide-calendar-days"></i> Motor de Reservas 24/7</span>
                 <h2>Gestión de Agenda con Bloqueo Dinámico</h2>
                 <p>Automatiza los turnos disponibles según la duración exacta de cada tratamiento (de 30 a 90 minutos). El sistema sincroniza en tiempo real la disponibilidad simultánea de cabina y especialista cualificado para evitar retrasos y dobles reservas.</p>
                 <ul class="feature-points-list">
@@ -267,7 +438,6 @@
         <!-- Feature 2: Fichas Técnicas e Historial Dérmico -->
         <div class="feature-detail-card reverse">
             <div class="feature-info-col">
-                <span class="feature-badge-chip"><i class="lucide-file-heart"></i> Historial Clínico-Estético</span>
                 <h2>Fichas Técnicas y Notas de Cabina</h2>
                 <p>Tus terapeutas acceden al instante al expediente dermatológico del paciente antes de comenzar el tratamiento: alertas visibles de intolerancias, registro de principios activos aplicados y notas privadas de cabina por cada sesión.</p>
                 <ul class="feature-points-list">
@@ -307,7 +477,6 @@
         <!-- Feature 3: Inventario y Control de Insumos -->
         <div class="feature-detail-card">
             <div class="feature-info-col">
-                <span class="feature-badge-chip"><i class="lucide-package-check"></i> Control de Stock</span>
                 <h2>Insumos de Cabina y Venta Retail</h2>
                 <p>Evita interrupciones en cabina por falta de producto. Cuquora diferencia los consumibles de uso interno del catálogo destinado a venta directa al cliente, con semáforo de existencias mínimas y control de mermas.</p>
                 <ul class="feature-points-list">
@@ -347,7 +516,6 @@
         <!-- Feature 4: Directorio de Centros y Geolocalización -->
         <div class="feature-detail-card reverse">
             <div class="feature-info-col">
-                <span class="feature-badge-chip"><i class="lucide-map-pin"></i> Proximidad y Mapa</span>
                 <h2>Directorio Geolocalizado con Mapa Interactivo</h2>
                 <p>Permite a los usuarios descubrir centros de belleza cercanos a su ubicación en tiempo real. Incorpora visualización en mapa Leaflet interactivo, cálculo de distancia exacta y filtros según el tipo de servicio estético deseado.</p>
                 <ul class="feature-points-list">
@@ -387,7 +555,6 @@
         <!-- Feature 5: Personal, Roles y TPV -->
         <div class="feature-detail-card">
             <div class="feature-info-col">
-                <span class="feature-badge-chip"><i class="lucide-users"></i> Equipo y Facturación</span>
                 <h2>Gestión de Personal y Cobro de Servicios (TPV)</h2>
                 <p>Coordina la jornada de tus terapeutas según sus especialidades homologadas y gestiona los cobros en recepción con emisión de tickets y comprobantes, garantizando el control total de la actividad económica de tu centro.</p>
                 <ul class="feature-points-list">
