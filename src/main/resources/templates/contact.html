@@ -124,6 +124,70 @@
             font-weight: 600;
             margin-bottom: 24px;
         }
+        .alert-error-box {
+            background: #ffebee;
+            border: 1px solid #ffcdd2;
+            color: #c62828;
+            padding: 16px 20px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 24px;
+        }
+
+        html {
+            overflow-y: scroll; /* Mantiene la barra de desplazamiento fija para evitar saltos de layout */
+        }
+
+        /* Minimalist Darkened Screen & Centered Loading Spinner */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(18, 16, 14, 0.72);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            z-index: 99999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+            overflow: hidden;
+            pointer-events: all;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .loading-spinner {
+            width: 52px;
+            height: 52px;
+            border: 4px solid rgba(255, 255, 255, 0.18);
+            border-top: 4px solid var(--primary, #c5a880);
+            border-right: 4px solid #deb887;
+            border-radius: 50%;
+            animation: spinLoader 0.8s linear infinite;
+        }
+
+        @keyframes spinLoader {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
         @media (max-width: 640px) {
             .contact-form-box {
                 padding: 26px 20px;
@@ -133,6 +197,8 @@
             }
         }
     </style>
+    <!-- EmailJS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 </head>
 <body class="landing-page-view">
     <!-- Navbar -->
@@ -145,19 +211,22 @@
             <p>¿Tienes dudas sobre cómo funciona el CRM, necesitas ayuda con una reserva o quieres certificar tu salón? Nuestro equipo te atiende de forma personalizada.</p>
         </header>
 
-        <!-- Flash Message -->
+        <!-- Flash Message (Backend Fallback) -->
         <div class="alert-success-box" th:if="${successMessage != null}">
             <i class="lucide-check-circle-2"></i>
             <span th:text="${successMessage}">Gracias por contactar con nosotros.</span>
         </div>
 
         <div class="contact-form-container">
+            <!-- Dynamic Feedback Container for EmailJS (Encima de la card) -->
+            <div id="contactFeedback" style="display: none;"></div>
+
             <!-- Contact Form Box -->
             <div class="contact-form-box">
                 <h2 style="font-size: 21px; font-weight: 800; color: var(--text-main); margin-bottom: 6px;">Envíanos un mensaje</h2>
                 <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 22px;">Rellena el siguiente formulario y responderemos a tu consulta a través de tu correo electrónico.</p>
 
-                <form action="/contact" method="post">
+                <form id="contactForm">
                     <div class="form-item-field">
                         <label for="name">Nombre y Apellidos *</label>
                         <input type="text" id="name" name="name" placeholder="Tu nombre" required>
@@ -183,7 +252,7 @@
                         <textarea id="message" name="message" rows="5" placeholder="¿En qué podemos ayudarte?" required></textarea>
                     </div>
 
-                    <button type="submit" class="contact-submit-btn">
+                    <button type="submit" id="contactSubmitBtn" class="contact-submit-btn">
                         <i class="lucide-send"></i>
                         <span>Enviar Consulta</span>
                     </button>
@@ -191,6 +260,81 @@
             </div>
         </div>
     </main>
+
+    <!-- Minimalist Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay" aria-hidden="true">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- EmailJS Integration Script -->
+    <script>
+        (function() {
+            // === CONFIGURACIÓN DE EMAILJS (Opción A: Plantilla única con Bcc) ===
+            const EMAILJS_PUBLIC_KEY = 'GFk0Vgl7-t3dgQwXd';
+            const EMAILJS_SERVICE_ID = 'service_zz67ay6';
+            const EMAILJS_TEMPLATE_ID = 'template_7h9uh2l';
+
+            // Inicializar SDK
+            emailjs.init(EMAILJS_PUBLIC_KEY);
+
+            const form = document.getElementById('contactForm');
+            const submitBtn = document.getElementById('contactSubmitBtn');
+            const feedbackBox = document.getElementById('contactFeedback');
+            const loadingOverlay = document.getElementById('loadingOverlay');
+
+            if (!form) return;
+
+            function showLoading() {
+                submitBtn.disabled = true;
+                if (loadingOverlay) {
+                    loadingOverlay.style.display = 'flex';
+                    // Fuerza un frame para que se active la transición CSS
+                    setTimeout(() => {
+                        loadingOverlay.classList.add('active');
+                        loadingOverlay.setAttribute('aria-hidden', 'false');
+                    }, 10);
+                }
+            }
+
+            function hideLoading() {
+                if (loadingOverlay) {
+                    loadingOverlay.classList.remove('active');
+                    loadingOverlay.setAttribute('aria-hidden', 'true');
+                    setTimeout(() => {
+                        loadingOverlay.style.display = 'none';
+                        submitBtn.disabled = false;
+                    }, 300);
+                } else {
+                    submitBtn.disabled = false;
+                }
+            }
+
+            form.addEventListener('submit', function(event) {
+                event.preventDefault();
+
+                // Mostrar animación de carga en pantalla completa
+                showLoading();
+                feedbackBox.style.display = 'none';
+
+                // Envío con EmailJS (Llega al cliente y a ti en copia oculta Bcc)
+                emailjs.sendForm(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, form)
+                    .then(() => {
+                        hideLoading();
+                        feedbackBox.className = 'alert-success-box';
+                        feedbackBox.innerHTML = '<i class="lucide-check-circle-2"></i> <span>¡Mensaje enviado con éxito! Te hemos enviado una confirmación a tu correo y te responderemos a la mayor brevedad.</span>';
+                        feedbackBox.style.display = 'flex';
+                        form.reset();
+                    })
+                    .catch((err) => {
+                        console.error('Error al enviar correo con EmailJS:', err);
+                        hideLoading();
+                        feedbackBox.className = 'alert-error-box';
+                        feedbackBox.innerHTML = '<i class="lucide-alert-circle"></i> <span>Hubo un problema al enviar tu consulta. Por favor, inténtalo de nuevo o escríbenos directamente.</span>';
+                        feedbackBox.style.display = 'flex';
+                    });
+            });
+        })();
+    </script>
 
     <!-- Footer -->
     <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Software de gestión para centros de estética, salones y spas.')}"></div>
