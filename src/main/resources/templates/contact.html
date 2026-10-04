@@ -71,7 +71,19 @@
             color: var(--text-main, #2b2825);
         }
         .form-item-field input,
-        .form-item-field select,
+        .form-item-field select {
+            padding: 12px 16px;
+            border: 1px solid rgba(197, 168, 128, 0.4);
+            border-radius: 12px;
+            font-size: 14.5px;
+            font-family: inherit;
+            color: var(--text-main);
+            background: #faf7f2;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+            outline: none;
+            width: 100%;
+            box-sizing: border-box;
+        }
         .form-item-field textarea {
             padding: 12px 16px;
             border: 1px solid rgba(197, 168, 128, 0.4);
@@ -80,8 +92,15 @@
             font-family: inherit;
             color: var(--text-main);
             background: #faf7f2;
-            transition: all 0.25s ease;
             outline: none;
+            width: 100%;
+            min-width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+            resize: vertical;
+            min-height: 100px;
+            max-height: 350px;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
         }
         .form-item-field input:focus,
         .form-item-field select:focus,
@@ -107,9 +126,48 @@
             transition: all 0.25s ease;
             box-shadow: 0 4px 16px rgba(197, 168, 128, 0.3);
         }
-        .contact-submit-btn:hover {
+        .contact-submit-btn:hover:not(:disabled):not(.disabled) {
             filter: brightness(1.05);
             transform: translateY(-1px);
+        }
+        .contact-submit-btn.disabled,
+        .contact-submit-btn:disabled {
+            background: #d8d0c7 !important;
+            color: #8f857a !important;
+            cursor: not-allowed !important;
+            box-shadow: none !important;
+            transform: none !important;
+            opacity: 0.65;
+            filter: grayscale(0.2);
+        }
+        .form-item-field input.has-error,
+        .form-item-field select.has-error,
+        .form-item-field textarea.has-error {
+            border-color: #d32f2f !important;
+            background: #fff8f8 !important;
+            box-shadow: 0 0 0 3.5px rgba(211, 47, 47, 0.14) !important;
+        }
+        .field-error-msg {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12.5px;
+            font-weight: 600;
+            color: #d32f2f;
+            margin-top: 5px;
+            animation: fadeInDown 0.2s ease;
+        }
+        @keyframes fieldShake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-4px); }
+            40%, 80% { transform: translateX(4px); }
+        }
+        .shake-field {
+            animation: fieldShake 0.35s ease;
+        }
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-4px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         .alert-success-box {
             background: #e8f5e9;
@@ -252,7 +310,7 @@
                         <textarea id="message" name="message" rows="5" placeholder="¿En qué podemos ayudarte?" required></textarea>
                     </div>
 
-                    <button type="submit" id="contactSubmitBtn" class="contact-submit-btn">
+                    <button type="submit" id="contactSubmitBtn" class="contact-submit-btn disabled" aria-disabled="true">
                         <i class="lucide-send"></i>
                         <span>Enviar Consulta</span>
                     </button>
@@ -284,11 +342,127 @@
 
             if (!form) return;
 
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+            const fields = {
+                name: {
+                    el: document.getElementById('name'),
+                    validate: (v) => v.trim() ? '' : 'Por favor, introduce tu nombre y apellidos.'
+                },
+                email: {
+                    el: document.getElementById('email'),
+                    validate: (v) => {
+                        if (!v.trim()) return 'Por favor, introduce tu correo electrónico.';
+                        if (!emailRegex.test(v.trim())) return 'Formato de correo no válido. Debe incluir "@" y un dominio válido (ej. usuario@gmail.com).';
+                        return '';
+                    }
+                },
+                subject: {
+                    el: document.getElementById('subject'),
+                    validate: (v) => v.trim() ? '' : 'Por favor, selecciona un motivo de consulta.'
+                },
+                message: {
+                    el: document.getElementById('message'),
+                    validate: (v) => v.trim() ? '' : 'Por favor, escribe tu consulta o mensaje.'
+                }
+            };
+
+            function setFieldError(fieldEl, errorMessage) {
+                clearFieldError(fieldEl);
+                fieldEl.classList.add('has-error');
+
+                fieldEl.classList.remove('shake-field');
+                void fieldEl.offsetWidth;
+                fieldEl.classList.add('shake-field');
+
+                const msg = document.createElement('div');
+                msg.className = 'field-error-msg';
+                msg.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg><span>' + errorMessage + '</span>';
+
+                fieldEl.parentNode.appendChild(msg);
+            }
+
+            function clearFieldError(fieldEl) {
+                fieldEl.classList.remove('has-error', 'shake-field');
+                const existing = fieldEl.parentNode.querySelector('.field-error-msg');
+                if (existing) existing.remove();
+            }
+
+            function isFormValid() {
+                for (const key in fields) {
+                    const item = fields[key];
+                    if (item.el) {
+                        const err = item.validate(item.el.value);
+                        if (err) return false;
+                    }
+                }
+                return true;
+            }
+
+            function updateButtonState() {
+                if (isFormValid()) {
+                    submitBtn.classList.remove('disabled');
+                    submitBtn.removeAttribute('aria-disabled');
+                } else {
+                    submitBtn.classList.add('disabled');
+                    submitBtn.setAttribute('aria-disabled', 'true');
+                }
+            }
+
+            function highlightAllErrors() {
+                let firstInvalid = null;
+                for (const key in fields) {
+                    const item = fields[key];
+                    if (item.el) {
+                        const err = item.validate(item.el.value);
+                        if (err) {
+                            setFieldError(item.el, err);
+                            if (!firstInvalid) firstInvalid = item.el;
+                        } else {
+                            clearFieldError(item.el);
+                        }
+                    }
+                }
+                if (firstInvalid) {
+                    firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    firstInvalid.focus();
+                }
+            }
+
+            for (const key in fields) {
+                const item = fields[key];
+                if (item.el) {
+                    const handleInput = function () {
+                        const err = item.validate(item.el.value);
+                        if (!err) {
+                            clearFieldError(item.el);
+                        }
+                        updateButtonState();
+                    };
+                    item.el.addEventListener('input', handleInput);
+                    item.el.addEventListener('change', handleInput);
+                    item.el.addEventListener('blur', function () {
+                        if (item.el.value.trim()) {
+                            const err = item.validate(item.el.value);
+                            if (err) setFieldError(item.el, err);
+                            else clearFieldError(item.el);
+                        }
+                    });
+                }
+            }
+
+            submitBtn.addEventListener('click', function (e) {
+                if (submitBtn.classList.contains('disabled')) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    highlightAllErrors();
+                }
+            });
+
             function showLoading() {
-                submitBtn.disabled = true;
+                submitBtn.classList.add('disabled');
                 if (loadingOverlay) {
                     loadingOverlay.style.display = 'flex';
-                    // Fuerza un frame para que se active la transición CSS
                     setTimeout(() => {
                         loadingOverlay.classList.add('active');
                         loadingOverlay.setAttribute('aria-hidden', 'false');
@@ -302,21 +476,24 @@
                     loadingOverlay.setAttribute('aria-hidden', 'true');
                     setTimeout(() => {
                         loadingOverlay.style.display = 'none';
-                        submitBtn.disabled = false;
+                        updateButtonState();
                     }, 300);
                 } else {
-                    submitBtn.disabled = false;
+                    updateButtonState();
                 }
             }
 
             form.addEventListener('submit', function(event) {
                 event.preventDefault();
 
-                // Mostrar animación de carga en pantalla completa
+                if (submitBtn.classList.contains('disabled') || !isFormValid()) {
+                    highlightAllErrors();
+                    return;
+                }
+
                 showLoading();
                 feedbackBox.style.display = 'none';
 
-                // Envío con EmailJS (Llega al cliente y a ti en copia oculta Bcc)
                 emailjs.sendForm(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, form)
                     .then(() => {
                         hideLoading();
@@ -324,6 +501,7 @@
                         feedbackBox.innerHTML = '<i class="lucide-check-circle-2"></i> <span>¡Mensaje enviado con éxito! Te hemos enviado una confirmación a tu correo y te responderemos a la mayor brevedad.</span>';
                         feedbackBox.style.display = 'flex';
                         form.reset();
+                        updateButtonState();
                     })
                     .catch((err) => {
                         console.error('Error al enviar correo con EmailJS:', err);
@@ -333,6 +511,9 @@
                         feedbackBox.style.display = 'flex';
                     });
             });
+
+            updateButtonState();
+            setTimeout(updateButtonState, 150);
         })();
     </script>
 

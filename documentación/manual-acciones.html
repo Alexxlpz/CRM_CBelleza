@@ -44,6 +44,7 @@
                     <li><a href="#modulo-cliente">Módulo 2: Cliente & Reservas</a></li>
                     <li><a href="#modulo-worker">Módulo 3: Especialista & Cabina</a></li>
                     <li><a href="#modulo-api">Módulo 4: APIs REST de Disponibilidad</a></li>
+                    <li><a href="#modulo-onboarding">Módulo 5: Contacto & Alta de Centros</a></li>
                     <li><a href="#reglas-negocio">Reglas de Negocio & Validaciones</a></li>
                 </ul>
             </div>
@@ -127,6 +128,39 @@
                                 <td>Selector de depuración y cambio rápido</td>
                                 <td>✅ Permitido</td>
                                 <td>✅ Permitido</td>
+                                <td>✅ Permitido</td>
+                            </tr>
+                            <!-- Portal, Soporte y Onboarding -->
+                            <tr>
+                                <td><code>/contact</code></td>
+                                <td><span class="http-get">GET</span> <span class="http-post">POST</span></td>
+                                <td>Formulario de atención y soporte con validación reactiva y envío transaccional</td>
+                                <td>✅ Permitido</td>
+                                <td>✅ Permitido</td>
+                                <td>✅ Permitido</td>
+                            </tr>
+                            <tr>
+                                <td><code>/register-center</code></td>
+                                <td><span class="http-get">GET</span> <span class="http-post">POST</span></td>
+                                <td>Solicitud de alta de centro: acuse con plazo de 1 semana y auditoría admin con 1-click accept/reject</td>
+                                <td>✅ Permitido</td>
+                                <td>✅ Permitido</td>
+                                <td>✅ Permitido</td>
+                            </tr>
+                            <tr>
+                                <td><code>/profile</code></td>
+                                <td><span class="http-get">GET</span> <span class="http-post">POST</span></td>
+                                <td>Gestión y actualización de perfil del usuario en sesión</td>
+                                <td>❌ Bloqueado</td>
+                                <td>✅ Permitido</td>
+                                <td>✅ Permitido</td>
+                            </tr>
+                            <tr>
+                                <td><code>/my-center</code></td>
+                                <td><span class="http-get">GET</span> <span class="http-post">POST</span></td>
+                                <td>Consulta y ajuste de información del centro de belleza asignado</td>
+                                <td>❌ Bloqueado</td>
+                                <td>❌ Bloqueado</td>
                                 <td>✅ Permitido</td>
                             </tr>
                             <!-- Cliente -->
@@ -526,6 +560,56 @@
                     <p>
                         Búsqueda y ordenación espacial de centros. Si se proporcionan los parámetros <code>lat</code> y <code>lon</code>, calcula la distancia física en kilómetros hacia cada centro utilizando la <strong>fórmula de Haversine</strong> y devuelve el listado ordenado por cercanía geográfica.
                     </p>
+                </div>
+            </section>
+
+            <!-- MÓDULO 5: CONTACTO, NOTIFICACIONES Y CERTIFICACIÓN DE CENTROS -->
+            <section class="doc-section" id="modulo-onboarding">
+                <div class="section-header">
+                    <div class="section-header-title">
+                        <div class="section-icon">📬</div>
+                        <div>
+                            <h2>Módulo 5: Contacto, Notificaciones y Certificación de Centros</h2>
+                            <p style="margin: 0; font-size: 0.95rem;">Controladores: <code>BaseController</code>, <code>EmailService</code>, Integración Frontend <code>EmailJS</code></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-feature" style="margin-bottom: 1.5rem;">
+                    <div class="card-feature-header">
+                        <span class="http-get">GET</span> <span class="http-post">POST</span>
+                        <strong>/register-center</strong>
+                        <span class="card-badge badge-guest">Público / Solicitantes</span>
+                    </div>
+                    <p>
+                        Tramitación de expedientes de alta para centros de belleza colaboradores. Incorpora una interfaz con validación reactiva continua y control de desbordamiento en el área de notas.
+                    </p>
+                    <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.9rem; margin-bottom: 0.8rem;">
+                        <li><strong>Parámetros enviados:</strong> <code>center_name</code>, <code>cif</code>, <code>contact_name</code>, <code>phone</code>, <code>email</code>, <code>city</code>, <code>specialties</code>, <code>notes</code>, <code>submission_date</code>.</li>
+                        <li><strong>Validación reactiva:</strong> Botón de envío deshabilitado condicionalmente. Al intentar enviar con datos pendientes, se acciona un efecto de vibración visual y se señalan los campos con borde rojo (<code>#d32f2f</code>) y mensaje contextual; se verifica el patrón regex estricto de email con comprobación de dominio.</li>
+                        <li><strong>Estrategia de Plantilla Única (EmailJS Free Tier):</strong> Se canaliza a través de un único template con <code>To: {{email}}</code> (solicitante) y <code>BCC: cuquora@hotmail.com</code> (administrador).</li>
+                        <li><strong>Garantía para el Solicitante:</strong> Compromiso explícito notificado en el correo de evaluación y respuesta en un plazo máximo de <strong>1 semana (7 días naturales)</strong>.</li>
+                        <li><strong>Panel de Resolución Directa para el Administrador:</strong> El correo remitido al administrador incorpora botones interactivos para resolución en 1 solo clic:
+                            <br>• <strong style="color: #2e7d32;">✓ Aceptar Solicitud</strong>: Genera un <code>mailto:</code> directo hacia el solicitante con asunto y cuerpo pre-redactados de bienvenida y credenciales de acceso.
+                            <br>• <strong style="color: #c62828;">✕ Denegar / Subsanar</strong>: Genera un <code>mailto:</code> pre-redactado para requerir subsanación de datos o comunicar la no admisión.
+                        </li>
+                        <li><strong>Fallback en Backend:</strong> Ejecución asíncrona mediante <code>EmailService.sendCenterRegistrationRequestAsync()</code> para garantizar la recepción incluso en caso de fallo del cliente JavaScript.</li>
+                    </ul>
+                </div>
+
+                <div class="card-feature" style="margin-bottom: 1.5rem;">
+                    <div class="card-feature-header">
+                        <span class="http-get">GET</span> <span class="http-post">POST</span>
+                        <strong>/contact</strong>
+                        <span class="card-badge badge-guest">Público</span>
+                    </div>
+                    <p>
+                        Canal de atención al cliente y consultas comerciales. Dispone de validación reactiva en tiempo real sobre los campos obligatorios (nombre, email con verificación de dominio, motivo y mensaje), con limitación en el redimensionamiento del área de texto para preservar el contenedor de tarjeta.
+                    </p>
+                    <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.9rem; margin-bottom: 0.8rem;">
+                        <li><strong>Parámetros enviados:</strong> <code>user_name</code>, <code>user_email</code>, <code>user_subject</code>, <code>user_message</code>, <code>date</code>.</li>
+                        <li><strong>Canal de envío:</strong> Disparo transaccional vía EmailJS hacia la bandeja de soporte con fallback en controlador Spring Boot.</li>
+                    </ul>
                 </div>
             </section>
 

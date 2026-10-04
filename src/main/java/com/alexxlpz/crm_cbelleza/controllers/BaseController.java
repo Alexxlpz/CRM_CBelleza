@@ -90,9 +90,10 @@ public class BaseController {
                                        @RequestParam(value = "specialties", required = false) List<String> specialties,
                                        @RequestParam(value = "notes", required = false) String notes,
                                        RedirectAttributes redirectAttributes) {
+        emailService.sendCenterRegistrationRequestAsync(centerName, cif, contactName, phone, email, city, specialties, notes);
         redirectAttributes.addFlashAttribute("successMessage",
-                "¡Solicitud enviada con éxito! Nuestro departamento de acreditación revisará los datos de " + centerName +
-                " y se pondrá en contacto contigo en un plazo máximo de 24 horas para verificar y certificar tu centro.");
+                "¡Solicitud enviada con éxito! Hemos enviado un correo de confirmación a " + email +
+                ". Nuestro departamento auditará los datos de la empresa para su comprobación en un plazo máximo de una semana.");
         return "redirect:/register-center";
     }
 

@@ -77,10 +77,10 @@ CREATE INDEX IF NOT EXISTS idx_inventories_product ON inventories(product_id);
 
 -- Centers
 INSERT INTO centers (id, name, address, phone, email, latitude, longitude) VALUES
-(1, 'Cuquora Centro Histórico', 'Calle Mayor 45, 28013 Madrid', '+34 910 111 222', 'centro@cbelleza.com', 40.4168, -3.7038),
-(2, 'Cuquora Plaza Norte', 'Av. de la Ilustración 12, 28034 Madrid', '+34 910 222 333', 'plazanorte@cbelleza.com', 40.5401, -3.6143),
-(3, 'Cuquora Sarrià-Sant Gervasi', 'Carrer Major de Sarrià 88, 08017 Barcelona', '+34 932 444 555', 'barcelona@cbelleza.com', 41.3984, 2.1221),
-(4, 'Cuquora Las Condes', 'Av. Las Condes 8900, Santiago', '+56 2 2033 3444', 'lascondes@cbelleza.com', -33.4000, -70.5667)
+(1, 'Centro Histórico', 'Calle Mayor 45, 28013 Madrid', '+34 910 111 222', 'centro@cbelleza.com', 40.4168, -3.7038),
+(2, 'Plaza Norte', 'Av. de la Ilustración 12, 28034 Madrid', '+34 910 222 333', 'plazanorte@cbelleza.com', 40.5401, -3.6143),
+(3, 'Sarrià-Sant Gervasi', 'Carrer Major de Sarrià 88, 08017 Barcelona', '+34 932 444 555', 'barcelona@cbelleza.com', 41.3984, 2.1221),
+(4, 'Las Condes', 'Av. Las Condes 8900, Santiago', '+56 2 2033 3444', 'lascondes@cbelleza.com', -33.4000, -70.5667)
 ON CONFLICT (id) DO NOTHING;
 
 -- Users (Workers & Clients with BCrypt hashed password for 'password123')

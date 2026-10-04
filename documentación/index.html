@@ -182,8 +182,8 @@
                             </tr>
                             <tr>
                                 <td><strong>Lógica de Negocio (Servicios)</strong></td>
-                                <td><code>AppointmentService</code>, <code>InventoryService</code>, <code>TreatmentService</code>, <code>UserService</code>, <code>NotificationService</code></td>
-                                <td>Validación matemática de disponibilidad de cabinas (intervalos de 30 min), prevención de roturas de stock, emisión de alertas proactivas y encriptación de contraseñas.</td>
+                                <td><code>AppointmentService</code>, <code>InventoryService</code>, <code>TreatmentService</code>, <code>UserService</code>, <code>NotificationService</code>, <code>EmailService</code></td>
+                                <td>Validación matemática de disponibilidad de cabinas (intervalos de 30 min), prevención de roturas de stock, emisión de alertas proactivas, encriptación BCrypt y canal de comunicación por correo transaccional (Spring Mail / EmailJS).</td>
                             </tr>
                             <tr>
                                 <td><strong>Acceso a Datos (Repositorios)</strong></td>
@@ -430,25 +430,25 @@
                 <div class="grid-4">
                     <div class="card-feature">
                         <span class="card-badge badge-client">Madrid Capital</span>
-                        <h4 style="margin-top: 0.5rem;">Cuquora Centro Histórico</h4>
+                        <h4 style="margin-top: 0.5rem;">Centro Histórico</h4>
                         <p style="font-size: 0.85rem; margin-bottom: 0.5rem;">Calle Mayor 45, Madrid</p>
                         <p class="text-muted" style="font-size: 0.8rem;">Especialidad en manicura rusa, faciales con ácido hialurónico y aromaterapia.</p>
                     </div>
                     <div class="card-feature">
                         <span class="card-badge badge-client">Madrid Norte</span>
-                        <h4 style="margin-top: 0.5rem;">Cuquora Plaza Norte</h4>
+                        <h4 style="margin-top: 0.5rem;">Plaza Norte</h4>
                         <p style="font-size: 0.85rem; margin-bottom: 0.5rem;">Av. de la Ilustración 12, Madrid</p>
                         <p class="text-muted" style="font-size: 0.8rem;">Centro especializado en peluquería de autor, balayage y depilación láser.</p>
                     </div>
                     <div class="card-feature">
                         <span class="card-badge badge-client">Barcelona</span>
-                        <h4 style="margin-top: 0.5rem;">Cuquora Sarrià</h4>
+                        <h4 style="margin-top: 0.5rem;">Sarrià</h4>
                         <p style="font-size: 0.85rem; margin-bottom: 0.5rem;">Carrer Major de Sarrià 88, BCN</p>
                         <p class="text-muted" style="font-size: 0.8rem;">Cabinas de bienestar holístico, maderoterapia y diseño de cejas con henna.</p>
                     </div>
                     <div class="card-feature">
                         <span class="card-badge badge-client">Internacional</span>
-                        <h4 style="margin-top: 0.5rem;">Cuquora Las Condes</h4>
+                        <h4 style="margin-top: 0.5rem;">Las Condes</h4>
                         <p style="font-size: 0.85rem; margin-bottom: 0.5rem;">Av. Las Condes 8900, Santiago</p>
                         <p class="text-muted" style="font-size: 0.8rem;">Sede spa de lujo con rituales balineses y tratamientos capilares con botox.</p>
                     </div>
@@ -526,35 +526,35 @@ docker-compose logs -f app</code></pre>
                                 <td><strong>Carlos Mendoza</strong></td>
                                 <td><code>carlos@cbelleza.com</code></td>
                                 <td><span class="card-badge badge-worker">WORKER</span></td>
-                                <td>Cuquora Centro Histórico (Madrid)</td>
+                                <td>Centro Histórico (Madrid)</td>
                                 <td><code>password123</code></td>
                             </tr>
                             <tr>
                                 <td><strong>Lucía Romero</strong></td>
                                 <td><code>lucia.romero@cbelleza.com</code></td>
                                 <td><span class="card-badge badge-worker">WORKER</span></td>
-                                <td>Cuquora Centro Histórico (Madrid)</td>
+                                <td>Centro Histórico (Madrid)</td>
                                 <td><code>password123</code></td>
                             </tr>
                             <tr>
                                 <td><strong>Elena Rostova</strong></td>
                                 <td><code>elena@cbelleza.com</code></td>
                                 <td><span class="card-badge badge-worker">WORKER</span></td>
-                                <td>Cuquora Plaza Norte (Madrid)</td>
+                                <td>Plaza Norte (Madrid)</td>
                                 <td><code>password123</code></td>
                             </tr>
                             <tr>
                                 <td><strong>Marco Bellini</strong></td>
                                 <td><code>marco@cbelleza.com</code></td>
                                 <td><span class="card-badge badge-worker">WORKER</span></td>
-                                <td>Cuquora Sarrià (Barcelona)</td>
+                                <td>Sarrià (Barcelona)</td>
                                 <td><code>password123</code></td>
                             </tr>
                             <tr>
                                 <td><strong>Ana Valdés</strong></td>
                                 <td><code>ana@cbelleza.com</code></td>
                                 <td><span class="card-badge badge-worker">WORKER</span></td>
-                                <td>Cuquora Las Condes (Santiago)</td>
+                                <td>Las Condes (Santiago)</td>
                                 <td><code>password123</code></td>
                             </tr>
                             <tr>
