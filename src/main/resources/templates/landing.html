@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cuquora CRM - Software de Gestión para Centros de Estética y Spas</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" href="/images/icon.png">
+    <link rel="apple-touch-icon" href="/images/icon.png">
     <!-- Lucide Icons CDN -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.321.0/font/lucide.min.css">
     <!-- Stylesheets -->
@@ -379,9 +383,6 @@
             <div class="saas-roles-grid">
                 <div class="role-box">
                     <div class="role-box-header">
-                        <div class="role-avatar-badge" aria-hidden="true">
-                            <i class="lucide-briefcase"></i>
-                        </div>
                         <div>
                             <h3>Directores y Propietarios</h3>
                             <span class="role-subtitle">Control integral del negocio</span>
@@ -397,9 +398,6 @@
 
                 <div class="role-box">
                     <div class="role-box-header">
-                        <div class="role-avatar-badge" aria-hidden="true">
-                            <i class="lucide-sparkles"></i>
-                        </div>
                         <div>
                             <h3>Especialistas y Terapeutas</h3>
                             <span class="role-subtitle">Eficiencia y enfoque en cabina</span>
@@ -415,9 +413,6 @@
 
                 <div class="role-box">
                     <div class="role-box-header">
-                        <div class="role-avatar-badge" aria-hidden="true">
-                            <i class="lucide-calendar-check-2"></i>
-                        </div>
                         <div>
                             <h3>Clientes y Pacientes</h3>
                             <span class="role-subtitle">Autonomía y comodidad de reserva</span>
@@ -502,12 +497,24 @@
                     if (section) {
                         const targetTop = section.getBoundingClientRect().top + window.pageYOffset - 90;
                         window.scrollTo({ top: targetTop, behavior: 'smooth' });
+                        navLinks.forEach(l => l.classList.remove('active'));
+                        link.classList.add('active');
                     }
                 });
             });
 
             function updateScrollSpy() {
-                const scrollPosition = window.scrollY + 180;
+                const scrollY = window.pageYOffset || document.documentElement.scrollTop;
+                const windowHeight = window.innerHeight;
+                const documentHeight = document.documentElement.scrollHeight;
+
+                if (scrollY + windowHeight >= documentHeight - 70 && sections.length > 0) {
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    sections[sections.length - 1].link.classList.add('active');
+                    return;
+                }
+
+                const scrollPosition = scrollY + 180;
                 let activeFound = false;
 
                 for (let i = sections.length - 1; i >= 0; i--) {
@@ -523,7 +530,7 @@
 
                 if (!activeFound && navLinks.length > 0) {
                     navLinks.forEach(l => l.classList.remove('active'));
-                    navLinks[0].classList.add('active');
+                    sections[0].link.classList.add('active');
                 }
             }
 

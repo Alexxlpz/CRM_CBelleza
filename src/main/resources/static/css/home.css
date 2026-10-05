@@ -1881,40 +1881,12 @@ html {
 
 .role-box-header {
     display: flex;
-    align-items: center;
-    gap: 14px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
     margin-bottom: 20px;
     padding-bottom: 16px;
     border-bottom: 1px solid #f0eae1;
-}
-
-.role-avatar-badge {
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
-    background: #faf4ec;
-    border: 1px solid #e6d7c5;
-    color: var(--primary-dark, #a3875f);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    transition: all 0.25s ease;
-}
-
-.role-avatar-badge i {
-    font-size: 20px;
-    line-height: 1;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.role-box:hover .role-avatar-badge {
-    background: #f4ece1;
-    border-color: #d1bda2;
-    color: #8b6b43;
-    transform: scale(1.06);
 }
 
 .role-box-header h3 {
@@ -2126,7 +2098,7 @@ html {
     display: none;
 }
 
-/* Landing Container: strictly centered horizontally on the screen with symmetrical padding */
+/* Landing & Features Container: strictly centered horizontally on the screen with symmetrical padding */
 .landing-main-container {
     width: 100% !important;
     max-width: 1060px !important;
@@ -2138,8 +2110,8 @@ html {
     overflow-x: hidden;
 }
 
-/* Only display the desktop left rail when the screen is wide enough (>= 1520px) to fit without displacing the centered hero */
-@media (min-width: 1520px) {
+/* Display the desktop left rail on all standard desktop and laptop screens (>= 1200px) */
+@media (min-width: 1200px) {
     .desktop-left-rail {
         display: flex;
         flex-direction: column;
@@ -2150,14 +2122,14 @@ html {
         bottom: 0;
         height: calc(100vh - 86px);
         height: calc(100dvh - 86px);
-        width: 220px;
+        width: 205px;
         background: rgba(255, 255, 255, 0.85);
         backdrop-filter: blur(24px);
         -webkit-backdrop-filter: blur(24px);
         border: none;
         border-right: 1px solid rgba(197, 168, 128, 0.25);
         border-radius: 0;
-        padding: 32px 16px 24px 16px;
+        padding: 28px 12px 24px 14px;
         box-shadow: 4px 0 30px rgba(197, 168, 128, 0.08);
         z-index: 1000;
         overflow-y: auto;
@@ -2179,6 +2151,15 @@ html {
 
     .desktop-left-rail::-webkit-scrollbar-thumb:hover {
         background: var(--primary-dark, #a3875f);
+    }
+
+    /* Provide a generous gutter (minimum 80px) between the vertical index rail and the main content */
+    .landing-main-container,
+    .features-page-container {
+        margin-left: max(285px, calc((100% - 1040px) / 2)) !important;
+        margin-right: auto !important;
+        max-width: min(1040px, calc(100% - 310px)) !important;
+        box-sizing: border-box !important;
     }
 }
 

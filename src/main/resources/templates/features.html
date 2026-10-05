@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Funcionalidades y Módulos de Gestión - Cuquora CRM</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" href="/images/icon.png">
+    <link rel="apple-touch-icon" href="/images/icon.png">
     <!-- Lucide Icons CDN -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.321.0/font/lucide.min.css">
     <!-- Stylesheets -->
@@ -11,9 +15,9 @@
     <link rel="stylesheet" href="/css/home.css">
     <style>
         .public-page-container {
-            max-width: 1160px;
+            max-width: 1040px;
             margin: 0 auto;
-            padding: 40px 24px 80px 24px;
+            padding: 40px 24px 260px 24px; /* Generous bottom spacing so section 05 (Personal y TPV) can comfortably scroll to top */
             width: 100%;
             box-sizing: border-box;
             overflow-x: hidden;
@@ -56,6 +60,7 @@
 
         /* Feature Card: White Container */
         .feature-detail-card {
+            scroll-margin-top: 110px;
             background: #ffffff;
             border: 1px solid rgba(197, 168, 128, 0.3);
             border-radius: var(--border-radius-lg, 24px);
@@ -389,7 +394,41 @@
     <!-- Navbar -->
     <div th:replace="~{fragments/navbar :: brand(true)}"></div>
 
-    <main class="public-page-container">
+    <!-- Desktop Left Rail: Full-Height Luxury Interactive Index -->
+    <aside class="desktop-left-rail" id="desktopIndexRail" aria-label="Navegación de módulos">
+        <div class="rail-header">
+            <h4 class="rail-title">Índice</h4>
+        </div>
+        <nav class="rail-nav">
+            <a href="#agenda-citas" class="rail-link active" data-target="agenda-citas">
+                <span class="rail-num">01</span>
+                <span class="rail-text">Agenda y Reservas</span>
+                <svg class="rail-chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </a>
+            <a href="#fichas-tecnicas" class="rail-link" data-target="fichas-tecnicas">
+                <span class="rail-num">02</span>
+                <span class="rail-text">Fichas Técnicas</span>
+                <svg class="rail-chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </a>
+            <a href="#control-stock" class="rail-link" data-target="control-stock">
+                <span class="rail-num">03</span>
+                <span class="rail-text">Control de Insumos</span>
+                <svg class="rail-chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </a>
+            <a href="#directorio-gps" class="rail-link" data-target="directorio-gps">
+                <span class="rail-num">04</span>
+                <span class="rail-text">Directorio y GPS</span>
+                <svg class="rail-chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </a>
+            <a href="#personal-tpv" class="rail-link" data-target="personal-tpv">
+                <span class="rail-num">05</span>
+                <span class="rail-text">Personal y TPV</span>
+                <svg class="rail-chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </a>
+        </nav>
+    </aside>
+
+    <main class="public-page-container features-page-container">
         <!-- Hero Header -->
         <header class="features-hero">
             <h1>Todo lo que tu centro de belleza necesita para operar con excelencia</h1>
@@ -397,7 +436,7 @@
         </header>
 
         <!-- Feature 1: Agenda y Reservas -->
-        <div class="feature-detail-card">
+        <div class="feature-detail-card" id="agenda-citas">
             <div class="feature-info-col">
                 <h2>Gestión de Agenda con Bloqueo Dinámico</h2>
                 <p>Automatiza los turnos disponibles según la duración exacta de cada tratamiento (de 30 a 90 minutos). El sistema sincroniza en tiempo real la disponibilidad simultánea de cabina y especialista cualificado para evitar retrasos y dobles reservas.</p>
@@ -436,7 +475,7 @@
         </div>
 
         <!-- Feature 2: Fichas Técnicas e Historial Dérmico -->
-        <div class="feature-detail-card reverse">
+        <div class="feature-detail-card reverse" id="fichas-tecnicas">
             <div class="feature-info-col">
                 <h2>Fichas Técnicas y Notas de Cabina</h2>
                 <p>Tus terapeutas acceden al instante al expediente dermatológico del paciente antes de comenzar el tratamiento: alertas visibles de intolerancias, registro de principios activos aplicados y notas privadas de cabina por cada sesión.</p>
@@ -475,7 +514,7 @@
         </div>
 
         <!-- Feature 3: Inventario y Control de Insumos -->
-        <div class="feature-detail-card">
+        <div class="feature-detail-card" id="control-stock">
             <div class="feature-info-col">
                 <h2>Insumos de Cabina y Venta Retail</h2>
                 <p>Evita interrupciones en cabina por falta de producto. Cuquora diferencia los consumibles de uso interno del catálogo destinado a venta directa al cliente, con semáforo de existencias mínimas y control de mermas.</p>
@@ -514,7 +553,7 @@
         </div>
 
         <!-- Feature 4: Directorio de Centros y Geolocalización -->
-        <div class="feature-detail-card reverse">
+        <div class="feature-detail-card reverse" id="directorio-gps">
             <div class="feature-info-col">
                 <h2>Directorio Geolocalizado con Mapa Interactivo</h2>
                 <p>Permite a los usuarios descubrir centros de belleza cercanos a su ubicación en tiempo real. Incorpora visualización en mapa Leaflet interactivo, cálculo de distancia exacta y filtros según el tipo de servicio estético deseado.</p>
@@ -553,7 +592,7 @@
         </div>
 
         <!-- Feature 5: Personal, Roles y TPV -->
-        <div class="feature-detail-card">
+        <div class="feature-detail-card" id="personal-tpv">
             <div class="feature-info-col">
                 <h2>Gestión de Personal y Cobro de Servicios (TPV)</h2>
                 <p>Coordina la jornada de tus terapeutas según sus especialidades homologadas y gestiona los cobros en recepción con emisión de tickets y comprobantes, garantizando el control total de la actividad económica de tu centro.</p>
@@ -609,5 +648,66 @@
 
     <!-- Footer -->
     <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Software de gestión para centros de estética, salones y spas.')}"></div>
+
+    <!-- ScrollSpy Script for Dynamic Animated Left Rail -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const navLinks = document.querySelectorAll('.rail-link');
+            const sections = [];
+
+            navLinks.forEach(link => {
+                const targetId = link.getAttribute('data-target');
+                const section = document.getElementById(targetId);
+                if (section) {
+                    sections.push({ id: targetId, el: section, link: link });
+                }
+
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    if (section) {
+                        const targetTop = section.getBoundingClientRect().top + window.pageYOffset - 90;
+                        window.scrollTo({ top: targetTop, behavior: 'smooth' });
+                        navLinks.forEach(l => l.classList.remove('active'));
+                        link.classList.add('active');
+                    }
+                });
+            });
+
+            function updateScrollSpy() {
+                const scrollY = window.pageYOffset || document.documentElement.scrollTop;
+                const windowHeight = window.innerHeight;
+                const documentHeight = document.documentElement.scrollHeight;
+
+                // Guarantee that reaching or approaching the bottom of the page highlights the last section
+                if (scrollY + windowHeight >= documentHeight - 70 && sections.length > 0) {
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    sections[sections.length - 1].link.classList.add('active');
+                    return;
+                }
+
+                const scrollPosition = scrollY + 180;
+                let activeFound = false;
+
+                for (let i = sections.length - 1; i >= 0; i--) {
+                    const item = sections[i];
+                    const top = item.el.offsetTop;
+                    if (scrollPosition >= top) {
+                        navLinks.forEach(l => l.classList.remove('active'));
+                        item.link.classList.add('active');
+                        activeFound = true;
+                        break;
+                    }
+                }
+
+                if (!activeFound && navLinks.length > 0) {
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    sections[0].link.classList.add('active');
+                }
+            }
+
+            window.addEventListener('scroll', updateScrollSpy, { passive: true });
+            updateScrollSpy();
+        });
+    </script>
 </body>
 </html>

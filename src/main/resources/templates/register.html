@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crear Cuenta - Cuquora CRM</title>
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="/icons/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" href="/images/icon.png">
+    <link rel="apple-touch-icon" href="/images/icon.png">
     <!-- Lucide Icons CDN -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.321.0/font/lucide.min.css">
     <!-- Stylesheets -->
@@ -34,7 +36,7 @@
             </div>
             
             <!-- Registration Form -->
-            <form action="/register" method="POST" id="registerForm" autocomplete="on">
+            <form action="/register" method="POST" id="registerForm" autocomplete="on" novalidate>
                 
                 <!-- Name -->
                 <div class="form-group">
@@ -43,7 +45,6 @@
                            id="nameInput" 
                            name="name" 
                            class="form-control"
-                           required 
                            autofocus 
                            autocomplete="name" 
                            placeholder="Ej. Laura Gómez"
@@ -57,7 +58,6 @@
                            id="emailInput" 
                            name="email" 
                            class="form-control"
-                           required 
                            autocomplete="email" 
                            placeholder="ejemplo@cbelleza.com"
                            th:value="${email}">
@@ -83,7 +83,6 @@
                                id="passwordInput" 
                                name="password" 
                                class="form-control"
-                               required 
                                autocomplete="new-password" 
                                placeholder="Mínimo 6 caracteres"
                                minlength="6">
@@ -106,7 +105,6 @@
                                id="confirmPasswordInput" 
                                name="confirmPassword" 
                                class="form-control"
-                               required 
                                autocomplete="new-password" 
                                placeholder="Repite tu contraseña"
                                minlength="6">
@@ -122,7 +120,7 @@
                 </div>
                 
                 <!-- Submit Button -->
-                <button type="submit" class="btn btn-primary btn-auth-submit" id="submitBtn">
+                <button type="submit" class="btn btn-primary btn-auth-submit disabled" id="submitBtn" aria-disabled="true">
                     <i class="lucide-user-plus"></i>
                     <span>Crear mi cuenta</span>
                 </button>
@@ -164,6 +162,179 @@
                 toggleIcon.className = 'lucide-eye';
             }
         }
+
+        // Validation & Disabled Button Interaction (Identical to Contact & Register Center)
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('registerForm');
+            const submitBtn = document.getElementById('submitBtn');
+            if (!form || !submitBtn) return;
+
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+            const fields = {
+                name: {
+                    el: document.getElementById('nameInput'),
+                    validate: (v) => {
+                        const val = (v || '').trim();
+                        if (!val) return 'Por favor, introduce tu nombre y apellidos.';
+                        if (val.length < 2) return 'El nombre debe tener al menos 2 caracteres.';
+                        return '';
+                    }
+                },
+                email: {
+                    el: document.getElementById('emailInput'),
+                    validate: (v) => {
+                        const val = (v || '').trim();
+                        if (!val) return 'Por favor, introduce tu correo electrónico.';
+                        if (!emailRegex.test(val)) return 'Formato de correo no válido. Debe incluir "@" y un dominio válido (ej. usuario@gmail.com).';
+                        return '';
+                    }
+                },
+                phone: {
+                    el: document.getElementById('phoneInput'),
+                    validate: (v) => {
+                        const val = (v || '').trim();
+                        if (!val) return ''; // Teléfono es opcional
+                        const digits = val.replace(/\D/g, '');
+                        if (digits.length < 6) return 'Introduce un número de teléfono válido (mínimo 6 dígitos).';
+                        return '';
+                    }
+                },
+                password: {
+                    el: document.getElementById('passwordInput'),
+                    validate: (v) => {
+                        const val = v || '';
+                        if (!val) return 'Por favor, introduce una contraseña.';
+                        if (val.length < 6) return 'La contraseña debe tener al menos 6 caracteres.';
+                        return '';
+                    }
+                },
+                confirmPassword: {
+                    el: document.getElementById('confirmPasswordInput'),
+                    validate: (v) => {
+                        const val = v || '';
+                        if (!val) return 'Por favor, confirma tu contraseña.';
+                        const passVal = fields.password.el ? fields.password.el.value : '';
+                        if (val !== passVal) return 'Las contraseñas no coinciden. Por favor, revísalas.';
+                        return '';
+                    }
+                }
+            };
+
+            function setFieldError(fieldEl, errorMessage) {
+                clearFieldError(fieldEl);
+                fieldEl.classList.add('has-error');
+
+                fieldEl.classList.remove('shake-field');
+                void fieldEl.offsetWidth;
+                fieldEl.classList.add('shake-field');
+
+                const msg = document.createElement('div');
+                msg.className = 'field-error-msg';
+                msg.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg><span>' + errorMessage + '</span>';
+
+                const parentGroup = fieldEl.closest('.form-group') || fieldEl.parentNode;
+                parentGroup.appendChild(msg);
+            }
+
+            function clearFieldError(fieldEl) {
+                fieldEl.classList.remove('has-error', 'shake-field');
+                const parentGroup = fieldEl.closest('.form-group') || fieldEl.parentNode;
+                const existing = parentGroup.querySelector('.field-error-msg');
+                if (existing) existing.remove();
+            }
+
+            function isFormValid() {
+                for (const key in fields) {
+                    const item = fields[key];
+                    if (item.el) {
+                        const err = item.validate(item.el.value);
+                        if (err) return false;
+                    }
+                }
+                return true;
+            }
+
+            function updateButtonState() {
+                if (isFormValid()) {
+                    submitBtn.classList.remove('disabled');
+                    submitBtn.removeAttribute('aria-disabled');
+                } else {
+                    submitBtn.classList.add('disabled');
+                    submitBtn.setAttribute('aria-disabled', 'true');
+                }
+            }
+
+            function highlightAllErrors() {
+                let firstInvalid = null;
+                for (const key in fields) {
+                    const item = fields[key];
+                    if (item.el) {
+                        const err = item.validate(item.el.value);
+                        if (err) {
+                            setFieldError(item.el, err);
+                            if (!firstInvalid) firstInvalid = item.el;
+                        } else {
+                            clearFieldError(item.el);
+                        }
+                    }
+                }
+                if (firstInvalid) {
+                    firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    firstInvalid.focus();
+                }
+            }
+
+            for (const key in fields) {
+                const item = fields[key];
+                if (item.el) {
+                    const handleInput = function () {
+                        const err = item.validate(item.el.value);
+                        if (!err) {
+                            clearFieldError(item.el);
+                        }
+                        updateButtonState();
+                    };
+                    item.el.addEventListener('input', handleInput);
+                    item.el.addEventListener('change', handleInput);
+                    item.el.addEventListener('blur', function () {
+                        if (item.el.value.trim()) {
+                            const err = item.validate(item.el.value);
+                            if (err) setFieldError(item.el, err);
+                            else clearFieldError(item.el);
+                        }
+                    });
+                }
+            }
+
+            // Sync confirmPassword check when password is typed
+            fields.password.el.addEventListener('input', function () {
+                if (fields.confirmPassword.el.value) {
+                    const err = fields.confirmPassword.validate(fields.confirmPassword.el.value);
+                    if (err) setFieldError(fields.confirmPassword.el, err);
+                    else clearFieldError(fields.confirmPassword.el);
+                }
+            });
+
+            submitBtn.addEventListener('click', function (e) {
+                if (submitBtn.classList.contains('disabled')) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    highlightAllErrors();
+                }
+            });
+
+            form.addEventListener('submit', function (e) {
+                if (submitBtn.classList.contains('disabled') || !isFormValid()) {
+                    e.preventDefault();
+                    highlightAllErrors();
+                }
+            });
+
+            updateButtonState();
+            setTimeout(updateButtonState, 150);
+            setTimeout(updateButtonState, 500);
+        });
     </script>
 </body>
 </html>

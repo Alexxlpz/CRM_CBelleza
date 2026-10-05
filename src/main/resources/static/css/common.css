@@ -245,7 +245,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* Align navbar links to begin where the vertical index rail ends only on large displays where rail fits */
-@media (min-width: 1520px) {
+@media (min-width: 1200px) {
     .navbar {
         padding-left: 20px;
         padding-right: 36px;
@@ -270,7 +270,7 @@ h1, h2, h3, h4, h5, h6 {
     }
 }
 
-@media (max-width: 1519px) and (min-width: 993px) {
+@media (max-width: 1199px) and (min-width: 993px) {
     .nav-brand {
         width: auto;
     }

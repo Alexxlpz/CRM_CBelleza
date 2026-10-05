@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iniciar Sesión - Cuquora CRM</title>
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="/icons/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" href="/images/icon.png">
+    <link rel="apple-touch-icon" href="/images/icon.png">
     <!-- Lucide Icons CDN -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.321.0/font/lucide.min.css">
     <!-- Stylesheets -->
@@ -42,7 +44,7 @@
             </div>
             
             <!-- Credentials Form -->
-            <form action="/login" method="POST" id="loginForm" autocomplete="on">
+            <form action="/login" method="POST" id="loginForm" autocomplete="on" novalidate>
                 
                 <!-- Identifier: Email or Username -->
                 <div class="form-group">
@@ -51,7 +53,6 @@
                            id="identifierInput" 
                            name="identifier" 
                            class="form-control"
-                           required 
                            autofocus 
                            autocomplete="username" 
                            placeholder="ejemplo@cbelleza.com"
@@ -71,7 +72,6 @@
                                id="passwordInput" 
                                name="password" 
                                class="form-control"
-                               required 
                                autocomplete="current-password" 
                                placeholder="Tu contraseña">
                         <button type="button" 
@@ -94,7 +94,7 @@
                 </div>
                 
                 <!-- Submit Button -->
-                <button type="submit" class="btn btn-primary btn-auth-submit" id="submitBtn">
+                <button type="submit" class="btn btn-primary btn-auth-submit disabled" id="submitBtn" aria-disabled="true">
                     <i class="lucide-log-in"></i>
                     <span>Iniciar sesión</span>
                 </button>
@@ -174,6 +174,145 @@
             if (event.target === modal) {
                 closeRecoveryModal();
             }
+        });
+
+        // Validation & Disabled Button Interaction (Identical to Contact & Register Center)
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('loginForm');
+            const submitBtn = document.getElementById('submitBtn');
+            if (!form || !submitBtn) return;
+
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+            const fields = {
+                identifier: {
+                    el: document.getElementById('identifierInput'),
+                    validate: (v) => {
+                        const val = (v || '').trim();
+                        if (!val) return 'Por favor, introduce tu correo electrónico o usuario.';
+                        if (val.includes('@')) {
+                            if (!emailRegex.test(val)) return 'Formato de correo no válido. Debe incluir "@" y un dominio válido (ej. usuario@gmail.com).';
+                        } else {
+                            if (val.length < 3) return 'El nombre de usuario debe tener al menos 3 caracteres.';
+                        }
+                        return '';
+                    }
+                },
+                password: {
+                    el: document.getElementById('passwordInput'),
+                    validate: (v) => {
+                        const val = v || '';
+                        if (!val) return 'Por favor, introduce tu contraseña.';
+                        if (val.length < 6) return 'La contraseña debe tener al menos 6 caracteres.';
+                        return '';
+                    }
+                }
+            };
+
+            function setFieldError(fieldEl, errorMessage) {
+                clearFieldError(fieldEl);
+                fieldEl.classList.add('has-error');
+
+                fieldEl.classList.remove('shake-field');
+                void fieldEl.offsetWidth;
+                fieldEl.classList.add('shake-field');
+
+                const msg = document.createElement('div');
+                msg.className = 'field-error-msg';
+                msg.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg><span>' + errorMessage + '</span>';
+
+                const parentGroup = fieldEl.closest('.form-group') || fieldEl.parentNode;
+                parentGroup.appendChild(msg);
+            }
+
+            function clearFieldError(fieldEl) {
+                fieldEl.classList.remove('has-error', 'shake-field');
+                const parentGroup = fieldEl.closest('.form-group') || fieldEl.parentNode;
+                const existing = parentGroup.querySelector('.field-error-msg');
+                if (existing) existing.remove();
+            }
+
+            function isFormValid() {
+                for (const key in fields) {
+                    const item = fields[key];
+                    if (item.el) {
+                        const err = item.validate(item.el.value);
+                        if (err) return false;
+                    }
+                }
+                return true;
+            }
+
+            function updateButtonState() {
+                if (isFormValid()) {
+                    submitBtn.classList.remove('disabled');
+                    submitBtn.removeAttribute('aria-disabled');
+                } else {
+                    submitBtn.classList.add('disabled');
+                    submitBtn.setAttribute('aria-disabled', 'true');
+                }
+            }
+
+            function highlightAllErrors() {
+                let firstInvalid = null;
+                for (const key in fields) {
+                    const item = fields[key];
+                    if (item.el) {
+                        const err = item.validate(item.el.value);
+                        if (err) {
+                            setFieldError(item.el, err);
+                            if (!firstInvalid) firstInvalid = item.el;
+                        } else {
+                            clearFieldError(item.el);
+                        }
+                    }
+                }
+                if (firstInvalid) {
+                    firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    firstInvalid.focus();
+                }
+            }
+
+            for (const key in fields) {
+                const item = fields[key];
+                if (item.el) {
+                    const handleInput = function () {
+                        const err = item.validate(item.el.value);
+                        if (!err) {
+                            clearFieldError(item.el);
+                        }
+                        updateButtonState();
+                    };
+                    item.el.addEventListener('input', handleInput);
+                    item.el.addEventListener('change', handleInput);
+                    item.el.addEventListener('blur', function () {
+                        if (item.el.value.trim()) {
+                            const err = item.validate(item.el.value);
+                            if (err) setFieldError(item.el, err);
+                            else clearFieldError(item.el);
+                        }
+                    });
+                }
+            }
+
+            submitBtn.addEventListener('click', function (e) {
+                if (submitBtn.classList.contains('disabled')) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    highlightAllErrors();
+                }
+            });
+
+            form.addEventListener('submit', function (e) {
+                if (submitBtn.classList.contains('disabled') || !isFormValid()) {
+                    e.preventDefault();
+                    highlightAllErrors();
+                }
+            });
+
+            updateButtonState();
+            setTimeout(updateButtonState, 150);
+            setTimeout(updateButtonState, 500);
         });
     </script>
 </body>

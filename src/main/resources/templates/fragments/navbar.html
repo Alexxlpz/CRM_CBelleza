@@ -8,8 +8,8 @@
                 </a>
                 <div class="nav-links-menu">
                     <a href="/home" class="nav-menu-link" th:classappend="${activePage == 'home'} ? ' active' : ''">Inicio</a>
-                    <a href="/centers" class="nav-menu-link" th:classappend="${activePage == 'centers'} ? ' active' : ''">Centros</a>
                     <a href="/features" class="nav-menu-link" th:classappend="${activePage == 'features'} ? ' active' : ''">Funcionalidades</a>
+                    <a href="/centers" class="nav-menu-link" th:classappend="${activePage == 'centers'} ? ' active' : ''">Centros</a>
                     <a href="/register-center" class="nav-menu-link" th:classappend="${activePage == 'register-center'} ? ' active' : ''">Registra tu Centro</a>
                     <a href="/contact" class="nav-menu-link" th:classappend="${activePage == 'contact'} ? ' active' : ''">Contacto</a>
                 </div>
@@ -39,7 +39,7 @@
                 </div>
 
                 <!-- Hamburger Button (AgendaPro Mobile Pattern) -->
-                <button type="button" class="mobile-nav-toggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobileNavDrawer">
+                <button type="button" class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobileNavDrawer">
                     <span class="hamburger-box">
                         <span class="hamburger-line"></span>
                         <span class="hamburger-line"></span>
@@ -64,8 +64,8 @@
                 </a>
                 <div class="nav-links-menu">
                     <a href="/home" class="nav-menu-link" th:classappend="${activePage == 'home'} ? ' active' : ''">Inicio</a>
-                    <a href="/centers" class="nav-menu-link" th:classappend="${activePage == 'centers'} ? ' active' : ''">Centros</a>
                     <a href="/features" class="nav-menu-link" th:classappend="${activePage == 'features'} ? ' active' : ''">Funcionalidades</a>
+                    <a href="/centers" class="nav-menu-link" th:classappend="${activePage == 'centers'} ? ' active' : ''">Centros</a>
                     <a href="/register-center" class="nav-menu-link" th:classappend="${activePage == 'register-center'} ? ' active' : ''">Registra tu Centro</a>
                     <a href="/contact" class="nav-menu-link" th:classappend="${activePage == 'contact'} ? ' active' : ''">Contacto</a>
                 </div>
@@ -82,7 +82,7 @@
                 </div>
 
                 <!-- Hamburger Button (AgendaPro Mobile Pattern) -->
-                <button type="button" class="mobile-nav-toggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobileNavDrawer">
+                <button type="button" class="mobile-nav-toggle" id="mobileNavToggleClient" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobileNavDrawer">
                     <span class="hamburger-box">
                         <span class="hamburger-line"></span>
                         <span class="hamburger-line"></span>
@@ -107,8 +107,8 @@
                 </a>
                 <div class="nav-links-menu">
                     <a href="/home" class="nav-menu-link" th:classappend="${activePage == 'home'} ? ' active' : ''">Inicio</a>
-                    <a href="/centers" class="nav-menu-link" th:classappend="${activePage == 'centers'} ? ' active' : ''">Centros</a>
                     <a href="/features" class="nav-menu-link" th:classappend="${activePage == 'features'} ? ' active' : ''">Funcionalidades</a>
+                    <a href="/centers" class="nav-menu-link" th:classappend="${activePage == 'centers'} ? ' active' : ''">Centros</a>
                     <a href="/register-center" class="nav-menu-link" th:classappend="${activePage == 'register-center'} ? ' active' : ''">Registra tu Centro</a>
                     <a href="/contact" class="nav-menu-link" th:classappend="${activePage == 'contact'} ? ' active' : ''">Contacto</a>
                 </div>
@@ -126,7 +126,7 @@
                 </div>
 
                 <!-- Hamburger Button (AgendaPro Mobile Pattern) -->
-                <button type="button" class="mobile-nav-toggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobileNavDrawer">
+                <button type="button" class="mobile-nav-toggle" id="mobileNavToggleWorker" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobileNavDrawer">
                     <span class="hamburger-box">
                         <span class="hamburger-line"></span>
                         <span class="hamburger-line"></span>
@@ -164,12 +164,12 @@
                             <span class="mobile-link-text">Inicio</span>
                             <svg class="mobile-link-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
                         </a>
-                        <a href="/centers" class="mobile-drawer-link" th:classappend="${activePage == 'centers'} ? ' active' : ''">
-                            <span class="mobile-link-text">Centros</span>
-                            <svg class="mobile-link-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                        </a>
                         <a href="/features" class="mobile-drawer-link" th:classappend="${activePage == 'features'} ? ' active' : ''">
                             <span class="mobile-link-text">Funcionalidades</span>
+                            <svg class="mobile-link-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        </a>
+                        <a href="/centers" class="mobile-drawer-link" th:classappend="${activePage == 'centers'} ? ' active' : ''">
+                            <span class="mobile-link-text">Centros</span>
                             <svg class="mobile-link-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
                         </a>
                         <a href="/register-center" class="mobile-drawer-link" th:classappend="${activePage == 'register-center'} ? ' active' : ''">
@@ -250,7 +250,7 @@
         <script>
             (function() {
                 function initMobileNav() {
-                    var toggleBtn = document.getElementById('mobileNavToggle');
+                    var toggleBtns = document.querySelectorAll('.mobile-nav-toggle, #mobileNavToggle');
                     var drawer = document.getElementById('mobileNavDrawer');
                     var backdrop = document.getElementById('mobileNavBackdrop');
                     var closeBtn = document.getElementById('mobileDrawerClose');
@@ -258,7 +258,7 @@
                     if (!drawer || !backdrop) return;
 
                     // Reparent to document.body so navbar's backdrop-filter doesn't clip or trap fixed elements
-                    if (drawer.parentElement !== document.body) {
+                    if (document.body && drawer.parentElement !== document.body) {
                         document.body.appendChild(backdrop);
                         document.body.appendChild(drawer);
                     }
@@ -267,36 +267,42 @@
                         drawer.classList.add('is-open');
                         backdrop.classList.add('is-open');
                         drawer.setAttribute('aria-hidden', 'false');
-                        if (toggleBtn) {
-                            toggleBtn.setAttribute('aria-expanded', 'true');
-                            toggleBtn.classList.add('is-active');
-                        }
+                        toggleBtns.forEach(function(btn) {
+                            btn.setAttribute('aria-expanded', 'true');
+                            btn.classList.add('is-active');
+                        });
                         document.body.classList.add('mobile-nav-locked');
+
+                        if (window.lucide && typeof window.lucide.createIcons === 'function') {
+                            try { window.lucide.createIcons(); } catch (err) {}
+                        }
                     }
 
                     function closeDrawer() {
                         drawer.classList.remove('is-open');
                         backdrop.classList.remove('is-open');
                         drawer.setAttribute('aria-hidden', 'true');
-                        if (toggleBtn) {
-                            toggleBtn.setAttribute('aria-expanded', 'false');
-                            toggleBtn.classList.remove('is-active');
-                        }
+                        toggleBtns.forEach(function(btn) {
+                            btn.setAttribute('aria-expanded', 'false');
+                            btn.classList.remove('is-active');
+                        });
                         document.body.classList.remove('mobile-nav-locked');
                     }
 
-                    if (toggleBtn && !toggleBtn.__cuquoraBound) {
-                        toggleBtn.__cuquoraBound = true;
-                        toggleBtn.addEventListener('click', function(e) {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            if (drawer.classList.contains('is-open')) {
-                                closeDrawer();
-                            } else {
-                                openDrawer();
-                            }
-                        });
-                    }
+                    toggleBtns.forEach(function(btn) {
+                        if (!btn.__cuquoraBound) {
+                            btn.__cuquoraBound = true;
+                            btn.addEventListener('click', function(e) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                if (drawer.classList.contains('is-open')) {
+                                    closeDrawer();
+                                } else {
+                                    openDrawer();
+                                }
+                            });
+                        }
+                    });
 
                     if (closeBtn && !closeBtn.__cuquoraBound) {
                         closeBtn.__cuquoraBound = true;
