@@ -1,64 +1,46 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nuestros Centros de Belleza - Cuquora CRM</title>
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="icon" type="image/png" href="/images/icon.png">
-    <link rel="apple-touch-icon" href="/images/icon.png">
-    <!-- Lucide Icons CDN -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.321.0/font/lucide.min.css">
+    <th:block th:replace="~{fragments/head :: meta('Nuestros Centros de Belleza - Cuquora CRM')}"></th:block>
     <!-- Leaflet CSS & JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    
-    <!-- Stylesheets -->
-    <link rel="stylesheet" href="/css/common.css">
-    <link rel="stylesheet" href="/css/modals.css">
-    <link rel="stylesheet" href="/css/cliente.css">
+        <link rel="stylesheet" href="/css/cliente.css">
 </head>
-<body class="landing-page-view">
-    <!-- Navbar -->
+<body>
     <div th:replace="~{fragments/navbar :: brand(true)}"></div>
 
-    <!-- Main Container -->
     <main class="main-container">
-        
-        <!-- Page Header -->
         <div class="page-header">
             <h1>Nuestros Centros de Belleza</h1>
             <p>Elige el salón más conveniente y agenda tu experiencia de lujo</p>
         </div>
 
-        <!-- Feedback Alert / Worker Restriction Warning -->
-        <div th:if="${errorMessage != null}" style="margin-bottom: 24px; border-radius: 14px; background: rgba(211, 47, 47, 0.1); border: 1px solid rgba(211, 47, 47, 0.3); color: #d32f2f; padding: 14px 20px; font-weight: 600; display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 16px rgba(211, 47, 47, 0.08);">
-            <i class="lucide-alert-circle" style="font-size: 20px; flex-shrink: 0;"></i>
-            <span th:text="${errorMessage}">Solo los clientes pueden acceder a los centros.</span>
-        </div>
+        <div th:replace="~{fragments/alerts :: flash}"></div>
 
-        <!-- Advanced Search Bar -->
-        <div class="filter-search-bar filter-search-container glass-panel">
+        <!-- Buscador -->
+        <div class="filter-search-bar filter-search-container glass-panel" role="search">
             <div class="filter-search-row">
-                <input type="text" id="searchName" class="form-control search-input-flex" placeholder="Buscar centro...">
-                
-                <button type="button" class="btn btn-secondary filter-button filter-icon-btn" onclick="toggleAdvancedSearch()" id="btnAdvSearch" aria-label="Filtros avanzados">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
-                    <span id="treatmentBadge" class="bell-badge" style="display: none;"></span>
+                <label for="searchName" class="visually-hidden">Buscar centro</label>
+                <input type="search" id="searchName" class="form-control search-input-flex" placeholder="Buscar centro..." autocomplete="off">
+
+                <button type="button" class="btn btn-secondary filter-button filter-icon-btn" id="btnAdvSearch"
+                        aria-label="Filtros avanzados" aria-expanded="false" aria-controls="advancedSearchPanel">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+                    <span id="treatmentBadge" class="bell-badge" aria-hidden="true"></span>
                 </button>
-                <button type="button" class="btn btn-secondary filter-icon-btn" onclick="toggleMap()" id="btnMapToggle" aria-label="Ver en mapa">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"></polygon><line x1="9" y1="3" x2="9" y2="21"></line><line x1="15" y1="3" x2="15" y2="21"></line></svg>
+                <button type="button" class="btn btn-secondary filter-icon-btn" id="btnMapToggle" aria-label="Ver en mapa" aria-pressed="false">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"></polygon><line x1="9" y1="3" x2="9" y2="21"></line><line x1="15" y1="3" x2="15" y2="21"></line></svg>
                 </button>
-                <button type="button" class="btn btn-primary filter-icon-btn" onclick="resetAndFetch()">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <button type="button" class="btn btn-primary filter-icon-btn" id="btnSearch" aria-label="Buscar">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                 </button>
             </div>
-            
+
             <div id="advancedSearchPanel" class="advanced-search-panel">
                 <div class="advanced-search-fields">
                     <div class="advanced-search-field">
-                        <label class="form-label advanced-search-label">Tipo de Tratamiento</label>
+                        <label class="form-label advanced-search-label" for="searchTreatment">Tipo de Tratamiento</label>
                         <select id="searchTreatment" class="form-control">
                             <option value="">Cualquier tipo</option>
                             <option value="MANICURA_PEDICURA">Manicura y Pedicura</option>
@@ -74,376 +56,237 @@
             </div>
         </div>
 
-        <!-- Map Container (Hidden by default) -->
-        <div id="mapContainer" class="map-container"></div>
+        <div id="mapContainer" class="map-container" aria-label="Mapa de centros"></div>
 
-        <!-- Centers Cards Grid (Populated by JS) -->
-        <div class="centers-grid" id="centersGrid">
-            <!-- Cards will be injected here -->
-        </div>
+        <div class="centers-grid" id="centersGrid" aria-live="polite"></div>
 
-        <!-- Infinite Scroll Trigger -->
         <div id="infiniteScrollTrigger" class="infinite-scroll-trigger">
-            <i class="lucide-loader" style="animation: spin 1s linear infinite;"></i> Cargando centros cercanos...
+            <i class="lucide-loader spin" aria-hidden="true"></i> Cargando centros cercanos...
         </div>
-        
     </main>
 
-    <!-- Footer -->
     <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Software de gestión para centros de estética, salones y spas.')}"></div>
 
     <script th:inline="javascript">
-        /*<![CDATA[*/
         const currentSessionRole = /*[[${sessionRole}]]*/ null;
-        /*]]>*/
 
-        function showWorkerRestrictedModal(centerName) {
-            const modal = document.createElement('div');
-            modal.className = 'center-confirm-modal';
-            modal.setAttribute('role', 'dialog');
-            modal.setAttribute('aria-modal', 'true');
-            modal.innerHTML = `
-                <div class="center-confirm-dialog" style="max-width: 440px; text-align: center; padding: 32px 28px; border-radius: 20px; background: #ffffff; border: 1px solid rgba(197, 168, 128, 0.35); box-shadow: 0 20px 48px rgba(35, 28, 22, 0.25), 0 2px 8px rgba(197, 168, 128, 0.12);">
-                    <h2 style="font-size: 21px; font-weight: 800; color: var(--text-main, #2b2825); margin-bottom: 12px; letter-spacing: -0.3px;">Acceso exclusivo para clientes</h2>
-                    <p style="font-size: 14.5px; color: var(--text-muted, #7a736e); line-height: 1.6; margin-bottom: 24px;">
-                        Has iniciado sesión como <strong>trabajador</strong>. Solo los clientes pueden acceder a los centros para consultar tratamientos y solicitar citas.
-                    </p>
-                    <div class="center-confirm-actions" style="display: flex; gap: 12px; justify-content: center;">
-                        <button type="button" class="btn btn-secondary" data-modal-close style="border-radius: 12px; font-weight: 700; padding: 10px 20px;">Entendido</button>
-                        <a href="/worker/dashboard" class="btn btn-primary" style="border-radius: 12px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 10px 20px;">
-                            <i class="lucide-layout-dashboard"></i> Mi Panel
-                        </a>
-                    </div>
-                </div>
-            `;
+        document.addEventListener('DOMContentLoaded', () => {
+            const esc = Cuquora.escapeHtml;
+            const PAGE_SIZE = 10;
 
-            const closeModal = () => modal.remove();
-            modal.querySelector('[data-modal-close]').addEventListener('click', closeModal);
-            modal.addEventListener('click', (event) => {
-                if (event.target === modal) closeModal();
+            const centersGrid = document.getElementById('centersGrid');
+            const trigger = document.getElementById('infiniteScrollTrigger');
+            const mapContainer = document.getElementById('mapContainer');
+            const btnMapToggle = document.getElementById('btnMapToggle');
+            const btnAdvSearch = document.getElementById('btnAdvSearch');
+            const advancedPanel = document.getElementById('advancedSearchPanel');
+            const treatmentBadge = document.getElementById('treatmentBadge');
+            const searchName = document.getElementById('searchName');
+            const searchTreatment = document.getElementById('searchTreatment');
+
+            let userLat = null;
+            let userLon = null;
+            let currentPage = 0;
+            let isLoading = false;
+            let hasMore = true;
+            let isMapView = false;
+            let map = null;
+            let mapMarkers = [];
+            let firstLoadDone = false;
+
+            /* ---- Acceso a un centro ---- */
+            async function canOpenCenter(center) {
+                if (currentSessionRole === 'WORKER') {
+                    const goToPanel = await Cuquora.confirm(
+                        'Has iniciado sesión como trabajador. Solo los clientes pueden acceder a los centros para consultar tratamientos y solicitar citas.',
+                        { title: 'Acceso exclusivo para clientes', confirmText: 'Ir a mi panel', cancelText: 'Entendido', tone: 'default' });
+                    if (goToPanel) window.location.href = '/worker/dashboard';
+                    return false;
+                }
+                return Cuquora.confirm('¿Quieres acceder a ' + center.name + '?',
+                    { title: 'Acceder al centro', confirmText: 'Continuar', tone: 'default', icon: 'map-pin' });
+            }
+
+            /* ---- Filtros ---- */
+            btnAdvSearch.addEventListener('click', () => {
+                const open = advancedPanel.classList.toggle('is-open');
+                btnAdvSearch.classList.toggle('is-active', open);
+                btnAdvSearch.setAttribute('aria-expanded', String(open));
             });
-            document.body.appendChild(modal);
-            modal.querySelector('[data-modal-close]').focus();
-        }
 
-        function handleCenterAccess(centerId, centerName, event) {
-            if (currentSessionRole === 'WORKER') {
-                if (event) event.preventDefault();
-                showWorkerRestrictedModal(centerName);
-                return false;
-            }
-            return true;
-        }
+            btnMapToggle.addEventListener('click', () => {
+                isMapView = !isMapView;
+                btnMapToggle.classList.toggle('is-active', isMapView);
+                btnMapToggle.setAttribute('aria-pressed', String(isMapView));
+                mapContainer.classList.toggle('is-visible', isMapView);
+                centersGrid.hidden = isMapView;
+                trigger.hidden = isMapView || !hasMore;
+                if (isMapView) initMap(); else resetAndFetch();
+            });
 
-        let userLat = null;
-        let userLon = null;
-        let currentPage = 0;
-        let isLoading = false;
-        let hasMore = true;
-        
-        const centersGrid = document.getElementById('centersGrid');
-        const trigger = document.getElementById('infiniteScrollTrigger');
-        const mapContainer = document.getElementById('mapContainer');
-        const btnMapToggle = document.getElementById('btnMapToggle');
-        const treatmentBadge = document.getElementById('treatmentBadge');
+            document.getElementById('btnSearch').addEventListener('click', resetAndFetch);
 
-        let isMapView = false;
-        let map = null;
-        let mapMarkers = [];
-
-        function toggleAdvancedSearch() {
-            const panel = document.getElementById('advancedSearchPanel');
-            const btn = document.getElementById('btnAdvSearch');
-            if (panel.style.display === 'none') {
-                panel.style.display = 'block';
-                btn.style.background = 'var(--primary)';
-                btn.style.color = 'white';
-            } else {
-                panel.style.display = 'none';
-                btn.style.background = 'transparent';
-                btn.style.color = 'var(--text-main)';
-            }
-        }
-
-        function toggleMap() {
-            isMapView = !isMapView;
-            if (isMapView) {
-                btnMapToggle.style.background = 'var(--primary)';
-                btnMapToggle.style.color = 'white';
-                centersGrid.style.display = 'none';
-                trigger.style.display = 'none';
-                mapContainer.style.display = 'block';
-                initMap();
-            } else {
-                btnMapToggle.style.background = 'transparent';
-                btnMapToggle.style.color = 'var(--text-main)';
-                mapContainer.style.display = 'none';
-                centersGrid.style.display = 'grid'; // Restore grid
+            let searchTimeout;
+            searchName.addEventListener('input', () => {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(resetAndFetch, 400);
+            });
+            searchTreatment.addEventListener('change', () => {
+                treatmentBadge.classList.toggle('is-visible', searchTreatment.value !== '');
                 resetAndFetch();
-            }
-        }
-
-        function confirmCenterAccess(center) {
-            if (currentSessionRole === 'WORKER') {
-                showWorkerRestrictedModal(center.name);
-                return Promise.resolve(false);
-            }
-            return new Promise((resolve) => {
-                const modal = document.createElement('div');
-                modal.className = 'center-confirm-modal';
-                modal.setAttribute('role', 'dialog');
-                modal.setAttribute('aria-modal', 'true');
-                modal.innerHTML = `
-                    <div class="center-confirm-dialog glass-panel">
-                        <i class="lucide-map-pin" style="font-size: 34px; color: var(--primary-dark);"></i>
-                        <h2>Acceder al centro</h2>
-                        <p>¿Quieres acceder a <strong>${center.name}</strong>?</p>
-                        <div class="center-confirm-actions">
-                            <button type="button" class="btn btn-secondary" data-modal-cancel>Cancelar</button>
-                            <button type="button" class="btn btn-primary" data-modal-confirm>Continuar</button>
-                        </div>
-                    </div>
-                `;
-
-                const closeModal = (confirmed) => {
-                    modal.remove();
-                    resolve(confirmed);
-                };
-
-                modal.querySelector('[data-modal-cancel]').addEventListener('click', () => closeModal(false));
-                modal.querySelector('[data-modal-confirm]').addEventListener('click', () => closeModal(true));
-                modal.addEventListener('click', (event) => {
-                    if (event.target === modal) closeModal(false);
-                });
-                document.body.appendChild(modal);
-                modal.querySelector('[data-modal-confirm]').focus();
             });
-        }
 
-        function initMap() {
-            if (map) {
-                map.invalidateSize();
+            function filterParams(extra) {
+                const params = new URLSearchParams(extra);
+                if (searchName.value) params.append('searchName', searchName.value);
+                if (searchTreatment.value) params.append('searchTreatment', searchTreatment.value);
+                return params;
+            }
+
+            /* ---- Mapa ---- */
+            const markerIcon = color => L.icon({
+                iconUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-${color}.png`,
+                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                iconSize: [25, 41], iconAnchor: [12, 41]
+            });
+
+            function initMap() {
+                if (map) {
+                    map.invalidateSize();
+                    fetchMapCenters();
+                    return;
+                }
+                map = L.map('mapContainer').setView([userLat || 40.4168, userLon || -3.7038], 12);
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                    attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+                    maxZoom: 19
+                }).addTo(map);
+                if (userLat && userLon) {
+                    L.marker([userLat, userLon], { icon: markerIcon('blue') }).addTo(map).bindPopup('Tu ubicación');
+                }
+                map.on('moveend', fetchMapCenters);
                 fetchMapCenters();
-                return;
-            }
-            
-            const initLat = userLat || 40.4168;
-            const initLon = userLon || -3.7038;
-            
-            map = L.map('mapContainer').setView([initLat, initLon], 12);
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-                attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
-                maxZoom: 19
-            }).addTo(map);
-
-            if (userLat && userLon) {
-                L.marker([userLat, userLon], {
-                    icon: L.icon({
-                        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
-                        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-                        iconSize: [25, 41], iconAnchor: [12, 41]
-                    })
-                }).addTo(map).bindPopup('Tu ubicación');
             }
 
-            map.on('moveend', () => {
-                fetchMapCenters();
-            });
-
-            fetchMapCenters();
-        }
-
-        async function fetchMapCenters() {
-            if (!map) return;
-            const bounds = map.getBounds();
-            const name = document.getElementById('searchName').value;
-            const treatment = document.getElementById('searchTreatment').value;
-
-            const params = new URLSearchParams({
-                north: bounds.getNorth(),
-                south: bounds.getSouth(),
-                east: bounds.getEast(),
-                west: bounds.getWest()
-            });
-            if (name) params.append('searchName', name);
-            if (treatment) params.append('searchTreatment', treatment);
-
-            try {
-                const response = await fetch('/api/centers?' + params.toString());
-                const centers = await response.json();
-                
-                mapMarkers.forEach(m => map.removeLayer(m));
-                mapMarkers = [];
-
-                centers.forEach(center => {
-                    if (center.latitude && center.longitude) {
-                        const marker = L.marker([center.latitude, center.longitude], {
-                            icon: L.icon({
-                                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-gold.png',
-                                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-                                iconSize: [25, 41], iconAnchor: [12, 41]
-                            }),
-                            title: center.name
-                        }).addTo(map);
-                        
-                        marker.on('click', async () => {
-                            if (await confirmCenterAccess(center)) {
-                                window.location.href = `/client/centers/${center.id}`;
-                            }
+            async function fetchMapCenters() {
+                if (!map) return;
+                const b = map.getBounds();
+                const params = filterParams({ north: b.getNorth(), south: b.getSouth(), east: b.getEast(), west: b.getWest() });
+                try {
+                    const centers = await (await fetch('/api/centers?' + params)).json();
+                    mapMarkers.forEach(m => map.removeLayer(m));
+                    mapMarkers = centers
+                        .filter(c => c.latitude && c.longitude)
+                        .map(center => {
+                            const marker = L.marker([center.latitude, center.longitude], { icon: markerIcon('gold'), title: center.name }).addTo(map);
+                            marker.on('click', async () => {
+                                if (await canOpenCenter(center)) window.location.href = `/client/centers/${center.id}`;
+                            });
+                            return marker;
                         });
-                        
-                        mapMarkers.push(marker);
-                    }
-                });
-            } catch(e) {
-                console.error("Error fetching map centers", e);
-            }
-        }
-
-        function resetAndFetch() {
-            if (isMapView) {
-                fetchMapCenters();
-                return;
-            }
-            currentPage = 0;
-            hasMore = true;
-            centersGrid.innerHTML = '';
-            trigger.style.display = 'block';
-            fetchCenters();
-        }
-
-        function updateTreatmentBadge() {
-            const treatment = document.getElementById('searchTreatment');
-            treatmentBadge.style.display = treatment.value !== '' ? 'inline-block' : 'none';
-        }
-
-        async function fetchCenters() {
-            if (isLoading || !hasMore) return;
-            isLoading = true;
-
-            const name = document.getElementById('searchName').value;
-            const treatment = document.getElementById('searchTreatment').value;
-
-            const params = new URLSearchParams({
-                page: currentPage,
-                size: 10
-            });
-            if (userLat) params.append('lat', userLat);
-            if (userLon) params.append('lon', userLon);
-            if (name) params.append('searchName', name);
-            if (treatment) params.append('searchTreatment', treatment);
-
-            try {
-                const response = await fetch('/api/centers?' + params.toString());
-                const centers = await response.json();
-
-                if (centers.length < 10) {
-                    hasMore = false;
-                    trigger.style.display = 'none';
+                } catch (e) {
+                    console.error('Error al cargar los centros del mapa', e);
                 }
-
-                if (centers.length === 0 && currentPage === 0) {
-                    centersGrid.innerHTML = `
-                        <div class="no-appointments-box glass-panel grid-col-full">
-                            <i class="lucide-map-pin-off"></i>
-                            <p>No se encontraron centros de belleza que coincidan con tus criterios.</p>
-                        </div>
-                    `;
-                }
-
-                centers.forEach(center => {
-                    const distanceStr = center.distanceKm !== null ? 
-                        `<span class="center-distance-badge">A ${center.distanceKm.toFixed(1)} km</span>` : '';
-                    
-                    const card = document.createElement('div');
-                    card.className = 'center-card glass-panel';
-                    card.innerHTML = `
-                        <div class="center-card-header">
-                            <h2 class="center-card-title">${center.name}</h2>
-                            ${distanceStr || '<i class="lucide-map-pin center-meta-icon"></i>'}
-                        </div>
-                        <div class="center-card-body">
-                            <div class="center-meta-item align-start">
-                                <i class="lucide-navigation center-meta-icon"></i>
-                                <div>
-                                    <span class="center-meta-title">Dirección:</span>
-                                    <span>${center.address || 'N/A'}</span>
-                                </div>
-                            </div>
-                            <div class="center-meta-item align-start">
-                                <i class="lucide-phone center-meta-icon"></i>
-                                <div>
-                                    <span class="center-meta-title">Número de teléfono:</span>
-                                    <span>${center.phone || 'N/A'}</span>
-                                </div>
-                            </div>
-                            <div class="center-meta-item align-start">
-                                <i class="lucide-mail center-meta-icon"></i>
-                                <div>
-                                    <span class="center-meta-title">Dirección email:</span>
-                                    <span>${center.email || 'N/A'}</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="center-card-footer">
-                            <a href="/client/centers/${center.id}" onclick="return handleCenterAccess(${center.id}, '${(center.name || '').replace(/'/g, "\\'")}', event)" class="btn btn-primary center-select-btn">
-                                <i class="lucide-calendar-plus"></i> Ver Tratamientos y Reservar
-                            </a>
-                        </div>
-                    `;
-                    centersGrid.appendChild(card);
-                });
-
-                currentPage++;
-            } catch (err) {
-                console.error("Error fetching centers:", err);
-            } finally {
-                isLoading = false;
             }
-        }
 
-        // Intersection Observer for Infinite Scroll
-        const observer = new IntersectionObserver((entries) => {
-            if (entries[0].isIntersecting && hasMore && !isLoading && !isMapView) {
+            /* ---- Listado con scroll infinito ---- */
+            function resetAndFetch() {
+                if (isMapView) {
+                    fetchMapCenters();
+                    return;
+                }
+                currentPage = 0;
+                hasMore = true;
+                centersGrid.innerHTML = '';
+                trigger.hidden = false;
                 fetchCenters();
             }
-        }, { rootMargin: '100px' });
 
-        // Initialize Geolocation and Fetch
-        window.addEventListener('DOMContentLoaded', () => {
-            observer.observe(trigger);
-            if ("geolocation" in navigator) {
-                navigator.geolocation.getCurrentPosition((pos) => {
+            function centerCard(center) {
+                const card = document.createElement('article');
+                card.className = 'center-card glass-panel';
+                const distance = center.distanceKm !== null
+                    ? `<span class="center-distance-badge">A ${center.distanceKm.toFixed(1)} km</span>`
+                    : '<i class="lucide-map-pin center-meta-icon" aria-hidden="true"></i>';
+                const meta = (icon, label, value) => `
+                    <div class="center-meta-item align-start">
+                        <i class="lucide-${icon} center-meta-icon" aria-hidden="true"></i>
+                        <div>
+                            <span class="center-meta-title">${label}</span>
+                            <span>${esc(value || 'N/A')}</span>
+                        </div>
+                    </div>`;
+                card.innerHTML = `
+                    <div class="center-card-header">
+                        <h2 class="center-card-title">${esc(center.name)}</h2>
+                        ${distance}
+                    </div>
+                    <div class="center-card-body">
+                        ${meta('navigation', 'Dirección:', center.address)}
+                        ${meta('phone', 'Número de teléfono:', center.phone)}
+                        ${meta('mail', 'Dirección email:', center.email)}
+                    </div>
+                    <div class="center-card-footer">
+                        <a href="/client/centers/${encodeURIComponent(center.id)}" class="btn btn-primary center-select-btn">
+                            <i class="lucide-calendar-plus" aria-hidden="true"></i> Ver Tratamientos y Reservar
+                        </a>
+                    </div>`;
+                card.querySelector('a').addEventListener('click', async e => {
+                    e.preventDefault();
+                    if (await canOpenCenter(center)) window.location.href = e.currentTarget.href;
+                });
+                return card;
+            }
+
+            async function fetchCenters() {
+                if (isLoading || !hasMore) return;
+                isLoading = true;
+                const params = filterParams({ page: currentPage, size: PAGE_SIZE });
+                if (userLat) params.append('lat', userLat);
+                if (userLon) params.append('lon', userLon);
+                try {
+                    const centers = await (await fetch('/api/centers?' + params)).json();
+                    if (centers.length < PAGE_SIZE) {
+                        hasMore = false;
+                        trigger.hidden = true;
+                    }
+                    if (centers.length === 0 && currentPage === 0) {
+                        centersGrid.innerHTML = `
+                            <div class="no-appointments-box glass-panel grid-col-full">
+                                <i class="lucide-map-pin-off" aria-hidden="true"></i>
+                                <p>No se encontraron centros de belleza que coincidan con tus criterios.</p>
+                            </div>`;
+                    }
+                    centers.forEach(center => centersGrid.appendChild(centerCard(center)));
+                    currentPage++;
+                    firstLoadDone = true;
+                } catch (err) {
+                    console.error('Error al cargar los centros', err);
+                } finally {
+                    isLoading = false;
+                }
+            }
+
+            new IntersectionObserver(entries => {
+                if (entries[0].isIntersecting && hasMore && !isLoading && !isMapView && firstLoadDone) fetchCenters();
+            }, { rootMargin: '100px' }).observe(trigger);
+
+            // Primera carga: se intenta ordenar por cercanía; si no hay ubicación en 3 s, se carga sin ella.
+            const fallback = setTimeout(() => { if (!firstLoadDone) resetAndFetch(); }, 3000);
+            if ('geolocation' in navigator) {
+                navigator.geolocation.getCurrentPosition(pos => {
+                    clearTimeout(fallback);
                     userLat = pos.coords.latitude;
                     userLon = pos.coords.longitude;
-                    if (currentPage === 0 && !isMapView) resetAndFetch();
-                }, (err) => {
-                    console.warn("Geolocation denied or error. Falling back to non-proximity search.", err);
-                    if (currentPage === 0 && !isMapView) resetAndFetch();
+                    resetAndFetch();
+                }, () => {
+                    clearTimeout(fallback);
+                    if (!firstLoadDone) resetAndFetch();
                 });
             } else {
-                if (!isMapView) resetAndFetch();
-            }
-            
-            setTimeout(() => {
-                if (currentPage === 0 && !isLoading && !isMapView) {
-                    resetAndFetch();
-                }
-            }, 3000);
-
-            // Live Search Event Listeners
-            let searchTimeout;
-            document.getElementById('searchName').addEventListener('input', () => {
-                clearTimeout(searchTimeout);
-                searchTimeout = setTimeout(() => {
-                    resetAndFetch();
-                }, 400);
-            });
-
-            document.getElementById('searchTreatment').addEventListener('change', () => {
-                updateTreatmentBadge();
+                clearTimeout(fallback);
                 resetAndFetch();
-            });
+            }
         });
     </script>
 </body>

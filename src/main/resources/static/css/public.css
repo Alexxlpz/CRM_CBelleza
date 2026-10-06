@@ -1,0 +1,149 @@
+/* ==========================================================================
+   Páginas públicas de contenido: Funcionalidades, Contacto y Alta de centro.
+   Requiere common.css (tokens, botones, alertas y validación).
+   ========================================================================== */
+
+.public-page-container {
+    width: 100%;
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+}
+
+.public-page-container--narrow {
+    max-width: 980px;
+}
+
+/* ---- Cabecera de página (hero centrado) ---- */
+.page-hero {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.page-hero h1 {
+    font-size: 38px;
+    font-weight: 800;
+    margin-bottom: 12px;
+    letter-spacing: -0.6px;
+    overflow-wrap: break-word;
+}
+
+.page-hero p {
+    font-size: 16px;
+    color: var(--text-muted);
+    max-width: 680px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+/* ---- Tarjeta de formulario ---- */
+.form-card-container {
+    max-width: 640px;
+    margin: 30px auto 0;
+}
+
+.form-card {
+    background: var(--surface);
+    border: 1px solid rgba(var(--primary-rgb), 0.35);
+    border-radius: var(--border-radius-lg);
+    padding: 40px 42px;
+    box-shadow: 0 10px 32px rgba(var(--primary-rgb), 0.12);
+}
+
+.form-card--wide {
+    padding: 42px 48px;
+    margin-top: 36px;
+}
+
+.form-card-header {
+    margin-bottom: 22px;
+}
+
+.form-card-header--divided {
+    margin-bottom: 26px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-soft);
+}
+
+.form-card-header h2 {
+    font-size: 21px;
+    font-weight: 800;
+    margin-bottom: 6px;
+}
+
+.form-card-header p {
+    font-size: 13.5px;
+    color: var(--text-muted);
+}
+
+.form-grid-two {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+/* ---- Alta de centro: especialidades y confirmación ---- */
+.specialties-checkbox-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 10px;
+    background: var(--surface-muted);
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(var(--primary-rgb), 0.3);
+    margin-bottom: 22px;
+}
+
+.checkbox-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-main);
+    cursor: pointer;
+}
+
+.checkbox-chip input {
+    accent-color: var(--primary-dark);
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+}
+
+.terms-check-row {
+    margin-bottom: 24px;
+}
+
+.terms-check-row .checkbox-chip {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    align-items: flex-start;
+}
+
+.checkbox-chip:has(input.has-error) {
+    border: 1px solid var(--error);
+    background: var(--error-bg);
+    border-radius: 8px;
+    padding: 8px 10px;
+}
+
+.center-lead-box--spaced {
+    margin-top: 50px;
+}
+
+@media (max-width: 768px) {
+    .form-card,
+    .form-card--wide {
+        padding: 26px 20px;
+    }
+
+    .form-grid-two {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+
+    .page-hero h1 {
+        font-size: 28px;
+    }
+}

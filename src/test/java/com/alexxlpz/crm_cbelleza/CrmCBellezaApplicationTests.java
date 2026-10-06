@@ -3,6 +3,10 @@ package com.alexxlpz.crm_cbelleza;
 import com.alexxlpz.crm_cbelleza.dto.ClientSummaryDTO;
 import com.alexxlpz.crm_cbelleza.entities.Appointment;
 import com.alexxlpz.crm_cbelleza.entities.AppointmentStatus;
+import com.alexxlpz.crm_cbelleza.entities.Treatment;
+import com.alexxlpz.crm_cbelleza.forms.ContactForm;
+import com.alexxlpz.crm_cbelleza.mail.InquiryMailService;
+import com.alexxlpz.crm_cbelleza.repositories.UserRepository;
 import com.alexxlpz.crm_cbelleza.services.ClientCardService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +22,12 @@ class CrmCBellezaApplicationTests {
 
     @Autowired
     private ClientCardService clientCardService;
+
+    @Autowired
+    private InquiryMailService inquiryMailService;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Test
     void contextLoads() {
@@ -46,59 +56,45 @@ class CrmCBellezaApplicationTests {
 
     @Test
     void testAppointmentDurationBasedCompletion() {
-        com.alexxlpz.crm_cbelleza.entities.Treatment oneHourTreatment = com.alexxlpz.crm_cbelleza.entities.Treatment.builder()
+        Treatment oneHourTreatment = Treatment.builder()
                 .duration(60)
                 .name("Tratamiento 1h")
                 .price(30.0)
                 .build();
 
-        // Appointment started 30 minutes ago, 60m duration: must still be CONFIRMED (in progress)
         Appointment inProgress = Appointment.builder()
                 .dateTime(LocalDateTime.now().minusMinutes(30))
                 .treatment(oneHourTreatment)
                 .status(AppointmentStatus.CONFIRMED)
                 .build();
-        assertEquals(AppointmentStatus.CONFIRMED, inProgress.getStatus(), "Appointment within duration should remain CONFIRMED");
+        assertEquals(AppointmentStatus.CONFIRMED, inProgress.getStatus(), "Una cita en curso sigue CONFIRMED");
 
-        // Appointment started 61 minutes ago, 60m duration: duration has elapsed, must be COMPLETED
         Appointment finished = Appointment.builder()
                 .dateTime(LocalDateTime.now().minusMinutes(61))
                 .treatment(oneHourTreatment)
                 .status(AppointmentStatus.CONFIRMED)
                 .build();
-        assertEquals(AppointmentStatus.COMPLETED, finished.getStatus(), "Appointment past duration should be COMPLETED");
+        assertEquals(AppointmentStatus.COMPLETED, finished.getStatus(), "Una cita terminada pasa a COMPLETED");
     }
 
     @Test
     void testClientCardLastCompletedAppointment() {
-        List<ClientSummaryDTO> clients = clientCardService.getClientsForCenter(1L, null);
-        assertNotNull(clients);
+        Long centerId = userRepository.findByEmailIgnoreCase("carlos@cbelleza.com").orElseThrow().getCenter().getId();
+        List<ClientSummaryDTO> clients = clientCardService.getClientsForCenter(centerId, null);
         assertFalse(clients.isEmpty());
 
-        // Client 1 (Sofía Martínez) has past completed appointment and future confirmed appointment
-        ClientSummaryDTO client1 = clients.stream()
+        ClientSummaryDTO sofia = clients.stream()
                 .filter(c -> c.getName() != null && c.getName().contains("Sofía"))
                 .findFirst()
-                .orElse(null);
-
-        assertNotNull(client1);
-        assertNotNull(client1.getLastAppointmentDate(), "Client 1 should have a last appointment date from completed appointment");
-        assertTrue(client1.getLastAppointmentDate().isBefore(LocalDateTime.now()), "Last appointment date must be in the past (completed)");
+                .orElseThrow();
+        assertNotNull(sofia.getLastAppointmentDate(), "Debe mostrar la fecha de la última cita completada");
+        assertTrue(sofia.getLastAppointmentDate().isBefore(LocalDateTime.now()));
     }
 
-    @Autowired
-    private com.alexxlpz.crm_cbelleza.services.EmailService emailService;
-
     @Test
-    void testContactEmailServiceFallback() {
-        assertDoesNotThrow(() -> {
-            emailService.sendContactInquiry(
-                    "Cliente Prueba",
-                    "cliente@ejemplo.com",
-                    "600123456",
-                    "Consulta sobre horarios",
-                    "Hola, me gustaría saber si abrís los sábados por la tarde."
-            );
-        });
+    void testContactEmailFallsBackToConsoleWithoutSmtp() {
+        assertDoesNotThrow(() -> inquiryMailService.sendContactInquiry(new ContactForm(
+                "Cliente Prueba", "cliente@ejemplo.com", "600123456",
+                "Consulta sobre horarios", "Hola, ¿abrís los sábados por la tarde?")));
     }
 }

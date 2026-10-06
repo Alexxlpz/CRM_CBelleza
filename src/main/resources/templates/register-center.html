@@ -1,255 +1,18 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alta y Certificación de Centro - Cuquora CRM</title>
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="icon" type="image/png" href="/images/icon.png">
-    <link rel="apple-touch-icon" href="/images/icon.png">
-    <!-- Lucide Icons CDN -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.321.0/font/lucide.min.css">
-    <!-- Stylesheets -->
-    <link rel="stylesheet" href="/css/common.css">
+    <th:block th:replace="~{fragments/head :: meta('Alta y Certificación de Centro - Cuquora CRM')}"></th:block>
     <link rel="stylesheet" href="/css/home.css">
-    <!-- EmailJS SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-    <style>
-        .public-page-container {
-            max-width: 980px;
-            margin: 0 auto;
-            padding: 40px 24px 80px 24px;
-            width: 100%;
-        }
-        .register-center-hero {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-        .register-center-hero .eyebrow {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: rgba(197, 168, 128, 0.16);
-            color: var(--primary-dark, #a38258);
-            font-size: 12px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            padding: 6px 14px;
-            border-radius: 20px;
-            margin-bottom: 14px;
-        }
-        .register-center-hero h1 {
-            font-size: 38px;
-            font-weight: 800;
-            color: var(--text-main, #2b2825);
-            margin-bottom: 12px;
-            letter-spacing: -0.6px;
-        }
-        .register-center-hero p {
-            font-size: 16px;
-            color: var(--text-muted, #7a736e);
-            max-width: 680px;
-            margin: 0 auto;
-            line-height: 1.6;
-        }
-        .reg-center-form-card {
-            background: #ffffff;
-            border: 1px solid rgba(197, 168, 128, 0.35);
-            border-radius: var(--border-radius-lg, 24px);
-            padding: 42px 48px;
-            box-shadow: 0 12px 36px rgba(197, 168, 128, 0.12);
-            margin-top: 36px;
-        }
-        .form-grid-two {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-        .form-group-item {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-bottom: 20px;
-        }
-        .form-group-item label {
-            font-size: 13.5px;
-            font-weight: 700;
-            color: var(--text-main, #2b2825);
-        }
-        .form-group-item .field-input,
-        .form-group-item .field-select {
-            padding: 12px 16px;
-            border: 1px solid rgba(197, 168, 128, 0.4);
-            border-radius: 12px;
-            font-size: 14.5px;
-            font-family: inherit;
-            color: var(--text-main);
-            background: #faf7f2;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
-            outline: none;
-            width: 100%;
-            box-sizing: border-box;
-        }
-        .form-group-item textarea {
-            padding: 12px 16px;
-            border: 1px solid rgba(197, 168, 128, 0.4);
-            border-radius: 12px;
-            font-size: 14.5px;
-            font-family: inherit;
-            color: var(--text-main);
-            background: #faf7f2;
-            outline: none;
-            width: 100%;
-            min-width: 100%;
-            max-width: 100%;
-            box-sizing: border-box;
-            resize: vertical;
-            min-height: 80px;
-            max-height: 280px;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
-        }
-        .form-group-item .field-input:focus,
-        .form-group-item .field-select:focus,
-        .form-group-item textarea:focus {
-            background: #ffffff;
-            border-color: var(--primary, #c5a880);
-            box-shadow: 0 0 0 4px rgba(197, 168, 128, 0.18);
-        }
-        .specialties-checkbox-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 10px;
-            background: #faf7f2;
-            padding: 16px;
-            border-radius: 12px;
-            border: 1px solid rgba(197, 168, 128, 0.3);
-            margin-bottom: 22px;
-        }
-        .checkbox-chip {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 13px;
-            font-weight: 600;
-            color: #4f473e;
-            cursor: pointer;
-        }
-        .checkbox-chip input {
-            accent-color: var(--primary-dark, #a38258);
-            width: 16px;
-            height: 16px;
-        }
-        .alert-success-box {
-            background: #e8f5e9;
-            border: 1px solid #a5d6a7;
-            color: #1b5e20;
-            padding: 18px 24px;
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            font-size: 14.5px;
-            font-weight: 600;
-            margin-bottom: 28px;
-            box-shadow: 0 4px 14px rgba(46, 125, 50, 0.1);
-        }
-        .alert-success-box i {
-            font-size: 24px;
-            flex-shrink: 0;
-        }
-        .submit-cert-btn {
-            background: linear-gradient(135deg, var(--primary, #c5a880) 0%, var(--primary-dark, #a38258) 100%);
-            border: none;
-            color: #ffffff;
-            font-size: 16px;
-            font-weight: 800;
-            padding: 14px 32px;
-            border-radius: 28px;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            width: 100%;
-            transition: all 0.25s ease;
-            box-shadow: 0 6px 20px rgba(197, 168, 128, 0.35);
-        }
-        .submit-cert-btn:hover:not(:disabled):not(.disabled) {
-            filter: brightness(1.05);
-            transform: translateY(-2px);
-            box-shadow: 0 10px 26px rgba(197, 168, 128, 0.45);
-        }
-        .submit-cert-btn.disabled,
-        .submit-cert-btn:disabled {
-            background: #d8d0c7 !important;
-            color: #8f857a !important;
-            cursor: not-allowed !important;
-            box-shadow: none !important;
-            transform: none !important;
-            opacity: 0.65;
-            filter: grayscale(0.2);
-        }
-        .field-input.has-error,
-        .field-select.has-error,
-        .form-group-item textarea.has-error {
-            border-color: #d32f2f !important;
-            background: #fff8f8 !important;
-            box-shadow: 0 0 0 3.5px rgba(211, 47, 47, 0.14) !important;
-        }
-        .checkbox-chip.has-error {
-            border: 1px solid #d32f2f !important;
-            background: #fff8f8 !important;
-            border-radius: 8px;
-            padding: 8px 10px;
-        }
-        .field-error-msg {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 12.5px;
-            font-weight: 600;
-            color: #d32f2f;
-            margin-top: 5px;
-            animation: fadeInDown 0.2s ease;
-        }
-        @keyframes fieldShake {
-            0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-4px); }
-            40%, 80% { transform: translateX(4px); }
-        }
-        .shake-field {
-            animation: fieldShake 0.35s ease;
-        }
-        @keyframes fadeInDown {
-            from { opacity: 0; transform: translateY(-4px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes spin {
-            100% { transform: rotate(360deg); }
-        }
-        @media (max-width: 768px) {
-            .reg-center-form-card {
-                padding: 26px 20px;
-            }
-            .form-grid-two {
-                grid-template-columns: 1fr;
-                gap: 0;
-            }
-            .register-center-hero h1 {
-                font-size: 28px;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="/css/public.css">
+    <script src="/js/form-validation.js" defer></script>
 </head>
-<body class="landing-page-view">
+<body>
     <!-- Navbar -->
     <div th:replace="~{fragments/navbar :: brand(true)}"></div>
 
-    <main class="public-page-container">
+    <main class="public-page-container public-page-container--narrow">
         <!-- Hero Header -->
-        <header class="register-center-hero">
+        <header class="page-hero">
             <h1>Registra tu Centro en Cuquora</h1>
             <p>Suma tu centro a nuestra red profesional. Para garantizar un ecosistema exclusivo, sin intrusismo y con la máxima seguridad para los clientes, cada solicitud es auditada y certificada manualmente por nuestro equipo.</p>
         </header>
@@ -274,56 +37,58 @@
         </div>
 
         <!-- Success Alert Flash Message -->
-        <div class="alert-success-box" th:if="${successMessage != null}">
-            <i class="lucide-check-circle-2"></i>
+        <div class="alert alert-success" role="status" th:if="${successMessage != null}">
+            <i class="lucide-check-circle-2" aria-hidden="true"></i>
             <span th:text="${successMessage}">¡Solicitud enviada con éxito!</span>
         </div>
 
-        <!-- Dynamic Feedback Container for EmailJS -->
-        <div id="registerCenterFeedback" style="display: none; margin-bottom: 24px;"></div>
+        <div class="alert alert-error" role="alert" th:if="${errorMessage != null}">
+            <i class="lucide-alert-circle" aria-hidden="true"></i>
+            <span th:text="${errorMessage}">Error</span>
+        </div>
 
         <!-- Registration Form Card -->
-        <div class="reg-center-form-card">
-            <div style="margin-bottom: 26px; border-bottom: 1px solid #f2ebe2; padding-bottom: 16px;">
-                <h2 style="font-size: 22px; font-weight: 800; color: var(--text-main); margin-bottom: 4px;">Formulario de Solicitud de Certificación</h2>
-                <p style="font-size: 13.5px; color: var(--text-muted);">Completa los datos de tu centro para que nuestro equipo inicie la validación.</p>
+        <div class="form-card form-card--wide">
+            <div class="form-card-header form-card-header--divided">
+                <h2>Formulario de Solicitud de Certificación</h2>
+                <p>Completa los datos de tu centro para que nuestro equipo inicie la validación.</p>
             </div>
 
-            <form action="/register-center" method="post">
+            <form th:action="@{/register-center}" method="post" id="registerCenterForm" novalidate>
                 <div class="form-grid-two">
-                    <div class="form-group-item">
+                    <div class="form-field">
                         <label for="centerName">Nombre Comercial del Centro *</label>
-                        <input type="text" id="centerName" name="centerName" class="field-input" placeholder="Ej: Salón Bellas Artes, Spa Zen..." required>
+                        <input type="text" id="centerName" name="centerName" placeholder="Ej: Salón Bellas Artes, Spa Zen..." required>
                     </div>
-                    <div class="form-group-item">
+                    <div class="form-field">
                         <label for="cif">CIF / NIF de la Empresa o Autónomo *</label>
-                        <input type="text" id="cif" name="cif" class="field-input" placeholder="Ej: B12345678 o 12345678Z" required>
+                        <input type="text" id="cif" name="cif" placeholder="Ej: B12345678 o 12345678Z" required>
                     </div>
                 </div>
 
                 <div class="form-grid-two">
-                    <div class="form-group-item">
+                    <div class="form-field">
                         <label for="contactName">Nombre del Titular o Responsable *</label>
-                        <input type="text" id="contactName" name="contactName" class="field-input" placeholder="Nombre y Apellidos" required>
+                        <input type="text" id="contactName" name="contactName" placeholder="Nombre y Apellidos" required>
                     </div>
-                    <div class="form-group-item">
+                    <div class="form-field">
                         <label for="phone">Teléfono de Contacto Profesional *</label>
-                        <input type="tel" id="phone" name="phone" class="field-input" placeholder="+34 600 000 000" required>
+                        <input type="tel" id="phone" name="phone" placeholder="+34 600 000 000" required>
                     </div>
                 </div>
 
                 <div class="form-grid-two">
-                    <div class="form-group-item">
+                    <div class="form-field">
                         <label for="email">Correo Electrónico de Contacto *</label>
-                        <input type="email" id="email" name="email" class="field-input" placeholder="info@tucentro.com" required>
+                        <input type="email" id="email" name="email" placeholder="info@tucentro.com" required>
                     </div>
-                    <div class="form-group-item">
+                    <div class="form-field">
                         <label for="city">Ciudad y Código Postal *</label>
-                        <input type="text" id="city" name="city" class="field-input" placeholder="Ej: Madrid, 28001" required>
+                        <input type="text" id="city" name="city" placeholder="Ej: Madrid, 28001" required>
                     </div>
                 </div>
 
-                <div class="form-group-item">
+                <div class="form-field">
                     <label>Especialidades y Servicios que ofrecéis:</label>
                     <div class="specialties-checkbox-grid">
                         <label class="checkbox-chip">
@@ -347,20 +112,20 @@
                     </div>
                 </div>
 
-                <div class="form-group-item">
+                <div class="form-field">
                     <label for="notes">Información Adicional (Enlace web, Instagram o detalles):</label>
                     <textarea id="notes" name="notes" rows="3" placeholder="Cuéntanos brevemente sobre tus instalaciones, número de cabinas o equipo..."></textarea>
                 </div>
 
-                <div style="margin-bottom: 24px;">
-                    <label class="checkbox-chip" style="font-size: 12.5px; color: #706860;">
-                        <input type="checkbox" required>
+                <div class="terms-check-row">
+                    <label class="checkbox-chip">
+                        <input type="checkbox" name="terms" value="true" required>
                         <span>Confirmo que los datos aportados corresponden a un centro de belleza con actividad legal en vigor y autorizo la verificación manual por el equipo de Cuquora.</span>
                     </label>
                 </div>
 
-                <button type="submit" id="submitCertBtn" class="submit-cert-btn disabled" aria-disabled="true">
-                    <i class="lucide-sparkles"></i>
+                <button type="submit" id="submitCertBtn" class="btn btn-primary btn-block btn-lg btn-pill disabled" aria-disabled="true">
+                    <i class="lucide-sparkles" aria-hidden="true"></i>
                     <span>Enviar Solicitud de Certificación</span>
                 </button>
             </form>
@@ -371,245 +136,26 @@
     <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Software de gestión para centros de estética, salones y spas.')}"></div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // === CONFIGURACIÓN DE EMAILJS (Doble Envío: Trabajador + Administrador) ===
-            const EMAILJS_PUBLIC_KEY = 'GFk0Vgl7-t3dgQwXd';
-            const EMAILJS_SERVICE_ID = 'service_zz67ay6';
-            const EMAILJS_TEMPLATE_WORKER = 'template_7h9uh2l'; // Plantilla confirmación trabajador
-            const EMAILJS_TEMPLATE_ADMIN = 'template_btv8esj';   // Plantilla expediente admin (aceptar / denegar)
-
-            emailjs.init(EMAILJS_PUBLIC_KEY);
-
-            const form = document.querySelector('form[action="/register-center"]');
+        document.addEventListener('DOMContentLoaded', () => {
+            const V = Cuquora.validators;
+            const form = document.getElementById('registerCenterForm');
             const submitBtn = document.getElementById('submitCertBtn');
-            if (!form || !submitBtn) return;
-
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-
-            const fields = {
-                centerName: {
-                    el: document.getElementById('centerName'),
-                    validate: (v) => v.trim() ? '' : 'Por favor, introduce el nombre comercial de tu centro.'
-                },
-                cif: {
-                    el: document.getElementById('cif'),
-                    validate: (v) => v.trim() ? '' : 'Por favor, indica el CIF o NIF de la empresa o autónomo.'
-                },
-                contactName: {
-                    el: document.getElementById('contactName'),
-                    validate: (v) => v.trim() ? '' : 'Por favor, introduce el nombre del titular o responsable.'
-                },
-                phone: {
-                    el: document.getElementById('phone'),
-                    validate: (v) => {
-                        if (!v.trim()) return 'Por favor, introduce un teléfono de contacto.';
-                        if (v.replace(/\D/g, '').length < 6) return 'Introduce un número de teléfono válido (mínimo 6 dígitos).';
-                        return '';
-                    }
-                },
-                email: {
-                    el: document.getElementById('email'),
-                    validate: (v) => {
-                        if (!v.trim()) return 'Por favor, introduce tu correo electrónico.';
-                        if (!emailRegex.test(v.trim())) return 'Formato de correo no válido. Debe incluir "@" y un dominio válido (ej. usuario@gmail.com).';
-                        return '';
-                    }
-                },
-                city: {
-                    el: document.getElementById('city'),
-                    validate: (v) => v.trim() ? '' : 'Por favor, indica la ciudad y código postal.'
-                },
-                terms: {
-                    el: form.querySelector('input[type="checkbox"][required]'),
-                    validate: (v, el) => el.checked ? '' : 'Debes confirmar y autorizar la verificación para continuar.'
-                }
-            };
-
-            function setFieldError(fieldEl, errorMessage) {
-                clearFieldError(fieldEl);
-                fieldEl.classList.add('has-error');
-
-                fieldEl.classList.remove('shake-field');
-                void fieldEl.offsetWidth;
-                fieldEl.classList.add('shake-field');
-
-                const msg = document.createElement('div');
-                msg.className = 'field-error-msg';
-                msg.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg><span>' + errorMessage + '</span>';
-
-                if (fieldEl.type === 'checkbox') {
-                    const parentChip = fieldEl.closest('.checkbox-chip');
-                    if (parentChip) {
-                        parentChip.classList.add('has-error');
-                        parentChip.classList.remove('shake-field');
-                        void parentChip.offsetWidth;
-                        parentChip.classList.add('shake-field');
-                        parentChip.parentNode.appendChild(msg);
-                    }
-                } else {
-                    fieldEl.parentNode.appendChild(msg);
-                }
-            }
-
-            function clearFieldError(fieldEl) {
-                fieldEl.classList.remove('has-error', 'shake-field');
-                if (fieldEl.type === 'checkbox') {
-                    const parentChip = fieldEl.closest('.checkbox-chip');
-                    if (parentChip) {
-                        parentChip.classList.remove('has-error', 'shake-field');
-                        const existing = parentChip.parentNode.querySelector('.field-error-msg');
-                        if (existing) existing.remove();
-                    }
-                } else {
-                    const existing = fieldEl.parentNode.querySelector('.field-error-msg');
-                    if (existing) existing.remove();
-                }
-            }
-
-            function isFormValid() {
-                for (const key in fields) {
-                    const item = fields[key];
-                    if (item.el) {
-                        const err = item.validate(item.el.value, item.el);
-                        if (err) return false;
-                    }
-                }
-                return true;
-            }
-
-            function updateButtonState() {
-                if (isFormValid()) {
-                    submitBtn.classList.remove('disabled');
-                    submitBtn.removeAttribute('aria-disabled');
-                } else {
-                    submitBtn.classList.add('disabled');
-                    submitBtn.setAttribute('aria-disabled', 'true');
-                }
-            }
-
-            function highlightAllErrors() {
-                let firstInvalid = null;
-                for (const key in fields) {
-                    const item = fields[key];
-                    if (item.el) {
-                        const err = item.validate(item.el.value, item.el);
-                        if (err) {
-                            setFieldError(item.el, err);
-                            if (!firstInvalid) firstInvalid = item.el;
-                        } else {
-                            clearFieldError(item.el);
-                        }
-                    }
-                }
-                if (firstInvalid) {
-                    firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    firstInvalid.focus();
-                }
-            }
-
-            for (const key in fields) {
-                const item = fields[key];
-                if (item.el) {
-                    const handleInput = function () {
-                        const err = item.validate(item.el.value, item.el);
-                        if (!err) {
-                            clearFieldError(item.el);
-                        }
-                        updateButtonState();
-                    };
-                    item.el.addEventListener('input', handleInput);
-                    item.el.addEventListener('change', handleInput);
-                    item.el.addEventListener('blur', function () {
-                        if (item.el.value.trim()) {
-                            const err = item.validate(item.el.value, item.el);
-                            if (err) setFieldError(item.el, err);
-                            else clearFieldError(item.el);
-                        }
-                    });
-                }
-            }
-
-            submitBtn.addEventListener('click', function (e) {
-                if (submitBtn.classList.contains('disabled')) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    highlightAllErrors();
+            Cuquora.validateForm(form, {
+                centerName: [V.required('Por favor, introduce el nombre comercial de tu centro.')],
+                cif: [V.required('Por favor, indica el CIF o NIF de la empresa o autónomo.')],
+                contactName: [V.required('Por favor, introduce el nombre del titular o responsable.')],
+                phone: [V.required('Por favor, introduce un teléfono de contacto.'), V.phone()],
+                email: [V.required('Por favor, introduce tu correo electrónico.'), V.email()],
+                city: [V.required('Por favor, indica la ciudad y código postal.')],
+                terms: [V.required('Debes confirmar y autorizar la verificación para continuar.')]
+            }, {
+                submitButton: submitBtn,
+                onSubmit: () => {
+                    submitBtn.classList.add('is-loading');
+                    submitBtn.setAttribute('aria-busy', 'true');
+                    submitBtn.querySelector('span').textContent = 'Enviando solicitud...';
                 }
             });
-
-            form.addEventListener('submit', function (e) {
-                e.preventDefault();
-
-                if (submitBtn.classList.contains('disabled') || !isFormValid()) {
-                    highlightAllErrors();
-                    return;
-                }
-
-                submitBtn.classList.add('disabled');
-                submitBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="animation: spin 1s linear infinite;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg><span>Enviando Solicitud...</span>';
-
-                const selectedSpecialties = Array.from(form.querySelectorAll('input[name="specialties"]:checked'))
-                    .map(cb => cb.parentNode.textContent.trim());
-
-                const centerName = document.getElementById('centerName').value.trim();
-                const cif = document.getElementById('cif').value.trim();
-                const contactName = document.getElementById('contactName').value.trim();
-                const phone = document.getElementById('phone').value.trim();
-                const email = document.getElementById('email').value.trim();
-                const city = document.getElementById('city').value.trim();
-                const specialties = selectedSpecialties.join(', ') || 'No especificadas';
-                const notes = document.getElementById('notes').value.trim() || 'Sin notas adicionales';
-                const submissionDate = new Date().toLocaleDateString('es-ES', {
-                    day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
-                });
-
-                const templateParams = {
-                    // Variables para plantilla admin (template_btv8esj)
-                    center_name: centerName,
-                    cif: cif,
-                    contact_name: contactName,
-                    phone: phone,
-                    email: email,
-                    city: city,
-                    specialties: specialties,
-                    notes: notes,
-                    submission_date: submissionDate,
-
-                    // Variables para plantilla trabajador (template_7h9uh2l)
-                    name: contactName,
-                    to_email: email,
-                    subject: 'Solicitud de Registro de Centro - ' + centerName,
-                    message: 'Hola ' + contactName + ', hemos recibido correctamente la solicitud para incorporar ' + centerName + ' a Cuquora CRM. Se procesará lo antes posible, siendo 1 semana (7 días naturales) el tiempo límite estimado.'
-                };
-
-                // Enviar a la plantilla del trabajador y a la plantilla del administrador
-                const sendWorker = emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_WORKER, templateParams);
-                const sendAdmin = emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ADMIN, templateParams);
-
-                Promise.all([sendWorker, sendAdmin])
-                    .then(() => {
-                        const feedbackBox = document.getElementById('registerCenterFeedback');
-                        feedbackBox.className = 'alert-success-box';
-                        feedbackBox.innerHTML = '<i class="lucide-check-circle-2"></i> <span>¡Solicitud enviada con éxito! Se ha enviado el acuse de recibo a <strong>' + email + '</strong> y el expediente a <strong>cuquora@hotmail.com</strong>. Revisaremos los datos en un plazo máximo de 1 semana.</span>';
-                        feedbackBox.style.display = 'flex';
-                        feedbackBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        form.reset();
-                        submitBtn.classList.add('disabled');
-                        submitBtn.innerHTML = '<i class="lucide-sparkles"></i><span>Enviar Solicitud de Certificación</span>';
-                        updateButtonState();
-                    })
-                    .catch((err) => {
-                        console.error('Error al enviar correos con EmailJS:', err);
-                        const feedbackBox = document.getElementById('registerCenterFeedback');
-                        feedbackBox.className = 'alert-error-box';
-                        feedbackBox.innerHTML = '<i class="lucide-alert-circle"></i> <span>Error en el envío EmailJS (' + (err.text || err.message || 'error de conexión') + '). Enviando por servidor...</span>';
-                        feedbackBox.style.display = 'flex';
-                        setTimeout(() => { form.submit(); }, 1200);
-                    });
-            });
-
-            updateButtonState();
-            setTimeout(updateButtonState, 150);
         });
     </script>
 </body>

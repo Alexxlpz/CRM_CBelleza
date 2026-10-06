@@ -1,0 +1,11 @@
+<!--/* Mensajes flash (successMessage / errorMessage) con el componente .alert común. */-->
+<th:block xmlns:th="http://www.thymeleaf.org" th:fragment="flash">
+    <div class="alert alert-success" role="status" th:if="${successMessage != null}">
+        <i class="lucide-check-circle-2" aria-hidden="true"></i>
+        <span th:text="${successMessage}">Operación realizada correctamente.</span>
+    </div>
+    <div class="alert alert-error" role="alert" th:if="${errorMessage != null}">
+        <i class="lucide-alert-circle" aria-hidden="true"></i>
+        <span th:text="${errorMessage}">Ha ocurrido un error.</span>
+    </div>
+</th:block>

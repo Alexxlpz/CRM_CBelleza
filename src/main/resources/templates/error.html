@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{fragments/head :: meta('Página no disponible - Cuquora')}"></th:block>
+</head>
+<body>
+    <div th:replace="~{fragments/navbar :: brand(true)}"></div>
+
+    <main class="main-container error-page">
+        <section class="error-card glass-panel">
+            <span class="error-code" th:text="${status != null ? status : 'Error'}">404</span>
+            <h1 th:text="${status == 404 ? 'No encontramos esta página' : (status == 403 ? 'No tienes acceso a esta página' : 'Algo no ha ido bien')}">
+                No encontramos esta página
+            </h1>
+            <p th:text="${status == 404 ? 'Puede que el enlace haya cambiado o que el contenido ya no exista.' : (status == 403 ? 'Tu cuenta no tiene permiso para ver este contenido.' : 'Ha ocurrido un error inesperado. Inténtalo de nuevo en unos minutos.')}">
+                Puede que el enlace haya cambiado o que el contenido ya no exista.
+            </p>
+            <div class="error-actions">
+                <a href="/" class="btn btn-primary"><i class="lucide-home" aria-hidden="true"></i> Ir al inicio</a>
+                <a href="/contact" class="btn btn-secondary">Contactar con soporte</a>
+            </div>
+        </section>
+    </main>
+
+    <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Software de gestión para centros de estética, salones y spas.')}"></div>
+</body>
+</html>

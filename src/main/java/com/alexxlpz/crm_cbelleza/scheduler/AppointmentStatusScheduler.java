@@ -1,6 +1,6 @@
 package com.alexxlpz.crm_cbelleza.scheduler;
 
-import com.alexxlpz.crm_cbelleza.repositories.AppointmentRepository;
+import com.alexxlpz.crm_cbelleza.services.AppointmentLifecycleService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -8,29 +8,26 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
+/** Cada minuto marca como completadas las citas confirmadas que ya han terminado. */
 @Component
 public class AppointmentStatusScheduler {
 
     private static final Logger log = LoggerFactory.getLogger(AppointmentStatusScheduler.class);
-    private final AppointmentRepository appointmentRepository;
+    private final AppointmentLifecycleService lifecycleService;
 
-    public AppointmentStatusScheduler(AppointmentRepository appointmentRepository) {
-        this.appointmentRepository = appointmentRepository;
+    public AppointmentStatusScheduler(AppointmentLifecycleService lifecycleService) {
+        this.lifecycleService = lifecycleService;
     }
 
-    /**
-     * Checks every minute for confirmed appointments whose end time (start time + treatment duration)
-     * has elapsed, updating their status to COMPLETED automatically in real-time.
-     */
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(fixedRate = 60_000)
     public void autoUpdateCompletedAppointments() {
         try {
-            int updated = appointmentRepository.updatePastConfirmedToCompleted(LocalDateTime.now());
+            int updated = lifecycleService.completePastAppointments(LocalDateTime.now());
             if (updated > 0) {
-                log.info("Auto-completed {} past appointment(s) at {}", updated, LocalDateTime.now());
+                log.info("Marcadas como completadas {} cita(s) finalizadas", updated);
             }
         } catch (Exception e) {
-            log.error("Error executing autoUpdateCompletedAppointments scheduler", e);
+            log.error("Error al actualizar el estado de las citas finalizadas", e);
         }
     }
 }

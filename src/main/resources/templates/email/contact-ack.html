@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{email/layout :: layout('¡Hola, ' + ${form.name()} + '!', 'Hemos recibido tu consulta', ~{::content})}">
+<body>
+<th:block th:fragment="content">
+    <p style="font-size:15px; color:#5c5550; line-height:1.6; margin:0 0 20px;">
+        Gracias por ponerte en contacto con el equipo de <strong>Cuquora</strong>. Un miembro del equipo te responderá a la mayor brevedad posible.
+    </p>
+    <div style="background:#fdfcfb; border:1px solid #eee8e2; border-radius:12px; padding:18px; margin-bottom:20px;">
+        <p style="margin:0 0 6px; font-size:14px;"><strong>Asunto:</strong> <span th:text="${form.subject()}">Asunto</span></p>
+        <p style="margin:0 0 6px; font-size:14px;"><strong>Fecha:</strong> <span th:text="${timestamp}">fecha</span></p>
+        <p style="margin:8px 0 0; font-size:14px; color:#5c5550; font-style:italic; white-space:pre-wrap;" th:text="${form.message()}">Mensaje</p>
+    </div>
+    <p style="font-size:13px; color:#857b74; margin:0;">Mensaje automático. Si quieres añadir información, responde a este correo.</p>
+</th:block>
+</body>
+</html>

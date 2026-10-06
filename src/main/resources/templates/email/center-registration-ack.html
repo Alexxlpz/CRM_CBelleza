@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{email/layout :: layout('¡Hola, ' + ${form.contactName()} + '!', 'Solicitud de alta recibida', ~{::content})}">
+<body>
+<th:block th:fragment="content">
+    <p style="font-size:15px; color:#5c5550; line-height:1.6; margin:0 0 16px;">
+        La solicitud de alta del centro <strong th:text="${form.centerName()}">Centro</strong> se ha registrado correctamente.
+        Nuestro equipo revisará los datos en un plazo máximo de <strong>una semana</strong>.
+    </p>
+    <div style="background:#fdfcfb; border:1px solid #eee8e2; border-radius:12px; padding:18px; margin-bottom:20px;">
+        <p style="margin:0 0 6px; font-size:14px;"><strong>Centro:</strong> <span th:text="${form.centerName()}">Centro</span></p>
+        <p style="margin:0 0 6px; font-size:14px;"><strong>Fecha de registro:</strong> <span th:text="${timestamp}">fecha</span></p>
+        <p style="margin:0; font-size:14px;"><strong>Estado:</strong> en revisión</p>
+    </div>
+    <p style="font-size:13px; color:#857b74; margin:0;">Si quieres aportar documentación adicional, responde a este correo.</p>
+</th:block>
+</body>
+</html>

@@ -1,14 +1,9 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ficha de Cliente - Cuquora CRM</title>
-    <!-- Lucide Icons CDN -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.321.0/font/lucide.min.css">
-    <!-- Stylesheets -->
-    <link rel="stylesheet" href="/css/common.css">
+    <th:block th:replace="~{fragments/head :: meta('Ficha de Cliente - Cuquora CRM')}"></th:block>
     <link rel="stylesheet" href="/css/clients.css">
+    <script src="/js/unsaved-changes.js" defer></script>
 </head>
 <body>
     <div th:replace="~{fragments/navbar :: worker('/worker/clients', 'Volver a lista de clientes', ${notifications})}"></div>
@@ -16,16 +11,15 @@
     <!-- Main Container -->
     <main class="main-container">
 
-        <!-- Flash Success Message -->
-        <div class="alert-success-banner" id="saveSuccessBanner" th:style="${successMessage != null ? 'display: flex;' : 'display: none;'}">
-            <i class="lucide-check-circle"></i>
+        <div class="alert alert-success" id="saveSuccessBanner" role="status" th:hidden="${successMessage == null}">
+            <i class="lucide-check-circle" aria-hidden="true"></i>
             <span id="saveSuccessMessageText" th:text="${successMessage != null ? successMessage : 'Ficha técnica guardada con éxito.'}">Ficha técnica guardada con éxito.</span>
         </div>
 
         <!-- Top Navigation Back Pill: Siempre vuelve directamente al listado de clientes sin bucles -->
         <div class="page-top-nav">
-            <a href="/worker/clients" class="btn-back-pill" id="btnBackPill">
-                <i class="lucide-arrow-left"></i>
+            <a href="/worker/clients" class="btn-back-pill" id="btnBackPill" data-exit-link>
+                <i class="lucide-arrow-left" aria-hidden="true"></i>
                 <span>Volver a Clientes</span>
             </a>
         </div>
@@ -33,30 +27,21 @@
         <!-- Client Profile Header Card -->
         <div class="client-profile-header-card">
             <div class="profile-identity">
-                <div class="profile-avatar-large"
-                     th:text="${isGuest ? (guestName != null and !guestName.isEmpty() ? #strings.substring(guestName, 0, 1) : 'I') : (client != null and client.name != null and !client.name.isEmpty() ? #strings.substring(client.name, 0, 1) : 'C')}">
-                    M
-                </div>
+                <div class="profile-avatar-large" aria-hidden="true"
+                     th:text="${#strings.isEmpty(client.name) ? 'C' : #strings.substring(client.name, 0, 1)}">M</div>
                 <div>
-                    <h1 class="profile-title" th:text="${isGuest ? guestName : (client != null ? client.name : '')}">María López</h1>
+                    <h1 class="profile-title" th:text="${client.name}">María López</h1>
                     <div class="profile-contact-chips">
-                        <span class="profile-chip" th:if="${!isGuest and client != null and client.phone != null and !client.phone.isEmpty()}">
-                            <i class="lucide-phone"></i>
+                        <span class="profile-chip" th:if="${!#strings.isEmpty(client.phone)}">
+                            <i class="lucide-phone" aria-hidden="true"></i>
                             <span th:text="${client.phone}">+34 600 111 222</span>
                         </span>
-                        <span class="profile-chip" th:if="${isGuest and guestPhone != null and !guestPhone.isEmpty()}">
-                            <i class="lucide-phone"></i>
-                            <span th:text="${guestPhone}">+34 600 111 222</span>
-                        </span>
-                        <span class="profile-chip" th:if="${!isGuest and client != null and client.email != null and !client.email.isEmpty()}">
-                            <i class="lucide-mail"></i>
+                        <span class="profile-chip" th:if="${!#strings.isEmpty(client.email)}">
+                            <i class="lucide-mail" aria-hidden="true"></i>
                             <span th:text="${client.email}">cliente@email.com</span>
                         </span>
-                        <span class="client-sub-badge registered" th:if="${!isGuest}">
-                            <i class="lucide-shield-check"></i> Registrado
-                        </span>
-                        <span class="client-sub-badge guest" th:if="${isGuest}">
-                            <i class="lucide-user-check"></i> Invitado
+                        <span class="client-sub-badge registered">
+                            <i class="lucide-shield-check" aria-hidden="true"></i> Registrado
                         </span>
                     </div>
                 </div>
@@ -64,7 +49,7 @@
 
             <div class="profile-header-actions">
                 <a href="/worker/clients/template" class="btn-template-config">
-                    <i class="lucide-sliders"></i>
+                    <i class="lucide-sliders" aria-hidden="true"></i>
                     <span>Configurar Plantilla</span>
                 </a>
             </div>
@@ -79,7 +64,7 @@
                     <div>
                         <h2 class="panel-title">Ficha Técnica</h2>
                         <span class="card-meta-stamp" id="cardMetaStamp">
-                            <i class="lucide-clock"></i>
+                            <i class="lucide-clock" aria-hidden="true"></i>
                             <span class="card-meta-text" th:if="${card != null and card.updatedAt != null}">
                                 Última edición: <strong th:text="${#temporals.format(card.updatedAt, 'dd/MM/yyyy HH:mm')}">28/09/2026</strong>
                                 <span th:if="${card.updatedBy != null}" th:text="'por ' + ${card.updatedBy.name}"></span>
@@ -90,20 +75,18 @@
                         </span>
                     </div>
                     <span class="badge-card-status filled" th:if="${card != null and card.dataJson != null and !card.dataJson.equals('{}')}">
-                        <i class="lucide-check-circle-2"></i> Activa
+                        <i class="lucide-check-circle-2" aria-hidden="true"></i> Activa
                     </span>
                     <span class="badge-card-status pending" th:if="${card == null or card.dataJson == null or card.dataJson.equals('{}')}">
-                        <i class="lucide-alert-circle"></i> Por completar
+                        <i class="lucide-alert-circle" aria-hidden="true"></i> Por completar
                     </span>
                 </div>
 
                 <!-- Dynamic Form based on Center Template -->
-                <form th:action="${isGuest ? '/worker/clients/guest/card' : (client != null ? '/worker/clients/' + client.id + '/card' : '#')}"
+                <form th:action="@{/worker/clients/{id}/card(id=${client.id})}"
                       method="post" class="ficha-form" id="fichaForm" autocomplete="off">
 
-                    <!-- Hidden fields for guest and navigation redirect if applicable -->
-                    <input type="hidden" name="guestPhone" th:if="${isGuest}" th:value="${guestPhone}">
-                    <input type="hidden" name="guestName" th:if="${isGuest}" th:value="${guestName}">
+                    <!-- Ruta a la que volver tras guardar (la rellena el aviso de cambios sin guardar) -->
                     <input type="hidden" name="redirectAfter" id="redirectAfterInput" value="">
 
                     <div class="field-group" th:each="field : ${fields}">
@@ -169,7 +152,7 @@
                     </div>
 
                     <button type="submit" class="btn-save-ficha" id="btnSaveFicha">
-                        <i class="lucide-save"></i>
+                        <i class="lucide-save" aria-hidden="true"></i>
                         <span>Guardar Ficha del Cliente</span>
                     </button>
                 </form>
@@ -189,7 +172,7 @@
                     <div class="history-item" th:each="app : ${appointments}">
                         <div class="history-top">
                             <span class="history-date">
-                                <i class="lucide-calendar-days"></i>
+                                <i class="lucide-calendar-days" aria-hidden="true"></i>
                                 <span th:text="${#temporals.format(app.dateTime, 'dd/MM/yyyy HH:mm')}">14/07/2026 10:30</span>
                             </span>
                             <span class="badge badge-confirmed" th:if="${app.status.name() == 'CONFIRMED'}">Confirmada</span>
@@ -202,24 +185,24 @@
 
                         <div class="history-details-row">
                             <span class="history-worker">
-                                <i class="lucide-user"></i>
+                                <i class="lucide-user" aria-hidden="true"></i>
                                 <span th:text="${app.worker != null ? app.worker.name : 'Sin asignar'}">Laura Gómez</span>
                             </span>
                             <span>
-                                <strong th:text="${#numbers.formatDecimal(app.treatment.price, 1, 2) + ' €'}">35.00 €</strong>
+                                <strong th:text="${#numbers.formatDecimal(app.treatment.price, 1, 'POINT', 2, 'COMMA') + ' €'}">35,00 €</strong>
                                 <span th:text="'(' + ${app.treatment.duration} + ' min)'">(45 min)</span>
                             </span>
                         </div>
 
-                        <div class="agenda-worker-note" th:if="${app.workerMessage != null and !app.workerMessage.isEmpty()}" style="margin-top: 8px;">
-                            <i class="lucide-message-square"></i>
+                        <div class="agenda-worker-note history-note" th:if="${!#strings.isEmpty(app.workerMessage)}">
+                            <i class="lucide-message-square" aria-hidden="true"></i>
                             <span th:text="${app.workerMessage}"></span>
                         </div>
                     </div>
                 </div>
 
-                <div class="notification-empty" th:if="${appointments == null or appointments.isEmpty()}" style="padding: 24px;">
-                    <i class="lucide-calendar-x"></i>
+                <div class="notification-empty notification-empty--padded" th:if="${appointments == null or appointments.isEmpty()}">
+                    <i class="lucide-calendar-x" aria-hidden="true"></i>
                     <span>No hay citas registradas para este cliente en este centro.</span>
                 </div>
             </section>
@@ -228,366 +211,67 @@
 
     </main>
 
-    <!-- Modal: Confirmación de Cambios sin Guardar -->
-    <div class="modal-backdrop" id="unsavedChangesModal" style="display: none;" onclick="handleUnsavedModalBackdrop(event)">
-        <div class="modal-card modal-unsaved-card">
-            <h2 class="modal-title modal-unsaved-title">¿Guardar cambios antes de salir?</h2>
-            <p class="modal-unsaved-desc">
-                Has realizado modificaciones en la ficha técnica de este cliente. Si sales ahora sin guardar, se perderán las notas y cambios introducidos.
-            </p>
-
+    <!-- Aviso de cambios sin guardar -->
+    <div class="ui-modal-overlay" id="unsavedChangesModal" hidden>
+        <div class="ui-modal ui-modal--unsaved" role="dialog" aria-modal="true" aria-labelledby="unsavedTitle" aria-describedby="unsavedText">
+            <h2 class="ui-modal-title" id="unsavedTitle">¿Guardar cambios antes de salir?</h2>
+            <p class="ui-modal-text" id="unsavedText">Has realizado modificaciones en la ficha técnica de este cliente. Si sales ahora sin guardar, se perderán las notas y cambios introducidos.</p>
             <div class="modal-unsaved-actions">
-                <button type="button" class="btn-save-and-exit" id="btnSaveAndExit">
-                    <i class="lucide-save"></i>
+                <button type="button" class="btn-save-and-exit" data-unsaved="save">
+                    <i class="lucide-save" aria-hidden="true"></i>
                     <span>Guardar y salir</span>
                 </button>
-                <button type="button" class="btn-discard-and-exit" id="btnDiscardAndExit">
-                    <i class="lucide-log-out"></i>
+                <button type="button" class="btn-discard-and-exit" data-unsaved="discard">
+                    <i class="lucide-log-out" aria-hidden="true"></i>
                     <span>Salir sin guardar</span>
                 </button>
-                <button type="button" class="btn-stay-editing" id="btnStayEditing">
-                    <i class="lucide-edit-3"></i>
+                <button type="button" class="btn-stay-editing" data-unsaved="stay">
+                    <i class="lucide-edit-3" aria-hidden="true"></i>
                     <span>Seguir editando</span>
                 </button>
             </div>
         </div>
     </div>
 
-    <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Panel de gestión operativa.')}"></div>
+    <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Panel de gestión de centros.')}"></div>
 
-    <!-- Auto-expand textareas, Non-looping Navigation, and History Stack Optimization -->
     <script>
-        const CLIENTS_LIST_URL = '/worker/clients';
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('fichaForm');
 
-        // 1. Ensure only ONE client detail entry exists in history stack (normalize on load)
-        if (window.history.replaceState) {
-            window.history.replaceState({ page: 'client_detail' }, document.title, window.location.href);
-        }
-
-        // 2. Auto-expand textareas so all content is 100% visible
-        function autoResizeAllTextareas() {
-            document.querySelectorAll('.field-textarea-auto').forEach(textarea => {
+            // Los campos de texto crecen con su contenido para que se lea todo de un vistazo.
+            const autoResize = textarea => {
                 textarea.style.height = 'auto';
-                const newHeight = Math.max(textarea.scrollHeight + 4, 46);
-                textarea.style.height = newHeight + 'px';
-            });
-        }
+                textarea.style.height = Math.max(textarea.scrollHeight + 4, 46) + 'px';
+            };
+            const resizeAll = () => document.querySelectorAll('.field-textarea-auto').forEach(autoResize);
+            document.querySelectorAll('.field-textarea-auto').forEach(t => t.addEventListener('input', () => autoResize(t)));
+            window.addEventListener('resize', resizeAll);
+            document.fonts?.ready.then(resizeAll);
+            // Si el navegador restauró valores no guardados, se vuelve a los datos reales del servidor.
+            form.reset();
+            resizeAll();
 
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', autoResizeAllTextareas);
-        } else {
-            autoResizeAllTextareas();
-        }
-
-        window.addEventListener('load', autoResizeAllTextareas);
-        window.addEventListener('resize', autoResizeAllTextareas);
-        if (document.fonts && document.fonts.ready) {
-            document.fonts.ready.then(autoResizeAllTextareas);
-        }
-
-        document.querySelectorAll('.field-textarea-auto').forEach(textarea => {
-            textarea.addEventListener('input', function() {
-                this.style.height = 'auto';
-                const newHeight = Math.max(this.scrollHeight + 4, 46);
-                this.style.height = newHeight + 'px';
-            });
-        });
-
-        // 3. Dirty Form Tracking & Mobile/Browser Back Button Guard
-        const fichaForm = document.getElementById('fichaForm');
-        let isFormSubmitting = false;
-        let guardPushed = false;
-
-        function getRealServerValue(el) {
-            return el.getAttribute('data-real-value') ?? '';
-        }
-
-        function resetToRealServerValues() {
-            if (!fichaForm) return;
-            const elements = fichaForm.querySelectorAll('input:not([type="hidden"]), textarea, select');
-            elements.forEach(el => {
-                const realVal = getRealServerValue(el);
-                if (el.value !== realVal) {
-                    el.value = realVal;
-                }
-            });
-            // Auto-resize textareas to fit the real restored content
-            document.querySelectorAll('.field-textarea-auto').forEach(ta => {
-                ta.style.height = 'auto';
-                ta.style.height = Math.max(ta.scrollHeight + 4, 46) + 'px';
-            });
-        }
-
-        function isFormDirty() {
-            if (!fichaForm || isFormSubmitting) return false;
-            const elements = fichaForm.querySelectorAll('input:not([type="hidden"]), textarea, select');
-            for (const el of elements) {
-                const realVal = getRealServerValue(el);
-                if ((el.value || '').trim() !== realVal.trim()) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        function updateRealValues() {
-            if (!fichaForm) return;
-            const elements = fichaForm.querySelectorAll('input:not([type="hidden"]), textarea, select');
-            elements.forEach(el => {
-                el.setAttribute('data-real-value', el.value);
-            });
-        }
-
-        // Arm the browser/mobile back guard when form becomes dirty
-        function checkAndArmGuard() {
-            if (isFormDirty() && !guardPushed) {
-                window.history.pushState({ unsavedGuard: true }, document.title, window.location.href);
-                guardPushed = true;
-            }
-        }
-
-        fichaForm?.addEventListener('input', checkAndArmGuard);
-        fichaForm?.addEventListener('change', checkAndArmGuard);
-
-        // Ensure form strictly displays real database information, never stale/discarded unsubmitted data
-        window.addEventListener('pageshow', function(event) {
-            const perfNav = window.performance && window.performance.getEntriesByType && window.performance.getEntriesByType("navigation")[0];
-            const isBackForward = event.persisted || (perfNav && perfNav.type === 'back_forward');
-
-            if (isBackForward) {
-                // Navigated via Back/Forward button: reload from server to guarantee 100% real database state
-                window.location.reload();
-            } else {
-                resetToRealServerValues();
-            }
-        });
-
-        const unsavedModal = document.getElementById('unsavedChangesModal');
-
-        function openUnsavedModal() {
-            if (unsavedModal) {
-                unsavedModal.style.display = 'flex';
-                document.body.style.overflow = 'hidden';
-            }
-        }
-
-        function closeUnsavedModal() {
-            if (unsavedModal) {
-                unsavedModal.style.display = 'none';
-                document.body.style.overflow = '';
-            }
-        }
-
-        function handleUnsavedModalBackdrop(event) {
-            if (event.target && event.target.id === 'unsavedChangesModal') {
-                closeUnsavedModal();
-                if (isFormDirty() && !guardPushed) {
-                    window.history.pushState({ unsavedGuard: true }, document.title, window.location.href);
-                    guardPushed = true;
-                }
-            }
-        }
-
-        function exitToClientsList() {
-            isFormSubmitting = true;
-            closeUnsavedModal();
-
-            const isCurrentStateGuard = !!(window.history.state && window.history.state.unsavedGuard);
-            const isSameOriginReferrer = document.referrer && document.referrer.startsWith(window.location.origin);
-            const minLength = isCurrentStateGuard ? 2 : 1;
-            const canPopStack = isSameOriginReferrer && (window.history.length > minLength);
-
-            if (canPopStack) {
-                if (isCurrentStateGuard) {
-                    window.history.go(-2);
-                } else {
-                    window.history.back();
-                }
-            } else {
-                window.location.replace(CLIENTS_LIST_URL);
-            }
-        }
-
-        // Top Back Pill click handler - pops this screen completely from the history stack
-        const btnBackPill = document.getElementById('btnBackPill');
-        if (btnBackPill) {
-            btnBackPill.addEventListener('click', function(e) {
-                e.preventDefault();
-                if (isFormDirty()) {
-                    openUnsavedModal();
-                } else {
-                    exitToClientsList();
-                }
-            });
-        }
-
-        // Intercept any internal navigation links (navbar, template config button, footer links, etc.)
-        document.querySelectorAll('a[href]').forEach(link => {
-            if (link.id === 'btnBackPill') return;
-            const href = link.getAttribute('href');
-            if (!href || href.startsWith('#') || href.startsWith('javascript:')) return;
-
-            link.addEventListener('click', function(e) {
-                if (isFormDirty() && !isFormSubmitting) {
-                    e.preventDefault();
-                    openUnsavedModal();
-                }
-            });
-        });
-
-        // 4. Mobile Back (hardware button / swipe gesture) and Browser Back Interception
-        window.addEventListener('popstate', function(event) {
-            if (isFormSubmitting) return;
-
-            // If modal is already showing and user presses mobile back: close it gracefully!
-            if (unsavedModal && unsavedModal.style.display === 'flex') {
-                closeUnsavedModal();
-                window.history.pushState({ unsavedGuard: true }, document.title, window.location.href);
-                guardPushed = true;
-                return;
-            }
-
-            // If form is dirty: show our custom modal!
-            if (isFormDirty()) {
-                guardPushed = false; // state was just popped by the back action
-                openUnsavedModal();
-            } else {
-                // If form is clean: pop this screen off the stack completely!
-                guardPushed = false;
-                exitToClientsList();
-            }
-        });
-
-        // Browser Close Tab / Refresh (beforeunload native prompt for total tab close)
-        window.addEventListener('beforeunload', function(e) {
-            if (isFormDirty() && !isFormSubmitting) {
-                e.preventDefault();
-                e.returnValue = '';
-            }
-        });
-
-        function showSuccessBanner(message) {
-            const banner = document.getElementById('saveSuccessBanner');
-            const msgSpan = document.getElementById('saveSuccessMessageText');
-            if (banner && msgSpan) {
-                msgSpan.textContent = message;
-                banner.style.display = 'flex';
-            }
-        }
-
-        function updateLastEditedTimestamp() {
-            const metaText = document.querySelector('.card-meta-text');
-            if (metaText) {
-                const now = new Date();
-                const d = String(now.getDate()).padStart(2, '0');
-                const m = String(now.getMonth() + 1).padStart(2, '0');
-                const y = now.getFullYear();
-                const hh = String(now.getHours()).padStart(2, '0');
-                const mm = String(now.getMinutes()).padStart(2, '0');
-                metaText.innerHTML = `Última edición: <strong>${d}/${m}/${y} ${hh}:${mm}</strong> (guardado ahora)`;
-            }
-            const statusBadge = document.querySelector('.badge-card-status');
-            if (statusBadge) {
-                statusBadge.className = 'badge-card-status filled';
-                statusBadge.innerHTML = '<i class="lucide-check-circle-2"></i> Activa';
-            }
-        }
-
-        // Form Submit: Save asynchronously without reloading page or polluting browser history
-        fichaForm?.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const btn = document.getElementById('btnSaveFicha');
-            const originalHtml = btn ? btn.innerHTML : '';
-            if (btn) {
-                btn.disabled = true;
-                btn.innerHTML = '<i class="lucide-loader-2" style="display: inline-block; animation: spin 0.8s linear infinite;"></i> <span>Guardando...</span>';
-            }
-
-            try {
-                const formData = new FormData(fichaForm);
-                const bodyParams = new URLSearchParams(formData);
-                const res = await fetch(fichaForm.action, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: bodyParams
-                });
-
-                if (res.ok) {
-                    updateRealValues(); // updates data-real-value to the newly saved values
-                    guardPushed = !!(window.history.state && window.history.state.unsavedGuard);
-                    showSuccessBanner('Ficha técnica del cliente guardada con éxito.');
-                    updateLastEditedTimestamp();
-                    if (btn) {
-                        btn.innerHTML = '<i class="lucide-check-circle"></i> <span>¡Guardado con éxito!</span>';
-                        setTimeout(() => {
-                            btn.disabled = false;
-                            btn.innerHTML = originalHtml;
-                        }, 2000);
+            Cuquora.guardUnsavedChanges({
+                form,
+                modalId: 'unsavedChangesModal',
+                exitUrl: '/worker/clients',
+                saveButton: document.getElementById('btnSaveFicha'),
+                successMessage: 'Ficha técnica del cliente guardada con éxito.',
+                onSaved: () => {
+                    const now = new Date();
+                    const pad = n => String(n).padStart(2, '0');
+                    const meta = document.querySelector('.card-meta-text');
+                    if (meta) {
+                        meta.innerHTML = `Última edición: <strong>${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}</strong> (guardado ahora)`;
                     }
-                } else {
-                    throw new Error('Error al guardar');
+                    const status = document.querySelector('.badge-card-status');
+                    if (status) {
+                        status.className = 'badge-card-status filled';
+                        status.innerHTML = '<i class="lucide-check-circle-2" aria-hidden="true"></i> Activa';
+                    }
                 }
-            } catch (err) {
-                console.warn('Fallback a envío clásico:', err);
-                isFormSubmitting = true;
-                fichaForm.submit();
-            }
-        });
-
-        // Modal Action 1: "Guardar y salir"
-        document.getElementById('btnSaveAndExit')?.addEventListener('click', async function() {
-            isFormSubmitting = true;
-            const btn = document.getElementById('btnSaveAndExit');
-            if (btn) {
-                btn.disabled = true;
-                btn.innerHTML = '<i class="lucide-loader-2" style="display: inline-block; animation: spin 0.8s linear infinite;"></i> <span>Guardando...</span>';
-            }
-
-            try {
-                const formData = new FormData(fichaForm);
-                formData.set('redirectAfter', CLIENTS_LIST_URL);
-                const bodyParams = new URLSearchParams(formData);
-                await fetch(fichaForm.action, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: bodyParams
-                });
-            } catch (err) {
-                console.error('Error al guardar y salir:', err);
-            }
-            exitToClientsList();
-        });
-
-        // Modal Action 2: "Salir sin guardar"
-        document.getElementById('btnDiscardAndExit')?.addEventListener('click', function() {
-            exitToClientsList();
-        });
-
-        // Modal Action 3: "Seguir editando"
-        document.getElementById('btnStayEditing')?.addEventListener('click', function() {
-            closeUnsavedModal();
-            if (isFormDirty() && !guardPushed) {
-                window.history.pushState({ unsavedGuard: true }, document.title, window.location.href);
-                guardPushed = true;
-            }
-        });
-
-        fichaForm?.addEventListener('keydown', function(e) {
-            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-                e.preventDefault();
-                document.getElementById('btnSaveFicha')?.click();
-            }
-        });
-
-        // Escape key closes modal
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && unsavedModal && unsavedModal.style.display === 'flex') {
-                closeUnsavedModal();
-                if (isFormDirty() && !guardPushed) {
-                    window.history.pushState({ unsavedGuard: true }, document.title, window.location.href);
-                    guardPushed = true;
-                }
-            }
+            });
         });
     </script>
 

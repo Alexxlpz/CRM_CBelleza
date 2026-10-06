@@ -1,13 +1,14 @@
+<!--/* Modal de error de reserva: se muestra abierto al cargar la página si existe "bookingError". */-->
 <div xmlns:th="http://www.thymeleaf.org">
-    <!-- Booking Error Modal Dialog -->
-    <div class="booking-error-modal" role="dialog" aria-modal="true" aria-labelledby="bookingErrorTitle"
-         th:fragment="bookingError(error)"
-         th:if="${error != null}">
-        <div class="booking-error-dialog glass-panel">
-            <i class="lucide-circle-alert booking-error-icon" aria-hidden="true"></i>
-            <h2 id="bookingErrorTitle">No se ha podido reservar</h2>
-            <p th:text="${error}">No se ha podido crear la reserva.</p>
-            <button type="button" class="btn btn-primary" id="bookingErrorAccept">Aceptar</button>
+    <div class="ui-modal-overlay is-open" id="bookingErrorModal"
+         th:fragment="bookingError(error)" th:if="${error != null}">
+        <div class="ui-modal" role="dialog" aria-modal="true" aria-labelledby="bookingErrorTitle" aria-describedby="bookingErrorText">
+            <div class="ui-modal-icon ui-modal-icon--danger"><i class="lucide-circle-alert" aria-hidden="true"></i></div>
+            <h2 class="ui-modal-title" id="bookingErrorTitle">No se ha podido reservar</h2>
+            <p class="ui-modal-text" id="bookingErrorText" th:text="${error}">No se ha podido crear la reserva.</p>
+            <div class="ui-modal-actions">
+                <button type="button" class="btn btn-primary" data-modal-close autofocus>Aceptar</button>
+            </div>
         </div>
     </div>
 </div>

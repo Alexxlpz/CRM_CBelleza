@@ -1,48 +1,33 @@
 <div xmlns:th="http://www.thymeleaf.org">
-    <!-- Reusable Appointment Card Component -->
-    <div class="appointment-card glass-panel" th:fragment="card(app)">
+    <!-- Tarjeta de cita del cliente. data-status permite filtrar por estado sin depender del texto. -->
+    <article class="appointment-card glass-panel" th:fragment="card(app)" th:attr="data-status=${app.status.name()}">
         <div class="appointment-card-header">
-            <span class="appointment-service" th:text="${app.treatment.name}">Tratamiento</span>
-            
-            <span th:if="${app.status == T(com.alexxlpz.crm_cbelleza.entities.AppointmentStatus).PENDING}" 
-                  class="badge badge-pending">Pendiente</span>
-            <span th:if="${app.status == T(com.alexxlpz.crm_cbelleza.entities.AppointmentStatus).CONFIRMED}" 
-                  class="badge badge-confirmed">Confirmada</span>
-            <span th:if="${app.status == T(com.alexxlpz.crm_cbelleza.entities.AppointmentStatus).COMPLETED}" 
-                  class="badge badge-completed">Completada</span>
-            <span th:if="${app.status == T(com.alexxlpz.crm_cbelleza.entities.AppointmentStatus).REJECTED}" 
-                  class="badge badge-rejected">Rechazada</span>
+            <h2 class="appointment-service" th:text="${app.treatment.name}">Tratamiento</h2>
+            <span class="badge" th:classappend="${'badge-' + #strings.toLowerCase(app.status.name())}"
+                  th:text="${app.status.name() == 'PENDING' ? 'Pendiente' : (app.status.name() == 'CONFIRMED' ? 'Confirmada' : (app.status.name() == 'COMPLETED' ? 'Completada' : 'Rechazada'))}">Pendiente</span>
         </div>
-        
+
         <div class="appointment-card-body">
             <div class="appointment-detail-item">
-                <i class="lucide-map-pin"></i>
+                <i class="lucide-map-pin" aria-hidden="true"></i>
                 <span th:text="${app.center.name}">Centro Histórico</span>
             </div>
             <div class="appointment-detail-item">
-                <i class="lucide-calendar"></i>
-                <span th:text="${#temporals.format(app.dateTime, 'dd/MM/yyyy HH:mm')}">18/07/2026 10:00</span>
+                <i class="lucide-calendar" aria-hidden="true"></i>
+                <time th:datetime="${app.dateTime}" th:text="${#temporals.format(app.dateTime, 'dd/MM/yyyy HH:mm')}">18/07/2026 10:00</time>
             </div>
             <div class="appointment-detail-item">
-                <i class="lucide-user-cog"></i>
+                <i class="lucide-user-cog" aria-hidden="true"></i>
                 <span th:text="'Profesional: ' + (${app.worker != null} ? ${app.worker.name} : 'Sin asignar')">Elena Rostova</span>
             </div>
             <div class="appointment-detail-item">
-                <i class="lucide-dollar-sign"></i>
-                <span th:text="'Precio: ' + ${app.treatment.price} + ' € (' + ${app.treatment.duration} + ' min)'">25.00 €</span>
-            </div>
-            
-            <!-- Guest info if guest search -->
-            <div class="appointment-client-info" th:if="${app.guestName != null}">
-                <i class="lucide-user"></i>
-                <span th:text="'Reserva de: ' + ${app.guestName} + ' (' + ${app.guestPhone} + ')'">Invitado</span>
+                <i class="lucide-euro" aria-hidden="true"></i>
+                <span th:text="'Precio: ' + ${#numbers.formatDecimal(app.treatment.price, 1, 'POINT', 2, 'COMMA')} + ' € (' + ${app.treatment.duration} + ' min)'">25,00 €</span>
             </div>
 
-            <!-- Worker message feedback display -->
-            <div class="appointment-worker-note" 
-                 th:if="${app.workerMessage != null && !#strings.isEmpty(app.workerMessage)}">
-                <i class="lucide-message-square"></i> Nota del salón: "<span th:text="${app.workerMessage}">Mensaje</span>"
+            <div class="appointment-worker-note" th:if="${!#strings.isEmpty(app.workerMessage)}">
+                <i class="lucide-message-square" aria-hidden="true"></i> Nota del salón: "<span th:text="${app.workerMessage}">Mensaje</span>"
             </div>
         </div>
-    </div>
+    </article>
 </div>

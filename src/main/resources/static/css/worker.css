@@ -1,27 +1,23 @@
 /* ==========================================================================
-   Cuquora CRM - Worker Dashboard Styles (Lux Aesthetic)
-   Used by: worker/dashboard.html
+   Panel principal del trabajador (worker/dashboard.html)
    ========================================================================== */
 
 .worker-dashboard-container {
     display: flex;
     flex-direction: column;
-    gap: 30px;
+    gap: 24px;
 }
 
 .worker-welcome-banner {
-    padding: 30px;
-    background: linear-gradient(135deg, rgba(236, 220, 197, 0.3) 0%, rgba(224, 176, 176, 0.2) 100%);
-    border-radius: var(--border-radius-lg, 24px);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    text-align: center;
+    padding: 26px 30px;
+    background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.18) 0%, rgba(var(--secondary-rgb), 0.16) 100%);
+    border-radius: var(--border-radius-lg);
+    border: 1px solid var(--card-border);
 }
 
-.worker-welcome-banner h2 {
+.worker-welcome-banner h1 {
     font-size: 26px;
-    margin-bottom: 6px;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-weight: 700;
+    margin-bottom: 4px;
     letter-spacing: -0.4px;
 }
 
@@ -30,12 +26,11 @@
     font-size: 14px;
 }
 
-/* Quick Counters Component */
+/* ---- Contadores ---- */
 .quick-counters-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 16px;
-    margin-bottom: 24px;
 }
 
 .counter-card {
@@ -43,10 +38,14 @@
     text-align: center;
 }
 
+.counter-card--alert .counter-value {
+    color: var(--warning-text);
+}
+
 .counter-value {
-    font-size: 24px;
+    font-size: 26px;
     font-weight: 800;
-    color: var(--primary-dark);
+    color: var(--primary-text);
 }
 
 .counter-label {
@@ -54,38 +53,33 @@
     font-weight: 700;
     color: var(--text-muted);
     text-transform: uppercase;
+    letter-spacing: 0.4px;
     margin-top: 4px;
 }
 
-/* Dashboard Action Cards Grid */
+/* ---- Accesos directos (rejilla 2x2) ---- */
 .actions-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 24px;
 }
 
 .action-card {
-    padding: 32px 24px;
+    padding: 30px 24px;
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
-    gap: 14px;
+    gap: 12px;
     text-decoration: none;
-    background: rgba(255, 255, 255, 0.75) !important;
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
-    border-radius: var(--border-radius-lg, 24px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.6) !important;
-    box-shadow: 0 10px 30px rgba(197, 168, 128, 0.08);
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    animation: slideInUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+    transition: transform 0.3s var(--ease-out), box-shadow 0.3s var(--ease-out), border-color 0.3s var(--ease-out);
+    animation: slideInUp 0.45s var(--ease-out) both;
 }
 
 .action-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 20px 40px rgba(197, 168, 128, 0.18);
-    border-color: rgba(197, 168, 128, 0.4) !important;
+    box-shadow: 0 20px 40px rgba(var(--primary-rgb), 0.18);
+    border-color: rgba(var(--primary-rgb), 0.4);
 }
 
 .action-card:active {
@@ -96,8 +90,8 @@
     width: 64px;
     height: 64px;
     border-radius: 50%;
-    background: linear-gradient(135deg, rgba(197, 168, 128, 0.2) 0%, rgba(197, 168, 128, 0.08) 100%);
-    border: 1px solid rgba(197, 168, 128, 0.3);
+    background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.2) 0%, rgba(var(--primary-rgb), 0.08) 100%);
+    border: 1px solid rgba(var(--primary-rgb), 0.3);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -106,39 +100,39 @@
 
 .action-icon-wrapper i {
     font-size: 30px;
-    color: var(--primary-dark, #a38258);
+    color: var(--primary-text);
     transition: color 0.3s ease;
 }
 
 .action-card:hover .action-icon-wrapper {
     transform: scale(1.08);
-    background: var(--primary-dark, #a38258);
+    background: var(--primary-dark);
 }
 
 .action-card:hover .action-icon-wrapper i {
-    color: #ffffff;
+    color: var(--on-primary);
 }
 
 .action-card-title {
-    font-family: 'Plus Jakarta Sans', sans-serif;
     font-size: 20px;
     font-weight: 700;
-    color: var(--text-main, #2b2825);
+    color: var(--text-main);
     letter-spacing: -0.3px;
 }
 
 .action-card-desc {
-    font-size: 13px;
-    color: var(--text-muted, #7a736e);
+    font-size: 13.5px;
+    color: var(--text-muted);
     line-height: 1.5;
 }
 
 .action-card-badge {
     padding: 5px 12px;
-    border-radius: 14px;
+    border-radius: var(--radius-pill);
     font-size: 11.5px;
     font-weight: 700;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    background: rgba(var(--primary-rgb), 0.2);
+    color: var(--primary-text);
 }
 
 .action-card-badge.badge-success {
@@ -151,18 +145,10 @@
     color: var(--warning-text);
 }
 
-/* Responsive Overrides */
 @media (max-width: 900px) {
-    .metrics-row {
-        grid-template-columns: repeat(3, 1fr);
+    .quick-counters-grid {
+        grid-template-columns: repeat(2, 1fr);
         gap: 12px;
-    }
-
-    .metric-card {
-        padding: 14px;
-        flex-direction: column;
-        text-align: center;
-        gap: 8px;
     }
 
     .actions-grid {
@@ -176,22 +162,23 @@
 }
 
 @media (max-width: 600px) {
-    .metrics-row {
-        grid-template-columns: 1fr;
-        gap: 12px;
-    }
-
-    .metric-card {
-        flex-direction: row;
-        text-align: left;
-        padding: 16px;
-    }
-
     .worker-welcome-banner {
-        padding: 22px 18px;
+        padding: 20px 18px;
     }
 
-    .worker-welcome-banner h2 {
-        font-size: 24px;
+    .worker-welcome-banner h1 {
+        font-size: 22px;
     }
+}
+
+.counter-card--link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out);
+}
+
+.counter-card--link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(var(--primary-rgb), 0.16);
 }

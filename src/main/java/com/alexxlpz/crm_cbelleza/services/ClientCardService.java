@@ -2,388 +2,236 @@ package com.alexxlpz.crm_cbelleza.services;
 
 import com.alexxlpz.crm_cbelleza.dto.ClientCardFieldDTO;
 import com.alexxlpz.crm_cbelleza.dto.ClientSummaryDTO;
-import com.alexxlpz.crm_cbelleza.entities.*;
-import com.alexxlpz.crm_cbelleza.repositories.*;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.alexxlpz.crm_cbelleza.entities.Appointment;
+import com.alexxlpz.crm_cbelleza.entities.AppointmentStatus;
+import com.alexxlpz.crm_cbelleza.entities.Center;
+import com.alexxlpz.crm_cbelleza.entities.ClientCard;
+import com.alexxlpz.crm_cbelleza.entities.Role;
+import com.alexxlpz.crm_cbelleza.entities.User;
+import com.alexxlpz.crm_cbelleza.exceptions.BusinessRuleException;
+import com.alexxlpz.crm_cbelleza.exceptions.ResourceNotFoundException;
+import com.alexxlpz.crm_cbelleza.forms.FormText;
+import com.alexxlpz.crm_cbelleza.forms.NewClientForm;
+import com.alexxlpz.crm_cbelleza.repositories.AppointmentRepository;
+import com.alexxlpz.crm_cbelleza.repositories.CenterRepository;
+import com.alexxlpz.crm_cbelleza.repositories.ClientCardRepository;
+import com.alexxlpz.crm_cbelleza.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
+/**
+ * Cartera de clientes y fichas técnicas de un centro.
+ * Un cliente forma parte de la cartera si tiene al menos una cita confirmada/completada en el centro
+ * o si el centro le ha creado una ficha.
+ */
 @Service
+@Transactional
 public class ClientCardService {
 
+    private static final Set<AppointmentStatus> VISIT_STATUSES = Set.of(AppointmentStatus.CONFIRMED, AppointmentStatus.COMPLETED);
+    /** Campo de la plantilla por defecto donde se guardan las notas iniciales del alta manual. */
+    private static final String DEFAULT_NOTES_FIELD = "observaciones_preferencias";
+
     private final ClientCardRepository clientCardRepository;
-    private final ClientCardTemplateRepository templateRepository;
     private final CenterRepository centerRepository;
     private final UserRepository userRepository;
     private final AppointmentRepository appointmentRepository;
+    private final ClientCardTemplateService templateService;
     private final UserService userService;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ClientCardJson json;
+    private final Clock clock;
 
     public ClientCardService(ClientCardRepository clientCardRepository,
-                             ClientCardTemplateRepository templateRepository,
                              CenterRepository centerRepository,
                              UserRepository userRepository,
                              AppointmentRepository appointmentRepository,
-                             UserService userService) {
+                             ClientCardTemplateService templateService,
+                             UserService userService,
+                             ClientCardJson json,
+                             Clock clock) {
         this.clientCardRepository = clientCardRepository;
-        this.templateRepository = templateRepository;
         this.centerRepository = centerRepository;
         this.userRepository = userRepository;
         this.appointmentRepository = appointmentRepository;
+        this.templateService = templateService;
         this.userService = userService;
+        this.json = json;
+        this.clock = clock;
     }
 
-    private static final String DEFAULT_FIELDS_JSON = """
-        [
-          {"id":"tipo_piel_cabello","label":"Tipo de Piel / Cabello","type":"text","placeholder":"Ej. Piel mixta / Cabello fino teñido","required":false},
-          {"id":"alergias_sensibilidades","label":"Alergias o Sensibilidades","type":"text","placeholder":"Ej. Alergia al amoníaco, látex, fragancias","required":false},
-          {"id":"tratamientos_habituales","label":"Coloración / Tratamientos habituales","type":"text","placeholder":"Ej. Tinte 6.34, Mechas balayage, etc.","required":false},
-          {"id":"observaciones_preferencias","label":"Observaciones y Preferencias Técnicas","type":"textarea","placeholder":"Preferencias de temperatura de lavado, notas del especialista, etc.","required":false}
-        ]
-        """;
-
-    @Transactional
-    public ClientCardTemplate getOrCreateTemplateForCenter(Long centerId) {
-        return templateRepository.findByCenterId(centerId)
-                .orElseGet(() -> {
-                    Center center = centerRepository.findById(centerId)
-                            .orElseThrow(() -> new IllegalArgumentException("Centro no encontrado"));
-                    ClientCardTemplate template = ClientCardTemplate.builder()
-                            .center(center)
-                            .fieldsJson(DEFAULT_FIELDS_JSON)
-                            .build();
-                    return templateRepository.save(template);
-                });
+    /** Lanza {@link ResourceNotFoundException} si el cliente no pertenece a la cartera del centro. */
+    @Transactional(readOnly = true)
+    public User requireClientOfCenter(Long centerId, Long clientId) {
+        boolean belongs = clientCardRepository.existsByCenterIdAndClientId(centerId, clientId)
+                || appointmentRepository.existsByCenterIdAndClientIdAndStatusIn(centerId, clientId, VISIT_STATUSES);
+        if (!belongs) {
+            throw new ResourceNotFoundException("Este cliente no forma parte de la cartera de tu centro.");
+        }
+        return userRepository.findById(clientId)
+                .orElseThrow(() -> new ResourceNotFoundException("Cliente no encontrado."));
     }
 
-    public List<ClientCardFieldDTO> parseTemplateFields(String fieldsJson) {
-        if (fieldsJson == null || fieldsJson.trim().isEmpty()) {
-            fieldsJson = DEFAULT_FIELDS_JSON;
-        }
-        try {
-            return objectMapper.readValue(fieldsJson, new TypeReference<List<ClientCardFieldDTO>>() {});
-        } catch (Exception e) {
-            try {
-                return objectMapper.readValue(DEFAULT_FIELDS_JSON, new TypeReference<List<ClientCardFieldDTO>>() {});
-            } catch (Exception ex) {
-                return Collections.emptyList();
-            }
-        }
+    /** Datos que necesita la vista de detalle de un cliente. */
+    public ClientCardView getCardView(Long centerId, Long clientId) {
+        User client = requireClientOfCenter(centerId, clientId);
+        ClientCard card = getOrCreateCard(centerId, client);
+        return new ClientCardView(client, card, templateService.getFields(centerId), json.readData(card.getDataJson()));
     }
 
-    @Transactional
-    public void saveTemplateFields(Long centerId, List<ClientCardFieldDTO> fields) {
-        ClientCardTemplate template = getOrCreateTemplateForCenter(centerId);
-        try {
-            String json = objectMapper.writeValueAsString(fields);
-            template.setFieldsJson(json);
-            templateRepository.save(template);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al serializar la plantilla de ficha del centro", e);
-        }
+    public void saveCardData(Long centerId, Long clientId, Map<String, String> values, Long workerId) {
+        User client = requireClientOfCenter(centerId, clientId);
+        ClientCard card = getOrCreateCard(centerId, client);
+        card.setDataJson(json.write(values));
+        card.setUpdatedAt(LocalDateTime.now(clock));
+        card.setUpdatedBy(workerId != null ? userRepository.getReferenceById(workerId) : null);
+        clientCardRepository.save(card);
     }
 
-    @Transactional
-    public ClientCard getOrCreateCard(Long centerId, Long clientId, String guestPhone, String guestName) {
-        Center center = centerRepository.findById(centerId)
-                .orElseThrow(() -> new IllegalArgumentException("Centro no encontrado"));
-
-        if (clientId != null) {
-            return clientCardRepository.findByCenterIdAndClientId(centerId, clientId)
-                    .orElseGet(() -> {
-                        User client = userRepository.findById(clientId).orElse(null);
-                        ClientCard card = ClientCard.builder()
-                                .center(center)
-                                .client(client)
-                                .guestName(client != null ? client.getName() : null)
-                                .guestPhone(client != null ? client.getPhone() : null)
-                                .dataJson("{}")
-                                .updatedAt(LocalDateTime.now())
-                                .build();
-                        return clientCardRepository.save(card);
-                    });
-        } else if (guestPhone != null && !guestPhone.trim().isEmpty()) {
-            return clientCardRepository.findByCenterIdAndGuestPhone(centerId, guestPhone)
-                    .orElseGet(() -> {
-                        ClientCard card = ClientCard.builder()
-                                .center(center)
-                                .guestPhone(guestPhone)
-                                .guestName(guestName)
-                                .dataJson("{}")
-                                .updatedAt(LocalDateTime.now())
-                                .build();
-                        return clientCardRepository.save(card);
-                    });
-        }
-
-        throw new IllegalArgumentException("Se requiere un ID de cliente o teléfono de invitado");
-    }
-
-    public Map<String, String> parseCardData(String dataJson) {
-        if (dataJson == null || dataJson.trim().isEmpty()) {
-            return new HashMap<>();
-        }
-        try {
-            return objectMapper.readValue(dataJson, new TypeReference<Map<String, String>>() {});
-        } catch (Exception e) {
-            return new HashMap<>();
-        }
-    }
-
-    @Transactional
-    public void updateCardData(Long centerId, Long clientId, String guestPhone, String guestName,
-                               Map<String, String> values, User worker) {
-        ClientCard card = getOrCreateCard(centerId, clientId, guestPhone, guestName);
-        try {
-            String json = objectMapper.writeValueAsString(values != null ? values : Collections.emptyMap());
-            card.setDataJson(json);
-            card.setUpdatedAt(LocalDateTime.now());
-            card.setUpdatedBy(worker);
-            if (guestName != null && !guestName.trim().isEmpty() && card.getGuestName() == null) {
-                card.setGuestName(guestName);
-            }
-            clientCardRepository.save(card);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al guardar la información de la ficha", e);
-        }
-    }
-
-    @Transactional
+    @Transactional(readOnly = true)
     public List<ClientSummaryDTO> getClientsForCenter(Long centerId, String searchQuery) {
-        appointmentRepository.updatePastConfirmedToCompleted(LocalDateTime.now());
-        List<Appointment> appointments = appointmentRepository.findByCenterIdOrderByDateTimeDesc(centerId);
+        Map<Long, ClientCard> cardsByClient = clientCardRepository.findByCenterId(centerId).stream()
+                .filter(card -> card.getClient() != null)
+                .collect(Collectors.toMap(card -> card.getClient().getId(), Function.identity(), (a, b) -> a));
 
-        // Group appointments by registered client
-        Map<String, List<Appointment>> clientAppointmentsMap = new LinkedHashMap<>();
-
-        for (Appointment app : appointments) {
-            if (app.getClient() == null) {
-                continue; // Ignore any orphan guest appointments
+        Map<Long, List<Appointment>> appointmentsByClient = new LinkedHashMap<>();
+        for (Appointment app : appointmentRepository.findByCenterIdOrderByDateTimeDesc(centerId)) {
+            if (app.getClient() != null) {
+                appointmentsByClient.computeIfAbsent(app.getClient().getId(), id -> new ArrayList<>()).add(app);
             }
-            String key = "user_" + app.getClient().getId();
-            clientAppointmentsMap.computeIfAbsent(key, k -> new ArrayList<>()).add(app);
         }
 
         List<ClientSummaryDTO> result = new ArrayList<>();
-
-        for (Map.Entry<String, List<Appointment>> entry : clientAppointmentsMap.entrySet()) {
-            List<Appointment> apps = entry.getValue();
-            Appointment latestApp = apps.get(0); // already sorted descending
-
-            Long clientId = null;
-            String name = "";
-            String phone = "";
-            String email = "";
-            boolean isGuest = false;
-
-            if (latestApp.getClient() != null) {
-                User u = latestApp.getClient();
-                clientId = u.getId();
-                name = u.getName();
-                phone = u.getPhone() != null ? u.getPhone() : "";
-                email = u.getEmail() != null ? u.getEmail() : "";
-                isGuest = false;
-            } else {
-                name = latestApp.getGuestName() != null ? latestApp.getGuestName() : "Cliente Invitado";
-                phone = latestApp.getGuestPhone() != null ? latestApp.getGuestPhone() : "";
-                email = "";
-                isGuest = true;
+        appointmentsByClient.forEach((clientId, apps) -> {
+            ClientCard card = cardsByClient.get(clientId);
+            boolean filled = card != null && json.hasAnyValue(card.getDataJson());
+            long visits = apps.stream().filter(a -> VISIT_STATUSES.contains(a.getStatus())).count();
+            if (visits == 0 && !filled) {
+                return; // solo solicitudes pendientes/rechazadas: aún no es cliente del centro
             }
-
-            // Search query filter
-            if (searchQuery != null && !searchQuery.trim().isEmpty()) {
-                String q = searchQuery.trim().toLowerCase();
-                boolean matchesName = name.toLowerCase().contains(q);
-                boolean matchesPhone = phone.toLowerCase().contains(q);
-                boolean matchesEmail = email.toLowerCase().contains(q);
-                if (!matchesName && !matchesPhone && !matchesEmail) {
-                    continue;
-                }
-            }
-
-            // Check card status
-            Optional<ClientCard> cardOpt;
-            if (clientId != null) {
-                cardOpt = clientCardRepository.findByCenterIdAndClientId(centerId, clientId);
-            } else {
-                cardOpt = clientCardRepository.findByCenterIdAndGuestPhone(centerId, phone);
-            }
-
-            boolean hasFilledCard = false;
-            LocalDateTime cardUpdatedAt = null;
-            String cardUpdatedByName = null;
-
-            if (cardOpt.isPresent()) {
-                ClientCard card = cardOpt.get();
-                cardUpdatedAt = card.getUpdatedAt();
-                if (card.getUpdatedBy() != null) {
-                    cardUpdatedByName = card.getUpdatedBy().getName();
-                }
-                if (card.getDataJson() != null && !card.getDataJson().trim().isEmpty() && !card.getDataJson().equals("{}")) {
-                    Map<String, String> data = parseCardData(card.getDataJson());
-                    hasFilledCard = data.values().stream().anyMatch(val -> val != null && !val.trim().isEmpty());
-                }
-            }
-
-            // Requirement: Only consider someone a client (with ficha) if they have at least one CONFIRMED/COMPLETED appointment or already filled card
-            boolean hasValidAppointment = apps.stream().anyMatch(a -> a.getStatus() == AppointmentStatus.CONFIRMED || a.getStatus() == AppointmentStatus.COMPLETED);
-            if (!hasValidAppointment && !hasFilledCard) {
-                continue;
-            }
-
-            int validAppointmentsCount = (int) apps.stream().filter(a -> a.getStatus() == AppointmentStatus.CONFIRMED || a.getStatus() == AppointmentStatus.COMPLETED).count();
-            
-            // Requisito: En cada carta de cliente poner la última cita completada
-            Appointment latestCompletedApp = apps.stream()
+            Appointment lastCompleted = apps.stream()
                     .filter(a -> a.getStatus() == AppointmentStatus.COMPLETED)
                     .findFirst()
                     .orElse(null);
+            result.add(summary(apps.get(0).getClient(), card, filled, (int) (visits > 0 ? visits : apps.size()),
+                    lastCompleted != null ? lastCompleted.getDateTime() : null));
+        });
 
-            result.add(ClientSummaryDTO.builder()
-                    .id(clientId)
-                    .name(name)
-                    .phone(phone)
-                    .email(email)
-                    .isGuest(isGuest)
-                    .totalAppointments(validAppointmentsCount > 0 ? validAppointmentsCount : apps.size())
-                    .lastAppointmentDate(latestCompletedApp != null ? latestCompletedApp.getDateTime() : null)
-                    .hasFilledCard(hasFilledCard)
-                    .cardUpdatedAt(cardUpdatedAt)
-                    .cardUpdatedByName(cardUpdatedByName)
-                    .build());
-        }
-
-        // Include manually registered clients who don't have appointments yet
-        List<ClientCard> allCards = clientCardRepository.findByCenterId(centerId);
-        for (ClientCard card : allCards) {
-            if (card.getClient() == null) {
-                continue; // Ignore any orphan guest cards
+        // Clientes dados de alta manualmente que aún no tienen citas
+        cardsByClient.forEach((clientId, card) -> {
+            if (!appointmentsByClient.containsKey(clientId)) {
+                result.add(summary(card.getClient(), card, json.hasAnyValue(card.getDataJson()), 0, null));
             }
-            String key = "user_" + card.getClient().getId();
-            if (clientAppointmentsMap.containsKey(key)) {
-                continue; // Already included from appointment processing
-            }
+        });
 
-            Long clientId = card.getClient().getId();
-            String name = card.getClient().getName();
-            String phone = card.getClient().getPhone() != null ? card.getClient().getPhone() : "";
-            String email = card.getClient().getEmail() != null ? card.getClient().getEmail() : "";
-            boolean isGuest = false;
-
-            if (searchQuery != null && !searchQuery.trim().isEmpty()) {
-                String q = searchQuery.trim().toLowerCase();
-                boolean matchesName = name.toLowerCase().contains(q);
-                boolean matchesPhone = phone.toLowerCase().contains(q);
-                boolean matchesEmail = email.toLowerCase().contains(q);
-                if (!matchesName && !matchesPhone && !matchesEmail) {
-                    continue;
-                }
-            }
-
-            boolean hasFilledCard = false;
-            if (card.getDataJson() != null && !card.getDataJson().trim().isEmpty() && !card.getDataJson().equals("{}")) {
-                Map<String, String> data = parseCardData(card.getDataJson());
-                hasFilledCard = data.values().stream().anyMatch(val -> val != null && !val.trim().isEmpty());
-            }
-
-            result.add(ClientSummaryDTO.builder()
-                    .id(clientId)
-                    .name(name)
-                    .phone(phone)
-                    .email(email)
-                    .isGuest(isGuest)
-                    .totalAppointments(0)
-                    .lastAppointmentDate(null)
-                    .hasFilledCard(hasFilledCard)
-                    .cardUpdatedAt(card.getUpdatedAt())
-                    .cardUpdatedByName(card.getUpdatedBy() != null ? card.getUpdatedBy().getName() : null)
-                    .build());
-        }
-
-        return result;
+        return result.stream().filter(matches(searchQuery)).toList();
     }
 
-    @Transactional
-    public String createClientManually(Long centerId, String name, String phone, String email, String initialNotes, User worker) {
-        if (name == null || name.trim().isEmpty() || phone == null || phone.trim().isEmpty()) {
-            throw new IllegalArgumentException("El nombre y el teléfono son obligatorios para dar de alta a un cliente.");
+    /** Alta manual de un cliente desde la cartera. Devuelve el id del cliente. */
+    public Long createClientManually(Long centerId, NewClientForm form, Long workerId) {
+        if (FormText.isBlank(form.name()) || FormText.isBlank(form.phone())) {
+            throw new BusinessRuleException("El nombre y el teléfono son obligatorios para dar de alta a un cliente.");
         }
+        String name = form.name().trim();
+        String phone = form.phone().trim();
+        String email = FormText.trimToNull(form.email());
 
-        Center center = centerRepository.findById(centerId)
-                .orElseThrow(() -> new IllegalArgumentException("Centro no encontrado"));
+        User client = findExistingClient(phone, email).orElseGet(() ->
+                // Sin contraseña: la cuenta no puede iniciar sesión hasta que el cliente se registre.
+                userService.createUser(name, email != null ? email : placeholderEmail(phone), phone, null, Role.CLIENT, null));
 
-        String cleanName = name.trim();
-        String cleanPhone = phone.trim();
-        String cleanEmail = email != null && !email.trim().isEmpty() ? email.trim() : null;
-
-        Optional<User> existingUserOpt = userRepository.findByPhone(cleanPhone);
-        if (existingUserOpt.isEmpty() && cleanEmail != null) {
-            existingUserOpt = userRepository.findByEmail(cleanEmail);
+        ClientCard card = getOrCreateCard(centerId, client);
+        if (!FormText.isBlank(form.initialNotes())) {
+            Map<String, String> data = json.readData(card.getDataJson());
+            data.put(notesFieldId(centerId), form.initialNotes().trim());
+            card.setDataJson(json.write(data));
         }
-
-        User clientUser;
-        if (existingUserOpt.isPresent() && existingUserOpt.get().getRole() == Role.CLIENT) {
-            clientUser = existingUserOpt.get();
-        } else {
-            String autoEmail = cleanEmail != null ? cleanEmail : "cliente_" + cleanPhone.replaceAll("[^0-9]", "") + "@cbelleza.local";
-            if (userRepository.findByEmailIgnoreCase(autoEmail).isPresent()) {
-                autoEmail = "cliente_" + System.currentTimeMillis() + "@cbelleza.local";
-            }
-            clientUser = userService.registerUser(cleanName, autoEmail, cleanPhone, "password123", Role.CLIENT, null);
-        }
-
-        ClientCard card = clientCardRepository.findByCenterIdAndClientId(centerId, clientUser.getId())
-                .orElseGet(() -> ClientCard.builder()
-                        .center(center)
-                        .client(clientUser)
-                        .dataJson("{}")
-                        .updatedAt(LocalDateTime.now())
-                        .build());
-        String redirectUrl = "/worker/clients/" + clientUser.getId();
-
-        if (initialNotes != null && !initialNotes.trim().isEmpty()) {
-            Map<String, String> data = parseCardData(card.getDataJson());
-            String trimmedNotes = initialNotes.trim();
-            data.put("observaciones_preferencias", trimmedNotes);
-            data.put("observaciones_iniciales", trimmedNotes);
-            data.put("Observaciones iniciales", trimmedNotes);
-            data.put("notas", trimmedNotes);
-
-            // Also map to first textarea field of the center template if present
-            try {
-                ClientCardTemplate tpl = getOrCreateTemplateForCenter(centerId);
-                List<ClientCardFieldDTO> fields = parseTemplateFields(tpl.getFieldsJson());
-                for (ClientCardFieldDTO f : fields) {
-                    if ("textarea".equalsIgnoreCase(f.getType()) && (!data.containsKey(f.getId()) || data.get(f.getId()).isEmpty())) {
-                        data.put(f.getId(), trimmedNotes);
-                    }
-                }
-            } catch (Exception ignored) {}
-
-            try {
-                card.setDataJson(objectMapper.writeValueAsString(data));
-            } catch (Exception ignored) {}
-        }
-
-        card.setUpdatedAt(LocalDateTime.now());
-        card.setUpdatedBy(worker);
+        card.setUpdatedAt(LocalDateTime.now(clock));
+        card.setUpdatedBy(workerId != null ? userRepository.getReferenceById(workerId) : null);
         clientCardRepository.save(card);
-
-        return redirectUrl;
+        return client.getId();
     }
 
-    @Transactional
-    public List<Appointment> getClientAppointmentsInCenter(Long centerId, Long clientId, String guestPhone) {
-        appointmentRepository.updatePastConfirmedToCompleted(LocalDateTime.now());
-        if (clientId != null) {
-            return appointmentRepository.findByCenterIdAndClientIdOrderByDateTimeDesc(centerId, clientId);
-        } else if (guestPhone != null && !guestPhone.trim().isEmpty()) {
-            return appointmentRepository.findByCenterIdAndGuestPhoneOrderByDateTimeDesc(centerId, guestPhone);
+    private Optional<User> findExistingClient(String phone, String email) {
+        Optional<User> existing = userRepository.findByPhone(phone);
+        if (existing.isEmpty() && email != null) {
+            existing = userRepository.findByEmailIgnoreCase(email);
         }
-        return Collections.emptyList();
+        if (existing.isPresent() && existing.get().getRole() != Role.CLIENT) {
+            throw new BusinessRuleException("Ese teléfono o correo pertenece a una cuenta de personal.");
+        }
+        return existing;
+    }
+
+    private String placeholderEmail(String phone) {
+        String candidate = "cliente_" + phone.replaceAll("[^0-9]", "") + "@cbelleza.local";
+        return userRepository.findByEmailIgnoreCase(candidate).isPresent()
+                ? "cliente_" + System.currentTimeMillis() + "@cbelleza.local"
+                : candidate;
+    }
+
+    /** Primer campo de texto largo de la plantilla del centro (o el campo de observaciones por defecto). */
+    private String notesFieldId(Long centerId) {
+        return templateService.getFields(centerId).stream()
+                .filter(field -> "textarea".equalsIgnoreCase(field.getType()))
+                .map(ClientCardFieldDTO::getId)
+                .findFirst()
+                .orElse(DEFAULT_NOTES_FIELD);
+    }
+
+    private ClientCard getOrCreateCard(Long centerId, User client) {
+        return clientCardRepository.findByCenterIdAndClientId(centerId, client.getId())
+                .orElseGet(() -> clientCardRepository.save(ClientCard.builder()
+                        .center(center(centerId))
+                        .client(client)
+                        .guestName(client.getName())
+                        .guestPhone(client.getPhone())
+                        .dataJson("{}")
+                        .updatedAt(LocalDateTime.now(clock))
+                        .build()));
+    }
+
+    private Center center(Long centerId) {
+        return centerRepository.findById(centerId)
+                .orElseThrow(() -> new ResourceNotFoundException("Centro no encontrado."));
+    }
+
+    private static ClientSummaryDTO summary(User client, ClientCard card, boolean filled, int total, LocalDateTime last) {
+        return ClientSummaryDTO.builder()
+                .id(client.getId())
+                .name(client.getName())
+                .phone(client.getPhone() != null ? client.getPhone() : "")
+                .email(client.getEmail() != null ? client.getEmail() : "")
+                .totalAppointments(total)
+                .lastAppointmentDate(last)
+                .hasFilledCard(filled)
+                .cardUpdatedAt(card != null ? card.getUpdatedAt() : null)
+                .cardUpdatedByName(card != null && card.getUpdatedBy() != null ? card.getUpdatedBy().getName() : null)
+                .build();
+    }
+
+    private static java.util.function.Predicate<ClientSummaryDTO> matches(String query) {
+        if (FormText.isBlank(query)) {
+            return c -> true;
+        }
+        String q = query.trim().toLowerCase(Locale.ROOT);
+        return c -> c.getName().toLowerCase(Locale.ROOT).contains(q)
+                || c.getPhone().toLowerCase(Locale.ROOT).contains(q)
+                || c.getEmail().toLowerCase(Locale.ROOT).contains(q);
+    }
+
+    /** Todo lo que muestra la ficha de un cliente. */
+    public record ClientCardView(User client, ClientCard card, List<ClientCardFieldDTO> fields, Map<String, String> data) {
     }
 }

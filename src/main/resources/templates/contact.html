@@ -1,321 +1,69 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contacto y Soporte - Cuquora CRM</title>
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="icon" type="image/png" href="/images/icon.png">
-    <link rel="apple-touch-icon" href="/images/icon.png">
-    <!-- Lucide Icons CDN -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.321.0/font/lucide.min.css">
-    <!-- Stylesheets -->
-    <link rel="stylesheet" href="/css/common.css">
+    <th:block th:replace="~{fragments/head :: meta('Contacto y Soporte - Cuquora CRM')}"></th:block>
     <link rel="stylesheet" href="/css/home.css">
-    <style>
-        .public-page-container {
-            max-width: 1040px;
-            margin: 0 auto;
-            padding: 40px 24px 80px 24px;
-            width: 100%;
-        }
-        .contact-hero {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-        .contact-hero .eyebrow {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: rgba(197, 168, 128, 0.16);
-            color: var(--primary-dark, #a38258);
-            font-size: 12px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            padding: 6px 14px;
-            border-radius: 20px;
-            margin-bottom: 14px;
-        }
-        .contact-hero h1 {
-            font-size: 38px;
-            font-weight: 800;
-            color: var(--text-main, #2b2825);
-            margin-bottom: 12px;
-            letter-spacing: -0.6px;
-        }
-        .contact-hero p {
-            font-size: 16px;
-            color: var(--text-muted, #7a736e);
-            max-width: 660px;
-            margin: 0 auto;
-            line-height: 1.6;
-        }
-        .contact-form-container {
-            max-width: 640px;
-            margin: 30px auto 0 auto;
-        }
-        .contact-form-box {
-            background: #ffffff;
-            border: 1px solid rgba(197, 168, 128, 0.35);
-            border-radius: var(--border-radius-lg, 24px);
-            padding: 40px 42px;
-            box-shadow: 0 10px 32px rgba(197, 168, 128, 0.12);
-        }
-        .form-item-field {
-            display: flex;
-            flex-direction: column;
-            gap: 7px;
-            margin-bottom: 20px;
-        }
-        .form-item-field label {
-            font-size: 13.5px;
-            font-weight: 700;
-            color: var(--text-main, #2b2825);
-        }
-        .form-item-field input,
-        .form-item-field select {
-            padding: 12px 16px;
-            border: 1px solid rgba(197, 168, 128, 0.4);
-            border-radius: 12px;
-            font-size: 14.5px;
-            font-family: inherit;
-            color: var(--text-main);
-            background: #faf7f2;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
-            outline: none;
-            width: 100%;
-            box-sizing: border-box;
-        }
-        .form-item-field textarea {
-            padding: 12px 16px;
-            border: 1px solid rgba(197, 168, 128, 0.4);
-            border-radius: 12px;
-            font-size: 14.5px;
-            font-family: inherit;
-            color: var(--text-main);
-            background: #faf7f2;
-            outline: none;
-            width: 100%;
-            min-width: 100%;
-            max-width: 100%;
-            box-sizing: border-box;
-            resize: vertical;
-            min-height: 100px;
-            max-height: 350px;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
-        }
-        .form-item-field input:focus,
-        .form-item-field select:focus,
-        .form-item-field textarea:focus {
-            background: #ffffff;
-            border-color: var(--primary, #c5a880);
-            box-shadow: 0 0 0 4px rgba(197, 168, 128, 0.18);
-        }
-        .contact-submit-btn {
-            background: linear-gradient(135deg, var(--primary, #c5a880) 0%, var(--primary-dark, #a38258) 100%);
-            border: none;
-            color: #ffffff;
-            font-size: 15px;
-            font-weight: 800;
-            padding: 13px 28px;
-            border-radius: 24px;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            width: 100%;
-            transition: all 0.25s ease;
-            box-shadow: 0 4px 16px rgba(197, 168, 128, 0.3);
-        }
-        .contact-submit-btn:hover:not(:disabled):not(.disabled) {
-            filter: brightness(1.05);
-            transform: translateY(-1px);
-        }
-        .contact-submit-btn.disabled,
-        .contact-submit-btn:disabled {
-            background: #d8d0c7 !important;
-            color: #8f857a !important;
-            cursor: not-allowed !important;
-            box-shadow: none !important;
-            transform: none !important;
-            opacity: 0.65;
-            filter: grayscale(0.2);
-        }
-        .form-item-field input.has-error,
-        .form-item-field select.has-error,
-        .form-item-field textarea.has-error {
-            border-color: #d32f2f !important;
-            background: #fff8f8 !important;
-            box-shadow: 0 0 0 3.5px rgba(211, 47, 47, 0.14) !important;
-        }
-        .field-error-msg {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 12.5px;
-            font-weight: 600;
-            color: #d32f2f;
-            margin-top: 5px;
-            animation: fadeInDown 0.2s ease;
-        }
-        @keyframes fieldShake {
-            0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-4px); }
-            40%, 80% { transform: translateX(4px); }
-        }
-        .shake-field {
-            animation: fieldShake 0.35s ease;
-        }
-        @keyframes fadeInDown {
-            from { opacity: 0; transform: translateY(-4px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .alert-success-box {
-            background: #e8f5e9;
-            border: 1px solid #a5d6a7;
-            color: #1b5e20;
-            padding: 16px 20px;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 24px;
-        }
-        .alert-error-box {
-            background: #ffebee;
-            border: 1px solid #ffcdd2;
-            color: #c62828;
-            padding: 16px 20px;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 24px;
-        }
-
-        html {
-            overflow-y: scroll; /* Mantiene la barra de desplazamiento fija para evitar saltos de layout */
-        }
-
-        /* Minimalist Darkened Screen & Centered Loading Spinner */
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(18, 16, 14, 0.72);
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
-            z-index: 99999;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: opacity 0.25s ease;
-            overflow: hidden;
-            pointer-events: all;
-        }
-
-        .loading-overlay.active {
-            display: flex;
-            opacity: 1;
-        }
-
-        .loading-spinner {
-            width: 52px;
-            height: 52px;
-            border: 4px solid rgba(255, 255, 255, 0.18);
-            border-top: 4px solid var(--primary, #c5a880);
-            border-right: 4px solid #deb887;
-            border-radius: 50%;
-            animation: spinLoader 0.8s linear infinite;
-        }
-
-        @keyframes spinLoader {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        @media (max-width: 640px) {
-            .contact-form-box {
-                padding: 26px 20px;
-            }
-            .contact-hero h1 {
-                font-size: 28px;
-            }
-        }
-    </style>
-    <!-- EmailJS SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <link rel="stylesheet" href="/css/public.css">
+    <script src="/js/form-validation.js" defer></script>
 </head>
-<body class="landing-page-view">
+<body>
     <!-- Navbar -->
     <div th:replace="~{fragments/navbar :: brand(true)}"></div>
 
     <main class="public-page-container">
         <!-- Hero Header -->
-        <header class="contact-hero">
+        <header class="page-hero">
             <h1>Contacto y Soporte Cuquora</h1>
             <p>¿Tienes dudas sobre cómo funciona el CRM, necesitas ayuda con una reserva o quieres certificar tu salón? Nuestro equipo te atiende de forma personalizada.</p>
         </header>
 
         <!-- Flash Message (Backend Fallback) -->
-        <div class="alert-success-box" th:if="${successMessage != null}">
-            <i class="lucide-check-circle-2"></i>
+        <div class="alert alert-success" role="status" th:if="${successMessage != null}">
+            <i class="lucide-check-circle-2" aria-hidden="true"></i>
             <span th:text="${successMessage}">Gracias por contactar con nosotros.</span>
         </div>
 
-        <div class="contact-form-container">
-            <!-- Dynamic Feedback Container for EmailJS (Encima de la card) -->
-            <div id="contactFeedback" style="display: none;"></div>
+        <div class="form-card-container">
+            <div class="alert alert-error" role="alert" th:if="${errorMessage != null}">
+                <i class="lucide-alert-circle" aria-hidden="true"></i>
+                <span th:text="${errorMessage}">Error</span>
+            </div>
 
             <!-- Contact Form Box -->
-            <div class="contact-form-box">
-                <h2 style="font-size: 21px; font-weight: 800; color: var(--text-main); margin-bottom: 6px;">Envíanos un mensaje</h2>
-                <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 22px;">Rellena el siguiente formulario y responderemos a tu consulta a través de tu correo electrónico.</p>
+            <div class="form-card">
+                <div class="form-card-header">
+                    <h2>Envíanos un mensaje</h2>
+                    <p>Rellena el siguiente formulario y responderemos a tu consulta a través de tu correo electrónico.</p>
+                </div>
 
-                <form id="contactForm">
-                    <div class="form-item-field">
+                <form th:action="@{/contact}" method="post" id="contactForm" novalidate>
+                    <div class="form-field">
                         <label for="name">Nombre y Apellidos *</label>
                         <input type="text" id="name" name="name" placeholder="Tu nombre" required>
                     </div>
 
-                    <div class="form-item-field">
+                    <div class="form-field">
                         <label for="email">Correo Electrónico *</label>
                         <input type="email" id="email" name="email" placeholder="tu@correo.com" required>
                     </div>
 
-                    <div class="form-item-field">
+                    <div class="form-field">
                         <label for="subject">Motivo de Consulta *</label>
                         <select id="subject" name="subject" required>
-                            <option value="DUDAS_CRM">Información sobre Cuquora CRM</option>
-                            <option value="ALTA_CENTRO">Quiero certificar mi centro de belleza</option>
-                            <option value="SOPORTE_CITAS">Ayuda con mis reservas / cuenta</option>
-                            <option value="OTRO">Otro motivo</option>
+                            <option value="Información sobre Cuquora CRM">Información sobre Cuquora CRM</option>
+                            <option value="Quiero certificar mi centro de belleza">Quiero certificar mi centro de belleza</option>
+                            <option value="Ayuda con mis reservas / cuenta">Ayuda con mis reservas / cuenta</option>
+                            <option value="Otro motivo">Otro motivo</option>
                         </select>
                     </div>
 
-                    <div class="form-item-field">
+                    <div class="form-field">
                         <label for="message">Mensaje *</label>
                         <textarea id="message" name="message" rows="5" placeholder="¿En qué podemos ayudarte?" required></textarea>
                     </div>
 
-                    <button type="submit" id="contactSubmitBtn" class="contact-submit-btn disabled" aria-disabled="true">
-                        <i class="lucide-send"></i>
+                    <button type="submit" id="contactSubmitBtn" class="btn btn-primary btn-block btn-lg btn-pill disabled" aria-disabled="true">
+                        <i class="lucide-send" aria-hidden="true"></i>
                         <span>Enviar Consulta</span>
                     </button>
                 </form>
@@ -323,202 +71,25 @@
         </div>
     </main>
 
-    <!-- Minimalist Loading Overlay -->
-    <div id="loadingOverlay" class="loading-overlay" aria-hidden="true">
-        <div class="loading-spinner"></div>
-    </div>
-
-    <!-- EmailJS Integration Script -->
     <script>
-        (function() {
-            // === CONFIGURACIÓN DE EMAILJS (Opción A: Plantilla única con Bcc) ===
-            const EMAILJS_PUBLIC_KEY = 'GFk0Vgl7-t3dgQwXd';
-            const EMAILJS_SERVICE_ID = 'service_zz67ay6';
-            const EMAILJS_TEMPLATE_ID = 'template_7h9uh2l';
-
-            // Inicializar SDK
-            emailjs.init(EMAILJS_PUBLIC_KEY);
-
+        document.addEventListener('DOMContentLoaded', () => {
+            const V = Cuquora.validators;
             const form = document.getElementById('contactForm');
             const submitBtn = document.getElementById('contactSubmitBtn');
-            const feedbackBox = document.getElementById('contactFeedback');
-            const loadingOverlay = document.getElementById('loadingOverlay');
-
-            if (!form) return;
-
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-
-            const fields = {
-                name: {
-                    el: document.getElementById('name'),
-                    validate: (v) => v.trim() ? '' : 'Por favor, introduce tu nombre y apellidos.'
-                },
-                email: {
-                    el: document.getElementById('email'),
-                    validate: (v) => {
-                        if (!v.trim()) return 'Por favor, introduce tu correo electrónico.';
-                        if (!emailRegex.test(v.trim())) return 'Formato de correo no válido. Debe incluir "@" y un dominio válido (ej. usuario@gmail.com).';
-                        return '';
-                    }
-                },
-                subject: {
-                    el: document.getElementById('subject'),
-                    validate: (v) => v.trim() ? '' : 'Por favor, selecciona un motivo de consulta.'
-                },
-                message: {
-                    el: document.getElementById('message'),
-                    validate: (v) => v.trim() ? '' : 'Por favor, escribe tu consulta o mensaje.'
-                }
-            };
-
-            function setFieldError(fieldEl, errorMessage) {
-                clearFieldError(fieldEl);
-                fieldEl.classList.add('has-error');
-
-                fieldEl.classList.remove('shake-field');
-                void fieldEl.offsetWidth;
-                fieldEl.classList.add('shake-field');
-
-                const msg = document.createElement('div');
-                msg.className = 'field-error-msg';
-                msg.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg><span>' + errorMessage + '</span>';
-
-                fieldEl.parentNode.appendChild(msg);
-            }
-
-            function clearFieldError(fieldEl) {
-                fieldEl.classList.remove('has-error', 'shake-field');
-                const existing = fieldEl.parentNode.querySelector('.field-error-msg');
-                if (existing) existing.remove();
-            }
-
-            function isFormValid() {
-                for (const key in fields) {
-                    const item = fields[key];
-                    if (item.el) {
-                        const err = item.validate(item.el.value);
-                        if (err) return false;
-                    }
-                }
-                return true;
-            }
-
-            function updateButtonState() {
-                if (isFormValid()) {
-                    submitBtn.classList.remove('disabled');
-                    submitBtn.removeAttribute('aria-disabled');
-                } else {
-                    submitBtn.classList.add('disabled');
-                    submitBtn.setAttribute('aria-disabled', 'true');
-                }
-            }
-
-            function highlightAllErrors() {
-                let firstInvalid = null;
-                for (const key in fields) {
-                    const item = fields[key];
-                    if (item.el) {
-                        const err = item.validate(item.el.value);
-                        if (err) {
-                            setFieldError(item.el, err);
-                            if (!firstInvalid) firstInvalid = item.el;
-                        } else {
-                            clearFieldError(item.el);
-                        }
-                    }
-                }
-                if (firstInvalid) {
-                    firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    firstInvalid.focus();
-                }
-            }
-
-            for (const key in fields) {
-                const item = fields[key];
-                if (item.el) {
-                    const handleInput = function () {
-                        const err = item.validate(item.el.value);
-                        if (!err) {
-                            clearFieldError(item.el);
-                        }
-                        updateButtonState();
-                    };
-                    item.el.addEventListener('input', handleInput);
-                    item.el.addEventListener('change', handleInput);
-                    item.el.addEventListener('blur', function () {
-                        if (item.el.value.trim()) {
-                            const err = item.validate(item.el.value);
-                            if (err) setFieldError(item.el, err);
-                            else clearFieldError(item.el);
-                        }
-                    });
-                }
-            }
-
-            submitBtn.addEventListener('click', function (e) {
-                if (submitBtn.classList.contains('disabled')) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    highlightAllErrors();
+            Cuquora.validateForm(form, {
+                name: [V.required('Por favor, introduce tu nombre y apellidos.')],
+                email: [V.required('Por favor, introduce tu correo electrónico.'), V.email()],
+                subject: [V.required('Por favor, selecciona un motivo de consulta.')],
+                message: [V.required('Por favor, escribe tu consulta o mensaje.')]
+            }, {
+                submitButton: submitBtn,
+                onSubmit: () => {
+                    submitBtn.classList.add('is-loading');
+                    submitBtn.setAttribute('aria-busy', 'true');
+                    submitBtn.querySelector('span').textContent = 'Enviando...';
                 }
             });
-
-            function showLoading() {
-                submitBtn.classList.add('disabled');
-                if (loadingOverlay) {
-                    loadingOverlay.style.display = 'flex';
-                    setTimeout(() => {
-                        loadingOverlay.classList.add('active');
-                        loadingOverlay.setAttribute('aria-hidden', 'false');
-                    }, 10);
-                }
-            }
-
-            function hideLoading() {
-                if (loadingOverlay) {
-                    loadingOverlay.classList.remove('active');
-                    loadingOverlay.setAttribute('aria-hidden', 'true');
-                    setTimeout(() => {
-                        loadingOverlay.style.display = 'none';
-                        updateButtonState();
-                    }, 300);
-                } else {
-                    updateButtonState();
-                }
-            }
-
-            form.addEventListener('submit', function(event) {
-                event.preventDefault();
-
-                if (submitBtn.classList.contains('disabled') || !isFormValid()) {
-                    highlightAllErrors();
-                    return;
-                }
-
-                showLoading();
-                feedbackBox.style.display = 'none';
-
-                emailjs.sendForm(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, form)
-                    .then(() => {
-                        hideLoading();
-                        feedbackBox.className = 'alert-success-box';
-                        feedbackBox.innerHTML = '<i class="lucide-check-circle-2"></i> <span>¡Mensaje enviado con éxito! Te hemos enviado una confirmación a tu correo y te responderemos a la mayor brevedad.</span>';
-                        feedbackBox.style.display = 'flex';
-                        form.reset();
-                        updateButtonState();
-                    })
-                    .catch((err) => {
-                        console.error('Error al enviar correo con EmailJS:', err);
-                        hideLoading();
-                        feedbackBox.className = 'alert-error-box';
-                        feedbackBox.innerHTML = '<i class="lucide-alert-circle"></i> <span>Hubo un problema al enviar tu consulta. Por favor, inténtalo de nuevo o escríbenos directamente.</span>';
-                        feedbackBox.style.display = 'flex';
-                    });
-            });
-
-            updateButtonState();
-            setTimeout(updateButtonState, 150);
-        })();
+        });
     </script>
 
     <!-- Footer -->

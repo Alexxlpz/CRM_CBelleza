@@ -1,6 +1,6 @@
 <div xmlns:th="http://www.thymeleaf.org">
-    <!-- Worker Dashboard Quick Metrics Counters Row -->
-    <div class="quick-counters-grid" th:fragment="counters(todayCount, tomorrowCount, lowStockCount)">
+    <!-- Contadores rápidos del panel del trabajador -->
+    <div class="quick-counters-grid" th:fragment="counters(todayCount, tomorrowCount, pendingCount, lowStockCount)">
         <div class="glass-panel counter-card">
             <div class="counter-value" th:text="${todayCount}">0</div>
             <div class="counter-label">Citas Hoy</div>
@@ -9,9 +9,13 @@
             <div class="counter-value" th:text="${tomorrowCount}">0</div>
             <div class="counter-label">Citas Mañana</div>
         </div>
-        <div class="glass-panel counter-card">
+        <a href="/worker/calendar" class="glass-panel counter-card counter-card--link" th:classappend="${pendingCount > 0} ? 'counter-card--alert'">
+            <div class="counter-value" th:text="${pendingCount}">0</div>
+            <div class="counter-label">Solicitudes Pendientes</div>
+        </a>
+        <a href="/worker/inventory" class="glass-panel counter-card counter-card--link" th:classappend="${lowStockCount > 0} ? 'counter-card--alert'">
             <div class="counter-value" th:text="${lowStockCount}">0</div>
             <div class="counter-label">Stock Bajo</div>
-        </div>
+        </a>
     </div>
 </div>

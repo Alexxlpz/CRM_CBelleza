@@ -1,66 +1,58 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Control - Cuquora CRM</title>
-    <!-- Lucide Icons CDN -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.321.0/font/lucide.min.css">
-    <!-- Stylesheets -->
-    <link rel="stylesheet" href="/css/common.css">
+    <th:block th:replace="~{fragments/head :: meta('Panel de Control - Cuquora CRM')}"></th:block>
     <link rel="stylesheet" href="/css/worker.css">
 </head>
 <body>
     <div th:replace="~{fragments/navbar :: worker(null, null, ${notifications})}"></div>
 
-    <!-- Main Container -->
     <main class="main-container">
-        
         <div class="worker-dashboard-container">
-            <!-- Quick Counters Row Component -->
-            <div th:replace="~{worker/fragments/dashboard-counters :: counters(${todayAppointmentsCount}, ${tomorrowAppointmentsCount}, ${lowStockCount})}"></div>
-            
-            <!-- Action Cards Grid -->
-            <div class="actions-grid">
-                
-                <!-- Action 1: Agenda Calendar -->
+            <header class="worker-welcome-banner">
+                <h1 th:text="'Hola, ' + ${sessionUserName}">Hola</h1>
+                <p th:text="'Panel de gestión de ' + ${sessionCenterName}">Panel de gestión del centro</p>
+            </header>
+
+            <div th:replace="~{fragments/alerts :: flash}"></div>
+
+            <div th:replace="~{worker/fragments/dashboard-counters :: counters(${todayAppointmentsCount}, ${tomorrowAppointmentsCount}, ${pendingAppointmentsCount}, ${lowStockCount})}"></div>
+
+            <nav class="actions-grid" aria-label="Accesos directos">
                 <a href="/worker/calendar" class="action-card glass-panel">
-                    <i class="lucide-calendar-days"></i>
+                    <span class="action-icon-wrapper" aria-hidden="true"><i class="lucide-calendar-days" aria-hidden="true"></i></span>
                     <span class="action-card-title">Calendario de Agenda</span>
-                    <p class="action-card-desc">Consulta los horarios de reserva del salón en una cuadrícula diaria interactiva.</p>
-                    <span class="action-card-badge badge-success" th:if="${todayAppointmentsCount > 0}" th:text="${todayAppointmentsCount} + ' Citas Hoy'">1 Citas Hoy</span>
-                </a>
-                
-                <!-- Action 2: Stock adjustments -->
-                <a href="/worker/inventory" class="action-card glass-panel">
-                    <i class="lucide-package-open"></i>
-                    <span class="action-card-title">Gestión de Inventario</span>
-                    <p class="action-card-desc">Controla las existencias del salón. Añade nuevos productos y simula entradas/ventas (+1 / -1).</p>
-                    <span class="action-card-badge badge-warning" th:if="${lowStockCount > 0}" th:text="${lowStockCount} + ' Alertas'">3</span>
-                </a>
-                
-                <!-- Action 3: Add new treatments -->
-                <a href="/worker/treatments" class="action-card glass-panel">
-                    <i class="lucide-clipboard-plus"></i>
-                    <span class="action-card-title">Añadir Tratamientos</span>
-                    <p class="action-card-desc">Crea y añade nuevos tratamientos específicos a la carta de servicios de este centro.</p>
+                    <p class="action-card-desc">Consulta las reservas del salón y aprueba o rechaza las solicitudes de cita.</p>
+                    <span class="action-card-badge badge-warning" th:if="${pendingAppointmentsCount > 0}"
+                          th:text="${pendingAppointmentsCount} + (${pendingAppointmentsCount == 1} ? ' solicitud pendiente' : ' solicitudes pendientes')">1 solicitud</span>
+                    <span class="action-card-badge badge-success" th:if="${pendingAppointmentsCount == 0 and todayAppointmentsCount > 0}"
+                          th:text="${todayAppointmentsCount} + (${todayAppointmentsCount == 1} ? ' cita hoy' : ' citas hoy')">1 cita hoy</span>
                 </a>
 
-                <!-- Action 4: Clients and Dynamic Cards -->
-                <a href="/worker/clients" class="action-card glass-panel">
-                    <i class="lucide-users"></i>
-                    <span class="action-card-title">Cartera de Clientes</span>
-                    <p class="action-card-desc">Consulta el historial de clientes del salón, sus citas y gestiona sus fichas técnicas personalizadas.</p>
-                    <span class="action-card-badge" style="background: rgba(197, 168, 128, 0.2); color: var(--primary-dark);">Fichas Técnicas</span>
+                <a href="/worker/inventory" class="action-card glass-panel">
+                    <span class="action-icon-wrapper" aria-hidden="true"><i class="lucide-package-open" aria-hidden="true"></i></span>
+                    <span class="action-card-title">Gestión de Inventario</span>
+                    <p class="action-card-desc">Controla las existencias del salón, añade productos y registra entradas y ventas.</p>
+                    <span class="action-card-badge badge-warning" th:if="${lowStockCount > 0}"
+                          th:text="${lowStockCount} + (${lowStockCount == 1} ? ' alerta de stock' : ' alertas de stock')">3 alertas</span>
                 </a>
-                
-            </div>
-            
+
+                <a href="/worker/treatments" class="action-card glass-panel">
+                    <span class="action-icon-wrapper" aria-hidden="true"><i class="lucide-clipboard-plus" aria-hidden="true"></i></span>
+                    <span class="action-card-title">Carta de Tratamientos</span>
+                    <p class="action-card-desc">Crea y revisa los servicios que ofrece este centro a sus clientes.</p>
+                </a>
+
+                <a href="/worker/clients" class="action-card glass-panel">
+                    <span class="action-icon-wrapper" aria-hidden="true"><i class="lucide-users" aria-hidden="true"></i></span>
+                    <span class="action-card-title">Cartera de Clientes</span>
+                    <p class="action-card-desc">Consulta el historial de clientes, sus citas y sus fichas técnicas personalizadas.</p>
+                    <span class="action-card-badge">Fichas Técnicas</span>
+                </a>
+            </nav>
         </div>
-        
     </main>
 
-    <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Panel de gestión operativa.')}"></div>
-
+    <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Panel de gestión de centros.')}"></div>
 </body>
 </html>

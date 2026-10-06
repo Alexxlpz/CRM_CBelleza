@@ -1,0 +1,354 @@
+/* ==========================================================================
+   Página de Funcionalidades (/features): tarjetas de módulos e índice lateral.
+   ========================================================================== */
+
+/* Espacio inferior amplio para que la última sección pueda llegar arriba al usar el índice.
+   El margen lateral con el índice fijo (≥1200px) lo define home.css. */
+.public-page-container.features-page-container {
+    padding: 40px 24px 260px 24px;
+    overflow-x: hidden;
+}
+.features-hero {
+    text-align: center;
+    margin-bottom: 56px;
+}
+.features-hero h1 {
+    font-size: 40px;
+    font-weight: 800;
+    color: var(--text-main);
+    margin-bottom: 14px;
+    letter-spacing: -0.6px;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+.features-hero p {
+    font-size: 16.5px;
+    color: var(--text-muted);
+    max-width: 720px;
+    margin: 0 auto;
+    line-height: 1.6;
+    overflow-wrap: break-word;
+}
+/* Feature Card: White Container */
+.feature-detail-card {
+    scroll-margin-top: 110px;
+    background: var(--surface);
+    border: 1px solid rgba(var(--primary-rgb), 0.3);
+    border-radius: var(--border-radius-lg);
+    padding: 38px 40px;
+    margin-bottom: 34px;
+    box-shadow: 0 8px 26px rgba(var(--primary-rgb), 0.08);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 40px;
+    align-items: center;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden; /* Ensures all inner contents remain strictly bounded within the white card */
+}
+.feature-detail-card:hover {
+    box-shadow: 0 14px 36px rgba(var(--primary-rgb), 0.16);
+    border-color: var(--primary);
+}
+/* Reverse layout on desktop using modern order instead of direction:rtl */
+@media (min-width: 901px) {
+    .feature-detail-card.reverse .feature-info-col {
+        order: 2;
+    }
+    .feature-detail-card.reverse .feature-visual-col {
+        order: 1;
+    }
+}
+.feature-info-col {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+.feature-info-col h2 {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--text-main);
+    margin-bottom: 12px;
+    letter-spacing: -0.4px;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+.feature-info-col p {
+    font-size: 14.5px;
+    color: var(--text-muted);
+    line-height: 1.65;
+    margin-bottom: 20px;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+.feature-points-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+}
+.feature-points-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 13.5px;
+    color: var(--text-main);
+    line-height: 1.5;
+    min-width: 0;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+.feature-points-list li i {
+    color: var(--success-strong);
+    font-size: 16px;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+.feature-visual-col {
+    background: linear-gradient(135deg, var(--surface-muted) 0%, var(--border-soft) 100%);
+    border: 1px solid rgba(var(--primary-rgb), 0.25);
+    border-radius: var(--border-radius-md);
+    padding: 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+.feature-interactive-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    width: 100%;
+    min-width: 0;
+}
+.feature-bubble-card {
+    background: var(--surface);
+    border: 1px solid rgba(var(--primary-rgb), 0.28);
+    border-radius: 14px;
+    padding: 14px 16px;
+    box-shadow: 0 3px 12px rgba(var(--primary-rgb), 0.08);
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    transition: all 0.25s ease;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+.feature-bubble-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--primary);
+    box-shadow: 0 6px 18px rgba(var(--primary-rgb), 0.16);
+}
+.bubble-emoji-badge {
+    font-size: 22px;
+    line-height: 1;
+    padding: 8px;
+    border-radius: 10px;
+    background: rgba(var(--primary-rgb), 0.14);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.bubble-content {
+    flex: 1;
+    min-width: 0;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+.bubble-content h4 {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--text-main);
+    margin: 0 0 4px 0;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap; /* Allows text and status pill to wrap gracefully on narrow screens */
+    gap: 6px;
+    row-gap: 4px;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+.bubble-content p {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    margin: 0;
+    line-height: 1.45;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+.status-pill {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 2px 7px;
+    border-radius: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.status-pill.success {
+    background: var(--success-bg);
+    color: var(--success-strong);
+}
+.status-pill.warning {
+    background: var(--warning-bg);
+    color: var(--warning-text);
+}
+.status-pill.info {
+    background: rgba(var(--info-rgb), 0.15);
+    color: var(--info-text);
+}
+/* Mobile & Tablet Responsiveness */
+@media (max-width: 900px) {
+    .public-page-container.features-page-container {
+        padding: 30px 20px 60px 20px;
+    }
+    .features-hero {
+        margin-bottom: 38px;
+    }
+    .features-hero h1 {
+        font-size: clamp(24px, 5.5vw, 32px);
+        line-height: 1.25;
+    }
+    .features-hero p {
+        font-size: 15px;
+        line-height: 1.55;
+    }
+    .feature-detail-card {
+        display: flex;
+        flex-direction: column;
+        padding: 30px 26px;
+        gap: 24px;
+        border-radius: 22px;
+        margin-bottom: 28px;
+    }
+    .feature-info-col {
+        order: 1;
+        width: 100%;
+        min-width: 0;
+    }
+    .feature-visual-col {
+        order: 2;
+        width: 100%;
+        min-width: 0;
+        padding: 22px 20px;
+        border-radius: 16px;
+        gap: 14px;
+    }
+    .feature-info-col h2 {
+        font-size: clamp(20px, 4.8vw, 24px);
+        line-height: 1.35;
+        margin-bottom: 12px;
+    }
+    .feature-info-col p {
+        font-size: 14.5px;
+        line-height: 1.6;
+        margin-bottom: 18px;
+    }
+    .feature-points-list {
+        gap: 12px;
+    }
+    .feature-points-list li {
+        font-size: 13.5px;
+        line-height: 1.5;
+    }
+    .feature-bubble-card {
+        padding: 15px 16px;
+        gap: 12px;
+    }
+    .bubble-emoji-badge {
+        font-size: 20px;
+        padding: 8px;
+    }
+    .bubble-content h4 {
+        font-size: 14px;
+    }
+    .bubble-content p {
+        font-size: 12.5px;
+    }
+}
+@media (max-width: 480px) {
+    .public-page-container.features-page-container {
+        padding: 20px 16px 48px 16px;
+    }
+    .feature-detail-card {
+        padding: 26px 22px;
+        border-radius: 20px;
+        gap: 20px;
+        margin-bottom: 22px;
+    }
+    .feature-visual-col {
+        padding: 18px 16px;
+        border-radius: 14px;
+        gap: 12px;
+    }
+    .feature-interactive-stack {
+        gap: 12px;
+    }
+    .feature-info-col h2 {
+        font-size: 21px;
+        line-height: 1.35;
+        margin-bottom: 10px;
+    }
+    .feature-info-col p {
+        font-size: 13.5px;
+        line-height: 1.55;
+        margin-bottom: 16px;
+    }
+    .feature-points-list {
+        gap: 10px;
+    }
+    .feature-points-list li {
+        font-size: 13px;
+        line-height: 1.45;
+    }
+    .feature-bubble-card {
+        padding: 13px 14px;
+        gap: 10px;
+        border-radius: 12px;
+    }
+    .bubble-emoji-badge {
+        font-size: 19px;
+        padding: 7px;
+        border-radius: 9px;
+    }
+    .bubble-content h4 {
+        font-size: 13.5px;
+        line-height: 1.35;
+    }
+    .bubble-content p {
+        font-size: 12px;
+        line-height: 1.45;
+    }
+    .features-hero h1 {
+        font-size: 23px;
+    }
+    .features-hero p {
+        font-size: 14px;
+    }
+}
+@media (max-width: 360px) {
+    .public-page-container.features-page-container {
+        padding: 16px 12px 40px 12px;
+    }
+    .feature-detail-card {
+        padding: 22px 18px;
+        border-radius: 18px;
+    }
+    .feature-visual-col {
+        padding: 15px 14px;
+    }
+    .feature-bubble-card {
+        padding: 11px 12px;
+    }
+}

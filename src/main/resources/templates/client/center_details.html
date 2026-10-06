@@ -2,14 +2,7 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detalles del Centro - Cuquora</title>
-    <!-- Lucide Icons CDN -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.321.0/font/lucide.min.css">
-    <!-- Stylesheets -->
-    <link rel="stylesheet" href="/css/common.css">
-    <link rel="stylesheet" href="/css/modals.css">
+    <th:block th:replace="~{fragments/head :: meta('Detalles del Centro - Cuquora')}"></th:block>
     <link rel="stylesheet" href="/css/datepicker.css">
     <link rel="stylesheet" href="/css/cliente.css">
 </head>
@@ -27,11 +20,11 @@
 
         <section class="glass-panel booking-section">
             <h2 class="booking-section-title">
-                <i class="lucide-calendar-plus" style="margin-right: 8px; color: var(--primary-dark);"></i>
+                <i class="lucide-calendar-plus" aria-hidden="true"></i>
                 Solicitar Cita de Estética
             </h2>
 
-            <form action="/client/booking" method="POST" class="role-form">
+            <form th:action="@{/client/booking}" method="post" id="bookingForm">
                 <input type="hidden" name="centerId" th:value="${center.id}">
 
                 <!-- 1. Selectable Treatments list -->
@@ -51,7 +44,7 @@
                         </label>
                     </div>
                     <div th:if="${#lists.isEmpty(treatments)}" class="no-appointments-box">
-                        <i class="lucide-slash"></i>
+                        <i class="lucide-slash" aria-hidden="true"></i>
                         <p>Este centro no dispone de tratamientos activos en este momento.</p>
                     </div>
                 </div>
@@ -64,7 +57,7 @@
 
                 <button type="submit" class="btn btn-primary btn-large-submit"
                     th:if="${not #lists.isEmpty(treatments)}">
-                    <i class="lucide-check-circle"></i> Confirmar y Reservar Cita
+                    <i class="lucide-check-circle" aria-hidden="true"></i> Confirmar y Reservar Cita
                 </button>
             </form>
         </section>
@@ -72,230 +65,10 @@
     </main>
 
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const bookingErrorAccept = document.getElementById('bookingErrorAccept');
-            if (bookingErrorAccept) {
-                bookingErrorAccept.addEventListener('click', function () {
-                    const modal = document.querySelector('.booking-error-modal');
-                    if (modal) modal.remove();
-                });
-                bookingErrorAccept.focus();
-            }
-
-            const centerId = document.querySelector('input[name="centerId"]').value;
-            const dateInput = document.getElementById('dateTime');
-            const trigger = document.getElementById('datepickerTrigger');
-            const triggerValue = document.getElementById('datepickerValue');
-            const popover = document.getElementById('calendarPopover');
-            const calendarDays = document.getElementById('calendarDays');
-            const calendarMonth = document.getElementById('calendarMonth');
-            const message = document.getElementById('availabilityMessage');
-            const previousMonth = document.getElementById('previousMonth');
-            const nextMonth = document.getElementById('nextMonth');
-            const timeTrigger = document.getElementById('timepickerTrigger');
-            const timeValue = document.getElementById('timepickerValue');
-            const timePopover = document.getElementById('timepickerPopover');
-            const timeOptions = document.getElementById('timepickerOptions');
-            const treatmentInputs = document.querySelectorAll('input[name="treatmentId"]');
-            if (!trigger || !dateInput) return;
-            const form = dateInput.form;
-            const fallback = { slotMinutes: 30, workingDays: [1, 2, 3, 4, 5], openHour: 9, closeHour: 20, closedDates: new Set() };
-            const today = new Date(); today.setHours(0, 0, 0, 0);
-            const firstMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-            const lastMonth = new Date(today.getFullYear(), today.getMonth() + 6, 1);
-            let month = new Date(firstMonth);
-            let selectedDate = '';
-            let config = fallback;
-            let occupied = new Map();
-            let serviceDuration = Number(document.querySelector('input[name="treatmentId"]:checked')?.dataset.duration) || 30;
-
-            function key(date) { return date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0'); }
-            function dayOfWeek(date) { return date.getDay() === 0 ? 7 : date.getDay(); }
-            function timeLabel(minutes) { return String(Math.floor(minutes / 60)).padStart(2, '0') + ':' + String(minutes % 60).padStart(2, '0'); }
-            function setMessage(text, error) { message.textContent = text; message.classList.toggle('is-error', !!error); }
-            function requiredSlots() { return Math.ceil(serviceDuration / config.slotMinutes); }
-            function slots(day) {
-                const taken = occupied.get(day) || new Set(), result = [];
-                for (let minutes = config.openHour * 60; minutes < config.closeHour * 60; minutes += config.slotMinutes) {
-                    const value = timeLabel(minutes);
-                    result.push({
-                        value: value,
-                        taken: taken.has(value),
-                        past: new Date(day + 'T' + value + ':00') <= new Date()
-                    });
-                }
-                return result;
-            }
-            function canFit(day, index, availableSlots) {
-                const required = requiredSlots();
-                console.log('Available slots: ' + slotsToString(availableSlots));
-                console.log('Checking if can fit', required, 'slots starting at index', index, 'on day', day);
-                if (index + required > availableSlots.length) {
-                    console.log('Can fit:', false);
-                    return false;
-                }
-                const isAvailable = availableSlots.slice(index, index + required).every(function (slot) {
-                    return !slot.taken && !slot.past;
-                });
-                console.log('Can fit:', isAvailable);
-                return isAvailable;
-            }
-
-            function slotsToString(availableSlots) {
-                return availableSlots.map(function (slot) {
-                    return slot.value + (slot.taken ? ' (ocupada)' : slot.past ? ' (no disponible)' : '');
-                }).join(', ');
-            }
-
-            function state(date) {
-                if (date < today) return 'past';
-                const day = key(date);
-                if (!config.workingDays.includes(dayOfWeek(date)) || config.closedDates.has(day)) return 'closed';
-                const allSlots = slots(day);
-                const hasFreeSlot = allSlots.some(function (slot, index) { return canFit(day, index, allSlots); });
-                return hasFreeSlot ? 'free' : 'full';
-            }
-            function renderTimes(day) {
-                timeOptions.innerHTML = '';
-                const allSlots = slots(day);
-                const required = requiredSlots();
-                // Solo slots de inicio que permiten completar el tratamiento antes del cierre
-                const startSlots = allSlots.filter(function (slot, index) {
-                    return index + required <= allSlots.length;
-                });
-                const visibleSlots = startSlots.filter(function (slot) { return !slot.past; });
-
-                if (visibleSlots.length === 0) {
-                    timeTrigger.disabled = true;
-                    timeValue.textContent = 'No quedan horas disponibles hoy';
-                    return;
-                }
-
-                visibleSlots.forEach(function (slot) {
-                    const originalIndex = allSlots.indexOf(slot);
-                    const fits = canFit(day, originalIndex, allSlots);
-                    const option = document.createElement('button');
-                    option.type = 'button';
-                    option.className = 'time-option';
-                    option.textContent = slot.value + (slot.taken ? ' (ocupada)' : !fits ? ' (sin tiempo suficiente)' : '');
-                    option.setAttribute('role', 'option');
-                    if (slot.taken || !fits) {
-                        option.disabled = true;
-                        option.classList.add(slot.taken ? 'is-occupied' : 'is-no-fit');
-                    } else {
-                        option.addEventListener('click', function () {
-                            dateInput.value = day + 'T' + slot.value;
-                            timeValue.textContent = slot.value;
-                            timeOptions.querySelectorAll('.time-option').forEach(function (item) {
-                                item.classList.remove('is-selected');
-                            });
-                            option.classList.add('is-selected');
-                            timePopover.hidden = true;
-                            timeTrigger.setAttribute('aria-expanded', 'false');
-                        });
-                    }
-                    timeOptions.appendChild(option);
-                });
-                const hasValidSlot = visibleSlots.some(function (slot) {
-                    return canFit(day, allSlots.indexOf(slot), allSlots);
-                });
-                timeTrigger.disabled = !hasValidSlot;
-                timeValue.textContent = timeTrigger.disabled ? 'No hay horas disponibles' : 'Selecciona una hora';
-            }
-            function render() {
-                calendarDays.innerHTML = '';
-                calendarMonth.textContent = month.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
-                const offset = (new Date(month.getFullYear(), month.getMonth(), 1).getDay() + 6) % 7;
-                for (let i = 0; i < offset; i++) calendarDays.appendChild(document.createElement('span'));
-                const total = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
-                for (let number = 1; number <= total; number++) {
-                    const date = new Date(month.getFullYear(), month.getMonth(), number), day = key(date), currentState = state(date);
-                    const button = document.createElement('button');
-                    button.type = 'button'; button.textContent = number; button.dataset.date = day;
-                    button.className = 'is-' + currentState; button.disabled = currentState !== 'free';
-                    if (currentState === 'full') button.title = 'Día completo: no hay horas disponibles';
-                    if (day === key(today)) button.classList.add('is-today');
-                    if (day === selectedDate) button.classList.add('selected');
-                    button.addEventListener('click', function () { selectDate(day); });
-                    calendarDays.appendChild(button);
-                }
-                previousMonth.disabled = month <= firstMonth;
-                nextMonth.disabled = month >= lastMonth;
-            }
-            function selectDate(day) {
-                const date = new Date(day + 'T00:00:00');
-                if (state(date) !== 'free') return;
-                selectedDate = day;
-                triggerValue.textContent = date.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
-                dateInput.value = '';
-                renderTimes(day);
-                render();
-                popover.hidden = true; trigger.setAttribute('aria-expanded', 'false');
-            }
-            trigger.addEventListener('click', function () {
-                popover.hidden = !popover.hidden; trigger.setAttribute('aria-expanded', String(!popover.hidden));
-                if (!popover.hidden) render();
-            });
-            document.addEventListener('click', function (event) {
-                if (!popover.hidden && !popover.contains(event.target) && !trigger.contains(event.target)) {
-                    popover.hidden = true; trigger.setAttribute('aria-expanded', 'false');
-                }
-            });
-            previousMonth.addEventListener('click', function () { month = new Date(month.getFullYear(), month.getMonth() - 1, 1); render(); });
-            nextMonth.addEventListener('click', function () { month = new Date(month.getFullYear(), month.getMonth() + 1, 1); render(); });
-            treatmentInputs.forEach(function (input) {
-                input.addEventListener('change', function () {
-                    serviceDuration = Number(this.dataset.duration) || 30;
-                    selectedDate = '';
-                    dateInput.value = '';
-                    triggerValue.textContent = 'Elige una fecha';
-                    timeOptions.innerHTML = '';
-                    timeValue.textContent = 'Selecciona una hora';
-                    timeTrigger.disabled = true;
-                    timePopover.hidden = true;
-                    render();
-                    setMessage('Disponibilidad actualizada para un servicio de ' + serviceDuration + ' minutos.');
-                });
-            });
-            timeTrigger.addEventListener('click', function () {
-                if (timeTrigger.disabled) return;
-                timePopover.hidden = !timePopover.hidden;
-                timeTrigger.setAttribute('aria-expanded', String(!timePopover.hidden));
-            });
-            form.addEventListener('submit', function (event) {
-                if (!dateInput.value) {
-                    event.preventDefault();
-                    setMessage('Selecciona una fecha y una hora disponibles.', true);
-                    trigger.focus();
-                }
-            });
-            document.addEventListener('click', function (event) {
-                if (!timePopover.hidden && !timePopover.contains(event.target) && !timeTrigger.contains(event.target)) {
-                    timePopover.hidden = true;
-                    timeTrigger.setAttribute('aria-expanded', 'false');
-                }
-            });
-            fetch('/api/centers/' + encodeURIComponent(centerId) + '/availability', { headers: { Accept: 'application/json' } })
-                .then(function (response) { if (!response.ok) throw new Error('HTTP ' + response.status); return response.json(); })
-                .then(function (data) {
-                    config = { slotMinutes: Number(data.slotMinutes) || fallback.slotMinutes, workingDays: data.workingDays || fallback.workingDays, openHour: Number(data.openHour), closeHour: Number(data.closeHour), closedDates: new Set(data.closedDates || []) };
-                    occupied = new Map();
-                    console.log('los dias ocupados segun el fetch son: ' + data.occupied);
-                    (data.occupied || []).forEach(function (value) {
-                        const day = value.slice(0, 10), time = value.slice(11, 16);
-                        if (!occupied.has(day)) occupied.set(day, new Set());
-                        occupied.get(day).add(time);
-                    });
-                    setMessage('Selecciona un día y una hora disponibles.'); render();
-                })
-                .catch(function (error) { setMessage('No se pudo cargar la disponibilidad.', true); console.error(error); render(); });
-            render();
-        });
-    </script>
+    <script src="/js/booking-picker.js" defer></script>
 
     <!-- Footer -->
-    <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Prototipo responsive.')}"></div>
+    <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Software de gestión para centros de estética, salones y spas.')}"></div>
 
 </body>
 

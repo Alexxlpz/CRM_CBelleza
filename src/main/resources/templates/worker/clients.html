@@ -1,13 +1,7 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cartera de Clientes - Cuquora CRM</title>
-    <!-- Lucide Icons CDN -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.321.0/font/lucide.min.css">
-    <!-- Stylesheets -->
-    <link rel="stylesheet" href="/css/common.css">
+    <th:block th:replace="~{fragments/head :: meta('Cartera de Clientes - Cuquora CRM')}"></th:block>
     <link rel="stylesheet" href="/css/clients.css">
 </head>
 <body>
@@ -21,31 +15,24 @@
             <p>Consulta las fichas técnicas personalizadas y el historial de citas de los clientes de este centro</p>
         </div>
 
-        <!-- Flash Messages -->
-        <div class="alert-success-banner" th:if="${successMessage}">
-            <i class="lucide-check-circle"></i>
-            <span th:text="${successMessage}">Cliente dado de alta con éxito.</span>
-        </div>
-        <div class="alert-error-banner" th:if="${errorMessage}">
-            <i class="lucide-alert-triangle"></i>
-            <span th:text="${errorMessage}">Ha ocurrido un error.</span>
-        </div>
+        <div th:replace="~{fragments/alerts :: flash}"></div>
 
         <!-- Toolbar: Search + Action Buttons -->
         <div class="clients-toolbar">
-            <form action="/worker/clients" method="get" class="clients-search-box">
-                <i class="lucide-search clients-search-icon"></i>
-                <input type="text" name="search" class="clients-search-input"
+            <form th:action="@{/worker/clients}" method="get" class="clients-search-box" role="search">
+                <i class="lucide-search clients-search-icon" aria-hidden="true"></i>
+                <label for="clientSearch" class="visually-hidden">Buscar clientes</label>
+                <input type="search" id="clientSearch" name="search" class="clients-search-input"
                        placeholder="Buscar por nombre, teléfono o email..."
                        th:value="${searchQuery}" autocomplete="off">
             </form>
             <div class="clients-action-group">
-                <button type="button" class="btn-create-client" onclick="openCreateClientModal()">
-                    <i class="lucide-user-plus"></i>
-                    <span>+ Nuevo Cliente</span>
+                <button type="button" class="btn-create-client" data-modal-open="createClientModal">
+                    <i class="lucide-user-plus" aria-hidden="true"></i>
+                    <span>Nuevo Cliente</span>
                 </button>
                 <a href="/worker/clients/template" class="btn-template-config">
-                    <i class="lucide-settings"></i>
+                    <i class="lucide-settings" aria-hidden="true"></i>
                     <span>Plantilla de Ficha</span>
                 </a>
             </div>
@@ -57,14 +44,11 @@
                 <div>
                     <!-- Header -->
                     <div class="client-card-header">
-                        <div class="client-avatar" th:text="${#strings.substring(c.name, 0, 1)}">M</div>
+                        <div class="client-avatar" aria-hidden="true" th:text="${#strings.isEmpty(c.name) ? 'C' : #strings.substring(c.name, 0, 1)}">M</div>
                         <div class="client-info-main">
-                            <h3 class="client-name" th:text="${c.name}">María López</h3>
-                            <span class="client-sub-badge registered" th:if="${!c.isGuest}">
-                                <i class="lucide-shield-check"></i> Registrado
-                            </span>
-                            <span class="client-sub-badge guest" th:if="${c.isGuest}">
-                                <i class="lucide-user-check"></i> Invitado
+                            <h2 class="client-name" th:text="${c.name}">María López</h2>
+                            <span class="client-sub-badge registered">
+                                <i class="lucide-shield-check" aria-hidden="true"></i> Registrado
                             </span>
                         </div>
                     </div>
@@ -72,30 +56,30 @@
                     <!-- Details -->
                     <div class="client-details-list">
                         <div class="client-detail-row" th:if="${c.phone != null and !c.phone.isEmpty()}">
-                            <i class="lucide-phone"></i>
+                            <i class="lucide-phone" aria-hidden="true"></i>
                             <span th:text="${c.phone}">+34 600 111 222</span>
                         </div>
                         <div class="client-detail-row" th:if="${c.email != null and !c.email.isEmpty()}">
-                            <i class="lucide-mail"></i>
+                            <i class="lucide-mail" aria-hidden="true"></i>
                             <span th:text="${c.email}">cliente@email.com</span>
                         </div>
                         <div class="client-detail-row" th:if="${c.lastAppointmentDate != null}">
-                            <i class="lucide-calendar-check-2"></i>
+                            <i class="lucide-calendar-check-2" aria-hidden="true"></i>
                             <span>Última cita: <strong th:text="${#temporals.format(c.lastAppointmentDate, 'dd/MM/yyyy')}">12/07/2026</strong></span>
                         </div>
                         <div class="client-detail-row" th:if="${c.lastAppointmentDate == null}">
-                            <i class="lucide-calendar"></i>
-                            <span>Última cita: <em style="opacity: 0.7;">Sin citas completadas</em></span>
+                            <i class="lucide-calendar" aria-hidden="true"></i>
+                            <span>Última cita: <em class="text-soft">Sin citas completadas</em></span>
                         </div>
                     </div>
 
                     <!-- Status Bar -->
                     <div class="client-card-status-bar">
                         <span class="badge-card-status filled" th:if="${c.hasFilledCard}">
-                            <i class="lucide-check-circle-2"></i> Ficha al día
+                            <i class="lucide-check-circle-2" aria-hidden="true"></i> Ficha al día
                         </span>
                         <span class="badge-card-status pending" th:if="${!c.hasFilledCard}">
-                            <i class="lucide-alert-circle"></i> Ficha pendiente
+                            <i class="lucide-alert-circle" aria-hidden="true"></i> Ficha pendiente
                         </span>
                         <span class="client-appointments-count" th:text="${c.totalAppointments} + (${c.totalAppointments == 1} ? ' cita' : ' citas')">
                             1 cita
@@ -104,17 +88,17 @@
                 </div>
 
                 <!-- Action Button -->
-                <a th:href="(c.id != null) ? '/worker/clients/' + ${c.id} : '/worker/clients/guest?phone=' + ${c.phone}"
+                <a th:href="@{/worker/clients/{id}(id=${c.id})}"
                    class="btn-view-client">
                     <span>Ver Ficha e Historial</span>
-                    <i class="lucide-arrow-right"></i>
+                    <i class="lucide-arrow-right" aria-hidden="true"></i>
                 </a>
             </div>
         </div>
 
         <!-- Empty State -->
         <div class="notification-empty glass-panel" th:if="${clients == null or clients.isEmpty()}">
-            <i class="lucide-users"></i>
+            <i class="lucide-users" aria-hidden="true"></i>
             <span th:if="${searchQuery != null and !searchQuery.isEmpty()}">
                 No se encontraron clientes que coincidan con "<strong th:text="${searchQuery}"></strong>".
             </span>
@@ -124,21 +108,21 @@
         </div>
 
         <!-- Modal: Dar de Alta Nuevo Cliente -->
-        <div class="modal-backdrop" id="createClientModal" style="display: none;" onclick="closeModalOnBackdrop(event)">
-            <div class="modal-card">
+        <div class="ui-modal-overlay" id="createClientModal" hidden>
+            <div class="ui-modal ui-modal--form" role="dialog" aria-modal="true" aria-labelledby="createClientTitle">
                 <div class="modal-header">
                     <div>
-                        <h2 class="modal-title">Dar de Alta Nuevo Cliente</h2>
+                        <h2 class="modal-title" id="createClientTitle">Dar de Alta Nuevo Cliente</h2>
                         <p class="modal-subtitle">Para clientes presenciales, llamadas telefónicas o personas sin dispositivo web.</p>
                     </div>
                 </div>
 
-                <form action="/worker/clients/create" method="post" class="modal-form" id="createClientForm">
+                <form th:action="@{/worker/clients/create}" method="post" class="modal-form" id="createClientForm">
                     <div class="form-group">
                         <label class="form-label" for="clientNameInput">
                             Nombre y Apellidos <span class="required-star">*</span>
                         </label>
-                        <input type="text" id="clientNameInput" name="name" class="field-input" required
+                        <input type="text" id="clientNameInput" name="name" class="field-input" required autofocus
                                placeholder="Ej. Carmen Fernández García" autocomplete="off">
                     </div>
 
@@ -168,11 +152,11 @@
                     </div>
 
                     <div class="modal-footer">
-                        <button type="button" class="btn-modal-cancel" onclick="closeCreateClientModal()">
+                        <button type="button" class="btn-modal-cancel" data-modal-close>
                             Cancelar
                         </button>
-                        <button type="submit" class="btn-save-ficha" style="margin-top: 0;">
-                            <i class="lucide-check"></i>
+                        <button type="submit" class="btn-save-ficha btn-save-ficha--inline">
+                            <i class="lucide-check" aria-hidden="true"></i>
                             <span>Crear y Abrir Ficha</span>
                         </button>
                     </div>
@@ -182,42 +166,8 @@
 
     </main>
 
-    <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Panel de gestión operativa.')}"></div>
+    <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Panel de gestión de centros.')}"></div>
 
-    <!-- Script for Create Client Modal -->
-    <script>
-        function openCreateClientModal() {
-            const modal = document.getElementById('createClientModal');
-            if (modal) {
-                modal.style.display = 'flex';
-                document.body.style.overflow = 'hidden';
-                setTimeout(() => {
-                    const input = document.getElementById('clientNameInput');
-                    if (input) input.focus();
-                }, 100);
-            }
-        }
-
-        function closeCreateClientModal() {
-            const modal = document.getElementById('createClientModal');
-            if (modal) {
-                modal.style.display = 'none';
-                document.body.style.overflow = '';
-            }
-        }
-
-        function closeModalOnBackdrop(event) {
-            if (event.target && event.target.id === 'createClientModal') {
-                closeCreateClientModal();
-            }
-        }
-
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') {
-                closeCreateClientModal();
-            }
-        });
-    </script>
 
 </body>
 </html>

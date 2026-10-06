@@ -1,15 +1,14 @@
 <div xmlns:th="http://www.thymeleaf.org">
     <!-- Add Treatment Bottom Sheet Modal Component -->
-    <div id="addTreatmentSheet" class="sheet-overlay" style="display:none" onclick="closeTreatmentSheetOnOverlay(event)"
-         th:fragment="addTreatmentSheet">
-        <div class="sheet-content glass-panel" onclick="event.stopPropagation()">
-            <div class="bottom-sheet-handle"></div>
+    <div id="addTreatmentSheet" class="sheet-overlay" hidden th:fragment="addTreatmentSheet">
+        <div class="sheet-content" role="dialog" aria-modal="true" aria-labelledby="addTreatmentTitle">
+            <div class="bottom-sheet-handle" aria-hidden="true"></div>
             <div class="sheet-header">
-                <h2>Añadir Tratamiento</h2>
-                <button type="button" class="sheet-close" onclick="closeTreatmentSheet()">&times;</button>
+                <h2 id="addTreatmentTitle">Añadir Tratamiento</h2>
+                <button type="button" class="sheet-close" data-sheet-close aria-label="Cerrar">&times;</button>
             </div>
-            
-            <form action="/worker/treatments/add" method="POST" class="role-form">
+
+            <form th:action="@{/worker/treatments/add}" method="post">
                 <div class="form-group">
                     <label class="form-label" for="treatmentName">Nombre del Tratamiento</label>
                     <input type="text" name="name" id="treatmentName" class="form-control" 
@@ -48,8 +47,8 @@
                            value="45" min="5" required>
                 </div>
                 
-                <button type="submit" class="btn btn-primary btn-full-width">
-                    <i class="lucide-plus"></i> Guardar Tratamiento
+                <button type="submit" class="btn btn-primary btn-block">
+                    <i class="lucide-plus" aria-hidden="true"></i> Guardar Tratamiento
                 </button>
             </form>
         </div>

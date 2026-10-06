@@ -2,58 +2,50 @@ package com.alexxlpz.crm_cbelleza.repositories;
 
 import com.alexxlpz.crm_cbelleza.entities.Appointment;
 import com.alexxlpz.crm_cbelleza.entities.AppointmentStatus;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
+
+    /** Carga también tratamiento, cliente y trabajador para evitar una consulta por cita al pintar listas. */
+    @EntityGraph(attributePaths = {"treatment", "client", "worker"})
     List<Appointment> findByCenterIdOrderByDateTimeDesc(Long centerId);
+
+    @EntityGraph(attributePaths = {"treatment", "center", "worker"})
     List<Appointment> findByClientIdOrderByDateTimeDesc(Long clientId);
-    List<Appointment> findByGuestPhoneOrderByDateTimeDesc(String phone);
-    List<Appointment> findByCenterIdAndStatusInAndDateTimeAfterOrderByDateTimeAsc(
-            Long centerId, List<AppointmentStatus> statuses, LocalDateTime dateTime);
-    List<Appointment> findByCenterIdAndStatusIn(Long centerId, List<AppointmentStatus> statuses);
 
-    long countByCenterIdAndClientIdAndDateTimeBefore(Long centerId, Long clientId, LocalDateTime dateTime);
-    long countByCenterIdAndGuestPhoneAndDateTimeBefore(Long centerId, String guestPhone, LocalDateTime dateTime);
-    long countByCenterIdAndClientIdAndStatusAndDateTimeBefore(Long centerId, Long clientId, AppointmentStatus status, LocalDateTime dateTime);
-    long countByCenterIdAndGuestPhoneAndStatusAndDateTimeBefore(Long centerId, String guestPhone, AppointmentStatus status, LocalDateTime dateTime);
-    long countByCenterIdAndClientIdAndStatusInAndDateTimeBefore(Long centerId, Long clientId, List<AppointmentStatus> statuses, LocalDateTime dateTime);
-    long countByCenterIdAndGuestPhoneAndStatusInAndDateTimeBefore(Long centerId, String guestPhone, List<AppointmentStatus> statuses, LocalDateTime dateTime);
-
-    boolean existsByCenterIdAndClientIdAndStatus(Long centerId, Long clientId, AppointmentStatus status);
-    boolean existsByCenterIdAndGuestPhoneAndStatus(Long centerId, String guestPhone, AppointmentStatus status);
-    boolean existsByCenterIdAndClientIdAndStatusIn(Long centerId, Long clientId, List<AppointmentStatus> statuses);
-    boolean existsByCenterIdAndGuestPhoneAndStatusIn(Long centerId, String guestPhone, List<AppointmentStatus> statuses);
-
+    @EntityGraph(attributePaths = {"treatment", "client", "worker"})
     List<Appointment> findByCenterIdAndClientIdOrderByDateTimeDesc(Long centerId, Long clientId);
-    List<Appointment> findByCenterIdAndGuestPhoneOrderByDateTimeDesc(Long centerId, String guestPhone);
 
+    @EntityGraph(attributePaths = {"treatment"})
+    List<Appointment> findByCenterIdAndStatusIn(Long centerId, Collection<AppointmentStatus> statuses);
+
+    @EntityGraph(attributePaths = {"treatment"})
+    List<Appointment> findByCenterIdAndStatusInAndDateTimeAfterOrderByDateTimeAsc(
+            Long centerId, Collection<AppointmentStatus> statuses, LocalDateTime dateTime);
+
+    @EntityGraph(attributePaths = {"treatment", "client"})
+    Optional<Appointment> findByIdAndCenterId(Long id, Long centerId);
+
+    long countByClientId(Long clientId);
+
+    boolean existsByCenterIdAndClientIdAndStatusIn(Long centerId, Long clientId, Collection<AppointmentStatus> statuses);
+
+    @EntityGraph(attributePaths = {"treatment"})
     List<Appointment> findByStatusAndDateTimeBefore(AppointmentStatus status, LocalDateTime dateTime);
 
-    default int updatePastConfirmedToCompleted(LocalDateTime now) {
-        List<Appointment> confirmed = findByStatusAndDateTimeBefore(AppointmentStatus.CONFIRMED, now);
-        List<Appointment> toUpdate = new java.util.ArrayList<>();
-        for (Appointment a : confirmed) {
-            int duration = (a.getTreatment() != null && a.getTreatment().getDuration() != null && a.getTreatment().getDuration() > 0)
-                    ? a.getTreatment().getDuration()
-                    : 60;
-            LocalDateTime endTime = a.getDateTime().plusMinutes(duration);
-            if (!now.isBefore(endTime)) {
-                a.setStatus(AppointmentStatus.COMPLETED);
-                toUpdate.add(a);
-            }
-        }
-        if (!toUpdate.isEmpty()) {
-            saveAll(toUpdate);
-        }
-        return toUpdate.size();
-    }
-
-    @org.springframework.data.jpa.repository.Modifying
-    @org.springframework.transaction.annotation.Transactional
-    @org.springframework.data.jpa.repository.Query("DELETE FROM Appointment a WHERE a.client IS NULL")
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM Appointment a WHERE a.client IS NULL")
     void deleteGuestAppointments();
 }

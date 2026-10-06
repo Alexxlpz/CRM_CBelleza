@@ -1,318 +1,114 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iniciar Sesión - Cuquora CRM</title>
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="icon" type="image/png" href="/images/icon.png">
-    <link rel="apple-touch-icon" href="/images/icon.png">
-    <!-- Lucide Icons CDN -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.321.0/font/lucide.min.css">
-    <!-- Stylesheets -->
-    <link rel="stylesheet" href="/css/common.css">
+    <th:block th:replace="~{fragments/head :: meta('Iniciar Sesión - Cuquora CRM')}"></th:block>
     <link rel="stylesheet" href="/css/auth.css">
+    <script src="/js/form-validation.js" defer></script>
 </head>
 <body class="auth-page">
     <div th:replace="~{fragments/navbar :: brand(false)}"></div>
 
-    <!-- Main Content -->
     <main class="auth-container">
         <div class="auth-card">
-            
-            <!-- Brand & Heading -->
             <div class="auth-header">
-                <h2>Iniciar sesión</h2>
+                <h1>Iniciar sesión</h1>
                 <p>Ingresa a tu cuenta para gestionar citas, servicios y tratamientos</p>
             </div>
 
-            <!-- Error Notification -->
-            <div class="auth-alert auth-alert-danger" th:if="${errorMessage != null or param.error != null}">
-                <i class="lucide-alert-circle"></i>
+            <div class="alert alert-error" role="alert" th:if="${errorMessage != null or param.error != null}">
+                <i class="lucide-alert-circle" aria-hidden="true"></i>
                 <span th:text="${errorMessage != null ? errorMessage : 'Credenciales no válidas. Revisa tu correo o usuario y contraseña.'}">
-                    Credenciales no válidas. Revisa tu correo o usuario y contraseña.
+                    Credenciales no válidas.
                 </span>
+            </div>
+            <div class="alert alert-success" role="status" th:if="${successMessage != null or param.logout != null}">
+                <i class="lucide-check-circle-2" aria-hidden="true"></i>
+                <span th:text="${successMessage != null ? successMessage : 'Has cerrado sesión correctamente.'}">Has cerrado sesión correctamente.</span>
             </div>
 
-            <!-- Success Notification -->
-            <div class="auth-alert auth-alert-success" th:if="${successMessage != null or param.logout != null}">
-                <i class="lucide-check-circle-2"></i>
-                <span th:text="${successMessage != null ? successMessage : 'Has cerrado sesión correctamente.'}">
-                    Has cerrado sesión correctamente.
-                </span>
-            </div>
-            
-            <!-- Credentials Form -->
-            <form action="/login" method="POST" id="loginForm" autocomplete="on" novalidate>
-                
-                <!-- Identifier: Email or Username -->
+            <form th:action="@{/login}" method="post" id="loginForm" autocomplete="on" novalidate>
                 <div class="form-group">
                     <label for="identifierInput" class="form-label">Correo electrónico o usuario</label>
-                    <input type="text" 
-                           id="identifierInput" 
-                           name="identifier" 
-                           class="form-control"
-                           autofocus 
-                           autocomplete="username" 
-                           placeholder="ejemplo@cbelleza.com"
-                           th:value="${identifier != null ? identifier : param.identifier}">
+                    <input type="text" id="identifierInput" name="identifier" class="form-control"
+                           autofocus autocomplete="username" placeholder="ejemplo@cbelleza.com"
+                           th:value="${identifier}">
                 </div>
 
-                <!-- Password -->
                 <div class="form-group">
                     <div class="label-row">
                         <label for="passwordInput" class="form-label">Contraseña</label>
-                        <a href="javascript:void(0)" onclick="openRecoveryModal()" class="forgot-link">
-                            ¿Olvidaste tu contraseña?
-                        </a>
+                        <button type="button" class="forgot-link" data-modal-open="recoveryModal">¿Olvidaste tu contraseña?</button>
                     </div>
                     <div class="password-wrapper">
-                        <input type="password" 
-                               id="passwordInput" 
-                               name="password" 
-                               class="form-control"
-                               autocomplete="current-password" 
-                               placeholder="Tu contraseña">
-                        <button type="button" 
-                                class="password-toggle-btn" 
-                                id="togglePasswordBtn" 
-                                onclick="togglePasswordVisibility()" 
-                                title="Mostrar u ocultar contraseña"
-                                aria-label="Mostrar u ocultar contraseña">
-                            <i class="lucide-eye" id="togglePasswordIcon"></i>
+                        <input type="password" id="passwordInput" name="password" class="form-control"
+                               autocomplete="current-password" placeholder="Tu contraseña">
+                        <button type="button" class="password-toggle-btn" data-toggle-password="passwordInput"
+                                aria-label="Mostrar u ocultar contraseña" aria-pressed="false">
+                            <i class="lucide-eye" aria-hidden="true"></i>
                         </button>
                     </div>
                 </div>
 
-                <!-- Remember Me -->
                 <div class="form-options">
                     <label class="remember-label">
                         <input type="checkbox" name="rememberMe" value="true">
                         <span>Recordar mi sesión</span>
                     </label>
                 </div>
-                
-                <!-- Submit Button -->
-                <button type="submit" class="btn btn-primary btn-auth-submit disabled" id="submitBtn" aria-disabled="true">
-                    <i class="lucide-log-in"></i>
+
+                <button type="submit" class="btn btn-primary btn-block btn-lg disabled" id="submitBtn" aria-disabled="true">
+                    <i class="lucide-log-in" aria-hidden="true"></i>
                     <span>Iniciar sesión</span>
                 </button>
             </form>
 
-            <!-- Register Link -->
-            <div class="auth-footer-links" style="margin-top: 18px; padding-top: 14px;">
+            <div class="auth-footer-links">
                 <p>¿No tienes una cuenta? <a href="/register">Regístrate aquí</a></p>
             </div>
 
-            <!-- ========================================================================= -->
-            <!-- [DEBUG] BOTÓN ACCESO AL SELECTOR ANTIGUO                                  -->
-            <!-- Para desactivar o quitar en producción, simplemente comenta o borra:     -->
-            <div class="debug-selector-wrapper">
-                <a th:href="@{/login-selector}" class="btn-debug-selector" title="Acceso al selector de perfiles anterior (Modo depuración)">
-                    <i class="lucide-bug"></i>
-                    <span>Acceso al Selector Antiguo (Debug)</span>
+            <!-- Solo con el perfil "dev": acceso rápido como cualquier usuario de prueba -->
+            <div class="debug-selector-wrapper" th:if="${devLoginEnabled}">
+                <a th:href="@{/login-selector}" class="btn-debug-selector">
+                    <i class="lucide-bug" aria-hidden="true"></i>
+                    <span>Selector de perfiles (modo desarrollo)</span>
                 </a>
             </div>
-            <!-- ========================================================================= -->
 
-            <!-- Trust Row from Landing page -->
             <div class="auth-trust-row">
-                <span><i class="lucide-shield-check"></i> Conexión SSL segura</span>
-                <span><i class="lucide-check"></i> Privacidad RGPD</span>
+                <span><i class="lucide-shield-check" aria-hidden="true"></i> Conexión segura</span>
+                <span><i class="lucide-check" aria-hidden="true"></i> Privacidad RGPD</span>
             </div>
-
         </div>
     </main>
 
-    <!-- Recovery Help Modal -->
-    <div id="recoveryModal" class="custom-modal-overlay" style="display: none;">
-        <div class="custom-modal-content glass-panel" style="max-width: 440px; text-align: left; padding: 28px; border-radius: 20px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-                <h3 style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 19px; font-weight: 700; color: var(--text-main); margin: 0;">
-                    Recuperación de contraseña
-                </h3>
-                <button type="button" onclick="closeRecoveryModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-muted); line-height: 1;">&times;</button>
-            </div>
-            <p style="font-size: 14px; color: var(--text-muted); line-height: 1.6; margin-bottom: 20px;">
+    <!-- Ayuda para recuperar la contraseña -->
+    <div class="ui-modal-overlay" id="recoveryModal" hidden>
+        <div class="ui-modal ui-modal--left" role="dialog" aria-modal="true" aria-labelledby="recoveryTitle">
+            <button type="button" class="ui-modal-close" data-modal-close aria-label="Cerrar">
+                <i class="lucide-x" aria-hidden="true"></i>
+            </button>
+            <h2 class="ui-modal-title" id="recoveryTitle">Recuperación de contraseña</h2>
+            <p class="ui-modal-text">
                 Para restablecer tu acceso a <strong>Cuquora</strong>, contacta con la administración de tu centro de belleza habitual o con soporte técnico.
             </p>
-            <button type="button" class="btn btn-primary" onclick="closeRecoveryModal()" style="width: 100%; height: 44px; font-weight: 700; border-radius: 12px;">
-                Entendido
-            </button>
+            <div class="ui-modal-actions">
+                <button type="button" class="btn btn-primary btn-block" data-modal-close>Entendido</button>
+            </div>
         </div>
     </div>
 
-    <!-- Footer -->
     <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Software de gestión para centros de estética.')}"></div>
 
-    <!-- Interactive Script -->
     <script>
-        function togglePasswordVisibility() {
-            const passwordInput = document.getElementById('passwordInput');
-            const toggleIcon = document.getElementById('togglePasswordIcon');
-            
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                toggleIcon.className = 'lucide-eye-off';
-            } else {
-                passwordInput.type = 'password';
-                toggleIcon.className = 'lucide-eye';
-            }
-        }
-
-        function openRecoveryModal() {
-            document.getElementById('recoveryModal').style.display = 'flex';
-        }
-
-        function closeRecoveryModal() {
-            document.getElementById('recoveryModal').style.display = 'none';
-        }
-
-        window.addEventListener('click', function(event) {
-            const modal = document.getElementById('recoveryModal');
-            if (event.target === modal) {
-                closeRecoveryModal();
-            }
-        });
-
-        // Validation & Disabled Button Interaction (Identical to Contact & Register Center)
-        document.addEventListener('DOMContentLoaded', function () {
-            const form = document.getElementById('loginForm');
-            const submitBtn = document.getElementById('submitBtn');
-            if (!form || !submitBtn) return;
-
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-
-            const fields = {
-                identifier: {
-                    el: document.getElementById('identifierInput'),
-                    validate: (v) => {
-                        const val = (v || '').trim();
-                        if (!val) return 'Por favor, introduce tu correo electrónico o usuario.';
-                        if (val.includes('@')) {
-                            if (!emailRegex.test(val)) return 'Formato de correo no válido. Debe incluir "@" y un dominio válido (ej. usuario@gmail.com).';
-                        } else {
-                            if (val.length < 3) return 'El nombre de usuario debe tener al menos 3 caracteres.';
-                        }
-                        return '';
-                    }
-                },
-                password: {
-                    el: document.getElementById('passwordInput'),
-                    validate: (v) => {
-                        const val = v || '';
-                        if (!val) return 'Por favor, introduce tu contraseña.';
-                        if (val.length < 6) return 'La contraseña debe tener al menos 6 caracteres.';
-                        return '';
-                    }
-                }
-            };
-
-            function setFieldError(fieldEl, errorMessage) {
-                clearFieldError(fieldEl);
-                fieldEl.classList.add('has-error');
-
-                fieldEl.classList.remove('shake-field');
-                void fieldEl.offsetWidth;
-                fieldEl.classList.add('shake-field');
-
-                const msg = document.createElement('div');
-                msg.className = 'field-error-msg';
-                msg.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg><span>' + errorMessage + '</span>';
-
-                const parentGroup = fieldEl.closest('.form-group') || fieldEl.parentNode;
-                parentGroup.appendChild(msg);
-            }
-
-            function clearFieldError(fieldEl) {
-                fieldEl.classList.remove('has-error', 'shake-field');
-                const parentGroup = fieldEl.closest('.form-group') || fieldEl.parentNode;
-                const existing = parentGroup.querySelector('.field-error-msg');
-                if (existing) existing.remove();
-            }
-
-            function isFormValid() {
-                for (const key in fields) {
-                    const item = fields[key];
-                    if (item.el) {
-                        const err = item.validate(item.el.value);
-                        if (err) return false;
-                    }
-                }
-                return true;
-            }
-
-            function updateButtonState() {
-                if (isFormValid()) {
-                    submitBtn.classList.remove('disabled');
-                    submitBtn.removeAttribute('aria-disabled');
-                } else {
-                    submitBtn.classList.add('disabled');
-                    submitBtn.setAttribute('aria-disabled', 'true');
-                }
-            }
-
-            function highlightAllErrors() {
-                let firstInvalid = null;
-                for (const key in fields) {
-                    const item = fields[key];
-                    if (item.el) {
-                        const err = item.validate(item.el.value);
-                        if (err) {
-                            setFieldError(item.el, err);
-                            if (!firstInvalid) firstInvalid = item.el;
-                        } else {
-                            clearFieldError(item.el);
-                        }
-                    }
-                }
-                if (firstInvalid) {
-                    firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    firstInvalid.focus();
-                }
-            }
-
-            for (const key in fields) {
-                const item = fields[key];
-                if (item.el) {
-                    const handleInput = function () {
-                        const err = item.validate(item.el.value);
-                        if (!err) {
-                            clearFieldError(item.el);
-                        }
-                        updateButtonState();
-                    };
-                    item.el.addEventListener('input', handleInput);
-                    item.el.addEventListener('change', handleInput);
-                    item.el.addEventListener('blur', function () {
-                        if (item.el.value.trim()) {
-                            const err = item.validate(item.el.value);
-                            if (err) setFieldError(item.el, err);
-                            else clearFieldError(item.el);
-                        }
-                    });
-                }
-            }
-
-            submitBtn.addEventListener('click', function (e) {
-                if (submitBtn.classList.contains('disabled')) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    highlightAllErrors();
-                }
+        document.addEventListener('DOMContentLoaded', () => {
+            const V = Cuquora.validators;
+            Cuquora.validateForm(document.getElementById('loginForm'), {
+                identifier: [
+                    V.required('Por favor, introduce tu correo electrónico o usuario.'),
+                    V.emailOrUsername(3, 'El nombre de usuario debe tener al menos 3 caracteres.')
+                ],
+                password: [V.required('Por favor, introduce tu contraseña.')]
             });
-
-            form.addEventListener('submit', function (e) {
-                if (submitBtn.classList.contains('disabled') || !isFormValid()) {
-                    e.preventDefault();
-                    highlightAllErrors();
-                }
-            });
-
-            updateButtonState();
-            setTimeout(updateButtonState, 150);
-            setTimeout(updateButtonState, 500);
         });
     </script>
 </body>

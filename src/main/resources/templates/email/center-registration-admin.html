@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{email/layout :: layout('Nueva solicitud de alta de centro', 'Recibida el ' + ${timestamp} + ' para su verificación', ~{::content})}">
+<body>
+<th:block th:fragment="content">
+    <table style="width:100%; border-collapse:collapse; margin-bottom:24px; font-size:14.5px;">
+        <tr><td style="padding:8px 0; color:#7a716a; width:170px; font-weight:600;">Nombre comercial:</td>
+            <td style="padding:8px 0; font-weight:700;" th:text="${form.centerName()}">Centro</td></tr>
+        <tr><td style="padding:8px 0; color:#7a716a; font-weight:600;">CIF / NIF:</td>
+            <td style="padding:8px 0; font-weight:700;" th:text="${form.cif()}">CIF</td></tr>
+        <tr><td style="padding:8px 0; color:#7a716a; font-weight:600;">Responsable:</td>
+            <td style="padding:8px 0;" th:text="${form.contactName()}">Nombre</td></tr>
+        <tr><td style="padding:8px 0; color:#7a716a; font-weight:600;">Teléfono:</td>
+            <td style="padding:8px 0;" th:text="${form.phone()}">Teléfono</td></tr>
+        <tr><td style="padding:8px 0; color:#7a716a; font-weight:600;">Correo:</td>
+            <td style="padding:8px 0;"><a th:href="'mailto:' + ${form.email()}" th:text="${form.email()}" style="color:#a87d4f; text-decoration:none; font-weight:600;">correo</a></td></tr>
+        <tr><td style="padding:8px 0; color:#7a716a; font-weight:600;">Ciudad / CP:</td>
+            <td style="padding:8px 0;" th:text="${#strings.isEmpty(form.city()) ? 'No especificada' : form.city()}">Ciudad</td></tr>
+        <tr><td style="padding:8px 0; color:#7a716a; font-weight:600;">Especialidades:</td>
+            <td style="padding:8px 0;" th:text="${specialties}">-</td></tr>
+    </table>
+    <div style="background:#faf7f4; border-left:4px solid #c5a880; padding:18px 20px; border-radius:8px;">
+        <p style="margin:0 0 8px; font-size:12px; text-transform:uppercase; letter-spacing:0.5px; color:#857b74; font-weight:700;">Información adicional</p>
+        <p style="margin:0; font-size:14.5px; line-height:1.6; white-space:pre-wrap;"
+           th:text="${#strings.isEmpty(form.notes()) ? 'Sin observaciones adicionales' : form.notes()}">Notas</p>
+    </div>
+</th:block>
+</body>
+</html>

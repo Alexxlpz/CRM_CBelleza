@@ -1,99 +1,53 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Selector de Perfiles (Debug) - Cuquora CRM</title>
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="icon" type="image/png" href="/images/icon.png">
-    <link rel="apple-touch-icon" href="/images/icon.png">
-    <!-- Lucide Icons CDN -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.321.0/font/lucide.min.css">
-    <!-- Stylesheets -->
-    <link rel="stylesheet" href="/css/common.css">
+    <th:block th:replace="~{fragments/head :: meta('Selector de Perfiles (Desarrollo) - Cuquora CRM')}"></th:block>
     <link rel="stylesheet" href="/css/auth.css">
 </head>
 <body class="auth-page">
     <div th:replace="~{fragments/navbar :: brand(false)}"></div>
 
-    <!-- Main Content -->
     <main class="auth-container">
         <div class="auth-card">
-            
-            <!-- Heading -->
             <div class="auth-header">
-                <h2>Selector de perfiles</h2>
-                <p>Modo de depuración: selecciona un usuario para ingresar directamente</p>
+                <h1>Selector de perfiles</h1>
+                <p>Modo desarrollo: selecciona un usuario para entrar directamente, sin contraseña.</p>
             </div>
-            
-            <!-- Direct Profile Selection Form -->
-            <form action="/select-session" method="POST" id="loginForm">
-                <input type="hidden" name="role" id="formRole" value="CLIENT">
-                <input type="hidden" name="userId" id="formUserId" value="">
-                
+
+            <form th:action="@{/select-session}" method="post">
                 <div class="form-group">
-                    <label class="form-label" for="profileSelector">Seleccionar usuario o rol</label>
-                    <select id="profileSelector" class="form-control" onchange="updateLoginFormValues()" required>
+                    <label class="form-label" for="profileSelector">Seleccionar usuario</label>
+                    <select id="profileSelector" name="userId" class="form-control" required>
                         <option value="" disabled selected>Elige un perfil para continuar...</option>
-                        
-                        <optgroup label="Clientes (Cuentas Registradas)">
-                            <option th:each="client : ${clients}" 
-                                    th:value="'CLIENT:' + ${client.id}" 
-                                    th:text="${client.name} + ' (Cliente registrado)'">
-                                Sofía Martínez
-                            </option>
+                        <optgroup label="Clientes">
+                            <option th:each="client : ${clients}" th:value="${client.id}"
+                                    th:text="${client.name}">Sofía Martínez</option>
                         </optgroup>
-                        
-                        <optgroup label="Colaboradores (Personal)">
-                            <option th:each="worker : ${workers}" 
-                                    th:value="'WORKER:' + ${worker.id}" 
-                                    th:text="${worker.name} + ' — ' + ${worker.center.name}">
+                        <optgroup label="Personal de los centros">
+                            <option th:each="worker : ${workers}" th:value="${worker.id}"
+                                    th:text="${worker.name} + (${worker.center != null} ? ' — ' + ${worker.center.name} : '')">
                                 Carlos Mendoza — Centro Histórico
                             </option>
                         </optgroup>
                     </select>
                 </div>
-                
-                <button type="submit" class="btn btn-primary btn-auth-submit">
-                    <i class="lucide-log-in"></i>
-                    <span>Ingresar con perfil seleccionado</span>
+
+                <button type="submit" class="btn btn-primary btn-block btn-lg">
+                    <i class="lucide-log-in" aria-hidden="true"></i>
+                    <span>Entrar con el perfil seleccionado</span>
                 </button>
             </form>
 
-            <!-- Link back to standard credentials login -->
             <div class="auth-footer-links">
                 <p><a href="/login">← Volver al inicio de sesión con credenciales</a></p>
             </div>
 
-            <!-- Trust Row -->
             <div class="auth-trust-row">
-                <span><i class="lucide-shield-check"></i> Entorno de desarrollo local</span>
+                <span><i class="lucide-shield-alert" aria-hidden="true"></i> Solo disponible con el perfil "dev"</span>
             </div>
-
         </div>
     </main>
 
-    <!-- Footer -->
     <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Entorno de desarrollo.')}"></div>
-
-    <!-- Script to handle selector values -->
-    <script>
-        function updateLoginFormValues() {
-            const selector = document.getElementById('profileSelector');
-            const roleInput = document.getElementById('formRole');
-            const userIdInput = document.getElementById('formUserId');
-            
-            const selectedVal = selector.value;
-            if (selectedVal) {
-                const parts = selectedVal.split(':');
-                const role = parts[0];
-                const idVal = parts[1];
-                
-                roleInput.value = role;
-                userIdInput.value = idVal;
-            }
-        }
-    </script>
 </body>
 </html>

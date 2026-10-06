@@ -1,0 +1,161 @@
+/* ==========================================================================
+   Cuquora — Tokens de diseño
+   Única fuente de colores, radios, sombras y movimiento. Ningún otro fichero
+   debe declarar :root ni colores en hexadecimal: si hace falta un color nuevo,
+   se añade aquí con su variante para modo oscuro.
+   ========================================================================== */
+
+:root {
+    color-scheme: light;
+
+    /* ---- Marca ---- */
+    --primary: #c5a880;              /* Champagne bronze */
+    --primary-rgb: 197, 168, 128;    /* para tintes: rgba(var(--primary-rgb), .15) */
+    --primary-light: #ecdcc5;
+    --primary-dark: #a3875f;         /* fondos, bordes y degradados */
+    --primary-text: #84653d;         /* texto dorado con contraste AA sobre blanco/crema */
+    --secondary: #e0b0b0;            /* Rose gold */
+    --secondary-rgb: 224, 176, 176;
+    --secondary-dark: #b88a8a;
+    --on-primary: #ffffff;           /* texto sobre botones/fondos dorados */
+    --gold-glow: rgba(var(--primary-rgb), 0.35);
+    /* Botones y estados activos con texto blanco: tonos bronce con contraste AA (≥4,5:1) */
+    --brand-gradient: linear-gradient(135deg, #8f7049 0%, #765833 100%);
+    --brand-solid: #84653d;
+    --danger-gradient: linear-gradient(135deg, #b3261e 0%, #8c1d17 100%);
+
+    /* ---- Superficies ---- */
+    --bg-gradient: linear-gradient(135deg, #faf6f2 0%, #f3e6dd 100%);
+    --surface: #ffffff;
+    --surface-rgb: 255, 255, 255;
+    --surface-muted: #faf7f2;        /* campos de formulario, bloques secundarios */
+    --surface-inverse: #2b2825;      /* tooltips, chips oscuros */
+    --on-inverse: #f5f0eb;
+    --overlay: rgba(31, 25, 20, 0.55);
+    --card-bg: rgba(255, 255, 255, 0.75);
+    --card-border: rgba(255, 255, 255, 0.5);
+    --border-soft: #ebe2d6;
+    --disabled-bg: #d8d0c7;          /* botones deshabilitados */
+    --disabled-text: #6f665d;
+
+    /* ---- Texto ---- */
+    --text-main: #2b2825;
+    --text-muted: #6b6159;           /* 5,6:1 sobre blanco y 5,1:1 sobre crema */
+    --text-soft: #8f857c;            /* solo para texto no esencial / deshabilitado */
+
+    /* ---- Estados ---- */
+    --success: #8fa89b;
+    --success-text: #2f4539;
+    --success-bg: rgba(143, 168, 155, 0.25);
+    --success-strong: #2f6b45;
+    --success-border: rgba(47, 107, 69, 0.28);
+
+    --danger: #d99a9a;
+    --danger-dark: #b87474;
+    --danger-text: #592525;
+    --danger-bg: rgba(217, 154, 154, 0.25);
+
+    --warning: #ecd29b;
+    --warning-text: #59451d;
+    --warning-bg: rgba(236, 210, 155, 0.25);
+
+    --error: #b3261e;                /* validación y mensajes de error */
+    --error-rgb: 179, 38, 30;
+    --error-bg: #fdf1f0;
+    --error-border: rgba(179, 38, 30, 0.3);
+
+    --neutral-text: #334155;         /* estado "completada" */
+    --info-text: #1d5fa3;
+    --info-rgb: 111, 169, 232;
+
+    /* Bloques oscuros que lo son en ambos modos (banner promocional) */
+    --ink: #2b2825;
+    --ink-deep: #1a1816;
+    --on-ink: #f5f0eb;
+    --on-ink-muted: rgba(245, 240, 235, 0.72);
+    --neutral-rgb: 100, 116, 139;
+
+    /* ---- Forma ---- */
+    --border-radius-lg: 24px;
+    --border-radius-md: 16px;
+    --border-radius-sm: 10px;
+    --radius-pill: 999px;
+
+    /* ---- Sombras ---- */
+    --shadow-soft: 0 12px 40px rgba(var(--primary-rgb), 0.08);
+    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.04);
+    --shadow-gold: 0 4px 15px rgba(var(--primary-rgb), 0.2);
+    --shadow-gold-hover: 0 6px 20px rgba(var(--primary-rgb), 0.35);
+    --shadow-modal: 0 24px 60px rgba(31, 25, 20, 0.28);
+
+    /* ---- Movimiento ---- */
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* ---- Foco (anillo interior, nunca recortado por overflow) ---- */
+    --focus-ring: inset 0 0 0 2px var(--primary-dark), inset 0 0 0 3px rgba(255, 255, 255, 0.5);
+    --focus-ring-primary-dark: inset 0 0 0 2px var(--primary-dark), inset 0 0 0 3px rgba(255, 255, 255, 0.5);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        color-scheme: dark;
+
+        --primary-light: #473928;
+        --primary-dark: #b8996d;
+        --primary-text: #e8d3b8;
+        --secondary-dark: #f7d2d2;
+        --on-primary: #1c1815;
+        --gold-glow: rgba(var(--primary-rgb), 0.25);
+        --brand-gradient: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        --brand-solid: var(--primary);
+        --danger-gradient: linear-gradient(135deg, #e07a72 0%, #c8605a 100%);
+
+        --bg-gradient: linear-gradient(135deg, #1c1815 0%, #120e0c 100%);
+        --surface: #221d19;
+        --surface-rgb: 34, 29, 25;
+        --surface-muted: #2b2520;
+        --surface-inverse: #f5f0eb;
+        --on-inverse: #2b2825;
+        --overlay: rgba(0, 0, 0, 0.65);
+        --card-bg: rgba(34, 29, 25, 0.82);
+        --card-border: rgba(var(--primary-rgb), 0.2);
+        --border-soft: rgba(var(--primary-rgb), 0.18);
+        --disabled-bg: #3a332d;
+        --disabled-text: #9a8f84;
+
+        --text-main: #f5f0eb;
+        --text-muted: #c2b6aa;
+        --text-soft: #968a7f;
+
+        --success: #678a76;
+        --success-text: #c2eed5;
+        --success-bg: rgba(103, 138, 118, 0.2);
+        --success-strong: #9fd5b0;
+        --success-border: rgba(159, 213, 176, 0.3);
+
+        --danger: #b86e6e;
+        --danger-dark: #9a5656;
+        --danger-text: #ffcfcf;
+        --danger-bg: rgba(184, 110, 110, 0.2);
+
+        --warning: #cfa861;
+        --warning-text: #ffefcd;
+        --warning-bg: rgba(207, 168, 97, 0.2);
+
+        --error: #ff9d94;
+        --error-rgb: 255, 157, 148;
+        --error-bg: rgba(255, 157, 148, 0.1);
+        --error-border: rgba(255, 157, 148, 0.35);
+
+        --neutral-text: #e2e8f0;
+        --info-text: #9cc6f2;
+        --neutral-rgb: 148, 163, 184;
+
+        --shadow-soft: 0 12px 40px rgba(0, 0, 0, 0.3);
+        --shadow-modal: 0 24px 60px rgba(0, 0, 0, 0.55);
+
+        --focus-ring: inset 0 0 0 2px var(--primary), inset 0 0 0 3px rgba(0, 0, 0, 0.5);
+        --focus-ring-primary-dark: inset 0 0 0 2px var(--primary-dark), inset 0 0 0 3px rgba(0, 0, 0, 0.5);
+    }
+}

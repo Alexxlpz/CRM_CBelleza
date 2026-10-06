@@ -1,359 +1,164 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Control de Inventario - Cuquora CRM</title>
-    <!-- Lucide Icons CDN -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.321.0/font/lucide.min.css">
-    <!-- Stylesheets -->
-    <link rel="stylesheet" href="/css/common.css">
+    <th:block th:replace="~{fragments/head :: meta('Control de Inventario - Cuquora CRM')}"></th:block>
     <link rel="stylesheet" href="/css/inventario.css">
+    <script src="/js/sheets.js" defer></script>
 </head>
 <body>
     <div th:replace="~{fragments/navbar :: worker('/worker/dashboard', 'Volver al panel principal', ${notifications})}"></div>
 
-    <!-- Main Container -->
     <main class="main-container">
-
-        <!-- Screen Header -->
         <div class="page-header inventory-page-header">
             <div>
                 <h1>Gestión de Inventario</h1>
                 <p th:text="${#lists.size(inventoryItems)} + ' productos registrados en el stock del salón'">0 productos registrados</p>
             </div>
-            
-            <button type="button" class="btn btn-primary btn-add-product" onclick="openProductSheet()" title="Añadir Producto">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <button type="button" class="btn btn-primary btn-add-product" data-sheet-open="addProductModal">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                 <span class="btn-add-label">Añadir Producto</span>
             </button>
         </div>
 
-        <!-- Category Filter Bar -->
-        <div class="category-filter-bar">
-            <button type="button" class="category-pill active" onclick="filterCategory('all', this)">Todos</button>
-            <button type="button" class="category-pill" onclick="filterCategory('Rostro', this)">Rostro</button>
-            <button type="button" class="category-pill" onclick="filterCategory('Cabello', this)">Cabello</button>
-            <button type="button" class="category-pill" onclick="filterCategory('Uñas', this)">Uñas</button>
-            <button type="button" class="category-pill" onclick="filterCategory('Cuerpo', this)">Cuerpo</button>
+        <div th:replace="~{fragments/alerts :: flash}"></div>
+
+        <div class="category-filter-bar" role="toolbar" aria-label="Filtrar por categoría">
+            <button type="button" class="category-pill active" data-category-filter="ALL" aria-pressed="true">Todos</button>
+            <button type="button" class="category-pill" data-category-filter="Rostro" aria-pressed="false">Rostro</button>
+            <button type="button" class="category-pill" data-category-filter="Cabello" aria-pressed="false">Cabello</button>
+            <button type="button" class="category-pill" data-category-filter="Uñas" aria-pressed="false">Uñas</button>
+            <button type="button" class="category-pill" data-category-filter="Cuerpo" aria-pressed="false">Cuerpo</button>
         </div>
 
-        <!-- Inventory Grid -->
         <div class="inventory-grid" id="inventoryGrid" th:if="${not #lists.isEmpty(inventoryItems)}">
-            <div class="inventory-card glass-panel" th:each="item : ${inventoryItems}" th:data-category="${item.product.category}">
-                
-                <!-- Category image mapping -->
-                <img th:if="${item.product.category == 'Rostro'}" src="/images/face_serum.png" class="product-thumbnail" alt="Rostro">
-                <img th:if="${item.product.category == 'Cabello'}" src="/images/hair_oil.png" class="product-thumbnail" alt="Cabello">
-                <img th:if="${item.product.category != 'Rostro' and item.product.category != 'Cabello'}" src="/images/beauty_salon_hero.png" class="product-thumbnail" alt="Otros">
-                
+            <article class="inventory-card glass-panel" th:each="item : ${inventoryItems}" th:data-category="${item.product.category}">
+                <img th:src="${item.product.category == 'Rostro' ? '/images/face_serum.webp' : (item.product.category == 'Cabello' ? '/images/hair_oil.webp' : '/images/beauty_salon_hero.webp')}"
+                     class="product-thumbnail" alt="" loading="lazy" width="96" height="96">
+
                 <div class="inventory-card-info">
-                    <span class="product-name" th:text="${item.product.name}">Producto</span>
+                    <h2 class="product-name" th:text="${item.product.name}">Producto</h2>
                     <div class="product-meta">
-                        <span class="product-price" th:text="${item.product.price} + ' €'">0.00 €</span>
+                        <span class="product-price" th:text="${#numbers.formatDecimal(item.product.price, 1, 'POINT', 2, 'COMMA')} + ' €'">0,00 €</span>
                         <span class="product-category" th:text="${item.product.category}">Categoría</span>
                     </div>
                     <p class="product-description-short" th:text="${item.product.description}">Descripción del producto...</p>
-                    
-                    <!-- Action buttons row -->
-                    <div class="inventory-card-actions">
-                        <button type="button" class="btn-card-action" 
-                                th:onclick="'openProductModal(\'detailModal_\' + ' + ${item.id} + ')'">
-                            <i class="lucide-info"></i> Ver Info
-                        </button>
 
-                        <form th:action="@{'/worker/inventory/' + ${item.id} + '/delete'}" method="POST" 
-                              onsubmit="return confirm('¿Seguro que deseas eliminar este producto del inventario local? Se conservará en el catálogo general.');" 
-                              class="delete-form">
-                            <button type="submit" class="btn-card-action btn-delete" aria-label="Eliminar producto" title="Eliminar producto del inventario">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                    <div class="inventory-card-actions">
+                        <button type="button" class="btn-card-action" th:attr="data-sheet-open='detailModal_' + ${item.id}">
+                            <i class="lucide-info" aria-hidden="true"></i> Ver Info
+                        </button>
+                        <form th:action="@{/worker/inventory/{id}/delete(id=${item.id})}" method="post" class="delete-form"
+                              data-confirm="El producto se retirará del inventario de tu centro, pero se conservará en el catálogo general."
+                              data-confirm-title="¿Eliminar este producto?" data-confirm-button="Eliminar">
+                            <button type="submit" class="btn-card-action btn-delete" th:aria-label="'Eliminar ' + ${item.product.name} + ' del inventario'">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
                             </button>
                         </form>
                     </div>
                 </div>
-                
-                <!-- Stock Direct Adjuster Panel (+1 / -1 buttons) -->
+
                 <div class="stock-adjust-panel">
                     <div class="stock-value-wrapper">
                         <span class="stock-label">Stock:</span>
-                        <span class="stock-count-val" th:text="${item.stock}">0</span>
+                        <span class="stock-count-val" th:text="${item.stock}" aria-live="polite">0</span>
                     </div>
-                    
-                    <!-- Plus and Minus Buttons -->
                     <div class="stock-adjust-actions">
-                        <!-- Decrement Button (-1) -->
-                        <button type="button" class="btn-adjust btn-decrement" 
-                                th:data-id="${item.id}" th:disabled="${item.stock == 0}"
-                                onclick="handleStockAdjust(this, -1)">-1</button>
-                        <!-- Increment Button (+1) -->
-                        <button type="button" class="btn-adjust btn-increment" 
-                                th:data-id="${item.id}"
-                                onclick="handleStockAdjust(this, 1)">+1</button>
+                        <button type="button" class="btn-adjust btn-decrement" th:data-id="${item.id}" data-change="-1"
+                                th:disabled="${item.stock == 0}" th:aria-label="'Restar una unidad de ' + ${item.product.name}">-1</button>
+                        <button type="button" class="btn-adjust btn-increment" th:data-id="${item.id}" data-change="1"
+                                th:aria-label="'Sumar una unidad de ' + ${item.product.name}">+1</button>
                     </div>
-                    
-                    <!-- Stock Alert Badges -->
-                    <span th:if="${item.stock == 0}" class="badge badge-rejected badge-pill badge-micro">Agotado</span>
-                    <span th:if="${item.stock > 0 and item.stock <= 3}" class="badge badge-pending badge-pill badge-micro">Bajo Stock</span>
-                    <span th:if="${item.stock > 3}" class="badge badge-confirmed badge-pill badge-micro">Normal</span>
+                    <span class="badge badge-pill badge-micro stock-badge"
+                          th:classappend="${item.stock == 0 ? 'badge-rejected' : (item.stock <= 3 ? 'badge-pending' : 'badge-confirmed')}"
+                          th:text="${item.stock == 0 ? 'Agotado' : (item.stock <= 3 ? 'Bajo Stock' : 'Normal')}">Normal</span>
                 </div>
-
-                
-            </div>
+            </article>
         </div>
 
-        <!-- Product Info Modals Component -->
         <div th:replace="~{worker/fragments/inventory-modals :: productDetailModals(${inventoryItems})}"></div>
 
-        <!-- Empty state -->
         <div class="no-appointments-box glass-panel" th:if="${#lists.isEmpty(inventoryItems)}">
-            <i class="lucide-package-x"></i>
+            <i class="lucide-package-x" aria-hidden="true"></i>
             <p>No hay existencias en stock. Comienza añadiendo productos desde el catálogo.</p>
         </div>
 
-        <!-- Mobile FAB Button -->
-        <button type="button" class="fab-add-btn" onclick="openProductSheet()" aria-label="Añadir Producto" title="Añadir Producto">
-            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        <button type="button" class="fab-add-btn" data-sheet-open="addProductModal" aria-label="Añadir producto">
+            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
         </button>
-        
     </main>
 
-    <!-- Add Product Sheet Modal Component -->
     <div th:replace="~{worker/fragments/inventory-modals :: addProductSheet(${catalogProducts})}"></div>
 
-    <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Panel de gestión operativa.')}"></div>
+    <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Panel de gestión de centros.')}"></div>
 
-    <!-- JS for mode tab switching in modal and notifications -->
     <script>
-        function openProductModal(modalId) {
-            const modal = document.getElementById(modalId);
-            if (modal) {
-                modal.style.display = 'flex';
-                document.body.style.overflow = 'hidden';
-            }
-        }
-
-        function closeProductModal(modalId) {
-            const modal = document.getElementById(modalId);
-            if (modal) {
-                modal.style.display = 'none';
-                document.body.style.overflow = 'auto';
-            }
-        }
-
-        function closeProductModalOnBackdrop(event, modalId) {
-            if (event.target.classList.contains('info-modal-overlay')) {
-                closeProductModal(modalId);
-            }
-        }
-
-        function filterCategory(category, btnEl) {
-            const pills = document.querySelectorAll('.category-pill');
-            pills.forEach(p => p.classList.remove('active'));
-            if (btnEl) btnEl.classList.add('active');
-
-            const cards = document.querySelectorAll('#inventoryGrid .inventory-card');
-            cards.forEach(card => {
-                const cardCat = card.getAttribute('data-category');
-                if (category === 'all' || cardCat === category) {
-                    card.style.display = 'flex';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-        }
-
-        function setAddMode(mode) {
-            const tabExisting = document.getElementById('tab-existing');
-            const tabNew = document.getElementById('tab-new');
-            const groupExisting = document.getElementById('group-existing');
-            const groupNew = document.getElementById('group-new');
-            const inputMode = document.getElementById('input-mode');
-            
-            const prodSelect = document.getElementById('productId');
-            const newName = document.getElementById('name');
-            const newPrice = document.getElementById('price');
-            
-            if (mode === 'existing') {
-                tabExisting.classList.add('active');
-                tabNew.classList.remove('active');
-                groupExisting.classList.add('active');
-                groupNew.classList.remove('active');
-                inputMode.value = 'existing';
-                
-                prodSelect.setAttribute('required', 'required');
-                newName.removeAttribute('required');
-                newPrice.removeAttribute('required');
-            } else {
-                tabExisting.classList.remove('active');
-                tabNew.classList.add('active');
-                groupExisting.classList.remove('active');
-                groupNew.classList.add('active');
-                inputMode.value = 'new';
-                
-                prodSelect.removeAttribute('required');
-                newName.setAttribute('required', 'required');
-                newPrice.setAttribute('required', 'required');
-            }
-        }
-        
-        // Bottom Sheet Drag to Dismiss
-        function initBottomSheetDrag() {
-            document.querySelectorAll('.bottom-sheet-handle').forEach(handle => {
-                let startY = 0;
-                let currentDeltaY = 0;
-                let isDragging = false;
-                const modalCard = handle.closest('.sheet-content, .info-modal-card');
-                const overlay = handle.closest('.sheet-overlay, .info-modal-overlay');
-
-                if (!modalCard || !overlay) return;
-
-                function onStart(e) {
-                    startY = e.touches ? e.touches[0].clientY : e.clientY;
-                    isDragging = true;
-                    modalCard.style.transition = 'none';
-                    
-                    document.addEventListener('touchmove', onMove, { passive: false });
-                    document.addEventListener('touchend', onEnd);
-                    document.addEventListener('mousemove', onMove);
-                    document.addEventListener('mouseup', onEnd);
-                }
-
-                function onMove(e) {
-                    if (!isDragging) return;
-                    const currentY = e.touches ? e.touches[0].clientY : e.clientY;
-                    currentDeltaY = currentY - startY;
-
-                    if (currentDeltaY > 0) { // Dragging downwards
-                        if (e.cancelable) e.preventDefault();
-                        modalCard.style.transform = `translateY(${currentDeltaY}px)`;
-                        overlay.style.opacity = `${Math.max(0.1, 1 - currentDeltaY / 300)}`;
-                    }
-                }
-
-                function onEnd() {
-                    if (!isDragging) return;
-                    isDragging = false;
-
-                    document.removeEventListener('touchmove', onMove);
-                    document.removeEventListener('touchend', onEnd);
-                    document.removeEventListener('mousemove', onMove);
-                    document.removeEventListener('mouseup', onEnd);
-
-                    modalCard.style.transition = 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease';
-
-                    if (currentDeltaY > 70) {
-                        modalCard.style.transform = 'translateY(100%)';
-                        overlay.style.opacity = '0';
-                        setTimeout(() => {
-                            if (overlay.id === 'addProductModal') {
-                                closeProductSheet();
-                            } else if (overlay.id) {
-                                closeProductModal(overlay.id);
-                            }
-                            modalCard.style.transform = '';
-                            modalCard.style.transition = '';
-                            overlay.style.opacity = '';
-                            currentDeltaY = 0;
-                        }, 220);
-                    } else {
-                        modalCard.style.transform = 'translateY(0)';
-                        overlay.style.opacity = '1';
-                        setTimeout(() => {
-                            modalCard.style.transition = '';
-                            currentDeltaY = 0;
-                        }, 250);
-                    }
-                }
-
-                handle.addEventListener('touchstart', onStart, { passive: true });
-                handle.addEventListener('mousedown', onStart);
-            });
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            setAddMode('existing');
-            initBottomSheetDrag();
-        });
-
-        // AJAX Stock Adjuster
-        async function handleStockAdjust(btn, change) {
-            const itemId = btn.getAttribute('data-id');
-            const card = btn.closest('.inventory-card');
-            const stockSpan = card.querySelector('.stock-value-wrapper span:last-child');
-            const decBtn = card.querySelector('.btn-decrement');
-            
-            try {
-                const url = `/worker/inventory/${itemId}/adjust-stock`;
-                
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: `change=${change}`
+        document.addEventListener('DOMContentLoaded', () => {
+            /* ---- Filtro por categoría ---- */
+            document.querySelectorAll('[data-category-filter]').forEach(button => {
+                button.addEventListener('click', () => {
+                    const category = button.dataset.categoryFilter;
+                    document.querySelectorAll('[data-category-filter]').forEach(b => {
+                        b.classList.toggle('active', b === button);
+                        b.setAttribute('aria-pressed', String(b === button));
+                    });
+                    document.querySelectorAll('#inventoryGrid .inventory-card').forEach(card => {
+                        card.hidden = category !== 'ALL' && card.dataset.category !== category;
+                    });
                 });
-                
-                if (response.ok) {
-                    let currentStock = parseInt(stockSpan.innerText) || 0;
-                    let newStock = Math.max(0, currentStock + change);
-                    stockSpan.innerText = newStock;
-                    
-                    // Add pulse animation
-                    stockSpan.classList.remove('pulsing');
-                    void stockSpan.offsetWidth; // trigger reflow
-                    stockSpan.classList.add('pulsing');
-                    
-                    if (newStock === 0) {
-                        decBtn.disabled = true;
-                    } else {
-                        decBtn.disabled = false;
-                    }
-                    
-                    const badgeContainer = card.querySelector('.stock-adjust-panel');
-                    const oldBadges = badgeContainer.querySelectorAll('.badge');
-                    oldBadges.forEach(b => b.remove());
-                    
-                    const badge = document.createElement('span');
-                    badge.style.fontSize = '8px';
-                    badge.style.padding = '2px 6px';
-                    if (newStock === 0) {
-                        badge.className = 'badge badge-rejected badge-pill';
-                        badge.innerText = 'Agotado';
-                    } else if (newStock > 0 && newStock <= 3) {
-                        badge.className = 'badge badge-pending badge-pill';
-                        badge.innerText = 'Bajo Stock';
-                    } else {
-                        badge.className = 'badge badge-confirmed badge-pill';
-                        badge.innerText = 'Normal';
-                    }
-                    badgeContainer.appendChild(badge);
-                } else {
-                    alert('Error al actualizar el stock. Por favor, inténtelo de nuevo.');
-                }
-            } catch (err) {
-                console.error(err);
-                alert('Error de red al actualizar el stock.');
+            });
+
+            /* ---- Alta: catálogo existente o producto nuevo ---- */
+            const modeInput = document.getElementById('input-mode');
+            const productSelect = document.getElementById('productId');
+            const newRequired = [document.getElementById('name'), document.getElementById('price')];
+            function applyMode(mode) {
+                modeInput.value = mode;
+                productSelect.required = mode === 'existing';
+                newRequired.forEach(input => { input.required = mode === 'new'; });
             }
-        }
+            const tablist = document.getElementById('addModeTabs');
+            tablist.addEventListener('tabchange', e => applyMode(e.detail.tab.dataset.mode));
+            applyMode(tablist.querySelector('[aria-selected="true"]')?.dataset.mode || 'existing');
 
-        // Product Sheet helper controls
-        function openProductSheet() {
-            const sheet = document.getElementById('addProductModal');
-            sheet.style.display = 'flex';
-            document.body.style.overflow = 'hidden'; // Prevent background scrolling
-        }
-
-        function closeProductSheet() {
-            const sheet = document.getElementById('addProductModal');
-            sheet.style.display = 'none';
-            document.body.style.overflow = 'auto'; // Restore background scrolling
-        }
-
-        function closeProductSheetOnOverlay(event) {
-            if (event.target.id === 'addProductModal') {
-                closeProductSheet();
+            /* ---- Ajuste rápido de stock ---- */
+            function stockBadge(badge, stock, lowThreshold) {
+                badge.classList.remove('badge-rejected', 'badge-pending', 'badge-confirmed');
+                if (stock === 0) { badge.classList.add('badge-rejected'); badge.textContent = 'Agotado'; }
+                else if (stock <= lowThreshold) { badge.classList.add('badge-pending'); badge.textContent = 'Bajo Stock'; }
+                else { badge.classList.add('badge-confirmed'); badge.textContent = 'Normal'; }
             }
-        }
+
+            document.querySelectorAll('.btn-adjust').forEach(button => {
+                button.addEventListener('click', async () => {
+                    const card = button.closest('.inventory-card');
+                    const stockValue = card.querySelector('.stock-count-val');
+                    const decrement = card.querySelector('.btn-decrement');
+                    card.querySelectorAll('.btn-adjust').forEach(b => { b.disabled = true; });
+                    try {
+                        const response = await fetch(`/worker/inventory/${encodeURIComponent(button.dataset.id)}/adjust-stock`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            body: new URLSearchParams({ change: button.dataset.change })
+                        });
+                        if (!response.ok) {
+                            throw new Error(await Cuquora.errorMessage(response, 'No se ha podido actualizar el stock.'));
+                        }
+                        const { stock, lowStockThreshold } = await response.json();
+                        stockValue.textContent = stock;
+                        stockValue.classList.remove('pulsing');
+                        void stockValue.offsetWidth;
+                        stockValue.classList.add('pulsing');
+                        stockBadge(card.querySelector('.stock-badge'), stock, lowStockThreshold);
+                        card.querySelector('.btn-increment').disabled = false;
+                        decrement.disabled = stock === 0;
+                    } catch (err) {
+                        card.querySelectorAll('.btn-adjust').forEach(b => { b.disabled = false; });
+                        decrement.disabled = Number(stockValue.textContent) === 0;
+                        Cuquora.alert(err.message || 'Error de conexión al actualizar el stock.', 'No se ha podido actualizar el stock');
+                    }
+                });
+            });
+        });
     </script>
 </body>
 </html>

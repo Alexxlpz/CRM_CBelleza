@@ -1,13 +1,7 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agenda del Salón - Cuquora CRM</title>
-    <!-- Lucide Icons CDN -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.321.0/font/lucide.min.css">
-    <!-- Stylesheets -->
-    <link rel="stylesheet" href="/css/common.css">
+    <th:block th:replace="~{fragments/head :: meta('Agenda del Salón - Cuquora CRM')}"></th:block>
     <link rel="stylesheet" href="/css/calendar.css">
 </head>
 <body>
@@ -26,18 +20,18 @@
             <!-- Left Pane: Monthly Calendar Grid -->
             <section class="calendar-card glass-panel">
                 <div class="calendar-header">
-                    <h2 class="calendar-month-title" id="calendarMonthYear">Julio 2026</h2>
+                    <h2 class="calendar-month-title" id="calendarMonthYear" aria-live="polite">Julio 2026</h2>
                     <div class="calendar-header-nav">
-                        <button type="button" class="calendar-nav-btn" onclick="prevMonth()" aria-label="Mes anterior">
+                        <button type="button" class="calendar-nav-btn" id="prevMonthBtn" aria-label="Mes anterior">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
                         </button>
-                        <button type="button" class="calendar-nav-btn" onclick="nextMonth()" aria-label="Mes siguiente">
+                        <button type="button" class="calendar-nav-btn" id="nextMonthBtn" aria-label="Mes siguiente">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
                         </button>
                     </div>
                 </div>
                 
-                <div class="calendar-weekdays">
+                <div class="calendar-weekdays" aria-hidden="true">
                     <div>Lun</div>
                     <div>Mar</div>
                     <div>Mié</div>
@@ -55,13 +49,13 @@
             <!-- Right Pane: Selected Day Agenda Details -->
             <section class="agenda-panel glass-panel">
                 <div class="agenda-header">
-                    <h3 id="selectedDateTitle">Selecciona un día</h3>
+                    <h2 id="selectedDateTitle" tabindex="-1">Selecciona un día</h2>
                     <p id="selectedDateCount">Citas programadas para la fecha elegida</p>
                 </div>
                 
-                <div class="agenda-list" id="agendaList">
+                <div class="agenda-list" id="agendaList" aria-live="polite">
                     <div class="notification-empty">
-                        <i class="lucide-calendar-days"></i>
+                        <i class="lucide-calendar-days" aria-hidden="true"></i>
                         <span>Haz clic en un día del calendario para ver las citas de esa jornada</span>
                     </div>
                 </div>
@@ -71,370 +65,12 @@
         
     </main>
 
-    <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Prototipo responsive.')}"></div>
+    <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Panel de gestión de centros.')}"></div>
 
-    <!-- Inline appointments from Thymeleaf -->
+    <!-- Citas del centro (JSON) para el calendario -->
     <script th:inline="javascript">
-        /*<![CDATA[*/
-        const appointmentsList = /*[[${appointments}]]*/ [];
-        /*]]>*/
+        window.CALENDAR_APPOINTMENTS = /*[[${appointments}]]*/ [];
     </script>
-
-    <!-- Dynamic Calendar JS -->
-    <script>
-        let currentYear, currentMonth;
-        let selectedDayKey = null;
-
-        function updateRealtimeStatuses() {
-            let hasChanges = false;
-            const now = new Date();
-            appointmentsList.forEach(app => {
-                if (app.status === 'CONFIRMED' && app.dateTime) {
-                    const duration = (app.treatment && app.treatment.duration) ? app.treatment.duration : 60;
-                    const startTime = new Date(app.dateTime);
-                    const endTime = new Date(startTime.getTime() + duration * 60000);
-                    if (now >= endTime) {
-                        app.status = 'COMPLETED';
-                        hasChanges = true;
-                    }
-                }
-            });
-            if (hasChanges) {
-                renderCalendar();
-                if (selectedDayKey) {
-                    const parts = selectedDayKey.split('-');
-                    selectDay(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
-                }
-            }
-        }
-
-        // Initialize Calendar
-        document.addEventListener('DOMContentLoaded', function() {
-            updateRealtimeStatuses();
-            setInterval(updateRealtimeStatuses, 15000);
-
-            // Check for target date query parameter
-            const urlParams = new Date(new Date().getTime());
-            const queryParams = new URLSearchParams(window.location.search);
-            const targetDate = queryParams.get('date');
-
-            if (targetDate) {
-                const parts = targetDate.split('-');
-                currentYear = parseInt(parts[0]);
-                currentMonth = parseInt(parts[1]) - 1;
-                selectedDayKey = targetDate;
-                renderCalendar();
-                selectDay(parseInt(parts[2]), currentMonth, currentYear);
-            } else {
-                const today = new Date();
-                currentYear = today.getFullYear();
-                currentMonth = today.getMonth();
-                renderCalendar();
-                selectDay(today.getDate(), currentMonth, currentYear);
-            }
-        });
-
-        function renderCalendar() {
-            const months = [
-                "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-                "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
-            ];
-            
-            document.getElementById('calendarMonthYear').innerText = `${months[currentMonth]} ${currentYear}`;
-            
-            const firstDayIndex = new Date(currentYear, currentMonth, 1).getDay(); // Sunday=0, Monday=1
-            // Convert to European standard (Monday=0, Sunday=6)
-            let startDay = firstDayIndex === 0 ? 6 : firstDayIndex - 1;
-            
-            const totalDays = new Date(currentYear, currentMonth + 1, 0).getDate();
-            const prevMonthDays = new Date(currentYear, currentMonth, 0).getDate();
-            
-            const grid = document.getElementById('calendarDays');
-            grid.innerHTML = '';
-            
-            // 1. Render previous month offset cells
-            for (let i = startDay; i > 0; i--) {
-                const cell = document.createElement('div');
-                cell.className = 'calendar-day-cell other-month';
-                cell.innerText = prevMonthDays - i + 1;
-                grid.appendChild(cell);
-            }
-            
-            // 2. Render current month cells
-            const today = new Date();
-            for (let day = 1; day <= totalDays; day++) {
-                const cell = document.createElement('div');
-                cell.className = 'calendar-day-cell';
-                cell.innerText = day;
-                
-                // Highlight today
-                if (day === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear()) {
-                    cell.classList.add('today-day');
-                }
-                
-                // Check status of appointments
-                const dateKey = formatDateKey(day, currentMonth, currentYear);
-                const dayApps = getAppointmentsForDate(dateKey);
-                
-                const hasConfirmed = dayApps.some(app => app.status === 'CONFIRMED');
-                const hasCompleted = dayApps.some(app => app.status === 'COMPLETED');
-                const hasPending = dayApps.some(app => app.status === 'PENDING');
-                
-                if (hasConfirmed || hasCompleted || hasPending) {
-                    const dotsContainer = document.createElement('div');
-                    dotsContainer.className = 'calendar-dots-container';
-                    
-                    if (hasConfirmed || hasCompleted) {
-                        const dot = document.createElement('div');
-                        dot.className = 'calendar-dot gold-dot';
-                        dotsContainer.appendChild(dot);
-                    }
-                    if (hasPending) {
-                        const dot = document.createElement('div');
-                        dot.className = 'calendar-dot red-dot';
-                        dotsContainer.appendChild(dot);
-                        cell.classList.add('pending-day-highlight');
-                    }
-                    cell.appendChild(dotsContainer);
-                }
-                
-                // Active selection check
-                if (selectedDayKey === dateKey) {
-                    cell.classList.add('active-day');
-                }
-                
-                cell.onclick = () => selectDay(day, currentMonth, currentYear, true);
-                grid.appendChild(cell);
-            }
-            
-            // 3. Render next month offset cells to complete grid rows
-            const renderedCount = startDay + totalDays;
-            const remaining = (7 - (renderedCount % 7)) % 7;
-            for (let i = 1; i <= remaining; i++) {
-                const cell = document.createElement('div');
-                cell.className = 'calendar-day-cell other-month';
-                cell.innerText = i;
-                grid.appendChild(cell);
-            }
-        }
-
-        function prevMonth() {
-            currentMonth--;
-            if (currentMonth < 0) {
-                currentMonth = 11;
-                currentYear--;
-            }
-            renderCalendar();
-        }
-
-        function nextMonth() {
-            currentMonth++;
-            if (currentMonth > 11) {
-                currentMonth = 0;
-                currentYear++;
-            }
-            renderCalendar();
-        }
-
-        function formatDateKey(day, month, year) {
-            const d = String(day).padStart(2, '0');
-            const m = String(month + 1).padStart(2, '0');
-            return `${year}-${m}-${d}`;
-        }
-
-        function getAppointmentsForDate(dateKey) {
-            return appointmentsList.filter(app => {
-                if (!app.dateTime) return false;
-                return app.dateTime.startsWith(dateKey);
-            }).sort((a, b) => a.dateTime.localeCompare(b.dateTime));
-        }
-
-        async function handleStatusChange(appId, action) {
-            const url = `/worker/appointments/${appId}/${action}`;
-            const messageInput = document.getElementById(`message-${appId}`);
-            const message = messageInput ? messageInput.value : '';
-
-            try {
-                const formData = new URLSearchParams();
-                formData.append('message', message);
-                
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: formData.toString()
-                });
-                
-                if (response.ok) {
-                    // Update appointmentsList array locally
-                    const app = appointmentsList.find(a => a.id === appId);
-                    if (app) {
-                        app.status = action === 'approve' ? 'CONFIRMED' : 'REJECTED';
-                        app.workerMessage = message;
-                    }
-                    
-                    // Re-render the grid (for colors/dots)
-                    renderCalendar();
-                    
-                    // Re-render the selected day details
-                    if (selectedDayKey) {
-                        const parts = selectedDayKey.split('-');
-                        selectDay(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
-                    }
-                } else {
-                    alert('Error al actualizar el estado de la cita.');
-                }
-            } catch (err) {
-                console.error('Fetch error:', err);
-                alert('Error de red al actualizar la cita.');
-            }
-        }
-
-        function selectDay(day, month, year, isUserClick = false) {
-            selectedDayKey = formatDateKey(day, month, year);
-            
-            // Redraw grid to update active classes
-            renderCalendar();
-            
-            // Format Title
-            const dateObj = new Date(year, month, day);
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            const titleText = dateObj.toLocaleDateString('es-ES', options);
-            document.getElementById('selectedDateTitle').innerText = titleText.charAt(0).toUpperCase() + titleText.slice(1);
-            
-            // Populate list
-            const apps = getAppointmentsForDate(selectedDayKey);
-            const listContainer = document.getElementById('agendaList');
-            listContainer.innerHTML = '';
-            
-            // Text summary
-            const confirmedApps = apps.filter(app => app.status === 'CONFIRMED');
-            const completedApps = apps.filter(app => app.status === 'COMPLETED');
-            const pendingApps = apps.filter(app => app.status === 'PENDING');
-            let countSummary = `${confirmedApps.length} confirmadas`;
-            if (completedApps.length > 0) {
-                countSummary += `, ${completedApps.length} completadas`;
-            }
-            countSummary += `, ${pendingApps.length} solicitudes pendientes`;
-            document.getElementById('selectedDateCount').innerText = countSummary;
-            
-            if (apps.length === 0) {
-                listContainer.innerHTML = `
-                    <div class="notification-empty">
-                        <i class="lucide-calendar-days"></i>
-                        <span>No hay citas programadas para esta jornada</span>
-                    </div>
-                `;
-                return;
-            }
-            
-            apps.forEach(app => {
-                const timeStr = app.dateTime.split('T')[1].substring(0, 5); // hh:mm
-                const clientName = app.client ? app.client.name : app.guestName;
-                const clientPhone = app.client ? app.client.phone : app.guestPhone;
-                const isGuest = app.client === null;
-                const isPending = app.status === 'PENDING';
-                const isRejected = app.status === 'REJECTED';
-                
-                const card = document.createElement('div');
-                card.className = `agenda-item-card ${isPending ? 'pending-card' : ''}`;
-                
-                let badgeClass = 'badge-confirmed';
-                let badgeText = 'Confirmada';
-                if (isPending) {
-                    badgeClass = 'badge-pending';
-                    badgeText = 'Solicitud';
-                } else if (isRejected) {
-                    badgeClass = 'badge-rejected';
-                    badgeText = 'Rechazada';
-                } else if (app.status === 'COMPLETED') {
-                    badgeClass = 'badge-completed';
-                    badgeText = 'Completada';
-                }
-
-                let formHtml = '';
-                if (isPending) {
-                    formHtml = `
-                        <div class="approval-message-box">
-                            <label class="form-label agenda-note-label">Escribir nota opcional (mensaje al cliente):</label>
-                            <textarea id="message-${app.id}" class="approval-msg-input" placeholder="Ej. Por favor ven 5 minutos antes o motivo de cancelación..." rows="2"></textarea>
-                            <div class="agenda-card-actions">
-                                <button type="button" class="btn-agenda-action reject" onclick="handleStatusChange(${app.id}, 'reject')">
-                                    <i class="lucide-x agenda-action-icon"></i> Rechazar
-                                </button>
-                                <button type="button" class="btn-agenda-action approve" onclick="handleStatusChange(${app.id}, 'approve')">
-                                    <i class="lucide-check agenda-action-icon"></i> Aceptar Cita
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                }
-
-                let messageHtml = '';
-                if (app.workerMessage) {
-                    messageHtml = `
-                        <div class="agenda-worker-note">
-                            <i class="lucide-message-square"></i> Nota: "${app.workerMessage}"
-                        </div>
-                    `;
-                }
-                
-                const newClientBadge = app.isNewClient ? `<span class="badge-new-client"><i class="lucide-sparkles"></i> Nuevo Cliente</span>` : '';
-                const clientCardUrl = app.client ? `/worker/clients/${app.client.id}` : `/worker/clients/guest?phone=${encodeURIComponent(clientPhone)}`;
-                const fichaButtonHtml = (app.status === 'CONFIRMED' || app.status === 'COMPLETED') ? `
-                    <div style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed rgba(197, 168, 128, 0.25); display: flex; justify-content: flex-end;">
-                        <a href="${clientCardUrl}" class="btn-template-config" style="padding: 6px 12px; font-size: 12px; border-radius: 8px;">
-                            <i class="lucide-file-text"></i> Ficha del Cliente
-                        </a>
-                    </div>
-                ` : '';
-
-                card.innerHTML = `
-                    <div class="agenda-card-top">
-                        <div class="agenda-item-time">
-                            <i class="lucide-clock"></i>
-                            <span>${timeStr} h</span>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                            ${newClientBadge}
-                            <span class="badge ${badgeClass}">${badgeText}</span>
-                        </div>
-                    </div>
-                    
-                    <div class="agenda-item-treatment">${app.treatment.name}</div>
-                    
-                    <div class="agenda-item-detail">
-                        <i class="lucide-user"></i>
-                        <strong>${clientName}</strong> ${isGuest ? '(Invitado)' : ''}
-                    </div>
-                    <div class="agenda-item-detail">
-                        <i class="lucide-phone"></i>
-                        <span>Teléfono: ${clientPhone}</span>
-                    </div>
-                    <div class="agenda-item-detail">
-                        <i class="lucide-sparkles"></i>
-                        <span>Estilista: ${app.worker ? app.worker.name : 'Pendiente de asignación'}</span>
-                    </div>
-                    <div class="agenda-item-detail agenda-detail-margin">
-                        <i class="lucide-badge-euro"></i>
-                        <span class="agenda-price-text">${app.treatment.price.toFixed(2)} €</span>
-                        <span class="agenda-duration-text">(${app.treatment.duration} min)</span>
-                    </div>
-
-                    ${fichaButtonHtml}
-                    ${messageHtml}
-                    ${formHtml}
-                `;
-                listContainer.appendChild(card);
-            });
-
-            // Smooth scroll to selected day agenda on mobile only on explicit user click
-            if (isUserClick && window.innerWidth <= 900) {
-                const titleElement = document.getElementById('selectedDateTitle');
-                if (titleElement) {
-                    titleElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-            }
-        }
-    </script>
+    <script src="/js/worker-calendar.js" defer></script>
 </body>
 </html>
