@@ -44,20 +44,8 @@ public class DatabaseSeeder implements CommandLineRunner {
     @Override
     @org.springframework.transaction.annotation.Transactional
     public void run(String... args) throws Exception {
-        // Eliminar a todos los clientes invitados (citas y fichas huérfanas) de la base de datos
-        clientCardRepository.deleteGuestCards();
-        appointmentRepository.deleteGuestAppointments();
-
-        // Limpiar prefijo "Cuquora " de centros existentes si los hubiera
-        centerRepository.findAll().forEach(center -> {
-            if (center.getName() != null && center.getName().startsWith("Cuquora ")) {
-                center.setName(center.getName().substring("Cuquora ".length()).trim());
-                centerRepository.save(center);
-            }
-        });
-
         if (centerRepository.count() > 0) {
-            return; // Already seeded (e.g. from init.sql in PostgreSQL)
+            return; // Datos de demostración ya cargados
         }
 
         // 1. Seed Centers

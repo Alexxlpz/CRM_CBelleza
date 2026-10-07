@@ -17,6 +17,9 @@ services:
       SPRING_DATASOURCE_PASSWORD: crm_pass
       SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQLDialect
       H2_CONSOLE_ENABLED: "false"
+      # Una base de datos creada antes de Flyway (con el antiguo init.sql) se marca como versión 1
+      # en lugar de fallar; en un volumen nuevo las migraciones se ejecutan desde cero.
+      SPRING_FLYWAY_BASELINE_ON_MIGRATE: "true"
     depends_on:
       db:
         condition: service_healthy
@@ -33,7 +36,6 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U crm_user -d crm_cbelleza"]
       interval: 5s
