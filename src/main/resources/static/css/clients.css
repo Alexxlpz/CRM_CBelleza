@@ -258,47 +258,6 @@
 /* INTUITIVE BACK NAVIGATION (PILL & SECONDARY ACTIONS)                      */
 /* ========================================================================= */
 
-.page-top-nav {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    margin-bottom: 18px;
-}
-
-.btn-back-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
-    border-radius: 999px;
-    background: var(--card-bg);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border: 1px solid var(--card-border);
-    color: var(--text-main);
-    font-size: 13.5px;
-    font-weight: 600;
-    text-decoration: none;
-    box-shadow: 0 3px 12px rgba(var(--primary-rgb), 0.08);
-    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.btn-back-pill:hover {
-    background: var(--surface);
-    border-color: var(--primary);
-    color: var(--primary-text);
-    transform: translateX(-3px);
-    box-shadow: 0 6px 18px rgba(var(--primary-rgb), 0.2);
-}
-
-.btn-back-pill i {
-    font-size: 15px;
-    transition: transform 0.2s ease;
-}
-
-.btn-back-pill:hover i {
-    transform: translateX(-3px);
-}
 
 .profile-header-actions {
     display: flex;

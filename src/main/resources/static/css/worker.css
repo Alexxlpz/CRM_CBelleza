@@ -86,31 +86,15 @@
     transform: scale(0.97);
 }
 
-.action-icon-wrapper {
-    width: 64px;
-    height: 64px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.2) 0%, rgba(var(--primary-rgb), 0.08) 100%);
-    border: 1px solid rgba(var(--primary-rgb), 0.3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform 0.3s ease, background 0.3s ease;
-}
-
-.action-icon-wrapper i {
-    font-size: 30px;
+.action-icon {
+    width: 40px;
+    height: 40px;
     color: var(--primary-text);
-    transition: color 0.3s ease;
+    transition: transform 0.3s ease;
 }
 
-.action-card:hover .action-icon-wrapper {
-    transform: scale(1.08);
-    background: var(--primary-dark);
-}
-
-.action-card:hover .action-icon-wrapper i {
-    color: var(--on-primary);
+.action-card:hover .action-icon {
+    transform: translateY(-2px) scale(1.08);
 }
 
 .action-card-title {

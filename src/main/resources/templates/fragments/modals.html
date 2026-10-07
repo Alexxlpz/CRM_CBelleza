@@ -3,7 +3,6 @@
     <div class="ui-modal-overlay is-open" id="bookingErrorModal"
          th:fragment="bookingError(error)" th:if="${error != null}">
         <div class="ui-modal" role="dialog" aria-modal="true" aria-labelledby="bookingErrorTitle" aria-describedby="bookingErrorText">
-            <div class="ui-modal-icon ui-modal-icon--danger"><i class="lucide-circle-alert" aria-hidden="true"></i></div>
             <h2 class="ui-modal-title" id="bookingErrorTitle">No se ha podido reservar</h2>
             <p class="ui-modal-text" id="bookingErrorText" th:text="${error}">No se ha podido crear la reserva.</p>
             <div class="ui-modal-actions">

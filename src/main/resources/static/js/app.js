@@ -104,14 +104,13 @@
     }
 
     /* ---------- 3. Diálogos propios ---------- */
-    function openDialog({ title, message, confirmText = 'Aceptar', cancelText = null, tone = 'default', icon = null }) {
+    function openDialog({ title, message, confirmText = 'Aceptar', cancelText = null, tone = 'default' }) {
         return new Promise(resolve => {
             const lastFocused = document.activeElement;
             const overlay = document.createElement('div');
             overlay.className = 'ui-modal-overlay is-open';
             overlay.innerHTML = `
                 <div class="ui-modal" role="dialog" aria-modal="true" aria-labelledby="uiModalTitle" aria-describedby="uiModalText">
-                    <div class="ui-modal-icon ui-modal-icon--${tone}"><i class="lucide-${icon || (tone === 'danger' ? 'alert-triangle' : 'info')}" aria-hidden="true"></i></div>
                     <h2 class="ui-modal-title" id="uiModalTitle">${escapeHtml(title)}</h2>
                     <p class="ui-modal-text" id="uiModalText">${escapeHtml(message)}</p>
                     <div class="ui-modal-actions">
@@ -148,8 +147,8 @@
         alert(message, title = 'Aviso') {
             return openDialog({ title, message, tone: 'danger' });
         },
-        confirm(message, { title = '¿Estás seguro?', confirmText = 'Confirmar', cancelText = 'Cancelar', tone = 'danger', icon = null } = {}) {
-            return openDialog({ title, message, confirmText, cancelText, tone, icon });
+        confirm(message, { title = '¿Estás seguro?', confirmText = 'Confirmar', cancelText = 'Cancelar', tone = 'danger' } = {}) {
+            return openDialog({ title, message, confirmText, cancelText, tone });
         },
         /** Lee el mensaje de error que devuelve la API ({message}) o usa uno genérico. */
         async errorMessage(response, fallback) {
