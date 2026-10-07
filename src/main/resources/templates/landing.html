@@ -2,7 +2,7 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <th:block th:replace="~{fragments/head :: meta('Cuquora CRM - Software de Gestión para Centros de Estética y Spas')}"></th:block>
-    <link rel="stylesheet" href="/css/home.css">
+    <link rel="stylesheet" th:href="@{/css/home.css}">
 </head>
 <body>
     <div th:replace="~{fragments/navbar :: brand(true)}"></div>
@@ -470,7 +470,7 @@
     <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Software de gestión para centros de estética, salones y spas.')}"></div>
 
     <!-- ScrollSpy Script for Dynamic Animated Left Rail -->
-    <script src="/js/scroll-index.js" defer></script>
+    <script th:src="@{/js/scroll-index.js}" defer></script>
 
 </body>
 </html>

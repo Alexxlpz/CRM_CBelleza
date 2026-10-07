@@ -2,8 +2,8 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <th:block th:replace="~{fragments/head :: meta('Control de Inventario - Cuquora CRM')}"></th:block>
-    <link rel="stylesheet" href="/css/inventario.css">
-    <script src="/js/sheets.js" defer></script>
+    <link rel="stylesheet" th:href="@{/css/inventario.css}">
+    <script th:src="@{/js/sheets.js}" defer></script>
 </head>
 <body>
     <div th:replace="~{fragments/navbar :: worker('/worker/dashboard', 'Volver al panel principal', ${notifications})}"></div>

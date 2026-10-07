@@ -48,8 +48,11 @@ public class AuthController {
     }
 
     @GetMapping("/register")
-    public String registerPage(@AuthenticationPrincipal AppUserDetails user) {
-        return user != null ? "redirect:" + RoleHomes.homeFor(user) : "register";
+    public String registerPage(@AuthenticationPrincipal AppUserDetails user, Model model) {
+        if (user != null) {
+            return "redirect:" + RoleHomes.homeFor(user);
+        }
+        return "register";
     }
 
     @PostMapping("/register")

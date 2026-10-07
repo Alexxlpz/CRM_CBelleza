@@ -2,7 +2,7 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <th:block th:replace="~{fragments/head :: meta('Cartera de Clientes - Cuquora CRM')}"></th:block>
-    <link rel="stylesheet" href="/css/clients.css">
+    <link rel="stylesheet" th:href="@{/css/clients.css}">
 </head>
 <body>
     <div th:replace="~{fragments/navbar :: worker('/worker/dashboard', 'Volver al panel principal', ${notifications})}"></div>

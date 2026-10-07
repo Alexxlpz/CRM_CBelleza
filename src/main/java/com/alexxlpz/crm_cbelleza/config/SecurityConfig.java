@@ -16,6 +16,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
+import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 
 import java.util.UUID;
 
@@ -91,6 +92,12 @@ public class SecurityConfig {
                 .permitAll());
 
         http.exceptionHandling(ex -> ex.accessDeniedHandler(accessDeniedHandler));
+
+        // Tras iniciar sesión se vuelve a la página protegida que se pidió (p. ej. el centro elegido),
+        // sin añadir el parámetro "?continue" a la URL.
+        HttpSessionRequestCache requestCache = new HttpSessionRequestCache();
+        requestCache.setMatchingRequestParameterName(null);
+        http.requestCache(cache -> cache.requestCache(requestCache));
 
         if (h2ConsoleEnabled) {
             http.csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**"));

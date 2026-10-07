@@ -2,7 +2,7 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <th:block th:replace="~{fragments/head :: meta('Mis Citas - Cuquora')}"></th:block>
-    <link rel="stylesheet" href="/css/citas.css">
+    <link rel="stylesheet" th:href="@{/css/citas.css}">
 </head>
 <body>
     <div th:replace="~{fragments/navbar :: brand(true)}"></div>

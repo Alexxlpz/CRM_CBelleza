@@ -3,8 +3,8 @@
 
 <head>
     <th:block th:replace="~{fragments/head :: meta('Detalles del Centro - Cuquora')}"></th:block>
-    <link rel="stylesheet" href="/css/datepicker.css">
-    <link rel="stylesheet" href="/css/cliente.css">
+    <link rel="stylesheet" th:href="@{/css/datepicker.css}">
+    <link rel="stylesheet" th:href="@{/css/cliente.css}">
 </head>
 
 <body>
@@ -65,7 +65,7 @@
     </main>
 
 
-    <script src="/js/booking-picker.js" defer></script>
+    <script th:src="@{/js/booking-picker.js}" defer></script>
 
     <!-- Footer -->
     <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Software de gestión para centros de estética, salones y spas.')}"></div>

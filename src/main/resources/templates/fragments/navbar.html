@@ -15,7 +15,7 @@
                 <th:block th:replace="~{fragments/navbar :: menuLinks}"></th:block>
             </div>
             <div class="nav-right-group">
-                <th:block th:replace="~{fragments/navbar :: sessionActions(${sessionRole}, ${showSession}, null)}"></th:block>
+                <th:block th:replace="~{fragments/navbar :: sessionActions(${sessionRole}, ${showSession}, ${notifications})}"></th:block>
                 <th:block th:replace="~{fragments/navbar :: hamburger}"></th:block>
             </div>
         </nav>
@@ -60,9 +60,9 @@
     </a>
 
     <a th:fragment="backButton(backUrl, backLabel)" th:if="${backUrl != null}" th:href="${backUrl}"
-       class="back-arrow-btn" th:title="${backLabel != null ? backLabel : 'Volver'}"
+       class="back-arrow-btn" data-exit-link th:title="${backLabel != null ? backLabel : 'Volver'}"
        th:aria-label="${backLabel != null ? backLabel : 'Volver'}">
-        <i class="lucide-chevron-left" aria-hidden="true"></i>
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m15 18-6-6 6-6"/></svg>
     </a>
 
     <div th:fragment="menuLinks" class="nav-links-menu">
@@ -75,7 +75,9 @@
 
     <th:block th:fragment="sessionActions(role, showSession, notifications)">
         <div class="nav-session-info" th:if="${role != null}">
-            <div th:if="${role == 'WORKER' and notifications != null}" th:replace="~{fragments/notifications :: menu(${notifications})}"></div>
+            <th:block th:if="${role == 'WORKER' and notifications != null}">
+                <div th:replace="~{fragments/notifications :: menu(${notifications})}"></div>
+            </th:block>
             <th:block th:if="${role == 'CLIENT'}">
                 <a href="/client/appointments" class="nav-auth-btn nav-auth-register"><i class="lucide-calendar-days" aria-hidden="true"></i> Mis Citas</a>
                 <a href="/client/profile" class="nav-auth-btn nav-auth-register"><i class="lucide-user" aria-hidden="true"></i> Mi Perfil</a>
@@ -104,7 +106,8 @@
     </button>
 
     <a th:fragment="drawerLink(href, label, active, danger)" th:href="${href}" class="mobile-drawer-link"
-       th:classappend="${(active ? ' active' : '') + (danger ? ' mobile-link-danger' : '')}">
+       th:classappend="${(active ? ' active' : '') + (danger ? ' mobile-link-danger' : '')}"
+       th:attr="aria-current=${active} ? 'page'">
         <span class="mobile-link-text" th:text="${label}">Enlace</span>
         <svg class="mobile-link-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
     </a>
@@ -145,20 +148,19 @@
 
                     <div class="mobile-drawer-nav" th:if="${role == 'CLIENT'}">
                         <div class="mobile-user-badge client-badge"><i class="lucide-user-check" aria-hidden="true"></i> Modo Cliente</div>
-                        <a th:replace="~{fragments/navbar :: drawerLink('/client/appointments', 'Mis Citas', false, false)}"></a>
-                        <a th:replace="~{fragments/navbar :: drawerLink('/client/profile', 'Mi Perfil', false, false)}"></a>
+                        <a th:replace="~{fragments/navbar :: drawerLink('/client/appointments', 'Mis Citas', ${accountSection == 'appointments'}, false)}"></a>
+                        <a th:replace="~{fragments/navbar :: drawerLink('/client/profile', 'Mi Perfil', ${accountSection == 'profile'}, false)}"></a>
                     </div>
 
                     <div class="mobile-drawer-nav" th:if="${role == 'WORKER'}">
                         <div class="mobile-user-badge worker-badge"><i class="lucide-sparkles" aria-hidden="true"></i> Profesional / Centro</div>
-                        <a th:replace="~{fragments/navbar :: drawerLink('/worker/dashboard', 'Mi Panel', false, false)}"></a>
-                        <a th:replace="~{fragments/navbar :: drawerLink('/worker/center', 'Mi Centro', false, false)}"></a>
+                        <a th:replace="~{fragments/navbar :: drawerLink('/worker/dashboard', 'Mi Panel', ${accountSection == 'panel'}, false)}"></a>
+                        <a th:replace="~{fragments/navbar :: drawerLink('/worker/center', 'Mi Centro', ${accountSection == 'center'}, false)}"></a>
                     </div>
 
                     <form th:if="${role != null}" th:action="@{/logout}" method="post" class="mobile-drawer-nav">
                         <button type="submit" class="mobile-drawer-link mobile-link-danger">
                             <span class="mobile-link-text">Cerrar sesión</span>
-                            <svg class="mobile-link-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
                         </button>
                     </form>
 

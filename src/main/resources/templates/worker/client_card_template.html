@@ -2,22 +2,14 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <th:block th:replace="~{fragments/head :: meta('Configuración de Ficha - Cuquora CRM')}"></th:block>
-    <link rel="stylesheet" href="/css/clients.css">
-    <script src="/js/unsaved-changes.js" defer></script>
+    <link rel="stylesheet" th:href="@{/css/clients.css}">
+    <script th:src="@{/js/unsaved-changes.js}" defer></script>
 </head>
 <body>
     <div th:replace="~{fragments/navbar :: worker('/worker/clients', 'Volver a lista de clientes', ${notifications})}"></div>
 
     <!-- Main Container -->
     <main class="main-container">
-
-        <!-- Top Navigation Back Pill: Siempre vuelve directamente a la cartera de clientes sin bucles -->
-        <div class="page-top-nav">
-            <a href="/worker/clients" class="btn-back-pill" id="btnBackPill" data-exit-link>
-                <i class="lucide-arrow-left" aria-hidden="true"></i>
-                <span>Volver a Cartera de Clientes</span>
-            </a>
-        </div>
 
         <div class="page-header">
             <h1>Configuración de Plantilla de Ficha</h1>

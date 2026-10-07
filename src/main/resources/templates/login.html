@@ -2,11 +2,11 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <th:block th:replace="~{fragments/head :: meta('Iniciar Sesión - Cuquora CRM')}"></th:block>
-    <link rel="stylesheet" href="/css/auth.css">
-    <script src="/js/form-validation.js" defer></script>
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
+    <script th:src="@{/js/form-validation.js}" defer></script>
 </head>
 <body class="auth-page">
-    <div th:replace="~{fragments/navbar :: brand(false)}"></div>
+    <div th:replace="~{fragments/navbar :: brand(true)}"></div>
 
     <main class="auth-container">
         <div class="auth-card">

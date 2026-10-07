@@ -2,10 +2,10 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <th:block th:replace="~{fragments/head :: meta('Selector de Perfiles (Desarrollo) - Cuquora CRM')}"></th:block>
-    <link rel="stylesheet" href="/css/auth.css">
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
 </head>
 <body class="auth-page">
-    <div th:replace="~{fragments/navbar :: brand(false)}"></div>
+    <div th:replace="~{fragments/navbar :: brand(true)}"></div>
 
     <main class="auth-container">
         <div class="auth-card">

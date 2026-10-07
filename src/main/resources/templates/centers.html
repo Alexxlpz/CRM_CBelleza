@@ -5,7 +5,7 @@
     <!-- Leaflet CSS & JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-        <link rel="stylesheet" href="/css/cliente.css">
+        <link rel="stylesheet" th:href="@{/css/cliente.css}">
 </head>
 <body>
     <div th:replace="~{fragments/navbar :: brand(true)}"></div>
@@ -95,16 +95,34 @@
             let firstLoadDone = false;
 
             /* ---- Acceso a un centro ---- */
-            async function canOpenCenter(center) {
+            /*
+             * Acceso a la ficha de un centro (/client/centers/{id}):
+             *  - Trabajador: no puede consultar otros centros → aviso y no se navega.
+             *  - Sin sesión: se navega igualmente; el servidor redirige al inicio de sesión
+             *    y, tras entrar, devuelve al usuario al centro que eligió.
+             *  - Cliente: navega directamente.
+             */
+            const centerUrl = center => `/client/centers/${encodeURIComponent(center.id)}`;
+
+            async function showWorkerRestriction() {
+                const goToPanel = await Cuquora.confirm(
+                    'Has iniciado sesión como trabajador y un trabajador no puede consultar otros centros. Para reservar una cita, entra con una cuenta de cliente.',
+                    { title: 'Acceso no disponible', confirmText: 'Ir a mi panel', cancelText: 'Entendido', tone: 'default' });
+                if (goToPanel) window.location.href = '/worker/dashboard';
+            }
+
+            /** Desde el mapa se confirma antes de salir, porque un toque en un marcador es fácil de hacer sin querer. */
+            async function openCenterFromMap(center) {
                 if (currentSessionRole === 'WORKER') {
-                    const goToPanel = await Cuquora.confirm(
-                        'Has iniciado sesión como trabajador. Solo los clientes pueden acceder a los centros para consultar tratamientos y solicitar citas.',
-                        { title: 'Acceso exclusivo para clientes', confirmText: 'Ir a mi panel', cancelText: 'Entendido', tone: 'default' });
-                    if (goToPanel) window.location.href = '/worker/dashboard';
-                    return false;
+                    showWorkerRestriction();
+                    return;
                 }
-                return Cuquora.confirm('¿Quieres acceder a ' + center.name + '?',
-                    { title: 'Acceder al centro', confirmText: 'Continuar', tone: 'default', icon: 'map-pin' });
+                const message = currentSessionRole
+                    ? '¿Quieres ver los tratamientos y reservar en ' + center.name + '?'
+                    : '¿Quieres ver los tratamientos de ' + center.name + '? Te pediremos que inicies sesión para continuar.';
+                if (await Cuquora.confirm(message, { title: 'Acceder al centro', confirmText: 'Continuar', tone: 'default' })) {
+                    window.location.href = centerUrl(center);
+                }
             }
 
             /* ---- Filtros ---- */
@@ -179,9 +197,7 @@
                         .filter(c => c.latitude && c.longitude)
                         .map(center => {
                             const marker = L.marker([center.latitude, center.longitude], { icon: markerIcon('gold'), title: center.name }).addTo(map);
-                            marker.on('click', async () => {
-                                if (await canOpenCenter(center)) window.location.href = `/client/centers/${center.id}`;
-                            });
+                            marker.on('click', () => openCenterFromMap(center));
                             return marker;
                         });
                 } catch (e) {
@@ -231,9 +247,12 @@
                             <i class="lucide-calendar-plus" aria-hidden="true"></i> Ver Tratamientos y Reservar
                         </a>
                     </div>`;
-                card.querySelector('a').addEventListener('click', async e => {
-                    e.preventDefault();
-                    if (await canOpenCenter(center)) window.location.href = e.currentTarget.href;
+                // El enlace navega de forma normal (también con Ctrl/clic central); solo se intercepta para trabajadores.
+                card.querySelector('a').addEventListener('click', e => {
+                    if (currentSessionRole === 'WORKER') {
+                        e.preventDefault();
+                        showWorkerRestriction();
+                    }
                 });
                 return card;
             }

@@ -2,7 +2,7 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <th:block th:replace="~{fragments/head :: meta('Agenda del Salón - Cuquora CRM')}"></th:block>
-    <link rel="stylesheet" href="/css/calendar.css">
+    <link rel="stylesheet" th:href="@{/css/calendar.css}">
 </head>
 <body>
     <div th:replace="~{fragments/navbar :: worker('/worker/dashboard', 'Volver al panel principal', ${notifications})}"></div>
@@ -71,6 +71,6 @@
     <script th:inline="javascript">
         window.CALENDAR_APPOINTMENTS = /*[[${appointments}]]*/ [];
     </script>
-    <script src="/js/worker-calendar.js" defer></script>
+    <script th:src="@{/js/worker-calendar.js}" defer></script>
 </body>
 </html>

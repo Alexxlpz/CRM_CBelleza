@@ -47,7 +47,7 @@ public class RoleAwareAccessDeniedHandler implements AccessDeniedHandler {
 
     private String messageFor(AppUserDetails user) {
         if (user != null && user.isWorker()) {
-            return "Has iniciado sesión como trabajador. Esa sección es exclusiva para clientes.";
+            return "Has iniciado sesión como trabajador y un trabajador no puede consultar otros centros ni reservar citas. Entra con una cuenta de cliente para hacerlo.";
         }
         if (user != null && user.isClient()) {
             return "Esa sección es exclusiva para el personal de los centros.";

@@ -2,7 +2,7 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <th:block th:replace="~{fragments/head :: meta('Panel de Control - Cuquora CRM')}"></th:block>
-    <link rel="stylesheet" href="/css/worker.css">
+    <link rel="stylesheet" th:href="@{/css/worker.css}">
 </head>
 <body>
     <div th:replace="~{fragments/navbar :: worker(null, null, ${notifications})}"></div>
@@ -20,7 +20,7 @@
 
             <nav class="actions-grid" aria-label="Accesos directos">
                 <a href="/worker/calendar" class="action-card glass-panel">
-                    <span class="action-icon-wrapper" aria-hidden="true"><i class="lucide-calendar-days" aria-hidden="true"></i></span>
+                    <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/></svg>
                     <span class="action-card-title">Calendario de Agenda</span>
                     <p class="action-card-desc">Consulta las reservas del salón y aprueba o rechaza las solicitudes de cita.</p>
                     <span class="action-card-badge badge-warning" th:if="${pendingAppointmentsCount > 0}"
@@ -30,7 +30,7 @@
                 </a>
 
                 <a href="/worker/inventory" class="action-card glass-panel">
-                    <span class="action-icon-wrapper" aria-hidden="true"><i class="lucide-package-open" aria-hidden="true"></i></span>
+                    <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12M7.5 4.27l9 5.15"/></svg>
                     <span class="action-card-title">Gestión de Inventario</span>
                     <p class="action-card-desc">Controla las existencias del salón, añade productos y registra entradas y ventas.</p>
                     <span class="action-card-badge badge-warning" th:if="${lowStockCount > 0}"
@@ -38,13 +38,13 @@
                 </a>
 
                 <a href="/worker/treatments" class="action-card glass-panel">
-                    <span class="action-icon-wrapper" aria-hidden="true"><i class="lucide-clipboard-plus" aria-hidden="true"></i></span>
+                    <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/><path d="M5 3v4M3 5h4M19 17v4M17 19h4"/></svg>
                     <span class="action-card-title">Carta de Tratamientos</span>
                     <p class="action-card-desc">Crea y revisa los servicios que ofrece este centro a sus clientes.</p>
                 </a>
 
                 <a href="/worker/clients" class="action-card glass-panel">
-                    <span class="action-icon-wrapper" aria-hidden="true"><i class="lucide-users" aria-hidden="true"></i></span>
+                    <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                     <span class="action-card-title">Cartera de Clientes</span>
                     <p class="action-card-desc">Consulta el historial de clientes, sus citas y sus fichas técnicas personalizadas.</p>
                     <span class="action-card-badge">Fichas Técnicas</span>

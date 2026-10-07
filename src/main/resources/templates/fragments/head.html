@@ -2,7 +2,7 @@
     <head> común a todas las páginas. Uso:
         <head>
             <th:block th:replace="~{fragments/head :: meta('Título de la página')}"></th:block>
-            <link rel="stylesheet" href="/css/pagina.css">   <- estilos propios de la página
+            <link rel="stylesheet" th:href="@{/css/pagina.css}">   <- estilos propios de la página
         </head>
 */-->
 <th:block xmlns:th="http://www.thymeleaf.org" th:fragment="meta(title)">
@@ -24,7 +24,7 @@
     <!-- Iconos Lucide -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.321.0/font/lucide.min.css">
     <!-- Estilos base (tokens, componentes y layout comunes) -->
-    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" th:href="@{/css/common.css}">
     <!-- Comportamiento común: CSRF en fetch, menú móvil, diálogos -->
-    <script src="/js/app.js" defer></script>
+    <script th:src="@{/js/app.js}" defer></script>
 </th:block>
