@@ -16,6 +16,7 @@ public class ClientSummaryDTO {
     private int totalAppointments;
     private LocalDateTime lastAppointmentDate;
     private boolean hasFilledCard;
+    private boolean registered;
     private LocalDateTime cardUpdatedAt;
     private String cardUpdatedByName;
 }

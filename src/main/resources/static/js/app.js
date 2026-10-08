@@ -7,6 +7,8 @@
  *  5. Cuquora.escapeHtml: para insertar texto del servidor en plantillas HTML de JavaScript.
  *  6. Modales estáticos: <div class="ui-modal-overlay" id="x" hidden> se abren con
  *     [data-modal-open="x"] y se cierran con [data-modal-close], Escape o clic fuera.
+ *  7. Selector de vista Tarjetas / Lista: [data-view-toggle="idDelListado"] con botones
+ *     [data-view="grid|list"]. Añade .is-list-view al listado y recuerda la elección.
  */
 (function () {
     'use strict';
@@ -250,9 +252,31 @@
         }
     });
 
+    /* ---------- 7. Vista tarjetas / lista ---------- */
+    function initViewToggles() {
+        document.querySelectorAll('[data-view-toggle]').forEach(toggle => {
+            const list = document.getElementById(toggle.dataset.viewToggle);
+            if (!list) return;
+            const key = 'cuquora.view.' + toggle.dataset.viewToggle;
+            const buttons = toggle.querySelectorAll('[data-view]');
+            const apply = view => {
+                list.classList.toggle('is-list-view', view === 'list');
+                buttons.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.view === view)));
+            };
+            let saved = null;
+            try { saved = localStorage.getItem(key); } catch (e) { /* almacenamiento no disponible */ }
+            if (saved === 'grid' || saved === 'list') apply(saved);
+            buttons.forEach(b => b.addEventListener('click', () => {
+                apply(b.dataset.view);
+                try { localStorage.setItem(key, b.dataset.view); } catch (e) { /* almacenamiento no disponible */ }
+            }));
+        });
+    }
+
     function init() {
         initMobileNav();
         initNotifications();
+        initViewToggles();
     }
 
     if (document.readyState === 'loading') {

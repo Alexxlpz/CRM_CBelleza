@@ -809,9 +809,10 @@
 
 .rail-text {
     flex-grow: 1;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    min-width: 0;
+    /* El título completo se lee siempre: pasa a dos líneas si no cabe */
+    white-space: normal;
+    line-height: 1.3;
 }
 
 .rail-chevron {

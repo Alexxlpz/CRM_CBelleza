@@ -79,15 +79,15 @@
                 <div th:replace="~{fragments/notifications :: menu(${notifications})}"></div>
             </th:block>
             <th:block th:if="${role == 'CLIENT'}">
-                <a href="/client/appointments" class="nav-auth-btn nav-auth-register"><i class="lucide-calendar-days" aria-hidden="true"></i> Mis Citas</a>
-                <a href="/client/profile" class="nav-auth-btn nav-auth-register"><i class="lucide-user" aria-hidden="true"></i> Mi Perfil</a>
+                <a href="/client/appointments" class="nav-auth-btn nav-auth-register" title="Mis Citas"><i class="lucide-calendar-days" aria-hidden="true"></i> <span class="nav-btn-label">Mis Citas</span></a>
+                <a href="/client/profile" class="nav-auth-btn nav-auth-register" title="Mi Perfil"><i class="lucide-user" aria-hidden="true"></i> <span class="nav-btn-label">Mi Perfil</span></a>
             </th:block>
             <th:block th:if="${role == 'WORKER'}">
-                <a href="/worker/dashboard" class="nav-auth-btn nav-auth-register"><i class="lucide-layout-dashboard" aria-hidden="true"></i> Mi Panel</a>
-                <a href="/worker/center" class="nav-auth-btn nav-auth-register"><i class="lucide-store" aria-hidden="true"></i> Mi Centro</a>
+                <a href="/worker/dashboard" class="nav-auth-btn nav-auth-register" title="Mi Panel"><i class="lucide-layout-dashboard" aria-hidden="true"></i> <span class="nav-btn-label">Mi Panel</span></a>
+                <a href="/worker/center" class="nav-auth-btn nav-auth-register" title="Mi Centro"><i class="lucide-store" aria-hidden="true"></i> <span class="nav-btn-label">Mi Centro</span></a>
             </th:block>
             <form th:action="@{/logout}" method="post" class="nav-logout-form">
-                <button type="submit" class="nav-logout"><i class="lucide-log-out" aria-hidden="true"></i> Cerrar sesión</button>
+                <button type="submit" class="nav-logout" title="Cerrar sesión"><i class="lucide-log-out" aria-hidden="true"></i> <span class="nav-btn-label">Cerrar sesión</span></button>
             </form>
         </div>
         <div class="nav-session-info nav-auth-duo" th:if="${role == null and (showSession == null or showSession != false)}">

@@ -216,6 +216,7 @@ public class ClientCardService {
                 .totalAppointments(total)
                 .lastAppointmentDate(last)
                 .hasFilledCard(filled)
+                .registered(client.hasAccount())
                 .cardUpdatedAt(card != null ? card.getUpdatedAt() : null)
                 .cardUpdatedByName(card != null && card.getUpdatedBy() != null ? card.getUpdatedBy().getName() : null)
                 .build();

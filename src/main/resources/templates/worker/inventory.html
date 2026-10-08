@@ -8,7 +8,7 @@
 <body>
     <div th:replace="~{fragments/navbar :: worker('/worker/dashboard', 'Volver al panel principal', ${notifications})}"></div>
 
-    <main class="main-container">
+    <main class="main-container main-container--wide">
         <div class="page-header inventory-page-header">
             <div>
                 <h1>Gestión de Inventario</h1>
@@ -22,15 +22,60 @@
 
         <div th:replace="~{fragments/alerts :: flash}"></div>
 
-        <div class="category-filter-bar" role="toolbar" aria-label="Filtrar por categoría">
-            <button type="button" class="category-pill active" data-category-filter="ALL" aria-pressed="true">Todos</button>
-            <button type="button" class="category-pill" data-category-filter="Rostro" aria-pressed="false">Rostro</button>
-            <button type="button" class="category-pill" data-category-filter="Cabello" aria-pressed="false">Cabello</button>
-            <button type="button" class="category-pill" data-category-filter="Uñas" aria-pressed="false">Uñas</button>
-            <button type="button" class="category-pill" data-category-filter="Cuerpo" aria-pressed="false">Cuerpo</button>
+        <div class="stats-strip" th:if="${not #lists.isEmpty(inventoryItems)}">
+            <div class="stat-tile">
+                <span class="stat-tile-icon" aria-hidden="true"><i class="lucide-package"></i></span>
+                <div class="stat-tile-text">
+                    <span class="stat-tile-value" th:text="${#lists.size(inventoryItems)}">0</span>
+                    <span class="stat-tile-label">Productos en stock</span>
+                </div>
+            </div>
+            <div class="stat-tile">
+                <span class="stat-tile-icon" aria-hidden="true"><i class="lucide-layers"></i></span>
+                <div class="stat-tile-text">
+                    <span class="stat-tile-value" data-stat="units" th:text="${totalUnits}">0</span>
+                    <span class="stat-tile-label">Unidades totales</span>
+                </div>
+            </div>
+            <div class="stat-tile stat-tile--warning">
+                <span class="stat-tile-icon" aria-hidden="true"><i class="lucide-alert-triangle"></i></span>
+                <div class="stat-tile-text">
+                    <span class="stat-tile-value" data-stat="low" th:text="${lowStockCount}">0</span>
+                    <span class="stat-tile-label">Bajo stock</span>
+                </div>
+            </div>
+            <div class="stat-tile stat-tile--danger">
+                <span class="stat-tile-icon" aria-hidden="true"><i class="lucide-package-x"></i></span>
+                <div class="stat-tile-text">
+                    <span class="stat-tile-value" data-stat="out" th:text="${outOfStockCount}">0</span>
+                    <span class="stat-tile-label">Agotados</span>
+                </div>
+            </div>
         </div>
 
-        <div class="inventory-grid" id="inventoryGrid" th:if="${not #lists.isEmpty(inventoryItems)}">
+        <div class="list-toolbar">
+            <div class="category-filter-bar" role="toolbar" aria-label="Filtrar por categoría">
+                <button type="button" class="category-pill active" data-category-filter="ALL" aria-pressed="true">Todos</button>
+                <button type="button" class="category-pill" data-category-filter="Rostro" aria-pressed="false">Rostro</button>
+                <button type="button" class="category-pill" data-category-filter="Cabello" aria-pressed="false">Cabello</button>
+                <button type="button" class="category-pill" data-category-filter="Uñas" aria-pressed="false">Uñas</button>
+                <button type="button" class="category-pill" data-category-filter="Cuerpo" aria-pressed="false">Cuerpo</button>
+            </div>
+            <div class="view-toggle" role="group" aria-label="Modo de vista" data-view-toggle="inventoryGrid"
+                 th:if="${not #lists.isEmpty(inventoryItems)}">
+                <button type="button" class="view-toggle-btn" data-view="grid" aria-pressed="false"><i class="lucide-layout-grid" aria-hidden="true"></i> Tarjetas</button>
+                <button type="button" class="view-toggle-btn" data-view="list" aria-pressed="true"><i class="lucide-list" aria-hidden="true"></i> Lista</button>
+            </div>
+        </div>
+
+        <div class="inventory-grid is-list-view" id="inventoryGrid" th:if="${not #lists.isEmpty(inventoryItems)}">
+            <div class="list-head" aria-hidden="true">
+                <span></span>
+                <span>Producto</span>
+                <span>Precio y categoría</span>
+                <span>Stock</span>
+                <span class="list-head-end">Acciones</span>
+            </div>
             <article class="inventory-card glass-panel" th:each="item : ${inventoryItems}" th:data-category="${item.product.category}">
                 <img th:src="${item.product.category == 'Rostro' ? '/images/face_serum.webp' : (item.product.category == 'Cabello' ? '/images/hair_oil.webp' : '/images/beauty_salon_hero.webp')}"
                      class="product-thumbnail" alt="" loading="lazy" width="96" height="96">
@@ -128,6 +173,18 @@
                 else { badge.classList.add('badge-confirmed'); badge.textContent = 'Normal'; }
             }
 
+            /* Resumen superior: se recalcula con el stock visible en las tarjetas */
+            function updateStats(lowThreshold) {
+                const stocks = [...document.querySelectorAll('#inventoryGrid .stock-count-val')].map(el => Number(el.textContent));
+                const set = (name, value) => {
+                    const el = document.querySelector(`[data-stat="${name}"]`);
+                    if (el) el.textContent = value;
+                };
+                set('units', stocks.reduce((total, stock) => total + stock, 0));
+                set('low', stocks.filter(stock => stock > 0 && stock <= lowThreshold).length);
+                set('out', stocks.filter(stock => stock === 0).length);
+            }
+
             document.querySelectorAll('.btn-adjust').forEach(button => {
                 button.addEventListener('click', async () => {
                     const card = button.closest('.inventory-card');
@@ -149,6 +206,7 @@
                         void stockValue.offsetWidth;
                         stockValue.classList.add('pulsing');
                         stockBadge(card.querySelector('.stock-badge'), stock, lowStockThreshold);
+                        updateStats(lowStockThreshold);
                         card.querySelector('.btn-increment').disabled = false;
                         decrement.disabled = stock === 0;
                     } catch (err) {

@@ -8,7 +8,7 @@
 <body>
     <div th:replace="~{fragments/navbar :: worker('/worker/dashboard', 'Volver al panel principal', ${notifications})}"></div>
 
-    <main class="main-container">
+    <main class="main-container main-container--wide">
         <div class="page-header treatments-header">
             <div>
                 <h1>Carta de Tratamientos</h1>
@@ -22,16 +22,63 @@
 
         <div th:replace="~{fragments/alerts :: flash}"></div>
 
+        <div class="stats-strip" th:if="${not #lists.isEmpty(treatments)}">
+            <div class="stat-tile">
+                <span class="stat-tile-icon" aria-hidden="true"><i class="lucide-sparkles"></i></span>
+                <div class="stat-tile-text">
+                    <span class="stat-tile-value" th:text="${#lists.size(treatments)}">0</span>
+                    <span class="stat-tile-label">Tratamientos en carta</span>
+                </div>
+            </div>
+            <div class="stat-tile">
+                <span class="stat-tile-icon" aria-hidden="true"><i class="lucide-euro"></i></span>
+                <div class="stat-tile-text">
+                    <span class="stat-tile-value" th:text="${#numbers.formatDecimal(averagePrice, 1, 'POINT', 2, 'COMMA')} + ' €'">0,00 €</span>
+                    <span class="stat-tile-label">Precio medio</span>
+                </div>
+            </div>
+            <div class="stat-tile">
+                <span class="stat-tile-icon" aria-hidden="true"><i class="lucide-clock"></i></span>
+                <div class="stat-tile-text">
+                    <span class="stat-tile-value" th:text="${averageDuration} + ' min'">0 min</span>
+                    <span class="stat-tile-label">Duración media</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="list-toolbar" th:if="${not #lists.isEmpty(treatments)}">
+            <div class="category-filter-bar" role="toolbar" aria-label="Filtrar por categoría">
+                <button type="button" class="category-pill active" data-category-filter="ALL" aria-pressed="true">Todos</button>
+                <th:block th:each="type : ${treatmentTypes}">
+                    <button type="button" class="category-pill"
+                            th:data-category-filter="${type}" aria-pressed="false" th:text="${type.displayName}">Facial</button>
+                </th:block>
+            </div>
+            <div class="view-toggle" role="group" aria-label="Modo de vista" data-view-toggle="treatmentsList">
+                <button type="button" class="view-toggle-btn" data-view="grid" aria-pressed="true"><i class="lucide-layout-grid" aria-hidden="true"></i> Tarjetas</button>
+                <button type="button" class="view-toggle-btn" data-view="list" aria-pressed="false"><i class="lucide-list" aria-hidden="true"></i> Lista</button>
+            </div>
+        </div>
+
         <div class="treatments-full-layout">
             <section class="treatments-section" aria-label="Tratamientos del centro">
-                <div class="treatments-list" th:if="${not #lists.isEmpty(treatments)}">
-                    <article class="treatment-item-card glass-panel" th:each="t : ${treatments}">
+                <div class="treatments-list" id="treatmentsList" th:if="${not #lists.isEmpty(treatments)}">
+                    <div class="list-head" aria-hidden="true">
+                        <span>Tratamiento</span>
+                        <span>Descripción</span>
+                        <span>Categoría y duración</span>
+                        <span class="list-head-end">Precio</span>
+                    </div>
+                    <article class="treatment-item-card glass-panel" th:each="t : ${treatments}" th:data-category="${t.type}">
                         <div class="treatment-item-header">
                             <h2 class="treatment-item-name" th:text="${t.name}">Manicura</h2>
                             <span class="treatment-item-price" th:text="${#numbers.formatDecimal(t.price, 1, 'POINT', 2, 'COMMA')} + ' €'">0,00 €</span>
                         </div>
                         <p class="treatment-item-desc" th:text="${t.description}">Descripción del tratamiento...</p>
-                        <span class="treatment-item-meta" th:text="'Duración: ' + ${t.duration} + ' min'">30 min</span>
+                        <div class="treatment-item-tags">
+                            <span class="treatment-item-type" th:if="${t.type != null}" th:text="${t.type.displayName}">Facial</span>
+                            <span class="treatment-item-meta"><i class="lucide-clock" aria-hidden="true"></i> <span th:text="${t.duration} + ' min'">30 min</span></span>
+                        </div>
                     </article>
                 </div>
 
@@ -50,5 +97,23 @@
     <div th:replace="~{worker/fragments/treatment-modals :: addTreatmentSheet}"></div>
 
     <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Panel de gestión de centros.')}"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            /* ---- Filtro por categoría ---- */
+            document.querySelectorAll('[data-category-filter]').forEach(button => {
+                button.addEventListener('click', () => {
+                    const category = button.dataset.categoryFilter;
+                    document.querySelectorAll('[data-category-filter]').forEach(b => {
+                        b.classList.toggle('active', b === button);
+                        b.setAttribute('aria-pressed', String(b === button));
+                    });
+                    document.querySelectorAll('#treatmentsList .treatment-item-card').forEach(card => {
+                        card.hidden = category !== 'ALL' && card.dataset.category !== category;
+                    });
+                });
+            });
+        });
+    </script>
 </body>
 </html>

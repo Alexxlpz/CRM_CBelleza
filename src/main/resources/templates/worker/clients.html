@@ -8,7 +8,7 @@
     <div th:replace="~{fragments/navbar :: worker('/worker/dashboard', 'Volver al panel principal', ${notifications})}"></div>
 
     <!-- Main Container -->
-    <main class="main-container">
+    <main class="main-container main-container--wide">
 
         <div class="page-header">
             <h1>Cartera de Clientes</h1>
@@ -38,16 +38,63 @@
             </div>
         </div>
 
+        <!-- Resumen -->
+        <div class="stats-strip" th:if="${clients != null and !clients.isEmpty()}">
+            <div class="stat-tile">
+                <span class="stat-tile-icon" aria-hidden="true"><i class="lucide-users"></i></span>
+                <div class="stat-tile-text">
+                    <span class="stat-tile-value" th:text="${#lists.size(clients)}">0</span>
+                    <span class="stat-tile-label" th:text="${searchQuery != null and !searchQuery.isEmpty()} ? 'Clientes encontrados' : 'Clientes en cartera'">Clientes en cartera</span>
+                </div>
+            </div>
+            <div class="stat-tile">
+                <span class="stat-tile-icon" aria-hidden="true"><i class="lucide-check-circle-2"></i></span>
+                <div class="stat-tile-text">
+                    <span class="stat-tile-value" th:text="${filledCards}">0</span>
+                    <span class="stat-tile-label">Fichas al día</span>
+                </div>
+            </div>
+            <div class="stat-tile stat-tile--warning">
+                <span class="stat-tile-icon" aria-hidden="true"><i class="lucide-alert-circle"></i></span>
+                <div class="stat-tile-text">
+                    <span class="stat-tile-value" th:text="${pendingCards}">0</span>
+                    <span class="stat-tile-label">Fichas pendientes</span>
+                </div>
+            </div>
+            <div class="stat-tile">
+                <span class="stat-tile-icon" aria-hidden="true"><i class="lucide-calendar-check-2"></i></span>
+                <div class="stat-tile-text">
+                    <span class="stat-tile-value" th:text="${totalAppointments}">0</span>
+                    <span class="stat-tile-label">Citas registradas</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Selector de vista (misma posición que en inventario y tratamientos) -->
+        <div class="list-toolbar clients-view-bar" th:if="${clients != null and !clients.isEmpty()}">
+            <div class="view-toggle" role="group" aria-label="Modo de vista" data-view-toggle="clientsGrid">
+                <button type="button" class="view-toggle-btn" data-view="grid" aria-pressed="false"><i class="lucide-layout-grid" aria-hidden="true"></i> Tarjetas</button>
+                <button type="button" class="view-toggle-btn" data-view="list" aria-pressed="true"><i class="lucide-list" aria-hidden="true"></i> Lista</button>
+            </div>
+        </div>
+
         <!-- Clients Grid -->
-        <div class="clients-grid" th:if="${clients != null and !clients.isEmpty()}">
+        <div class="clients-grid is-list-view" id="clientsGrid" th:if="${clients != null and !clients.isEmpty()}">
+            <div class="list-head" aria-hidden="true">
+                <span>Cliente</span>
+                <span>Contacto</span>
+                <span>Última cita</span>
+                <span>Ficha</span>
+                <span></span>
+            </div>
             <div class="client-card-item" th:each="c : ${clients}">
-                <div>
+                <div class="client-card-body">
                     <!-- Header -->
                     <div class="client-card-header">
                         <div class="client-avatar" aria-hidden="true" th:text="${#strings.isEmpty(c.name) ? 'C' : #strings.substring(c.name, 0, 1)}">M</div>
                         <div class="client-info-main">
                             <h2 class="client-name" th:text="${c.name}">María López</h2>
-                            <span class="client-sub-badge registered">
+                            <span class="client-sub-badge registered" th:if="${c.registered}">
                                 <i class="lucide-shield-check" aria-hidden="true"></i> Registrado
                             </span>
                         </div>
@@ -55,21 +102,23 @@
 
                     <!-- Details -->
                     <div class="client-details-list">
-                        <div class="client-detail-row" th:if="${c.phone != null and !c.phone.isEmpty()}">
-                            <i class="lucide-phone" aria-hidden="true"></i>
-                            <span th:text="${c.phone}">+34 600 111 222</span>
+                        <div class="client-contact" th:if="${!#strings.isEmpty(c.phone) or !#strings.isEmpty(c.email)}">
+                            <div class="client-detail-row" th:if="${c.phone != null and !c.phone.isEmpty()}">
+                                <i class="lucide-phone" aria-hidden="true"></i>
+                                <span th:text="${c.phone}">+34 600 111 222</span>
+                            </div>
+                            <div class="client-detail-row" th:if="${c.email != null and !c.email.isEmpty()}">
+                                <i class="lucide-mail" aria-hidden="true"></i>
+                                <span th:text="${c.email}">cliente@email.com</span>
+                            </div>
                         </div>
-                        <div class="client-detail-row" th:if="${c.email != null and !c.email.isEmpty()}">
-                            <i class="lucide-mail" aria-hidden="true"></i>
-                            <span th:text="${c.email}">cliente@email.com</span>
-                        </div>
-                        <div class="client-detail-row" th:if="${c.lastAppointmentDate != null}">
+                        <div class="client-detail-row client-detail-row--last" th:if="${c.lastAppointmentDate != null}">
                             <i class="lucide-calendar-check-2" aria-hidden="true"></i>
-                            <span>Última cita: <strong th:text="${#temporals.format(c.lastAppointmentDate, 'dd/MM/yyyy')}">12/07/2026</strong></span>
+                            <span><span class="client-detail-label">Última cita: </span><strong th:text="${#temporals.format(c.lastAppointmentDate, 'dd/MM/yyyy')}">12/07/2026</strong></span>
                         </div>
-                        <div class="client-detail-row" th:if="${c.lastAppointmentDate == null}">
+                        <div class="client-detail-row client-detail-row--last" th:if="${c.lastAppointmentDate == null}">
                             <i class="lucide-calendar" aria-hidden="true"></i>
-                            <span>Última cita: <em class="text-soft">Sin citas completadas</em></span>
+                            <span><span class="client-detail-label">Última cita: </span><em class="text-soft">Sin citas completadas</em></span>
                         </div>
                     </div>
 

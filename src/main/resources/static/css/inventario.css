@@ -99,9 +99,8 @@
     font-size: 17px;
     font-weight: 700;
     color: var(--text-main);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    /* Nombre completo siempre visible: hace salto de línea en vez de recortarse */
+    overflow-wrap: break-word;
     letter-spacing: -0.2px;
 }
 
@@ -549,11 +548,6 @@
     
     .product-name {
         font-size: 16px;
-        white-space: normal;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
     }
     
     .product-price {
@@ -626,3 +620,115 @@
     display: block;
 }
 
+
+/* -------------------------------------------------------------
+   ESCRITORIO (>= 1100px): vista lista tipo tabla
+   Las piezas de la tarjeta se recolocan en columnas con grid
+   (.inventory-card-info usa display: contents), sin duplicar marcado.
+   ------------------------------------------------------------- */
+@media (min-width: 1100px) {
+    /* Tarjetas más anchas para que la foto del producto luzca más */
+    .inventory-grid {
+        grid-template-columns: repeat(auto-fill, minmax(460px, 1fr));
+    }
+
+    .inventory-grid .product-thumbnail {
+        width: 140px;
+        height: 140px;
+    }
+
+    .inventory-grid .list-head,
+    .inventory-grid.is-list-view .inventory-card {
+        grid-template-columns: 76px minmax(0, 1fr) 170px 270px 150px;
+        column-gap: 22px;
+    }
+
+    .inventory-grid.is-list-view {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 12px;
+        margin-top: 0;
+    }
+
+    .inventory-grid.is-list-view .inventory-card {
+        display: grid;
+        grid-template-areas:
+            "thumb name meta stock actions"
+            "thumb desc meta stock actions";
+        align-items: center;
+        row-gap: 2px;
+        height: auto;
+        min-height: var(--list-row-height);
+        padding: 14px 24px;
+        border-radius: var(--border-radius-lg);
+        box-shadow: 0 4px 14px rgba(var(--primary-rgb), 0.06);
+    }
+
+    .inventory-grid.is-list-view .inventory-card:hover {
+        transform: none;
+        box-shadow: 0 8px 22px rgba(var(--primary-rgb), 0.14);
+    }
+
+    .inventory-grid.is-list-view .inventory-card-info {
+        display: contents;
+    }
+
+    .inventory-grid.is-list-view .product-thumbnail {
+        grid-area: thumb;
+        width: 76px;
+        height: 76px;
+        border-radius: 14px;
+    }
+
+    .inventory-grid.is-list-view .inventory-card:hover .product-thumbnail {
+        transform: none;
+    }
+
+    .inventory-grid.is-list-view .product-name {
+        grid-area: name;
+        align-self: end;
+        font-size: 15.5px;
+    }
+
+    .inventory-grid.is-list-view .product-description-short {
+        grid-area: desc;
+        align-self: start;
+        margin-top: 0;
+        -webkit-line-clamp: 1;
+    }
+
+    .inventory-grid.is-list-view .product-meta {
+        grid-area: meta;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+
+    .inventory-grid.is-list-view .stock-adjust-panel {
+        grid-area: stock;
+        flex-direction: row;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .inventory-grid.is-list-view .stock-value-wrapper {
+        min-width: 70px;
+    }
+
+    .inventory-grid.is-list-view .stock-badge {
+        font-size: 9.5px;
+        padding: 3px 8px;
+    }
+
+    .inventory-grid.is-list-view .inventory-card-actions {
+        grid-area: actions;
+        justify-content: flex-end;
+        gap: 4px;
+        margin-top: 0;
+        padding-top: 0;
+        border-top: none;
+    }
+
+    .inventory-grid.is-list-view .inventory-card-actions .delete-form {
+        margin-left: 0;
+    }
+}

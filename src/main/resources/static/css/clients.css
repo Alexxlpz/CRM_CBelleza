@@ -170,6 +170,12 @@
     border-bottom: 1px solid rgba(var(--primary-rgb), 0.15);
 }
 
+.client-contact {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
 .client-detail-row {
     display: flex;
     align-items: center;
@@ -241,6 +247,122 @@
     box-shadow: 0 6px 18px rgba(163, 135, 95, 0.32);
     transform: translateY(-1px);
     color: var(--on-primary);
+}
+
+/* -------------------------------------------------------------
+   ESCRITORIO (>= 1100px): buscador más ancho y vista lista tipo tabla.
+   .client-card-body y .client-details-list usan display: contents para
+   colocar cada dato en su columna sin duplicar el marcado.
+   ------------------------------------------------------------- */
+/* El selector Tarjetas / Lista solo existe en escritorio: en móvil la barra no ocupa espacio */
+.clients-view-bar {
+    display: none;
+}
+
+@media (min-width: 1100px) {
+    .clients-view-bar {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .clients-search-box {
+        max-width: 560px;
+    }
+
+    .clients-grid {
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    }
+
+    .clients-grid .list-head,
+    .clients-grid.is-list-view .client-card-item {
+        grid-template-columns: minmax(200px, 1.2fr) minmax(0, 1.6fr) 150px 210px 180px;
+        column-gap: 20px;
+    }
+
+    .clients-grid.is-list-view {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 12px;
+    }
+
+    .clients-grid.is-list-view .client-card-item {
+        display: grid;
+        align-items: center;
+        min-height: var(--list-row-height);
+        padding: 14px 24px;
+        border-radius: var(--border-radius-lg);
+    }
+
+    .clients-grid.is-list-view .client-card-item:hover {
+        transform: none;
+    }
+
+    .clients-grid.is-list-view .client-card-body,
+    .clients-grid.is-list-view .client-details-list {
+        display: contents;
+    }
+
+    .clients-grid.is-list-view .client-card-header {
+        grid-column: 1;
+        grid-row: 1;
+        align-items: center;
+        margin-bottom: 0;
+        min-width: 0;
+    }
+
+    .clients-grid.is-list-view .client-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        font-size: 16px;
+    }
+
+    .clients-grid.is-list-view .client-name {
+        font-size: 15.5px;
+        margin-bottom: 2px;
+    }
+
+    .clients-grid.is-list-view .client-contact {
+        grid-column: 2;
+        grid-row: 1;
+        gap: 4px;
+        min-width: 0;
+    }
+
+    .clients-grid.is-list-view .client-detail-row {
+        min-width: 0;
+    }
+
+    .clients-grid.is-list-view .client-contact .client-detail-row > span {
+        min-width: 0;
+        /* Emails largos: se parten en vez de recortarse */
+        overflow-wrap: anywhere;
+    }
+
+    .clients-grid.is-list-view .client-detail-row--last {
+        grid-column: 3;
+        grid-row: 1;
+    }
+
+    .clients-grid.is-list-view .client-detail-label {
+        display: none;
+    }
+
+    .clients-grid.is-list-view .client-card-status-bar {
+        grid-column: 4;
+        grid-row: 1;
+        justify-content: flex-start;
+        gap: 10px;
+        margin-bottom: 0;
+    }
+
+    .clients-grid.is-list-view .btn-view-client {
+        grid-column: 5;
+        grid-row: 1;
+        justify-self: end;
+        width: auto;
+        padding: 9px 14px;
+        font-size: 13px;
+    }
 }
 
 /* Badge New Client for Calendar & Listings */

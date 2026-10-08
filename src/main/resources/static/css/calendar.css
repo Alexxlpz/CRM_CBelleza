@@ -182,6 +182,14 @@
     background: rgba(236, 210, 155, 0.55);
 }
 
+/* Día seleccionado con solicitudes pendientes: manda el estilo de selección (el borde rojo avisa de lo pendiente) */
+.calendar-day-cell.active-day.pending-day-highlight,
+.calendar-day-cell.active-day.pending-day-highlight:hover {
+    background: var(--brand-gradient);
+    color: var(--on-primary);
+    border-color: rgba(var(--surface-rgb), 0.7);
+}
+
 /* Appointment Dot indicators */
 .calendar-dots-container {
     position: absolute;
@@ -208,9 +216,13 @@
     background-color: var(--error);
 }
 
-.calendar-day-cell.active-day .calendar-dot.gold-dot,
-.calendar-day-cell.active-day .calendar-dot.red-dot {
+.calendar-day-cell.active-day .calendar-dot.gold-dot {
     background-color: var(--surface);
+}
+
+/* Día seleccionado: el punto rojo se aclara para contrastar con el fondo dorado, pero sigue siendo rojo */
+.calendar-day-cell.active-day .calendar-dot.red-dot {
+    background-color: color-mix(in srgb, var(--error) 70%, var(--surface));
 }
 
 /* Right Pane: Day agenda panel — fixed height on desktop only */
@@ -458,6 +470,64 @@
 .btn-agenda-action.reject:hover {
     background: var(--error);
     color: var(--on-primary);
+}
+
+/* =============================================================
+   ESCRITORIO (>900px): la agenda ocupa todo el ancho disponible.
+   - El contenedor de la página se ensancha (main-container--wide).
+   - Las celdas del mes se dimensionan según el alto de la ventana para que
+     el calendario completo quepa sin scroll.
+   - El panel de citas toma el alto del calendario (contain: size) y su
+     listado hace scroll interno.
+   ============================================================= */
+@media (min-width: 901px) {
+    .main-container--wide {
+        max-width: 1680px;
+        padding: 28px 40px 40px;
+    }
+
+    .main-container--wide .page-header {
+        margin-bottom: 22px;
+    }
+
+    .calendar-split-layout {
+        grid-template-columns: minmax(0, 1.55fr) minmax(380px, 1fr);
+        align-items: stretch;
+        gap: 28px;
+    }
+
+    .calendar-card {
+        padding: 28px 30px;
+    }
+
+    .calendar-days-grid,
+    .calendar-weekdays {
+        gap: 10px;
+    }
+
+    .calendar-day-cell {
+        aspect-ratio: auto;
+        height: clamp(64px, calc((100vh - 400px) / 6), 128px);
+        font-size: 17px;
+        border-radius: 16px;
+    }
+
+    .calendar-dots-container {
+        bottom: 9px;
+        gap: 4px;
+    }
+
+    .calendar-dot {
+        width: 7px;
+        height: 7px;
+    }
+
+    .agenda-panel {
+        height: auto;
+        min-height: 480px;
+        contain: size;
+        padding: 28px 30px;
+    }
 }
 
 /* =============================================================

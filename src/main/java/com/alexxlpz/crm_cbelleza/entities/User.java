@@ -33,4 +33,9 @@ public class User {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "center_id")
     private Center center;
+
+    /** Tiene cuenta propia (puede iniciar sesión). Los clientes dados de alta a mano desde la cartera no tienen contraseña. */
+    public boolean hasAccount() {
+        return password != null;
+    }
 }
