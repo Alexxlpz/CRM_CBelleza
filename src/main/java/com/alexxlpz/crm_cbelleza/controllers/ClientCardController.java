@@ -1,5 +1,6 @@
 package com.alexxlpz.crm_cbelleza.controllers;
 
+import com.alexxlpz.crm_cbelleza.dto.ClientSummaryDTO;
 import com.alexxlpz.crm_cbelleza.exceptions.BusinessRuleException;
 import com.alexxlpz.crm_cbelleza.forms.NewClientForm;
 import com.alexxlpz.crm_cbelleza.security.AppUserDetails;
@@ -47,7 +48,12 @@ public class ClientCardController {
     public String list(@AuthenticationPrincipal AppUserDetails worker,
                        @RequestParam(required = false) String search,
                        Model model) {
-        model.addAttribute("clients", clientCardService.getClientsForCenter(worker.getCenterId(), search));
+        List<ClientSummaryDTO> clients = clientCardService.getClientsForCenter(worker.getCenterId(), search);
+        long filledCards = clients.stream().filter(ClientSummaryDTO::isHasFilledCard).count();
+        model.addAttribute("clients", clients);
+        model.addAttribute("filledCards", filledCards);
+        model.addAttribute("pendingCards", clients.size() - filledCards);
+        model.addAttribute("totalAppointments", clients.stream().mapToInt(ClientSummaryDTO::getTotalAppointments).sum());
         model.addAttribute("searchQuery", search);
         return "worker/clients";
     }
