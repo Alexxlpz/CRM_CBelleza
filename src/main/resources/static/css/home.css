@@ -716,12 +716,14 @@
         background: var(--primary-dark);
     }
 
-    /* Provide a generous gutter (minimum 80px) between the vertical index rail and the main content */
+    /* El contenido ocupa el espacio libre a la derecha del índice (205px + 40px de separación),
+       hasta 1400px de ancho, y se centra en ese espacio en pantallas muy anchas */
     .landing-main-container,
     .public-page-container.features-page-container {
-        margin-left: max(285px, calc((100% - 1040px) / 2));
+        --rail-space: 245px;
+        max-width: min(1400px, calc(100% - var(--rail-space) - 40px));
+        margin-left: calc(var(--rail-space) + max(0px, (100% - var(--rail-space) - 40px - 1400px) / 2));
         margin-right: auto;
-        max-width: min(1040px, calc(100% - 310px));
         box-sizing: border-box;
     }
 }

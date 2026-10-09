@@ -396,3 +396,60 @@
     margin-right: 8px;
     color: var(--primary-text);
 }
+
+/* Escritorio: listado de centros a todo el ancho, con más tarjetas por fila */
+@media (min-width: 1100px) {
+    .centers-grid {
+        grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+        gap: 20px;
+    }
+
+    .center-card-body span {
+        overflow-wrap: anywhere;
+    }
+}
+
+/* Globo de un centro en el mapa (centers.html) */
+.map-popup-wrapper .leaflet-popup-content-wrapper,
+.map-popup-wrapper .leaflet-popup-tip {
+    background: var(--surface);
+    color: var(--text-main);
+    box-shadow: var(--shadow-modal);
+}
+
+.map-popup-wrapper .leaflet-popup-content-wrapper {
+    border-radius: var(--border-radius-sm);
+}
+
+.map-popup-wrapper .leaflet-popup-close-button {
+    color: var(--text-muted);
+}
+
+.map-popup {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-family: inherit;
+}
+
+.map-popup-title {
+    font-size: 15px;
+    padding-right: 12px;
+}
+
+.map-popup-address {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.map-popup-distance {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--primary-text);
+}
+
+.map-popup-btn {
+    margin-top: 6px;
+    width: 100%;
+    justify-content: center;
+}

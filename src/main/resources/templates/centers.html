@@ -10,7 +10,7 @@
 <body>
     <div th:replace="~{fragments/navbar :: brand(true)}"></div>
 
-    <main class="main-container">
+    <main class="main-container main-container--wide">
         <div class="page-header">
             <h1>Nuestros Centros de Belleza</h1>
             <p>Elige el salón más conveniente y agenda tu experiencia de lujo</p>
@@ -91,7 +91,7 @@
             let hasMore = true;
             let isMapView = false;
             let map = null;
-            let mapMarkers = [];
+            let mapMarkers = new Map();
             let firstLoadDone = false;
 
             /* ---- Acceso a un centro ---- */
@@ -111,18 +111,36 @@
                 if (goToPanel) window.location.href = '/worker/dashboard';
             }
 
-            /** Desde el mapa se confirma antes de salir, porque un toque en un marcador es fácil de hacer sin querer. */
+            /** Botón «Ver tratamientos» del globo del mapa: sin sesión se avisa antes de mandar al inicio de sesión. */
             async function openCenterFromMap(center) {
                 if (currentSessionRole === 'WORKER') {
                     showWorkerRestriction();
                     return;
                 }
-                const message = currentSessionRole
-                    ? '¿Quieres ver los tratamientos y reservar en ' + center.name + '?'
-                    : '¿Quieres ver los tratamientos de ' + center.name + '? Te pediremos que inicies sesión para continuar.';
-                if (await Cuquora.confirm(message, { title: 'Acceder al centro', confirmText: 'Continuar', tone: 'default' })) {
-                    window.location.href = centerUrl(center);
+                if (!currentSessionRole) {
+                    const goToLogin = await Cuquora.confirm(
+                        'Para ver los tratamientos y reservar en ' + center.name + ' tienes que iniciar sesión. Después volverás directamente a este centro.',
+                        { title: 'Inicia sesión para continuar', confirmText: 'Iniciar sesión', cancelText: 'Ahora no', tone: 'default' });
+                    if (!goToLogin) return;
                 }
+                window.location.href = centerUrl(center);
+            }
+
+            /** Globo que aparece al tocar un centro en el mapa: primero se ve qué centro es y luego se decide entrar. */
+            function centerPopup(center) {
+                const el = document.createElement('div');
+                el.className = 'map-popup';
+                const distance = center.distanceKm !== null && center.distanceKm !== undefined
+                    ? `<span class="map-popup-distance">A ${center.distanceKm.toFixed(1)} km</span>` : '';
+                el.innerHTML = `
+                    <strong class="map-popup-title">${esc(center.name)}</strong>
+                    ${center.address ? `<span class="map-popup-address">${esc(center.address)}</span>` : ''}
+                    ${distance}
+                    <button type="button" class="btn btn-primary btn-sm map-popup-btn">
+                        <i class="lucide-calendar-plus" aria-hidden="true"></i> Ver tratamientos
+                    </button>`;
+                el.querySelector('button').addEventListener('click', () => openCenterFromMap(center));
+                return el;
             }
 
             /* ---- Filtros ---- */
@@ -165,7 +183,7 @@
             const markerIcon = color => L.icon({
                 iconUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-${color}.png`,
                 shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-                iconSize: [25, 41], iconAnchor: [12, 41]
+                iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34]
             });
 
             function initMap() {
@@ -175,8 +193,10 @@
                     return;
                 }
                 map = L.map('mapContainer').setView([userLat || 40.4168, userLon || -3.7038], 12);
-                L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-                    attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+                // Teselas oficiales de OpenStreetMap: gratuitas y sin API key (CARTO ahora exige clave).
+                // Política de uso: https://operations.osmfoundation.org/policies/tiles/
+                L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
                     maxZoom: 19
                 }).addTo(map);
                 if (userLat && userLon) {
@@ -192,14 +212,24 @@
                 const params = filterParams({ north: b.getNorth(), south: b.getSouth(), east: b.getEast(), west: b.getWest() });
                 try {
                     const centers = await (await fetch('/api/centers?' + params)).json();
-                    mapMarkers.forEach(m => map.removeLayer(m));
-                    mapMarkers = centers
+                    // Se conservan los marcadores que siguen visibles: así el globo abierto no se cierra
+                    // cuando el mapa se desplaza para mostrarlo entero.
+                    const visible = new Set();
+                    centers
                         .filter(c => c.latitude && c.longitude)
-                        .map(center => {
+                        .forEach(center => {
+                            visible.add(center.id);
+                            if (mapMarkers.has(center.id)) return;
                             const marker = L.marker([center.latitude, center.longitude], { icon: markerIcon('gold'), title: center.name }).addTo(map);
-                            marker.on('click', () => openCenterFromMap(center));
-                            return marker;
+                            marker.bindPopup(() => centerPopup(center), { className: 'map-popup-wrapper', minWidth: 200, maxWidth: 260 });
+                            mapMarkers.set(center.id, marker);
                         });
+                    mapMarkers.forEach((marker, id) => {
+                        if (!visible.has(id)) {
+                            map.removeLayer(marker);
+                            mapMarkers.delete(id);
+                        }
+                    });
                 } catch (e) {
                     console.error('Error al cargar los centros del mapa', e);
                 }
