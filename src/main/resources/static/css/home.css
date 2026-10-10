@@ -719,7 +719,8 @@
     /* El contenido ocupa el espacio libre a la derecha del índice (205px + 40px de separación),
        hasta 1400px de ancho, y se centra en ese espacio en pantallas muy anchas */
     .landing-main-container,
-    .public-page-container.features-page-container {
+    .public-page-container.features-page-container,
+    .public-page-container.legal-page-container {
         --rail-space: 245px;
         max-width: min(1400px, calc(100% - var(--rail-space) - 40px));
         margin-left: calc(var(--rail-space) + max(0px, (100% - var(--rail-space) - 40px - 1400px) / 2));

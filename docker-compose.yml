@@ -1,3 +1,6 @@
+# Los datos sensibles (contraseñas, correo, claves) se leen del fichero .env de esta carpeta,
+# que NO se sube a git. Para crearlo: copia .env.example a .env y rellénalo.
+# Si falta una variable obligatoria, "docker compose up" se detiene con un mensaje.
 services:
   app:
     build:
@@ -7,16 +10,24 @@ services:
     ports:
       - "8080:8080"
     environment:
-      DB_URL: jdbc:postgresql://db:5432/crm_cbelleza
+      DB_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:?Falta POSTGRES_DB en .env}
       DB_DRIVER_CLASS_NAME: org.postgresql.Driver
-      DB_USERNAME: crm_user
-      DB_PASSWORD: crm_pass
+      DB_USERNAME: ${POSTGRES_USER:?Falta POSTGRES_USER en .env}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:?Falta POSTGRES_PASSWORD en .env}
       DB_DIALECT: org.hibernate.dialect.PostgreSQLDialect
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/crm_cbelleza
-      SPRING_DATASOURCE_USERNAME: crm_user
-      SPRING_DATASOURCE_PASSWORD: crm_pass
-      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQLDialect
       H2_CONSOLE_ENABLED: "false"
+      # Correo (vacío = los correos se escriben en la consola en lugar de enviarse)
+      MAIL_HOST: ${MAIL_HOST:-}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      CRM_ADMIN_EMAIL: ${CRM_ADMIN_EMAIL:-cuquora@hotmail.com}
+      CRM_FROM_EMAIL: ${CRM_FROM_EMAIL:-cuquora@hotmail.com}
+      # Clave fija para que «Recordar mi sesión» siga funcionando tras reiniciar el contenedor
+      REMEMBER_ME_KEY: ${REMEMBER_ME_KEY:?Falta REMEMBER_ME_KEY en .env}
+      SITE_URL: ${SITE_URL:-}
+      # Cuentas demo con contraseña pública: solo "true" en una instalación de pruebas
+      SEED_DEMO_DATA: ${SEED_DEMO_DATA:-false}
       # Una base de datos creada antes de Flyway (con el antiguo init.sql) se marca como versión 1
       # en lugar de fallar; en un volumen nuevo las migraciones se ejecutan desde cero.
       SPRING_FLYWAY_BASELINE_ON_MIGRATE: "true"
@@ -29,15 +40,18 @@ services:
     image: postgres:16-alpine
     container_name: crm_cbelleza_db
     environment:
-      POSTGRES_DB: crm_cbelleza
-      POSTGRES_USER: crm_user
-      POSTGRES_PASSWORD: crm_pass
-    ports:
-      - "5432:5432"
+      POSTGRES_DB: ${POSTGRES_DB:?Falta POSTGRES_DB en .env}
+      POSTGRES_USER: ${POSTGRES_USER:?Falta POSTGRES_USER en .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Falta POSTGRES_PASSWORD en .env}
+    # Sin "ports": PostgreSQL solo es accesible desde la app, dentro de la red de Docker.
+    # Para conectarte desde tu equipo (DBeaver, IntelliJ...) durante el desarrollo, descomenta
+    # estas dos líneas: lo publica solo en localhost, nunca hacia fuera.
+    # ports:
+    #   - "127.0.0.1:5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U crm_user -d crm_cbelleza"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 5

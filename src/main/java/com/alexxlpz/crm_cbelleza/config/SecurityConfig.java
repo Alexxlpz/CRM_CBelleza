@@ -6,8 +6,10 @@ import com.alexxlpz.crm_cbelleza.security.LoginFailureHandler;
 import com.alexxlpz.crm_cbelleza.security.RoleAwareAccessDeniedHandler;
 import com.alexxlpz.crm_cbelleza.security.RoleBasedAuthenticationSuccessHandler;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.server.RequestPath;
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.authorization.AuthorizationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -17,6 +19,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
+import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.util.ServletRequestPathUtils;
 
 import java.util.UUID;
 
@@ -34,13 +39,14 @@ public class SecurityConfig {
     private static final String[] PUBLIC_PAGES = {
             "/", "/home", "/features", "/funcionalidades", "/centers",
             "/register-center", "/alta-centro", "/contact", "/contacto",
+            "/terms", "/terminos", "/cookies", "/politica-cookies",
             "/login", "/register", "/error",
             // Solo existen con el perfil "dev" (DevLoginController); en producción devuelven 404.
             "/login-selector", "/select-session"
     };
 
     private static final String[] STATIC_RESOURCES = {
-            "/css/**", "/js/**", "/images/**", "/icons/**", "/favicon.ico"
+            "/css/**", "/js/**", "/images/**", "/icons/**", "/favicon.ico", "/robots.txt"
     };
 
     @Bean
@@ -55,7 +61,8 @@ public class SecurityConfig {
                                                    LoginFailureHandler failureHandler,
                                                    RoleAwareAccessDeniedHandler accessDeniedHandler,
                                                    @Value("${crm.security.remember-me-key:}") String rememberMeKey,
-                                                   @Value("${spring.h2.console.enabled:false}") boolean h2ConsoleEnabled)
+                                                   @Value("${spring.h2.console.enabled:false}") boolean h2ConsoleEnabled,
+                                                   ApplicationContext context)
             throws Exception {
 
         http.authorizeHttpRequests(auth -> {
@@ -67,6 +74,8 @@ public class SecurityConfig {
             }
             auth.requestMatchers("/client/**").hasRole("CLIENT");
             auth.requestMatchers("/worker/**").access(workerWithCenter());
+            // Una dirección que no existe responde con la página 404 también sin sesión, en vez de mandar al login
+            auth.requestMatchers(unmappedRoute(context)).permitAll();
             auth.anyRequest().authenticated();
         });
 
@@ -105,6 +114,29 @@ public class SecurityConfig {
         }
 
         return http.build();
+    }
+
+    /**
+     * Peticiones que no atiende ningún controlador (p. ej. una URL mal escrita o un enlace antiguo).
+     * Se dejan pasar para que respondan 404 con la página propia; las rutas que sí existen siguen
+     * exigiendo sesión, así que un controlador nuevo nunca queda público por error.
+     */
+    private static RequestMatcher unmappedRoute(ApplicationContext context) {
+        return request -> {
+            HandlerMapping controllers = context.getBean("requestMappingHandlerMapping", HandlerMapping.class);
+            // El DispatcherServlet aún no ha analizado la ruta (estamos en el filtro de seguridad)
+            RequestPath previous = ServletRequestPathUtils.hasParsedRequestPath(request)
+                    ? ServletRequestPathUtils.getParsedRequestPath(request) : null;
+            ServletRequestPathUtils.parseAndCache(request);
+            try {
+                return controllers.getHandler(request) == null;
+            } catch (Exception e) {
+                // La ruta existe con otro método o formato: decide la regla general (iniciar sesión)
+                return false;
+            } finally {
+                ServletRequestPathUtils.setParsedRequestPath(previous, request);
+            }
+        };
     }
 
     /** Un trabajador solo puede usar el panel si tiene un centro asignado. */

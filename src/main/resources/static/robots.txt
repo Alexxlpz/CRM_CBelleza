@@ -1,0 +1,12 @@
+# Cuquora: las páginas públicas se pueden indexar; las zonas privadas no aportan nada a un buscador.
+# (No es una medida de seguridad: /client y /worker ya exigen iniciar sesión.)
+User-agent: *
+Disallow: /client/
+Disallow: /worker/
+Disallow: /login
+# Con «$» solo se excluye /register, no /register-center (alta de centros, que sí interesa indexar).
+Disallow: /register$
+Disallow: /error
+# El buscador de /centers carga sus resultados desde /api/centers: se permite para que el buscador pueda pintarlo.
+Allow: /api/centers
+Disallow: /api/

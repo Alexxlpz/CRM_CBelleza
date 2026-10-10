@@ -3,12 +3,19 @@ package com.alexxlpz.crm_cbelleza.config;
 import com.alexxlpz.crm_cbelleza.entities.*;
 import com.alexxlpz.crm_cbelleza.repositories.*;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 
+/**
+ * Datos de demostración (centros, tratamientos y cuentas con la contraseña "password123").
+ * Solo se cargan con crm.seed-demo-data=true: lo activan el perfil "dev" y los tests.
+ * Nunca debe activarse en producción, porque la contraseña de las cuentas demo es pública.
+ */
 @Component
+@ConditionalOnProperty(name = "crm.seed-demo-data", havingValue = "true")
 public class DatabaseSeeder implements CommandLineRunner {
 
     private final CenterRepository centerRepository;

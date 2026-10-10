@@ -24,6 +24,7 @@ public class ContactController {
     @GetMapping({"/contact", "/contacto"})
     public String contact(Model model) {
         model.addAttribute("activePage", "contact");
+        model.addAttribute("pageDescription", "¿Dudas sobre Cuquora o sobre tus citas? Escríbenos y te respondemos por correo.");
         return "contact";
     }
 
@@ -46,6 +47,7 @@ public class ContactController {
     @GetMapping({"/register-center", "/alta-centro"})
     public String registerCenter(Model model) {
         model.addAttribute("activePage", "register-center");
+        model.addAttribute("pageDescription", "Da de alta tu centro de belleza en Cuquora y recibe reservas online de nuevos clientes.");
         return "register-center";
     }
 

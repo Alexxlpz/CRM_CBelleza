@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{fragments/head :: meta('Términos y condiciones - Cuquora')}"></th:block>
+    <link rel="stylesheet" th:href="@{/css/home.css}">
+    <link rel="stylesheet" th:href="@{/css/public.css}">
+    <link rel="stylesheet" th:href="@{/css/legal.css}">
+</head>
+<!--/* Títulos del índice (lateral y en página); el orden coincide con los id terminos-1…12 */-->
+<body th:with="sections=${ {'Quiénes somos', 'Objeto y aceptación', 'Cuentas de usuario', 'Reserva de citas', 'Centros de belleza', 'Uso aceptable', 'Datos personales', 'Propiedad intelectual', 'Responsabilidad', 'Suspensión y baja', 'Cambios', 'Ley aplicable'} }">
+    <div th:replace="~{fragments/navbar :: brand(true)}"></div>
+
+    <!--/* Índice lateral (desde 1200 px), igual que en Inicio y Funcionalidades */-->
+    <aside class="desktop-left-rail" aria-label="Índice de los términos">
+        <div class="rail-header">
+            <h4 class="rail-title">Índice</h4>
+        </div>
+        <nav class="rail-nav">
+            <a th:each="item, it : ${sections}"
+               th:href="|#terminos-${it.count}|" th:attr="data-target=|terminos-${it.count}|"
+               class="rail-link" th:classappend="${it.first} ? ' active'">
+                <span class="rail-num" th:text="${#numbers.formatInteger(it.count, 2)}">01</span>
+                <span class="rail-text" th:text="${item}">Quiénes somos</span>
+                <svg class="rail-chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </a>
+        </nav>
+    </aside>
+
+    <main class="public-page-container legal-page-container">
+        <header class="page-hero">
+            <h1>Términos y condiciones</h1>
+            <p>Las normas de uso de Cuquora para clientes que piden cita y para los centros de belleza que gestionan su negocio con nosotros.</p>
+            <span class="legal-updated"><i class="lucide-calendar-check" aria-hidden="true"></i> Última actualización: 10 de octubre de 2026</span>
+        </header>
+
+        <div class="legal-document">
+            <nav class="legal-toc-inline" aria-label="Índice de los términos">
+                <h2><i class="lucide-list" aria-hidden="true"></i> En esta página</h2>
+                <ol>
+                    <li th:each="item, it : ${sections}">
+                        <a th:href="|#terminos-${it.count}|" th:text="${item}">Quiénes somos</a>
+                    </li>
+                </ol>
+            </nav>
+
+            <section class="legal-section" id="terminos-1">
+                <h2><span class="legal-section-num">01</span> Quiénes somos</h2>
+                <p><strong>Cuquora</strong> es una plataforma web que conecta a clientes con centros de belleza, salones y spas, y ofrece a esos centros herramientas para gestionar su agenda, sus clientes, sus tratamientos y su inventario.</p>
+                <p>Puedes escribirnos a <a th:href="|mailto:${contactEmail}|" th:text="${contactEmail}">cuquora@hotmail.com</a> o desde la página de <a href="/contact">contacto</a>.</p>
+            </section>
+
+            <section class="legal-section" id="terminos-2">
+                <h2><span class="legal-section-num">02</span> Objeto y aceptación</h2>
+                <p>Estos términos regulan el uso de la web de Cuquora. Al crear una cuenta, pedir una cita o usar el panel de un centro, aceptas estos términos y la <a href="/cookies">política de cookies</a>. Si no estás de acuerdo, no utilices la plataforma.</p>
+                <p>Hay dos tipos de usuario:</p>
+                <ul>
+                    <li><strong>Clientes:</strong> buscan centros, consultan sus tratamientos y piden cita.</li>
+                    <li><strong>Personal de un centro:</strong> gestiona la agenda, las citas, las fichas de sus clientes, los tratamientos y el inventario de su centro.</li>
+                </ul>
+            </section>
+
+            <section class="legal-section" id="terminos-3">
+                <h2><span class="legal-section-num">03</span> Cuentas de usuario</h2>
+                <ul>
+                    <li>Para pedir cita necesitas una cuenta de cliente. Debes ser mayor de 14 años y dar datos reales y actualizados.</li>
+                    <li>Las cuentas del personal las crea Cuquora una vez verificado el centro, tras la <a href="/register-center">solicitud de alta</a>.</li>
+                    <li>Eres responsable de guardar tu contraseña y de lo que se haga con tu cuenta. Si marcas «Recordar mi sesión», no lo hagas en dispositivos compartidos.</li>
+                    <li>Si sospechas que alguien ha entrado en tu cuenta, cambia la contraseña y avísanos.</li>
+                </ul>
+                <p>Un centro puede registrar en su cartera a un cliente que no tiene cuenta (por ejemplo, alguien que reserva por teléfono).</p>
+            </section>
+
+            <section class="legal-section" id="terminos-4">
+                <h2><span class="legal-section-num">04</span> Reserva de citas</h2>
+                <ul>
+                    <li>Cuando pides una cita, queda <strong>pendiente</strong> hasta que el centro la confirma o la rechaza. Puedes ver su estado y el mensaje del centro en «Mis Citas».</li>
+                    <li>Solo se ofrecen los huecos libres dentro del horario de reservas del centro. Una cita confirmada no garantiza el resultado del tratamiento.</li>
+                    <li>Los tratamientos, precios y duraciones los publica cada centro, que es el responsable de que sean correctos. El precio final es el que te indique el centro.</li>
+                    <li>Cuquora no cobra los tratamientos: el pago se hace directamente en el centro.</li>
+                    <li>Para cambiar o anular una cita, contacta con el centro con la mayor antelación posible.</li>
+                </ul>
+            </section>
+
+            <section class="legal-section" id="terminos-5">
+                <h2><span class="legal-section-num">05</span> Centros de belleza</h2>
+                <p>Los centros que usan Cuquora se comprometen a:</p>
+                <ul>
+                    <li>Tener su actividad en regla y publicar información veraz (dirección, teléfono, tratamientos, precios y duraciones).</li>
+                    <li>Responder a las solicitudes de cita en un plazo razonable.</li>
+                    <li>Usar las fichas técnicas solo para prestar sus servicios y con el consentimiento del cliente, sobre todo si incluyen información de salud (alergias, contraindicaciones, medicación…).</li>
+                    <li>Dar acceso al panel solo a su personal y retirarlo cuando alguien deje el centro.</li>
+                </ul>
+                <p>El servicio de belleza lo presta cada centro, no Cuquora. Cualquier reclamación sobre un tratamiento debe dirigirse al centro que lo realizó.</p>
+            </section>
+
+            <section class="legal-section" id="terminos-6">
+                <h2><span class="legal-section-num">06</span> Uso aceptable</h2>
+                <p>No está permitido:</p>
+                <ul>
+                    <li>Hacer reservas falsas o masivas, o suplantar a otra persona o centro.</li>
+                    <li>Intentar acceder a cuentas, datos o centros que no son tuyos.</li>
+                    <li>Usar programas automáticos para copiar contenido o sobrecargar la plataforma.</li>
+                    <li>Publicar contenido ilegal, ofensivo o que vulnere derechos de terceros.</li>
+                    <li>Usar los formularios de contacto para enviar publicidad no solicitada.</li>
+                </ul>
+            </section>
+
+            <section class="legal-section" id="terminos-7">
+                <h2><span class="legal-section-num">07</span> Datos personales</h2>
+                <p>Tratamos tus datos conforme al Reglamento General de Protección de Datos (RGPD) y a la Ley Orgánica 3/2018 (LOPDGDD):</p>
+                <ul>
+                    <li><strong>Datos de tu cuenta</strong> (nombre, correo, teléfono y citas): los usamos para que puedas reservar y para avisarte de tus citas.</li>
+                    <li><strong>Fichas técnicas:</strong> las rellena el centro, que es el responsable de esos datos. Cuquora solo los guarda y los muestra al personal de ese centro, nunca a otros centros.</li>
+                    <li>No vendemos tus datos ni los usamos para publicidad.</li>
+                </ul>
+                <p>Puedes pedir acceso, rectificación, supresión, oposición, limitación o portabilidad escribiendo a <a th:href="|mailto:${contactEmail}|" th:text="${contactEmail}">cuquora@hotmail.com</a>. Si no quedas satisfecho, puedes reclamar ante la Agencia Española de Protección de Datos (aepd.es).</p>
+                <p>Las cookies que usamos están en la <a href="/cookies">política de cookies</a>.</p>
+            </section>
+
+            <section class="legal-section" id="terminos-8">
+                <h2><span class="legal-section-num">08</span> Propiedad intelectual</h2>
+                <p>El diseño, el código, la marca y los textos de Cuquora nos pertenecen o tenemos permiso para usarlos. No puedes copiarlos ni reutilizarlos sin autorización.</p>
+                <p>Los centros conservan los derechos sobre su propia información (nombre, fotos, descripción de tratamientos) y nos permiten mostrarla en la plataforma mientras usen el servicio.</p>
+            </section>
+
+            <section class="legal-section" id="terminos-9">
+                <h2><span class="legal-section-num">09</span> Responsabilidad</h2>
+                <ul>
+                    <li>Trabajamos para que la plataforma esté siempre disponible, pero puede haber interrupciones por mantenimiento o causas ajenas a nosotros.</li>
+                    <li>No respondemos de los tratamientos, precios, cancelaciones ni retrasos de los centros, ni de la información que ellos publican.</li>
+                    <li>Nada de lo anterior limita los derechos que te reconoce la normativa de consumidores.</li>
+                </ul>
+            </section>
+
+            <section class="legal-section" id="terminos-10">
+                <h2><span class="legal-section-num">10</span> Suspensión y baja</h2>
+                <p>Puedes pedir la baja de tu cuenta en cualquier momento escribiéndonos. Borraremos tus datos salvo los que la ley nos obligue a conservar.</p>
+                <p>Podemos suspender o cerrar una cuenta que incumpla estos términos, avisando antes cuando sea posible.</p>
+            </section>
+
+            <section class="legal-section" id="terminos-11">
+                <h2><span class="legal-section-num">11</span> Cambios en los términos</h2>
+                <p>Podemos actualizar estos términos para adaptarlos a cambios de la plataforma o de la ley. La fecha de la última versión está arriba; si el cambio es importante, lo avisaremos en la propia web.</p>
+            </section>
+
+            <section class="legal-section" id="terminos-12">
+                <h2><span class="legal-section-num">12</span> Ley aplicable</h2>
+                <p>Estos términos se rigen por la ley española. Si eres consumidor, serán competentes los juzgados de tu domicilio. Antes de acudir a ellos, escríbenos e intentaremos resolverlo.</p>
+                <div class="legal-callout">
+                    <i class="lucide-mail" aria-hidden="true"></i>
+                    <p>¿Alguna duda sobre estos términos? Escríbenos desde la página de <a href="/contact">contacto</a>.</p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Software de gestión para centros de estética, salones y spas.')}"></div>
+    <script th:src="@{/js/scroll-index.js}" defer></script>
+</body>
+</html>

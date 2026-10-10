@@ -499,7 +499,7 @@ docker-compose logs -f app</code></pre>
                         <div class="section-icon">🔑</div>
                         <div>
                             <h2>Cuentas y Credenciales de Prueba (Demo)</h2>
-                            <p style="margin: 0; font-size: 0.95rem;">Usuarios precargados en el sistema para probar los diferentes perfiles</p>
+                            <p style="margin: 0; font-size: 0.95rem;">Usuarios precargados en el entorno de desarrollo para probar los diferentes perfiles</p>
                         </div>
                     </div>
                 </div>
@@ -507,8 +507,8 @@ docker-compose logs -f app</code></pre>
                 <div class="callout callout-warning">
                     <div class="callout-icon">🔐</div>
                     <div class="callout-content">
-                        <strong>Contraseña Universal de Demostración:</strong>
-                        <p>Todas las cuentas de prueba tienen asignada por defecto la contraseña: <code>password123</code> (encriptada con BCrypt en la base de datos).</p>
+                        <strong>Solo en desarrollo:</strong>
+                        <p>Estas cuentas solo existen al arrancar la aplicación con el perfil <code>dev</code> (o con <code>SEED_DEMO_DATA=true</code> en una instalación de pruebas). Todas usan la contraseña <code>password123</code>, que es pública: en un servidor real no se crean y nunca deben activarse.</p>
                     </div>
                 </div>
 

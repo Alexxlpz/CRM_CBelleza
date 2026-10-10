@@ -1,5 +1,36 @@
 <div xmlns:th="http://www.thymeleaf.org">
-    <footer th:fragment="footer(text)">
-        <p th:text="${text}">Cuquora CRM.</p>
-    </footer>
+    <!--/*
+        Pie común: texto de la página, enlaces legales y aviso de cookies.
+        El aviso sale oculto y app.js lo muestra hasta que el usuario pulsa «Entendido».
+    */-->
+    <th:block th:fragment="footer(text)">
+        <footer>
+            <p th:text="${text}">Cuquora CRM.</p>
+            <nav class="footer-legal" aria-label="Información legal">
+                <a href="/terms"><i class="lucide-scale" aria-hidden="true"></i> Términos y condiciones</a>
+                <a href="/cookies"><i class="lucide-cookie" aria-hidden="true"></i> Política de cookies</a>
+            </nav>
+        </footer>
+
+        <section class="cookie-banner" id="cookieBanner" aria-labelledby="cookieBannerTitle" hidden>
+            <div class="cookie-banner-inner">
+                <span class="cookie-banner-icon" aria-hidden="true"><i class="lucide-cookie"></i></span>
+                <div class="cookie-banner-body">
+                    <h2 class="cookie-banner-title" id="cookieBannerTitle">Solo usamos cookies necesarias</h2>
+                    <p class="cookie-banner-text">
+                        Las usamos para mantener tu sesión iniciada y proteger los formularios.
+                        No usamos cookies de análisis ni de publicidad.
+                    </p>
+                </div>
+                <div class="cookie-banner-actions">
+                    <a href="/cookies" class="btn btn-secondary btn-lg">
+                        <i class="lucide-info" aria-hidden="true"></i> Más información
+                    </a>
+                    <button type="button" class="btn btn-primary btn-lg" data-cookie-accept>
+                        <i class="lucide-check" aria-hidden="true"></i> Entendido
+                    </button>
+                </div>
+            </div>
+        </section>
+    </th:block>
 </div>

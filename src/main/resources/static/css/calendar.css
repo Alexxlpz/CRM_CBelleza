@@ -262,6 +262,11 @@
     margin: 0;
 }
 
+/* El título recibe el foco por programa al elegir un día (para lectores de pantalla): sin recuadro */
+.agenda-header h2:focus {
+    outline: none;
+}
+
 .agenda-header p {
     font-size: 13px;
     color: var(--text-muted);
@@ -779,4 +784,553 @@ button.calendar-day-cell {
     padding: 6px 12px;
     font-size: 12px;
     border-radius: 8px;
+}
+
+/* =============================================================
+   BARRA DE LA AGENDA: leyenda de colores + selector Mes / Semana
+   (mismo .list-toolbar y .view-toggle que tratamientos, inventario y clientes)
+   ============================================================= */
+.calendar-toolbar {
+    flex-wrap: wrap;
+}
+
+.calendar-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.calendar-legend li {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.legend-swatch {
+    width: 22px;
+    height: 12px;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+.legend-swatch--confirmed {
+    background: rgba(var(--primary-rgb), 0.3);
+    border-left: 4px solid var(--brand-solid);
+}
+
+.legend-swatch--pending {
+    background: var(--error-bg);
+    border: 1px dashed var(--error-border);
+    border-left: 4px solid var(--error);
+}
+
+.legend-swatch--completed {
+    background: var(--surface-muted);
+    border: 1px solid var(--border-soft);
+    border-left: 4px solid var(--text-soft);
+}
+
+/* El selector de la agenda se ve en todos los anchos (el de Tarjetas / Lista solo desde 1100 px) */
+.view-toggle.view-toggle--always {
+    display: inline-flex;
+}
+
+/* =============================================================
+   VISTA SEMANAL
+   ============================================================= */
+.week-card {
+    --hour-height: 72px;
+    padding: 26px 28px 30px;
+    background: rgba(var(--surface-rgb), 0.78);
+    border: 1px solid rgba(var(--surface-rgb), 0.6);
+    box-shadow: 0 10px 30px rgba(var(--primary-rgb), 0.08);
+    animation: slideInUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+    min-width: 0;
+}
+
+.week-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px 20px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px dashed rgba(var(--primary-rgb), 0.25);
+}
+
+.week-heading {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+}
+
+.week-heading .calendar-month-title {
+    text-transform: none;
+}
+
+.week-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.week-summary li {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: var(--radius-pill);
+    background: rgba(var(--primary-rgb), 0.12);
+    color: var(--primary-text);
+    font-size: 12.5px;
+    font-weight: 700;
+}
+
+.week-summary li.is-pending {
+    background: var(--error-bg);
+    color: var(--error);
+}
+
+.week-today-btn {
+    height: 40px;
+    padding: 0 18px;
+    border-radius: var(--radius-pill);
+    background: rgba(var(--primary-rgb), 0.15);
+    border: 1px solid rgba(var(--primary-rgb), 0.25);
+    color: var(--primary-text);
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.week-today-btn:hover {
+    background: var(--brand-solid);
+    color: var(--on-primary);
+}
+
+.week-today-btn:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+}
+
+/* ---- Rejilla: columna de horas + 7 días; cada hora mide --hour-height ---- */
+.week-grid-inner {
+    /* Valores por defecto: worker-calendar.js los sustituye según la semana */
+    --week-columns: repeat(7, minmax(0, 1fr));
+    --hours: 11;
+    display: grid;
+    grid-template-columns: 54px var(--week-columns);
+    grid-template-rows: auto calc(var(--hours) * var(--hour-height));
+    column-gap: 6px;
+    row-gap: 10px;
+    min-width: 0;
+}
+
+.week-day-head {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    min-width: 0;
+    padding: 10px 4px;
+    border-radius: 14px;
+    background: rgba(var(--surface-rgb), 0.6);
+    border: 1px solid rgba(var(--primary-rgb), 0.18);
+    color: var(--text-main);
+    font-family: inherit;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.week-day-head:hover {
+    background: var(--surface);
+    border-color: rgba(var(--primary-rgb), 0.45);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(var(--primary-rgb), 0.15);
+}
+
+.week-day-head:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+}
+
+.week-day-head.is-today {
+    border: 2px solid var(--primary-dark);
+    background: rgba(var(--primary-rgb), 0.14);
+}
+
+.week-day-name {
+    font-size: 11.5px;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--primary-text);
+}
+
+.week-day-number {
+    font-size: 21px;
+    font-weight: 800;
+    line-height: 1.2;
+}
+
+.week-day-count,
+.week-day-pending {
+    font-size: 11.5px;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--text-muted);
+}
+
+.week-day-pending {
+    font-weight: 700;
+    color: var(--error);
+}
+
+.week-times {
+    position: relative;
+}
+
+.week-times span {
+    --top: 0%;
+    position: absolute;
+    top: var(--top);
+    right: 6px;
+    transform: translateY(-50%);
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.week-times span:first-child {
+    transform: none;
+}
+
+/* Cada columna dibuja una línea por hora y una más suave a la media hora */
+.week-day-col {
+    position: relative;
+    min-width: 0;
+    border-radius: 12px;
+    border: 1px solid rgba(var(--primary-rgb), 0.14);
+    background-color: rgba(var(--surface-rgb), 0.55);
+    background-image:
+        linear-gradient(to bottom, rgba(var(--primary-rgb), 0.2) 1px, transparent 1px),
+        linear-gradient(to bottom, transparent calc(50% - 0.5px), rgba(var(--primary-rgb), 0.08) calc(50% - 0.5px), rgba(var(--primary-rgb), 0.08) calc(50% + 0.5px), transparent calc(50% + 0.5px));
+    background-size: 100% var(--hour-height);
+    overflow: hidden;
+}
+
+/* Día que el centro no abre: rayado suave */
+.week-day-col.is-closed {
+    background-image:
+        repeating-linear-gradient(135deg, transparent 0, transparent 9px, rgba(var(--primary-rgb), 0.09) 9px, rgba(var(--primary-rgb), 0.09) 10px),
+        linear-gradient(to bottom, rgba(var(--primary-rgb), 0.12) 1px, transparent 1px);
+    background-size: auto, 100% var(--hour-height);
+}
+
+.week-day-col.is-today {
+    border-color: var(--primary-dark);
+}
+
+/* ---- Bloques de cita: posición y alto según hora y duración; las que se solapan se reparten el ancho ---- */
+.week-event,
+.week-list-item {
+    font-family: inherit;
+    text-align: left;
+    color: var(--text-main);
+    border: none;
+    border-left: 4px solid var(--brand-solid);
+    background: rgba(var(--primary-rgb), 0.22);
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.week-event {
+    /* Posición dentro del día: worker-calendar.js pone hora (--top), duración (--height)
+       y, si se solapa con otras, su carril (--left, --width) */
+    --top: 0%;
+    --height: 0%;
+    --left: 0%;
+    --width: 100%;
+    position: absolute;
+    top: calc(var(--top) + 1px);
+    left: calc(var(--left) + 3px);
+    width: calc(var(--width) - 6px);
+    height: calc(var(--height) - 2px);
+    min-height: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    padding: 5px 8px;
+    border-radius: 10px;
+    overflow: hidden;
+    line-height: 1.3;
+    box-shadow: 0 3px 10px rgba(var(--primary-rgb), 0.12);
+}
+
+.week-event:hover,
+.week-list-item:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 18px rgba(var(--primary-rgb), 0.22);
+    z-index: 2;
+}
+
+.week-event:focus-visible,
+.week-list-item:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+    z-index: 2;
+}
+
+.status-pending {
+    background: var(--error-bg);
+    border-left-color: var(--error);
+    box-shadow: inset 0 0 0 1px var(--error-border);
+}
+
+.status-completed {
+    background: var(--surface-muted);
+    border-left-color: var(--text-soft);
+    color: var(--text-muted);
+    box-shadow: inset 0 0 0 1px var(--border-soft);
+}
+
+.week-event-time {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--primary-text);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.status-pending .week-event-time {
+    color: var(--error);
+}
+
+.status-completed .week-event-time {
+    color: var(--text-muted);
+}
+
+/* En el bloque solo cabe un resumen: el detalle completo está en el modal al pulsarlo */
+.week-event-title,
+.week-event-client {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.week-event-title {
+    font-size: 12.5px;
+    font-weight: 700;
+}
+
+.week-event-client {
+    font-size: 11.5px;
+    color: var(--text-muted);
+}
+
+.week-event .week-event-flag {
+    display: none;
+}
+
+/* Citas de menos de 50 minutos: sin el cliente (está en el detalle) */
+.week-event.is-compact .week-event-client {
+    display: none;
+}
+
+/* Citas de 30 minutos: hora y tratamiento en una línea */
+.week-event.is-short {
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 8px;
+}
+
+.week-event.is-short .week-event-client {
+    display: none;
+}
+
+/* Línea roja con la hora actual en la columna de hoy */
+.week-now-line {
+    --top: 0%;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: var(--top);
+    height: 2px;
+    background: var(--error);
+    z-index: 3;
+    pointer-events: none;
+}
+
+.week-now-line::before {
+    content: "";
+    position: absolute;
+    left: -1px;
+    top: -4px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--error);
+}
+
+/* ---- Lista por días (móvil) ---- */
+.week-list {
+    display: none;
+}
+
+.week-list-day {
+    padding: 14px;
+    border-radius: var(--border-radius-md);
+    background: rgba(var(--surface-rgb), 0.6);
+    border: 1px solid rgba(var(--primary-rgb), 0.18);
+}
+
+.week-list-day.is-today {
+    border: 2px solid var(--primary-dark);
+}
+
+.week-list-day.is-closed {
+    background: rgba(var(--primary-rgb), 0.06);
+}
+
+.week-list-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 0;
+    font-size: 15px;
+    font-weight: 800;
+}
+
+.week-list-count {
+    flex-shrink: 0;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+}
+
+.week-list-today {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 1px 8px;
+    border-radius: var(--radius-pill);
+    background: var(--brand-gradient);
+    color: var(--on-primary);
+    font-size: 11px;
+    vertical-align: middle;
+}
+
+.week-list-item {
+    display: grid;
+    grid-template-columns: 92px minmax(0, 1fr);
+    gap: 2px 10px;
+    width: 100%;
+    margin-top: 10px;
+    padding: 10px 12px;
+    border-radius: 12px;
+}
+
+.week-list-item .week-event-time {
+    grid-row: 1 / span 3;
+    font-size: 12.5px;
+}
+
+.week-list-item .week-event-title,
+.week-list-item .week-event-client {
+    white-space: normal;
+}
+
+.week-list-item .week-event-title {
+    font-size: 14px;
+}
+
+.week-list-item .week-event-client {
+    font-size: 12.5px;
+}
+
+.week-event-flag {
+    justify-self: start;
+    margin-top: 2px;
+    padding: 1px 8px;
+    border-radius: var(--radius-pill);
+    background: var(--error);
+    color: var(--on-primary);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+/* ---- Modal con la ficha de la cita ---- */
+.appointment-modal .ui-modal-title {
+    padding-right: 40px;
+}
+
+.appointment-modal .agenda-item-card,
+.appointment-modal .agenda-item-card:hover {
+    animation: none;
+    transform: none;
+    box-shadow: none;
+}
+
+/* ---- Anchos ---- */
+@media (min-width: 769px) and (max-width: 1099px) {
+    .week-card {
+        --hour-height: 64px;
+        padding: 22px 18px 24px;
+    }
+
+    .week-grid-inner {
+        grid-template-columns: 46px var(--week-columns);
+        column-gap: 4px;
+    }
+
+    .week-day-number {
+        font-size: 18px;
+    }
+
+    .week-event {
+        padding: 5px 6px;
+    }
+}
+
+@media (max-width: 768px) {
+    .week-grid {
+        display: none;
+    }
+
+    .week-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .week-card {
+        padding: 18px 14px;
+        border-radius: var(--border-radius-md);
+    }
+
+    .week-header .calendar-month-title {
+        font-size: 18px;
+        white-space: normal;
+    }
+
+    .calendar-toolbar .view-toggle {
+        margin-left: auto;
+    }
 }

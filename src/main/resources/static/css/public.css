@@ -121,6 +121,11 @@
     align-items: flex-start;
 }
 
+.terms-check-row a {
+    color: var(--primary-text);
+    font-weight: 700;
+}
+
 .checkbox-chip:has(input.has-error) {
     border: 1px solid var(--error);
     background: var(--error-bg);

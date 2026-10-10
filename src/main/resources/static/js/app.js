@@ -9,6 +9,7 @@
  *     [data-modal-open="x"] y se cierran con [data-modal-close], Escape o clic fuera.
  *  7. Selector de vista Tarjetas / Lista: [data-view-toggle="idDelListado"] con botones
  *     [data-view="grid|list"]. Añade .is-list-view al listado y recuerda la elección.
+ *  8. Aviso de cookies (#cookieBanner, en fragments/footer): se muestra hasta que se pulsa «Entendido».
  */
 (function () {
     'use strict';
@@ -273,10 +274,30 @@
         });
     }
 
+    /* ---------- 8. Aviso de cookies ---------- */
+    // Si algún día se añaden cookies de análisis o publicidad, sube la versión para volver a mostrarlo
+    // y añade los botones Aceptar / Rechazar: esas cookies sí necesitan consentimiento previo.
+    const COOKIE_NOTICE_KEY = 'cuquora.cookies';
+    const COOKIE_NOTICE_VERSION = '1';
+
+    function initCookieBanner() {
+        const banner = document.getElementById('cookieBanner');
+        if (!banner) return;
+        let seen = null;
+        try { seen = localStorage.getItem(COOKIE_NOTICE_KEY); } catch (e) { /* almacenamiento no disponible */ }
+        if (seen === COOKIE_NOTICE_VERSION) return;
+        banner.hidden = false;
+        banner.querySelector('[data-cookie-accept]')?.addEventListener('click', () => {
+            try { localStorage.setItem(COOKIE_NOTICE_KEY, COOKIE_NOTICE_VERSION); } catch (e) { /* almacenamiento no disponible */ }
+            banner.hidden = true;
+        });
+    }
+
     function init() {
         initMobileNav();
         initNotifications();
         initViewToggles();
+        initCookieBanner();
     }
 
     if (document.readyState === 'loading') {

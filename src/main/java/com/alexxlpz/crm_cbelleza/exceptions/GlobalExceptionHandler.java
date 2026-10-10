@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-/** Convierte los recursos inexistentes en una página 404 con el diseño de la aplicación. */
+/** Convierte los recursos inexistentes en la página 404 propia (templates/error/404.html). */
 @ControllerAdvice(annotations = Controller.class)
 public class GlobalExceptionHandler {
 
@@ -17,6 +17,6 @@ public class GlobalExceptionHandler {
         model.addAttribute("status", 404);
         model.addAttribute("error", "No encontrado");
         model.addAttribute("message", ex.getMessage());
-        return "error";
+        return "error/404";
     }
 }

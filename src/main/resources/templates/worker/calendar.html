@@ -11,11 +11,25 @@
     <main class="main-container main-container--wide">
 
         <div class="page-header">
-            <h1>Agenda Mensual</h1>
-            <p>Consulta las citas agendadas y los detalles de los clientes por día</p>
+            <h1>Agenda</h1>
+            <p>Consulta las citas del centro por mes o de un vistazo por semana</p>
         </div>
 
-        <div class="calendar-split-layout">
+        <!-- Leyenda y selector Mes / Semana (misma posición que Tarjetas / Lista en las otras pantallas) -->
+        <div class="list-toolbar calendar-toolbar">
+            <ul class="calendar-legend" aria-label="Leyenda de colores">
+                <li><span class="legend-swatch legend-swatch--confirmed" aria-hidden="true"></span> Confirmada</li>
+                <li><span class="legend-swatch legend-swatch--pending" aria-hidden="true"></span> Solicitud pendiente</li>
+                <li><span class="legend-swatch legend-swatch--completed" aria-hidden="true"></span> Completada</li>
+            </ul>
+            <div class="view-toggle view-toggle--always" role="group" aria-label="Disposición de la agenda">
+                <button type="button" class="view-toggle-btn" data-calendar-view="month" aria-pressed="true"><i class="lucide-calendar-days" aria-hidden="true"></i> Mes</button>
+                <button type="button" class="view-toggle-btn" data-calendar-view="week" aria-pressed="false"><i class="lucide-calendar-range" aria-hidden="true"></i> Semana</button>
+            </div>
+        </div>
+
+        <!-- ===== Vista mensual ===== -->
+        <div class="calendar-split-layout" id="monthView">
             
             <!-- Left Pane: Monthly Calendar Grid -->
             <section class="calendar-card glass-panel">
@@ -62,14 +76,46 @@
             </section>
             
         </div>
+
+        <!-- ===== Vista semanal (worker-calendar.js) ===== -->
+        <section class="week-card glass-panel" id="weekView" aria-labelledby="weekTitle" hidden>
+            <div class="week-header">
+                <div class="week-heading">
+                    <h2 class="calendar-month-title" id="weekTitle" aria-live="polite">Semana</h2>
+                    <ul class="week-summary" id="weekSummary"></ul>
+                </div>
+                <div class="calendar-header-nav">
+                    <button type="button" class="week-today-btn" id="weekTodayBtn">Hoy</button>
+                    <button type="button" class="calendar-nav-btn" id="prevWeekBtn" aria-label="Semana anterior">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+                    </button>
+                    <button type="button" class="calendar-nav-btn" id="nextWeekBtn" aria-label="Semana siguiente">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+                    </button>
+                </div>
+            </div>
+            <!-- Desde 769 px: rejilla horaria; en móvil: lista por días -->
+            <div class="week-grid" id="weekGrid"></div>
+            <div class="week-list" id="weekList"></div>
+        </section>
         
     </main>
+
+    <!-- Detalle de una cita de la vista semanal (misma ficha que la vista mensual, con Aceptar / Rechazar) -->
+    <div class="ui-modal-overlay" id="appointmentModal" hidden>
+        <div class="ui-modal ui-modal--form appointment-modal" role="dialog" aria-modal="true" aria-labelledby="appointmentModalTitle">
+            <button type="button" class="ui-modal-close" data-modal-close aria-label="Cerrar"><i class="lucide-x" aria-hidden="true"></i></button>
+            <h2 class="ui-modal-title" id="appointmentModalTitle">Detalle de la cita</h2>
+            <div id="appointmentModalBody"></div>
+        </div>
+    </div>
 
     <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Panel de gestión de centros.')}"></div>
 
     <!-- Citas del centro (JSON) para el calendario -->
     <script th:inline="javascript">
         window.CALENDAR_APPOINTMENTS = /*[[${appointments}]]*/ [];
+        window.CALENDAR_HOURS = /*[[${openingHours}]]*/ {};
     </script>
     <script th:src="@{/js/worker-calendar.js}" defer></script>
 </body>

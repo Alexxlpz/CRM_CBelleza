@@ -5,14 +5,42 @@
             <link rel="stylesheet" th:href="@{/css/pagina.css}">   <- estilos propios de la página
         </head>
 */-->
-<th:block xmlns:th="http://www.thymeleaf.org" th:fragment="meta(title)">
+
+<!--/* El <head> solo envuelve el fragmento (como el <div> de footer.html y navbar.html) para que
+       IntelliJ valide las etiquetas en su contexto: al usar "fragments/head :: meta(...)" no se copia. */-->
+<head xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="meta(title)">
+    <!--/* Variables del modelo que usa este fragmento (para que IntelliJ las resuelva):
+           pageDescription la pone el controlador de cada página (opcional) y siteUrl SiteModelAdvice */-->
+    <!--/*@thymesVar id="pageDescription" type="java.lang.String"*/-->
+    <!--/*@thymesVar id="siteUrl" type="java.lang.String"*/-->
+    <!--/*@thymesVar id="_csrf" type="org.springframework.security.web.csrf.CsrfToken"*/-->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="color-scheme" content="light dark">
     <title th:text="${title}">Cuquora</title>
+    <!-- Descripción para buscadores y vista previa al compartir un enlace (Open Graph).
+         Cada controlador puede poner su "pageDescription"; si no, se usa la general.
+         Los content="…" fijos son valores de prototipo (los exige el HTML): th:content los sustituye. -->
+    <th:block
+            th:with="description=${pageDescription ?: 'Cuquora: citas online, fichas de clientes e inventario para centros de belleza, salones y spas.'}">
+        <meta name="description" content="Cuquora" th:content="${description}">
+        <meta property="og:type" content="website">
+        <meta property="og:site_name" content="Cuquora">
+        <meta property="og:locale" content="es_ES">
+        <meta property="og:title" content="Cuquora" th:content="${title}">
+        <meta property="og:description" content="Cuquora" th:content="${description}">
+        <meta property="og:image" content="/images/og-image.jpg"
+              th:content="${(siteUrl ?: '') + '/images/og-image.jpg'}">
+        <meta property="og:image:type" content="image/jpeg">
+        <meta property="og:image:width" content="1200">
+        <meta property="og:image:height" content="630">
+        <meta property="og:image:alt" content="Cuquora, software de gestión para centros de belleza">
+        <meta name="twitter:card" content="summary_large_image">
+    </th:block>
     <!-- Token CSRF para las peticiones fetch (lo usa /js/app.js) -->
-    <meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}">
-    <meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}">
+    <meta name="_csrf" content="" th:if="${_csrf != null}" th:content="${_csrf.token}">
+    <meta name="_csrf_header" content="" th:if="${_csrf != null}" th:content="${_csrf.headerName}">
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="icon" type="image/png" href="/images/icon.png">
@@ -28,3 +56,4 @@
     <!-- Comportamiento común: CSRF en fetch, menú móvil, diálogos -->
     <script th:src="@{/js/app.js}" defer></script>
 </th:block>
+</head>

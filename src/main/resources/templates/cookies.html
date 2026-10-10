@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{fragments/head :: meta('Política de cookies - Cuquora')}"></th:block>
+    <link rel="stylesheet" th:href="@{/css/home.css}">
+    <link rel="stylesheet" th:href="@{/css/public.css}">
+    <link rel="stylesheet" th:href="@{/css/legal.css}">
+</head>
+<!--/* Títulos del índice (lateral y en página); el orden coincide con los id cookies-1…6 */-->
+<body th:with="sections=${ {'Qué son', 'Cookies que usamos', 'Almacenamiento local', 'Servicios externos', 'Por qué no pedimos permiso', 'Cómo borrarlas'} }">
+    <div th:replace="~{fragments/navbar :: brand(true)}"></div>
+
+    <aside class="desktop-left-rail" aria-label="Índice de la política de cookies">
+        <div class="rail-header">
+            <h4 class="rail-title">Índice</h4>
+        </div>
+        <nav class="rail-nav">
+            <a th:each="item, it : ${sections}"
+               th:href="|#cookies-${it.count}|" th:attr="data-target=|cookies-${it.count}|"
+               class="rail-link" th:classappend="${it.first} ? ' active'">
+                <span class="rail-num" th:text="${#numbers.formatInteger(it.count, 2)}">01</span>
+                <span class="rail-text" th:text="${item}">Qué son</span>
+                <svg class="rail-chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </a>
+        </nav>
+    </aside>
+
+    <main class="public-page-container legal-page-container">
+        <header class="page-hero">
+            <h1>Política de cookies</h1>
+            <p>Solo usamos las cookies imprescindibles para que puedas iniciar sesión y usar la web con seguridad. Sin análisis, sin publicidad y sin rastreo.</p>
+            <span class="legal-updated"><i class="lucide-calendar-check" aria-hidden="true"></i> Última actualización: 10 de octubre de 2026</span>
+        </header>
+
+        <div class="legal-document">
+            <nav class="legal-toc-inline" aria-label="Índice de la política de cookies">
+                <h2><i class="lucide-list" aria-hidden="true"></i> En esta página</h2>
+                <ol>
+                    <li th:each="item, it : ${sections}">
+                        <a th:href="|#cookies-${it.count}|" th:text="${item}">Qué son</a>
+                    </li>
+                </ol>
+            </nav>
+
+            <section class="legal-section" id="cookies-1">
+                <h2><span class="legal-section-num">01</span> Qué son las cookies</h2>
+                <p>Una cookie es un pequeño archivo que la web guarda en tu navegador para recordar algo entre una página y la siguiente, por ejemplo que ya has iniciado sesión.</p>
+            </section>
+
+            <section class="legal-section" id="cookies-2">
+                <h2><span class="legal-section-num">02</span> Cookies que usamos</h2>
+                <p>Todas son <strong>propias</strong> (las pone Cuquora, no terceros) y <strong>técnicas</strong>: sin ellas no podrías entrar en tu cuenta.</p>
+                <table class="legal-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Nombre</th>
+                            <th scope="col">Tipo</th>
+                            <th scope="col">Para qué sirve</th>
+                            <th scope="col">Duración</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td data-label="Nombre"><code>JSESSIONID</code></td>
+                            <td data-label="Tipo"><span class="legal-tag">Necesaria</span></td>
+                            <td data-label="Para qué">Mantiene tu sesión iniciada mientras navegas y protege los formularios frente a envíos falsificados (CSRF).</td>
+                            <td data-label="Duración">Hasta que cierras el navegador o la sesión</td>
+                        </tr>
+                        <tr>
+                            <td data-label="Nombre"><code>remember-me</code></td>
+                            <td data-label="Tipo"><span class="legal-tag">Necesaria</span></td>
+                            <td data-label="Para qué">Solo si marcas «Recordar mi sesión» al entrar: evita que tengas que volver a escribir la contraseña.</td>
+                            <td data-label="Duración">14 días, o hasta que cierres la sesión</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section class="legal-section" id="cookies-3">
+                <h2><span class="legal-section-num">03</span> Almacenamiento local del navegador</h2>
+                <p>Además, guardamos en tu navegador (almacenamiento local) un par de preferencias que eliges tú. No se envían a nuestro servidor.</p>
+                <table class="legal-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Nombre</th>
+                            <th scope="col">Tipo</th>
+                            <th scope="col">Para qué sirve</th>
+                            <th scope="col">Duración</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td data-label="Nombre"><code>cuquora.cookies</code></td>
+                            <td data-label="Tipo"><span class="legal-tag">Preferencia</span></td>
+                            <td data-label="Para qué">Recuerda que ya has leído el aviso de cookies para no volver a mostrártelo.</td>
+                            <td data-label="Duración">Hasta que borres los datos del navegador</td>
+                        </tr>
+                        <tr>
+                            <td data-label="Nombre"><code>cuquora.view.*</code></td>
+                            <td data-label="Tipo"><span class="legal-tag">Preferencia</span></td>
+                            <td data-label="Para qué">Solo en el panel de los centros: recuerda si prefieres ver tratamientos, inventario y clientes en tarjetas o en lista.</td>
+                            <td data-label="Duración">Hasta que borres los datos del navegador</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section class="legal-section" id="cookies-4">
+                <h2><span class="legal-section-num">04</span> Servicios externos</h2>
+                <p>Para mostrar algunas partes de la web cargamos recursos de otros servicios. <strong>No instalan cookies</strong>, pero, como cualquier web que visitas, reciben tu dirección IP para poder enviarte el contenido:</p>
+                <ul>
+                    <li><strong>Google Fonts</strong> (Google): la tipografía de la web.</li>
+                    <li><strong>OpenStreetMap</strong>: las imágenes del mapa de centros.</li>
+                    <li><strong>unpkg</strong> y <strong>GitHub</strong>: la librería del mapa (Leaflet) y los iconos de sus marcadores.</li>
+                </ul>
+            </section>
+
+            <section class="legal-section" id="cookies-5">
+                <h2><span class="legal-section-num">05</span> Por qué no pedimos permiso</h2>
+                <p>La ley (artículo 22.2 de la LSSI y la guía de cookies de la Agencia Española de Protección de Datos) exige pedir consentimiento antes de usar cookies de análisis, publicidad o personalización de terceros. Las cookies técnicas imprescindibles para un servicio que tú solicitas, como iniciar sesión, están exentas: basta con informarte, que es lo que hace el aviso.</p>
+                <div class="legal-callout">
+                    <i class="lucide-shield-check" aria-hidden="true"></i>
+                    <p>Si algún día añadimos cookies de análisis, te pediremos permiso antes de instalarlas y podrás rechazarlas con la misma facilidad que aceptarlas.</p>
+                </div>
+            </section>
+
+            <section class="legal-section" id="cookies-6">
+                <h2><span class="legal-section-num">06</span> Cómo borrarlas o bloquearlas</h2>
+                <p>Puedes borrar o bloquear las cookies desde la configuración de tu navegador (normalmente en «Privacidad y seguridad» › «Cookies y datos de sitios»). Si bloqueas las de Cuquora, no podrás iniciar sesión.</p>
+                <p>¿Dudas? Escríbenos a <a th:href="|mailto:${contactEmail}|" th:text="${contactEmail}">cuquora@hotmail.com</a>. También puedes consultar los <a href="/terms">términos y condiciones</a>.</p>
+            </section>
+        </div>
+    </main>
+
+    <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Software de gestión para centros de estética, salones y spas.')}"></div>
+    <script th:src="@{/js/scroll-index.js}" defer></script>
+</body>
+</html>

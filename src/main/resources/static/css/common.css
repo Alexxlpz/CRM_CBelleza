@@ -274,6 +274,17 @@ h1, h2, h3, h4, h5, h6 {
         font-size: 15px;
         padding: 8px 14px;
     }
+    /* Sin sesión, «Iniciar Sesión» y «Registrarse» van con texto: se compacta un poco todo para que quepan */
+    .navbar:has(.nav-auth-duo) .nav-menu-link {
+        padding: 8px 10px;
+    }
+    .nav-auth-duo {
+        gap: 6px;
+    }
+    .nav-auth-duo .nav-auth-btn {
+        padding: 0 13px;
+        font-size: 13px;
+    }
 }
 
 /* Escritorio estrecho (p. ej. ventana a media pantalla): los accesos de sesión
@@ -294,7 +305,8 @@ h1, h2, h3, h4, h5, h6 {
         white-space: nowrap;
         border: 0;
     }
-    .nav-session-info .nav-auth-btn {
+    /* «Iniciar Sesión» y «Registrarse» (sin sesión) no tienen icono: conservan su texto */
+    .nav-session-info:not(.nav-auth-duo) .nav-auth-btn {
         width: 40px;
         height: 40px;
         padding: 0;
@@ -1110,6 +1122,156 @@ footer {
     margin-top: auto;
 }
 
+/* Enlaces legales del pie */
+.footer-legal {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px 22px;
+    margin-top: 10px;
+}
+
+.footer-legal a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.footer-legal a:hover,
+.footer-legal a:focus-visible {
+    color: var(--primary-text);
+    text-decoration: underline;
+}
+
+/* ---------- Aviso de cookies (fragments/footer + app.js) ----------
+   Barra fija a todo el ancho de la parte inferior. Mientras se ve, la página reserva
+   espacio abajo para que la barra no tape el pie. */
+.cookie-banner {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1040;               /* sobre el contenido y el índice lateral, bajo la navbar, el menú móvil y los modales */
+    background: var(--surface);
+    border-top: 1px solid rgba(var(--primary-rgb), 0.35);
+    box-shadow: 0 -12px 40px rgba(var(--primary-rgb), 0.18);
+    animation: cookie-banner-in 0.45s var(--ease-out);
+}
+
+.cookie-banner-inner {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 20px 32px;
+}
+
+.cookie-banner-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: rgba(var(--primary-rgb), 0.16);
+    color: var(--primary-text);
+    font-size: 24px;
+}
+
+.cookie-banner-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.cookie-banner-title {
+    margin: 0 0 4px;
+    font-size: 16.5px;
+    font-weight: 800;
+}
+
+.cookie-banner-text {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--text-muted);
+}
+
+.cookie-banner-actions {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 12px;
+}
+
+.cookie-banner-actions .btn {
+    gap: 8px;
+    min-width: 170px;
+    padding: 0 26px;
+}
+
+body:has(.cookie-banner:not([hidden])) {
+    padding-bottom: 104px;
+}
+
+@keyframes cookie-banner-in {
+    from { opacity: 0; transform: translateY(100%); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Por debajo de 1100 px: los botones bajan a su propia fila y se reparten el ancho */
+@media (max-width: 1099px) {
+    .cookie-banner-inner {
+        flex-wrap: wrap;
+        padding: 18px 24px;
+    }
+
+    .cookie-banner-actions {
+        flex-basis: 100%;
+    }
+
+    .cookie-banner-actions .btn {
+        flex: 1;
+    }
+
+    body:has(.cookie-banner:not([hidden])) {
+        padding-bottom: 170px;
+    }
+}
+
+/* Móvil: botones uno debajo de otro, «Entendido» primero */
+@media (max-width: 600px) {
+    .cookie-banner-inner {
+        gap: 14px;
+        padding: 18px 16px calc(18px + env(safe-area-inset-bottom));
+    }
+
+    .cookie-banner-icon {
+        width: 42px;
+        height: 42px;
+        font-size: 20px;
+    }
+
+    .cookie-banner-actions {
+        flex-direction: column-reverse;
+        gap: 10px;
+    }
+
+    .cookie-banner-actions .btn {
+        width: 100%;
+        min-width: 0;
+    }
+
+    body:has(.cookie-banner:not([hidden])) {
+        padding-bottom: 300px;
+    }
+}
+
 /* Back Arrow Button (Aesthetic, good focus, doesn't span full width) */
 .back-arrow-btn {
     display: inline-flex;
@@ -1823,6 +1985,228 @@ body.modal-open {
     gap: 12px;
     justify-content: center;
     flex-wrap: wrap;
+}
+
+.error-actions .btn {
+    gap: 8px;
+}
+
+.error-help {
+    margin: 24px 0 0;
+    font-size: 13.5px;
+}
+
+.error-card .error-help {
+    margin-bottom: 0;
+}
+
+.error-help a {
+    color: var(--primary-text);
+    font-weight: 700;
+}
+
+/* 404: el niño se asoma al espejo del salón y solo ve un 404 (templates/error/404.html) */
+.not-found-card {
+    max-width: 620px;
+    padding: 40px;
+}
+
+.not-found-art {
+    display: block;
+    width: 100%;
+    max-width: 480px;
+    height: auto;
+    margin: 0 auto 18px;
+    overflow: visible;
+}
+
+.not-found-art * {
+    transform-box: fill-box;
+}
+
+.nf-floor {
+    stroke: var(--border-soft);
+    stroke-width: 3;
+    stroke-linecap: round;
+}
+
+/* Tocador y productos */
+.nf-leg {
+    stroke: var(--text-main);
+    stroke-width: 5;
+    stroke-linecap: round;
+}
+
+.nf-console {
+    fill: var(--brand-solid);
+    stroke: var(--text-main);
+    stroke-width: 3;
+}
+
+.nf-bottle,
+.nf-bottle-cap {
+    stroke: var(--text-main);
+    stroke-width: 2.5;
+}
+
+.nf-bottle-1 { fill: var(--secondary); }
+.nf-bottle-2 { fill: var(--primary-light); }
+.nf-bottle-cap { fill: var(--primary-dark); }
+
+/* Espejo */
+.nf-mirror-frame {
+    fill: var(--primary);
+    stroke: var(--text-main);
+    stroke-width: 3;
+}
+
+.nf-mirror-glass {
+    fill: var(--surface-muted);
+    stroke: var(--text-main);
+    stroke-width: 2.5;
+}
+
+.nf-mirror-shine rect {
+    fill: rgba(var(--primary-rgb), 0.22);
+}
+
+.nf-mirror-shine {
+    animation: nf-shine 3.6s ease-in-out infinite;
+}
+
+.nf-mirror-code {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 38px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    fill: var(--primary-text);
+    animation: nf-fade 3.6s ease-in-out infinite;
+}
+
+.nf-sparkle {
+    fill: var(--primary);
+    transform-origin: 50% 50%;
+    animation: nf-twinkle 2s ease-in-out infinite;
+}
+
+.nf-sparkle-2 {
+    animation-delay: 1s;
+}
+
+/* Niño */
+.nf-kid {
+    transform-origin: 30% 100%;
+    animation: nf-peek 3.6s ease-in-out infinite;
+}
+
+.nf-shirt {
+    fill: var(--primary);
+    stroke: var(--text-main);
+    stroke-width: 3;
+}
+
+.nf-arm {
+    fill: none;
+    stroke: var(--primary-dark);
+    stroke-width: 11;
+    stroke-linecap: round;
+}
+
+.nf-hand,
+.nf-skin {
+    fill: var(--primary-light);
+    stroke: var(--text-main);
+    stroke-width: 3;
+}
+
+.nf-arm-scratch {
+    transform-origin: 50% 100%;
+    animation: nf-scratch 0.5s ease-in-out infinite alternate;
+}
+
+.nf-hand-scratch {
+    transform-origin: 50% 50%;
+    animation: nf-scratch 0.5s ease-in-out infinite alternate;
+}
+
+.nf-hair {
+    fill: var(--primary-dark);
+    stroke: var(--text-main);
+    stroke-width: 3;
+    stroke-linejoin: round;
+}
+
+.nf-brow,
+.nf-mouth-o {
+    fill: none;
+    stroke: var(--text-main);
+    stroke-width: 3;
+    stroke-linecap: round;
+}
+
+.nf-pupil {
+    fill: var(--text-main);
+}
+
+.nf-cheek {
+    fill: rgba(var(--secondary-rgb), 0.7);
+}
+
+.nf-question {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    fill: var(--primary-text);
+    animation: nf-float 2.2s ease-in-out infinite;
+}
+
+.nf-question-2 {
+    font-size: 22px;
+    animation-delay: 0.7s;
+}
+
+@keyframes nf-shine {
+    0%, 15% { transform: translateX(-90px); }
+    65%, 100% { transform: translateX(120px); }
+}
+
+@keyframes nf-fade {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+}
+
+@keyframes nf-twinkle {
+    0%, 100% { opacity: 0.25; transform: scale(0.6); }
+    50% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes nf-peek {
+    0%, 100% { transform: rotate(0deg); }
+    40%, 60% { transform: rotate(4deg); }
+}
+
+@keyframes nf-scratch {
+    from { transform: rotate(-4deg); }
+    to { transform: rotate(5deg); }
+}
+
+@keyframes nf-float {
+    0%, 100% { transform: translateY(0); opacity: 1; }
+    50% { transform: translateY(-6px); opacity: 0.55; }
+}
+
+@media (max-width: 600px) {
+    .not-found-card {
+        padding: 28px 20px 30px;
+    }
+
+    .error-card h1 {
+        font-size: 24px;
+    }
+
+    .error-actions .btn {
+        width: 100%;
+    }
 }
 
 /* ---------- Componentes compartidos del panel (agenda, clientes, inventario, tratamientos) ---------- */

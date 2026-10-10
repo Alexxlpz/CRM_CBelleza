@@ -32,6 +32,34 @@ class SecurityIntegrationTests {
         mvc.perform(get(path)).andExpect(status().isOk());
     }
 
+    @Test
+    void robotsTxtIsPublic() throws Exception {
+        mvc.perform(get("/robots.txt")).andExpect(status().isOk());
+    }
+
+    /** Una dirección inexistente da 404 (página propia) sin mandar al login; las que existen siguen protegidas. */
+    @ParameterizedTest
+    @ValueSource(strings = {"/pagina-que-no-existe", "/blog/articulo", "/images/no-existe.png"})
+    void unknownUrlsReturnNotFoundWithoutLogin(String path) throws Exception {
+        mvc.perform(get(path)).andExpect(status().isNotFound());
+    }
+
+    /** /profile existe fuera de /client y /worker: que exista una 404 pública no la deja abierta. */
+    @ParameterizedTest
+    @ValueSource(strings = {"/worker/no-existe", "/client/no-existe", "/profile"})
+    void privateOrExistingUrlsStillRequireLogin(String path) throws Exception {
+        mvc.perform(get(path))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login"));
+    }
+
+    @Test
+    void wrongMethodOnExistingRouteStillRequiresLogin() throws Exception {
+        mvc.perform(post("/profile").with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login"));
+    }
+
     @ParameterizedTest
     @ValueSource(strings = {"/worker/dashboard", "/client/appointments", "/client/profile"})
     void protectedPagesRedirectAnonymousUsersToLogin(String path) throws Exception {

@@ -33,3 +33,6 @@ build/
 .vscode/
 
 .agents
+### Secretos: nunca dentro de la imagen ###
+.env
+.env.*
