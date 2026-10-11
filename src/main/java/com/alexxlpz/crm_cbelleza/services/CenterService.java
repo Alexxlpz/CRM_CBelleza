@@ -1,6 +1,8 @@
 package com.alexxlpz.crm_cbelleza.services;
 
+import com.alexxlpz.crm_cbelleza.booking.CenterTimeZones;
 import com.alexxlpz.crm_cbelleza.entities.Center;
+import com.alexxlpz.crm_cbelleza.exceptions.BusinessRuleException;
 import com.alexxlpz.crm_cbelleza.exceptions.ResourceNotFoundException;
 import com.alexxlpz.crm_cbelleza.forms.CenterForm;
 import com.alexxlpz.crm_cbelleza.forms.FormText;
@@ -12,6 +14,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 public class CenterService {
+
+    /** Límite razonable de cabinas o puestos de un centro. */
+    public static final int MAX_CABINS = 50;
 
     private final CenterRepository centerRepository;
 
@@ -36,6 +41,18 @@ public class CenterService {
         if (form.email() != null) center.setEmail(form.email().trim());
         if (form.latitude() != null) center.setLatitude(form.latitude());
         if (form.longitude() != null) center.setLongitude(form.longitude());
+        if (form.timeZone() != null) {
+            if (!CenterTimeZones.isValid(form.timeZone())) {
+                throw new BusinessRuleException("Elige una zona horaria de la lista.");
+            }
+            center.setTimeZone(form.timeZone());
+        }
+        if (form.cabins() != null) {
+            if (form.cabins() < 1 || form.cabins() > MAX_CABINS) {
+                throw new BusinessRuleException("El número de cabinas tiene que estar entre 1 y " + MAX_CABINS + ".");
+            }
+            center.setCabins(form.cabins());
+        }
         return centerRepository.save(center);
     }
 }

@@ -1,5 +1,6 @@
 package com.alexxlpz.crm_cbelleza.security;
 
+import com.alexxlpz.crm_cbelleza.services.ClientNotificationService;
 import com.alexxlpz.crm_cbelleza.services.NotificationService;
 import com.alexxlpz.crm_cbelleza.services.NotificationService.NotificationItem;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,10 +22,14 @@ import java.util.List;
 public class CurrentUserModelAdvice {
 
     private final NotificationService notificationService;
+    private final ClientNotificationService clientNotificationService;
     private final boolean devLoginEnabled;
 
-    public CurrentUserModelAdvice(NotificationService notificationService, Environment environment) {
+    public CurrentUserModelAdvice(NotificationService notificationService,
+                                  ClientNotificationService clientNotificationService,
+                                  Environment environment) {
         this.notificationService = notificationService;
+        this.clientNotificationService = clientNotificationService;
         this.devLoginEnabled = environment.acceptsProfiles(Profiles.of("dev"));
     }
 
@@ -47,6 +52,8 @@ public class CurrentUserModelAdvice {
                 List<NotificationItem> notifications = notificationService.getNotificationsForCenter(user.getCenterId());
                 model.addAttribute("notifications", notifications);
             }
+        } else if ("GET".equalsIgnoreCase(request.getMethod())) {
+            model.addAttribute("clientNotifications", clientNotificationService.forClient(user.getId()));
         }
     }
 

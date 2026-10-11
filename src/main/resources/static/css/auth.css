@@ -221,6 +221,17 @@
 
 /* Submit Button - Golden Bronze Glow */
 
+/* Acceso con Google: botón con el logotipo oficial «G» (guía de marca de Google) */
+.btn-google {
+    gap: 12px;
+}
+
+.btn-google img {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+}
+
 /* Alternative Actions & Dividers */
 .auth-divider {
     display: flex;

@@ -1,28 +1,39 @@
 /*
  * Agenda del trabajador (worker/calendar.html), con dos disposiciones:
- *  - Mes: calendario con indicadores por día y la lista de citas del día seleccionado.
+ *  - Mes: calendario con indicadores por día y la lista de citas y bloqueos del día seleccionado.
  *  - Semana: rejilla horaria de lunes a domingo con cada cita como un bloque del alto de su
  *    duración (en móvil, lista por días). Al pulsar una cita se abre su ficha en un modal.
- * En las dos se pueden aprobar o rechazar solicitudes (POST /worker/appointments/{id}/approve|reject).
+ * Acciones: aceptar, rechazar o proponer otra hora a una solicitud; cambiar de hora o anular una cita
+ * confirmada; crear citas (botón «Nueva cita» o pulsando un hueco libre de la semana); arrastrar una cita
+ * confirmada a otra hora; bloquear horario. Los formularios están en worker-agenda-forms.js y, tras cada
+ * cambio, la agenda se recarga desde /worker/calendar/data.
  * La disposición elegida se recuerda en el navegador.
  */
 document.addEventListener('DOMContentLoaded', function () {
     'use strict';
 
     const esc = Cuquora.escapeHtml;
-    const appointments = window.CALENDAR_APPOINTMENTS || [];
+    const forms = window.AgendaForms;
+    let appointments = window.CALENDAR_APPOINTMENTS || [];
+    let blocks = window.CALENDAR_BLOCKS || [];
     const hours = window.CALENDAR_HOURS || {};
+    const staff = window.CALENDAR_STAFF || {};
     const OPEN_HOUR = Number.isInteger(hours.openHour) ? hours.openHour : 9;
     const CLOSE_HOUR = Number.isInteger(hours.closeHour) ? hours.closeHour : 20;
+    const SLOT = Number.isInteger(hours.slotMinutes) ? hours.slotMinutes : 30;
     const WORKING_DAYS = Array.isArray(hours.workingDays) ? hours.workingDays : [1, 2, 3, 4, 5];
+    const WORKERS = Array.isArray(staff.workers) ? staff.workers : [];
+    const ME = staff.currentWorkerId;
     const WEEKDAYS_SHORT = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
     const VIEW_KEY = 'cuquora.calendar.view';
     const MONTHS = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
     const STATUS = {
         PENDING: { css: 'badge-pending', label: 'Solicitud' },
+        PROPOSED: { css: 'badge-proposed', label: 'Propuesta enviada' },
         CONFIRMED: { css: 'badge-confirmed', label: 'Confirmada' },
         COMPLETED: { css: 'badge-completed', label: 'Completada' },
-        REJECTED: { css: 'badge-rejected', label: 'Rechazada' }
+        REJECTED: { css: 'badge-rejected', label: 'Rechazada' },
+        CANCELLED: { css: 'badge-cancelled', label: 'Anulada' }
     };
 
     const grid = document.getElementById('calendarDays');
@@ -54,13 +65,65 @@ document.addEventListener('DOMContentLoaded', function () {
     const euros = value => Number(value).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     const capitalize = text => text.charAt(0).toUpperCase() + text.slice(1);
     const keyOf = date => dateKey(date.getDate(), date.getMonth(), date.getFullYear());
-    const startMinutes = app => {
-        const [h, m] = app.dateTime.split('T')[1].split(':').map(Number);
+    const minutesOfTime = dateTime => {
+        const [h, m] = dateTime.split('T')[1].split(':').map(Number);
         return h * 60 + m;
     };
+    const startMinutes = app => minutesOfTime(app.dateTime);
     const durationOf = app => app.treatment?.duration || 60;
     const clock = minutes => `${pad(Math.floor(minutes / 60))}:${pad(minutes % 60)}`;
     const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
+    const longDate = dateTime => new Date(dateTime).toLocaleString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
+    const isFuture = app => new Date(app.dateTime) > new Date();
+    /** Las rechazadas y anuladas no ocupan agenda: no se pintan en la semana. */
+    const occupiesAgenda = app => app.status !== 'REJECTED' && app.status !== 'CANCELLED';
+    const isOpenRequest = app => app.status === 'PENDING' || app.status === 'PROPOSED';
+
+    /** Bloqueos que tocan un día (con la parte del día que ocupan, en minutos). */
+    function blocksOn(key) {
+        const dayStart = new Date(key + 'T00:00:00');
+        const dayEnd = new Date(dayStart.getTime() + 24 * 3600000);
+        return blocks
+            .filter(b => new Date(b.startsAt) < dayEnd && new Date(b.endsAt) > dayStart)
+            .map(b => {
+                const from = Math.max(new Date(b.startsAt) - dayStart, 0) / 60000;
+                const to = Math.min(new Date(b.endsAt) - dayStart, 24 * 3600000) / 60000;
+                return { block: b, from, to, allDay: from === 0 && to === 1440 };
+            });
+    }
+
+    const blockWho = block => block.workerName ? block.workerName : 'Centro cerrado';
+    const blockSpan = part => part.allDay ? 'Todo el día' : `${clock(part.from)} – ${part.to >= 1440 ? '24:00' : clock(part.to)}`;
+
+    /* =====================================================================
+       Datos
+       ===================================================================== */
+
+    /** Vuelve a pedir citas y bloqueos al servidor y repinta (tras cada cambio). */
+    async function reload({ focusDate } = {}) {
+        try {
+            const response = await fetch('/worker/calendar/data');
+            if (response.ok) {
+                const data = await response.json();
+                appointments = data.appointments || [];
+                blocks = data.blocks || [];
+            }
+        } catch (err) {
+            console.error(err);
+        }
+        if (focusDate) {
+            const [y, m, d] = focusDate.split('-').map(Number);
+            currentYear = y;
+            currentMonth = m - 1;
+            selectedDayKey = focusDate;
+            if (currentView === 'week') weekStart = mondayOf(new Date(y, m - 1, d));
+        }
+        if (modalApp) {
+            modalApp = appointments.find(app => app.id === modalApp.id) || null;
+            if (!modalApp) Cuquora.closeModal('appointmentModal');
+        }
+        refresh();
+    }
 
     /** Las citas confirmadas cuya hora de fin ya pasó se muestran como completadas sin recargar. */
     function refreshFinishedAppointments() {
@@ -68,14 +131,17 @@ document.addEventListener('DOMContentLoaded', function () {
         let changed = false;
         appointments.forEach(app => {
             if (app.status !== 'CONFIRMED' || !app.dateTime) return;
-            const minutes = app.treatment?.duration || 60;
-            if (now >= new Date(new Date(app.dateTime).getTime() + minutes * 60000)) {
+            if (now >= new Date(new Date(app.dateTime).getTime() + durationOf(app) * 60000)) {
                 app.status = 'COMPLETED';
                 changed = true;
             }
         });
         if (changed) refresh();
     }
+
+    /* =====================================================================
+       Vista mensual
+       ===================================================================== */
 
     function renderCalendar() {
         monthTitle.textContent = `${MONTHS[currentMonth]} ${currentYear}`;
@@ -99,20 +165,25 @@ document.addEventListener('DOMContentLoaded', function () {
             const key = dateKey(day, currentMonth, currentYear);
             const dayApps = appointmentsOn(key);
             const hasAttended = dayApps.some(a => a.status === 'CONFIRMED' || a.status === 'COMPLETED');
-            const hasPending = dayApps.some(a => a.status === 'PENDING');
+            const hasPending = dayApps.some(isOpenRequest);
+            const dayBlocks = blocksOn(key);
 
             const cell = document.createElement('button');
             cell.type = 'button';
             cell.className = 'calendar-day-cell';
             cell.textContent = day;
             const label = new Date(currentYear, currentMonth, day).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
-            cell.setAttribute('aria-label', label + (dayApps.length ? `, ${dayApps.length} citas` : '') + (hasPending ? ', con solicitudes pendientes' : ''));
+            cell.setAttribute('aria-label', label + (dayApps.length ? `, ${dayApps.length} citas` : '')
+                + (hasPending ? ', con solicitudes pendientes' : '') + (dayBlocks.length ? ', con horario bloqueado' : ''));
 
             if (day === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear()) {
                 cell.classList.add('today-day');
                 cell.setAttribute('aria-current', 'date');
             }
-            if (hasAttended || hasPending) {
+            const isoDay = ((new Date(currentYear, currentMonth, day).getDay() + 6) % 7) + 1;
+            if (!WORKING_DAYS.includes(isoDay)) cell.classList.add('closed-day');
+            if (dayBlocks.some(part => part.allDay && !part.block.workerId)) cell.classList.add('blocked-day');
+            if (hasAttended || hasPending || dayBlocks.length) {
                 const dots = document.createElement('div');
                 dots.className = 'calendar-dots-container';
                 if (hasAttended) dots.insertAdjacentHTML('beforeend', '<div class="calendar-dot gold-dot"></div>');
@@ -120,6 +191,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     dots.insertAdjacentHTML('beforeend', '<div class="calendar-dot red-dot"></div>');
                     cell.classList.add('pending-day-highlight');
                 }
+                if (dayBlocks.length) dots.insertAdjacentHTML('beforeend', '<div class="calendar-dot block-dot"></div>');
                 cell.appendChild(dots);
             }
             if (selectedDayKey === key) {
@@ -134,39 +206,81 @@ document.addEventListener('DOMContentLoaded', function () {
         for (let i = 1; i <= remaining; i++) grid.appendChild(filler(i));
     }
 
+    function workerOptions(selectedId) {
+        return WORKERS.map(w => `<option value="${esc(String(w.id))}"${w.id === selectedId ? ' selected' : ''}>${esc(w.name)}${w.id === ME ? ' (tú)' : ''}</option>`).join('');
+    }
+
     function appointmentCard(app) {
         const status = STATUS[app.status] || STATUS.CONFIRMED;
         const time = app.dateTime.split('T')[1].substring(0, 5);
         const client = app.client || {};
         const card = document.createElement('article');
-        card.className = 'agenda-item-card' + (app.status === 'PENDING' ? ' pending-card' : '');
+        card.className = 'agenda-item-card' + (app.status === 'PENDING' ? ' pending-card' : '')
+            + (app.status === 'PROPOSED' ? ' proposed-card' : '');
 
         const newClient = app.isNewClient
             ? '<span class="badge-new-client"><i class="lucide-sparkles" aria-hidden="true"></i> Nuevo Cliente</span>' : '';
         const clientCardLink = (app.status === 'CONFIRMED' || app.status === 'COMPLETED') && client.id ? `
-            <div class="agenda-card-footer">
-                <a href="/worker/clients/${encodeURIComponent(client.id)}" class="btn-template-config btn-template-config--sm">
-                    <i class="lucide-file-text" aria-hidden="true"></i> Ficha del Cliente
-                </a>
-            </div>` : '';
+            <a href="/worker/clients/${encodeURIComponent(client.id)}" class="btn-template-config btn-template-config--sm">
+                <i class="lucide-file-text" aria-hidden="true"></i> Ficha del Cliente
+            </a>` : '';
         const note = app.workerMessage ? `
             <div class="agenda-worker-note">
                 <i class="lucide-message-square" aria-hidden="true"></i><span>Nota: "${esc(app.workerMessage)}"</span>
             </div>` : '';
-        const actions = app.status === 'PENDING' ? `
+        const moved = app.previousDateTime && app.status === 'CONFIRMED' ? `
+            <div class="agenda-worker-note">
+                <i class="lucide-history" aria-hidden="true"></i><span>Cambiada de hora (antes: ${esc(longDate(app.previousDateTime))})</span>
+            </div>` : '';
+        const proposals = app.status === 'PROPOSED' && app.proposals?.length ? `
+            <div class="agenda-proposals">
+                <p class="agenda-proposals-title"><i class="lucide-calendar-clock" aria-hidden="true"></i> Horas propuestas al cliente:</p>
+                <ul>${app.proposals.map(p => `<li>${esc(capitalize(longDate(p.dateTime)))}</li>`).join('')}</ul>
+                ${app.proposalExpiresAt ? `<p class="agenda-proposals-expiry">Si no responde, se anulará el ${esc(longDate(app.proposalExpiresAt))}.</p>` : ''}
+            </div>` : '';
+
+        let actions = '';
+        if (app.status === 'PENDING') {
+            actions = `
             <div class="approval-message-box">
-                <label class="form-label agenda-note-label" for="message-${app.id}">Escribir nota opcional (mensaje al cliente):</label>
+                <label class="form-label agenda-note-label" for="message-${app.id}">Nota opcional para el cliente:</label>
                 <textarea id="message-${app.id}" class="approval-msg-input" rows="2"
-                          placeholder="Ej. Por favor ven 5 minutos antes o motivo de cancelación..."></textarea>
-                <div class="agenda-card-actions">
+                          placeholder="Ej. Por favor ven 5 minutos antes o motivo del rechazo..."></textarea>
+                <label class="form-label agenda-note-label" for="worker-${app.id}">La atiende:</label>
+                <select id="worker-${app.id}" class="approval-msg-input agenda-worker-select">${workerOptions(app.worker?.id ?? ME)}</select>
+                <div class="agenda-card-actions agenda-card-actions--three">
                     <button type="button" class="btn-agenda-action reject" data-action="reject">
                         <i class="lucide-x agenda-action-icon" aria-hidden="true"></i> Rechazar
                     </button>
+                    <button type="button" class="btn-agenda-action propose" data-action="propose">
+                        <i class="lucide-calendar-clock agenda-action-icon" aria-hidden="true"></i> Otra hora
+                    </button>
                     <button type="button" class="btn-agenda-action approve" data-action="approve">
-                        <i class="lucide-check agenda-action-icon" aria-hidden="true"></i> Aceptar Cita
+                        <i class="lucide-check agenda-action-icon" aria-hidden="true"></i> Aceptar
                     </button>
                 </div>
-            </div>` : '';
+            </div>`;
+        } else if (app.status === 'PROPOSED') {
+            actions = `
+            <div class="agenda-card-actions">
+                <button type="button" class="btn-agenda-action reject" data-action="reject">
+                    <i class="lucide-x agenda-action-icon" aria-hidden="true"></i> Rechazar
+                </button>
+                <button type="button" class="btn-agenda-action neutral" data-action="withdraw">
+                    <i class="lucide-undo-2 agenda-action-icon" aria-hidden="true"></i> Retirar propuesta
+                </button>
+            </div>`;
+        } else if (app.status === 'CONFIRMED' && isFuture(app)) {
+            actions = `
+            <div class="agenda-card-actions">
+                <button type="button" class="btn-agenda-action reject" data-action="cancel">
+                    <i class="lucide-ban agenda-action-icon" aria-hidden="true"></i> Anular
+                </button>
+                <button type="button" class="btn-agenda-action neutral" data-action="reschedule">
+                    <i class="lucide-calendar-clock agenda-action-icon" aria-hidden="true"></i> Cambiar hora
+                </button>
+            </div>`;
+        }
 
         card.innerHTML = `
             <div class="agenda-card-top">
@@ -190,46 +304,70 @@ document.addEventListener('DOMContentLoaded', function () {
             </div>
             <div class="agenda-item-detail">
                 <i class="lucide-sparkles" aria-hidden="true"></i>
-                <span>Estilista: ${esc(app.worker ? app.worker.name : 'Pendiente de asignación')}</span>
+                <span>Profesional: ${esc(app.worker ? app.worker.name : 'Pendiente de asignación')}</span>
             </div>
             <div class="agenda-item-detail agenda-detail-margin">
                 <i class="lucide-badge-euro" aria-hidden="true"></i>
                 <span class="agenda-price-text">${euros(app.treatment?.price ?? 0)} €</span>
                 <span class="agenda-duration-text">(${esc(app.treatment?.duration)} min)</span>
             </div>
-            ${clientCardLink}
+            ${clientCardLink ? `<div class="agenda-card-footer">${clientCardLink}</div>` : ''}
+            ${moved}
+            ${proposals}
             ${note}
             ${actions}`;
 
         card.querySelectorAll('[data-action]').forEach(button =>
-            button.addEventListener('click', () => changeStatus(app, button.dataset.action, card)));
+            button.addEventListener('click', () => runAction(app, button.dataset.action, card)));
         return card;
     }
 
-    async function changeStatus(app, action, card) {
+    async function runAction(app, action, card) {
+        if (action === 'propose') return forms.openPropose(app);
+        if (action === 'reschedule') return forms.openReschedule(app);
+
         const message = card.querySelector('textarea')?.value || '';
+        if (action === 'cancel') {
+            const ok = await Cuquora.confirm(`Se anulará la cita de ${app.client?.name || 'este cliente'} del ${longDate(app.dateTime)} y le avisaremos.`, {
+                title: '¿Anular la cita?',
+                confirmText: 'Anular cita'
+            });
+            if (!ok) return;
+        }
+        const endpoints = { approve: 'approve', reject: 'reject', withdraw: 'withdraw-proposal', cancel: 'cancel' };
+        const params = { message };
+        if (action === 'approve') params.workerId = card.querySelector('.agenda-worker-select')?.value;
         const buttons = card.querySelectorAll('[data-action]');
         buttons.forEach(b => { b.disabled = true; });
-        try {
-            const response = await fetch(`/worker/appointments/${encodeURIComponent(app.id)}/${action}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: new URLSearchParams({ message })
-            });
-            if (!response.ok) {
-                const reason = await Cuquora.errorMessage(response, 'No se ha podido actualizar el estado de la cita.');
-                await Cuquora.alert(reason, 'No se ha podido actualizar la cita');
-                buttons.forEach(b => { b.disabled = false; });
-                return;
-            }
-            app.status = action === 'approve' ? 'CONFIRMED' : 'REJECTED';
-            app.workerMessage = message;
-            refresh();
-        } catch (err) {
-            console.error(err);
-            await Cuquora.alert('Error de conexión al actualizar la cita. Inténtalo de nuevo.', 'Sin conexión');
+        const result = await forms.post(`/worker/appointments/${encodeURIComponent(app.id)}/${endpoints[action]}`, params);
+        if (!result.ok) {
+            await Cuquora.alert(result.message, 'No se ha podido actualizar la cita');
             buttons.forEach(b => { b.disabled = false; });
+            return;
         }
+        await reload({});
+    }
+
+    function blockCard(part) {
+        const card = document.createElement('article');
+        card.className = 'agenda-item-card block-card';
+        card.innerHTML = `
+            <div class="agenda-card-top">
+                <div class="agenda-item-time">
+                    <i class="lucide-calendar-off" aria-hidden="true"></i>
+                    <span>${esc(blockSpan(part))}</span>
+                </div>
+                <span class="badge badge-blocked">Bloqueado</span>
+            </div>
+            <h3 class="agenda-item-treatment">${esc(blockWho(part.block))}</h3>
+            ${part.block.reason ? `<div class="agenda-item-detail"><i class="lucide-message-square" aria-hidden="true"></i><span>${esc(part.block.reason)}</span></div>` : ''}
+            <div class="agenda-card-actions">
+                <button type="button" class="btn-agenda-action neutral" data-remove-block>
+                    <i class="lucide-unlock agenda-action-icon" aria-hidden="true"></i> Quitar bloqueo
+                </button>
+            </div>`;
+        card.querySelector('[data-remove-block]').addEventListener('click', () => forms.removeBlock(part.block));
+        return card;
     }
 
     function selectDay(day, month, year, isUserClick) {
@@ -240,19 +378,23 @@ document.addEventListener('DOMContentLoaded', function () {
         dayTitle.textContent = title.charAt(0).toUpperCase() + title.slice(1);
 
         const apps = appointmentsOn(selectedDayKey);
+        const dayBlocks = blocksOn(selectedDayKey);
         const count = status => apps.filter(a => a.status === status).length;
         dayCount.textContent = `${count('CONFIRMED')} confirmadas`
             + (count('COMPLETED') ? `, ${count('COMPLETED')} completadas` : '')
-            + `, ${count('PENDING')} solicitudes pendientes`;
+            + `, ${count('PENDING')} solicitudes pendientes`
+            + (count('PROPOSED') ? `, ${count('PROPOSED')} propuestas enviadas` : '')
+            + (dayBlocks.length ? `, ${plural(dayBlocks.length, 'bloqueo', 'bloqueos')}` : '');
 
         list.innerHTML = '';
-        if (apps.length === 0) {
+        if (apps.length === 0 && dayBlocks.length === 0) {
             list.innerHTML = `
                 <div class="notification-empty">
                     <i class="lucide-calendar-days" aria-hidden="true"></i>
                     <span>No hay citas programadas para esta jornada</span>
                 </div>`;
         } else {
+            dayBlocks.forEach(part => list.appendChild(blockCard(part)));
             apps.forEach(app => list.appendChild(appointmentCard(app)));
         }
 
@@ -269,7 +411,7 @@ document.addEventListener('DOMContentLoaded', function () {
             selectDay(d, m - 1, y, false);
         }
         if (currentView === 'week') renderWeek();
-        // Si la cita abierta en el modal ha cambiado (aceptada, rechazada, completada), se repinta su ficha
+        // Si la cita abierta en el modal ha cambiado, se repinta su ficha
         if (modalApp && !document.getElementById('appointmentModal').hidden) {
             modalBody.replaceChildren(appointmentCard(modalApp));
         }
@@ -289,8 +431,14 @@ document.addEventListener('DOMContentLoaded', function () {
             new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate() + i));
     }
 
-    /** Citas que ocupan agenda (las rechazadas no se pintan en la semana), ordenadas por hora. */
-    const activeOn = key => appointmentsOn(key).filter(app => app.status !== 'REJECTED');
+    const activeOn = key => appointmentsOn(key).filter(occupiesAgenda);
+
+    /** Horas propuestas a clientes (bloques fantasma) que caen en un día. */
+    const proposalsOn = key => appointments
+        .filter(app => app.status === 'PROPOSED')
+        .flatMap(app => (app.proposals || [])
+            .filter(p => p.dateTime.startsWith(key))
+            .map(p => ({ app, start: minutesOfTime(p.dateTime), end: minutesOfTime(p.dateTime) + durationOf(app) })));
 
     function weekTitleText(days) {
         const first = days[0];
@@ -306,43 +454,47 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     /**
-     * Reparte en carriles las citas que se solapan en un mismo día (p. ej. dos estilistas a la vez):
+     * Reparte en carriles las citas que se solapan en un mismo día (p. ej. dos profesionales a la vez):
      * cada cita recibe su carril y el número de carriles de su grupo para dividir el ancho.
      */
-    function layoutLanes(apps) {
-        const placed = [];
+    function layoutLanes(items) {
+        const sorted = [...items].sort((a, b) => a.start - b.start);
         let group = [];
         let groupEnd = -1;
         let laneEnds = [];
         const closeGroup = () => group.forEach(item => { item.lanes = laneEnds.length; });
-        apps.forEach(app => {
-            const start = startMinutes(app);
-            const end = start + durationOf(app);
-            if (start >= groupEnd && group.length) {
+        sorted.forEach(item => {
+            if (item.start >= groupEnd && group.length) {
                 closeGroup();
                 group = [];
                 laneEnds = [];
             }
-            let lane = laneEnds.findIndex(laneEnd => laneEnd <= start);
+            let lane = laneEnds.findIndex(laneEnd => laneEnd <= item.start);
             if (lane === -1) {
                 lane = laneEnds.length;
-                laneEnds.push(end);
+                laneEnds.push(item.end);
             } else {
-                laneEnds[lane] = end;
+                laneEnds[lane] = item.end;
             }
-            const item = { app, start, end, lane, lanes: 1 };
+            item.lane = lane;
+            item.lanes = 1;
             group.push(item);
-            placed.push(item);
-            groupEnd = Math.max(groupEnd, end);
+            groupEnd = Math.max(groupEnd, item.end);
         });
         closeGroup();
-        return placed;
+        return sorted;
     }
 
     function renderWeek() {
         const days = weekDays();
         const todayKey = keyOf(new Date());
-        const perDay = days.map(date => ({ date, key: keyOf(date), apps: activeOn(keyOf(date)) }));
+        const perDay = days.map(date => ({
+            date,
+            key: keyOf(date),
+            apps: activeOn(keyOf(date)),
+            ghosts: proposalsOn(keyOf(date)),
+            blocks: blocksOn(keyOf(date))
+        }));
 
         weekTitle.textContent = weekTitleText(days);
         renderWeekSummary(perDay);
@@ -350,17 +502,18 @@ document.addEventListener('DOMContentLoaded', function () {
         // Franja horaria: el horario del centro, ampliado si alguna cita empieza antes o acaba después
         let firstMinute = OPEN_HOUR * 60;
         let lastMinute = CLOSE_HOUR * 60;
-        perDay.forEach(day => day.apps.forEach(app => {
-            firstMinute = Math.min(firstMinute, Math.floor(startMinutes(app) / 60) * 60);
-            lastMinute = Math.max(lastMinute, Math.ceil((startMinutes(app) + durationOf(app)) / 60) * 60);
-        }));
+        perDay.forEach(day => [...day.apps.map(app => ({ start: startMinutes(app), end: startMinutes(app) + durationOf(app) })), ...day.ghosts]
+            .forEach(item => {
+                firstMinute = Math.min(firstMinute, Math.floor(item.start / 60) * 60);
+                lastMinute = Math.max(lastMinute, Math.ceil(item.end / 60) * 60);
+            }));
         const span = lastMinute - firstMinute;
         const percent = minutes => `${((minutes - firstMinute) / span) * 100}%`;
 
         // Los días cerrados sin citas ocupan menos ancho
         perDay.forEach(day => {
             const isoDay = ((day.date.getDay() + 6) % 7) + 1;
-            day.closed = !WORKING_DAYS.includes(isoDay);
+            day.closed = !WORKING_DAYS.includes(isoDay) || day.blocks.some(part => part.allDay && !part.block.workerId);
             day.narrow = day.closed && day.apps.length === 0;
         });
 
@@ -389,18 +542,57 @@ document.addEventListener('DOMContentLoaded', function () {
             column.className = 'week-day-col'
                 + (day.closed ? ' is-closed' : '') + (day.narrow ? ' is-narrow' : '')
                 + (day.key === todayKey ? ' is-today' : '');
+            column.dataset.date = day.key;
             column.setAttribute('role', 'list');
             column.setAttribute('aria-label', capitalize(day.date.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })));
-            layoutLanes(day.apps).forEach(item => {
-                const block = eventButton(item.app, 'week-event');
-                block.setAttribute('role', 'listitem');
-                block.style.setProperty('--top', percent(item.start));
-                block.style.setProperty('--height', `${((item.end - item.start) / span) * 100}%`);
-                block.style.setProperty('--left', `${(item.lane / item.lanes) * 100}%`);
-                block.style.setProperty('--width', `${100 / item.lanes}%`);
-                if (item.end - item.start <= 30) block.classList.add('is-short');
-                else if (item.end - item.start < 50) block.classList.add('is-compact');
+
+            // Horas fuera del horario de apertura (solo se ven si alguna cita amplía la rejilla)
+            // (no en días cerrados ni con un bloqueo de todo el día, que ya van rayados enteros)
+            if (!day.closed && !day.blocks.some(part => part.allDay)) {
+                [[firstMinute, OPEN_HOUR * 60], [CLOSE_HOUR * 60, lastMinute]].forEach(([from, to]) => {
+                    if (to <= from) return;
+                    const band = document.createElement('div');
+                    band.className = 'week-closed-band';
+                    band.setAttribute('aria-hidden', 'true');
+                    band.style.setProperty('--top', percent(from));
+                    band.style.setProperty('--height', `${((to - from) / span) * 100}%`);
+                    column.appendChild(band);
+                });
+            }
+
+            // Bloqueos (debajo de las citas)
+            day.blocks.forEach(part => {
+                const from = Math.max(part.from, firstMinute);
+                const to = Math.min(part.to, lastMinute);
+                if (to <= from) return;
+                const block = document.createElement('button');
+                block.type = 'button';
+                block.className = 'week-block' + (part.block.workerId ? '' : ' is-center');
+                block.style.setProperty('--top', percent(from));
+                block.style.setProperty('--height', `${((to - from) / span) * 100}%`);
+                block.innerHTML = `<span class="week-block-label"><i class="lucide-calendar-off" aria-hidden="true"></i> ${esc(blockWho(part.block))}</span>`;
+                const text = `Bloqueado: ${blockWho(part.block)}, ${blockSpan(part)}${part.block.reason ? ` (${part.block.reason})` : ''}. Pulsa para quitarlo`;
+                block.title = text;
+                block.setAttribute('aria-label', text);
+                block.addEventListener('click', () => forms.removeBlock(part.block));
                 column.appendChild(block);
+            });
+
+            const items = [
+                ...day.apps.map(app => ({ app, start: startMinutes(app), end: startMinutes(app) + durationOf(app), ghost: false })),
+                ...day.ghosts.map(g => ({ ...g, ghost: true }))
+            ];
+            layoutLanes(items).forEach(item => {
+                const element = item.ghost ? ghostButton(item) : eventButton(item.app, 'week-event');
+                element.setAttribute('role', 'listitem');
+                element.style.setProperty('--top', percent(item.start));
+                element.style.setProperty('--height', `${((item.end - item.start) / span) * 100}%`);
+                element.style.setProperty('--left', `${(item.lane / item.lanes) * 100}%`);
+                element.style.setProperty('--width', `${100 / item.lanes}%`);
+                if (item.end - item.start <= 30) element.classList.add('is-short');
+                else if (item.end - item.start < 50) element.classList.add('is-compact');
+                if (!item.ghost && item.app.status === 'CONFIRMED' && isFuture(item.app)) enableDrag(element, item.app);
+                column.appendChild(element);
             });
             if (day.key === todayKey) {
                 const line = document.createElement('div');
@@ -408,6 +600,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 line.setAttribute('aria-hidden', 'true');
                 column.appendChild(line);
             }
+            column.addEventListener('click', e => {
+                if (e.target !== column) return;
+                const minute = minuteAt(column, e.clientY);
+                if (new Date(`${day.key}T${clock(minute)}`) <= new Date()) return;
+                forms.openNew({ date: day.key, minute });
+            });
             inner.appendChild(column);
         });
 
@@ -418,15 +616,27 @@ document.addEventListener('DOMContentLoaded', function () {
         renderWeekList(perDay, todayKey);
     }
 
+    /** Minuto del día (redondeado al hueco de reserva) en la altura y de una columna. */
+    function minuteAt(column, clientY) {
+        const rect = column.getBoundingClientRect();
+        const first = Number(weekGrid.dataset.firstMinute);
+        const span = Number(weekGrid.dataset.span);
+        const raw = first + ((clientY - rect.top) / rect.height) * span;
+        const rounded = Math.floor(raw / SLOT) * SLOT;
+        return Math.max(first, Math.min(first + span - SLOT, rounded));
+    }
+
     function renderWeekSummary(perDay) {
         const all = perDay.flatMap(day => day.apps);
         const pending = all.filter(app => app.status === 'PENDING').length;
+        const proposed = all.filter(app => app.status === 'PROPOSED').length;
         const income = all
             .filter(app => app.status === 'CONFIRMED' || app.status === 'COMPLETED')
             .reduce((sum, app) => sum + Number(app.treatment?.price || 0), 0);
         weekSummary.innerHTML = `
             <li><i class="lucide-calendar-check" aria-hidden="true"></i> ${plural(all.length, 'cita', 'citas')}</li>
             <li class="${pending ? 'is-pending' : ''}"><i class="lucide-bell" aria-hidden="true"></i> ${plural(pending, 'solicitud pendiente', 'solicitudes pendientes')}</li>
+            ${proposed ? `<li><i class="lucide-calendar-clock" aria-hidden="true"></i> ${plural(proposed, 'propuesta enviada', 'propuestas enviadas')}</li>` : ''}
             <li><i class="lucide-badge-euro" aria-hidden="true"></i> ${euros(income)} € previstos</li>`;
     }
 
@@ -434,7 +644,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const head = document.createElement('button');
         head.type = 'button';
         head.className = 'week-day-head' + (isToday ? ' is-today' : '') + (day.narrow ? ' is-narrow' : '');
-        const pending = day.apps.filter(app => app.status === 'PENDING').length;
+        const pending = day.apps.filter(isOpenRequest).length;
         const detail = day.apps.length
             ? plural(day.apps.length, 'cita', 'citas')
             : (day.closed ? 'Cerrado' : 'Sin citas');
@@ -443,8 +653,8 @@ document.addEventListener('DOMContentLoaded', function () {
             <span class="week-day-number">${day.date.getDate()}</span>
             <span class="week-day-count">${detail}</span>
             ${pending ? `<span class="week-day-pending">${plural(pending, 'solicitud', 'solicitudes')}</span>` : ''}`;
-        const longDate = day.date.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
-        head.setAttribute('aria-label', `Ver ${longDate} en la vista mensual: ${detail}`
+        const fullDate = day.date.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
+        head.setAttribute('aria-label', `Ver ${fullDate} en la vista mensual: ${detail}`
             + (pending ? `, ${plural(pending, 'solicitud pendiente', 'solicitudes pendientes')}` : ''));
         if (isToday) head.setAttribute('aria-current', 'date');
         head.title = 'Ver este día en la vista mensual';
@@ -461,17 +671,104 @@ document.addEventListener('DOMContentLoaded', function () {
         button.type = 'button';
         button.className = `${className} status-${app.status.toLowerCase()}`;
         button.dataset.appointmentId = String(app.id);
+        const flag = app.status === 'PENDING' ? '<span class="week-event-flag">Solicitud</span>'
+            : app.status === 'PROPOSED' ? '<span class="week-event-flag">Propuesta enviada</span>' : '';
         button.innerHTML = `
             <span class="week-event-time">${clock(start)} – ${clock(start + durationOf(app))}</span>
             <span class="week-event-title">${esc(app.treatment?.name)}</span>
-            <span class="week-event-client">${esc(client)}</span>
-            ${app.status === 'PENDING' ? '<span class="week-event-flag">Solicitud</span>' : ''}`;
+            <span class="week-event-client">${esc(client)}${app.worker && WORKERS.length > 1 ? ` · ${esc(app.worker.name)}` : ''}</span>
+            ${flag}`;
         button.setAttribute('aria-label',
             `${clock(start)}, ${app.treatment?.name || 'Cita'}, ${client}, ${status.label}. Ver detalle`);
         // En la rejilla el texto puede no caber: el texto completo sale al pasar el ratón
         button.title = `${clock(start)} – ${clock(start + durationOf(app))} · ${app.treatment?.name || 'Cita'} · ${client} (${status.label})`;
-        button.addEventListener('click', () => openAppointment(app));
+        button.addEventListener('click', () => {
+            if (button.dataset.dragged === 'true') {
+                delete button.dataset.dragged;
+                return;
+            }
+            openAppointment(app);
+        });
         return button;
+    }
+
+    /** Hora propuesta a un cliente: reservada mientras decide (bloque discontinuo). */
+    function ghostButton(item) {
+        const client = item.app.client?.name || item.app.guestName || 'Cliente';
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'week-event week-ghost';
+        button.dataset.appointmentId = String(item.app.id);
+        button.innerHTML = `
+            <span class="week-event-time">${clock(item.start)} – ${clock(item.end)}</span>
+            <span class="week-event-title">Propuesta a ${esc(client)}</span>`;
+        const text = `${clock(item.start)}, hora propuesta a ${client} para ${item.app.treatment?.name || 'su cita'}. Ver la solicitud`;
+        button.title = text;
+        button.setAttribute('aria-label', text);
+        button.addEventListener('click', () => openAppointment(item.app));
+        return button;
+    }
+
+    /* ---------- Arrastrar una cita confirmada a otra hora (escritorio) ---------- */
+
+    function enableDrag(element, app) {
+        element.classList.add('is-draggable');
+        element.addEventListener('pointerdown', e => {
+            if (e.button !== 0 || e.pointerType === 'touch') return;
+            const startX = e.clientX;
+            const startY = e.clientY;
+            const grabOffset = e.clientY - element.getBoundingClientRect().top;
+            let dragging = false;
+            let target = null;
+            let shadow = null;
+
+            const move = ev => {
+                if (!dragging && Math.hypot(ev.clientX - startX, ev.clientY - startY) < 6) return;
+                if (!dragging) {
+                    dragging = true;
+                    element.classList.add('is-dragging');
+                    shadow = document.createElement('div');
+                    shadow.className = 'week-drop-shadow';
+                    shadow.setAttribute('aria-hidden', 'true');
+                }
+                const column = document.elementsFromPoint(ev.clientX, ev.clientY).find(el => el.classList?.contains('week-day-col'));
+                if (!column) return;
+                const minute = minuteAt(column, ev.clientY - grabOffset + 4);
+                const first = Number(weekGrid.dataset.firstMinute);
+                const span = Number(weekGrid.dataset.span);
+                target = { date: column.dataset.date, minute };
+                shadow.style.setProperty('--top', `${((minute - first) / span) * 100}%`);
+                shadow.style.setProperty('--height', `${(durationOf(app) / span) * 100}%`);
+                shadow.textContent = `${capitalize(new Date(column.dataset.date + 'T00:00:00').toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric' }))} · ${clock(minute)}`;
+                if (shadow.parentElement !== column) column.appendChild(shadow);
+            };
+
+            const up = async () => {
+                document.removeEventListener('pointermove', move);
+                document.removeEventListener('pointerup', up);
+                element.classList.remove('is-dragging');
+                shadow?.remove();
+                if (!dragging || !target) return;
+                element.dataset.dragged = 'true';
+                const dateTime = `${target.date}T${clock(target.minute)}`;
+                if (dateTime === app.dateTime.substring(0, 16)) return;
+                if (new Date(dateTime) <= new Date()) {
+                    await Cuquora.alert('No se pueden poner citas en una hora que ya ha pasado.', 'No se ha podido mover la cita');
+                    return;
+                }
+                const ok = await Cuquora.confirm(`¿Mover la cita de ${app.client?.name || 'este cliente'} al ${longDate(dateTime)}? Le avisaremos del cambio.`, {
+                    title: 'Cambiar la hora de la cita',
+                    confirmText: 'Mover cita',
+                    tone: 'default'
+                });
+                if (!ok) return;
+                const result = await forms.reschedule(app, dateTime, app.worker?.id);
+                if (!result.ok && result.message) await Cuquora.alert(result.message, 'No se ha podido mover la cita');
+            };
+
+            document.addEventListener('pointermove', move);
+            document.addEventListener('pointerup', up);
+        });
     }
 
     function renderWeekList(perDay, todayKey) {
@@ -486,6 +783,18 @@ document.addEventListener('DOMContentLoaded', function () {
                     <span>${esc(title)}${day.key === todayKey ? ' <span class="week-list-today">Hoy</span>' : ''}</span>
                     <span class="week-list-count">${detail}</span>
                 </h3>`;
+            day.blocks.forEach(part => {
+                const row = document.createElement('button');
+                row.type = 'button';
+                row.className = 'week-list-item week-list-block';
+                row.innerHTML = `
+                    <span class="week-event-time">${esc(blockSpan(part))}</span>
+                    <span class="week-event-title"><i class="lucide-calendar-off" aria-hidden="true"></i> Bloqueado: ${esc(blockWho(part.block))}</span>
+                    ${part.block.reason ? `<span class="week-event-client">${esc(part.block.reason)}</span>` : ''}`;
+                row.setAttribute('aria-label', `Bloqueado: ${blockWho(part.block)}, ${blockSpan(part)}. Pulsa para quitarlo`);
+                row.addEventListener('click', () => forms.removeBlock(part.block));
+                section.appendChild(row);
+            });
             day.apps.forEach(app => section.appendChild(eventButton(app, 'week-list-item')));
             return section;
         }));
@@ -563,6 +872,12 @@ document.addEventListener('DOMContentLoaded', function () {
         if (currentMonth > 11) { currentMonth = 0; currentYear++; }
         renderCalendar();
     });
+
+    // «Nueva cita» y «Bloquear horario» abren con el día seleccionado (o hoy)
+    const selectedOrToday = () => (selectedDayKey && selectedDayKey >= keyOf(new Date()) ? selectedDayKey : keyOf(new Date()));
+    document.getElementById('newAppointmentBtn').addEventListener('click', () => forms.openNew({ date: selectedOrToday() }));
+    document.getElementById('newBlockBtn').addEventListener('click', () => forms.openBlock({ date: selectedOrToday() }));
+    forms.init({ reload });
 
     // Día inicial: el de ?date=YYYY-MM-DD (enlaces de las notificaciones) o hoy.
     const target = new URLSearchParams(window.location.search).get('date');

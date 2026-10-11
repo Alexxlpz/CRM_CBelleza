@@ -117,6 +117,11 @@
     box-sizing: border-box;
 }
 
+/* Rayado de «cerrado o bloqueado»: días y horas en que el centro no abre, cierres y vacaciones (todo igual) */
+:root {
+    --closed-hatch: repeating-linear-gradient(135deg, rgba(var(--primary-rgb), 0.06) 0, rgba(var(--primary-rgb), 0.06) 6px, rgba(var(--primary-rgb), 0.18) 6px, rgba(var(--primary-rgb), 0.18) 8px);
+}
+
 .calendar-day-cell {
     aspect-ratio: 1 / 1;
     width: 100%;
@@ -1035,12 +1040,12 @@ button.calendar-day-cell {
     overflow: hidden;
 }
 
-/* Día que el centro no abre: rayado suave */
+/* Día que el centro no abre: mismo rayado que un bloqueo, con las líneas de las horas encima */
 .week-day-col.is-closed {
     background-image:
-        repeating-linear-gradient(135deg, transparent 0, transparent 9px, rgba(var(--primary-rgb), 0.09) 9px, rgba(var(--primary-rgb), 0.09) 10px),
-        linear-gradient(to bottom, rgba(var(--primary-rgb), 0.12) 1px, transparent 1px);
-    background-size: auto, 100% var(--hour-height);
+        linear-gradient(to bottom, rgba(var(--primary-rgb), 0.2) 1px, transparent 1px),
+        var(--closed-hatch);
+    background-size: 100% var(--hour-height), auto;
 }
 
 .week-day-col.is-today {
@@ -1206,7 +1211,7 @@ button.calendar-day-cell {
 }
 
 .week-list-day.is-closed {
-    background: rgba(var(--primary-rgb), 0.06);
+    background: var(--closed-hatch), rgba(var(--surface-rgb), 0.6);
 }
 
 .week-list-title {
@@ -1332,5 +1337,459 @@ button.calendar-day-cell {
 
     .calendar-toolbar .view-toggle {
         margin-left: auto;
+    }
+}
+
+/* =============================================================
+   AGENDA FLEXIBLE: crear, mover y proponer citas, bloqueos
+   (worker-calendar.js + worker-agenda-forms.js)
+   ============================================================= */
+.calendar-toolbar-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.legend-swatch--proposed {
+    background: rgba(var(--info-rgb), 0.16);
+    border: 1px dashed var(--info-text);
+    border-left: 4px solid var(--info-text);
+}
+
+.legend-swatch--blocked {
+    background: var(--closed-hatch);
+    border: 1px solid rgba(var(--primary-rgb), 0.3);
+}
+
+.calendar-dot.block-dot {
+    background-color: var(--text-soft);
+}
+
+/* Días que el centro no abre o cerrados por un bloqueo de todo el centro */
+.calendar-day-cell.closed-day,
+.calendar-day-cell.blocked-day {
+    background-image: var(--closed-hatch);
+}
+
+.week-hint {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: -4px 0 12px;
+    font-size: 12.5px;
+    color: var(--text-muted);
+}
+
+/* ---- Fichas de cita: propuesta, bloqueo y acciones ---- */
+.agenda-item-card.proposed-card {
+    background: rgba(var(--info-rgb), 0.08);
+    border-color: rgba(var(--info-rgb), 0.45);
+    border-style: dashed;
+}
+
+.agenda-item-card.block-card {
+    background: var(--closed-hatch), var(--surface);
+}
+
+.agenda-proposals {
+    margin: 10px 0;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: rgba(var(--info-rgb), 0.1);
+    font-size: 13px;
+}
+
+.agenda-proposals-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 700;
+    color: var(--info-text);
+}
+
+.agenda-proposals ul {
+    margin: 6px 0 0;
+    padding-left: 20px;
+}
+
+.agenda-proposals-expiry {
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.agenda-worker-select {
+    height: 38px;
+    margin-bottom: 10px;
+}
+
+.agenda-card-actions {
+    flex-wrap: wrap;
+}
+
+.btn-agenda-action.neutral,
+.btn-agenda-action.propose {
+    background: rgba(var(--primary-rgb), 0.1);
+    color: var(--primary-text);
+    border-color: rgba(var(--primary-rgb), 0.35);
+}
+
+.btn-agenda-action.propose {
+    background: rgba(var(--info-rgb), 0.12);
+    color: var(--info-text);
+    border-color: rgba(var(--info-rgb), 0.4);
+}
+
+.btn-agenda-action.neutral:hover,
+.btn-agenda-action.propose:hover {
+    filter: brightness(0.95);
+    box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.18);
+}
+
+/* ---- Vista semanal: estados nuevos, bloqueos, horas propuestas y arrastre ---- */
+.week-day-col {
+    cursor: cell;
+}
+
+.status-proposed {
+    background: rgba(var(--info-rgb), 0.14);
+    border-left-color: var(--info-text);
+    box-shadow: inset 0 0 0 1px rgba(var(--info-rgb), 0.45);
+}
+
+.status-proposed .week-event-time {
+    color: var(--info-text);
+}
+
+.week-ghost {
+    background: rgba(var(--info-rgb), 0.06);
+    border: 1px dashed var(--info-text);
+    border-left: 4px dashed var(--info-text);
+    color: var(--info-text);
+    box-shadow: none;
+}
+
+.week-block {
+    /* worker-calendar.js pone la hora (--top) y la duración (--height) */
+    --top: 0%;
+    --height: 0%;
+    position: absolute;
+    top: var(--top);
+    left: 0;
+    right: 0;
+    height: var(--height);
+    padding: 4px 6px;
+    border: none;
+    border-top: 1px solid rgba(var(--primary-rgb), 0.3);
+    display: flex;
+    align-items: flex-start;
+    background: var(--closed-hatch);
+    color: var(--text-muted);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+/* Horas fuera del horario de apertura en un día abierto (si la rejilla se amplía por una cita) */
+.week-closed-band {
+    --top: 0%;
+    --height: 0%;
+    position: absolute;
+    top: var(--top);
+    left: 0;
+    right: 0;
+    height: var(--height);
+    background: var(--closed-hatch);
+    pointer-events: none;
+}
+
+.week-block:hover,
+.week-block:focus-visible {
+    outline: none;
+    box-shadow: inset 0 0 0 2px var(--primary-dark);
+}
+
+.week-block-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.week-event.is-draggable {
+    cursor: grab;
+    touch-action: none;
+}
+
+.week-event.is-dragging {
+    opacity: 0.45;
+    cursor: grabbing;
+}
+
+.week-drop-shadow {
+    --top: 0%;
+    --height: 0%;
+    position: absolute;
+    top: var(--top);
+    left: 3px;
+    right: 3px;
+    height: var(--height);
+    min-height: 22px;
+    padding: 4px 8px;
+    border: 2px dashed var(--primary-dark);
+    border-radius: 10px;
+    background: rgba(var(--primary-rgb), 0.12);
+    color: var(--primary-text);
+    font-size: 11px;
+    font-weight: 800;
+    pointer-events: none;
+    z-index: 3;
+}
+
+.week-list-block {
+    border-left-color: var(--text-soft);
+    background: var(--closed-hatch);
+}
+
+@media (max-width: 768px) {
+    .week-hint {
+        display: none;
+    }
+}
+
+/* ---- Formularios de la agenda (modales) ---- */
+.agenda-form-modal {
+    max-width: 580px;
+}
+
+.agenda-form-modal .ui-modal-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-right: 40px;
+}
+
+.agenda-form-modal .ui-modal-text {
+    margin-bottom: 18px;
+}
+
+.agenda-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 16px;
+}
+
+.agenda-grid .span-full {
+    grid-column: 1 / -1;
+}
+
+.agenda-form .form-control {
+    width: 100%;
+}
+
+.agenda-fieldset {
+    margin: 0 0 18px;
+    padding: 0;
+    border: none;
+}
+
+.agenda-fieldset legend {
+    margin-bottom: 8px;
+}
+
+.segmented {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.segmented-option {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border: 1px solid var(--border-soft);
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.segmented-option input {
+    accent-color: var(--primary-dark);
+}
+
+.segmented-option:has(input:checked) {
+    border-color: var(--primary-dark);
+    background: rgba(var(--primary-rgb), 0.14);
+    color: var(--primary-text);
+}
+
+.agenda-search {
+    position: relative;
+}
+
+.agenda-search i {
+    position: absolute;
+    top: 50%;
+    left: 14px;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    pointer-events: none;
+}
+
+.agenda-search .form-control {
+    padding-left: 40px;
+}
+
+.agenda-search-results {
+    margin: 6px 0 0;
+    padding: 4px;
+    list-style: none;
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid var(--border-soft);
+    border-radius: 12px;
+    background: var(--surface);
+}
+
+.agenda-search-results li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 10px;
+    border-radius: 8px;
+    font-size: 13.5px;
+    cursor: pointer;
+}
+
+.agenda-search-results li:hover,
+.agenda-search-results li:focus {
+    outline: none;
+    background: rgba(var(--primary-rgb), 0.14);
+}
+
+.agenda-search-results li.is-empty {
+    cursor: default;
+    color: var(--text-muted);
+}
+
+.agenda-selected {
+    margin-top: 8px;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.agenda-selected.is-selected {
+    font-weight: 700;
+    color: var(--success-strong);
+}
+
+.agenda-form-error {
+    margin: 14px 0 0;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: var(--error-bg);
+    border: 1px solid var(--error-border);
+    color: var(--error);
+    font-size: 13.5px;
+}
+
+.agenda-form .ui-modal-actions {
+    margin-top: 20px;
+}
+
+.agenda-top-gap {
+    margin-top: 16px;
+}
+
+.propose-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 0 0 12px;
+    padding: 0;
+    list-style: none;
+}
+
+.propose-row {
+    display: grid;
+    grid-template-columns: 28px minmax(0, 1.3fr) minmax(0, 1fr) 36px;
+    align-items: center;
+    gap: 8px;
+}
+
+.propose-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: rgba(var(--info-rgb), 0.18);
+    color: var(--info-text);
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--border-soft);
+    border-radius: 50%;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+}
+
+.icon-btn:hover {
+    background: rgba(var(--primary-rgb), 0.12);
+    color: var(--text-main);
+}
+
+.checkbox-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.checkbox-row input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary-dark);
+}
+
+@media (max-width: 520px) {
+    .agenda-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .propose-row {
+        grid-template-columns: 26px minmax(0, 1fr) 36px;
+    }
+
+    .propose-row select {
+        grid-column: 2;
+    }
+
+    .calendar-toolbar-actions {
+        width: 100%;
+        justify-content: stretch;
+    }
+
+    .calendar-toolbar-actions .btn {
+        flex: 1 1 auto;
     }
 }

@@ -1,5 +1,6 @@
 package com.alexxlpz.crm_cbelleza.controllers;
 
+import com.alexxlpz.crm_cbelleza.config.LegalOwner;
 import com.alexxlpz.crm_cbelleza.security.AppUserDetails;
 import com.alexxlpz.crm_cbelleza.security.RoleHomes;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,9 +14,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class PublicPagesController {
 
     private final String contactEmail;
+    private final LegalOwner legalOwner;
 
-    public PublicPagesController(@Value("${crm.mail.admin-email}") String contactEmail) {
+    public PublicPagesController(@Value("${crm.mail.admin-email}") String contactEmail, LegalOwner legalOwner) {
         this.contactEmail = contactEmail;
+        this.legalOwner = legalOwner;
     }
 
     @GetMapping("/")
@@ -49,6 +52,7 @@ public class PublicPagesController {
     @GetMapping({"/terms", "/terminos"})
     public String terms(Model model) {
         model.addAttribute("contactEmail", contactEmail);
+        model.addAttribute("legalOwner", legalOwner);
         model.addAttribute("pageDescription", "Condiciones de uso de Cuquora para clientes y centros de belleza.");
         return "terms";
     }
@@ -58,5 +62,14 @@ public class PublicPagesController {
         model.addAttribute("contactEmail", contactEmail);
         model.addAttribute("pageDescription", "Qué cookies usa Cuquora, para qué sirven y cómo borrarlas.");
         return "cookies";
+    }
+
+    @GetMapping({"/privacy", "/privacidad"})
+    public String privacy(Model model) {
+        model.addAttribute("contactEmail", contactEmail);
+        model.addAttribute("legalOwner", legalOwner);
+        model.addAttribute("pageDescription",
+                "Qué datos personales trata Cuquora, para qué, con quién los comparte y cómo ejercer tus derechos.");
+        return "privacy";
     }
 }

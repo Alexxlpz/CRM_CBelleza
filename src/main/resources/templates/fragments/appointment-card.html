@@ -1,10 +1,11 @@
 <div xmlns:th="http://www.thymeleaf.org">
     <!-- Tarjeta de cita del cliente. data-status permite filtrar por estado sin depender del texto. -->
-    <article class="appointment-card glass-panel" th:fragment="card(app)" th:attr="data-status=${app.status.name()}">
+    <article class="appointment-card glass-panel" th:fragment="card(app)" th:attr="data-status=${app.status.name()}"
+             th:classappend="${app.status.name() == 'PROPOSED'} ? ' appointment-card--proposed'">
         <div class="appointment-card-header">
             <h2 class="appointment-service" th:text="${app.treatment.name}">Tratamiento</h2>
             <span class="badge" th:classappend="${'badge-' + #strings.toLowerCase(app.status.name())}"
-                  th:text="${app.status.name() == 'PENDING' ? 'Pendiente' : (app.status.name() == 'CONFIRMED' ? 'Confirmada' : (app.status.name() == 'COMPLETED' ? 'Completada' : 'Rechazada'))}">Pendiente</span>
+                  th:text="${app.status.name() == 'PROPOSED' ? 'Nueva propuesta' : app.status.label()}">Pendiente</span>
         </div>
 
         <div class="appointment-card-body">
@@ -14,7 +15,14 @@
             </div>
             <div class="appointment-detail-item">
                 <i class="lucide-calendar" aria-hidden="true"></i>
-                <time th:datetime="${app.dateTime}" th:text="${#temporals.format(app.dateTime, 'dd/MM/yyyy HH:mm')}">18/07/2026 10:00</time>
+                <span>
+                    <th:block th:if="${app.status.name() == 'PROPOSED'}">Pediste: </th:block>
+                    <time th:datetime="${app.dateTime}" th:text="${#temporals.format(app.dateTime, 'dd/MM/yyyy HH:mm')}">18/07/2026 10:00</time>
+                </span>
+            </div>
+            <div class="appointment-detail-item appointment-moved" th:if="${app.previousDateTime != null and app.status.name() == 'CONFIRMED'}">
+                <i class="lucide-history" aria-hidden="true"></i>
+                <span>El centro cambió la hora (antes: <time th:datetime="${app.previousDateTime}" th:text="${#temporals.format(app.previousDateTime, 'dd/MM/yyyy HH:mm')}">17/07/2026 10:00</time>)</span>
             </div>
             <div class="appointment-detail-item">
                 <i class="lucide-user-cog" aria-hidden="true"></i>
@@ -28,6 +36,43 @@
             <div class="appointment-worker-note" th:if="${!#strings.isEmpty(app.workerMessage)}">
                 <i class="lucide-message-square" aria-hidden="true"></i> Nota del salón: "<span th:text="${app.workerMessage}">Mensaje</span>"
             </div>
+
+            <!-- Propuesta del centro: el cliente elige una hora o ninguna -->
+            <div class="appointment-proposal" th:if="${app.status.name() == 'PROPOSED'}">
+                <p class="appointment-proposal-title"><i class="lucide-calendar-clock" aria-hidden="true"></i> El centro te propone otra hora. Elige la que te venga bien:</p>
+                <div class="appointment-proposal-options">
+                    <form th:each="proposal : ${app.proposals}" th:action="@{/client/appointments/{id}/accept-proposal(id=${app.id})}" method="post"
+                          th:attr="data-confirm='¿Confirmar tu cita el ' + ${#temporals.format(proposal.dateTime, 'dd/MM/yyyy')} + ' a las ' + ${#temporals.format(proposal.dateTime, 'HH:mm')} + '?'"
+                          data-confirm-title="Confirmar cita" data-confirm-button="Confirmar">
+                        <input type="hidden" name="proposalId" th:value="${proposal.id}">
+                        <button type="submit" class="btn btn-secondary appointment-proposal-option">
+                            <i class="lucide-calendar-check" aria-hidden="true"></i>
+                            <span th:text="${#temporals.format(proposal.dateTime, 'EEEE d/MM · HH:mm')}">miércoles 15/10 · 11:30</span>
+                        </button>
+                    </form>
+                </div>
+                <p class="appointment-proposal-expiry" th:if="${app.proposalExpiresAt != null}">
+                    Si no eliges antes del <span th:text="${#temporals.format(app.proposalExpiresAt, 'dd/MM HH:mm')}">14/10 18:00</span>, la propuesta se anulará.
+                </p>
+                <form th:action="@{/client/appointments/{id}/decline-proposal(id=${app.id})}" method="post"
+                      data-confirm="Avisaremos al centro de que ninguna hora te viene bien y la solicitud quedará anulada."
+                      data-confirm-title="¿Ninguna hora te viene bien?" data-confirm-button="Ninguna me viene bien">
+                    <button type="submit" class="btn-link-danger"><i class="lucide-calendar-x" aria-hidden="true"></i> Ninguna me viene bien</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Anular: solicitudes y citas confirmadas que aún no han empezado -->
+        <div class="appointment-card-footer" th:if="${(app.status.name() == 'PENDING' or app.status.name() == 'CONFIRMED') and app.upcoming}">
+            <form th:action="@{/client/appointments/{id}/cancel(id=${app.id})}" method="post"
+                  th:attr="data-confirm=${app.status.name() == 'PENDING'} ? 'Se retirará tu solicitud y avisaremos al centro.' : 'Avisaremos al centro de que no vas a ir y el hueco quedará libre para otra persona.'"
+                  th:data-confirm-title="${app.status.name() == 'PENDING'} ? '¿Retirar la solicitud?' : '¿Anular la cita?'"
+                  data-confirm-button="Anular">
+                <button type="submit" class="btn-link-danger">
+                    <i class="lucide-ban" aria-hidden="true"></i>
+                    <span th:text="${app.status.name() == 'PENDING'} ? 'Retirar solicitud' : 'Anular cita'">Anular cita</span>
+                </button>
+            </form>
         </div>
     </article>
 </div>

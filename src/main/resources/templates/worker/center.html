@@ -12,9 +12,6 @@
                 <h1 th:text="${center.name}">Mi Centro</h1>
                 <p>Actualiza los datos públicos de tu salón y la configuración de tu cuenta</p>
             </div>
-            <a href="/worker/dashboard" class="btn btn-secondary btn-sm-height">
-                <i class="lucide-arrow-left" aria-hidden="true"></i> Volver al Panel
-            </a>
         </header>
 
         <div th:replace="~{fragments/alerts :: flash}"></div>
@@ -46,6 +43,19 @@
                     <div>
                         <label for="longitude" class="form-label">Longitud GPS</label>
                         <input type="number" id="longitude" name="longitude" class="form-control" th:value="${center.longitude}" step="any" placeholder="Ej: -3.7038">
+                    </div>
+                    <div>
+                        <label for="cabins" class="form-label">Cabinas o Puestos de Trabajo</label>
+                        <input type="number" id="cabins" name="cabins" class="form-control" th:value="${center.cabins}"
+                               min="1" max="50" step="1" required aria-describedby="cabinsHelp">
+                        <p class="form-help" id="cabinsHelp">Citas que podéis atender a la vez, si hay profesionales libres.</p>
+                    </div>
+                    <div>
+                        <label for="timeZone" class="form-label">Zona Horaria del Centro</label>
+                        <select id="timeZone" name="timeZone" class="form-control">
+                            <option th:each="zone : ${timeZones}" th:value="${zone.key}" th:text="${zone.value}"
+                                    th:selected="${zone.key == center.timeZone}">España (península y Baleares)</option>
+                        </select>
                     </div>
                 </div>
 
@@ -84,6 +94,43 @@
                     <button type="submit" class="btn btn-primary"><i class="lucide-save" aria-hidden="true"></i> Guardar Información</button>
                 </div>
             </form>
+        </section>
+
+        <section class="settings-card" id="google-calendar">
+            <h2 class="settings-section-title"><i class="lucide-calendar-check" aria-hidden="true"></i> Google Calendar</h2>
+            <div class="sync-setting">
+                <div class="sync-setting-text">
+                    <p class="sync-setting-title" id="googleCalendarLabel">Guardar mis citas en Google Calendar</p>
+                    <p class="sync-setting-help" th:if="${calendarSync.connected}">
+                        Activado<th:block th:if="${calendarSync.googleEmail != null}"> con <strong th:text="${calendarSync.googleEmail}">cuenta@gmail.com</strong></th:block>.
+                        Las citas que confirmes aparecen en el calendario «Cuquora» de tu Google y se borran si las rechazas.
+                    </p>
+                    <p class="sync-setting-help" th:if="${calendarSync.available and !calendarSync.connected}">
+                        Copia tus citas confirmadas a un calendario «Cuquora» en tu cuenta de Google. Puedes usar cualquier
+                        cuenta de Google, aunque entres en Cuquora con tu correo y contraseña. Cuquora solo podrá tocar ese calendario.
+                        Cada cita incluye el tratamiento y el nombre y teléfono del cliente: usa una cuenta de Google del centro
+                        o una que solo uses tú (más en la <a href="/privacy#privacidad-6">política de privacidad</a>).
+                    </p>
+                    <p class="sync-setting-help" th:unless="${calendarSync.available}">
+                        Próximamente: podrás copiar tus citas confirmadas a tu Google Calendar.
+                    </p>
+                </div>
+                <form th:if="${calendarSync.connected}" th:action="@{/worker/google-calendar/disconnect}" method="post"
+                      data-confirm="Se dejarán de copiar tus citas y se borrará el calendario «Cuquora» de tu cuenta de Google. Tus citas en Cuquora no cambian."
+                      data-confirm-title="¿Desactivar la sincronización?" data-confirm-button="Desactivar">
+                    <button type="submit" class="switch" role="switch" aria-checked="true" aria-labelledby="googleCalendarLabel"
+                            title="Desactivar la sincronización">
+                        <span class="switch-thumb" aria-hidden="true"></span>
+                    </button>
+                </form>
+                <form th:unless="${calendarSync.connected}" th:action="@{/worker/google-calendar/connect}" method="post">
+                    <button type="submit" class="switch" role="switch" aria-checked="false" aria-labelledby="googleCalendarLabel"
+                            th:disabled="${!calendarSync.available}"
+                            th:title="${calendarSync.available} ? 'Activar: te pediremos permiso en Google' : 'Todavía no disponible'">
+                        <span class="switch-thumb" aria-hidden="true"></span>
+                    </button>
+                </form>
+            </div>
         </section>
     </main>
 

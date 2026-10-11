@@ -1,5 +1,6 @@
 package com.alexxlpz.crm_cbelleza.controllers;
 
+import com.alexxlpz.crm_cbelleza.config.GoogleLoginSettings;
 import com.alexxlpz.crm_cbelleza.entities.User;
 import com.alexxlpz.crm_cbelleza.exceptions.BusinessRuleException;
 import com.alexxlpz.crm_cbelleza.forms.RegistrationForm;
@@ -28,10 +29,19 @@ public class AuthController {
 
     private final UserService userService;
     private final AuthenticationSessionService authSession;
+    private final GoogleLoginSettings google;
 
-    public AuthController(UserService userService, AuthenticationSessionService authSession) {
+    public AuthController(UserService userService, AuthenticationSessionService authSession, GoogleLoginSettings google) {
         this.userService = userService;
         this.authSession = authSession;
+        this.google = google;
+    }
+
+    /** Botón «Continuar con Google» en el login y el registro (solo si hay credenciales de Google). */
+    @ModelAttribute
+    public void addGoogleLogin(Model model) {
+        model.addAttribute("googleLoginEnabled", google.isEnabled());
+        model.addAttribute("googleLoginUrl", GoogleLoginSettings.AUTHORIZATION_URL);
     }
 
     @GetMapping("/login")

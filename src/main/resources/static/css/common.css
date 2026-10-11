@@ -889,6 +889,11 @@ button.mobile-drawer-link {
     background: var(--surface-muted);
 }
 
+.notification-item.is-unseen {
+    box-shadow: inset 3px 0 0 var(--primary-dark);
+    background: rgba(var(--primary-rgb), 0.08);
+}
+
 .notification-item i {
     font-size: 18px;
     color: var(--primary-text);
@@ -1044,6 +1049,22 @@ button.mobile-drawer-link {
 .badge-rejected {
     background-color: var(--danger-bg);
     color: var(--danger-text);
+}
+
+.badge-proposed {
+    background-color: rgba(var(--info-rgb), 0.18);
+    color: var(--info-text);
+}
+
+.badge-cancelled {
+    background-color: rgba(var(--neutral-rgb), 0.14);
+    color: var(--text-muted);
+    border: 1px dashed rgba(var(--neutral-rgb), 0.45);
+}
+
+.badge-blocked {
+    background-color: rgba(var(--primary-rgb), 0.14);
+    color: var(--primary-text);
 }
 
 .badge-completed {
@@ -1767,6 +1788,77 @@ body.modal-open {
     background: var(--surface-muted);
     color: var(--text-muted);
     cursor: not-allowed;
+}
+
+.settings-card + .settings-card {
+    margin-top: 24px;
+}
+
+/* Ajuste con interruptor (p. ej. Google Calendar en «Mi Centro»): texto a la izquierda, interruptor a la derecha */
+.sync-setting {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+}
+
+.sync-setting-title {
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.sync-setting-help {
+    margin-top: 4px;
+    font-size: 13.5px;
+    color: var(--text-muted);
+    overflow-wrap: anywhere;
+}
+
+/* Interruptor deslizable: <button role="switch" aria-checked="true|false"> */
+.switch {
+    position: relative;
+    flex-shrink: 0;
+    width: 52px;
+    height: 30px;
+    padding: 0;
+    border: none;
+    border-radius: 999px;
+    background: var(--border-soft);
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.switch-thumb {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--surface);
+    box-shadow: 0 1px 4px rgba(var(--primary-rgb), 0.35);
+    transition: transform 0.2s ease;
+}
+
+.switch[aria-checked="true"] {
+    background: var(--primary-dark);
+}
+
+.switch[aria-checked="true"] .switch-thumb {
+    transform: translateX(22px);
+}
+
+.switch:disabled {
+    background: var(--disabled-bg);
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Ayuda bajo un campo de formulario */
+.form-help {
+    margin-top: 6px;
+    font-size: 12.5px;
+    color: var(--text-muted);
 }
 
 .settings-actions {

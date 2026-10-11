@@ -35,7 +35,10 @@ public class ClientProfileController {
 
     @GetMapping("/client/profile")
     public String profile(@AuthenticationPrincipal AppUserDetails user, Model model) {
-        model.addAttribute("client", userService.getUser(user.getId()));
+        User client = userService.getUser(user.getId());
+        model.addAttribute("client", client);
+        // Cuenta creada con Google: la sección de contraseña sirve para añadir una, no para cambiarla
+        model.addAttribute("hasPassword", client.getPassword() != null);
         model.addAttribute("appointmentsCount", appointmentService.countClientAppointments(user.getId()));
         model.addAttribute("activePage", "profile");
         return "client/profile";

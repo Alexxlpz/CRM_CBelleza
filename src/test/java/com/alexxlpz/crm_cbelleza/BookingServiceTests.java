@@ -89,20 +89,24 @@ class BookingServiceTests {
         Appointment first = bookingService.requestBooking(client().getId(), center, treatmentId, slot);
         Appointment second = bookingService.requestBooking(client().getId(), center, treatmentId, slot);
 
-        bookingService.approve(center, first.getId(), workerId, "ok");
-        assertThrows(BusinessRuleException.class, () -> bookingService.approve(center, second.getId(), workerId, "ok"));
+        bookingService.approve(center, first.getId(), workerId, null, "ok");
+        assertThrows(BusinessRuleException.class, () -> bookingService.approve(center, second.getId(), workerId, null, "ok"));
         assertEquals(AppointmentStatus.PENDING, appointments.findById(second.getId()).orElseThrow().getStatus());
     }
 
+    /** El centro 1 tiene 2 cabinas y 2 profesionales: con las dos ocupadas, ese hueco ya no se puede pedir. */
     @Test
-    void cannotRequestAnAlreadyConfirmedSlot() {
+    void cannotRequestAFullSlot() {
         Long center = centerOf(TestUsers.WORKER_CENTER_1);
         Long treatmentId = treatmentOf(center).getId();
         LocalDateTime slot = farMonday(24, 12);
-        Long workerId = users.findByEmailIgnoreCase(TestUsers.WORKER_CENTER_1).orElseThrow().getId();
+        Long carlos = users.findByEmailIgnoreCase(TestUsers.WORKER_CENTER_1).orElseThrow().getId();
+        Long lucia = users.findByEmailIgnoreCase("lucia.romero@cbelleza.com").orElseThrow().getId();
 
-        Appointment confirmed = bookingService.requestBooking(client().getId(), center, treatmentId, slot);
-        bookingService.approve(center, confirmed.getId(), workerId, null);
+        Appointment first = bookingService.requestBooking(client().getId(), center, treatmentId, slot);
+        bookingService.approve(center, first.getId(), carlos, null, null);
+        Appointment second = bookingService.requestBooking(client().getId(), center, treatmentId, slot);
+        bookingService.approve(center, second.getId(), lucia, null, null);
 
         assertThrows(BusinessRuleException.class,
                 () -> bookingService.requestBooking(client().getId(), center, treatmentId, slot));

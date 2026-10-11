@@ -20,6 +20,14 @@
                 <span th:text="${errorMessage}">Ha ocurrido un error al crear tu cuenta.</span>
             </div>
 
+            <th:block th:if="${googleLoginEnabled}">
+                <a th:href="@{${googleLoginUrl}}" class="btn btn-secondary btn-block btn-lg btn-google">
+                    <img th:src="@{/images/google-g.svg}" src="/images/google-g.svg" alt="" width="20" height="20">
+                    <span>Registrarse con Google</span>
+                </a>
+                <div class="auth-divider"><span>o con tu correo</span></div>
+            </th:block>
+
             <form th:action="@{/register}" method="post" id="registerForm" autocomplete="on" novalidate>
                 <div class="form-group">
                     <label for="nameInput" class="form-label">Nombre y apellidos</label>
@@ -70,7 +78,7 @@
 
                 <p class="auth-legal-note">
                     Al crear tu cuenta aceptas los <a href="/terms">términos y condiciones</a>
-                    y la <a href="/cookies">política de cookies</a>.
+                    y la <a href="/cookies">política de cookies</a>. Así tratamos tus datos: <a href="/privacy">privacidad</a>.
                 </p>
             </form>
 

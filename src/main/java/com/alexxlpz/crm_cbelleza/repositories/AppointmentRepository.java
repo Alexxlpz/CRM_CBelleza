@@ -31,8 +31,40 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     List<Appointment> findByCenterIdAndStatusInAndDateTimeAfterOrderByDateTimeAsc(
             Long centerId, Collection<AppointmentStatus> statuses, LocalDateTime dateTime);
 
-    @EntityGraph(attributePaths = {"treatment", "client"})
+    @EntityGraph(attributePaths = {"treatment", "client", "worker", "center"})
     Optional<Appointment> findByIdAndCenterId(Long id, Long centerId);
+
+    @EntityGraph(attributePaths = {"treatment", "center", "worker"})
+    Optional<Appointment> findByIdAndClientId(Long id, Long clientId);
+
+    /** Citas confirmadas del centro en un rango (las que ocupan cabina y profesional). */
+    @EntityGraph(attributePaths = {"treatment", "worker"})
+    List<Appointment> findByCenterIdAndStatusAndDateTimeBetween(Long centerId, AppointmentStatus status,
+                                                                 LocalDateTime from, LocalDateTime to);
+
+    /** Propuestas abiertas del centro, con sus horas (reservan hueco hasta que el cliente responde). */
+    @EntityGraph(attributePaths = {"treatment", "worker", "proposals"})
+    List<Appointment> findByCenterIdAndStatus(Long centerId, AppointmentStatus status);
+
+    @EntityGraph(attributePaths = {"treatment", "client", "worker", "center"})
+    List<Appointment> findByStatusAndProposalExpiresAtBefore(AppointmentStatus status, LocalDateTime moment);
+
+    /** Citas confirmadas sin recordatorio enviado en un rango de fechas (recordatorio de 24 h). */
+    @EntityGraph(attributePaths = {"treatment", "client", "worker", "center"})
+    List<Appointment> findByStatusAndReminderSentAtIsNullAndDateTimeBetween(AppointmentStatus status,
+                                                                             LocalDateTime from, LocalDateTime to);
+
+    /** Carga todo lo que se escribe en el evento de Google Calendar. */
+    @EntityGraph(attributePaths = {"treatment", "client", "worker", "center"})
+    Optional<Appointment> findWithDetailsById(Long id);
+
+    /** Citas confirmadas de un trabajador desde una fecha (las que se copian al activar Google Calendar). */
+    @EntityGraph(attributePaths = {"treatment", "client", "worker", "center"})
+    List<Appointment> findByWorkerIdAndStatusAndDateTimeAfter(Long workerId, AppointmentStatus status, LocalDateTime dateTime);
+
+    List<Appointment> findByWorkerIdAndGoogleEventIdIsNotNull(Long workerId);
+
+    List<Appointment> findByGoogleEventOwnerId(Long workerId);
 
     long countByClientId(Long clientId);
 

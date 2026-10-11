@@ -138,8 +138,13 @@ public class ClientCardService {
         return result.stream().filter(matches(searchQuery)).toList();
     }
 
-    /** Alta manual de un cliente desde la cartera. Devuelve el id del cliente. */
-    public Long createClientManually(Long centerId, NewClientForm form, Long workerId) {
+    /**
+     * Alta manual de un cliente desde la cartera (o desde la agenda al crear una cita).
+     * Solo reutiliza clientes que ya son de este centro (con ficha o citas aquí) con el mismo teléfono o correo;
+     * si no, crea un cliente nuevo sin cuenta. Nunca enlaza cuentas de otros centros: no se revela si un
+     * correo o teléfono existe en la plataforma ni se da acceso a sus datos.
+     */
+    public NewClient createClientManually(Long centerId, NewClientForm form, Long workerId) {
         if (FormText.isBlank(form.name()) || FormText.isBlank(form.phone())) {
             throw new BusinessRuleException("El nombre y el teléfono son obligatorios para dar de alta a un cliente.");
         }
@@ -147,9 +152,18 @@ public class ClientCardService {
         String phone = form.phone().trim();
         String email = FormText.trimToNull(form.email());
 
-        User client = findExistingClient(phone, email).orElseGet(() ->
-                // Sin contraseña: la cuenta no puede iniciar sesión hasta que el cliente se registre.
-                userService.createUser(name, email != null ? email : placeholderEmail(phone), phone, null, Role.CLIENT, null));
+        Optional<User> existing = findClientOfCenter(centerId, phone, email);
+        boolean emailSkipped = false;
+        User client;
+        if (existing.isPresent()) {
+            client = existing.get();
+        } else {
+            // Un correo que ya usa otra cuenta no se puede repetir: el cliente se guarda sin él
+            emailSkipped = email != null && userRepository.findByEmailIgnoreCase(email).isPresent();
+            String storedEmail = email != null && !emailSkipped ? email : placeholderEmail(phone);
+            // Sin contraseña: la cuenta no puede iniciar sesión hasta que el cliente se registre.
+            client = userService.createUser(name, storedEmail, phone, null, Role.CLIENT, null);
+        }
 
         ClientCard card = getOrCreateCard(centerId, client);
         if (!FormText.isBlank(form.initialNotes())) {
@@ -160,24 +174,39 @@ public class ClientCardService {
         card.setUpdatedAt(LocalDateTime.now(clock));
         card.setUpdatedBy(workerId != null ? userRepository.getReferenceById(workerId) : null);
         clientCardRepository.save(card);
-        return client.getId();
+        return new NewClient(client.getId(), emailSkipped);
     }
 
-    private Optional<User> findExistingClient(String phone, String email) {
-        Optional<User> existing = userRepository.findByPhone(phone);
-        if (existing.isEmpty() && email != null) {
-            existing = userRepository.findByEmailIgnoreCase(email);
-        }
-        if (existing.isPresent() && existing.get().getRole() != Role.CLIENT) {
-            throw new BusinessRuleException("Ese teléfono o correo pertenece a una cuenta de personal.");
-        }
-        return existing;
+    /** Cliente de este centro (con ficha o con citas aquí) con ese teléfono o correo. */
+    private Optional<User> findClientOfCenter(Long centerId, String phone, String email) {
+        String digits = digits(phone);
+        List<User> clientsOfCenter = new ArrayList<>();
+        clientCardRepository.findByCenterId(centerId).stream()
+                .map(ClientCard::getClient)
+                .filter(java.util.Objects::nonNull)
+                .forEach(clientsOfCenter::add);
+        appointmentRepository.findByCenterIdOrderByDateTimeDesc(centerId).stream()
+                .map(Appointment::getClient)
+                .filter(java.util.Objects::nonNull)
+                .forEach(clientsOfCenter::add);
+        return clientsOfCenter.stream()
+                .filter(c -> (!digits.isEmpty() && digits.equals(digits(c.getPhone())))
+                        || (email != null && email.equalsIgnoreCase(c.getEmail())))
+                .findFirst();
+    }
+
+    private static String digits(String phone) {
+        return phone == null ? "" : phone.replaceAll("[^0-9]", "");
+    }
+
+    /** Resultado del alta: {@code emailSkipped} si el correo no se pudo guardar por estar ya en uso. */
+    public record NewClient(Long clientId, boolean emailSkipped) {
     }
 
     private String placeholderEmail(String phone) {
-        String candidate = "cliente_" + phone.replaceAll("[^0-9]", "") + "@cbelleza.local";
+        String candidate = "cliente_" + phone.replaceAll("[^0-9]", "") + User.PLACEHOLDER_EMAIL_DOMAIN;
         return userRepository.findByEmailIgnoreCase(candidate).isPresent()
-                ? "cliente_" + System.currentTimeMillis() + "@cbelleza.local"
+                ? "cliente_" + System.currentTimeMillis() + User.PLACEHOLDER_EMAIL_DOMAIN
                 : candidate;
     }
 

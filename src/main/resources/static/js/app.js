@@ -218,8 +218,9 @@
 
     /* ---------- 7. Campana de notificaciones ---------- */
     function initNotifications() {
-        const toggle = document.getElementById('notificationsToggle');
-        const dropdown = document.getElementById('notificationsDropdown');
+        // Campana del trabajador o del cliente: el botón apunta a su desplegable con aria-controls
+        const toggle = document.querySelector('[data-notifications-toggle]');
+        const dropdown = toggle && document.getElementById(toggle.getAttribute('aria-controls'));
         if (!toggle || !dropdown) return;
         const setOpen = open => {
             dropdown.hidden = !open;
@@ -228,7 +229,14 @@
         };
         toggle.addEventListener('click', e => {
             e.stopPropagation();
-            setOpen(dropdown.hidden);
+            const opening = dropdown.hidden;
+            setOpen(opening);
+            // Campana del cliente: al abrirla, los avisos dejan de contar como nuevos
+            if (opening && toggle.dataset.seenUrl && Number(toggle.dataset.unseen) > 0) {
+                toggle.dataset.unseen = '0';
+                toggle.querySelector('.bell-badge')?.remove();
+                fetch(toggle.dataset.seenUrl, { method: 'POST' }).catch(err => console.error(err));
+            }
         });
         document.addEventListener('click', e => {
             if (!dropdown.hidden && !e.target.closest('.notifications-container')) setOpen(false);

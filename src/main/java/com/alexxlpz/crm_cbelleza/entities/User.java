@@ -11,6 +11,9 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class User {
+
+    /** Dominio de los correos internos que se inventan para clientes dados de alta sin correo (ver ClientCardService). */
+    public static final String PLACEHOLDER_EMAIL_DOMAIN = "@cbelleza.local";
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -26,6 +29,10 @@ public class User {
     @Column
     private String password;
 
+    /** Identificador ("sub") de la cuenta de Google vinculada; nulo si no se ha entrado nunca con Google. */
+    @Column(name = "google_id", unique = true)
+    private String googleId;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
@@ -34,8 +41,15 @@ public class User {
     @JoinColumn(name = "center_id")
     private Center center;
 
-    /** Tiene cuenta propia (puede iniciar sesión). Los clientes dados de alta a mano desde la cartera no tienen contraseña. */
+    /** Última vez que abrió su campana de avisos: lo posterior cuenta como nuevo. */
+    @Column(name = "notifications_seen_at")
+    private java.time.LocalDateTime notificationsSeenAt;
+
+    /**
+     * Tiene cuenta propia (puede iniciar sesión con contraseña o con Google).
+     * Los clientes dados de alta a mano desde la cartera no tienen ninguna de las dos.
+     */
     public boolean hasAccount() {
-        return password != null;
+        return password != null || googleId != null;
     }
 }

@@ -92,9 +92,11 @@ public class ClientCardController {
                          @ModelAttribute NewClientForm form,
                          RedirectAttributes redirect) {
         try {
-            Long clientId = clientCardService.createClientManually(worker.getCenterId(), form, worker.getId());
-            redirect.addFlashAttribute("successMessage", "Cliente dado de alta con éxito. Ya puedes consultar o rellenar su ficha técnica.");
-            return "redirect:/worker/clients/" + clientId;
+            var created = clientCardService.createClientManually(worker.getCenterId(), form, worker.getId());
+            redirect.addFlashAttribute("successMessage", created.emailSkipped()
+                    ? "Cliente dado de alta sin correo: ese correo no se puede usar para un cliente nuevo. Ya puedes rellenar su ficha técnica."
+                    : "Cliente dado de alta con éxito. Ya puedes consultar o rellenar su ficha técnica.");
+            return "redirect:/worker/clients/" + created.clientId();
         } catch (BusinessRuleException e) {
             redirect.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/worker/clients";

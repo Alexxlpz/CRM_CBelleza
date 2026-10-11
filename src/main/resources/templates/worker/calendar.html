@@ -12,7 +12,7 @@
 
         <div class="page-header">
             <h1>Agenda</h1>
-            <p>Consulta las citas del centro por mes o de un vistazo por semana</p>
+            <p>Organiza las citas del centro: crea, mueve o propón otra hora y bloquea tus descansos</p>
         </div>
 
         <!-- Leyenda y selector Mes / Semana (misma posición que Tarjetas / Lista en las otras pantallas) -->
@@ -20,11 +20,21 @@
             <ul class="calendar-legend" aria-label="Leyenda de colores">
                 <li><span class="legend-swatch legend-swatch--confirmed" aria-hidden="true"></span> Confirmada</li>
                 <li><span class="legend-swatch legend-swatch--pending" aria-hidden="true"></span> Solicitud pendiente</li>
+                <li><span class="legend-swatch legend-swatch--proposed" aria-hidden="true"></span> Propuesta enviada</li>
+                <li><span class="legend-swatch legend-swatch--blocked" aria-hidden="true"></span> Cerrado o bloqueado</li>
                 <li><span class="legend-swatch legend-swatch--completed" aria-hidden="true"></span> Completada</li>
             </ul>
+            <div class="calendar-toolbar-actions">
+                <button type="button" class="btn btn-secondary btn-sm-height" id="newBlockBtn">
+                    <i class="lucide-calendar-off" aria-hidden="true"></i> Bloquear horario
+                </button>
+                <button type="button" class="btn btn-primary btn-sm-height" id="newAppointmentBtn">
+                    <i class="lucide-calendar-plus" aria-hidden="true"></i> Nueva cita
+                </button>
             <div class="view-toggle view-toggle--always" role="group" aria-label="Disposición de la agenda">
                 <button type="button" class="view-toggle-btn" data-calendar-view="month" aria-pressed="true"><i class="lucide-calendar-days" aria-hidden="true"></i> Mes</button>
                 <button type="button" class="view-toggle-btn" data-calendar-view="week" aria-pressed="false"><i class="lucide-calendar-range" aria-hidden="true"></i> Semana</button>
+            </div>
             </div>
         </div>
 
@@ -94,6 +104,7 @@
                     </button>
                 </div>
             </div>
+            <p class="week-hint" id="weekHint"><i class="lucide-mouse-pointer-click" aria-hidden="true"></i> Pulsa un hueco libre para crear una cita y arrastra una cita confirmada para cambiarla de hora.</p>
             <!-- Desde 769 px: rejilla horaria; en móvil: lista por días -->
             <div class="week-grid" id="weekGrid"></div>
             <div class="week-list" id="weekList"></div>
@@ -110,13 +121,183 @@
         </div>
     </div>
 
+
+    <!-- ===== Formularios de la agenda (worker-agenda-forms.js) ===== -->
+    <div class="ui-modal-overlay" id="newAppointmentModal" hidden>
+        <div class="ui-modal ui-modal--form agenda-form-modal" role="dialog" aria-modal="true" aria-labelledby="newAppointmentTitle">
+            <button type="button" class="ui-modal-close" data-modal-close aria-label="Cerrar"><i class="lucide-x" aria-hidden="true"></i></button>
+            <h2 class="ui-modal-title" id="newAppointmentTitle"><i class="lucide-calendar-plus" aria-hidden="true"></i> Nueva cita</h2>
+            <p class="ui-modal-text">La cita queda confirmada al guardarla. Si el cliente tiene correo, le avisaremos.</p>
+            <form id="newAppointmentForm" class="agenda-form" novalidate>
+                <fieldset class="agenda-fieldset">
+                    <legend class="form-label">Cliente</legend>
+                    <div class="segmented" role="radiogroup" aria-label="Tipo de cliente">
+                        <label class="segmented-option"><input type="radio" name="clientMode" value="existing" checked> <i class="lucide-users" aria-hidden="true"></i> De la cartera</label>
+                        <label class="segmented-option"><input type="radio" name="clientMode" value="new"> <i class="lucide-user-plus" aria-hidden="true"></i> Cliente nuevo</label>
+                    </div>
+                    <div class="agenda-client-existing" data-client-mode="existing">
+                        <label class="form-label" for="clientSearch">Buscar por nombre o teléfono</label>
+                        <div class="agenda-search">
+                            <i class="lucide-search" aria-hidden="true"></i>
+                            <input type="search" id="clientSearch" class="form-control" autocomplete="off" placeholder="Ej. Sofía o 600 123 456"
+                                   aria-controls="clientResults" aria-describedby="clientSelected">
+                        </div>
+                        <ul class="agenda-search-results" id="clientResults" role="listbox" aria-label="Clientes encontrados" hidden></ul>
+                        <p class="agenda-selected" id="clientSelected" aria-live="polite">Ningún cliente elegido</p>
+                        <input type="hidden" name="clientId" id="clientId">
+                    </div>
+                    <div class="agenda-client-new agenda-grid" data-client-mode="new" hidden>
+                        <div>
+                            <label class="form-label" for="newClientName">Nombre</label>
+                            <input type="text" id="newClientName" name="newClientName" class="form-control" autocomplete="off">
+                        </div>
+                        <div>
+                            <label class="form-label" for="newClientPhone">Teléfono</label>
+                            <input type="tel" id="newClientPhone" name="newClientPhone" class="form-control" autocomplete="off">
+                        </div>
+                        <div class="span-full">
+                            <label class="form-label" for="newClientEmail">Correo <span class="settings-optional">(opcional, para avisarle)</span></label>
+                            <input type="email" id="newClientEmail" name="newClientEmail" class="form-control" autocomplete="off">
+                        </div>
+                    </div>
+                </fieldset>
+                <div class="agenda-grid">
+                    <div class="span-full">
+                        <label class="form-label" for="newTreatment">Tratamiento</label>
+                        <select id="newTreatment" name="treatmentId" class="form-control" required></select>
+                    </div>
+                    <div>
+                        <label class="form-label" for="newDate">Día</label>
+                        <input type="date" id="newDate" class="form-control" required>
+                    </div>
+                    <div>
+                        <label class="form-label" for="newTime">Hora</label>
+                        <select id="newTime" class="form-control" required></select>
+                    </div>
+                    <div class="span-full">
+                        <label class="form-label" for="newWorker">Profesional</label>
+                        <select id="newWorker" name="workerId" class="form-control"></select>
+                    </div>
+                    <div class="span-full">
+                        <label class="form-label" for="newMessage">Nota para el cliente <span class="settings-optional">(opcional)</span></label>
+                        <textarea id="newMessage" name="message" class="form-control" rows="2" placeholder="Ej. Ven 5 minutos antes"></textarea>
+                    </div>
+                </div>
+                <p class="agenda-form-error" role="alert" hidden></p>
+                <div class="ui-modal-actions">
+                    <button type="button" class="btn btn-secondary" data-modal-close>Cancelar</button>
+                    <button type="submit" class="btn btn-primary"><i class="lucide-save" aria-hidden="true"></i> Guardar cita</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="ui-modal-overlay" id="rescheduleModal" hidden>
+        <div class="ui-modal ui-modal--form agenda-form-modal" role="dialog" aria-modal="true" aria-labelledby="rescheduleTitle">
+            <button type="button" class="ui-modal-close" data-modal-close aria-label="Cerrar"><i class="lucide-x" aria-hidden="true"></i></button>
+            <h2 class="ui-modal-title" id="rescheduleTitle"><i class="lucide-calendar-clock" aria-hidden="true"></i> Cambiar hora</h2>
+            <p class="ui-modal-text" id="rescheduleSummary">La cita sigue confirmada y avisaremos al cliente del cambio.</p>
+            <form id="rescheduleForm" class="agenda-form" novalidate>
+                <div class="agenda-grid">
+                    <div>
+                        <label class="form-label" for="rescheduleDate">Día</label>
+                        <input type="date" id="rescheduleDate" class="form-control" required>
+                    </div>
+                    <div>
+                        <label class="form-label" for="rescheduleTime">Hora</label>
+                        <select id="rescheduleTime" class="form-control" required></select>
+                    </div>
+                    <div class="span-full">
+                        <label class="form-label" for="rescheduleWorker">Profesional</label>
+                        <select id="rescheduleWorker" class="form-control"></select>
+                    </div>
+                </div>
+                <p class="agenda-form-error" role="alert" hidden></p>
+                <div class="ui-modal-actions">
+                    <button type="button" class="btn btn-secondary" data-modal-close>Cancelar</button>
+                    <button type="submit" class="btn btn-primary"><i class="lucide-calendar-check" aria-hidden="true"></i> Guardar cambio</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="ui-modal-overlay" id="proposeModal" hidden>
+        <div class="ui-modal ui-modal--form agenda-form-modal" role="dialog" aria-modal="true" aria-labelledby="proposeTitle">
+            <button type="button" class="ui-modal-close" data-modal-close aria-label="Cerrar"><i class="lucide-x" aria-hidden="true"></i></button>
+            <h2 class="ui-modal-title" id="proposeTitle"><i class="lucide-calendar-clock" aria-hidden="true"></i> Proponer otra hora</h2>
+            <p class="ui-modal-text" id="proposeSummary">Propón hasta 3 horas. El cliente elegirá una desde «Mis Citas» y esas horas quedan reservadas para él mientras decide.</p>
+            <form id="proposeForm" class="agenda-form" novalidate>
+                <ol class="propose-list" id="proposeList"></ol>
+                <button type="button" class="btn btn-secondary btn-sm-height" id="proposeAdd">
+                    <i class="lucide-plus" aria-hidden="true"></i> Añadir otra hora
+                </button>
+                <div class="form-group agenda-top-gap">
+                    <label class="form-label" for="proposeMessage">Mensaje para el cliente <span class="settings-optional">(opcional)</span></label>
+                    <textarea id="proposeMessage" class="form-control" rows="2" placeholder="Ej. Esa hora la tengo ocupada, ¿te viene bien alguna de estas?"></textarea>
+                </div>
+                <p class="agenda-form-error" role="alert" hidden></p>
+                <div class="ui-modal-actions">
+                    <button type="button" class="btn btn-secondary" data-modal-close>Cancelar</button>
+                    <button type="submit" class="btn btn-primary"><i class="lucide-send" aria-hidden="true"></i> Enviar propuesta</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="ui-modal-overlay" id="blockModal" hidden>
+        <div class="ui-modal ui-modal--form agenda-form-modal" role="dialog" aria-modal="true" aria-labelledby="blockTitle">
+            <button type="button" class="ui-modal-close" data-modal-close aria-label="Cerrar"><i class="lucide-x" aria-hidden="true"></i></button>
+            <h2 class="ui-modal-title" id="blockTitle"><i class="lucide-calendar-off" aria-hidden="true"></i> Bloquear horario</h2>
+            <p class="ui-modal-text">Vacaciones, descansos o cierres: en ese periodo no se podrán poner citas.</p>
+            <form id="blockForm" class="agenda-form" novalidate>
+                <div class="agenda-grid">
+                    <div class="span-full">
+                        <label class="form-label" for="blockWho">¿Para quién?</label>
+                        <select id="blockWho" class="form-control"></select>
+                    </div>
+                    <div class="span-full">
+                        <label class="checkbox-row"><input type="checkbox" id="blockAllDay" checked> Días completos</label>
+                    </div>
+                    <div>
+                        <label class="form-label" for="blockStartDate">Desde el día</label>
+                        <input type="date" id="blockStartDate" class="form-control" required>
+                    </div>
+                    <div data-block-time>
+                        <label class="form-label" for="blockStartTime">a las</label>
+                        <input type="time" id="blockStartTime" class="form-control" step="900" value="14:00">
+                    </div>
+                    <div>
+                        <label class="form-label" for="blockEndDate">Hasta el día</label>
+                        <input type="date" id="blockEndDate" class="form-control" required>
+                    </div>
+                    <div data-block-time>
+                        <label class="form-label" for="blockEndTime">a las</label>
+                        <input type="time" id="blockEndTime" class="form-control" step="900" value="15:00">
+                    </div>
+                    <div class="span-full">
+                        <label class="form-label" for="blockReason">Motivo <span class="settings-optional">(opcional)</span></label>
+                        <input type="text" id="blockReason" class="form-control" maxlength="255" placeholder="Ej. Vacaciones, comida, formación">
+                    </div>
+                </div>
+                <p class="agenda-form-error" role="alert" hidden></p>
+                <div class="ui-modal-actions">
+                    <button type="button" class="btn btn-secondary" data-modal-close>Cancelar</button>
+                    <button type="submit" class="btn btn-primary"><i class="lucide-lock" aria-hidden="true"></i> Bloquear</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Panel de gestión de centros.')}"></div>
 
     <!-- Citas del centro (JSON) para el calendario -->
     <script th:inline="javascript">
         window.CALENDAR_APPOINTMENTS = /*[[${appointments}]]*/ [];
         window.CALENDAR_HOURS = /*[[${openingHours}]]*/ {};
+        window.CALENDAR_BLOCKS = /*[[${blocks}]]*/ [];
+        window.CALENDAR_STAFF = /*[[${calendarStaff}]]*/ {};
     </script>
+    <script th:src="@{/js/worker-agenda-forms.js}" defer></script>
     <script th:src="@{/js/worker-calendar.js}" defer></script>
 </body>
 </html>

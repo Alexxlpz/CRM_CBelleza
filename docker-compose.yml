@@ -26,6 +26,17 @@ services:
       # Clave fija para que «Recordar mi sesión» siga funcionando tras reiniciar el contenedor
       REMEMBER_ME_KEY: ${REMEMBER_ME_KEY:?Falta REMEMBER_ME_KEY en .env}
       SITE_URL: ${SITE_URL:-}
+      # Zona horaria del servidor (hora de las citas, «ahora» al reservar y al completar citas)
+      TZ: ${TZ:-Europe/Madrid}
+      # Titular de la web en Términos y Privacidad (LSSI)
+      LEGAL_OWNER_NAME: ${LEGAL_OWNER_NAME:-}
+      LEGAL_OWNER_NIF: ${LEGAL_OWNER_NIF:-}
+      LEGAL_OWNER_ADDRESS: ${LEGAL_OWNER_ADDRESS:-}
+      # Iniciar sesión con Google (opcional: vacías = sin botón de Google)
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      # Cifra los tokens de Google Calendar guardados (opcional: vacía = sin sincronización)
+      GOOGLE_TOKEN_KEY: ${GOOGLE_TOKEN_KEY:-}
       # Cuentas demo con contraseña pública: solo "true" en una instalación de pruebas
       SEED_DEMO_DATA: ${SEED_DEMO_DATA:-false}
       # Una base de datos creada antes de Flyway (con el antiguo init.sql) se marca como versión 1

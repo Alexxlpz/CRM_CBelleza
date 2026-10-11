@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{fragments/head :: meta('Política de privacidad - Cuquora')}"></th:block>
+    <link rel="stylesheet" th:href="@{/css/home.css}">
+    <link rel="stylesheet" th:href="@{/css/public.css}">
+    <link rel="stylesheet" th:href="@{/css/legal.css}">
+</head>
+<!--/* Títulos del índice (lateral y en página); el orden coincide con los id privacidad-1…11 */-->
+<body th:with="sections=${ {'Responsable', 'Qué datos tratamos', 'Para qué y con qué base', 'Fichas técnicas', 'Iniciar sesión con Google', 'Google Calendar', 'Con quién los compartimos', 'Cuánto tiempo los guardamos', 'Seguridad', 'Tus derechos', 'Cambios'} }">
+    <div th:replace="~{fragments/navbar :: brand(true)}"></div>
+
+    <aside class="desktop-left-rail" aria-label="Índice de la política de privacidad">
+        <div class="rail-header">
+            <h4 class="rail-title">Índice</h4>
+        </div>
+        <nav class="rail-nav">
+            <a th:each="item, it : ${sections}"
+               th:href="|#privacidad-${it.count}|" th:attr="data-target=|privacidad-${it.count}|"
+               class="rail-link" th:classappend="${it.first} ? ' active'">
+                <span class="rail-num" th:text="${#numbers.formatInteger(it.count, 2)}">01</span>
+                <span class="rail-text" th:text="${item}">Responsable</span>
+                <svg class="rail-chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </a>
+        </nav>
+    </aside>
+
+    <main class="public-page-container legal-page-container">
+        <header class="page-hero">
+            <h1>Política de privacidad</h1>
+            <p>Qué datos personales tratamos, para qué, con quién los compartimos y cómo puedes ejercer tus derechos. Sin letra pequeña.</p>
+            <span class="legal-updated"><i class="lucide-calendar-check" aria-hidden="true"></i> Última actualización: 11 de octubre de 2026</span>
+        </header>
+
+        <div class="legal-document">
+            <nav class="legal-toc-inline" aria-label="Índice de la política de privacidad">
+                <h2><i class="lucide-list" aria-hidden="true"></i> En esta página</h2>
+                <ol>
+                    <li th:each="item, it : ${sections}">
+                        <a th:href="|#privacidad-${it.count}|" th:text="${item}">Responsable</a>
+                    </li>
+                </ol>
+            </nav>
+
+            <section class="legal-section" id="privacidad-1">
+                <h2><span class="legal-section-num">01</span> Responsable</h2>
+                <p>El responsable de los datos de tu cuenta es <strong th:text="${legalOwner.name}">Cuquora</strong><th:block th:if="${!legalOwner.nif.isEmpty()}">, NIF <span th:text="${legalOwner.nif}">00000000X</span></th:block><th:block th:if="${!legalOwner.address.isEmpty()}">, con domicilio en <span th:text="${legalOwner.address}">Calle</span></th:block>.</p>
+                <p>Para cualquier cuestión sobre tus datos escríbenos a <a th:href="|mailto:${contactEmail}|" th:text="${contactEmail}">cuquora@hotmail.com</a>.</p>
+                <p>Los datos que cada centro de belleza registra sobre sus clientes (citas atendidas, fichas técnicas) son responsabilidad de ese centro: Cuquora los trata por cuenta del centro, como encargado del tratamiento (ver <a href="#privacidad-4">fichas técnicas</a>).</p>
+            </section>
+
+            <section class="legal-section" id="privacidad-2">
+                <h2><span class="legal-section-num">02</span> Qué datos tratamos</h2>
+                <ul>
+                    <li><strong>Cuenta:</strong> nombre, correo, teléfono y contraseña (guardada cifrada, nadie puede leerla). Si entras con Google, también el identificador de tu cuenta de Google.</li>
+                    <li><strong>Citas:</strong> centro, tratamiento, fecha y hora, estado y los mensajes del centro.</li>
+                    <li><strong>Fichas técnicas:</strong> lo que el centro anota sobre ti para atenderte (por ejemplo tipo de piel, alergias o contraindicaciones). Pueden incluir datos de salud.</li>
+                    <li><strong>Personal de los centros:</strong> nombre, correo, teléfono y centro al que pertenecen; y, si activan Google Calendar, la cuenta de Google conectada.</li>
+                    <li><strong>Formularios de contacto y de alta de centro:</strong> los datos que nos escribas.</li>
+                    <li><strong>Datos técnicos:</strong> las cookies imprescindibles para la sesión (ver <a href="/cookies">política de cookies</a>) y los registros del servidor necesarios para la seguridad.</li>
+                </ul>
+                <p>No usamos cookies de análisis ni de publicidad, y no compramos datos a terceros.</p>
+            </section>
+
+            <section class="legal-section" id="privacidad-3">
+                <h2><span class="legal-section-num">03</span> Para qué los usamos y con qué base legal</h2>
+                <table class="legal-table legal-table--text">
+                    <thead>
+                        <tr>
+                            <th scope="col">Finalidad</th>
+                            <th scope="col">Base legal (RGPD art. 6)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td data-label="Finalidad"><span>Darte de alta, que puedas pedir citas y avisarte de su estado</span></td>
+                            <td data-label="Base legal"><span>Ejecución del contrato (los <a href="/terms">términos</a> que aceptas al registrarte)</span></td>
+                        </tr>
+                        <tr>
+                            <td data-label="Finalidad"><span>Que el personal de un centro gestione su agenda, sus clientes y su inventario</span></td>
+                            <td data-label="Base legal"><span>Ejecución del contrato con el centro</span></td>
+                        </tr>
+                        <tr>
+                            <td data-label="Finalidad"><span>Responder a tus mensajes y solicitudes de alta</span></td>
+                            <td data-label="Base legal"><span>Tu consentimiento al enviarnos el formulario</span></td>
+                        </tr>
+                        <tr>
+                            <td data-label="Finalidad"><span>Proteger la plataforma (inicios de sesión, abusos, copias de seguridad)</span></td>
+                            <td data-label="Base legal"><span>Interés legítimo en mantener el servicio seguro</span></td>
+                        </tr>
+                        <tr>
+                            <td data-label="Finalidad"><span>Cumplir obligaciones legales (por ejemplo, requerimientos de autoridades)</span></td>
+                            <td data-label="Base legal"><span>Obligación legal</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p>No tomamos decisiones automatizadas sobre ti ni hacemos perfiles.</p>
+            </section>
+
+            <section class="legal-section" id="privacidad-4">
+                <h2><span class="legal-section-num">04</span> Fichas técnicas</h2>
+                <p>Las fichas las crea y rellena cada centro, que decide qué anota y es el responsable de esos datos. Si incluyen información de salud, el centro debe contar con tu consentimiento explícito.</p>
+                <p>Cuquora solo las guarda y las muestra al personal de ese centro: nunca a otros centros ni a otros clientes. Para acceder a tu ficha, corregirla o borrarla, dirígete al centro; si nos escribes a nosotros, le trasladaremos tu petición.</p>
+            </section>
+
+            <section class="legal-section" id="privacidad-5">
+                <h2><span class="legal-section-num">05</span> Iniciar sesión con Google</h2>
+                <p>Si eliges «Continuar con Google», Google nos envía tu nombre, tu correo (y si está verificado) y un identificador de tu cuenta. Los usamos solo para crear tu cuenta o entrar en ella. No recibimos tu contraseña de Google ni accedemos a tus contactos, correos o archivos.</p>
+            </section>
+
+            <section class="legal-section" id="privacidad-6">
+                <h2><span class="legal-section-num">06</span> Google Calendar</h2>
+                <p>El personal de un centro puede activar, de forma voluntaria, «Guardar mis citas en Google Calendar» en su perfil. Al hacerlo:</p>
+                <ul>
+                    <li>Cuquora crea un calendario «Cuquora» en la cuenta de Google que el trabajador elija y <strong>solo puede ver y modificar ese calendario</strong>, nunca el resto de su agenda.</li>
+                    <li>Por cada cita confirmada se crea un evento con el tratamiento, la fecha, la hora y la duración, la dirección del centro, el mensaje del centro y el <strong>nombre y teléfono del cliente</strong>. Si la cita se rechaza, el evento se borra.</li>
+                    <li>Esos eventos quedan guardados en Google (Google LLC, Estados Unidos, adherida al Marco de Privacidad de Datos UE-EE. UU.) bajo la cuenta del trabajador y se rigen también por la <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">política de privacidad de Google</a>.</li>
+                    <li>El trabajador puede desactivarlo cuando quiera: se borra el calendario «Cuquora» de su cuenta y se retira el permiso. También puede retirarlo desde su cuenta de Google.</li>
+                </ul>
+                <p>Si eres cliente y no quieres que tus citas se copien al calendario del personal, díselo al centro o escríbenos y lo resolveremos.</p>
+                <p>El uso que hace Cuquora de la información recibida de las API de Google se ajusta a la <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener">Política de datos de usuario de los servicios de API de Google</a>, incluidos los requisitos de uso limitado: esos datos solo se usan para mostrar y sincronizar las citas, no se venden, no se usan para publicidad y ninguna persona los lee salvo que el propio usuario lo pida o lo exija la ley.</p>
+            </section>
+
+            <section class="legal-section" id="privacidad-7">
+                <h2><span class="legal-section-num">07</span> Con quién los compartimos</h2>
+                <ul>
+                    <li><strong>El centro en el que pides cita</strong> ve tus datos de cuenta, tus citas en ese centro y tu ficha.</li>
+                    <li><strong>Proveedores que nos prestan servicio</strong>, con contrato de encargado del tratamiento: el alojamiento de la plataforma, Cloudflare (conexión segura y protección de la web), el proveedor de envío de correos y Google en los casos de los apartados <a href="#privacidad-5">5</a> y <a href="#privacidad-6">6</a>. Algunos están en Estados Unidos y las transferencias se amparan en el Marco de Privacidad de Datos UE-EE. UU. o en cláusulas contractuales tipo de la Comisión Europea.</li>
+                    <li><strong>Autoridades</strong>, solo cuando la ley nos obligue.</li>
+                </ul>
+                <p>No vendemos ni cedemos tus datos para publicidad.</p>
+            </section>
+
+            <section class="legal-section" id="privacidad-8">
+                <h2><span class="legal-section-num">08</span> Cuánto tiempo los guardamos</h2>
+                <ul>
+                    <li><strong>Cuenta y citas:</strong> mientras tengas la cuenta. Si pides la baja, los borramos, salvo lo que debamos conservar por ley y durante el plazo que esta marque.</li>
+                    <li><strong>Fichas técnicas:</strong> lo que decida el centro responsable o hasta que este deje de usar Cuquora.</li>
+                    <li><strong>Mensajes de contacto y de alta:</strong> el tiempo necesario para atenderlos y, como máximo, un año.</li>
+                    <li><strong>Dispositivos recordados («Recordar mi sesión»):</strong> 14 días, o hasta que cierres sesión o cambies la contraseña.</li>
+                    <li><strong>Conexión con Google Calendar:</strong> hasta que el trabajador la desactive.</li>
+                </ul>
+            </section>
+
+            <section class="legal-section" id="privacidad-9">
+                <h2><span class="legal-section-num">09</span> Seguridad</h2>
+                <p>Toda la web funciona con conexión cifrada (HTTPS). Las contraseñas se guardan con un cifrado que no se puede revertir, los permisos de Google Calendar se guardan cifrados y cada centro solo puede ver sus propios datos. Si alguna vez hubiera una brecha que afectara a tus datos, te avisaríamos y lo comunicaríamos a la Agencia Española de Protección de Datos cuando corresponda.</p>
+            </section>
+
+            <section class="legal-section" id="privacidad-10">
+                <h2><span class="legal-section-num">10</span> Tus derechos</h2>
+                <p>Puedes pedir en cualquier momento <strong>acceso</strong>, <strong>rectificación</strong>, <strong>supresión</strong>, <strong>oposición</strong>, <strong>limitación</strong> o <strong>portabilidad</strong> de tus datos, y retirar tu consentimiento cuando sea la base del tratamiento. Escríbenos a <a th:href="|mailto:${contactEmail}|" th:text="${contactEmail}">cuquora@hotmail.com</a> desde el correo de tu cuenta; te responderemos en un plazo máximo de un mes.</p>
+                <p>Muchos datos puedes cambiarlos tú mismo desde «Mi Perfil». Si no quedas satisfecho con nuestra respuesta, puedes reclamar ante la <a href="https://www.aepd.es" target="_blank" rel="noopener">Agencia Española de Protección de Datos</a>.</p>
+            </section>
+
+            <section class="legal-section" id="privacidad-11">
+                <h2><span class="legal-section-num">11</span> Cambios en esta política</h2>
+                <p>Si cambia la forma en que tratamos tus datos, actualizaremos esta página y la fecha de arriba; si el cambio es importante, lo avisaremos en la propia web.</p>
+                <div class="legal-callout">
+                    <i class="lucide-mail" aria-hidden="true"></i>
+                    <p>¿Alguna duda sobre tus datos? Escríbenos desde la página de <a href="/contact">contacto</a>. Consulta también los <a href="/terms">términos y condiciones</a> y la <a href="/cookies">política de cookies</a>.</p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Software de gestión para centros de estética, salones y spas.')}"></div>
+    <script th:src="@{/js/scroll-index.js}" defer></script>
+</body>
+</html>

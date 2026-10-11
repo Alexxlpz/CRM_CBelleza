@@ -4,7 +4,7 @@ import com.alexxlpz.crm_cbelleza.booking.OpeningHoursPolicy;
 import com.alexxlpz.crm_cbelleza.dto.CenterSearchCriteria;
 import com.alexxlpz.crm_cbelleza.dto.CenterSummaryDTO;
 import com.alexxlpz.crm_cbelleza.exceptions.ApiEndpoint;
-import com.alexxlpz.crm_cbelleza.services.AppointmentService;
+import com.alexxlpz.crm_cbelleza.services.AgendaAvailabilityService;
 import com.alexxlpz.crm_cbelleza.services.CenterSearchService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -23,14 +23,14 @@ import java.util.Map;
 public class CenterApiController {
 
     private final CenterSearchService searchService;
-    private final AppointmentService appointmentService;
+    private final AgendaAvailabilityService availability;
     private final OpeningHoursPolicy openingHours;
 
     public CenterApiController(CenterSearchService searchService,
-                               AppointmentService appointmentService,
+                               AgendaAvailabilityService availability,
                                OpeningHoursPolicy openingHours) {
         this.searchService = searchService;
-        this.appointmentService = appointmentService;
+        this.availability = availability;
         this.openingHours = openingHours;
     }
 
@@ -39,14 +39,16 @@ public class CenterApiController {
         return searchService.search(criteria);
     }
 
+    /** Horario y huecos llenos (sin cabina o sin profesional libre) para el selector de hora del cliente. */
     @GetMapping("/{id}/availability")
     public Map<String, Object> availability(@PathVariable Long id) {
+        var free = availability.availability(id);
         return Map.of(
                 "slotMinutes", openingHours.slotMinutes(),
                 "workingDays", openingHours.workingDays().stream().map(DayOfWeek::getValue).sorted().toList(),
                 "openHour", openingHours.openHour(),
                 "closeHour", openingHours.closeHour(),
-                "closedDates", List.of(),
-                "occupied", appointmentService.getOccupiedSlots(id));
+                "closedDates", free.closedDates(),
+                "occupied", free.occupied());
     }
 }

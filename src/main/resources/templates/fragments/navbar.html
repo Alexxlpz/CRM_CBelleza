@@ -78,6 +78,9 @@
             <th:block th:if="${role == 'WORKER' and notifications != null}">
                 <div th:replace="~{fragments/notifications :: menu(${notifications})}"></div>
             </th:block>
+            <th:block th:if="${role == 'CLIENT' and clientNotifications != null}">
+                <div th:replace="~{fragments/notifications :: clientMenu(${clientNotifications})}"></div>
+            </th:block>
             <th:block th:if="${role == 'CLIENT'}">
                 <a href="/client/appointments" class="nav-auth-btn nav-auth-register" title="Mis Citas"><i class="lucide-calendar-days" aria-hidden="true"></i> <span class="nav-btn-label">Mis Citas</span></a>
                 <a href="/client/profile" class="nav-auth-btn nav-auth-register" title="Mi Perfil"><i class="lucide-user" aria-hidden="true"></i> <span class="nav-btn-label">Mi Perfil</span></a>

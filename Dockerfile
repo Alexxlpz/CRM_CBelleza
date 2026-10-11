@@ -22,6 +22,9 @@ USER appuser
 # Copy executable jar from build stage
 COPY --from=build /workspace/target/*.jar /app/app.jar
 
+# Hora del servidor: las citas se guardan en hora local y se comparan con "ahora" (se puede cambiar con TZ en docker-compose)
+ENV TZ=Europe/Madrid
+
 EXPOSE 8080
 
 ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "/app/app.jar"]

@@ -57,8 +57,59 @@ public class Appointment {
     @Column(name = "worker_message", length = 500)
     private String workerMessage;
 
+    /** Evento en el Google Calendar del trabajador asignado; nulo si no tiene la sincronización activada. */
+    @Column(name = "google_event_id")
+    private String googleEventId;
+
+    /** Trabajador en cuyo Google Calendar está el evento (puede no ser el asignado si se cambió de profesional). */
+    @Column(name = "google_event_owner_id")
+    private Long googleEventOwnerId;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    /** Último cambio y cuándo: alimenta las campanas de avisos y los correos. */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "last_change", length = 30)
+    private AppointmentChange lastChange;
+
+    @Column(name = "last_change_at")
+    private LocalDateTime lastChangeAt;
+
+    /** Hora anterior cuando el centro mueve una cita (se muestra al cliente: «antes: …»). */
+    @Column(name = "previous_date_time")
+    private LocalDateTime previousDateTime;
+
+    /** Una propuesta (PROPOSED) sin respuesta se anula sola a esta hora. */
+    @Column(name = "proposal_expires_at")
+    private LocalDateTime proposalExpiresAt;
+
+    @Column(name = "reminder_sent_at")
+    private LocalDateTime reminderSentAt;
+
+    @OneToMany(mappedBy = "appointment", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("dateTime ASC")
+    @JsonIgnoreProperties({"appointment"})
+    @Builder.Default
+    private java.util.List<AppointmentProposal> proposals = new java.util.ArrayList<>();
+
     @Transient
     private Boolean isNewClient;
+
+    public void recordChange(AppointmentChange change, LocalDateTime at) {
+        this.lastChange = change;
+        this.lastChangeAt = at;
+    }
+
+    /** Aún no ha empezado (hora del servidor): el cliente todavía puede anularla. */
+    public boolean isUpcoming() {
+        return dateTime != null && dateTime.isAfter(LocalDateTime.now());
+    }
+
+    /** true si [start, end) se solapa con esta cita. */
+    public boolean overlaps(LocalDateTime start, LocalDateTime end) {
+        return start.isBefore(getEndDateTime()) && end.isAfter(dateTime);
+    }
 
     public LocalDateTime getEndDateTime() {
         if (this.dateTime == null) {

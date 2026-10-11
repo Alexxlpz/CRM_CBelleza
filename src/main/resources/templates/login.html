@@ -26,6 +26,14 @@
                 <span th:text="${successMessage != null ? successMessage : 'Has cerrado sesión correctamente.'}">Has cerrado sesión correctamente.</span>
             </div>
 
+            <th:block th:if="${googleLoginEnabled}">
+                <a th:href="@{${googleLoginUrl}}" class="btn btn-secondary btn-block btn-lg btn-google" id="googleLoginBtn">
+                    <img th:src="@{/images/google-g.svg}" src="/images/google-g.svg" alt="" width="20" height="20">
+                    <span>Continuar con Google</span>
+                </a>
+                <div class="auth-divider"><span>o con tu correo</span></div>
+            </th:block>
+
             <form th:action="@{/login}" method="post" id="loginForm" autocomplete="on" novalidate>
                 <div class="form-group">
                     <label for="identifierInput" class="form-label">Correo electrónico o usuario</label>
@@ -51,7 +59,7 @@
 
                 <div class="form-options">
                     <label class="remember-label">
-                        <input type="checkbox" name="rememberMe" value="true">
+                        <input type="checkbox" name="rememberMe" value="true" id="rememberMeInput">
                         <span>Recordar mi sesión</span>
                     </label>
                 </div>
@@ -109,6 +117,16 @@
                 ],
                 password: [V.required('Por favor, introduce tu contraseña.')]
             });
+
+            // «Recordar mi sesión» también vale para entrar con Google: el botón lleva la casilla en la URL
+            const googleBtn = document.getElementById('googleLoginBtn');
+            const remember = document.getElementById('rememberMeInput');
+            if (googleBtn && remember) {
+                const baseUrl = googleBtn.getAttribute('href');
+                const sync = () => googleBtn.setAttribute('href', remember.checked ? baseUrl + '?rememberMe=true' : baseUrl);
+                remember.addEventListener('change', sync);
+                sync();
+            }
         });
     </script>
 </body>

@@ -74,3 +74,89 @@
     margin-right: 4px;
 }
 
+
+/* ---- Propuesta del centro, cambio de hora y anular (fragments/appointment-card) ---- */
+.appointment-card--proposed {
+    border: 1px dashed rgba(var(--info-rgb), 0.6);
+}
+
+.appointment-moved {
+    color: var(--info-text);
+    font-weight: 600;
+}
+
+.appointment-moved i {
+    color: var(--info-text);
+}
+
+.appointment-proposal {
+    margin-top: 6px;
+    padding: 14px;
+    border-radius: 14px;
+    background: rgba(var(--info-rgb), 0.1);
+}
+
+.appointment-proposal-title {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 10px;
+    color: var(--text-main);
+    font-weight: 700;
+}
+
+.appointment-proposal-title i {
+    color: var(--info-text);
+    margin-top: 2px;
+}
+
+.appointment-proposal-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.appointment-proposal-option {
+    width: 100%;
+    justify-content: flex-start;
+    gap: 8px;
+    text-transform: none;
+}
+
+.appointment-proposal-option span::first-letter {
+    text-transform: uppercase;
+}
+
+.appointment-proposal-expiry {
+    margin: 10px 0 6px;
+    font-size: 12.5px;
+}
+
+.appointment-card-footer {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 10px;
+    border-top: 1px dashed rgba(var(--primary-rgb), 0.25);
+}
+
+.btn-link-danger {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 0 3px;
+    border: none;
+    /* Subrayado continuo bajo icono y texto (text-decoration se corta en el hueco entre los dos) */
+    border-bottom: 1px solid transparent;
+    border-radius: 0;
+    background: none;
+    color: var(--error);
+    font: inherit;
+    font-size: 13.5px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.btn-link-danger:hover,
+.btn-link-danger:focus-visible {
+    border-bottom-color: currentColor;
+}

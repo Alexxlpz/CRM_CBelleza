@@ -69,11 +69,31 @@ class CenterIsolationTests {
     @Test
     void workerCannotOpenClientCardOfAnotherCenter() throws Exception {
         Long clientOfCenter1 = clientCards.createClientManually(centerOf(TestUsers.WORKER_CENTER_1),
-                new NewClientForm("Cliente Aislado", "+34 699 000 111", null, "Solo en el centro 1"), null);
+                new NewClientForm("Cliente Aislado", "+34 699 000 111", null, "Solo en el centro 1"), null).clientId();
         mvc.perform(get("/worker/clients/" + clientOfCenter1).with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
                 .andExpect(status().isOk());
         mvc.perform(get("/worker/clients/" + clientOfCenter1).with(TestUsers.as(users, TestUsers.WORKER_CENTER_2)))
                 .andExpect(status().isNotFound());
+    }
+
+    /** Fallo #3: dar de alta un cliente con el teléfono o correo de un cliente de otro centro no enlaza su cuenta. */
+    @Test
+    void manualClientNeverLinksAccountsOfOtherCenters() {
+        var sofia = users.findByNameIgnoreCase(TestUsers.CLIENT).orElseThrow();
+        // Un centro en el que Sofía no es clienta (ni ficha ni citas)
+        Long center2 = java.util.stream.Stream.of(TestUsers.WORKER_CENTER_2, "marco@cbelleza.com", "ana@cbelleza.com")
+                .map(this::centerOf)
+                .filter(center -> appointments.findByCenterIdOrderByDateTimeDesc(center).stream()
+                        .noneMatch(a -> a.getClient() != null && a.getClient().getId().equals(sofia.getId())))
+                .findFirst()
+                .orElseThrow();
+
+        var created = clientCards.createClientManually(center2,
+                new NewClientForm("Otra Persona", sofia.getPhone(), sofia.getEmail(), null), null);
+
+        org.junit.jupiter.api.Assertions.assertNotEquals(sofia.getId(), created.clientId(), "se crea un cliente local");
+        org.junit.jupiter.api.Assertions.assertTrue(created.emailSkipped(), "el correo en uso no se guarda");
+        assertEquals("Otra Persona", users.findById(created.clientId()).orElseThrow().getName());
     }
 
     @Test

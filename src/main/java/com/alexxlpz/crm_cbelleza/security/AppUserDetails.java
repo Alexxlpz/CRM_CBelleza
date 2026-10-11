@@ -28,9 +28,10 @@ public final class AppUserDetails implements UserDetails {
     private final Role role;
     private final Long centerId;
     private final String centerName;
+    private final boolean enabled;
 
     private AppUserDetails(Long id, String name, String username, String passwordHash,
-                           Role role, Long centerId, String centerName) {
+                           Role role, Long centerId, String centerName, boolean enabled) {
         this.id = id;
         this.name = name;
         this.username = username;
@@ -38,19 +39,25 @@ public final class AppUserDetails implements UserDetails {
         this.role = role;
         this.centerId = centerId;
         this.centerName = centerName;
+        this.enabled = enabled;
     }
 
     public static AppUserDetails from(User user) {
         Center center = user.getCenter();
-        String username = user.getEmail() != null ? user.getEmail() : user.getName();
         return new AppUserDetails(
                 user.getId(),
                 user.getName(),
-                username,
+                usernameOf(user),
                 user.getPassword(),
                 user.getRole(),
                 center != null ? center.getId() : null,
-                center != null ? center.getName() : null);
+                center != null ? center.getName() : null,
+                user.hasAccount());
+    }
+
+    /** Identificador de sesión del usuario (el correo o, si no tiene, el nombre); es el que guardan los tokens de «Recordar mi sesión». */
+    public static String usernameOf(User user) {
+        return user.getEmail() != null ? user.getEmail() : user.getName();
     }
 
     public Long getId() { return id; }
@@ -75,7 +82,9 @@ public final class AppUserDetails implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        // Las cuentas creadas por un trabajador desde la cartera no tienen contraseña: no pueden iniciar sesión.
-        return passwordHash != null && !passwordHash.isBlank();
+        // Los clientes creados por un trabajador desde la cartera no tienen cuenta (ni contraseña ni Google).
+        // Una cuenta solo de Google está activa (vale para «Recordar mi sesión»), pero sin contraseña
+        // el formulario de login siempre la rechaza.
+        return enabled;
     }
 }

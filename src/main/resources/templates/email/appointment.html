@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<!--/* Correo de cita (cliente o centro). Variables: heading, subtitle, intro, details (lista de [etiqueta, valor]),
+       proposals (horas propuestas, opcional), note (mensaje del centro, opcional), buttonUrl/buttonLabel (opcional). */-->
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{email/layout :: layout(${heading}, ${subtitle}, ~{::content})}">
+<body>
+<th:block th:fragment="content">
+    <p style="font-size:15px; color:#5c5550; line-height:1.6; margin:0 0 20px;" th:text="${intro}">Texto del aviso.</p>
+
+    <div style="background:#fdfcfb; border:1px solid #eee8e2; border-radius:12px; padding:18px; margin-bottom:20px;">
+        <p style="margin:0 0 6px; font-size:14px;" th:each="row : ${details}">
+            <strong th:text="${row[0]} + ':'">Etiqueta:</strong> <span th:text="${row[1]}">Valor</span>
+        </p>
+    </div>
+
+    <div th:if="${proposals != null and !proposals.isEmpty()}" style="margin-bottom:20px;">
+        <p style="margin:0 0 8px; font-size:14px; font-weight:700;">Horas que te proponemos:</p>
+        <p th:each="proposal : ${proposals}" style="margin:0 0 6px; font-size:14px; padding:10px 14px; border:1px solid #e7ded5; border-radius:10px;"
+           th:text="${proposal}">Miércoles 15/10 a las 11:30</p>
+    </div>
+
+    <p th:if="${note != null}" style="margin:0 0 20px; font-size:14px; color:#5c5550; font-style:italic;">
+        Mensaje del centro: «<span th:text="${note}">Mensaje</span>»
+    </p>
+
+    <p th:if="${buttonUrl != null}" style="margin:0 0 24px;">
+        <a th:href="${buttonUrl}" th:text="${buttonLabel}"
+           style="display:inline-block; padding:12px 22px; background:#8a6a45; color:#ffffff; text-decoration:none; border-radius:10px; font-weight:700; font-size:14px;">Ver mis citas</a>
+    </p>
+
+    <p style="font-size:13px; color:#857b74; margin:0;">Mensaje automático de Cuquora. Para cualquier cambio, contacta con el centro.</p>
+</th:block>
+</body>
+</html>

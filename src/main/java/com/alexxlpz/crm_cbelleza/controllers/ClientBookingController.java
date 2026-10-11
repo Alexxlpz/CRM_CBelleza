@@ -83,6 +83,42 @@ public class ClientBookingController {
         return "client/appointments";
     }
 
+    /** El cliente elige una de las horas que le propuso el centro. */
+    @PostMapping("/client/appointments/{id}/accept-proposal")
+    public String acceptProposal(@AuthenticationPrincipal AppUserDetails client,
+                                 @PathVariable Long id,
+                                 @RequestParam Long proposalId,
+                                 RedirectAttributes redirect) {
+        return clientAction(redirect, "¡Cita confirmada! Te esperamos a la hora que has elegido.",
+                () -> bookingService.acceptProposal(client.getId(), id, proposalId));
+    }
+
+    @PostMapping("/client/appointments/{id}/decline-proposal")
+    public String declineProposal(@AuthenticationPrincipal AppUserDetails client,
+                                  @PathVariable Long id,
+                                  RedirectAttributes redirect) {
+        return clientAction(redirect, "Hemos avisado al centro de que ninguna hora te viene bien. Puedes pedir otra cita cuando quieras.",
+                () -> bookingService.declineProposal(client.getId(), id));
+    }
+
+    @PostMapping("/client/appointments/{id}/cancel")
+    public String cancel(@AuthenticationPrincipal AppUserDetails client,
+                         @PathVariable Long id,
+                         RedirectAttributes redirect) {
+        return clientAction(redirect, "Cita anulada. Hemos avisado al centro.",
+                () -> bookingService.cancelByClient(client.getId(), id));
+    }
+
+    private static String clientAction(RedirectAttributes redirect, String success, Runnable action) {
+        try {
+            action.run();
+            redirect.addFlashAttribute("successMessage", success);
+        } catch (BusinessRuleException e) {
+            redirect.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:/client/appointments";
+    }
+
     private static LocalDateTime parse(String value) {
         try {
             return LocalDateTime.parse(value);

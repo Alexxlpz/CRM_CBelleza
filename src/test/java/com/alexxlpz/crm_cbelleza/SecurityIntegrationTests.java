@@ -1,6 +1,7 @@
 package com.alexxlpz.crm_cbelleza;
 
 import com.alexxlpz.crm_cbelleza.repositories.UserRepository;
+import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -9,9 +10,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.hamcrest.Matchers.not;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -88,6 +93,15 @@ class SecurityIntegrationTests {
                 .andExpect(status().isNotFound());
     }
 
+    /** Sin GOOGLE_CLIENT_ID ni GOOGLE_CLIENT_SECRET no hay acceso con Google ni botón (ver GoogleLoginTests). */
+    @Test
+    void googleLoginIsDisabledWithoutCredentials() throws Exception {
+        mvc.perform(get("/oauth2/authorization/google")).andExpect(status().isNotFound());
+        mvc.perform(get("/login"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(not(containsString("Continuar con Google"))));
+    }
+
     @Test
     void postWithoutCsrfTokenIsRejected() throws Exception {
         mvc.perform(post("/contact").param("name", "x"))
@@ -116,6 +130,21 @@ class SecurityIntegrationTests {
                         .param("identifier", TestUsers.WORKER_CENTER_1)
                         .param("password", "incorrecta"))
                 .andExpect(redirectedUrl("/login?error"));
+    }
+
+    @Test
+    void rememberMeCookieLogsBackInAfterSessionEnds() throws Exception {
+        var login = mvc.perform(post("/login").with(csrf())
+                        .param("identifier", TestUsers.WORKER_CENTER_1)
+                        .param("password", "password123")
+                        .param("rememberMe", "true"))
+                .andExpect(redirectedUrl("/worker/dashboard"))
+                .andReturn();
+        Cookie rememberMe = login.getResponse().getCookie("remember-me");
+        assertNotNull(rememberMe);
+
+        // Sin la sesión (navegador cerrado), solo con la cookie
+        mvc.perform(get("/worker/dashboard").cookie(rememberMe)).andExpect(status().isOk());
     }
 
     @Test

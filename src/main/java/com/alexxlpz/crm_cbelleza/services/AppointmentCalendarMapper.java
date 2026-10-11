@@ -2,6 +2,7 @@ package com.alexxlpz.crm_cbelleza.services;
 
 import com.alexxlpz.crm_cbelleza.dto.AppointmentCalendarDTO;
 import com.alexxlpz.crm_cbelleza.entities.Appointment;
+import com.alexxlpz.crm_cbelleza.entities.AppointmentStatus;
 import com.alexxlpz.crm_cbelleza.entities.Treatment;
 import com.alexxlpz.crm_cbelleza.entities.User;
 import org.springframework.stereotype.Component;
@@ -22,6 +23,14 @@ public class AppointmentCalendarMapper {
                 .client(toClient(app.getClient()))
                 .worker(toWorker(app.getWorker()))
                 .treatment(toTreatment(app.getTreatment()))
+                .previousDateTime(app.getPreviousDateTime() != null ? app.getPreviousDateTime().toString() : null)
+                // Las horas propuestas solo se cargan en las citas PROPOSED (pocas): así no hay una consulta por cita
+                .proposals(app.getStatus() == AppointmentStatus.PROPOSED
+                        ? app.getProposals().stream()
+                            .map(p -> new AppointmentCalendarDTO.ProposalDTO(p.getId(), p.getDateTime().toString()))
+                            .toList()
+                        : java.util.List.of())
+                .proposalExpiresAt(app.getProposalExpiresAt() != null ? app.getProposalExpiresAt().toString() : null)
                 .build();
     }
 

@@ -29,6 +29,9 @@ class PageRenderingTests {
     @Autowired
     private UserRepository users;
 
+    @Autowired
+    private com.alexxlpz.crm_cbelleza.services.AppointmentService appointmentService;
+
     @ParameterizedTest
     @ValueSource(strings = {"/worker/dashboard", "/worker/calendar", "/worker/inventory", "/worker/treatments",
             "/worker/clients", "/worker/clients/template", "/worker/center", "/centers", "/home"})
@@ -44,6 +47,30 @@ class PageRenderingTests {
                 .andExpect(content().string(containsString("id=\"weekView\"")))
                 .andExpect(content().string(containsString("data-calendar-view=\"week\"")))
                 .andExpect(content().string(containsString("\"openHour\":9")));
+    }
+
+    @Test
+    void googleCalendarSwitchIsDisabledWithoutGoogleKeys() throws Exception {
+        mvc.perform(get("/worker/center").with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Guardar mis citas en Google Calendar")))
+                .andExpect(content().string(containsString("Próximamente")));
+    }
+
+    @Test
+    void clientAppointmentsShowUpcomingFirstSoonestFirst() {
+        Long sofia = users.findByNameIgnoreCase(TestUsers.CLIENT).orElseThrow().getId();
+        var list = appointmentService.getClientAppointments(sofia);
+        java.time.LocalDateTime now = java.time.LocalDateTime.now();
+        var upcoming = list.stream().filter(a -> !a.getDateTime().isBefore(now)).toList();
+        var past = list.stream().filter(a -> a.getDateTime().isBefore(now)).toList();
+        org.junit.jupiter.api.Assertions.assertEquals(upcoming, list.subList(0, upcoming.size()), "primero las próximas");
+        for (int i = 1; i < upcoming.size(); i++) {
+            org.junit.jupiter.api.Assertions.assertFalse(upcoming.get(i).getDateTime().isBefore(upcoming.get(i - 1).getDateTime()));
+        }
+        for (int i = 1; i < past.size(); i++) {
+            org.junit.jupiter.api.Assertions.assertFalse(past.get(i).getDateTime().isAfter(past.get(i - 1).getDateTime()));
+        }
     }
 
     @Test
@@ -76,7 +103,7 @@ class PageRenderingTests {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"/terms", "/terminos", "/cookies", "/politica-cookies"})
+    @ValueSource(strings = {"/terms", "/terminos", "/cookies", "/politica-cookies", "/privacy", "/privacidad"})
     void legalPagesRenderWithoutLogin(String path) throws Exception {
         mvc.perform(get(path))
                 .andExpect(status().isOk())
@@ -89,6 +116,14 @@ class PageRenderingTests {
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("property=\"og:image\" content=\"http://localhost/images/og-image.jpg\"")))
                 .andExpect(content().string(containsString("id=\"cookieBanner\"")))
-                .andExpect(content().string(containsString("href=\"/terms\"")));
+                .andExpect(content().string(containsString("href=\"/terms\"")))
+                .andExpect(content().string(containsString("href=\"/privacy\"")));
+    }
+
+    @Test
+    void privacyPageExplainsGoogleCalendarAndLimitedUse() throws Exception {
+        mvc.perform(get("/privacy"))
+                .andExpect(content().string(containsString("nombre y teléfono del cliente")))
+                .andExpect(content().string(containsString("requisitos de uso limitado")));
     }
 }

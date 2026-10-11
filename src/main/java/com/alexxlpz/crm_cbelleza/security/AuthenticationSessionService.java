@@ -11,7 +11,7 @@ import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.stereotype.Service;
 
 /**
- * Inicia sesión de forma programática (tras registrarse) y actualiza los datos del usuario
+ * Inicia sesión de forma programática (tras registrarse o entrar con Google) y actualiza los datos del usuario
  * guardados en la sesión cuando cambian (nombre, centro).
  */
 @Service
@@ -20,11 +20,15 @@ public class AuthenticationSessionService {
     private final SecurityContextRepository securityContextRepository = new HttpSessionSecurityContextRepository();
 
     public void login(User user, HttpServletRequest request, HttpServletResponse response) {
+        login(AppUserDetails.from(user), request, response);
+    }
+
+    public void login(AppUserDetails principal, HttpServletRequest request, HttpServletResponse response) {
         // Evita la fijación de sesión: se genera un id nuevo al autenticar.
         if (request.getSession(false) != null) {
             request.changeSessionId();
         }
-        store(AppUserDetails.from(user), request, response);
+        store(principal, request, response);
     }
 
     public void refresh(User user, HttpServletRequest request, HttpServletResponse response) {

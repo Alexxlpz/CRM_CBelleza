@@ -51,6 +51,7 @@ public class NotificationService {
         }
         List<NotificationItem> notifications = new ArrayList<>(stockAlerts(centerId));
         List<Appointment> appointments = appointmentRepository.findByCenterIdOrderByDateTimeDesc(centerId);
+        notifications.addAll(clientResponseAlerts(appointments));
         notifications.addAll(appointmentAlerts(appointments));
         pendingCardsAlert(centerId, appointments).ifPresent(notifications::add);
         return notifications;
@@ -95,6 +96,31 @@ public class NotificationService {
             alerts.add(new NotificationItem(
                     "Tienes " + tomorrowCount + plural(tomorrowCount, " cita confirmada", " citas confirmadas") + " para mañana.",
                     "/worker/calendar?date=" + tomorrow));
+        }
+        return alerts;
+    }
+
+    /** Lo que han hecho los clientes en las últimas 24 h: aceptar o no una propuesta, anular una cita. */
+    private List<NotificationItem> clientResponseAlerts(List<Appointment> appointments) {
+        java.time.LocalDateTime since = java.time.LocalDateTime.now(clock).minusHours(24);
+        java.time.format.DateTimeFormatter when = java.time.format.DateTimeFormatter.ofPattern("dd/MM 'a las' HH:mm");
+        List<NotificationItem> alerts = new ArrayList<>();
+        for (Appointment app : appointments) {
+            if (app.getLastChange() == null || app.getLastChangeAt() == null || app.getLastChangeAt().isBefore(since)) {
+                continue;
+            }
+            String client = app.getClient() != null ? app.getClient().getName() : "Un cliente";
+            String url = "/worker/calendar?date=" + app.getDateTime().toLocalDate();
+            String message = switch (app.getLastChange()) {
+                case PROPOSAL_ACCEPTED -> client + " ha aceptado tu propuesta: " + app.getDateTime().format(when) + ".";
+                case PROPOSAL_DECLINED -> client + " no puede venir a ninguna de las horas que le propusiste.";
+                case CANCELLED_BY_CLIENT -> client + " ha anulado su cita del " + app.getDateTime().format(when) + ".";
+                case PROPOSAL_EXPIRED -> "La propuesta a " + client + " ha caducado sin respuesta.";
+                default -> null;
+            };
+            if (message != null) {
+                alerts.add(new NotificationItem(message, url));
+            }
         }
         return alerts;
     }

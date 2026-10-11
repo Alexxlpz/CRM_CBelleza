@@ -19,6 +19,12 @@ public class ApiExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", ex.getMessage()));
     }
 
+    /** La agenda reconoce el código y pregunta si se quiere guardar la cita fuera del horario. */
+    @ExceptionHandler(com.alexxlpz.crm_cbelleza.services.BookingService.OutsideOpeningHoursException.class)
+    public ResponseEntity<Map<String, String>> outsideHours(BusinessRuleException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("message", ex.getMessage(), "code", "OUTSIDE_HOURS"));
+    }
+
     @ExceptionHandler(BusinessRuleException.class)
     public ResponseEntity<Map<String, String>> businessRule(BusinessRuleException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("message", ex.getMessage()));

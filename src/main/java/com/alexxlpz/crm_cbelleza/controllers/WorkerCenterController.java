@@ -1,8 +1,10 @@
 package com.alexxlpz.crm_cbelleza.controllers;
 
+import com.alexxlpz.crm_cbelleza.booking.CenterTimeZones;
 import com.alexxlpz.crm_cbelleza.entities.User;
 import com.alexxlpz.crm_cbelleza.exceptions.BusinessRuleException;
 import com.alexxlpz.crm_cbelleza.forms.WorkerCenterForm;
+import com.alexxlpz.crm_cbelleza.googlecalendar.GoogleCalendarService;
 import com.alexxlpz.crm_cbelleza.security.AppUserDetails;
 import com.alexxlpz.crm_cbelleza.security.AuthenticationSessionService;
 import com.alexxlpz.crm_cbelleza.services.CenterService;
@@ -26,15 +28,18 @@ public class WorkerCenterController {
     private final UserService userService;
     private final TreatmentService treatmentService;
     private final AuthenticationSessionService authSession;
+    private final GoogleCalendarService googleCalendar;
 
     public WorkerCenterController(CenterService centerService,
                                   UserService userService,
                                   TreatmentService treatmentService,
-                                  AuthenticationSessionService authSession) {
+                                  AuthenticationSessionService authSession,
+                                  GoogleCalendarService googleCalendar) {
         this.centerService = centerService;
         this.userService = userService;
         this.treatmentService = treatmentService;
         this.authSession = authSession;
+        this.googleCalendar = googleCalendar;
     }
 
     @GetMapping("/worker/center")
@@ -44,6 +49,8 @@ public class WorkerCenterController {
         model.addAttribute("worker", userService.getUser(worker.getId()));
         model.addAttribute("treatmentsCount", treatmentService.countByCenter(centerId));
         model.addAttribute("workersCount", userService.countWorkersByCenter(centerId));
+        model.addAttribute("timeZones", CenterTimeZones.OPTIONS);
+        model.addAttribute("calendarSync", googleCalendar.status(worker.getId()));
         model.addAttribute("activePage", "center");
         return "worker/center";
     }

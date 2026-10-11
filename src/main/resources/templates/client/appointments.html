@@ -13,6 +13,8 @@
             <p>Estado y agenda de tus citas en Cuquora</p>
         </div>
 
+        <div th:replace="~{fragments/alerts :: flash}"></div>
+
         <div class="category-filter-bar" role="toolbar" aria-label="Filtrar citas por estado">
             <button type="button" class="category-pill active" data-filter="ALL" aria-pressed="true">
                 <i class="lucide-sparkles" aria-hidden="true"></i> Todas
@@ -23,11 +25,17 @@
             <button type="button" class="category-pill" data-filter="COMPLETED" aria-pressed="false">
                 <i class="lucide-check-circle-2" aria-hidden="true"></i> Completadas
             </button>
+            <button type="button" class="category-pill" data-filter="PROPOSED" aria-pressed="false">
+                <i class="lucide-calendar-clock" aria-hidden="true"></i> Propuestas
+            </button>
             <button type="button" class="category-pill" data-filter="PENDING" aria-pressed="false">
                 <i class="lucide-hourglass" aria-hidden="true"></i> Pendientes
             </button>
             <button type="button" class="category-pill" data-filter="REJECTED" aria-pressed="false">
                 <i class="lucide-x-circle" aria-hidden="true"></i> Rechazadas
+            </button>
+            <button type="button" class="category-pill" data-filter="CANCELLED" aria-pressed="false">
+                <i class="lucide-ban" aria-hidden="true"></i> Anuladas
             </button>
         </div>
 

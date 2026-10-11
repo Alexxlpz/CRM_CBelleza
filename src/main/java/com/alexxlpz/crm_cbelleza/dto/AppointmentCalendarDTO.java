@@ -20,6 +20,20 @@ public class AppointmentCalendarDTO {
     private ClientDTO client;
     private WorkerDTO worker;
     private TreatmentDTO treatment;
+    /** Hora anterior si el centro la movió. */
+    private String previousDateTime;
+    /** Horas propuestas al cliente (solo en citas PROPOSED). */
+    private java.util.List<ProposalDTO> proposals;
+    private String proposalExpiresAt;
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ProposalDTO {
+        private Long id;
+        private String dateTime;
+    }
 
     @Data
     @Builder

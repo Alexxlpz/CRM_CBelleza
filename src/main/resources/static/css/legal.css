@@ -231,6 +231,12 @@
     white-space: nowrap;          /* el nombre de la cookie nunca se parte */
 }
 
+/* Tablas de texto (p. ej. finalidades en Privacidad): la primera columna sí hace salto de línea.
+   En móvil cada celda lleva su texto en un <span> para que la rejilla etiqueta/valor no lo parta. */
+.legal-table--text td:first-child {
+    white-space: normal;
+}
+
 .legal-tag {
     display: inline-block;
     padding: 2px 10px;

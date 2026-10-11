@@ -17,6 +17,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     List<User> findByCenterIdAndRole(Long centerId, Role role);
 
+    Optional<User> findByIdAndCenterIdAndRole(Long id, Long centerId, Role role);
+
     long countByCenterIdAndRole(Long centerId, Role role);
 
     @EntityGraph(attributePaths = {"center"})
@@ -26,6 +28,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByNameIgnoreCase(String name);
 
     Optional<User> findByPhone(String phone);
+
+    @EntityGraph(attributePaths = {"center"})
+    Optional<User> findByGoogleId(String googleId);
 
     @EntityGraph(attributePaths = {"center"})
     Optional<User> findWithCenterById(Long id);

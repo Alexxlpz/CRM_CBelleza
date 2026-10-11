@@ -63,6 +63,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                 .email("centro@cbelleza.com")
                 .latitude(40.4168)
                 .longitude(-3.7038)
+                .cabins(2)
                 .build();
         Center c2 = Center.builder()
                 .name("Plaza Norte")
@@ -87,6 +88,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                 .email("lascondes@cbelleza.com")
                 .latitude(-33.4000)
                 .longitude(-70.5667)
+                .timeZone("America/Santiago")
                 .build();
         centerRepository.saveAll(Arrays.asList(c1, c2, c3, c4));
 

@@ -1,7 +1,6 @@
 package com.alexxlpz.crm_cbelleza.services;
 
 import com.alexxlpz.crm_cbelleza.booking.ClientVisitAnalyzer;
-import com.alexxlpz.crm_cbelleza.booking.OpeningHoursPolicy;
 import com.alexxlpz.crm_cbelleza.dto.AppointmentCalendarDTO;
 import com.alexxlpz.crm_cbelleza.entities.Appointment;
 import com.alexxlpz.crm_cbelleza.entities.AppointmentStatus;
@@ -11,9 +10,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.IntStream;
 
 /** Consultas de citas (solo lectura). Los cambios de estado están en {@link BookingService}. */
 @Service
@@ -26,23 +26,44 @@ public class AppointmentService {
     private final AppointmentRepository appointmentRepository;
     private final ClientVisitAnalyzer visitAnalyzer;
     private final AppointmentCalendarMapper calendarMapper;
-    private final OpeningHoursPolicy openingHours;
     private final Clock clock;
 
     public AppointmentService(AppointmentRepository appointmentRepository,
                               ClientVisitAnalyzer visitAnalyzer,
                               AppointmentCalendarMapper calendarMapper,
-                              OpeningHoursPolicy openingHours,
                               Clock clock) {
         this.appointmentRepository = appointmentRepository;
         this.visitAnalyzer = visitAnalyzer;
         this.calendarMapper = calendarMapper;
-        this.openingHours = openingHours;
         this.clock = clock;
     }
 
+    /**
+     * Citas del cliente para «Mis Citas»: primero las próximas, de la más cercana a la más lejana, y después
+     * las pasadas, de la más reciente a la más antigua. En las que tienen propuesta abierta se cargan ya las
+     * horas propuestas (las pinta la vista).
+     */
     public List<Appointment> getClientAppointments(Long clientId) {
-        return appointmentRepository.findByClientIdOrderByDateTimeDesc(clientId);
+        List<Appointment> appointments = appointmentRepository.findByClientIdOrderByDateTimeDesc(clientId);
+        appointments.stream()
+                .filter(app -> app.getStatus() == AppointmentStatus.PROPOSED)
+                .forEach(app -> app.getProposals().size());
+        LocalDateTime now = LocalDateTime.now(clock);
+        List<Appointment> ordered = new ArrayList<>(appointments.stream()
+                .filter(app -> !app.getDateTime().isBefore(now))
+                .sorted(Comparator.comparing(Appointment::getDateTime))
+                .toList());
+        appointments.stream()
+                .filter(app -> app.getDateTime().isBefore(now))
+                .forEach(ordered::add);
+        return ordered;
+    }
+
+    /** Una cita del centro en el formato de la agenda (respuesta de las acciones de la agenda). */
+    public AppointmentCalendarDTO getCalendarAppointment(Long centerId, Long appointmentId) {
+        Appointment appointment = appointmentRepository.findByIdAndCenterId(appointmentId, centerId)
+                .orElseThrow(() -> new com.alexxlpz.crm_cbelleza.exceptions.ResourceNotFoundException("La cita no existe en tu centro."));
+        return calendarMapper.toDto(appointment);
     }
 
     public long countClientAppointments(Long clientId) {
@@ -69,18 +90,5 @@ public class AppointmentService {
 
     public boolean hasVisitedCenter(Long centerId, Long clientId) {
         return appointmentRepository.existsByCenterIdAndClientIdAndStatusIn(centerId, clientId, VISIT_STATUSES);
-    }
-
-    /** Franjas ocupadas (inicio de cada bloque) por citas confirmadas futuras. Usado por el selector de hora. */
-    public List<String> getOccupiedSlots(Long centerId) {
-        int slot = openingHours.slotMinutes();
-        return appointmentRepository.findByCenterIdAndStatusInAndDateTimeAfterOrderByDateTimeAsc(
-                        centerId, List.of(AppointmentStatus.CONFIRMED), LocalDateTime.now(clock)).stream()
-                .flatMap(app -> {
-                    int blocks = (int) Math.ceil(app.getTreatment().getDuration() / (double) slot);
-                    return IntStream.range(0, blocks)
-                            .mapToObj(i -> app.getDateTime().plusMinutes((long) i * slot).toString());
-                })
-                .toList();
     }
 }

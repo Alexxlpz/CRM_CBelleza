@@ -36,8 +36,14 @@
                 </div>
 
                 <div class="settings-section">
-                    <h2 class="settings-section-title"><i class="lucide-key-round" aria-hidden="true"></i> Cambiar Contraseña <span class="settings-optional">(Opcional)</span></h2>
-                    <p class="settings-section-text">Déjalo en blanco si no deseas cambiar tu contraseña actual.</p>
+                    <th:block th:if="${hasPassword}">
+                        <h2 class="settings-section-title"><i class="lucide-key-round" aria-hidden="true"></i> Cambiar Contraseña <span class="settings-optional">(Opcional)</span></h2>
+                        <p class="settings-section-text">Déjalo en blanco si no deseas cambiar tu contraseña actual.</p>
+                    </th:block>
+                    <th:block th:unless="${hasPassword}">
+                        <h2 class="settings-section-title"><i class="lucide-key-round" aria-hidden="true"></i> Añadir Contraseña <span class="settings-optional">(Opcional)</span></h2>
+                        <p class="settings-section-text">Ahora entras con Google. Añade una contraseña si quieres iniciar sesión también con tu correo.</p>
+                    </th:block>
                     <div class="settings-grid">
                     <div>
                         <label for="newPassword" class="form-label">Nueva Contraseña</label>
