@@ -42,7 +42,7 @@
                 <div class="sidebar-title">Roles del Sistema</div>
                 <ul class="sidebar-nav">
                     <li><a href="#introduccion-roles" class="active">Introducción a los Roles</a></li>
-                    <li><a href="#rol-cliente">1. Rol Cliente (Registrado e Invitado)</a></li>
+                    <li><a href="#rol-cliente">1. Rol Cliente</a></li>
                     <li><a href="#rol-trabajador">2. Rol Especialista / Trabajador</a></li>
                     <li><a href="#rol-administrador">3. Rol Administrador / Gestor</a></li>
                     <li><a href="#resumen-comparativo">Resumen Comparativo de Experiencia</a></li>
@@ -94,7 +94,7 @@
                 </div>
 
                 <p>
-                    El cliente disfruta de una experiencia moderna, segura y fluida. Para garantizar la integridad de las fichas clínicas, preferencias estéticas y trazabilidad de turnos, el sistema <strong>requiere disponer de una cuenta de usuario</strong> (creación inmediata en <code>/register</code> con contraseña cifrada en BCrypt), permitiéndole gestionar sus reservas desde cualquier dispositivo.
+                    El cliente disfruta de una experiencia moderna, segura y fluida. Para garantizar la integridad de las fichas clínicas, preferencias estéticas y trazabilidad de turnos, el sistema <strong>requiere disponer de una cuenta de usuario</strong>: se crea en <code>/register</code> con contraseña (cifrada con BCrypt) o con el botón <strong>«Continuar con Google»</strong>. Si el centro ya le había dado de alta a mano con ese correo, al registrarse completa esa misma cuenta en lugar de crear otra. Con «Recordar mi sesión» el dispositivo mantiene la sesión 14 días.
                 </p>
 
                 <div class="step-list">
@@ -102,9 +102,9 @@
                     <div class="step-card">
                         <div class="step-num">1</div>
                         <div class="step-body">
-                            <h4>Exploración y Filtrado de Centros (/client/centers)</h4>
+                            <h4>Buscar un Centro (/centers)</h4>
                             <p>
-                                El cliente accede a la cartelera de centros de belleza. Puede utilizar la barra de búsqueda por ciudad, calle o barrio (ej. <em>"Madrid"</em> o <em>"Barcelona"</em>). La plataforma muestra la dirección exacta, teléfono de contacto y el botón <strong>"Ver Centro"</strong>.
+                                La página de centros es pública: tarjetas con los centros y un mapa (OpenStreetMap). Se puede buscar por nombre (con filtros avanzados) y, si el navegador comparte la ubicación, cada centro muestra a cuántos kilómetros está. Al tocar un marcador del mapa se abre un globo con nombre, dirección, distancia y <strong>«Ver tratamientos»</strong>; si no hay sesión, al pulsarlo se va al login y después se vuelve a ese centro.
                             </p>
                         </div>
                     </div>
@@ -113,15 +113,15 @@
                     <div class="step-card">
                         <div class="step-num">2</div>
                         <div class="step-body">
-                            <h4>Inspección de la Carta de Tratamientos (/client/centers/{id})</h4>
+                            <h4>Ver los Tratamientos del Centro (/client/centers/{id})</h4>
                             <p>
-                                Al entrar a la ficha del centro, se presenta un banner corporativo con la información del salón y la lista categorizada de tratamientos disponibles:
+                                La ficha del centro muestra su información, el horario de reservas y la lista de tratamientos:
                             </p>
                             <ul class="text-secondary" style="margin-left: 1.5rem; margin-bottom: 0.8rem;">
-                                <li><strong>Nombre y Descripción:</strong> Especifica los beneficios cosméticos y el procedimiento (ej. <em>"Manicura Rusa & Semipermanente"</em>).</li>
-                                <li><strong>Duración estimada:</strong> 30, 45, 60, 75 o 120 minutos (clave para el cálculo de turnos).</li>
-                                <li><strong>Tarifa clara en Euros (€):</strong> Precios transparentes sin costes ocultos.</li>
-                                <li><strong>Insignias de especialidad:</strong> Píldoras visuales (Facial, Masajes, Peluquería, etc.).</li>
+                                <li><strong>Nombre y descripción</strong> del tratamiento.</li>
+                                <li><strong>Duración</strong> en minutos (decide cuántos huecos ocupa).</li>
+                                <li><strong>Precio</strong> en euros.</li>
+                                <li><strong>Categoría:</strong> manicura y pedicura, facial, corporal, masajes, peluquería, depilación u otro.</li>
                             </ul>
                         </div>
                     </div>
@@ -130,15 +130,14 @@
                     <div class="step-card">
                         <div class="step-num">3</div>
                         <div class="step-body">
-                            <h4>Selección Interactiva de Turno Horario (Modal de Reserva)</h4>
+                            <h4>Elegir Día y Hora</h4>
                             <p>
-                                Al pulsar en <strong>"Reservar"</strong> sobre cualquier tratamiento:
+                                Al pulsar <strong>«Reservar»</strong> se abre el selector de fecha y hora:
                             </p>
                             <ol class="text-secondary" style="margin-left: 1.5rem; margin-bottom: 0.8rem;">
-                                <li>Se abre el modal interactivo con el calendario de fechas disponibles.</li>
-                                <li>El sistema contacta con el motor de disponibilidad (<code>/api/centers/{id}/availability</code>) y calcula los slots de 30 minutos.</li>
-                                <li>Los intervalos que ya han sido confirmados por otros clientes o los tramos fuera del horario laboral (09:00 a 20:00) quedan deshabilitados automáticamente.</li>
-                                <li>El cliente pulsa sobre la hora deseada que se ilumina en tono dorado/champagne.</li>
+                                <li>El selector consulta <code>/api/centers/{id}/availability</code>: horario (de lunes a viernes, de 9 a 20 h, huecos de 30 min), días cerrados y horas llenas.</li>
+                                <li>Una hora está llena si no queda cabina libre o ningún profesional disponible (por otra cita, un bloqueo o una hora propuesta a otro cliente).</li>
+                                <li>El cliente elige la hora y confirma. La solicitud queda <span class="card-badge badge-admin">PENDIENTE</span> hasta que el centro responda, y el cliente recibe un correo.</li>
                             </ol>
                         </div>
                     </div>
@@ -147,10 +146,15 @@
                     <div class="step-card">
                         <div class="step-num">4</div>
                         <div class="step-body">
-                            <h4>Confirmación con Cuenta Registrada</h4>
-                            <p>
-                                El cliente autenticado confirma la reserva asociando automáticamente su identidad (<code>sessionUserId</code>). Al pulsar <strong>"Confirmar Reserva"</strong>, la solicitud ingresa al sistema con estado <span class="card-badge badge-admin">PENDIENTE</span> para la revisión del especialista del centro.
-                            </p>
+                            <h4>Respuesta del Centro</h4>
+                            <p>El centro puede:</p>
+                            <ul class="text-secondary" style="margin-left: 1.5rem;">
+                                <li><strong>Aceptar</strong> la cita: pasa a <span class="card-badge badge-client">CONFIRMADA</span>.</li>
+                                <li><strong>Rechazarla</strong>, con un mensaje para el cliente.</li>
+                                <li><strong>Proponer otras horas</strong> (de 1 a 3). El cliente elige una en «Mis Citas» o responde que ninguna le viene bien. La propuesta caduca a las 48 h o 2 h antes de la primera hora propuesta.</li>
+                                <li><strong>Cambiar la hora</strong> de una cita ya confirmada (el cliente ve «antes: …») o <strong>anularla</strong>.</li>
+                            </ul>
+                            <p>Cada cambio llega por correo y a la campana. Un día antes se envía un recordatorio.</p>
                         </div>
                     </div>
 
@@ -158,14 +162,13 @@
                     <div class="step-card">
                         <div class="step-num">5</div>
                         <div class="step-body">
-                            <h4>Seguimiento en "Mis Citas" (/client/appointments)</h4>
-                            <p>
-                                En esta pantalla, el cliente consulta todas sus reservas activas e históricas:
-                            </p>
+                            <h4>«Mis Citas» y la Campana (/client/appointments)</h4>
                             <ul class="text-secondary" style="margin-left: 1.5rem;">
-                                <li><strong>Filtros rápidos (Filter Pills):</strong> Puede alternar entre <em>"Todas"</em>, <em>"Pendientes"</em>, <em>"Confirmadas"</em> o <em>"Rechazadas"</em>.</li>
-                                <li><strong>Identificación unificada:</strong> Visualización directa del estado del turno en tiempo real sin necesidad de introducir teléfonos manuales.</li>
-                                <li><strong>Notas del especialista:</strong> Si la cita fue confirmada o rechazada, el cliente puede leer la nota personalizada dejada por el terapeuta (ej. <em>"Cliente habitual, usar esmalte hipoalergénico"</em>).</li>
+                                <li><strong>Filtros por estado</strong> y tarjeta de cada cita con el mensaje del profesional.</li>
+                                <li><strong>Elegir una hora propuesta</strong> o rechazar la propuesta.</li>
+                                <li><strong>Anular</strong> una cita futura (se avisa al centro).</li>
+                                <li><strong>Campana:</strong> citas de hoy y mañana y cambios hechos por el centro en los últimos 7 días. Al abrirla se marcan como vistos.</li>
+                                <li><strong>Mi Perfil</strong> (<code>/client/profile</code>): datos personales, cambiar la contraseña o añadir una si la cuenta es solo de Google.</li>
                             </ul>
                         </div>
                     </div>
@@ -175,7 +178,7 @@
                     <div class="callout-icon">💡</div>
                     <div class="callout-content">
                         <strong>Prevención de Solapamientos Garantizada:</strong>
-                        <p>El cliente nunca experimentará una cita duplicada. Si un servicio dura 60 minutos, el sistema bloquea dos franjas consecutivas de 30 minutos en la cabina física del centro.</p>
+                        <p>Si un servicio dura 60 minutos, ocupa dos huecos seguidos de 30 minutos. El centro nunca tiene más citas a la vez que cabinas ni que profesionales libres, y un profesional no puede tener dos citas a la vez.</p>
                     </div>
                 </div>
             </section>
@@ -194,7 +197,7 @@
                 </div>
 
                 <p>
-                    El especialista es el motor operativo del salón de belleza. Al iniciar sesión con sus credenciales (en el entorno de desarrollo, p. ej. la cuenta demo <code>carlos@cbelleza.com</code>), el sistema carga en sesión el centro asignado al trabajador (ej. <em>Centro Histórico</em>), adaptando toda la interfaz a esa sucursal física.
+                    El especialista es el motor operativo del salón de belleza. Al iniciar sesión con sus credenciales (en el entorno de desarrollo, p. ej. la cuenta demo <code>carlos@cbelleza.com</code>), el sistema carga en sesión el centro asignado al trabajador (ej. <em>Centro Histórico</em>), adaptando toda la interfaz a esa sucursal física. Nunca puede ver datos de otro centro, y si intenta ver un centro como cliente le aparece un aviso con enlace a su panel. En escritorio, tratamientos, inventario y clientes ocupan todo el ancho, con una franja de resumen y el selector <strong>Tarjetas / Lista</strong>.
                 </p>
 
                 <div class="grid-2">
@@ -216,27 +219,29 @@
                     <!-- Agenda / Calendario -->
                     <div class="card-feature">
                         <div class="card-feature-header">
-                            <span class="card-badge badge-worker">Agenda Diaria</span>
+                            <span class="card-badge badge-worker">Agenda</span>
                         </div>
-                        <h4>2. Calendario de Turnos (/worker/calendar)</h4>
-                        <p>Visualización interactiva de la jornada de trabajo:</p>
+                        <h4>2. Agenda (/worker/calendar)</h4>
+                        <p>Dos vistas con el selector <strong>Mes / Semana</strong> (se recuerda la última elegida):</p>
                         <ul class="text-secondary" style="margin-left: 1.25rem; font-size: 0.88rem; margin-bottom: 0.8rem;">
-                            <li><strong>Selector de fecha:</strong> Navegación por días mediante pestañas táctiles.</li>
-                            <li><strong>Franjas horarias ocupadas:</strong> Bloques con hora de inicio y fin.</li>
-                            <li><strong>Ficha de cita:</strong> Nombre del cliente registrado, teléfono de contacto, servicio requerido y notas anteriores.</li>
+                            <li><strong>Mes:</strong> calendario mensual y lista de citas del día elegido.</li>
+                            <li><strong>Semana:</strong> rejilla de lunes a domingo; cada cita es un bloque del alto de su duración, coloreado por estado. Las horas propuestas salen en azul discontinuo, los bloqueos rayados y una línea roja marca la hora actual. En móvil es una lista por días.</li>
+                            <li>Al pulsar una cita se abre su ficha: cliente, teléfono, tratamiento y acciones.</li>
                         </ul>
                     </div>
 
                     <!-- Gestión de Citas -->
                     <div class="card-feature">
                         <div class="card-feature-header">
-                            <span class="card-badge badge-worker">Acciones Operativas</span>
+                            <span class="card-badge badge-worker">Organizar la agenda</span>
                         </div>
-                        <h4>3. Aprobar y Rechazar Citas</h4>
-                        <p>Control riguroso de cada solicitud de turno:</p>
+                        <h4>3. Gestionar Citas</h4>
                         <ul class="text-secondary" style="margin-left: 1.25rem; font-size: 0.88rem; margin-bottom: 0.8rem;">
-                            <li><strong>Aprobar Cita:</strong> El trabajador se autoasigna como especialista responsable de la cita e introduce opcionalmente una nota de preparación. La cita pasa a estado <span class="card-badge badge-client">CONFIRMADA</span>.</li>
-                            <li><strong>Rechazar Cita:</strong> En caso de indisponibilidad física o mantenimiento de cabina, pulsa "Rechazar" y detalla el motivo para información del cliente.</li>
+                            <li><strong>Solicitud pendiente:</strong> Aceptar (eligiendo profesional), Rechazar con un mensaje u <strong>«Otra hora»</strong> (propone de 1 a 3 horas).</li>
+                            <li><strong>«Nueva cita»</strong> (botón de la barra o pulsar un hueco libre de la semana): cliente de la cartera o uno nuevo, tratamiento, día, hora y profesional. Nace confirmada.</li>
+                            <li><strong>Cita confirmada futura:</strong> «Cambiar hora» (y profesional) o «Anular». En escritorio también se puede arrastrar en la vista semana.</li>
+                            <li><strong>«Bloquear horario»:</strong> vacaciones o descansos de un profesional, o cierre del centro. No se puede bloquear un periodo con citas confirmadas.</li>
+                            <li>Fuera del horario de reservas la app pregunta si guardar igualmente; los solapes nunca se permiten.</li>
                         </ul>
                     </div>
 
@@ -250,6 +255,7 @@
                         <ul class="text-secondary" style="margin-left: 1.25rem; font-size: 0.88rem; margin-bottom: 0.8rem;">
                             <li><strong>Semáforos de stock:</strong> Estado Óptimo (verde), Bajo Stock ≤ 3 uds (amarillo) y Agotado = 0 uds (rojo).</li>
                             <li><strong>Ajustes en 1 clic:</strong> Botones <code>+</code> y <code>-</code> para registrar consumos de cabina en tiempo real.</li>
+                            <li><strong>Resumen y filtros:</strong> productos, unidades, bajo stock y agotados; filtros por categoría y vista Lista por defecto en escritorio.</li>
                             <li><strong>Modal de Añadir Producto:</strong> Permite incorporar existencias de productos ya catalogados o crear un producto nuevo.</li>
                         </ul>
                     </div>
@@ -265,7 +271,7 @@
                         <ul class="text-secondary" style="margin-left: 1.5rem;">
                             <li><strong>Nombre y Descripción:</strong> Procedimiento técnico y beneficios.</li>
                             <li><strong>Precio (€) y Duración (minutos):</strong> Determina el tiempo exacto que reservará el algoritmo.</li>
-                            <li><strong>Tipología:</strong> Selector con las categorías autorizadas (<code>FACIAL</code>, <code>CORPORAL</code>, <code>DEPILACION</code>, <code>MANICURA_PEDICURA</code>, <code>MASAJES</code>, <code>PELUQUERIA</code>).</li>
+                            <li><strong>Tipología:</strong> Selector con las categorías autorizadas (<code>FACIAL</code>, <code>CORPORAL</code>, <code>DEPILACION</code>, <code>MANICURA_PEDICURA</code>, <code>MASAJES</code>, <code>PELUQUERIA</code>, <code>OTRO</code>).</li>
                         </ul>
                     </div>
                 </div>
@@ -277,6 +283,28 @@
                         <p>
                             En la barra superior de navegación, el especialista dispone de una campana de alertas inteligentes alimentada por <code>NotificationService</code>. Si se detecta un insumo agotado o solicitudes de citas pendientes para hoy o mañana, se muestra un indicador visual. Al hacer clic en la alerta, la aplicación redirige de forma automática al día exacto del calendario o a la pantalla de inventario.
                         </p>
+                    </div>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-num">7</div>
+                    <div class="step-body">
+                        <h4>Cartera de Clientes y Fichas (/worker/clients)</h4>
+                        <p>
+                            Lista de clientes del centro con buscador y resumen (total, fichas al día, pendientes y citas). La etiqueta «Registrado» indica que el cliente tiene cuenta. Desde aquí se da de alta un cliente a mano (también desde «Nueva cita»), se rellena su ficha técnica y se configuran los campos de la ficha del centro. El alta manual solo reutiliza clientes que ya son del centro; nunca enlaza cuentas de otros centros.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-num">8</div>
+                    <div class="step-body">
+                        <h4>Mi Centro (/worker/center)</h4>
+                        <ul class="text-secondary" style="margin-left: 1.5rem;">
+                            <li>Datos del centro, <strong>zona horaria</strong> (la usan las reservas y Google Calendar) y número de <strong>cabinas</strong> (citas a la vez, de 1 a 50).</li>
+                            <li>Datos personales y contraseña del trabajador.</li>
+                            <li>Interruptor <strong>«Guardar mis citas en Google Calendar»</strong>: el trabajador da permiso con la cuenta de Google que quiera y Cuquora crea un calendario «Cuquora» donde mantiene sus citas confirmadas. Si faltan las claves de Google en el servidor, sale apagado con «Próximamente».</li>
+                        </ul>
                     </div>
                 </div>
             </section>
@@ -305,15 +333,19 @@
                     </div>
                     <div class="card-feature">
                         <h4>🔐 Cifrado y Seguridad de Acceso</h4>
-                        <p>Todas las contraseñas están securizadas con el algoritmo <strong>BCrypt</strong> mediante <code>PasswordEncoder</code>. Ninguna credencial se almacena en texto plano en la base de datos PostgreSQL.</p>
+                        <p>Spring Security con contraseñas cifradas con <strong>BCrypt</strong>, protección CSRF y cierre de sesión por POST. Login con Google opcional y «Recordar mi sesión» con tokens que se borran al cerrar sesión o cambiar la contraseña. Los secretos del servidor van en el fichero <code>.env</code>, fuera del repositorio.</p>
                     </div>
                     <div class="card-feature">
                         <h4>👥 Gestión de Especialistas</h4>
                         <p>Asignación de trabajadores cualificados a cada centro de trabajo mediante la clave foránea <code>center_id</code> en la tabla <code>users</code>. Un especialista solo gestiona citas de su sede designada.</p>
                     </div>
                     <div class="card-feature">
+                        <h4>📜 Páginas Legales</h4>
+                        <p>Términos (<code>/terms</code>), Privacidad (<code>/privacy</code>) y Cookies (<code>/cookies</code>), enlazadas desde el pie de todas las páginas, con los datos del titular que exige la LSSI configurables por variables de entorno. Aviso de cookies informativo (solo hay cookies técnicas).</p>
+                    </div>
+                    <div class="card-feature">
                         <h4>🧪 Selector de Demostración (/login-selector)</h4>
-                        <p>Herramienta diseñada para demostraciones ante clientes e inversores: permite conmutar la sesión en un clic a cualquier cliente, trabajador o centro sin requerir memorizar contraseñas.</p>
+                        <p>Herramienta para demostraciones: permite entrar como cualquier cliente o trabajador sin contraseña. Solo existe con el perfil <code>dev</code>; en producción no está.</p>
                     </div>
                 </div>
             </section>
@@ -335,7 +367,7 @@
                         <thead>
                             <tr>
                                 <th>Dimensión</th>
-                                <th>Cliente / Invitado</th>
+                                <th>Cliente</th>
                                 <th>Especialista / Trabajador</th>
                                 <th>Director / Administrador</th>
                             </tr>
@@ -349,20 +381,20 @@
                             </tr>
                             <tr>
                                 <td><strong>Punto de Entrada</strong></td>
-                                <td>Landing page pública y buscador de centros (<code>/client/centers</code>).</td>
+                                <td>Página de inicio pública y buscador de centros con mapa (<code>/centers</code>).</td>
                                 <td>Inicio de sesión seguro (<code>/login</code>) al Dashboard de cabina.</td>
                                 <td>Panel integral o selector de perfiles de demostración (<code>/login-selector</code>).</td>
                             </tr>
                             <tr>
                                 <td><strong>Nivel de Autenticación</strong></td>
-                                <td>Obligatoria (registro con email, teléfono y contraseña BCrypt).</td>
-                                <td>Obligatoria (email/nombre y contraseña encriptada).</td>
+                                <td>Obligatoria (registro con correo y contraseña, o con Google).</td>
+                                <td>Obligatoria (correo o nombre y contraseña, o Google con el mismo correo).</td>
                                 <td>Obligatoria con privilegios de gestión de centro.</td>
                             </tr>
                             <tr>
                                 <td><strong>Gestión de Citas</strong></td>
-                                <td>Solicitud de turnos y visualización de estado en tiempo real.</td>
-                                <td>Aprobación, rechazo, notas técnicas y asignación personal.</td>
+                                <td>Pedir cita, elegir entre horas propuestas, anular y recibir avisos por correo y campana.</td>
+                                <td>Aceptar, rechazar, proponer otras horas, crear, mover y anular citas, y bloquear horario.</td>
                                 <td>Supervisión de métricas de puntualidad y ausencia de solapes.</td>
                             </tr>
                             <tr>

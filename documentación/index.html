@@ -76,15 +76,15 @@
                 <div class="hero-meta-row">
                     <div class="hero-meta-item">
                         <span>Tecnología:</span>
-                        <strong>Spring Boot 3 + PostgreSQL + Docker</strong>
+                        <strong>Java 21 + Spring Boot 4.1 + PostgreSQL 16 + Docker</strong>
                     </div>
                     <div class="hero-meta-item">
                         <span>Interfaz:</span>
-                        <strong>Thymeleaf + CSS3 Lux Glassmorphism</strong>
+                        <strong>Thymeleaf + CSS propio con modo oscuro + JS sin framework</strong>
                     </div>
                     <div class="hero-meta-item">
                         <span>Seguridad:</span>
-                        <strong>BCrypt Encryption + Session Guard</strong>
+                        <strong>Spring Security (BCrypt, CSRF, Google OpenID) + aislamiento por centro</strong>
                     </div>
                 </div>
             </section>
@@ -137,7 +137,7 @@
                         </div>
                         <h3>3. Evolución del Proyecto</h3>
                         <p>
-                            Crónica detallada del proceso de desarrollo apoyada en los <strong>commits de Git</strong> y el paso de los prototipos de <strong>Figma</strong> al código: hitos Beta 1 y Beta 2, modularización de CSS, algoritmo de citas y dockerización.
+                            Crónica detallada del proceso de desarrollo apoyada en los <strong>commits de Git</strong> y el paso de los prototipos de <strong>Figma</strong> al código: hitos Beta 1 y Beta 2, modularización de CSS, algoritmo de citas, dockerización, Spring Security, Flyway, login con Google y agenda flexible.
                         </p>
                         <a href="evolucion-proyecto.html" style="font-weight: 600; display: inline-flex; align-items: center; gap: 0.4rem;">
                             Ver Historial de Commits & Figma →
@@ -159,7 +159,7 @@
                 </div>
 
                 <p>
-                    Cuquora CRM implementa una arquitectura monolítica modular diseñada para alta cohesión y bajo acoplamiento. Se compone de un motor Spring Boot 3.3 ejecutándose sobre Java 17/21, persistencia relacional con JPA/Hibernate, motor de plantillas server-side Thymeleaf enriquecido con componentes interactivos JavaScript y estilos CSS desacoplados.
+                    Cuquora CRM implementa una arquitectura monolítica modular diseñada para alta cohesión y bajo acoplamiento. Se compone de Spring Boot 4.1 sobre Java 21 con Spring Security, persistencia relacional con JPA/Hibernate y esquema versionado con Flyway, plantillas Thymeleaf en el servidor con JavaScript sin framework y estilos CSS propios a partir de unos tokens de diseño.
                 </p>
 
                 <div class="table-responsive">
@@ -174,28 +174,38 @@
                         <tbody>
                             <tr>
                                 <td><strong>Presentación / Vistas</strong></td>
-                                <td><code>Thymeleaf</code>, HTML5 Semántico, CSS3 Vanilla modular</td>
-                                <td>Renderizado dinámico de vistas responsivas, modales unificados, selector de franjas horarias y layout adaptativo.</td>
+                                <td><code>Thymeleaf</code>, HTML5 semántico, CSS propio (<code>tokens.css</code> + <code>common.css</code> + uno por área), iconos Lucide servidos en local, Leaflet + OpenStreetMap</td>
+                                <td>Vistas responsivas con modo oscuro, vistas Tarjetas/Lista en escritorio, agenda Mes/Semana, mapa de centros y diálogos propios (<code>Cuquora.confirm</code>/<code>Cuquora.alert</code>).</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Seguridad</strong></td>
+                                <td><code>SecurityConfig</code>, <code>AppUserDetailsService</code>, <code>GoogleOidcUserService</code>, <code>JdbcRememberMeTokenRepository</code></td>
+                                <td>Login por formulario o con Google, «Recordar mi sesión» 14 días, CSRF, rutas por rol (<code>/client/**</code>, <code>/worker/**</code>) y 404 propia también sin sesión.</td>
                             </tr>
                             <tr>
                                 <td><strong>Controladores Web & API</strong></td>
-                                <td><code>BaseController</code>, <code>AppointmentController</code>, <code>InventoryController</code>, <code>CenterApiController</code></td>
-                                <td>Gestión de peticiones HTTP, validación de parámetros, orquestación de sesión HTTP y exposición de endpoints REST JSON con cálculo geográfico Haversine.</td>
+                                <td>Un controlador por área: <code>ClientBookingController</code>, <code>WorkerCalendarController</code>, <code>WorkerAppointmentApiController</code>, <code>InventoryController</code>, <code>ClientCardController</code>, <code>CenterApiController</code>…</td>
+                                <td>Controladores finos: reciben el formulario (<code>record</code>), llaman al servicio y eligen la vista. Los endpoints JSON (<code>@ApiEndpoint</code>) devuelven los errores también en JSON.</td>
                             </tr>
                             <tr>
                                 <td><strong>Lógica de Negocio (Servicios)</strong></td>
-                                <td><code>AppointmentService</code>, <code>InventoryService</code>, <code>TreatmentService</code>, <code>UserService</code>, <code>NotificationService</code>, <code>EmailService</code></td>
-                                <td>Validación matemática de disponibilidad de cabinas (intervalos de 30 min), prevención de roturas de stock, emisión de alertas proactivas, encriptación BCrypt y canal de comunicación por correo transaccional (Spring Mail / EmailJS).</td>
+                                <td><code>BookingService</code>, <code>AgendaAvailabilityService</code>, <code>AgendaBlockService</code>, <code>ClientCardService</code>, <code>InventoryService</code>, <code>UserService</code>, <code>ClientNotificationService</code></td>
+                                <td>Toda la validación vive aquí y lanza <code>BusinessRuleException</code> (mensaje en español) o <code>ResourceNotFoundException</code> (404). <code>BookingService</code> concentra todos los cambios de cita con bloqueo por centro.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Integraciones</strong></td>
+                                <td><code>mail/</code> (<code>EmailGateway</code>, <code>AppointmentMailService</code>), <code>googlecalendar/</code>, <code>scheduler/</code></td>
+                                <td>Correos de citas y contacto por SMTP (Brevo) o por consola; sincronización con Google Calendar en segundo plano tras cada cambio de cita (<code>AppointmentChangedEvent</code>); tarea cada 60 s que completa citas pasadas, caduca propuestas y envía recordatorios.</td>
                             </tr>
                             <tr>
                                 <td><strong>Acceso a Datos (Repositorios)</strong></td>
-                                <td><code>Spring Data JPA</code>, <code>CrudRepository</code> / <code>JpaRepository</code></td>
-                                <td>Consultas JPQL optimizadas para búsqueda espacial, filtrado por centro, ordenación cronológica y transacciones atómicas (<code>@Transactional</code>).</td>
+                                <td><code>Spring Data JPA</code></td>
+                                <td>Consultas por centro (<code>findByIdAndCenterId</code>) y <code>@EntityGraph</code> para evitar consultas N+1; <code>open-in-view</code> desactivado.</td>
                             </tr>
                             <tr>
                                 <td><strong>Persistencia & Datos</strong></td>
-                                <td><code>PostgreSQL 16</code> (Producción / Docker) o <code>H2 Database</code> (Desarrollo)</td>
-                                <td>Esquema relacional íntegro con claves foráneas en cascada, unicidad de stock por producto/centro y script automatizado <code>init.sql</code>.</td>
+                                <td><code>PostgreSQL 16</code> (Docker) o <code>H2</code> en memoria (desarrollo y tests)</td>
+                                <td>Esquema creado por <strong>Flyway</strong> (<code>db/migration/V1</code> a <code>V7</code>) con <code>ddl-auto=validate</code>; datos demo solo con <code>crm.seed-demo-data=true</code>.</td>
                             </tr>
                         </tbody>
                     </table>
@@ -205,7 +215,7 @@
                     <div class="callout-icon">💡</div>
                     <div class="callout-content">
                         <strong>Principio de Aislamiento por Sede:</strong>
-                        <p>Cada centro de belleza dispone de su propio almacén de inventario y sus propios tratamientos asignados. El catálogo de productos es global, pero las existencias, umbrales y alertas se calculan de manera independiente por cada sede física.</p>
+                        <p>Cada centro de belleza dispone de su propio almacén de inventario y sus propios tratamientos asignados. El catálogo de productos es global, pero las existencias, umbrales y alertas se calculan de manera independiente por cada sede física. Un trabajador solo puede ver y modificar datos de su centro: cualquier recurso de otro centro responde 404.</p>
                     </div>
                 </div>
             </section>
@@ -239,9 +249,27 @@
                         <tbody>
                             <tr>
                                 <td><code>common.css</code></td>
-                                <td>Design System global, variables CSS (colores champagne/lux, fuentes Playfair y Plus Jakarta Sans), navbar y pie de página.</td>
+                                <td>Componentes compartidos: navbar, pie, botones, avisos, modales, hojas laterales, barra de listado (<code>.list-toolbar</code>) y vista Tarjetas/Lista.</td>
                                 <td>Todas las vistas HTML</td>
-                                <td>Capa base inmutable y compartida con cero estilos específicos de página.</td>
+                                <td>Capa base compartida; los colores salen siempre de <code>tokens.css</code>.</td>
+                            </tr>
+                            <tr>
+                                <td><code>tokens.css</code></td>
+                                <td>Tokens de diseño: colores (<code>--primary</code>, <code>--text-main</code>, <code>--surface</code>…), con modo oscuro completo y contraste AA.</td>
+                                <td>Todas las vistas HTML</td>
+                                <td><strong>Desde el 6 oct:</strong> ningún otro CSS lleva colores en hex.</td>
+                            </tr>
+                            <tr>
+                                <td><code>lucide-icons.css</code></td>
+                                <td>Iconos Lucide 0.321.0 con el prefijo <code>lucide-</code> y la fuente en <code>static/icons/lucide/</code>.</td>
+                                <td>Todas las vistas HTML</td>
+                                <td><strong>Desde el 8 oct:</strong> servidos por la propia app (desde la CDN salían vacíos).</td>
+                            </tr>
+                            <tr>
+                                <td><code>legal.css</code></td>
+                                <td>Páginas legales con índice lateral (y dentro de la página por debajo de 1200 px).</td>
+                                <td><code>terms.html</code>, <code>cookies.html</code>, <code>privacy.html</code></td>
+                                <td><strong>Nuevo (10 oct).</strong></td>
                             </tr>
                             <tr>
                                 <td><code>auth.css</code></td>
@@ -269,7 +297,7 @@
                             </tr>
                             <tr>
                                 <td><code>calendar.css</code></td>
-                                <td>Rejilla interactiva mensual de citas, selección de día, filtros de estado y tarjetas de agenda con feedback.</td>
+                                <td>Agenda con vistas Mes y Semana, bloques de cita del alto de su duración, horas propuestas, bloqueos rayados y modales para organizar la agenda.</td>
                                 <td><code>worker/calendar.html</code></td>
                                 <td>Autosuficiente: absorbió los badges y botones necesarios, <strong>eliminando la dependencia de <code>clients.css</code> (24 KB)</strong>.</td>
                             </tr>
@@ -282,8 +310,8 @@
                             <tr>
                                 <td><code>cliente.css</code> / <code>citas.css</code></td>
                                 <td>Portal de reservas de cliente, selección de centro, mapas y consulta de historial de citas confirmadas.</td>
-                                <td><code>client/centers.html</code>, <code>center_details.html</code>, <code>booking.html</code>, <code>appointments.html</code></td>
-                                <td>Mantenidos independientes y combinados con <code>modals.css</code> y <code>datepicker.css</code> según necesidad real.</td>
+                                <td><code>centers.html</code>, <code>client/center_details.html</code>, <code>client/appointments.html</code></td>
+                                <td>Mantenidos independientes y combinados con <code>datepicker.css</code> según necesidad real (<code>modals.css</code> y <code>booking.html</code> se eliminaron el 6 oct).</td>
                             </tr>
                         </tbody>
                     </table>
@@ -305,6 +333,14 @@
                 <p>
                     Se ha completado una inspección rigurosa del código fuente del backend frente a los 5 principios fundamentales de diseño de software (<strong>SOLID</strong>), detectando los siguientes puntos de fricción arquitectónica y sus planes de refactorización recomendados:
                 </p>
+
+                <div class="callout callout-success">
+                    <div class="callout-icon">✅</div>
+                    <div class="callout-content">
+                        <strong>Estado a 12 de octubre de 2026:</strong>
+                        <p>La mayor parte de los hallazgos se resolvió en la refactorización del 6 de octubre: <code>BaseController</code> y <code>AppointmentController</code> se dividieron en un controlador por área; ningún controlador usa repositorios (salvo <code>DevLoginController</code>, que solo existe en <code>dev</code>); los roles los gestiona Spring Security; el horario está en <code>OpeningHoursPolicy</code> (<code>crm.booking.*</code>); las reglas de cita están en <code>BookingService</code>; el mapeo a DTO está en <code>AppointmentCalendarMapper</code>; las plantillas de ficha tienen su propio <code>ClientCardTemplateService</code>; y <code>ObjectMapper</code> se inyecta desde <code>JacksonConfig</code>. Queda pendiente separar los servicios en interfaces por caso de uso.</p>
+                    </div>
+                </div>
 
                 <div class="grid-2">
                     <div class="card-feature">
@@ -392,11 +428,11 @@
                 <div class="grid-2">
                     <div class="card-feature">
                         <h4>🏢 Center (Centros de Belleza)</h4>
-                        <p>Representa una sede física. Contiene nombre, dirección física, teléfono, email de contacto y coordenadas geográficas (latitud y longitud) para el cálculo de distancia en tiempo real.</p>
+                        <p>Representa una sede física. Contiene nombre, dirección física, teléfono, email de contacto, coordenadas (latitud y longitud) para el mapa y la distancia, <strong>zona horaria</strong> (<code>time_zone</code>) y número de <strong>cabinas</strong> (citas a la vez, de 1 a 50).</p>
                     </div>
                     <div class="card-feature">
                         <h4>👤 User & Role (Usuarios y Roles)</h4>
-                        <p>Entidad de usuarios del sistema. Posee nombre, email único, teléfono, contraseña cifrada en BCrypt y asignación a un <code>Role</code> (<code>CLIENT</code> o <code>WORKER</code>). Los trabajadores se vinculan a un <code>Center</code>.</p>
+                        <p>Entidad de usuarios del sistema. Posee nombre, email único, teléfono, contraseña cifrada en BCrypt (nula en clientes dados de alta a mano y en cuentas solo de Google), <code>google_id</code> si ha entrado con Google y un <code>Role</code> (<code>CLIENT</code> o <code>WORKER</code>). Los trabajadores se vinculan a un <code>Center</code>.</p>
                     </div>
                     <div class="card-feature">
                         <h4>💆 Treatment (Catálogo de Servicios)</h4>
@@ -412,7 +448,15 @@
                     </div>
                     <div class="card-feature">
                         <h4>📅 Appointment (Citas y Reservas)</h4>
-                        <p>Registra el turno acordado. Vincula un <code>dateTime</code> (fecha y hora exacta), un <code>treatment</code>, un <code>center</code> y obligatoriamente un <code>client</code> registrado (cuenta de usuario activa), el <code>worker</code> asignado, su estado (<code>PENDING</code>, <code>CONFIRMED</code>, <code>REJECTED</code>) y el <code>workerMessage</code> para feedback médico-estético. <em>Nota: El flujo de clientes invitados ha sido suprimido para garantizar trazabilidad e integridad técnica de las fichas.</em></p>
+                        <p>Registra el turno acordado. Vincula un <code>dateTime</code> (fecha y hora exacta), un <code>treatment</code>, un <code>center</code> y obligatoriamente un <code>client</code> registrado (cuenta de usuario activa), el <code>worker</code> asignado, su estado (<code>PENDING</code>, <code>PROPOSED</code>, <code>CONFIRMED</code>, <code>REJECTED</code>, <code>CANCELLED</code>, <code>COMPLETED</code>), el <code>workerMessage</code>, el último cambio y quién lo hizo (<code>last_change</code>), la hora anterior si el centro la movió y el evento de Google Calendar. <em>El flujo de clientes invitados se suprimió para garantizar la trazabilidad de las fichas.</em></p>
+                    </div>
+                    <div class="card-feature">
+                        <h4>🕒 AppointmentProposal & AgendaBlock</h4>
+                        <p><code>AppointmentProposal</code>: hasta 3 horas que el centro propone para una cita <code>PROPOSED</code>. <code>AgendaBlock</code>: bloqueos de agenda de un profesional (vacaciones, descansos) o de todo el centro si no tiene profesional.</p>
+                    </div>
+                    <div class="card-feature">
+                        <h4>🔗 GoogleCalendarLink & persistent_logins</h4>
+                        <p><code>GoogleCalendarLink</code>: trabajadores con Google Calendar activado (token cifrado e id del calendario «Cuquora»). <code>persistent_logins</code>: dispositivos con «Recordar mi sesión».</p>
                     </div>
                 </div>
             </section>
@@ -469,26 +513,26 @@
                     </div>
                 </div>
 
-                <h3>Opción A: Ejecución con Docker Compose (Recomendada con PostgreSQL)</h3>
-                <p>Levanta el servidor web Spring Boot y la base de datos PostgreSQL 16 con los datos iniciales de <code>init.sql</code> ya sembrados:</p>
-                <pre><code># Clonar el repositorio y situarse en la raíz del proyecto
-cd CRM_CBelleza
+                <h3>Opción A: Ejecución con Docker Compose (PostgreSQL 16)</h3>
+                <p>Primero copia <code>.env.example</code> a <code>.env</code> y rellena los secretos: <code>docker compose</code> no arranca si falta <code>POSTGRES_DB</code>, <code>POSTGRES_USER</code>, <code>POSTGRES_PASSWORD</code> o <code>REMEMBER_ME_KEY</code>. El esquema lo crea Flyway al arrancar.</p>
+                <pre><code># Desde la raíz del proyecto
+cp .env.example .env      # y rellenar los valores
 
-# Construir y levantar los contenedores en segundo plano
-docker-compose up --build -d
+docker compose up --build -d
+docker compose logs -f app</code></pre>
+                <p>La aplicación estará accesible en: <code>http://localhost:8080</code>. PostgreSQL no publica puerto: solo lo ve la app dentro de la red de Docker.</p>
 
-# Visualizar logs del servicio web
-docker-compose logs -f app</code></pre>
-                <p>La aplicación estará accesible en: <code>http://localhost:8080</code></p>
+                <h3 style="margin-top: 2rem;">Opción B: Ejecución Local con Maven y Java 21 (perfil dev)</h3>
+                <pre><code># Windows (wrapper local)
+mvnw.cmd spring-boot:run -Dspring-boot.run.profiles=dev
 
-                <h3 style="margin-top: 2rem;">Opción B: Ejecución Local con Maven y Java 17+</h3>
-                <pre><code># En Windows PowerShell
-./mvnw.cmd spring-boot:run
+# Linux (Maven del sistema)
+mvn spring-boot:run -Dspring-boot.run.profiles=dev
 
-# En Linux / macOS
-./mvnw spring-boot:run</code></pre>
+# Tests (129)
+mvn test</code></pre>
                 <p>
-                    Al arrancar localmente sin variables de entorno de PostgreSQL, Spring Boot arrancará con su base de datos en memoria H2 y ejecutará automáticamente <code>DatabaseSeeder.java</code>, precargando los centros, usuarios, citas, catálogo y stock.
+                    Con el perfil <code>dev</code> la aplicación usa H2 en memoria, carga los datos demo con <code>DatabaseSeeder</code> y activa <code>/login-selector</code> y la consola H2. Sin SMTP configurado, los correos se escriben en la consola. «Iniciar sesión con Google» y Google Calendar solo aparecen si están las variables <code>GOOGLE_CLIENT_ID</code>, <code>GOOGLE_CLIENT_SECRET</code> y <code>GOOGLE_TOKEN_KEY</code>.
                 </p>
             </section>
 
@@ -573,13 +617,6 @@ docker-compose logs -f app</code></pre>
                                 <td>N/A (Cliente Registrada)</td>
                                 <td><code>password123</code></td>
                             </tr>
-                            <tr>
-                                <td><strong>Invitado (Sin cuenta)</strong></td>
-                                <td><em>Cualquier teléfono (ej: 611222333)</em></td>
-                                <td><span class="card-badge badge-guest">INVITADO</span></td>
-                                <td>Acceso directo a reservas</td>
-                                <td><em>No requerida</em></td>
-                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -588,7 +625,7 @@ docker-compose logs -f app</code></pre>
                     <div class="callout-icon">⚡</div>
                     <div class="callout-content">
                         <strong>Selector Rápido de Sesión (/login-selector):</strong>
-                        <p>Para agilizar presentaciones y auditorías de código, el sistema incorpora la ruta <a href="/login-selector" target="_blank"><code>/login-selector</code></a>, que permite conmutar la sesión activa a cualquier usuario o centro con un solo clic.</p>
+                        <p>Para agilizar presentaciones y auditorías de código, el sistema incorpora la ruta <code>/login-selector</code>, que permite entrar como cualquier usuario sin contraseña. Solo existe con el perfil <code>dev</code>.</p>
                     </div>
                 </div>
             </section>

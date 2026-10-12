@@ -46,7 +46,7 @@
                     <li><a href="#modulo-cliente">Módulo 2: Cliente & Reservas</a></li>
                     <li><a href="#modulo-worker">Módulo 3: Especialista & Cabina</a></li>
                     <li><a href="#modulo-api">Módulo 4: APIs REST de Disponibilidad</a></li>
-                    <li><a href="#modulo-onboarding">Módulo 5: Contacto & Alta de Centros</a></li>
+                    <li><a href="#modulo-onboarding">Módulo 5: Contacto, Correos & Alta de Centros</a></li>
                     <li><a href="#reglas-negocio">Reglas de Negocio & Validaciones</a></li>
                 </ul>
             </div>
@@ -73,11 +73,11 @@
                 <div class="hero-meta-row">
                     <div class="hero-meta-item">
                         <span>Total de Operaciones:</span>
-                        <strong>18 Acciones Documentadas</strong>
+                        <strong>36 rutas documentadas</strong>
                     </div>
                     <div class="hero-meta-item">
-                        <span>Validación de Horarios:</span>
-                        <strong>Algoritmo Anti-Solape Activo</strong>
+                        <span>Validación de Citas:</span>
+                        <strong>Cabinas, profesionales y bloqueos</strong>
                     </div>
                 </div>
             </section>
@@ -89,10 +89,14 @@
                         <div class="section-icon">🛡️</div>
                         <div>
                             <h2>Matriz de Permisos por Rol de Usuario</h2>
-                            <p style="margin: 0; font-size: 0.95rem;">Mapa de accesibilidad de las operaciones según el estado de autenticación</p>
+                            <p style="margin: 0; font-size: 0.95rem;">Rutas reales de los controladores a 12 de octubre de 2026 y quién puede usarlas</p>
                         </div>
                     </div>
                 </div>
+
+                <p>
+                    Las rutas <code>/client/**</code> solo las usa <code>ROLE_CLIENT</code> y <code>/worker/**</code> solo los trabajadores con centro asignado. Sin sesión, una ruta protegida lleva al login; una URL que no existe muestra la página 404 propia. Todos los <code>POST</code> llevan token CSRF (en <code>fetch</code> lo añade <code>app.js</code>).
+                </p>
 
                 <div class="table-responsive">
                     <table class="doc-table">
@@ -101,192 +105,303 @@
                                 <th>Ruta / Endpoint</th>
                                 <th>Método</th>
                                 <th>Descripción de la Operación</th>
-                                <th>Invitado</th>
+                                <th>Sin sesión</th>
                                 <th>Cliente</th>
-                                <th>Worker</th>
+                                <th>Trabajador</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <!-- Auth -->
+                            <!-- Públicas -->
+                            <tr>
+                                <td><code>/, /home, /features, /centers</code></td>
+                                <td><span class="http-get">GET</span></td>
+                                <td>Páginas públicas: inicio, funcionalidades y buscador de centros con mapa</td>
+                                <td>✅ Permitido</td>
+                                <td>✅ Permitido</td>
+                                <td>✅ Permitido</td>
+                            </tr>
+                            <tr>
+                                <td><code>/terms, /privacy, /cookies</code></td>
+                                <td><span class="http-get">GET</span></td>
+                                <td>Términos, Privacidad y Cookies (también /terminos, /privacidad, /politica-cookies)</td>
+                                <td>✅ Permitido</td>
+                                <td>✅ Permitido</td>
+                                <td>✅ Permitido</td>
+                            </tr>
+                            <tr>
+                                <td><code>/contact, /register-center</code></td>
+                                <td><span class="http-get">GET</span> <span class="http-post">POST</span></td>
+                                <td>Formulario de contacto y solicitud de alta de centro (también /contacto, /alta-centro)</td>
+                                <td>✅ Permitido</td>
+                                <td>✅ Permitido</td>
+                                <td>✅ Permitido</td>
+                            </tr>
+                            <tr>
+                                <td><code>/api/centers, /api/centers/{id}/availability</code></td>
+                                <td><span class="http-get">GET</span></td>
+                                <td>JSON: búsqueda de centros con distancia y huecos llenos de un centro</td>
+                                <td>✅ Permitido</td>
+                                <td>✅ Permitido</td>
+                                <td>✅ Permitido</td>
+                            </tr>
+                            <!-- Sesión -->
                             <tr>
                                 <td><code>/login</code></td>
                                 <td><span class="http-get">GET</span> <span class="http-post">POST</span></td>
-                                <td>Inicio de sesión formal con credenciales</td>
+                                <td>Inicio de sesión con correo o nombre y contraseña</td>
+                                <td>✅ Permitido</td>
+                                <td>(Redirige)</td>
+                                <td>(Redirige)</td>
+                            </tr>
+                            <tr>
+                                <td><code>/oauth2/authorization/google</code></td>
+                                <td><span class="http-get">GET</span></td>
+                                <td>Inicio de sesión con Google (solo si está configurado)</td>
+                                <td>✅ Permitido</td>
+                                <td>—</td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><code>/register</code></td>
+                                <td><span class="http-get">GET</span> <span class="http-post">POST</span></td>
+                                <td>Registro de cliente</td>
                                 <td>✅ Permitido</td>
                                 <td>(Redirige)</td>
                                 <td>(Redirige)</td>
                             </tr>
                             <tr>
                                 <td><code>/logout</code></td>
-                                <td><span class="http-get">GET</span></td>
-                                <td>Cierre de sesión e invalidación de token</td>
+                                <td><span class="http-post">POST</span></td>
+                                <td>Cierre de sesión (borra también el dispositivo recordado)</td>
                                 <td>—</td>
                                 <td>✅ Permitido</td>
                                 <td>✅ Permitido</td>
                             </tr>
                             <tr>
-                                <td><code>/login-selector</code></td>
-                                <td><span class="http-get">GET</span></td>
-                                <td>Selector de depuración y cambio rápido</td>
-                                <td>✅ Permitido</td>
-                                <td>✅ Permitido</td>
-                                <td>✅ Permitido</td>
-                            </tr>
-                            <!-- Portal, Soporte y Onboarding -->
-                            <tr>
-                                <td><code>/contact</code></td>
-                                <td><span class="http-get">GET</span> <span class="http-post">POST</span></td>
-                                <td>Formulario de atención y soporte con validación reactiva y envío transaccional</td>
-                                <td>✅ Permitido</td>
-                                <td>✅ Permitido</td>
-                                <td>✅ Permitido</td>
-                            </tr>
-                            <tr>
-                                <td><code>/register-center</code></td>
-                                <td><span class="http-get">GET</span> <span class="http-post">POST</span></td>
-                                <td>Solicitud de alta de centro: acuse con plazo de 1 semana y auditoría admin con 1-click accept/reject</td>
-                                <td>✅ Permitido</td>
-                                <td>✅ Permitido</td>
-                                <td>✅ Permitido</td>
-                            </tr>
-                            <tr>
                                 <td><code>/profile</code></td>
-                                <td><span class="http-get">GET</span> <span class="http-post">POST</span></td>
-                                <td>Gestión y actualización de perfil del usuario en sesión</td>
-                                <td>❌ Bloqueado</td>
+                                <td><span class="http-get">GET</span></td>
+                                <td>Redirige al perfil según el rol</td>
+                                <td>❌ Login</td>
                                 <td>✅ Permitido</td>
                                 <td>✅ Permitido</td>
                             </tr>
                             <tr>
-                                <td><code>/my-center</code></td>
+                                <td><code>/login-selector, /select-session</code></td>
                                 <td><span class="http-get">GET</span> <span class="http-post">POST</span></td>
-                                <td>Consulta y ajuste de información del centro de belleza asignado</td>
-                                <td>❌ Bloqueado</td>
-                                <td>❌ Bloqueado</td>
-                                <td>✅ Permitido</td>
+                                <td>Entrar como cualquier usuario sin contraseña (solo perfil dev)</td>
+                                <td>Solo dev</td>
+                                <td>Solo dev</td>
+                                <td>Solo dev</td>
                             </tr>
                             <!-- Cliente -->
                             <tr>
-                                <td><code>/client/centers</code></td>
-                                <td><span class="http-get">GET</span></td>
-                                <td>Listado y filtrado geográfico de centros</td>
-                                <td>✅ Permitido</td>
-                                <td>✅ Permitido</td>
-                                <td>❌ Bloqueado</td>
-                            </tr>
-                            <tr>
                                 <td><code>/client/centers/{id}</code></td>
                                 <td><span class="http-get">GET</span></td>
-                                <td>Detalle de centro y carta de tratamientos</td>
+                                <td>Ficha del centro y tratamientos (/client/centers redirige a /centers)</td>
+                                <td>❌ Login</td>
                                 <td>✅ Permitido</td>
-                                <td>✅ Permitido</td>
-                                <td>❌ Bloqueado</td>
+                                <td>⚠️ Aviso</td>
                             </tr>
                             <tr>
                                 <td><code>/client/booking</code></td>
                                 <td><span class="http-post">POST</span></td>
-                                <td>Creación de reserva con validación anti-solapes</td>
-                                <td>✅ Con móvil</td>
-                                <td>✅ Con cuenta</td>
+                                <td>Solicitud de cita (queda pendiente)</td>
+                                <td>❌ Login</td>
+                                <td>✅ Permitido</td>
                                 <td>❌ Bloqueado</td>
                             </tr>
                             <tr>
                                 <td><code>/client/appointments</code></td>
                                 <td><span class="http-get">GET</span></td>
-                                <td>Historial de citas del cliente</td>
-                                <td>✅ Con filtro tel.</td>
-                                <td>✅ Automático</td>
+                                <td>«Mis Citas»</td>
+                                <td>❌ Login</td>
+                                <td>✅ Permitido</td>
                                 <td>❌ Bloqueado</td>
                             </tr>
-                            <!-- Worker -->
+                            <tr>
+                                <td><code>/client/appointments/{id}/accept-proposal</code></td>
+                                <td><span class="http-post">POST</span></td>
+                                <td>Elegir una de las horas propuestas</td>
+                                <td>❌ Login</td>
+                                <td>✅ Las suyas</td>
+                                <td>❌ Bloqueado</td>
+                            </tr>
+                            <tr>
+                                <td><code>/client/appointments/{id}/decline-proposal</code></td>
+                                <td><span class="http-post">POST</span></td>
+                                <td>Rechazar la propuesta</td>
+                                <td>❌ Login</td>
+                                <td>✅ Las suyas</td>
+                                <td>❌ Bloqueado</td>
+                            </tr>
+                            <tr>
+                                <td><code>/client/appointments/{id}/cancel</code></td>
+                                <td><span class="http-post">POST</span></td>
+                                <td>Anular una cita</td>
+                                <td>❌ Login</td>
+                                <td>✅ Las suyas</td>
+                                <td>❌ Bloqueado</td>
+                            </tr>
+                            <tr>
+                                <td><code>/client/notifications/seen</code></td>
+                                <td><span class="http-post">POST</span></td>
+                                <td>Marcar la campana como vista (JSON)</td>
+                                <td>❌ Login</td>
+                                <td>✅ Permitido</td>
+                                <td>❌ Bloqueado</td>
+                            </tr>
+                            <tr>
+                                <td><code>/client/profile</code></td>
+                                <td><span class="http-get">GET</span> <span class="http-post">POST</span></td>
+                                <td>Datos personales y contraseña</td>
+                                <td>❌ Login</td>
+                                <td>✅ Permitido</td>
+                                <td>❌ Bloqueado</td>
+                            </tr>
+                            <!-- Trabajador -->
                             <tr>
                                 <td><code>/worker/dashboard</code></td>
                                 <td><span class="http-get">GET</span></td>
-                                <td>Métricas operativas del centro asignado</td>
-                                <td>❌ Bloqueado</td>
+                                <td>Panel con métricas del centro</td>
+                                <td>❌ Login</td>
                                 <td>❌ Bloqueado</td>
                                 <td>✅ Permitido</td>
                             </tr>
                             <tr>
                                 <td><code>/worker/calendar</code></td>
                                 <td><span class="http-get">GET</span></td>
-                                <td>Agenda cronológica diaria de turnos</td>
-                                <td>❌ Bloqueado</td>
-                                <td>❌ Bloqueado</td>
-                                <td>✅ Permitido</td>
-                            </tr>
-                            <tr>
-                                <td><code>/worker/appointments/{id}/approve</code></td>
-                                <td><span class="http-post">POST</span></td>
-                                <td>Aprobación de turno y asignación de terapeuta</td>
-                                <td>❌ Bloqueado</td>
+                                <td>Agenda Mes / Semana</td>
+                                <td>❌ Login</td>
                                 <td>❌ Bloqueado</td>
                                 <td>✅ Permitido</td>
                             </tr>
                             <tr>
-                                <td><code>/worker/appointments/{id}/reject</code></td>
-                                <td><span class="http-post">POST</span></td>
-                                <td>Rechazo justificado de solicitud con motivo</td>
+                                <td><code>/worker/calendar/data</code></td>
+                                <td><span class="http-get">GET</span></td>
+                                <td>Citas, propuestas y bloqueos de la agenda (JSON)</td>
+                                <td>❌ Login</td>
                                 <td>❌ Bloqueado</td>
+                                <td>✅ Permitido</td>
+                            </tr>
+                            <tr>
+                                <td><code>/worker/appointments</code></td>
+                                <td><span class="http-post">POST</span></td>
+                                <td>Nueva cita creada por el trabajador (JSON)</td>
+                                <td>❌ Login</td>
+                                <td>❌ Bloqueado</td>
+                                <td>✅ Permitido</td>
+                            </tr>
+                            <tr>
+                                <td><code>/worker/appointments/{id}/approve | reject</code></td>
+                                <td><span class="http-post">POST</span></td>
+                                <td>Aceptar (eligiendo profesional) o rechazar una solicitud (JSON)</td>
+                                <td>❌ Login</td>
+                                <td>❌ Bloqueado</td>
+                                <td>✅ Permitido</td>
+                            </tr>
+                            <tr>
+                                <td><code>/worker/appointments/{id}/propose | withdraw-proposal</code></td>
+                                <td><span class="http-post">POST</span></td>
+                                <td>Proponer de 1 a 3 horas o retirar la propuesta (JSON)</td>
+                                <td>❌ Login</td>
+                                <td>❌ Bloqueado</td>
+                                <td>✅ Permitido</td>
+                            </tr>
+                            <tr>
+                                <td><code>/worker/appointments/{id}/reschedule | cancel</code></td>
+                                <td><span class="http-post">POST</span></td>
+                                <td>Cambiar hora/profesional o anular una cita confirmada (JSON)</td>
+                                <td>❌ Login</td>
+                                <td>❌ Bloqueado</td>
+                                <td>✅ Permitido</td>
+                            </tr>
+                            <tr>
+                                <td><code>/worker/agenda-blocks, /worker/agenda-blocks/{id}/delete</code></td>
+                                <td><span class="http-post">POST</span></td>
+                                <td>Crear o quitar un bloqueo de horario (JSON)</td>
+                                <td>❌ Login</td>
                                 <td>❌ Bloqueado</td>
                                 <td>✅ Permitido</td>
                             </tr>
                             <tr>
                                 <td><code>/worker/inventory</code></td>
                                 <td><span class="http-get">GET</span></td>
-                                <td>Supervisión de stock y almacén de cabina</td>
+                                <td>Inventario del centro</td>
+                                <td>❌ Login</td>
                                 <td>❌ Bloqueado</td>
+                                <td>✅ Permitido</td>
+                            </tr>
+                            <tr>
+                                <td><code>/worker/inventory/add, /{id}/delete</code></td>
+                                <td><span class="http-post">POST</span></td>
+                                <td>Añadir producto (existente o nuevo) o quitarlo del centro</td>
+                                <td>❌ Login</td>
                                 <td>❌ Bloqueado</td>
                                 <td>✅ Permitido</td>
                             </tr>
                             <tr>
                                 <td><code>/worker/inventory/{id}/adjust-stock</code></td>
                                 <td><span class="http-post">POST</span></td>
-                                <td>Incremento o decremento de existencias</td>
-                                <td>❌ Bloqueado</td>
-                                <td>❌ Bloqueado</td>
-                                <td>✅ Permitido</td>
-                            </tr>
-                            <tr>
-                                <td><code>/worker/inventory/add</code></td>
-                                <td><span class="http-post">POST</span></td>
-                                <td>Añadir producto existente o nuevo insumo</td>
-                                <td>❌ Bloqueado</td>
+                                <td>Sumar o restar unidades (JSON)</td>
+                                <td>❌ Login</td>
                                 <td>❌ Bloqueado</td>
                                 <td>✅ Permitido</td>
                             </tr>
                             <tr>
-                                <td><code>/worker/inventory/{id}/delete</code></td>
-                                <td><span class="http-post">POST</span></td>
-                                <td>Baja de producto del inventario de sede</td>
-                                <td>❌ Bloqueado</td>
+                                <td><code>/worker/treatments, /worker/treatments/add</code></td>
+                                <td><span class="http-get">GET</span> <span class="http-post">POST</span></td>
+                                <td>Tratamientos del centro y alta de uno nuevo</td>
+                                <td>❌ Login</td>
                                 <td>❌ Bloqueado</td>
                                 <td>✅ Permitido</td>
                             </tr>
                             <tr>
-                                <td><code>/worker/treatments</code></td>
+                                <td><code>/worker/clients, /worker/clients/search</code></td>
                                 <td><span class="http-get">GET</span></td>
-                                <td>Consulta de tratamientos activos en la sede</td>
-                                <td>❌ Bloqueado</td>
+                                <td>Cartera de clientes y buscador (JSON, para «Nueva cita»)</td>
+                                <td>❌ Login</td>
                                 <td>❌ Bloqueado</td>
                                 <td>✅ Permitido</td>
                             </tr>
                             <tr>
-                                <td><code>/worker/treatments/add</code></td>
+                                <td><code>/worker/clients/create</code></td>
                                 <td><span class="http-post">POST</span></td>
-                                <td>Alta de nuevo tratamiento con duración y PVP</td>
-                                <td>❌ Bloqueado</td>
+                                <td>Alta manual de cliente</td>
+                                <td>❌ Login</td>
                                 <td>❌ Bloqueado</td>
                                 <td>✅ Permitido</td>
                             </tr>
-                            <!-- APIs -->
                             <tr>
-                                <td><code>/api/centers/{id}/availability</code></td>
-                                <td><span class="http-get">GET</span></td>
-                                <td>Cálculo de slots de 30 min ocupados</td>
-                                <td>✅ Público</td>
-                                <td>✅ Público</td>
-                                <td>✅ Público</td>
+                                <td><code>/worker/clients/{clientId}, /{clientId}/card</code></td>
+                                <td><span class="http-get">GET</span> <span class="http-post">POST</span></td>
+                                <td>Ficha técnica del cliente</td>
+                                <td>❌ Login</td>
+                                <td>❌ Bloqueado</td>
+                                <td>✅ Permitido</td>
+                            </tr>
+                            <tr>
+                                <td><code>/worker/clients/template</code></td>
+                                <td><span class="http-get">GET</span> <span class="http-post">POST</span></td>
+                                <td>Campos de la ficha técnica del centro</td>
+                                <td>❌ Login</td>
+                                <td>❌ Bloqueado</td>
+                                <td>✅ Permitido</td>
+                            </tr>
+                            <tr>
+                                <td><code>/worker/center</code></td>
+                                <td><span class="http-get">GET</span> <span class="http-post">POST</span></td>
+                                <td>«Mi Centro»: datos del centro, zona horaria, cabinas y perfil</td>
+                                <td>❌ Login</td>
+                                <td>❌ Bloqueado</td>
+                                <td>✅ Permitido</td>
+                            </tr>
+                            <tr>
+                                <td><code>/worker/google-calendar/connect | disconnect, /callback</code></td>
+                                <td><span class="http-get">GET</span> <span class="http-post">POST</span></td>
+                                <td>Activar o desactivar Google Calendar</td>
+                                <td>❌ Login</td>
+                                <td>❌ Bloqueado</td>
+                                <td>✅ Permitido</td>
                             </tr>
                         </tbody>
                     </table>
@@ -300,7 +415,7 @@
                         <div class="section-icon">🔑</div>
                         <div>
                             <h2>Módulo 1: Autenticación, Sesión y Accesos</h2>
-                            <p style="margin: 0; font-size: 0.95rem;">Controladores: <code>BaseController</code>, <code>UserService</code></p>
+                            <p style="margin: 0; font-size: 0.95rem;">Spring Security: <code>SecurityConfig</code>, <code>AppUserDetailsService</code>, <code>GoogleOidcUserService</code>, <code>UserService</code></p>
                         </div>
                     </div>
                 </div>
@@ -311,32 +426,56 @@
                         <strong>/login</strong>
                         <span class="card-badge badge-guest">Público</span>
                     </div>
-                    <p>Valida las credenciales de acceso contra la base de datos utilizando el algoritmo de cifrado irreversible <strong>BCrypt</strong>.</p>
+                    <p>Login por formulario gestionado por Spring Security.</p>
                     <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.9rem; margin-bottom: 0.8rem;">
-                        <li><strong>Parámetros enviados:</strong> <code>identifier</code> (email o nombre de usuario), <code>password</code> (contraseña en texto claro), <code>rememberMe</code> (opcional).</li>
-                        <li><strong>Lógica de negocio:</strong> Busca el usuario primero por email insensible a mayúsculas; si no lo encuentra, busca por nombre. Compara la contraseña usando <code>passwordEncoder.matches(...)</code>.</li>
-                        <li><strong>Resultado con éxito (Rol CLIENT):</strong> Inyecta <code>sessionRole="CLIENT"</code>, <code>sessionUserId</code> y <code>sessionUserName</code>. Redirige a <code>/client/centers</code>.</li>
-                        <li><strong>Resultado con éxito (Rol WORKER):</strong> Inyecta <code>sessionRole="WORKER"</code>, <code>sessionUserId</code>, <code>sessionUserName</code>, <code>sessionCenterId</code> y <code>sessionCenterName</code>. Redirige a <code>/worker/dashboard</code>.</li>
-                        <li><strong>Resultado con error:</strong> Devuelve flash attribute <code>errorMessage="Credenciales incorrectas"</code> y redirige a <code>/login</code>.</li>
+                        <li><strong>Parámetros:</strong> <code>identifier</code> (correo o nombre), <code>password</code> y <code>rememberMe</code> (opcional) más el token CSRF.</li>
+                        <li><strong>Comprobación:</strong> <code>AppUserDetailsService</code> busca por correo y, si no, por nombre; la contraseña se compara con BCrypt.</li>
+                        <li><strong>Éxito:</strong> <code>RoleBasedAuthenticationSuccessHandler</code> manda al cliente a centros (o a la página que intentaba abrir) y al trabajador a <code>/worker/dashboard</code>.</li>
+                        <li><strong>Error:</strong> <code>LoginFailureHandler</code> vuelve a <code>/login</code> con el aviso y el identificador escrito.</li>
+                        <li><strong>«Recordar mi sesión»:</strong> 14 días con tokens en <code>persistent_logins</code>, firmados con <code>REMEMBER_ME_KEY</code>; se borran al cerrar sesión y al cambiar la contraseña.</li>
                     </ul>
                 </div>
 
                 <div class="card-feature" style="margin-bottom: 1.5rem;">
                     <div class="card-feature-header">
                         <span class="http-get">GET</span>
+                        <strong>/oauth2/authorization/google</strong>
+                        <span class="card-badge badge-guest">Público · opcional</span>
+                    </div>
+                    <p>«Iniciar sesión con Google» (OpenID Connect). Solo aparece si hay <code>GOOGLE_CLIENT_ID</code> y <code>GOOGLE_CLIENT_SECRET</code>. Google vuelve a <code>/login/oauth2/code/google</code> y <code>UserService.signInWithGoogle</code>:</p>
+                    <ol class="text-secondary" style="margin-left: 1.5rem; font-size: 0.9rem;">
+                        <li>Busca al usuario por su <code>google_id</code>.</li>
+                        <li>Si no, exige correo verificado y vincula la cuenta con ese correo (también trabajadores y clientes dados de alta a mano).</li>
+                        <li>Si no existe, crea un cliente sin contraseña.</li>
+                    </ol>
+                    <p style="font-size: 0.9rem;">Los errores vuelven a <code>/login</code> con un aviso (<code>GoogleLoginFailureHandler</code>).</p>
+                </div>
+
+                <div class="card-feature" style="margin-bottom: 1.5rem;">
+                    <div class="card-feature-header">
+                        <span class="http-post">POST</span>
+                        <strong>/register</strong>
+                        <span class="card-badge badge-guest">Público</span>
+                    </div>
+                    <p>Crea una cuenta de cliente (nombre, correo, teléfono, contraseña y confirmación; mínimo 6 caracteres). Si el correo es de un cliente dado de alta a mano, completa esa cuenta. Si es de una cuenta solo de Google, avisa de que ya existe y propone «Continuar con Google». No se aceptan correos internos <code>@cbelleza.local</code>.</p>
+                </div>
+
+                <div class="card-feature" style="margin-bottom: 1.5rem;">
+                    <div class="card-feature-header">
+                        <span class="http-post">POST</span>
                         <strong>/logout</strong>
                         <span class="card-badge badge-worker">Autenticado</span>
                     </div>
-                    <p>Invalida de inmediato la <code>HttpSession</code> en el contenedor de servlets y limpia cualquier atributo de usuario o centro. Redirige a <code>/home</code>.</p>
+                    <p>Cierra la sesión (solo por POST con CSRF), borra el token de «Recordar mi sesión» del dispositivo y vuelve a <code>/login?logout</code>.</p>
                 </div>
 
                 <div class="card-feature">
                     <div class="card-feature-header">
                         <span class="http-get">GET</span> <span class="http-post">POST</span>
-                        <strong>/select-session</strong>
-                        <span class="card-badge badge-admin">Herramienta Demo</span>
+                        <strong>/login-selector · /select-session</strong>
+                        <span class="card-badge badge-admin">Solo perfil dev</span>
                     </div>
-                    <p>Permite conmutar la sesión activa a cualquier usuario o sede sin requerir contraseña. Parámetros: <code>role</code> (CLIENT/WORKER), <code>userId</code> (opcional) y <code>centerId</code> (opcional).</p>
+                    <p>Permite entrar como cualquier usuario sin contraseña para probar la aplicación. <code>DevLoginController</code> lleva <code>@Profile("dev")</code>: en producción estas rutas no existen.</p>
                 </div>
             </section>
 
@@ -347,7 +486,7 @@
                         <div class="section-icon">📅</div>
                         <div>
                             <h2>Módulo 2: Portal de Clientes y Agendamiento</h2>
-                            <p style="margin: 0; font-size: 0.95rem;">Controladores: <code>AppointmentController</code>, <code>AppointmentService</code></p>
+                            <p style="margin: 0; font-size: 0.95rem;">Controladores: <code>PublicPagesController</code>, <code>ClientBookingController</code>, <code>ClientNotificationController</code>, <code>ClientProfileController</code></p>
                         </div>
                     </div>
                 </div>
@@ -355,51 +494,64 @@
                 <div class="card-feature" style="margin-bottom: 1.5rem;">
                     <div class="card-feature-header">
                         <span class="http-get">GET</span>
-                        <strong>/client/centers</strong>
-                        <span class="card-badge badge-client">CLIENT / INVITADO</span>
+                        <strong>/centers</strong>
+                        <span class="card-badge badge-guest">Público</span>
                     </div>
-                    <p>Devuelve la vista de exploración de sedes. Acepta el parámetro opcional <code>searchLocation</code> para filtrar centros cuya dirección o nombre coincidan parcialmente con el término de búsqueda.</p>
+                    <p>Buscador de centros con tarjetas y mapa (Leaflet + OpenStreetMap). Los datos llegan de <code>/api/centers</code>. Al tocar un marcador se abre un globo con «Ver tratamientos»; sin sesión, ese botón lleva al login y luego de vuelta al centro. La ruta antigua <code>/client/centers</code> redirige aquí.</p>
                 </div>
 
                 <div class="card-feature" style="margin-bottom: 1.5rem;">
                     <div class="card-feature-header">
                         <span class="http-get">GET</span>
                         <strong>/client/centers/{id}</strong>
-                        <span class="card-badge badge-client">CLIENT / INVITADO</span>
+                        <span class="card-badge badge-client">CLIENT</span>
                     </div>
-                    <p>Obtiene la ficha técnica completa del centro especificado por <code>{id}</code>: tratamientos ofrecidos por esa sede con duraciones y precios, y terapeutas autorizados que prestan servicio en sus instalaciones.</p>
+                    <p>Ficha del centro: datos, horario de reservas, tratamientos con duración y precio, y profesionales. Un trabajador que intenta ver un centro como cliente recibe un aviso con enlace a su panel.</p>
                 </div>
 
                 <div class="card-feature" style="margin-bottom: 1.5rem;">
                     <div class="card-feature-header">
                         <span class="http-post">POST</span>
                         <strong>/client/booking</strong>
-                        <span class="card-badge badge-client">CLIENT (Autenticado)</span>
+                        <span class="card-badge badge-client">CLIENT</span>
                     </div>
-                    <p>Crea una nueva solicitud de cita sujeta a estrictas validaciones matemáticas de negocio:</p>
+                    <p>Solicita una cita llamando a <code>BookingService.requestBooking</code>:</p>
                     <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.9rem; margin-bottom: 0.8rem;">
-                        <li><strong>Parámetros requeridos:</strong> <code>centerId</code> (ID de la sede), <code>treatmentId</code> (ID del tratamiento), <code>dateTime</code> (fecha y hora en formato ISO-8601).</li>
-                        <li><strong>Requisito de identidad:</strong> Cuenta de cliente registrada y autenticada en sesión (<code>sessionUserId</code>). El flujo de invitados ha sido revocado para garantizar fichas técnicas íntegras.</li>
-                        <li><strong>Comportamiento transaccional (<code>@Transactional</code>):</strong>
+                        <li><strong>Parámetros:</strong> <code>centerId</code>, <code>treatmentId</code> y <code>dateTime</code> (ISO-8601).</li>
+                        <li><strong>Validaciones</strong> (con bloqueo por centro):
                             <ol style="margin-left: 1.25rem; margin-top: 0.4rem;">
-                                <li>Rechaza fechas pasadas: <code>dateTime.isBefore(LocalDateTime.now())</code>.</li>
-                                <li>Verifica horario laboral: no permite sábados ni domingos, exige minutos en múltiplos de 30 y restringe el inicio a partir de las 09:00.</li>
-                                <li>Verifica finalización en horario: <code>hora_inicio + duracion_tratamiento &lt;= 20:00</code>.</li>
-                                <li>Comprueba solapamientos: verifica si existe alguna cita confirmada en esa sede cuyo tramo <code>[inicio, fin]</code> intersequen con el tramo solicitado.</li>
+                                <li>No es una hora pasada, según la hora local del centro (<code>CenterClock</code>).</li>
+                                <li>Cabe completa en el horario de reservas (<code>OpeningHoursPolicy</code>: lunes a viernes, de 9 a 20 h, huecos de 30 min).</li>
+                                <li>Cabe en la agenda (<code>AgendaSnapshot</code>): centro no cerrado, no más citas a la vez que cabinas y al menos un profesional libre.</li>
                             </ol>
                         </li>
-                        <li><strong>Resultado exitoso:</strong> Se persiste la entidad <code>Appointment</code> vinculada al usuario con estado <code>PENDING</code> y redirige a <code>/client/appointments</code>.</li>
-                        <li><strong>En caso de conflicto:</strong> Captura <code>IllegalArgumentException</code> y redirige con mensaje flash <code>bookingError</code> a la ficha del centro.</li>
+                        <li><strong>Éxito:</strong> cita <code>PENDING</code>, correo al cliente y redirección a <code>/client/appointments</code>.</li>
+                        <li><strong>Error:</strong> <code>BusinessRuleException</code> → vuelve a la ficha del centro con el mensaje en <code>bookingError</code>.</li>
                     </ul>
+                </div>
+
+                <div class="card-feature" style="margin-bottom: 1.5rem;">
+                    <div class="card-feature-header">
+                        <span class="http-get">GET</span>
+                        <strong>/client/appointments</strong>
+                        <span class="card-badge badge-client">CLIENT</span>
+                    </div>
+                    <p>«Mis Citas» con filtros por estado. Desde cada tarjeta:</p>
+                    <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.9rem;">
+                        <li><code>POST /client/appointments/{id}/accept-proposal</code> (<code>proposalId</code>): elige una hora propuesta y la cita queda confirmada.</li>
+                        <li><code>POST /client/appointments/{id}/decline-proposal</code>: ninguna hora le viene bien; se avisa al centro.</li>
+                        <li><code>POST /client/appointments/{id}/cancel</code>: anula la cita y se avisa al centro.</li>
+                    </ul>
+                    <p style="font-size: 0.9rem;">Las tres buscan la cita con <code>findByIdAndClientId</code>: la cita de otro cliente responde 404.</p>
                 </div>
 
                 <div class="card-feature">
                     <div class="card-feature-header">
-                        <span class="http-get">GET</span>
-                        <strong>/client/appointments</strong>
-                        <span class="card-badge badge-client">CLIENT (Autenticado)</span>
+                        <span class="http-post">POST</span>
+                        <strong>/client/notifications/seen</strong>
+                        <span class="card-badge badge-client">CLIENT · JSON</span>
                     </div>
-                    <p>Obtiene y renderiza el historial cronológico de citas del cliente autenticado en sesión mediante la consulta <code>findByClientIdOrderByDateTimeDesc</code>.</p>
+                    <p>La campana del cliente (<code>ClientNotificationService</code>) muestra sus citas de hoy y mañana y los cambios hechos por el centro en los últimos 7 días. Al abrirla, este endpoint guarda la hora en <code>notifications_seen_at</code>.</p>
                 </div>
             </section>
 
@@ -410,8 +562,16 @@
                         <div class="section-icon">🩺</div>
                         <div>
                             <h2>Módulo 3: Operaciones de Especialista y Cabina</h2>
-                            <p style="margin: 0; font-size: 0.95rem;">Controladores: <code>InventoryController</code>, <code>AppointmentController</code></p>
+                            <p style="margin: 0; font-size: 0.95rem;">Controladores: <code>WorkerCalendarController</code>, <code>WorkerAppointmentApiController</code>, <code>InventoryController</code>, <code>TreatmentController</code>, <code>ClientCardController</code>, <code>WorkerCenterController</code>, <code>GoogleCalendarController</code></p>
                         </div>
+                    </div>
+                </div>
+
+                <div class="callout callout-info" style="margin-bottom: 1.5rem;">
+                    <div class="callout-icon">🔒</div>
+                    <div class="callout-content">
+                        <strong>Aislamiento entre centros:</strong>
+                        <p>Todas las acciones usan el centro de la sesión y consultas <code>findByIdAndCenterId</code>. Una cita, producto, cliente o bloqueo de otro centro responde 404.</p>
                     </div>
                 </div>
 
@@ -421,39 +581,53 @@
                         <strong>/worker/dashboard</strong>
                         <span class="card-badge badge-worker">WORKER</span>
                     </div>
-                    <p>Calcula y proyecta las métricas de la jornada del centro: total de citas para hoy, citas de mañana, solicitudes pendientes de aprobación y recuento de productos con stock crítico (≤ 3 unidades).</p>
+                    <p>Métricas del centro: citas de hoy, citas de mañana, solicitudes pendientes y productos con stock bajo (≤ 3 unidades).</p>
+                </div>
+
+                <div class="card-feature" style="margin-bottom: 1.5rem;">
+                    <div class="card-feature-header">
+                        <span class="http-get">GET</span>
+                        <strong>/worker/calendar</strong>
+                        <span class="card-badge badge-worker">WORKER</span>
+                    </div>
+                    <p>Agenda con vistas Mes y Semana. Acepta <code>?view=week</code> y <code>?date=AAAA-MM-DD</code>. Tras cada cambio, la página se actualiza con <code>GET /worker/calendar/data</code> (JSON con citas, horas propuestas y bloqueos).</p>
                 </div>
 
                 <div class="card-feature" style="margin-bottom: 1.5rem;">
                     <div class="card-feature-header">
                         <span class="http-post">POST</span>
-                        <strong>/worker/appointments/{id}/approve</strong>
+                        <strong>Acciones sobre citas (JSON)</strong>
                         <span class="card-badge badge-worker">WORKER</span>
                     </div>
-                    <p>
-                        Aprueba formalmente la cita. Asigna como especialista a cargo al terapeuta autenticado en la sesión (<code>sessionUserId</code>) y actualiza el estado a <code>CONFIRMED</code>. Guarda opcionalmente una nota médica o de preparación en <code>workerMessage</code>. Redirige a la agenda manteniendo la fecha activa.
-                    </p>
-                </div>
-
-                <div class="card-feature" style="margin-bottom: 1.5rem;">
-                    <div class="card-feature-header">
-                        <span class="http-post">POST</span>
-                        <strong>/worker/appointments/{id}/reject</strong>
-                        <span class="card-badge badge-worker">WORKER</span>
+                    <p>Todas pasan por <code>BookingService</code>, anotan el último cambio y publican <code>AppointmentChangedEvent</code> (correos y Google Calendar, tras guardar y en segundo plano).</p>
+                    <div class="table-responsive">
+                        <table class="doc-table">
+                            <thead>
+                                <tr><th>Endpoint</th><th>Qué hace</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td><code>/worker/appointments</code></td><td>Crea una cita confirmada. Cliente de la cartera (<code>clientId</code>) o nuevo (<code>newClientName</code>, <code>newClientPhone</code>, <code>newClientEmail</code>), <code>treatmentId</code>, <code>dateTime</code>, <code>workerId</code> (vacío = quien la crea), <code>message</code> y <code>allowOutsideHours</code>.</td></tr>
+                                <tr><td><code>/{id}/approve</code></td><td>Acepta una solicitud pendiente asignando un profesional; puede llevar un mensaje.</td></tr>
+                                <tr><td><code>/{id}/reject</code></td><td>Rechaza una solicitud con un mensaje para el cliente.</td></tr>
+                                <tr><td><code>/{id}/propose</code></td><td>Propone de 1 a 3 horas futuras. La cita pasa a <code>PROPOSED</code>; caduca a las 48 h o 2 h antes de la primera hora.</td></tr>
+                                <tr><td><code>/{id}/withdraw-proposal</code></td><td>Retira la propuesta y la cita vuelve a pendiente.</td></tr>
+                                <tr><td><code>/{id}/reschedule</code></td><td>Cambia la hora (y el profesional) de una cita confirmada que no ha empezado. Sigue confirmada y se guarda la hora anterior.</td></tr>
+                                <tr><td><code>/{id}/cancel</code></td><td>Anula una cita confirmada que no ha empezado.</td></tr>
+                                <tr><td><code>/worker/agenda-blocks</code></td><td>Bloquea un horario de un profesional (<code>workerId</code>) o de todo el centro (<code>wholeCenter</code>) entre <code>startsAt</code> y <code>endsAt</code>, con motivo opcional. <code>/{id}/delete</code> lo quita.</td></tr>
+                            </tbody>
+                        </table>
                     </div>
-                    <p>
-                        Rechaza una solicitud de cita cambiando su estado a <code>REJECTED</code> y registrando en <code>workerMessage</code> la causa comunicada por el terapeuta (ej. indisponibilidad de cabina o necesidad de reagendar).
-                    </p>
+                    <p style="font-size: 0.9rem;">Fuera del horario de reservas el servidor responde <strong>409</strong> con <code>code: OUTSIDE_HOURS</code> y la pantalla pregunta si guardar igualmente (se reenvía con <code>allowOutsideHours=true</code>). Los solapes nunca se permiten.</p>
                 </div>
 
                 <div class="card-feature" style="margin-bottom: 1.5rem;">
                     <div class="card-feature-header">
                         <span class="http-post">POST</span>
                         <strong>/worker/inventory/{id}/adjust-stock</strong>
-                        <span class="card-badge badge-worker">WORKER</span>
+                        <span class="card-badge badge-worker">WORKER · JSON</span>
                     </div>
                     <p>
-                        Modifica en tiempo real las existencias de un insumo en la sede física. Parámetro <code>change</code> (+1 o -1). <strong>Salvaguarda matemática:</strong> aplica <code>Math.max(0, newStock)</code> asegurando que ningún producto registre existencias negativas.
+                        Suma o resta unidades (parámetro <code>change</code>) y devuelve <code>{"stock", "lowStockThreshold"}</code>. El stock nunca baja de 0.
                     </p>
                 </div>
 
@@ -463,57 +637,54 @@
                         <strong>/worker/inventory/add</strong>
                         <span class="card-badge badge-worker">WORKER</span>
                     </div>
-                    <p>
-                        Soporta dos modalidades de abastecimiento:
-                    </p>
+                    <p>Dos modalidades:</p>
                     <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.9rem;">
-                        <li><strong>Modo Existente (<code>mode="existing"</code>):</strong> Vincula al inventario del centro un producto del catálogo global indicando su stock inicial. Si ya existía, suma las unidades recibidas.</li>
-                        <li><strong>Modo Nuevo (<code>mode="new"</code>):</strong> Registra un producto inédito en el catálogo (nombre, descripción, categoría, PVP) y genera simultáneamente su registro en el inventario del centro con el stock especificado.</li>
+                        <li><strong><code>mode="existing"</code>:</strong> añade al centro un producto del catálogo global con su stock inicial; si ya lo tenía, suma las unidades.</li>
+                        <li><strong><code>mode="new"</code>:</strong> crea un producto en el catálogo y su stock en el centro.</li>
                     </ul>
                 </div>
 
-                <div class="card-feature">
+                <div class="card-feature" style="margin-bottom: 1.5rem;">
                     <div class="card-feature-header">
                         <span class="http-post">POST</span>
                         <strong>/worker/treatments/add</strong>
                         <span class="card-badge badge-worker">WORKER</span>
                     </div>
                     <p>
-                        Da de alta un nuevo tratamiento en el centro asignado. Parámetros: <code>name</code>, <code>description</code>, <code>price</code>, <code>duration</code> (en minutos) y <code>type</code> (valor del enumerado <code>TreatmentType</code>).
+                        Alta de tratamiento en el centro: <code>name</code>, <code>description</code>, <code>price</code>, <code>duration</code> (minutos) y <code>type</code> (<code>TreatmentType</code>).
                     </p>
                 </div>
 
                 <div class="card-feature" style="margin-bottom: 1.5rem;">
                     <div class="card-feature-header">
-                        <span class="http-get">GET</span>
-                        <strong>/worker/clients</strong>
+                        <span class="http-get">GET</span> <span class="http-post">POST</span>
+                        <strong>/worker/clients · /create · /{clientId} · /template</strong>
                         <span class="card-badge badge-worker">WORKER</span>
                     </div>
-                    <p>
-                        Consulta la cartera de clientes de la sede. Permite búsqueda en tiempo real por nombre, teléfono o email (<code>?search=...</code>) e integra botones para alta de cliente y acceso a la configuración de la plantilla de ficha.
-                    </p>
+                    <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.9rem;">
+                        <li><strong><code>GET /worker/clients</code>:</strong> cartera del centro con buscador (<code>?search=</code>) y resumen. <code>GET /worker/clients/search</code> devuelve JSON para el buscador de «Nueva cita».</li>
+                        <li><strong><code>POST /worker/clients/create</code>:</strong> alta manual (<code>name</code>, <code>phone</code>, <code>email</code>, <code>initialNotes</code>). Solo reutiliza clientes del propio centro con ese teléfono o correo; si el correo ya es de otra cuenta, el cliente se guarda sin él. Sin correo recibe uno interno <code>cliente_&lt;teléfono&gt;@cbelleza.local</code>.</li>
+                        <li><strong><code>/worker/clients/{clientId}</code></strong> y <strong><code>POST /{clientId}/card</code>:</strong> ver y guardar la ficha técnica (valores en JSON en <code>client_cards.data_json</code>).</li>
+                        <li><strong><code>/worker/clients/template</code>:</strong> campos de la ficha del centro (<code>text</code>, <code>textarea</code>, <code>select</code>, <code>checkbox</code>, <code>date</code>, <code>number</code>).</li>
+                    </ul>
                 </div>
 
                 <div class="card-feature" style="margin-bottom: 1.5rem;">
                     <div class="card-feature-header">
-                        <span class="http-get">GET</span> / <span class="http-post">POST</span>
-                        <strong>/worker/clients/{clientId}</strong>
+                        <span class="http-get">GET</span> <span class="http-post">POST</span>
+                        <strong>/worker/center</strong>
                         <span class="card-badge badge-worker">WORKER</span>
                     </div>
-                    <p>
-                        Visualiza y actualiza la <strong>ficha técnica clínica del cliente</strong>. Carga dinámicamente los campos definidos en la plantilla del centro y renderiza los inputs adecuados según el tipo (texto, textarea, select, número, etc.). Al hacer <code>POST</code>, serializa y persiste las respuestas en formato JSON en la entidad <code>ClientCard</code>.
-                    </p>
+                    <p>«Mi Centro»: datos del centro, zona horaria (entre las de <code>CenterTimeZones.OPTIONS</code>), cabinas (1-50), datos personales y contraseña del trabajador.</p>
                 </div>
 
                 <div class="card-feature">
                     <div class="card-feature-header">
-                        <span class="http-get">GET</span> / <span class="http-post">POST</span>
-                        <strong>/worker/clients/template</strong>
-                        <span class="card-badge badge-worker">WORKER</span>
+                        <span class="http-post">POST</span>
+                        <strong>/worker/google-calendar/connect · /disconnect</strong>
+                        <span class="card-badge badge-worker">WORKER · opcional</span>
                     </div>
-                    <p>
-                        Editor visual de la <strong>plantilla de ficha técnica</strong> del centro. Permite a los especialistas añadir, renombrar, reordenar y configurar los tipos de datos requeridos a sus clientes. Soporta tipos <code>text</code>, <code>textarea</code>, <code>select</code>, <code>checkbox</code>, <code>date</code> y el nuevo tipo <code>number</code>. Persiste la estructura normalizada en <code>ClientCardTemplate</code>.
-                    </p>
+                    <p>Activa o desactiva la copia de las citas en Google Calendar. <code>connect</code> manda a la pantalla de permiso de Google (ámbito <code>calendar.app.created</code>, con <code>state</code> en sesión) y Google vuelve a <code>/worker/google-calendar/callback</code>. Cuquora crea un calendario «Cuquora · Centro» y solo puede tocar ese. Necesita <code>GOOGLE_CLIENT_ID</code>, <code>GOOGLE_CLIENT_SECRET</code> y <code>GOOGLE_TOKEN_KEY</code>; si no, el interruptor sale como «Próximamente».</p>
                 </div>
             </section>
 
@@ -524,7 +695,7 @@
                         <div class="section-icon">🌐</div>
                         <div>
                             <h2>Módulo 4: APIs REST de Disponibilidad y Geoposicionamiento</h2>
-                            <p style="margin: 0; font-size: 0.95rem;">Controlador: <code>CenterApiController</code></p>
+                            <p style="margin: 0; font-size: 0.95rem;">Controlador: <code>CenterApiController</code> (<code>@ApiEndpoint</code>: los errores también salen en JSON)</p>
                         </div>
                     </div>
                 </div>
@@ -536,7 +707,7 @@
                         <span class="card-badge badge-guest">JSON REST</span>
                     </div>
                     <p>
-                        Endpoint consumido por el widget de reserva del cliente. Analiza todas las citas confirmadas de la sede física y calcula de forma matemática qué bloques de 30 minutos están ocupados según la duración del tratamiento asociado.
+                        Lo usa el selector de hora del cliente. Devuelve el horario de reservas, los días cerrados del centro (bloqueos de todo el centro) y los huecos llenos: los que no tienen cabina libre o ningún profesional disponible, contando citas, bloqueos y horas propuestas.
                     </p>
                     <pre><code>// Respuesta JSON de ejemplo:
 {
@@ -544,11 +715,11 @@
   "workingDays": [1, 2, 3, 4, 5],
   "openHour": 9,
   "closeHour": 20,
-  "closedDates": [],
+  "closedDates": ["2026-10-20"],
   "occupied": [
-    "2026-09-29T10:00:00",
-    "2026-09-29T10:30:00",
-    "2026-09-29T15:00:00"
+    "2026-10-14T10:00:00",
+    "2026-10-14T10:30:00",
+    "2026-10-14T15:00:00"
   ]
 }</code></pre>
                 </div>
@@ -560,7 +731,7 @@
                         <span class="card-badge badge-guest">JSON REST</span>
                     </div>
                     <p>
-                        Búsqueda y ordenación espacial de centros. Si se proporcionan los parámetros <code>lat</code> y <code>lon</code>, calcula la distancia física en kilómetros hacia cada centro utilizando la <strong>fórmula de Haversine</strong> y devuelve el listado ordenado por cercanía geográfica.
+                        Búsqueda de centros para la página <code>/centers</code>. Si se pasan <code>lat</code> y <code>lon</code>, calcula la distancia en kilómetros a cada centro con la <strong>fórmula de Haversine</strong> (<code>GeoDistance</code>).
                     </p>
                 </div>
             </section>
@@ -571,8 +742,8 @@
                     <div class="section-header-title">
                         <div class="section-icon">📬</div>
                         <div>
-                            <h2>Módulo 5: Contacto, Notificaciones y Certificación de Centros</h2>
-                            <p style="margin: 0; font-size: 0.95rem;">Controladores: <code>BaseController</code>, <code>EmailService</code>, Integración Frontend <code>EmailJS</code></p>
+                            <h2>Módulo 5: Contacto, Correos y Alta de Centros</h2>
+                            <p style="margin: 0; font-size: 0.95rem;">Controlador: <code>ContactController</code> · Correo: <code>EmailGateway</code>, <code>InquiryMailService</code>, <code>AppointmentMailService</code></p>
                         </div>
                     </div>
                 </div>
@@ -580,37 +751,25 @@
                 <div class="card-feature" style="margin-bottom: 1.5rem;">
                     <div class="card-feature-header">
                         <span class="http-get">GET</span> <span class="http-post">POST</span>
-                        <strong>/register-center</strong>
-                        <span class="card-badge badge-guest">Público / Solicitantes</span>
+                        <strong>/register-center · /contact</strong>
+                        <span class="card-badge badge-guest">Público</span>
                     </div>
-                    <p>
-                        Tramitación de expedientes de alta para centros de belleza colaboradores. Incorpora una interfaz con validación reactiva continua y control de desbordamiento en el área de notas.
-                    </p>
                     <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.9rem; margin-bottom: 0.8rem;">
-                        <li><strong>Parámetros enviados:</strong> <code>center_name</code>, <code>cif</code>, <code>contact_name</code>, <code>phone</code>, <code>email</code>, <code>city</code>, <code>specialties</code>, <code>notes</code>, <code>submission_date</code>.</li>
-                        <li><strong>Validación reactiva:</strong> Botón de envío deshabilitado condicionalmente. Al intentar enviar con datos pendientes, se acciona un efecto de vibración visual y se señalan los campos con borde rojo (<code>#d32f2f</code>) y mensaje contextual; se verifica el patrón regex estricto de email con comprobación de dominio.</li>
-                        <li><strong>Estrategia de Plantilla Única (EmailJS Free Tier):</strong> Se canaliza a través de un único template con <code>To: {{email}}</code> (solicitante) y <code>BCC: cuquora@hotmail.com</code> (administrador).</li>
-                        <li><strong>Garantía para el Solicitante:</strong> Compromiso explícito notificado en el correo de evaluación y respuesta en un plazo máximo de <strong>1 semana (7 días naturales)</strong>.</li>
-                        <li><strong>Panel de Resolución Directa para el Administrador:</strong> El correo remitido al administrador incorpora botones interactivos para resolución en 1 solo clic:
-                            <br>• <strong style="color: #2e7d32;">✓ Aceptar Solicitud</strong>: Genera un <code>mailto:</code> directo hacia el solicitante con asunto y cuerpo pre-redactados de bienvenida y credenciales de acceso.
-                            <br>• <strong style="color: #c62828;">✕ Denegar / Subsanar</strong>: Genera un <code>mailto:</code> pre-redactado para requerir subsanación de datos o comunicar la no admisión.
-                        </li>
-                        <li><strong>Fallback en Backend:</strong> Ejecución asíncrona mediante <code>EmailService.sendCenterRegistrationRequestAsync()</code> para garantizar la recepción incluso en caso de fallo del cliente JavaScript.</li>
+                        <li><strong>Alta de centro:</strong> <code>centerName</code>, <code>cif</code>, <code>contactName</code>, <code>phone</code>, <code>email</code>, ciudad, especialidades y notas. Se envía un acuse al solicitante y la solicitud al administrador (<code>CRM_ADMIN_EMAIL</code>).</li>
+                        <li><strong>Contacto:</strong> <code>name</code>, <code>email</code>, <code>phone</code>, <code>subject</code> y <code>message</code>, con acuse y aviso al administrador.</li>
+                        <li><strong>Validación</strong> en el navegador (botón desactivado hasta que el formulario es válido) y en el servidor.</li>
                     </ul>
                 </div>
 
-                <div class="card-feature" style="margin-bottom: 1.5rem;">
+                <div class="card-feature">
                     <div class="card-feature-header">
-                        <span class="http-get">GET</span> <span class="http-post">POST</span>
-                        <strong>/contact</strong>
-                        <span class="card-badge badge-guest">Público</span>
+                        <strong>Envío de correos</strong>
+                        <span class="card-badge badge-admin">Servidor</span>
                     </div>
-                    <p>
-                        Canal de atención al cliente y consultas comerciales. Dispone de validación reactiva en tiempo real sobre los campos obligatorios (nombre, email con verificación de dominio, motivo y mensaje), con limitación en el redimensionamiento del área de texto para preservar el contenedor de tarjeta.
-                    </p>
-                    <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.9rem; margin-bottom: 0.8rem;">
-                        <li><strong>Parámetros enviados:</strong> <code>user_name</code>, <code>user_email</code>, <code>user_subject</code>, <code>user_message</code>, <code>date</code>.</li>
-                        <li><strong>Canal de envío:</strong> Disparo transaccional vía EmailJS hacia la bandeja de soporte con fallback en controlador Spring Boot.</li>
+                    <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.9rem;">
+                        <li>Plantillas Thymeleaf en <code>templates/email/</code> enviadas con <code>EmailGateway</code>: por SMTP (Brevo, <code>MAIL_HOST</code>…) o, si no hay SMTP configurado, escritas en la consola (<code>LoggingEmailGateway</code>). EmailJS se retiró el 6 de octubre.</li>
+                        <li><strong>Correos de citas</strong> (<code>AppointmentMailService</code>): solicitud, confirmación, cambio de hora, propuesta, anulación y recordatorio 24 h antes (lo envía <code>AppointmentStatusScheduler</code>).</li>
+                        <li>Remitente: <code>CRM_FROM_EMAIL</code>. Con <code>SITE_URL</code> los correos llevan el botón «Ver mis citas».</li>
                     </ul>
                 </div>
             </section>
@@ -622,7 +781,7 @@
                         <div class="section-icon">⚖️</div>
                         <div>
                             <h2>Reglas de Negocio & Control de Excepciones</h2>
-                            <p style="margin: 0; font-size: 0.95rem;">Salvaguardas de integridad y gestión de errores en tiempo de ejecución</p>
+                            <p style="margin: 0; font-size: 0.95rem;">Los servicios lanzan <code>BusinessRuleException</code> con el mensaje en español; las páginas lo muestran como aviso y los endpoints JSON lo devuelven en el cuerpo</p>
                         </div>
                     </div>
                 </div>
@@ -633,34 +792,59 @@
                             <tr>
                                 <th>Condición Detectada</th>
                                 <th>Regla de Negocio Aplicada</th>
-                                <th>Excepción / Respuesta</th>
+                                <th>Mensaje / Respuesta</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
                                 <td><strong>Fecha de reserva en el pasado</strong></td>
-                                <td>No se permite agendar turnos anteriores al instante actual (<code>LocalDateTime.now()</code>).</td>
-                                <td>Lanza <code>IllegalArgumentException("No se puede reservar una fecha pasada")</code>.</td>
+                                <td>No se puede reservar antes de la hora actual del centro (<code>CenterClock.now</code>, con su zona horaria).</td>
+                                <td>«No se puede reservar una fecha pasada.»</td>
                             </tr>
                             <tr>
-                                <td><strong>Fin de semana (Sábado/Domingo)</strong></td>
-                                <td>Las cabinas operan exclusivamente en días laborables de Lunes a Viernes.</td>
-                                <td>Lanza <code>IllegalArgumentException("El servicio no cabe completo dentro del horario del centro")</code>.</td>
+                                <td><strong>Fuera del horario de reservas</strong></td>
+                                <td>Lunes a viernes, de 9 a 20 h; el tratamiento debe terminar dentro del horario. El trabajador puede saltárselo confirmándolo.</td>
+                                <td>Cliente: «El servicio no cabe completo dentro del horario del centro.» Trabajador: 409 <code>OUTSIDE_HOURS</code>.</td>
                             </tr>
                             <tr>
-                                <td><strong>Cita que sobrepasa las 20:00h</strong></td>
-                                <td>Un tratamiento de 60 min no puede iniciarse a las 19:30 porque concluiría fuera de jornada (20:30).</td>
-                                <td>Lanza <code>IllegalArgumentException("El servicio no cabe completo dentro del horario del centro")</code>.</td>
+                                <td><strong>Centro cerrado</strong></td>
+                                <td>Hay un bloqueo de todo el centro en ese horario.</td>
+                                <td>«El centro está cerrado en ese horario.»</td>
                             </tr>
                             <tr>
-                                <td><strong>Solapamiento con cita confirmada</strong></td>
-                                <td>Si existe otra cita en estado <code>CONFIRMED</code> en la misma franja de la cabina, se bloquea la reserva.</td>
-                                <td>Lanza <code>IllegalArgumentException("Esa hora ya está ocupada")</code>.</td>
+                                <td><strong>Profesional ocupado</strong></td>
+                                <td>El profesional ya tiene otra cita o un bloqueo a esa hora.</td>
+                                <td>«&lt;Nombre&gt; ya tiene otra cita a esa hora.» / «… no está disponible en ese horario.»</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Sin cabina o sin profesional libre</strong></td>
+                                <td>No puede haber más citas a la vez que <code>centers.cabins</code> ni que profesionales libres. Las horas propuestas a otros clientes cuentan como ocupadas.</td>
+                                <td>«No hay ningún profesional libre a esa hora.»</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Propuesta de horas</strong></td>
+                                <td>Solo para solicitudes pendientes; de 1 a 3 horas futuras con margen para que el cliente responda.</td>
+                                <td>«Propón entre 1 y 3 horas.» / «Propón horas con más margen…»</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Mover o anular</strong></td>
+                                <td>Solo citas confirmadas que aún no han empezado.</td>
+                                <td>«Solo se pueden mover citas confirmadas que aún no han empezado.»</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Bloqueo con citas</strong></td>
+                                <td>No se puede bloquear un periodo con citas confirmadas, ni uno pasado o de más de un año.</td>
+                                <td>«Hay N citas confirmadas…»</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Recurso de otro centro o cliente</strong></td>
+                                <td>Consultas por <code>centerId</code> o <code>clientId</code> de la sesión.</td>
+                                <td><code>ResourceNotFoundException</code> → 404.</td>
                             </tr>
                             <tr>
                                 <td><strong>Stock decremental en 0 unidades</strong></td>
-                                <td>Si un insumo llega a 0, la operación <code>adjustStock(..., -1)</code> no produce existencias negativas.</td>
-                                <td>Aplica <code>Math.max(0, newStock)</code> asegurando que el valor mínimo sea 0.</td>
+                                <td>El stock no baja de 0.</td>
+                                <td>Se queda en 0.</td>
                             </tr>
                         </tbody>
                     </table>

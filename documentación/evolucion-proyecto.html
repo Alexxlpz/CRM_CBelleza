@@ -49,6 +49,8 @@
                     <li><a href="#fase-4">Fase 4: Abstracción UI & Pulido de Figma</a></li>
                     <li><a href="#fase-5">Fase 5: Docker, PostgreSQL & Seguridad</a></li>
                     <li><a href="#fase-6">Fase 6: Notificaciones, Onboarding & UI Reactiva</a></li>
+                    <li><a href="#fase-7">Fase 7: Spring Security, Flyway & Escritorio</a></li>
+                    <li><a href="#fase-8">Fase 8: Legal, Google y Agenda Flexible</a></li>
                     <li><a href="#retos-superados">Retos Técnicos Superados</a></li>
                     <li><a href="#roadmap">Hoja de Ruta Futura</a></li>
                 </ul>
@@ -80,7 +82,7 @@
                     </div>
                     <div class="hero-meta-item">
                         <span>Commits Registrados:</span>
-                        <strong>23 Hitos Verificados</strong>
+                        <strong>36 commits (hasta el 11 oct 2026)</strong>
                     </div>
                     <div class="hero-meta-item">
                         <span>Metodología:</span>
@@ -517,7 +519,7 @@
                         <div class="timeline-dot"></div>
                         <div class="timeline-content">
                             <div class="timeline-header">
-                                <span class="commit-hash">Hito Actual</span>
+                                <span class="commit-hash">8e1d6c2</span>
                                 <span class="commit-date">📅 04 de Octubre, 2026</span>
                                 <span class="commit-author">👤 Alejandro López Ortega</span>
                             </div>
@@ -527,6 +529,167 @@
                                 <strong>Ergonomía en Formularios:</strong> Restricción de desborde y eliminación de lag al redimensionar <code>textarea</code> en <code>register-center.html</code> y <code>contact.html</code>; botones de envío interactivos con feedback visual/vibración que destacan campos incompletos o con sintaxis errónea (validación regex estricta con verificación de dominio).<br>
                                 <strong>Arquitectura de Correo Unificada (EmailJS + Spring Mail):</strong> Resolución de la limitación del plan gratuito de EmailJS (máximo 2 plantillas) fusionando la notificación al solicitante (compromiso de respuesta máxima en 1 semana / 7 días naturales) con la auditoría en copia oculta (BCC) al Administrador, dotada de botones instantáneos de resolución (<code>✓ Aceptar Solicitud</code> y <code>✕ Denegar / Subsanar</code> vía <code>mailto:</code> pre-redactado), respaldado por servicio de envío asíncrono en backend con <code>EmailService.java</code>.
                             </p>
+                        </div>
+                    </div>
+
+                    <!-- Commit 24 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="commit-hash">90b3e49</span>
+                                <span class="commit-date">📅 05 de Octubre, 2026</span>
+                                <span class="commit-author">👤 alejandro</span>
+                            </div>
+                            <h4>Navegación reorganizada e índice dinámico en Funcionalidades</h4>
+                            <p>
+                                Reorganización de la barra de navegación e índice lateral que sigue la lectura en la página de Funcionalidades. Los botones de «Iniciar sesión» y «Registrarse» quedan desactivados mientras falte un campo o esté mal rellenado. Arreglos en el menú hamburguesa desplegado y en el favicon, que a veces no aparecía.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Commit 25 -->
+                    <div class="timeline-item" id="fase-7">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="commit-hash">a281628</span>
+                                <span class="commit-date">📅 06 de Octubre, 2026</span>
+                                <span class="commit-author">👤 alejandro</span>
+                            </div>
+                            <h4>Spring Security, aislamiento entre centros y gran refactorización</h4>
+                            <p>
+                                <strong>El cambio de arquitectura más grande del proyecto:</strong>
+                            </p>
+                            <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.88rem;">
+                                <li><strong>Spring Security</strong> sustituye a la sesión manual: login por formulario con correo o nombre, roles <code>CLIENT</code>/<code>WORKER</code>, CSRF, «Recordar mi sesión» y cierre de sesión por POST. <code>/login-selector</code> y la consola H2 solo existen con el perfil <code>dev</code>.</li>
+                                <li><strong>Aislamiento entre centros:</strong> un trabajador solo ve citas, stock y fichas de su centro; lo de otro centro responde 404.</li>
+                                <li><code>BookingService</code> concentra las reglas de reserva con bloqueo por centro para evitar dobles reservas; horario configurable (<code>crm.booking.*</code>).</li>
+                                <li><code>BaseController</code> y <code>AppointmentController</code> se dividen en un controlador por área, sin lógica de negocio ni repositorios. Formularios como <code>record</code>, <code>PasswordPolicy</code> y errores con <code>BusinessRuleException</code> / <code>ResourceNotFoundException</code>.</li>
+                                <li>Correo rehecho: <code>EmailGateway</code> (SMTP o consola) con plantillas Thymeleaf; <strong>se elimina EmailJS</strong>.</li>
+                                <li>Sin consultas N+1, <code>open-in-view</code> desactivado y dependencias sin uso eliminadas (GraphQL, WebFlux, WebSocket…).</li>
+                                <li>Nuevo <code>tokens.css</code> con modo oscuro completo y contraste AA; componentes de UI unificados (botones, avisos, modales, hojas laterales); fuera los estilos inline, los <code>onclick</code>, los <code>!important</code> y unas 300 reglas CSS sin uso.</li>
+                                <li>Accesibilidad (teclado, foco atrapado en modales, etiquetas aria), arreglo de XSS al insertar datos con <code>innerHTML</code>, imágenes en WebP y primeros 54 tests.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Commit 26 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="commit-hash">334ac8a · abd01f5</span>
+                                <span class="commit-date">📅 07 de Octubre, 2026</span>
+                                <span class="commit-author">👤 alejandro</span>
+                            </div>
+                            <h4>Botón «Volver» y arreglos visuales</h4>
+                            <p>
+                                Botón de volver en las pantallas interiores para un recorrido más natural, arreglo del menú en móvil y de varios fallos visuales. Si se pulsa un centro sin sesión, la app lleva al login.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Commit 27 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="commit-hash">b0d29a3</span>
+                                <span class="commit-date">📅 07 de Octubre, 2026</span>
+                                <span class="commit-author">👤 alejandro</span>
+                            </div>
+                            <h4>Flyway gestiona el esquema de la base de datos</h4>
+                            <p>
+                                Se elimina <code>docker/postgres/init.sql</code>: el esquema vive en migraciones versionadas (<code>V1__esquema_inicial.sql</code>, <code>V2__eliminar_clientes_invitados.sql</code>) que valen igual para H2 y PostgreSQL, con <code>ddl-auto=validate</code>. Los datos de demostración los carga solo <code>DatabaseSeeder</code>.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Commit 28 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="commit-hash">9e411df · 0e95eea</span>
+                                <span class="commit-date">📅 08-09 de Octubre, 2026</span>
+                                <span class="commit-author">👤 alejandro</span>
+                            </div>
+                            <h4>Pantallas de gestión pensadas para escritorio</h4>
+                            <p>
+                                Tratamientos, inventario y clientes aprovechan el ancho en escritorio (<code>.main-container--wide</code>, hasta 1440 px): franja de resumen con totales, filtros de categoría y selector <strong>Tarjetas / Lista</strong> que se recuerda en el navegador, con todas las filas del mismo alto. Los iconos Lucide pasan a servirse desde la propia app con el prefijo <code>lucide-</code> (desde la CDN salían vacíos). Entre 993 y 1365 px los botones de sesión de la barra se quedan solo con icono. La etiqueta «Registrado» solo aparece en clientes con cuenta.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Commit 29 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="commit-hash">66cbb79</span>
+                                <span class="commit-date">📅 09 de Octubre, 2026</span>
+                                <span class="commit-author">👤 alejandro</span>
+                            </div>
+                            <h4>Nueva pantalla de centros y arreglos de seguridad</h4>
+                            <p>
+                                Rediseño del buscador de centros con mapa. Al tocar un marcador se abre primero un globo con nombre, dirección, distancia y «Ver tratamientos»; solo al pulsarlo se pide iniciar sesión si no la hay. Ese mismo día se hizo una auditoría de seguridad (el informe está en <code>PENDIENTES.md</code>); sus primeros arreglos llegaron el 10 y el 11 de octubre.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Commit 30 -->
+                    <div class="timeline-item" id="fase-8">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="commit-hash">7cad760</span>
+                                <span class="commit-date">📅 10 de Octubre, 2026</span>
+                                <span class="commit-author">👤 alejandro</span>
+                            </div>
+                            <h4>Páginas legales, 404 propia, secretos en .env y vista semanal de la agenda</h4>
+                            <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.88rem;">
+                                <li><strong>Términos</strong> (<code>/terms</code>) y <strong>Cookies</strong> (<code>/cookies</code>) con índice lateral, pie común con enlaces legales y aviso de cookies informativo.</li>
+                                <li><strong>Página 404 propia</strong>, también sin sesión: las URL que no existen ya no mandan al login.</li>
+                                <li><code>robots.txt</code> y etiquetas Open Graph con imagen para compartir en redes.</li>
+                                <li>Contraseñas y claves fuera del repositorio: van en <code>.env</code> (con <code>.env.example</code> como plantilla); PostgreSQL deja de publicar su puerto; los datos demo solo se cargan con <code>crm.seed-demo-data=true</code>.</li>
+                                <li>Login y registro ya no cambian de tamaño al pasar de una página a otra.</li>
+                                <li><strong>Vista Semana en la agenda</strong>: rejilla de lunes a domingo con cada cita del alto de su duración, coloreada por estado, y línea con la hora actual.</li>
+                            </ul>
+                            <div class="callout callout-warning" style="margin-top: 0.75rem;">
+                                <div class="callout-icon">⚠️</div>
+                                <div class="callout-content">
+                                    <p>El mensaje del commit menciona un límite de intentos de login, pero no llegó a implementarse: sigue abierto como punto #4 de <code>PENDIENTES.md</code>.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Commit 31 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="commit-hash">7d8ee30</span>
+                                <span class="commit-date">📅 11 de Octubre, 2026</span>
+                                <span class="commit-author">👤 alejandro</span>
+                            </div>
+                            <h4>Google, agenda flexible, campana del cliente y correos de citas</h4>
+                            <p>
+                                <strong>El commit con más funcionalidad nueva (109 archivos, migraciones V3 a V7):</strong>
+                            </p>
+                            <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.88rem;">
+                                <li><strong>«Iniciar sesión con Google»</strong> (OpenID Connect): vincula la cuenta con el mismo correo verificado o crea un cliente nuevo. Solo se muestra si están configuradas las credenciales.</li>
+                                <li><strong>«Recordar mi sesión» persistente</strong>: 14 días con tokens en la tabla <code>persistent_logins</code>, que se borran al cerrar sesión o cambiar la contraseña. También funciona entrando con Google.</li>
+                                <li><strong>Google Calendar</strong> desde «Mi Centro»: cada trabajador puede guardar sus citas confirmadas en un calendario «Cuquora» de su cuenta de Google, que se mantiene sincronizado en segundo plano.</li>
+                                <li><strong>Agenda flexible</strong>: cabinas por centro (citas a la vez), citas creadas por el trabajador (nacen confirmadas), cambiar hora o profesional (también arrastrando en la semana), proponer de 1 a 3 horas alternativas que el cliente elige en «Mis Citas», anulaciones y bloqueos de horario (vacaciones, descansos o centro cerrado).</li>
+                                <li><strong>Campana del cliente</strong> con sus citas de hoy y mañana y los cambios del centro de la última semana.</li>
+                                <li><strong>Correos de citas</strong> vía Brevo: solicitud, confirmación, cambio de hora, propuesta, anulación y recordatorio 24 h antes.</li>
+                                <li><strong>Zona horaria por centro</strong> (elegible en «Mi Centro») y <code>TZ</code> en Docker.</li>
+                                <li>Página de <strong>Privacidad</strong> y datos del titular (LSSI) en Términos y Privacidad.</li>
+                                <li>Arreglo de seguridad: el alta manual de clientes ya no enlaza cuentas de otros centros.</li>
+                                <li>Nuevos tests (<code>AgendaTests</code>, <code>GoogleLoginTests</code>, <code>GoogleCalendarTests</code>, <code>RegistrationTests</code>): 129 en total, todos en verde.</li>
+                            </ul>
                         </div>
                     </div>
 
@@ -556,7 +719,7 @@
                     <div class="card-feature">
                         <h4>2. Coexistencia H2 / PostgreSQL sin Discrepancias</h4>
                         <p>
-                            El proyecto debía ser capaz de arrancar en local de forma inmediata para el desarrollador (usando H2 en memoria y <code>DatabaseSeeder.java</code>) o levantarse en producción con Docker Compose sobre PostgreSQL 16 utilizando <code>init.sql</code>, manteniendo sincronizados exactamente los mismos datos de demostración y cifrado de contraseñas.
+                            El proyecto debía ser capaz de arrancar en local de forma inmediata para el desarrollador (usando H2 en memoria y <code>DatabaseSeeder.java</code>) o levantarse en producción con Docker Compose sobre PostgreSQL 16 con el mismo esquema y los mismos datos. Al principio había que mantener a mano un <code>init.sql</code> paralelo al <code>DatabaseSeeder</code>; desde el 7 de octubre el esquema lo crea <strong>Flyway</strong> con migraciones SQL compatibles con los dos motores y los datos demo solo los carga el seeder.
                         </p>
                     </div>
 
@@ -577,7 +740,28 @@
                     <div class="card-feature">
                         <h4>5. Orquestación Transaccional y Límite de Plantillas EmailJS</h4>
                         <p>
-                            La limitación de 2 plantillas en el tier gratuito de EmailJS obligó a una solución ingeniosa de diseño transaccional: una única plantilla compartida para el alta de centros que actúa como acuse de recibo para el solicitante (garantizando 1 semana de plazo máximo) y como panel de resolución con botones directos Aceptar/Denegar para el administrador en copia oculta (BCC), respaldada con ejecución asíncrona en Spring Boot (<code>EmailService.java</code>).
+                            La limitación de 2 plantillas en el tier gratuito de EmailJS obligó a una solución ingeniosa de diseño transaccional: una única plantilla compartida para el alta de centros que actúa como acuse de recibo para el solicitante (garantizando 1 semana de plazo máximo) y como panel de resolución con botones directos Aceptar/Denegar para el administrador en copia oculta (BCC), respaldada con ejecución asíncrona en Spring Boot (<code>EmailService.java</code>). El 6 de octubre se retiró EmailJS: hoy todos los correos salen del servidor con <code>EmailGateway</code> (Brevo por SMTP, o la consola si no hay SMTP configurado).
+                        </p>
+                    </div>
+
+                    <div class="card-feature">
+                        <h4>6. Aislamiento entre Centros</h4>
+                        <p>
+                            Con varios centros en la misma base de datos, un trabajador nunca debe poder ver ni tocar datos de otro cambiando un id en la URL. Toda acción de <code>/worker/**</code> usa el centro de la sesión y consultas <code>findByIdAndCenterId</code>; lo que es de otro centro responde 404. <code>CenterIsolationTests</code> lo comprueba en cada endpoint.
+                        </p>
+                    </div>
+
+                    <div class="card-feature">
+                        <h4>7. ¿Cabe la Cita? Cabinas, Profesionales y Bloqueos</h4>
+                        <p>
+                            Comprobar solo el horario dejó de bastar al permitir varias citas a la vez. <code>AgendaSnapshot</code> decide si cabe una cita: centro no cerrado, profesional sin otra cita ni bloqueo, y a la vez no más citas que cabinas ni que profesionales libres. Las horas propuestas al cliente reservan hueco, y todos los cambios pasan por <code>BookingService</code> con bloqueo por centro para evitar dobles reservas.
+                        </p>
+                    </div>
+
+                    <div class="card-feature">
+                        <h4>8. Google sin Romper el Resto</h4>
+                        <p>
+                            El login con Google tenía que convivir con el login por contraseña sin que el resto de la app notara la diferencia: el manejador de éxito cambia el usuario de Google por el mismo <code>AppUserDetails</code>. Google Calendar se sincroniza en segundo plano tras guardar la cita, así que si Google falla la cita no se ve afectada.
                         </p>
                     </div>
                 </div>
@@ -607,8 +791,8 @@
                     <div class="step-card">
                         <div class="step-num">2</div>
                         <div class="step-body">
-                            <h4>Recordatorios Automatizados vía WhatsApp Business & SMS</h4>
-                            <p>Envío de recordatorio interactivo 24 horas antes del turno con opción de reconfirmación en 1 clic.</p>
+                            <h4>Recordatorios por WhatsApp</h4>
+                            <p>El recordatorio por correo 24 horas antes ya existe. Falta enviarlo también por WhatsApp Business (plantillas aprobadas por Meta y consentimiento del cliente).</p>
                         </div>
                     </div>
 
@@ -617,6 +801,22 @@
                         <div class="step-body">
                             <h4>Panel Analítico y Liquidación de Especialistas</h4>
                             <p>Gráficos de facturación por cabina, rendimiento por profesional, comisiones y predicción de reposición de cosméticos mediante algoritmos de aprendizaje.</p>
+                        </div>
+                    </div>
+
+                    <div class="step-card">
+                        <div class="step-num">4</div>
+                        <div class="step-body">
+                            <h4>Agenda: Siguiente Fase</h4>
+                            <p>Que el cliente pueda pedir cita con varias franjas que le vienen bien y el trabajador elija, horario propio por centro y qué profesionales hacen cada tratamiento.</p>
+                        </div>
+                    </div>
+
+                    <div class="step-card">
+                        <div class="step-num">5</div>
+                        <div class="step-body">
+                            <h4>Puesta en Producción</h4>
+                            <p>Dominio propio detrás de Cloudflare (HTTPS y cookies seguras), remitente verificado en Brevo, credenciales y verificación de Google, límite de intentos de login y el resto de puntos 🟠 de <code>PENDIENTES.md</code>.</p>
                         </div>
                     </div>
                 </div>
