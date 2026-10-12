@@ -1,0 +1,163 @@
+# CLAUDE.md · Cuquora CRM
+
+Cuquora es una web responsive para centros de belleza: los **trabajadores** gestionan su centro (agenda, citas, clientes y fichas, tratamientos, inventario) y los **clientes** buscan centros y piden citas.
+
+- Repositorio: `github.com/Alexxlpz/CRM_CBelleza`, rama `master`. Paquete raíz: `com.alexxlpz.crm_cbelleza`.
+- Documentación para usuarios (HTML estático): `documentación/` (guía de roles, manual de acciones, evolución del proyecto).
+- **Trabajo pendiente y auditoría de seguridad: [`PENDIENTES.md`](PENDIENTES.md).** Léelo antes de tocar seguridad, login, correo, inventario o despliegue, y bórrale los puntos que cierres.
+
+### Lee solo lo que necesites (ahorra contexto)
+
+Este fichero se carga en cada sesión; el detalle está aparte y se lee bajo demanda:
+
+| Antes de… | Lee / usa |
+|---|---|
+| Tocar cualquier cosa visual (CSS, plantillas, JS de interfaz, textos) | skill **`interfaz-cuquora`** (movimiento, componentes, textos que no suenen a IA) |
+| Tocar agenda, navegación, mapa, cartera, listados, pie o páginas legales | [`.claude/docs/pantallas.md`](.claude/docs/pantallas.md) |
+| Tocar login, registro, sesión, Google o Google Calendar | [`.claude/docs/autenticacion.md`](.claude/docs/autenticacion.md) |
+| Tocar `.env`, variables de entorno, Docker o despliegue | [`.claude/docs/configuracion.md`](.claude/docs/configuracion.md) |
+| Añadir una funcionalidad con datos (migración, endpoint, pantalla) | skill **`nueva-funcionalidad`** |
+| Comprobar un cambio visual (capturas a varios anchos, antes y después) | skill **`capturas`** |
+
+Para buscar código usa `grep`/`rg` con el nombre de clase o la clase CSS; no leas ficheros enteros de 1000+ líneas (`common.css`, `calendar.css`, `worker-calendar.js`) si basta con un trozo.
+
+---
+
+## Cómo trabaja Alex (leer antes de cambiar nada)
+
+- **Textos de la app en español.** Todo lo que ve el usuario (plantillas, mensajes de error, correos, diálogos) va en español.
+- **No hagas commit ni push salvo que Alex lo pida**; deja los cambios en la carpeta para que los revise. Cuando los pida: en inglés y breves, título corto y como mucho unas viñetas de una línea:
+  ```
+  Improve desktop management screens and fix icons
+
+  - Wider layout, stats strip, category filters and grid/list toggle
+  - Self-host Lucide icons with the lucide- prefix
+  ```
+- **Escritorio aprovechando el ancho, sin romper el móvil.** En escritorio, contenedor ancho, más tarjetas por fila y vistas de lista. En móvil todo debe seguir igual.
+- **Nada cortado en anchos intermedios.** Media pantalla horizontal (≈960-1365 px) es un uso habitual: ningún botón se sale y los textos hacen salto de línea en lugar de recortarse con «…» (solo se recortan resúmenes que tienen versión completa en otro sitio, como la descripción corta de producto).
+- **Iconos con sentido, nunca huecos vacíos.** Si un elemento tiene hueco de icono, pon un icono Lucide que lo identifique; si no aporta nada, quita el hueco. Ante la duda, pon el icono.
+- **Coherencia entre pantallas.** Un control que existe en varias pantallas (p. ej. el selector Tarjetas/Lista) va en la misma posición en todas.
+- **Al terminar:** pasa los tests, prueba en 1920, 1440, 1100, 960, 768 y 390 px y di qué archivos has tocado y por qué. Si el cambio es visual, adjunta capturas de antes y después (escritorio y móvil).
+
+---
+
+## Entorno, arranque y tests
+
+Alex trabaja en dos máquinas:
+
+| | Windows (IntelliJ) | Linux (Arch) |
+|---|---|---|
+| Carpeta | `C:\Users\alexl\IdeaProjects\CRM_CBelleza` | `/home/alejandro/IdeaProjects/CRM_CBelleza` |
+| Maven | `mvnw.cmd` (wrapper local, no está en git) | `mvn` del sistema (no hay wrapper) |
+| JDK | 21 | **El `java` por defecto es OpenJDK 27 y no compila** (Lombok falla con `EndPosTable`). Usa siempre `JAVA_HOME=/home/alejandro/.jdks/ms-25.0.4.1` |
+
+```bash
+# En Linux, anteponer JAVA_HOME=/home/alejandro/.jdks/ms-25.0.4.1 a cada comando y usar mvn en vez de ./mvnw
+
+./mvnw spring-boot:run -Dspring-boot.run.profiles=dev   # desarrollo: H2 en memoria, /login-selector y consola H2
+./mvnw test                                             # todos los tests (134, verde a 12 oct 2026)
+./mvnw -Dtest=CenterIsolationTests test                 # un solo test
+./mvnw -DskipTests clean package                        # jar en target/
+docker compose up --build                               # app en :8080 + PostgreSQL 16 (necesita el .env, ver abajo)
+```
+
+- En IntelliJ: Run Configuration > Active profiles = `dev`. La app escucha en `http://localhost:8080`.
+- Con `mvn spring-boot:run` la app sirve CSS, JS y plantillas desde `target/classes`: tras editarlos fuera de IntelliJ, ejecuta `mvn -o resources:resources` para verlos.
+- `application-dev.properties` desactiva las cachés de Thymeleaf y del hash de recursos: los cambios de plantillas, CSS y JS se ven sin reiniciar. CSS y JS se sirven con hash de contenido en la URL, así que tras un despliegue no hace falta Ctrl+F5.
+- Usuarios demo: los crea `DatabaseSeeder` si la BD está vacía **y** `crm.seed-demo-data=true`, que solo activan el perfil `dev` y los tests (`src/test/resources/config/application.properties`). Contraseña `password123`, pública: nunca en producción.
+  - Trabajadores: `carlos@cbelleza.com` y `lucia.romero@cbelleza.com` (Centro Histórico), `elena@cbelleza.com` (Plaza Norte), `marco@cbelleza.com` (Sarrià-Sant Gervasi), `ana@cbelleza.com` (Las Condes).
+  - Clientes: `sofia@gmail.com` y otros.
+  - Con el perfil `dev`, `/login-selector` permite entrar como cualquiera sin contraseña.
+- **Secretos solo en `.env`** (en `.gitignore`); **nunca** contraseñas en `docker-compose.yml`, `application*.properties` ni en el código. Si añades una variable, añádela también a `.env.example`. Tabla de variables y despliegue: [`.claude/docs/configuracion.md`](.claude/docs/configuracion.md).
+- Si el 8080 está ocupado (Alex suele tener la app abierta en IntelliJ), no lo pares: arranca tu copia con `-Dspring-boot.run.arguments=--server.port=8091`.
+
+## Stack
+
+- **Java 21** (`java.version` del pom), **Spring Boot 4.1.0** (`spring-boot-starter-webmvc`, Thymeleaf, Security, Data JPA, Mail), Lombok, devtools.
+- **Flyway** para el esquema (`src/main/resources/db/migration`), `ddl-auto=validate`.
+- BD: **H2 en memoria** por defecto (local y tests); **PostgreSQL 16** con Docker. El driver de MySQL está incluido pero no se usa (necesitaría `flyway-mysql`).
+- Front: Thymeleaf + CSS propio + JS sin framework. Tipografía Plus Jakarta Sans (Google Fonts). Iconos **Lucide 0.321.0** servidos por la propia app. Mapa con **Leaflet 1.9.4** y teselas de **OpenStreetMap**.
+- Tests: JUnit 5 + Spring Boot Test + spring-security-test.
+
+## Estructura
+
+```
+src/main/java/com/alexxlpz/crm_cbelleza/
+  booking/       OpeningHoursPolicy, BookingProperties, ClientVisitAnalyzer, AgendaSnapshot (¿cabe una cita?), CenterClock, CenterTimeZones
+  config/        SecurityConfig, DatabaseSeeder, JacksonConfig, TimeConfig
+  controllers/   un controlador por área (sin lógica de negocio ni repositorios); DevLoginController solo en dev
+  dto/           DTOs de lectura (ClientSummaryDTO, CenterSummaryDTO, AppointmentCalendarDTO…)
+  entities/      entidades JPA + enums
+  exceptions/    BusinessRuleException, ResourceNotFoundException, handlers MVC y JSON (@ApiEndpoint)
+  forms/         formularios como records; PasswordPolicy, FormText
+  googlecalendar/ sincronización de citas con Google Calendar (GoogleCalendarService, Gateway HTTP, cifrado de tokens)
+  mail/          EmailGateway (Smtp / Logging), InquiryMailService, AppointmentMailService (+ Listener), MailConfig
+  repositories/  Spring Data JPA
+  scheduler/     AppointmentStatusScheduler (cada 60 s marca citas pasadas como COMPLETED)
+  security/      AppUserDetails(Service), handlers de login/acceso, RoleHomes, CurrentUserModelAdvice
+  services/      lógica de negocio y validación
+src/main/resources/
+  db/migration/  V1__esquema_inicial.sql, V2__eliminar_clientes_invitados.sql, V3__usuarios_google.sql,
+                 V4__sesiones_recordadas.sql, V5__calendario_google.sql, V6__zona_horaria_centros.sql,
+                 V7__agenda_flexible.sql, V8__resumen_tratamiento.sql
+  templates/     públicas en la raíz, client/, worker/, fragments/, email/
+  static/css/    tokens.css + common.css + un CSS por área
+  static/js/     app.js, form-validation.js, sheets.js, unsaved-changes.js, booking-picker.js,
+                 worker-calendar.js, worker-agenda-forms.js, treatment-summary.js, scroll-index.js
+  static/icons/lucide/  fuente de Lucide (woff/woff2)
+src/test/java/…  BookingServiceTests, CenterIsolationTests, SecurityIntegrationTests, PageRenderingTests,
+                 UnitTests, CrmCBellezaApplicationTests, GoogleLoginTests, GoogleCalendarTests, AgendaTests, RegistrationTests, TreatmentSummaryTests, security/CurrentUserModelAdviceTest, TestUsers
+```
+
+### Reglas de backend
+
+- Controladores finos: reciben el formulario (record), llaman al servicio y eligen la vista. La validación vive en los servicios y lanza `BusinessRuleException` (mensaje en español) o `ResourceNotFoundException` (404).
+- Endpoints JSON marcados con `@ApiEndpoint` devuelven errores en JSON (`ApiExceptionHandler`).
+- `BookingService` concentra todos los cambios de cita (solicitar, aceptar, rechazar, crear, mover, proponer, anular) con bloqueo por centro y respeta `OpeningHoursPolicy`. Si cabe una cita lo decide `AgendaSnapshot` (cargado por `AgendaAvailabilityService`): centro no cerrado, profesional sin otra cita ni bloqueo, y a la vez no más citas que `centers.cabins` ni que profesionales libres. Las horas propuestas reservan hueco frente a clientes y otras propuestas, pero el trabajador puede ocuparlas (la propuesta pierde esa opción). Cada cambio anota `lastChange` y publica `AppointmentChangedEvent` (Google Calendar y correos, tras el commit y en segundo plano). «Ahora» al reservar = `CenterClock.now` (zona del centro).
+- Sin N+1: usa `@EntityGraph` o cálculos en memoria. Con `open-in-view=false`, el servicio carga todo lo que la vista necesite.
+- Totales y medias que se muestran en pantalla se calculan en el controlador/servicio y se pasan al modelo. **No uses proyecciones de colección en Thymeleaf** (`lista.![campo]`, `lista.?[cond]`): IntelliJ las marca como error.
+- Correos: plantillas Thymeleaf en `templates/email/` enviadas con `EmailGateway`.
+
+## Modelo de datos
+
+Tablas (ver `V1__esquema_inicial.sql`):
+
+- `centers`: nombre, dirección, teléfono, email, `latitude`/`longitude` (el mapa usa estas coordenadas, no geocodifica), `time_zone` (IANA, elegible en «Mi Centro» entre `CenterTimeZones.OPTIONS`; la usan las reservas y Google Calendar), `cabins` (citas a la vez, 1-50, en «Mi Centro»).
+- `users`: `role` CLIENT | WORKER, `email` único, `password` (BCrypt, **nula en clientes dados de alta a mano y en cuentas solo de Google**), `google_id` único (claim `sub` de Google, nulo si no ha entrado nunca con Google), `center_id` solo para trabajadores. `User.hasAccount()` = tiene contraseña o Google. `notifications_seen_at`: última vez que el cliente abrió su campana.
+- `treatments`: por centro, `treatment_type` (MANICURA_PEDICURA, FACIAL, CORPORAL, MASAJES, PELUQUERIA, DEPILACION, OTRO), precio y duración en minutos.
+- `products`: catálogo **global** (sin centro). `inventories`: stock por centro y producto (único por par).
+- `appointments`: centro, tratamiento, cliente, trabajador, `status` PENDING | PROPOSED | CONFIRMED | REJECTED | CANCELLED | COMPLETED (etiquetas en `AppointmentStatus.label()`), `worker_message`, `last_change`/`last_change_at` (`AppointmentChange`: qué cambió y quién, para campanas y correos), `previous_date_time` (hora anterior si el centro la movió), `proposal_expires_at`, `reminder_sent_at`, `google_event_id`/`google_event_owner_id`, `treatment_summary` + `treatment_alert` + `summary_updated_at`/`summary_updated_by_id` (resumen del tratamiento realizado, ver abajo).
+- `appointment_proposals`: horas que el centro propone para una cita PROPOSED (máx. 3). `agenda_blocks`: bloqueos de agenda (`worker_id` nulo = todo el centro cerrado).
+- `persistent_logins`: dispositivos con «Recordar mi sesión» (tabla estándar de `JdbcTokenRepositoryImpl`, sin entidad JPA).
+- `google_calendar_links`: trabajadores con Google Calendar activado (token de actualización cifrado con `GOOGLE_TOKEN_KEY`, id del calendario «Cuquora» creado en su cuenta). `appointments.google_event_id` apunta el evento de cada cita.
+- **Resumen del tratamiento** (`TreatmentSummaryService`, `POST /worker/appointments/{id}/summary`, modal `fragments/treatment-summary.html` + `treatment-summary.js`): el trabajador lo escribe desde la agenda o el historial de la ficha cuando la cita confirmada **ya ha empezado** (hora del centro). Si lo marca como **aviso** (alergias, reacciones, productos que no le sientan bien), sale arriba en la ficha del cliente y en sus demás citas de la agenda (`AppointmentCalendarDTO.clientAlerts`). Es interno: el cliente nunca lo ve.
+- `client_cards`: ficha técnica por centro y cliente, `data_json` con los valores. `client_card_templates`: campos de la ficha por centro (`fields_json`).
+
+**Migraciones:** todo cambio de esquema es un nuevo `V<n>__descripcion.sql` (nombre en español, SQL compatible con H2 y PostgreSQL). Nunca edites una migración ya aplicada. La siguiente libre es **`V9`**. En Docker, `SPRING_FLYWAY_BASELINE_ON_MIGRATE=true` adopta BD creadas antes de Flyway.
+
+## Roles y aislamiento entre centros
+
+- `/client/**` solo `ROLE_CLIENT`. `/worker/**` solo trabajadores **con centro asignado** (`SecurityConfig.workerWithCenter`).
+- Públicas (`SecurityConfig.PUBLIC_PAGES`): `/`, `/home`, `/features` (`/funcionalidades`), `/centers`, `/contact` (`/contacto`), `/register-center` (`/alta-centro`), `/terms` (`/terminos`), `/cookies` (`/politica-cookies`), `/privacy` (`/privacidad`), `/login`, `/register`, `/error`, `/api/centers/**`, `/robots.txt` y estáticos.
+- Detalle de login, «Recordar mi sesión», Google y Google Calendar: [`.claude/docs/autenticacion.md`](.claude/docs/autenticacion.md).
+- **Aislamiento:** toda acción de `/worker/**` usa el `centerId` de la sesión y consultas `findByIdAndCenterId`; un recurso de otro centro responde 404. Las rutas de cliente usan el id de la sesión. Mantén esta regla en todo endpoint nuevo y añade un caso a `CenterIsolationTests`.
+- Cliente: `/client/appointments/{id}/accept-proposal|decline-proposal|cancel` buscan la cita con `findByIdAndClientId` (de otro cliente → 404). Campana del cliente: `ClientNotificationService` (citas de hoy/mañana y cambios del centro de los últimos 7 días); al abrirla, `POST /client/notifications/seen`.
+- Un trabajador no puede ver otros centros como cliente: desde tarjeta o mapa sale un aviso con enlace a su panel.
+- `/login-selector`, `/select-session` y la consola H2 solo existen con el perfil `dev`.
+
+---
+
+## Convenciones de UI
+
+### Base
+- **Colores solo desde `tokens.css`** (`--primary`, `--text-main`, `--surface`…), con modo oscuro completo y contraste AA. Ningún color en hex en otros CSS.
+- Sin estilos inline, sin `onclick`, sin `!important` (salvo `[hidden]` y reduced-motion).
+- `<head>` común: `th:replace="~{fragments/head :: meta('Título')}"` + el CSS propio de la página. Incluye la descripción y las etiquetas Open Graph (imagen `static/images/og-image.jpg`, 1200×630, en JPEG porque las redes no aceptan bien WebP); para una descripción propia, el controlador pone `pageDescription` en el modelo.
+- Diálogos propios: `Cuquora.confirm`, `Cuquora.alert`, `data-confirm="…"` en formularios, modales `.ui-modal-overlay` con `data-modal-open` / `data-modal-close`. Nunca `alert()`/`confirm()` del navegador.
+- Todo texto del servidor insertado con `innerHTML` pasa por `Cuquora.escapeHtml`.
+- Imágenes en WebP con `loading="lazy"`.
+
+### Iconos (Lucide 0.321.0, servidos en local)
+- `<i class="lucide-calendar" aria-hidden="true"></i>`. CSS en `static/css/lucide-icons.css` (el de Lucide con el prefijo `icon-` cambiado a `lucide-`), fuente en `static/icons/lucide/`.
+- **No cargues Lucide desde la CDN**: allí las clases se llaman `icon-…` y los iconos salen vacíos.
+- Usa solo nombres que existan en la 0.321.0 (p. ej. `edit-3` no existe; se usa `pen-line`). Si dudas, búscalo en `lucide-icons.css`.

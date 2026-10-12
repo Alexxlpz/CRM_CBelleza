@@ -83,8 +83,11 @@
             document.removeEventListener('touchend', onEnd);
             document.removeEventListener('mousemove', onMove);
             document.removeEventListener('mouseup', onEnd);
-            card.style.transition = 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease';
             const dismiss = delta > 70;
+            // Al soltar: si se cierra, rápido y acelerando; si vuelve a su sitio, frenando
+            card.style.transition = dismiss
+                ? 'transform 160ms cubic-bezier(0.4, 0, 1, 1), opacity 160ms ease-in'
+                : 'transform 180ms cubic-bezier(0.16, 1, 0.3, 1), opacity 180ms ease-out';
             card.style.transform = dismiss ? 'translateY(100%)' : 'translateY(0)';
             overlay.style.opacity = dismiss ? '0' : '1';
             setTimeout(() => {
@@ -93,7 +96,7 @@
                 card.style.transition = '';
                 overlay.style.opacity = '';
                 delta = 0;
-            }, 230);
+            }, dismiss ? 170 : 190);
         }
         function onStart(e) {
             startY = point(e);

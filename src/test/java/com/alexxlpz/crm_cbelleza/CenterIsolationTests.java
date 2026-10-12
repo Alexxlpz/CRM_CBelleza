@@ -52,6 +52,17 @@ class CenterIsolationTests {
     }
 
     @Test
+    void workerCannotWriteTreatmentSummaryOfAnotherCenter() throws Exception {
+        Appointment foreign = appointments.findByCenterIdOrderByDateTimeDesc(centerOf(TestUsers.WORKER_CENTER_1)).getFirst();
+
+        mvc.perform(post("/worker/appointments/" + foreign.getId() + "/summary").param("summary", "Intruso").with(csrf())
+                        .with(TestUsers.as(users, TestUsers.WORKER_CENTER_2)))
+                .andExpect(status().isNotFound());
+
+        assertEquals(null, appointments.findById(foreign.getId()).orElseThrow().getTreatmentSummary());
+    }
+
+    @Test
     void workerCannotChangeStockOfAnotherCenter() throws Exception {
         Inventory foreign = inventory.findByCenterId(centerOf(TestUsers.WORKER_CENTER_1)).getFirst();
         int stockBefore = foreign.getStock();

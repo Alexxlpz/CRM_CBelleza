@@ -7,11 +7,18 @@ import com.alexxlpz.crm_cbelleza.entities.Treatment;
 import com.alexxlpz.crm_cbelleza.entities.User;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 /** Convierte citas en el DTO que consume el calendario del trabajador (JSON embebido en la página). */
 @Component
 public class AppointmentCalendarMapper {
 
-    public AppointmentCalendarDTO toDto(Appointment app) {
+    /**
+     * @param now         «ahora» en la hora del centro (decide si ya se puede escribir el resumen)
+     * @param clientAlerts avisos del cliente en el centro (se excluye el de esta misma cita)
+     */
+    public AppointmentCalendarDTO toDto(Appointment app, LocalDateTime now, List<Appointment> clientAlerts) {
         return AppointmentCalendarDTO.builder()
                 .id(app.getId())
                 .dateTime(app.getDateTime() != null ? app.getDateTime().toString() : null)
@@ -31,6 +38,14 @@ public class AppointmentCalendarMapper {
                             .toList()
                         : java.util.List.of())
                 .proposalExpiresAt(app.getProposalExpiresAt() != null ? app.getProposalExpiresAt().toString() : null)
+                .treatmentSummary(app.getTreatmentSummary())
+                .treatmentAlert(app.isTreatmentAlert())
+                .summaryEditable(app.isSummaryEditableAt(now))
+                .clientAlerts(clientAlerts.stream()
+                        .filter(alert -> !alert.getId().equals(app.getId()))
+                        .map(alert -> new AppointmentCalendarDTO.ClientAlertDTO(
+                                alert.getDateTime().toString(), alert.getTreatment().getName(), alert.getTreatmentSummary()))
+                        .toList())
                 .build();
     }
 

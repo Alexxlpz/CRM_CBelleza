@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     sections.forEach(({ link, el }) => link.addEventListener('click', e => {
         e.preventDefault();
-        window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - OFFSET, behavior: 'smooth' });
+        window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - OFFSET, behavior: Cuquora.scrollBehavior() });
         activate(link);
     }));
 

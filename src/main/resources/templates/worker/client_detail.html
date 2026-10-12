@@ -4,6 +4,7 @@
     <th:block th:replace="~{fragments/head :: meta('Ficha de Cliente - Cuquora CRM')}"></th:block>
     <link rel="stylesheet" th:href="@{/css/clients.css}">
     <script th:src="@{/js/unsaved-changes.js}" defer></script>
+    <script th:src="@{/js/treatment-summary.js}" defer></script>
 </head>
 <body>
     <div th:replace="~{fragments/navbar :: worker('/worker/clients', 'Volver a lista de clientes', ${notifications})}"></div>
@@ -46,6 +47,17 @@
                 </a>
             </div>
         </div>
+
+        <!-- Avisos de los resúmenes de tratamiento (reacciones, productos que no le sientan bien...) -->
+        <section class="client-alerts client-alerts--page" id="clientAlerts" aria-labelledby="clientAlertsTitle" th:hidden="${alerts.isEmpty()}">
+            <h2 class="client-alerts-title" id="clientAlertsTitle"><i class="lucide-alert-triangle" aria-hidden="true"></i> Avisos de este cliente</h2>
+            <ul id="clientAlertsList">
+                <li th:each="alert : ${alerts}">
+                    <strong th:text="${#temporals.format(alert.dateTime, 'dd/MM/yyyy')} + ' · ' + ${alert.treatment.name} + ':'">14/07/2026 · Limpieza facial:</strong>
+                    <span th:text="${alert.treatmentSummary}">El sérum de vitamina C le irritó la piel.</span>
+                </li>
+            </ul>
+        </section>
 
         <!-- Split Layout: Ficha + Historial de Citas -->
         <div class="client-detail-layout">
@@ -161,16 +173,14 @@
                 </div>
 
                 <div class="history-list" th:if="${appointments != null and !appointments.isEmpty()}">
-                    <div class="history-item" th:each="app : ${appointments}">
+                    <div class="history-item" th:each="app : ${appointments}" th:id="'cita-' + ${app.id}"
+                         th:data-date="${#temporals.format(app.dateTime, 'dd/MM/yyyy')}" th:data-treatment="${app.treatment.name}">
                         <div class="history-top">
                             <span class="history-date">
                                 <i class="lucide-calendar-days" aria-hidden="true"></i>
                                 <span th:text="${#temporals.format(app.dateTime, 'dd/MM/yyyy HH:mm')}">14/07/2026 10:30</span>
                             </span>
-                            <span class="badge badge-confirmed" th:if="${app.status.name() == 'CONFIRMED'}">Confirmada</span>
-                            <span class="badge badge-completed" th:if="${app.status.name() == 'COMPLETED'}">Completada</span>
-                            <span class="badge badge-pending" th:if="${app.status.name() == 'PENDING'}">Solicitud</span>
-                            <span class="badge badge-rejected" th:if="${app.status.name() == 'REJECTED'}">Rechazada</span>
+                            <span th:class="'badge badge-' + ${#strings.toLowerCase(app.status.name())}" th:text="${app.status.label()}">Completada</span>
                         </div>
 
                         <div class="history-treatment" th:text="${app.treatment.name}">Corte y Peinado</div>
@@ -190,6 +200,25 @@
                             <i class="lucide-message-square" aria-hidden="true"></i>
                             <span th:text="${app.workerMessage}"></span>
                         </div>
+
+                        <div class="treatment-summary" th:if="${app.treatmentSummary != null}" th:classappend="${app.treatmentAlert} ? 'is-alert'">
+                            <p class="treatment-summary-head">
+                                <i th:class="${app.treatmentAlert} ? 'lucide-alert-triangle' : 'lucide-clipboard-pen-line'" aria-hidden="true"></i>
+                                <span th:text="${app.treatmentAlert} ? 'Resumen del tratamiento · aviso' : 'Resumen del tratamiento'">Resumen del tratamiento</span>
+                            </p>
+                            <p class="treatment-summary-text" th:text="${app.treatmentSummary}">Limpieza con peeling suave.</p>
+                            <p class="treatment-summary-meta" th:if="${app.summaryUpdatedAt != null}"
+                               th:text="${app.summaryUpdatedBy != null ? app.summaryUpdatedBy.name + ' · ' : ''} + ${#temporals.format(app.summaryUpdatedAt, 'dd/MM/yyyy HH:mm')}">Lucía · 14/07/2026 11:40</p>
+                        </div>
+
+                        <button type="button" class="btn btn-secondary btn-sm summary-button" th:if="${app.isSummaryEditableAt(centerNow)}"
+                                th:data-summary-id="${app.id}"
+                                th:data-summary-context="${app.treatment.name} + ' · ' + ${#temporals.format(app.dateTime, 'dd/MM/yyyy HH:mm')}"
+                                th:data-summary-text="${app.treatmentSummary}"
+                                th:data-summary-alert="${app.treatmentAlert}">
+                            <i class="lucide-clipboard-pen-line" aria-hidden="true"></i>
+                            <span th:text="${app.treatmentSummary != null} ? 'Editar resumen' : 'Añadir resumen del tratamiento'">Añadir resumen del tratamiento</span>
+                        </button>
                     </div>
                 </div>
 
@@ -225,6 +254,8 @@
         </div>
     </div>
 
+    <div th:replace="~{fragments/treatment-summary :: modal}"></div>
+
     <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Panel de gestión de centros.')}"></div>
 
     <script>
@@ -243,6 +274,44 @@
             // Si el navegador restauró valores no guardados, se vuelve a los datos reales del servidor.
             form.reset();
             resizeAll();
+
+            // Resumen del tratamiento de cada cita: al guardarlo se repinta la cita y la lista de avisos
+            const esc = Cuquora.escapeHtml;
+            const summaryHtml = app => app.treatmentSummary ? `
+                <div class="treatment-summary${app.treatmentAlert ? ' is-alert' : ''}">
+                    <p class="treatment-summary-head">
+                        <i class="${app.treatmentAlert ? 'lucide-alert-triangle' : 'lucide-clipboard-pen-line'}" aria-hidden="true"></i>
+                        <span>${app.treatmentAlert ? 'Resumen del tratamiento · aviso' : 'Resumen del tratamiento'}</span>
+                    </p>
+                    <p class="treatment-summary-text">${esc(app.treatmentSummary)}</p>
+                    <p class="treatment-summary-meta">Guardado ahora</p>
+                </div>` : '';
+
+            function renderAlerts() {
+                const items = [...document.querySelectorAll('.history-item')]
+                    .filter(item => item.querySelector('.treatment-summary.is-alert'));
+                document.getElementById('clientAlertsList').innerHTML = items.map(item => `
+                    <li><strong>${esc(item.dataset.date)} · ${esc(item.dataset.treatment)}:</strong>
+                        <span>${esc(item.querySelector('.treatment-summary-text').textContent)}</span></li>`).join('');
+                document.getElementById('clientAlerts').hidden = items.length === 0;
+            }
+
+            document.querySelectorAll('[data-summary-id]').forEach(button => button.addEventListener('click', () => {
+                TreatmentSummary.open({
+                    id: button.dataset.summaryId,
+                    context: button.dataset.summaryContext,
+                    summary: button.dataset.summaryText,
+                    alert: button.dataset.summaryAlert === 'true'
+                }, saved => {
+                    button.closest('.history-item').querySelector('.treatment-summary')?.remove();
+                    button.insertAdjacentHTML('beforebegin', summaryHtml(saved));
+                    button.dataset.summaryText = saved.treatmentSummary || '';
+                    button.dataset.summaryAlert = String(saved.treatmentAlert);
+                    button.querySelector('span').textContent = saved.treatmentSummary ? 'Editar resumen' : 'Añadir resumen del tratamiento';
+                    renderAlerts();
+                    button.focus();
+                });
+            }));
 
             Cuquora.guardUnsavedChanges({
                 form,

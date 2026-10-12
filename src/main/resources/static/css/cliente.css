@@ -37,7 +37,6 @@
 }
 
 .center-card:hover {
-    transform: translateY(-4px);
     box-shadow: 0 16px 40px rgba(var(--primary-rgb), 0.12);
     border-color: var(--primary-light);
 }
@@ -234,7 +233,6 @@
     background: var(--surface);
     border-color: var(--primary-dark);
     box-shadow: var(--shadow-soft);
-    transform: translateY(-2px);
 }
 
 .treatment-card-title {

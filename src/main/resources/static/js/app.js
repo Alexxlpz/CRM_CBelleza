@@ -146,6 +146,10 @@
 
     const Cuquora = Object.assign(window.Cuquora || {}, {
         escapeHtml,
+        /** 'smooth' salvo si el sistema pide reducir el movimiento (el CSS no frena el scroll hecho con JS). */
+        scrollBehavior() {
+            return window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+        },
         trapFocus,
         alert(message, title = 'Aviso') {
             return openDialog({ title, message, tone: 'danger' });

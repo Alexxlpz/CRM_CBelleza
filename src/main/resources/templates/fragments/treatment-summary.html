@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<body>
+<!-- Resumen del tratamiento realizado (agenda y ficha del cliente). Lo abre treatment-summary.js. -->
+<div th:fragment="modal" class="ui-modal-overlay" id="treatmentSummaryModal" hidden>
+    <div class="ui-modal ui-modal--form" role="dialog" aria-modal="true" aria-labelledby="treatmentSummaryTitle">
+        <button type="button" class="ui-modal-close" data-modal-close aria-label="Cerrar"><i class="lucide-x" aria-hidden="true"></i></button>
+        <h2 class="ui-modal-title" id="treatmentSummaryTitle"><i class="lucide-clipboard-pen-line" aria-hidden="true"></i> Resumen del tratamiento</h2>
+        <p class="ui-modal-text" id="treatmentSummaryContext"></p>
+        <form id="treatmentSummaryForm" class="summary-form" novalidate>
+            <label class="form-label" for="treatmentSummaryText">Qué se ha hecho y cómo ha ido</label>
+            <textarea id="treatmentSummaryText" class="form-control summary-textarea" rows="5" maxlength="2000"
+                      placeholder="Ej. Limpieza con peeling suave. El sérum de vitamina C le irritó la zona de las mejillas: no volver a usarlo."></textarea>
+            <span class="form-hint">Solo lo ve el equipo del centro.</span>
+            <label class="checkbox-row summary-alert-check">
+                <input type="checkbox" id="treatmentSummaryAlert">
+                Marcar como aviso
+            </label>
+            <span class="form-hint">Para alergias, reacciones o productos que no le sientan bien: sale en su ficha y en sus próximas citas.</span>
+            <p class="agenda-form-error" role="alert" hidden></p>
+            <div class="ui-modal-actions">
+                <button type="button" class="btn btn-secondary" data-modal-close>Cancelar</button>
+                <button type="submit" class="btn btn-primary"><i class="lucide-save" aria-hidden="true"></i> Guardar resumen</button>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>

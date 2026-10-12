@@ -26,15 +26,18 @@ public class AppointmentService {
     private final AppointmentRepository appointmentRepository;
     private final ClientVisitAnalyzer visitAnalyzer;
     private final AppointmentCalendarMapper calendarMapper;
+    private final TreatmentSummaryService summaryService;
     private final Clock clock;
 
     public AppointmentService(AppointmentRepository appointmentRepository,
                               ClientVisitAnalyzer visitAnalyzer,
                               AppointmentCalendarMapper calendarMapper,
+                              TreatmentSummaryService summaryService,
                               Clock clock) {
         this.appointmentRepository = appointmentRepository;
         this.visitAnalyzer = visitAnalyzer;
         this.calendarMapper = calendarMapper;
+        this.summaryService = summaryService;
         this.clock = clock;
     }
 
@@ -63,7 +66,9 @@ public class AppointmentService {
     public AppointmentCalendarDTO getCalendarAppointment(Long centerId, Long appointmentId) {
         Appointment appointment = appointmentRepository.findByIdAndCenterId(appointmentId, centerId)
                 .orElseThrow(() -> new com.alexxlpz.crm_cbelleza.exceptions.ResourceNotFoundException("La cita no existe en tu centro."));
-        return calendarMapper.toDto(appointment);
+        List<Appointment> alerts = appointment.getClient() == null ? List.of()
+                : summaryService.alertsByClient(centerId).getOrDefault(appointment.getClient().getId(), List.of());
+        return calendarMapper.toDto(appointment, summaryService.centerNow(centerId), alerts);
     }
 
     public long countClientAppointments(Long clientId) {
@@ -79,8 +84,11 @@ public class AppointmentService {
     }
 
     public List<AppointmentCalendarDTO> getCalendarAppointments(Long centerId) {
+        LocalDateTime now = summaryService.centerNow(centerId);
+        Map<Long, List<Appointment>> alerts = summaryService.alertsByClient(centerId);
         return getCenterAppointments(centerId).stream()
-                .map(calendarMapper::toDto)
+                .map(app -> calendarMapper.toDto(app, now,
+                        app.getClient() == null ? List.of() : alerts.getOrDefault(app.getClient().getId(), List.of())))
                 .toList();
     }
 

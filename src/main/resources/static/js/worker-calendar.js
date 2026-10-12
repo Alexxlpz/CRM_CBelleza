@@ -5,8 +5,10 @@
  *    duración (en móvil, lista por días). Al pulsar una cita se abre su ficha en un modal.
  * Acciones: aceptar, rechazar o proponer otra hora a una solicitud; cambiar de hora o anular una cita
  * confirmada; crear citas (botón «Nueva cita» o pulsando un hueco libre de la semana); arrastrar una cita
- * confirmada a otra hora; bloquear horario. Los formularios están en worker-agenda-forms.js y, tras cada
- * cambio, la agenda se recarga desde /worker/calendar/data.
+ * confirmada a otra hora; bloquear horario; escribir el resumen del tratamiento (treatment-summary.js) en
+ * citas que ya han empezado. Los avisos del cliente (resúmenes marcados como aviso) salen en sus demás citas.
+ * Los formularios están en worker-agenda-forms.js y, tras cada cambio, la agenda se recarga desde
+ * /worker/calendar/data.
  * La disposición elegida se recuerda en el navegador.
  */
 document.addEventListener('DOMContentLoaded', function () {
@@ -75,6 +77,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
     const longDate = dateTime => new Date(dateTime).toLocaleString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
     const isFuture = app => new Date(app.dateTime) > new Date();
+    const shortDate = dateTime => new Date(dateTime).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
     /** Las rechazadas y anuladas no ocupan agenda: no se pintan en la semana. */
     const occupiesAgenda = app => app.status !== 'REJECTED' && app.status !== 'CANCELLED';
     const isOpenRequest = app => app.status === 'PENDING' || app.status === 'PROPOSED';
@@ -239,6 +242,25 @@ document.addEventListener('DOMContentLoaded', function () {
                 ${app.proposalExpiresAt ? `<p class="agenda-proposals-expiry">Si no responde, se anulará el ${esc(longDate(app.proposalExpiresAt))}.</p>` : ''}
             </div>` : '';
 
+        // Avisos de otras citas del cliente (reacciones, productos que no le sientan bien...)
+        const alerts = occupiesAgenda(app) && app.clientAlerts?.length ? `
+            <div class="client-alerts">
+                <p class="client-alerts-title"><i class="lucide-alert-triangle" aria-hidden="true"></i> Avisos de este cliente</p>
+                <ul>${app.clientAlerts.map(a => `<li><strong>${esc(shortDate(a.dateTime))} · ${esc(a.treatmentName)}:</strong> <span>${esc(a.summary)}</span></li>`).join('')}</ul>
+            </div>` : '';
+        const summary = app.treatmentSummary ? `
+            <div class="treatment-summary${app.treatmentAlert ? ' is-alert' : ''}">
+                <p class="treatment-summary-head">
+                    <i class="${app.treatmentAlert ? 'lucide-alert-triangle' : 'lucide-clipboard-pen-line'}" aria-hidden="true"></i>
+                    ${app.treatmentAlert ? 'Resumen del tratamiento · aviso' : 'Resumen del tratamiento'}
+                </p>
+                <p class="treatment-summary-text">${esc(app.treatmentSummary)}</p>
+            </div>` : '';
+        const summaryButton = app.summaryEditable ? `
+            <button type="button" class="btn btn-secondary btn-sm summary-button" data-action="summary">
+                <i class="lucide-clipboard-pen-line" aria-hidden="true"></i> ${app.treatmentSummary ? 'Editar resumen' : 'Añadir resumen del tratamiento'}
+            </button>` : '';
+
         let actions = '';
         if (app.status === 'PENDING') {
             actions = `
@@ -312,9 +334,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 <span class="agenda-duration-text">(${esc(app.treatment?.duration)} min)</span>
             </div>
             ${clientCardLink ? `<div class="agenda-card-footer">${clientCardLink}</div>` : ''}
+            ${alerts}
             ${moved}
             ${proposals}
             ${note}
+            ${summary}
+            ${summaryButton}
             ${actions}`;
 
         card.querySelectorAll('[data-action]').forEach(button =>
@@ -325,6 +350,14 @@ document.addEventListener('DOMContentLoaded', function () {
     async function runAction(app, action, card) {
         if (action === 'propose') return forms.openPropose(app);
         if (action === 'reschedule') return forms.openReschedule(app);
+        if (action === 'summary') {
+            return window.TreatmentSummary.open({
+                id: app.id,
+                context: `${app.treatment?.name || 'Cita'} · ${app.client?.name || app.guestName || 'Cliente'} · ${capitalize(longDate(app.dateTime))}`,
+                summary: app.treatmentSummary,
+                alert: app.treatmentAlert
+            }, () => reload());
+        }
 
         const message = card.querySelector('textarea')?.value || '';
         if (action === 'cancel') {
@@ -399,7 +432,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         if (isUserClick && window.innerWidth <= 900) {
-            dayTitle.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            dayTitle.scrollIntoView({ behavior: Cuquora.scrollBehavior(), block: 'start' });
             dayTitle.focus({ preventScroll: true });
         }
     }

@@ -25,6 +25,23 @@ public class AppointmentCalendarDTO {
     /** Horas propuestas al cliente (solo en citas PROPOSED). */
     private java.util.List<ProposalDTO> proposals;
     private String proposalExpiresAt;
+    /** Resumen del tratamiento realizado y si es un aviso. */
+    private String treatmentSummary;
+    private boolean treatmentAlert;
+    /** La cita ya ha empezado: se puede escribir su resumen. */
+    private boolean summaryEditable;
+    /** Avisos que el cliente tiene en otras citas del centro (reacciones, productos que no le sientan bien...). */
+    private java.util.List<ClientAlertDTO> clientAlerts;
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ClientAlertDTO {
+        private String dateTime;
+        private String treatmentName;
+        private String summary;
+    }
 
     @Data
     @Builder

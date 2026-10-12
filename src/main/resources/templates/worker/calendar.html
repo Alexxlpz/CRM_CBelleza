@@ -288,6 +288,8 @@
         </div>
     </div>
 
+    <div th:replace="~{fragments/treatment-summary :: modal}"></div>
+
     <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Panel de gestión de centros.')}"></div>
 
     <!-- Citas del centro (JSON) para el calendario -->
@@ -298,6 +300,7 @@
         window.CALENDAR_STAFF = /*[[${calendarStaff}]]*/ {};
     </script>
     <script th:src="@{/js/worker-agenda-forms.js}" defer></script>
+    <script th:src="@{/js/treatment-summary.js}" defer></script>
     <script th:src="@{/js/worker-calendar.js}" defer></script>
 </body>
 </html>

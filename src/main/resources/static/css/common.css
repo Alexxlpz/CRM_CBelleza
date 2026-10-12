@@ -106,11 +106,6 @@ h1, h2, h3, h4, h5, h6 {
     width: auto;
     display: block;
     object-fit: contain;
-    transition: transform 0.2s ease;
-}
-
-.nav-brand:hover img {
-    transform: scale(1.02);
 }
 
 @media (max-width: 768px) {
@@ -145,7 +140,7 @@ h1, h2, h3, h4, h5, h6 {
     font-weight: 700;
     border-radius: 20px;
     text-decoration: none;
-    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: var(--transition);
     white-space: nowrap;
     letter-spacing: 0.1px;
 }
@@ -158,7 +153,6 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .nav-auth-login:hover {
-    transform: translateY(-1px);
     box-shadow: 0 6px 18px rgba(var(--primary-rgb), 0.45);
     filter: brightness(1.03);
 }
@@ -174,7 +168,6 @@ h1, h2, h3, h4, h5, h6 {
     background: var(--surface-muted);
     border-color: var(--primary-dark);
     color: var(--primary-text);
-    transform: translateY(-1px);
     box-shadow: 0 4px 14px rgba(var(--primary-rgb), 0.18);
 }
 
@@ -198,7 +191,7 @@ h1, h2, h3, h4, h5, h6 {
     font-weight: 700;
     color: var(--text-muted);
     text-decoration: none;
-    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: var(--transition);
     padding: 8px clamp(12px, 1vw, 18px);
     border-radius: 12px;
     position: relative;
@@ -211,7 +204,6 @@ h1, h2, h3, h4, h5, h6 {
 .nav-menu-link:hover {
     color: var(--primary-text);
     background: rgba(var(--primary-rgb), 0.12);
-    transform: translateY(-1px);
 }
 
 .nav-menu-link.active {
@@ -339,7 +331,7 @@ h1, h2, h3, h4, h5, h6 {
     color: var(--text-main);
     cursor: pointer;
     padding: 0;
-    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: var(--transition);
     flex-shrink: 0;
     outline: none;
     -webkit-tap-highlight-color: transparent;
@@ -348,7 +340,6 @@ h1, h2, h3, h4, h5, h6 {
 .mobile-nav-toggle:hover {
     background: rgba(var(--primary-rgb), 0.2);
     border-color: var(--primary-dark);
-    transform: scale(1.04);
 }
 
 .mobile-nav-toggle:active {
@@ -370,7 +361,7 @@ h1, h2, h3, h4, h5, h6 {
     height: 2px;
     background-color: var(--text-main);
     border-radius: 2px;
-    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+    transition: transform var(--dur-fast) ease, opacity var(--dur-fast) ease;
 }
 
 .mobile-nav-toggle.is-active .hamburger-line:nth-child(1) {
@@ -399,10 +390,11 @@ h1, h2, h3, h4, h5, h6 {
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
-    transition: opacity 0.32s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.32s;
+    transition: opacity 160ms var(--ease-in), visibility 160ms;
 }
 
 .mobile-nav-backdrop.is-open {
+    transition: opacity var(--dur-slow) var(--ease-out), visibility var(--dur-slow);
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
@@ -420,7 +412,7 @@ h1, h2, h3, h4, h5, h6 {
     background: var(--surface);
     z-index: 9999;
     transform: translateX(100%);
-    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: transform 160ms var(--ease-in);
     box-shadow: -10px 0 36px rgba(30, 24, 18, 0.16);
     display: flex;
     flex-direction: column;
@@ -429,6 +421,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .mobile-nav-drawer.is-open {
+    transition: transform var(--dur-slow) var(--ease-out);
     transform: translateX(0);
 }
 
@@ -468,7 +461,7 @@ h1, h2, h3, h4, h5, h6 {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.22s ease;
+    transition: var(--transition);
     padding: 0;
     outline: none;
 }
@@ -525,7 +518,7 @@ h1, h2, h3, h4, h5, h6 {
     color: var(--text-main);
     font-weight: 700;
     font-size: 15px;
-    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: var(--transition);
     background: transparent;
     position: relative;
     border: 1px solid transparent;
@@ -556,7 +549,7 @@ h1, h2, h3, h4, h5, h6 {
 .mobile-link-arrow {
     color: var(--text-muted);
     opacity: 0.55;
-    transition: transform 0.2s ease, opacity 0.2s ease, color 0.2s ease;
+    transition: transform var(--dur-fast) ease, opacity var(--dur-fast) ease, color var(--dur-fast) ease;
     flex-shrink: 0;
 }
 
@@ -605,13 +598,12 @@ h1, h2, h3, h4, h5, h6 {
     border-radius: 14px;
     text-decoration: none;
     box-shadow: 0 4px 14px rgba(var(--primary-rgb), 0.35);
-    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: var(--transition);
     text-align: center;
     border: none;
 }
 
 .mobile-btn-primary:hover {
-    transform: translateY(-1px);
     box-shadow: 0 6px 18px rgba(var(--primary-rgb), 0.45);
     filter: brightness(1.02);
 }
@@ -635,7 +627,7 @@ h1, h2, h3, h4, h5, h6 {
     border-radius: 14px;
     text-decoration: none;
     box-shadow: 0 2px 8px rgba(var(--primary-rgb), 0.08);
-    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: var(--transition);
     text-align: center;
 }
 
@@ -643,7 +635,6 @@ h1, h2, h3, h4, h5, h6 {
     background: var(--surface-muted);
     border-color: var(--primary-dark);
     color: var(--primary-text);
-    transform: translateY(-1px);
 }
 
 .mobile-btn-outline:active {
@@ -796,7 +787,6 @@ button.mobile-drawer-link {
 .bell-btn:hover {
     background: rgba(var(--primary-rgb), 0.25);
     color: var(--primary-text);
-    transform: scale(1.05);
 }
 
 .bell-btn:focus-visible {
@@ -839,7 +829,7 @@ button.mobile-drawer-link {
     display: none;
     flex-direction: column;
     overflow: hidden;
-    animation: slideDown 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: slideDown var(--dur-base) var(--ease-out);
 }
 
 @media (max-width: 600px) {
@@ -881,7 +871,7 @@ button.mobile-drawer-link {
     gap: 12px;
     text-align: left;
     background: var(--surface); /* Solid item background */
-    transition: background 0.2s ease;
+    transition: background var(--dur-fast) ease;
     text-decoration: none;
 }
 
@@ -996,8 +986,11 @@ button.mobile-drawer-link {
     box-shadow: 0 4px 15px rgba(var(--primary-rgb), 0.2);
 }
 .btn-primary:hover {
-    transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(var(--primary-rgb), 0.35);
+}
+
+.btn:active:not(:disabled) {
+    transform: scale(0.98);
 }
 
 .btn-secondary {
@@ -1013,9 +1006,6 @@ button.mobile-drawer-link {
 .btn-danger {
     background: var(--danger-gradient);
     color: var(--on-primary);
-}
-.btn-danger:hover {
-    transform: translateY(-2px);
 }
 
 .btn-sm {
@@ -1180,7 +1170,7 @@ footer {
     background: var(--surface);
     border-top: 1px solid rgba(var(--primary-rgb), 0.35);
     box-shadow: 0 -12px 40px rgba(var(--primary-rgb), 0.18);
-    animation: cookie-banner-in 0.45s var(--ease-out);
+    animation: cookie-banner-in var(--dur-slow) var(--ease-out);
 }
 
 .cookie-banner-inner {
@@ -1342,7 +1332,7 @@ body:has(.cookie-banner:not([hidden])) {
     background: var(--overlay);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    animation: fadeIn 0.3s ease;
+    animation: fadeIn var(--dur-base) ease-out;
 }
 
 .sheet-content {
@@ -1357,7 +1347,7 @@ body:has(.cookie-banner:not([hidden])) {
     border-left: 1px solid rgba(var(--primary-rgb), 0.35);
     border-radius: var(--border-radius-lg) 0 0 var(--border-radius-lg);
     box-shadow: -15px 0 45px rgba(43, 40, 37, 0.15);
-    animation: slideInRight 0.35s var(--ease-out);
+    animation: slideInRight var(--dur-slow) var(--ease-out);
 }
 
 .sheet-header {
@@ -1404,7 +1394,7 @@ body:has(.cookie-banner:not([hidden])) {
     cursor: grab;
     touch-action: none;
     user-select: none;
-    transition: background 0.2s ease;
+    transition: background var(--dur-fast) ease;
 }
 
 .bottom-sheet-handle:hover,
@@ -1428,7 +1418,7 @@ body:has(.cookie-banner:not([hidden])) {
         border-left: none;
         border-top: 1px solid rgba(var(--primary-rgb), 0.35);
         border-radius: 28px 28px 0 0;
-        animation: sheetSlideUp 0.3s var(--ease-out);
+        animation: sheetSlideUp var(--dur-slow) var(--ease-out);
     }
 
     .bottom-sheet-handle {
@@ -1471,7 +1461,7 @@ body:has(.cookie-banner:not([hidden])) {
     font-weight: 700;
     cursor: pointer;
     white-space: nowrap;
-    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: var(--transition);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
     display: inline-flex;
     align-items: center;
@@ -1483,7 +1473,6 @@ body:has(.cookie-banner:not([hidden])) {
 .category-pill:hover {
     background: rgba(var(--primary-rgb), 0.18);
     color: var(--primary-text);
-    transform: translateY(-1px);
     border-color: rgba(var(--primary-rgb), 0.45);
 }
 
@@ -1497,7 +1486,6 @@ body:has(.cookie-banner:not([hidden])) {
     color: var(--on-primary);
     border-color: transparent;
     box-shadow: 0 4px 14px rgba(var(--primary-rgb), 0.38);
-    transform: translateY(-1px);
 }
 
 .category-pill.active i {
@@ -1585,7 +1573,7 @@ body.modal-open {
     font-size: 14px;
     font-weight: 600;
     line-height: 1.45;
-    animation: slideInUp 0.3s ease;
+    animation: fadeIn var(--dur-base) ease-out;
 }
 
 .alert i {
@@ -1631,7 +1619,7 @@ body.modal-open {
     color: var(--text-main);
     background: var(--surface-muted);
     outline: none;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+    transition: border-color var(--dur-fast) ease, box-shadow var(--dur-fast) ease, background-color var(--dur-fast) ease;
 }
 
 .form-field textarea {
@@ -1677,7 +1665,7 @@ body.modal-open {
     font-size: 12.5px;
     font-weight: 600;
     color: var(--error);
-    animation: fadeInDown 0.2s ease;
+    animation: fadeInDown var(--dur-base) var(--ease-out);
 }
 
 .field-error-msg svg {
@@ -1825,7 +1813,7 @@ body.modal-open {
     border-radius: 999px;
     background: var(--border-soft);
     cursor: pointer;
-    transition: background 0.2s ease;
+    transition: background var(--dur-fast) ease;
 }
 
 .switch-thumb {
@@ -1837,7 +1825,7 @@ body.modal-open {
     border-radius: 50%;
     background: var(--surface);
     box-shadow: 0 1px 4px rgba(var(--primary-rgb), 0.35);
-    transition: transform 0.2s ease;
+    transition: transform var(--dur-fast) ease;
 }
 
 .switch[aria-checked="true"] {
@@ -1891,7 +1879,7 @@ body.modal-open {
     background: var(--overlay);
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
-    animation: fadeIn 0.2s ease-out;
+    animation: fadeIn var(--dur-base) ease-out;
 }
 
 .ui-modal {
@@ -1906,7 +1894,7 @@ body.modal-open {
     border: 1px solid rgba(var(--primary-rgb), 0.35);
     border-radius: 20px;
     box-shadow: var(--shadow-modal);
-    animation: scaleIn 0.25s var(--ease-out);
+    animation: scaleIn var(--dur-base) var(--ease-out);
 }
 
 .ui-modal--left,
@@ -1996,11 +1984,6 @@ body.modal-open {
     to { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes slideInUp {
-    from { opacity: 0; transform: translateY(24px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
 @keyframes sheetSlideUp {
     from { transform: translateY(100%); }
     to { transform: translateY(0); }
@@ -2012,13 +1995,13 @@ body.modal-open {
 }
 
 @keyframes slideDown {
-    from { opacity: 0; transform: translateY(-8px); }
+    from { opacity: 0; transform: translateY(-4px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes scaleIn {
-    from { opacity: 0; transform: scale(0.95) translateY(12px); }
-    to { opacity: 1; transform: scale(1) translateY(0); }
+    from { opacity: 0; transform: scale(0.98); }
+    to { opacity: 1; transform: scale(1); }
 }
 
 @keyframes fieldShake {
@@ -2163,7 +2146,7 @@ body.modal-open {
 }
 
 .nf-mirror-shine {
-    animation: nf-shine 3.6s ease-in-out infinite;
+    animation: nf-shine 3.6s ease-in-out 1 both;
 }
 
 .nf-mirror-code {
@@ -2172,13 +2155,12 @@ body.modal-open {
     font-weight: 800;
     letter-spacing: -1px;
     fill: var(--primary-text);
-    animation: nf-fade 3.6s ease-in-out infinite;
 }
 
 .nf-sparkle {
     fill: var(--primary);
     transform-origin: 50% 50%;
-    animation: nf-twinkle 2s ease-in-out infinite;
+    animation: nf-twinkle 2s ease-in-out 2;
 }
 
 .nf-sparkle-2 {
@@ -2188,7 +2170,7 @@ body.modal-open {
 /* Niño */
 .nf-kid {
     transform-origin: 30% 100%;
-    animation: nf-peek 3.6s ease-in-out infinite;
+    animation: nf-peek 3.6s ease-in-out 1;
 }
 
 .nf-shirt {
@@ -2213,12 +2195,12 @@ body.modal-open {
 
 .nf-arm-scratch {
     transform-origin: 50% 100%;
-    animation: nf-scratch 0.5s ease-in-out infinite alternate;
+    animation: nf-scratch 0.5s ease-in-out 6 alternate;
 }
 
 .nf-hand-scratch {
     transform-origin: 50% 50%;
-    animation: nf-scratch 0.5s ease-in-out infinite alternate;
+    animation: nf-scratch 0.5s ease-in-out 6 alternate;
 }
 
 .nf-hair {
@@ -2249,7 +2231,7 @@ body.modal-open {
     font-size: 28px;
     font-weight: 800;
     fill: var(--primary-text);
-    animation: nf-float 2.2s ease-in-out infinite;
+    animation: nf-float 2.2s ease-in-out 2;
 }
 
 .nf-question-2 {
@@ -2260,11 +2242,6 @@ body.modal-open {
 @keyframes nf-shine {
     0%, 15% { transform: translateX(-90px); }
     65%, 100% { transform: translateX(120px); }
-}
-
-@keyframes nf-fade {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.35; }
 }
 
 @keyframes nf-twinkle {
@@ -2325,7 +2302,6 @@ body.modal-open {
     background: var(--brand-solid);
     color: var(--on-primary);
     box-shadow: 0 4px 14px rgba(163, 135, 95, 0.25);
-    transform: translateY(-1px);
 }
 
 .badge-new-client {
@@ -2342,7 +2318,126 @@ body.modal-open {
     text-transform: uppercase;
     letter-spacing: 0.04em;
     box-shadow: 0 2px 8px rgba(var(--primary-rgb), 0.18);
-    animation: gentlePulse 3s infinite ease-in-out;
+}
+
+/* Error de los formularios en modal (agenda y resumen del tratamiento) */
+.agenda-form-error {
+    margin: 14px 0 0;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: var(--error-bg);
+    border: 1px solid var(--error-border);
+    color: var(--error);
+    font-size: 13.5px;
+}
+
+.checkbox-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.checkbox-row input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary-dark);
+}
+
+/* Resumen del tratamiento: bloque en la cita (agenda y ficha) y avisos del cliente */
+.summary-textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.summary-alert-check {
+    margin-top: 16px;
+}
+
+.summary-form .ui-modal-actions {
+    margin-top: 20px;
+}
+
+.treatment-summary {
+    margin-top: 10px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--border-soft);
+    background: var(--surface-muted);
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--text-main);
+}
+
+.treatment-summary.is-alert {
+    border-color: var(--warning);
+    background: var(--warning-bg);
+}
+
+.treatment-summary-head {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+}
+
+.treatment-summary.is-alert .treatment-summary-head {
+    color: var(--warning-text);
+}
+
+.treatment-summary-text {
+    margin: 0;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.treatment-summary-meta {
+    margin: 6px 0 0;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.client-alerts {
+    margin-top: 10px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--warning);
+    background: var(--warning-bg);
+    color: var(--warning-text);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.client-alerts-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0 0 4px;
+    font-weight: 700;
+}
+
+.client-alerts ul {
+    margin: 0;
+    padding-left: 18px;
+}
+
+.client-alerts li + li {
+    margin-top: 4px;
+}
+
+.client-alerts li span {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+/* Botón «Añadir/Editar resumen» (.btn .btn-secondary .btn-sm) bajo la cita */
+.summary-button {
+    margin-top: 10px;
 }
 
 .agenda-worker-note {
@@ -2391,7 +2486,7 @@ body.modal-open {
     justify-content: center;
     font-size: 24px;
     cursor: pointer;
-    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: var(--transition);
 }
 
 .no-appointments-box {
@@ -2440,7 +2535,6 @@ body.modal-open {
     border: 1px solid rgba(var(--primary-rgb), 0.18);
     border-radius: var(--border-radius-md);
     box-shadow: 0 6px 20px rgba(var(--primary-rgb), 0.06);
-    animation: fadeIn 0.3s ease-out both;
 }
 
 .stat-tile-icon {

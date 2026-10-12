@@ -21,7 +21,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     @EntityGraph(attributePaths = {"treatment", "center", "worker"})
     List<Appointment> findByClientIdOrderByDateTimeDesc(Long clientId);
 
-    @EntityGraph(attributePaths = {"treatment", "client", "worker"})
+    @EntityGraph(attributePaths = {"treatment", "client", "worker", "summaryUpdatedBy"})
     List<Appointment> findByCenterIdAndClientIdOrderByDateTimeDesc(Long centerId, Long clientId);
 
     @EntityGraph(attributePaths = {"treatment"})
@@ -65,6 +65,10 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     List<Appointment> findByWorkerIdAndGoogleEventIdIsNotNull(Long workerId);
 
     List<Appointment> findByGoogleEventOwnerId(Long workerId);
+
+    /** Resúmenes marcados como aviso (se muestran en las demás citas del cliente). */
+    @EntityGraph(attributePaths = {"treatment"})
+    List<Appointment> findByCenterIdAndTreatmentAlertTrueOrderByDateTimeDesc(Long centerId);
 
     long countByClientId(Long clientId);
 

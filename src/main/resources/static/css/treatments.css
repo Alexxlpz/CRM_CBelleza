@@ -39,12 +39,10 @@
     border-radius: var(--border-radius-lg);
     border: 1px solid rgba(var(--surface-rgb), 0.6);
     box-shadow: 0 10px 30px rgba(var(--primary-rgb), 0.08);
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    animation: slideInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+    transition: var(--transition);
 }
 
 .treatment-item-card:hover {
-    transform: translateY(-4px);
     box-shadow: 0 18px 40px rgba(var(--primary-rgb), 0.18);
     border-color: rgba(var(--primary-rgb), 0.4);
 }

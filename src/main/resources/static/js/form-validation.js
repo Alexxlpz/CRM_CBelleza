@@ -99,7 +99,7 @@
                 }
             });
             if (first) {
-                first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                first.scrollIntoView({ behavior: Cuquora.scrollBehavior(), block: 'center' });
                 first.focus({ preventScroll: true });
             }
         }

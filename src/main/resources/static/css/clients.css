@@ -100,11 +100,10 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    transition: transform var(--dur-fast) ease, box-shadow var(--dur-fast) ease, border-color var(--dur-fast) ease;
 }
 
 .client-card-item:hover {
-    transform: translateY(-3px);
     box-shadow: 0 12px 36px rgba(var(--primary-rgb), 0.12);
     border-color: rgba(var(--primary-rgb), 0.45);
 }
@@ -245,7 +244,6 @@
 
 .btn-view-client:hover {
     box-shadow: 0 6px 18px rgba(163, 135, 95, 0.32);
-    transform: translateY(-1px);
     color: var(--on-primary);
 }
 
@@ -367,19 +365,9 @@
 
 /* Badge New Client for Calendar & Listings */
 
-@keyframes gentlePulse {
-    0%, 100% {
-        box-shadow: 0 2px 8px rgba(var(--primary-rgb), 0.18);
-    }
-    50% {
-        box-shadow: 0 2px 14px rgba(var(--primary-rgb), 0.45);
-    }
-}
-
 /* ========================================================================= */
 /* INTUITIVE BACK NAVIGATION (PILL & SECONDARY ACTIONS)                      */
 /* ========================================================================= */
-
 
 .profile-header-actions {
     display: flex;
@@ -443,6 +431,16 @@
 /* ========================================================================= */
 /* CLIENT DETAIL VIEW: FICHA + HISTORIAL DE CITAS                            */
 /* ========================================================================= */
+
+.client-alerts--page {
+    margin: 0 0 24px;
+    padding: 14px 18px;
+    font-size: 14px;
+}
+
+.client-alerts--page .client-alerts-title {
+    font-size: 15px;
+}
 
 .client-detail-layout {
     display: grid;
@@ -588,7 +586,7 @@
     font-size: 14.5px;
     line-height: 1.55;
     box-sizing: border-box;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+    transition: border-color var(--dur-fast) ease, box-shadow var(--dur-fast) ease, background-color var(--dur-fast) ease;
 }
 
 .field-textarea {
@@ -597,7 +595,7 @@
     white-space: pre-wrap;
     word-break: break-word;
     overflow-wrap: break-word;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+    transition: border-color var(--dur-fast) ease, box-shadow var(--dur-fast) ease, background-color var(--dur-fast) ease;
 }
 
 .field-textarea.field-textarea-auto {
@@ -637,7 +635,6 @@
 
 .btn-save-ficha:hover {
     box-shadow: 0 6px 22px rgba(163, 135, 95, 0.35);
-    transform: translateY(-2px);
 }
 
 /* History Timeline */
@@ -652,7 +649,7 @@
     border: 1px solid rgba(var(--primary-rgb), 0.18);
     border-radius: 16px;
     padding: 16px;
-    transition: all 0.25s ease;
+    transition: var(--transition);
 }
 
 .history-item:hover {
@@ -738,7 +735,7 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    transition: all 0.2s ease;
+    transition: var(--transition);
 }
 
 .btn-remove-field:hover {
@@ -758,7 +755,7 @@
     font-size: 13.5px;
     font-weight: 700;
     cursor: pointer;
-    transition: all 0.25s ease;
+    transition: var(--transition);
 }
 
 .btn-add-field:hover {
@@ -787,11 +784,10 @@
     cursor: pointer;
     box-sizing: border-box;
     box-shadow: 0 4px 14px rgba(163, 135, 95, 0.25);
-    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, background 0.25s ease;
+    transition: transform var(--dur-fast) ease, box-shadow var(--dur-fast) ease, background var(--dur-fast) ease;
 }
 
 .btn-create-client:hover {
-    transform: translateY(-2px);
     box-shadow: 0 6px 18px rgba(163, 135, 95, 0.35);
 }
 
@@ -871,7 +867,7 @@
     font-size: 13.5px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: var(--transition);
 }
 
 .btn-modal-cancel:hover {
@@ -901,11 +897,10 @@
     border: none;
     cursor: pointer;
     box-shadow: 0 4px 14px rgba(163, 135, 95, 0.25);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: transform var(--dur-fast) ease, box-shadow var(--dur-fast) ease;
 }
 
 .btn-save-and-exit:hover {
-    transform: translateY(-1px);
     box-shadow: 0 6px 18px rgba(163, 135, 95, 0.35);
 }
 
@@ -923,7 +918,7 @@
     font-size: 14px;
     font-weight: 700;
     cursor: pointer;
-    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    transition: background var(--dur-fast) ease, border-color var(--dur-fast) ease, color var(--dur-fast) ease;
 }
 
 .btn-discard-and-exit:hover {
@@ -946,7 +941,7 @@
     font-size: 13.5px;
     font-weight: 600;
     cursor: pointer;
-    transition: background 0.2s ease, border-color 0.2s ease;
+    transition: background var(--dur-fast) ease, border-color var(--dur-fast) ease;
 }
 
 .btn-stay-editing:hover {

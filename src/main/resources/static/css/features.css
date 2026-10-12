@@ -42,7 +42,7 @@
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 40px;
     align-items: center;
-    transition: all 0.3s ease;
+    transition: var(--transition);
     box-sizing: border-box;
     width: 100%;
     max-width: 100%;
@@ -137,13 +137,12 @@
     display: flex;
     align-items: flex-start;
     gap: 12px;
-    transition: all 0.25s ease;
+    transition: var(--transition);
     width: 100%;
     min-width: 0;
     box-sizing: border-box;
 }
 .feature-bubble-card:hover {
-    transform: translateY(-2px);
     border-color: var(--primary);
     box-shadow: 0 6px 18px rgba(var(--primary-rgb), 0.16);
 }

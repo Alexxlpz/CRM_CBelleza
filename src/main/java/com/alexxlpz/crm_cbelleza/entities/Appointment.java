@@ -14,6 +14,8 @@ import java.time.LocalDateTime;
 @Builder
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Appointment {
+    public static final int TREATMENT_SUMMARY_MAX_LENGTH = 2000;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -87,6 +89,22 @@ public class Appointment {
     @Column(name = "reminder_sent_at")
     private LocalDateTime reminderSentAt;
 
+    /** Resumen del tratamiento realizado (interno del centro: el cliente no lo ve). */
+    @Column(name = "treatment_summary", length = TREATMENT_SUMMARY_MAX_LENGTH)
+    private String treatmentSummary;
+
+    /** El resumen es un aviso (reacción, alergia, producto que no le sentó bien): sale en sus próximas citas. */
+    @Column(name = "treatment_alert", nullable = false)
+    private boolean treatmentAlert;
+
+    @Column(name = "summary_updated_at")
+    private LocalDateTime summaryUpdatedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "summary_updated_by_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "password"})
+    private User summaryUpdatedBy;
+
     @OneToMany(mappedBy = "appointment", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("dateTime ASC")
     @JsonIgnoreProperties({"appointment"})
@@ -104,6 +122,13 @@ public class Appointment {
     /** Aún no ha empezado (hora del servidor): el cliente todavía puede anularla. */
     public boolean isUpcoming() {
         return dateTime != null && dateTime.isAfter(LocalDateTime.now());
+    }
+
+    /** El resumen del tratamiento se escribe cuando la cita confirmada ya ha empezado ({@code now}: hora del centro). */
+    public boolean isSummaryEditableAt(LocalDateTime now) {
+        AppointmentStatus current = getStatus();
+        return current == AppointmentStatus.COMPLETED
+                || (current == AppointmentStatus.CONFIRMED && dateTime != null && !dateTime.isAfter(now));
     }
 
     /** true si [start, end) se solapa con esta cita. */

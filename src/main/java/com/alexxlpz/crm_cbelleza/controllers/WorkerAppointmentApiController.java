@@ -9,6 +9,7 @@ import com.alexxlpz.crm_cbelleza.services.AgendaBlockService;
 import com.alexxlpz.crm_cbelleza.services.AppointmentService;
 import com.alexxlpz.crm_cbelleza.services.BookingService;
 import com.alexxlpz.crm_cbelleza.services.ClientCardService;
+import com.alexxlpz.crm_cbelleza.services.TreatmentSummaryService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -33,15 +34,18 @@ public class WorkerAppointmentApiController {
     private final AppointmentService appointmentService;
     private final AgendaBlockService blockService;
     private final ClientCardService clientCardService;
+    private final TreatmentSummaryService summaryService;
 
     public WorkerAppointmentApiController(BookingService bookingService,
                                           AppointmentService appointmentService,
                                           AgendaBlockService blockService,
-                                          ClientCardService clientCardService) {
+                                          ClientCardService clientCardService,
+                                          TreatmentSummaryService summaryService) {
         this.bookingService = bookingService;
         this.appointmentService = appointmentService;
         this.blockService = blockService;
         this.clientCardService = clientCardService;
+        this.summaryService = summaryService;
     }
 
     /** Citas y bloqueos actuales: la agenda se recarga con esto tras cada cambio. */
@@ -116,6 +120,16 @@ public class WorkerAppointmentApiController {
                                          @PathVariable Long id,
                                          @RequestParam(required = false) String message) {
         bookingService.cancelByCenter(worker.getCenterId(), id, message);
+        return appointmentService.getCalendarAppointment(worker.getCenterId(), id);
+    }
+
+    /** Resumen del tratamiento realizado (agenda y ficha del cliente). Texto vacío = se borra. */
+    @PostMapping("/worker/appointments/{id}/summary")
+    public AppointmentCalendarDTO saveSummary(@AuthenticationPrincipal AppUserDetails worker,
+                                              @PathVariable Long id,
+                                              @RequestParam(required = false) String summary,
+                                              @RequestParam(defaultValue = "false") boolean alert) {
+        summaryService.save(worker.getCenterId(), id, worker.getId(), summary, alert);
         return appointmentService.getCalendarAppointment(worker.getCenterId(), id);
     }
 

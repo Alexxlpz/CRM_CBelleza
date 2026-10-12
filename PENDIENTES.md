@@ -16,10 +16,21 @@ Trabajo pendiente y auditoría de seguridad. Se lee bajo demanda desde `CLAUDE.m
 - **Recordatorios de cita por WhatsApp.** Avisar al cliente por WhatsApp de su cita (p. ej. 24 h antes, como el recordatorio por correo de `AppointmentMailService.sendReminders`). Requisitos: WhatsApp Business Platform (API oficial de Meta, directa o con un proveedor como Twilio o 360dialog), número de empresa verificado y **plantillas de mensaje aprobadas por Meta** (los avisos iniciados por la empresa solo pueden ir con plantilla); se paga por conversación/mensaje. Consentimiento del cliente para recibir WhatsApp (casilla en registro y en el alta manual) y mencionarlo en `/privacy`. Encaje en el código: un `WhatsAppGateway` como `EmailGateway` (con versión de consola si no hay credenciales), teléfonos en formato internacional (E.164; hoy se guardan libres) y llamarlo desde el mismo recordatorio y, opcionalmente, al confirmar o cambiar una cita (`AppointmentChangedEvent`).
 - **Lector de código de barras — aparcado, no implementar sin que Alex lo pida.** Propuesta: migración con `products.barcode` opcional y único; campo «Escanear código» con foco en el modal «Añadir al Inventario» (los lectores USB/Bluetooth escriben el número y Enter); si existe, seleccionar el producto o sumar stock; si no, buscar en **Open Beauty Facts** (gratis, sin clave) para rellenar nombre, marca, descripción y foto, y que el trabajador ponga categoría y precio. Cámara del móvil en una segunda fase.
 
+## Calidad visual: que no parezca hecha con IA (auditoría del 12 oct 2026)
+
+Las reglas están en el skill `interfaz-cuquora`; esto es lo que hoy las incumple. Hacerlo por pantallas, con capturas antes/después (skill `capturas`), y borrar cada punto al cerrarlo. Orden propuesto (de más impacto y menos riesgo a más trabajo). El movimiento quedó resuelto el 12 oct 2026 (tokens `--dur-*`, sin entradas al cargar, sin bucles, sin «levitar»):
+
+1. **Textos.** Mayúscula solo al principio (≈40 títulos y botones en estilo inglés: «Guardar Ficha del Cliente», «Configurar Plantilla», «Cartera de Clientes», «Nuevo Cliente», «Iniciar Sesión»…); quitar los 13 «con éxito»; quitar «100 % garantizado», «100 % web responsiva… de forma fluida» y similares de `landing.html`.
+2. **Emojis e iconos.** Los 14 emojis de `features.html` (`.bubble-emoji-badge`) por iconos Lucide o nada; revisar los 8 `lucide-sparkles` (Nuevo cliente, Profesional…).
+3. **Superficies.** 39 `backdrop-filter: blur` sobre tarjetas opacas, 27 degradados (botón de peligro, insignia «Nuevo cliente», separadores del menú móvil, barra de progreso) y 152 `box-shadow` (muchos tintados con el color primario): fondo plano, borde de 1 px y sombra solo en lo que flota.
+4. **Componentes duplicados.** Más de 30 familias de botón (`btn-save-ficha`, `btn-template-config`, `btn-add-treatment`, `btn-create-client`, `btn-save-and-exit`…) que deberían ser `.btn` + `.btn-primary|secondary|danger` + tamaño. Mayúsculas espaciadas en 23 sitios (`text-transform: uppercase`).
+5. **Código.** Comentarios en inglés que describen el CSS («Solid crisp white», «Hero Section», «100% visible at a glance»): pasarlos a español y solo donde expliquen un porqué; borrar `@keyframes` y clases sin uso. 9 plantillas con `<script>` en línea: mover a ficheros si crecen.
+6. **Inicio y Funcionalidades.** Estructura típica de plantilla (héroe con insignias, tarjetas de 3 en 3 con icono + frase, «Centro ejemplo» inventado, FAQ genérica). Mejor capturas reales de la agenda, la ficha y el inventario y menos texto.
+
 ## Legal y SEO
 
 - **Datos del titular.** La LSSI (art. 10) exige nombre o razón social, NIF y domicilio del titular. Términos y Privacidad ya los muestran: falta rellenar `LEGAL_OWNER_NAME`, `LEGAL_OWNER_NIF` y `LEGAL_OWNER_ADDRESS` en el `.env` (sin NIF, Términos no muestra la línea del titular y Privacidad dice solo «Cuquora»).
-- **Política de privacidad: revisar antes de publicar.** `/privacy` (`/privacidad`) ya existe. Antes de abrir la web: confirmar que es cierto todo lo que dice (HTTPS activo con Cloudflare, ver seguridad #7; proveedores reales de alojamiento y correo y sus contratos de encargado; plazos de conservación), que los centros firmen el contrato de encargado del tratamiento por las fichas técnicas y, si es posible, que la revise alguien de legal. Si cambia algo, actualizar la fecha de la página.
+- **Política de privacidad: revisar antes de publicar.** `/privacy` (`/privacidad`) ya existe. Antes de abrir la web: confirmar que es cierto todo lo que dice (HTTPS activo con Cloudflare, ver seguridad #7; proveedores reales de alojamiento y correo y sus contratos de encargado; plazos de conservación), que los centros firmen el contrato de encargado del tratamiento por las fichas técnicas y los resúmenes de tratamiento (pueden incluir alergias y reacciones, que son datos de salud: añadirlos a `/privacy`) y, si es posible, que la revise alguien de legal. Si cambia algo, actualizar la fecha de la página.
 - **Sitemap.** Cuando haya dominio, añadir `sitemap.xml` con las páginas públicas y la línea `Sitemap: https://<dominio>/sitemap.xml` en `static/robots.txt`.
 - **Logo.** `static/images/big_icon.png` parece decir «COQUORA» y la marca es «Cuquora»: revisar.
 
@@ -45,5 +56,5 @@ Revisado y correcto: sin inyección SQL, sin `th:utext`, escapado en JS, CSRF, I
 
 ## Técnicos
 
-- Versionar en git `CLAUDE.md`, `PENDIENTES.md`, `mvnw`, `mvnw.cmd` y `.mvn/` (el wrapper solo existe en la carpeta de Windows; `.gitignore` ya prevé `.mvn/wrapper/maven-wrapper.jar`).
+- Versionar en git `mvnw`, `mvnw.cmd` y `.mvn/` (el wrapper solo existe en la carpeta de Windows; `.gitignore` ya prevé `.mvn/wrapper/maven-wrapper.jar`).
 - Al añadir una migración o un endpoint de trabajador, añadir su test (aislamiento, seguridad, renderizado).

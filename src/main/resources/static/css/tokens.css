@@ -90,7 +90,13 @@
 
     /* ---- Movimiento ---- */
     --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Movimiento (skill interfaz-cuquora): corto y solo en colores, opacidad y transform */
+    --dur-fast: 120ms;   /* hover y pulsación */
+    --dur-base: 180ms;   /* abrir menús, desplegables y modales */
+    --dur-slow: 240ms;   /* hojas y paneles que entran desde un borde */
+    --ease-in: cubic-bezier(0.4, 0, 1, 1);   /* al cerrar */
+    --transition: color var(--dur-fast) ease, background-color var(--dur-fast) ease, border-color var(--dur-fast) ease,
+                  box-shadow var(--dur-fast) ease, opacity var(--dur-fast) ease, transform var(--dur-fast) ease;
 
     /* ---- Foco (anillo interior, nunca recortado por overflow) ---- */
     --focus-ring: inset 0 0 0 2px var(--primary-dark), inset 0 0 0 3px rgba(255, 255, 255, 0.5);

@@ -40,7 +40,6 @@
     box-shadow: 0 24px 60px rgba(var(--primary-rgb), 0.18), 0 8px 24px rgba(0, 0, 0, 0.04);
     position: relative;
     overflow: hidden;
-    animation: slideInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .auth-card::before {
@@ -112,7 +111,7 @@
     font-size: 14.5px;
     font-family: 'Plus Jakarta Sans', sans-serif;
     color: var(--text-main);
-    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: var(--transition);
 }
 
 .auth-card .form-control::placeholder {
@@ -149,7 +148,7 @@
     font-weight: 600;
     color: var(--primary-text);
     text-decoration: none;
-    transition: color 0.2s ease, text-decoration 0.2s ease;
+    transition: color var(--dur-fast) ease, text-decoration var(--dur-fast) ease;
 }
 
 .forgot-link:hover {
@@ -181,7 +180,7 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: var(--transition);
 }
 
 .password-toggle-btn:hover {
@@ -279,7 +278,7 @@
     color: var(--primary-text);
     font-weight: 600;
     text-decoration: none;
-    transition: color 0.2s ease, text-decoration 0.2s ease;
+    transition: color var(--dur-fast) ease, text-decoration var(--dur-fast) ease;
 }
 
 .auth-footer-links a:hover {
@@ -375,7 +374,7 @@
     font-weight: 700;
     letter-spacing: 0.3px;
     text-decoration: none;
-    transition: all 0.2s ease;
+    transition: var(--transition);
     cursor: pointer;
 }
 
@@ -387,7 +386,6 @@
 .btn-debug-selector:hover {
     background: rgba(var(--primary-rgb), 0.35);
     border-color: var(--primary-dark);
-    transform: translateY(-1px);
     box-shadow: 0 4px 14px rgba(var(--primary-rgb), 0.25);
 }
 

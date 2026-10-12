@@ -20,7 +20,6 @@
     border-radius: var(--border-radius-lg);
     border: 1px solid rgba(var(--surface-rgb), 0.6);
     box-shadow: 0 10px 30px rgba(var(--primary-rgb), 0.08);
-    animation: slideInUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
     width: 100%;
     min-width: 0;
     box-sizing: border-box;
@@ -64,14 +63,13 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: var(--transition);
     flex-shrink: 0;
 }
 
 .calendar-nav-btn:hover {
     background: var(--brand-solid);
     color: var(--on-primary);
-    transform: scale(1.06);
     box-shadow: 0 6px 16px rgba(163, 130, 88, 0.3);
 }
 
@@ -141,13 +139,12 @@
     cursor: pointer;
     position: relative;
     box-sizing: border-box;
-    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: var(--transition);
 }
 
 .calendar-day-cell:hover {
     background: var(--surface);
     border-color: rgba(var(--primary-rgb), 0.45);
-    transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(var(--primary-rgb), 0.15);
 }
 
@@ -246,7 +243,6 @@
     min-width: 0;
     height: 520px;
     box-sizing: border-box;
-    animation: slideInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .agenda-header {
@@ -338,14 +334,12 @@
     width: 100%;
     min-width: 0;
     box-sizing: border-box;
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    animation: slideInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+    transition: var(--transition);
 }
 
 .agenda-item-card:hover {
     background: var(--surface);
     border-color: rgba(var(--primary-rgb), 0.4);
-    transform: translateY(-2px);
     box-shadow: 0 12px 28px rgba(var(--primary-rgb), 0.15);
 }
 
@@ -422,7 +416,7 @@
     resize: none;
     margin-top: 6px;
     margin-bottom: 12px;
-    transition: all 0.2s ease;
+    transition: var(--transition);
 }
 
 .approval-msg-input:focus {
@@ -446,7 +440,7 @@
     border-radius: 10px;
     border: 1px solid transparent;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: var(--transition);
     font-family: 'Plus Jakarta Sans', sans-serif;
     display: inline-flex;
     align-items: center;
@@ -855,7 +849,6 @@ button.calendar-day-cell {
     background: rgba(var(--surface-rgb), 0.78);
     border: 1px solid rgba(var(--surface-rgb), 0.6);
     box-shadow: 0 10px 30px rgba(var(--primary-rgb), 0.08);
-    animation: slideInUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
     min-width: 0;
 }
 
@@ -959,13 +952,12 @@ button.calendar-day-cell {
     font-family: inherit;
     text-align: center;
     cursor: pointer;
-    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: var(--transition);
 }
 
 .week-day-head:hover {
     background: var(--surface);
     border-color: rgba(var(--primary-rgb), 0.45);
-    transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(var(--primary-rgb), 0.15);
 }
 
@@ -1062,7 +1054,7 @@ button.calendar-day-cell {
     border-left: 4px solid var(--brand-solid);
     background: rgba(var(--primary-rgb), 0.22);
     cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: transform var(--dur-fast) ease, box-shadow var(--dur-fast) ease;
 }
 
 .week-event {
@@ -1090,7 +1082,6 @@ button.calendar-day-cell {
 
 .week-event:hover,
 .week-list-item:hover {
-    transform: translateY(-1px);
     box-shadow: 0 8px 18px rgba(var(--primary-rgb), 0.22);
     z-index: 2;
 }
@@ -1288,7 +1279,6 @@ button.calendar-day-cell {
 
 .appointment-modal .agenda-item-card,
 .appointment-modal .agenda-item-card:hover {
-    animation: none;
     transform: none;
     box-shadow: none;
 }
@@ -1691,16 +1681,6 @@ button.calendar-day-cell {
     color: var(--success-strong);
 }
 
-.agenda-form-error {
-    margin: 14px 0 0;
-    padding: 10px 12px;
-    border-radius: 10px;
-    background: var(--error-bg);
-    border: 1px solid var(--error-border);
-    color: var(--error);
-    font-size: 13.5px;
-}
-
 .agenda-form .ui-modal-actions {
     margin-top: 20px;
 }
@@ -1754,21 +1734,6 @@ button.calendar-day-cell {
 .icon-btn:hover {
     background: rgba(var(--primary-rgb), 0.12);
     color: var(--text-main);
-}
-
-.checkbox-row {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.checkbox-row input {
-    width: 18px;
-    height: 18px;
-    accent-color: var(--primary-dark);
 }
 
 @media (max-width: 520px) {

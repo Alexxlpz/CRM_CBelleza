@@ -72,12 +72,10 @@
     text-align: center;
     gap: 12px;
     text-decoration: none;
-    transition: transform 0.3s var(--ease-out), box-shadow 0.3s var(--ease-out), border-color 0.3s var(--ease-out);
-    animation: slideInUp 0.45s var(--ease-out) both;
+    transition: transform var(--dur-fast) ease, box-shadow var(--dur-fast) ease, border-color var(--dur-fast) ease;
 }
 
 .action-card:hover {
-    transform: translateY(-5px);
     box-shadow: 0 20px 40px rgba(var(--primary-rgb), 0.18);
     border-color: rgba(var(--primary-rgb), 0.4);
 }
@@ -90,11 +88,7 @@
     width: 40px;
     height: 40px;
     color: var(--primary-text);
-    transition: transform 0.3s ease;
-}
-
-.action-card:hover .action-icon {
-    transform: translateY(-2px) scale(1.08);
+    transition: transform var(--dur-fast) ease;
 }
 
 .action-card-title {
@@ -159,10 +153,9 @@
     display: block;
     text-decoration: none;
     color: inherit;
-    transition: transform 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out);
+    transition: transform var(--dur-fast) ease, box-shadow var(--dur-fast) ease;
 }
 
 .counter-card--link:hover {
-    transform: translateY(-2px);
     box-shadow: 0 10px 24px rgba(var(--primary-rgb), 0.16);
 }

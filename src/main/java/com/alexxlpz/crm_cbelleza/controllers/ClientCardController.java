@@ -1,6 +1,7 @@
 package com.alexxlpz.crm_cbelleza.controllers;
 
 import com.alexxlpz.crm_cbelleza.dto.ClientSummaryDTO;
+import com.alexxlpz.crm_cbelleza.entities.Appointment;
 import com.alexxlpz.crm_cbelleza.exceptions.BusinessRuleException;
 import com.alexxlpz.crm_cbelleza.forms.NewClientForm;
 import com.alexxlpz.crm_cbelleza.security.AppUserDetails;
@@ -8,6 +9,7 @@ import com.alexxlpz.crm_cbelleza.services.AppointmentService;
 import com.alexxlpz.crm_cbelleza.services.ClientCardService;
 import com.alexxlpz.crm_cbelleza.services.ClientCardService.ClientCardView;
 import com.alexxlpz.crm_cbelleza.services.ClientCardTemplateService;
+import com.alexxlpz.crm_cbelleza.services.TreatmentSummaryService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -35,13 +37,16 @@ public class ClientCardController {
     private final ClientCardService clientCardService;
     private final ClientCardTemplateService templateService;
     private final AppointmentService appointmentService;
+    private final TreatmentSummaryService summaryService;
 
     public ClientCardController(ClientCardService clientCardService,
                                 ClientCardTemplateService templateService,
-                                AppointmentService appointmentService) {
+                                AppointmentService appointmentService,
+                                TreatmentSummaryService summaryService) {
         this.clientCardService = clientCardService;
         this.templateService = templateService;
         this.appointmentService = appointmentService;
+        this.summaryService = summaryService;
     }
 
     @GetMapping
@@ -67,7 +72,10 @@ public class ClientCardController {
         model.addAttribute("card", view.card());
         model.addAttribute("fields", view.fields());
         model.addAttribute("cardData", view.data());
-        model.addAttribute("appointments", appointmentService.getClientAppointmentsInCenter(worker.getCenterId(), clientId));
+        List<Appointment> appointments = appointmentService.getClientAppointmentsInCenter(worker.getCenterId(), clientId);
+        model.addAttribute("appointments", appointments);
+        model.addAttribute("alerts", appointments.stream().filter(Appointment::isTreatmentAlert).toList());
+        model.addAttribute("centerNow", summaryService.centerNow(worker.getCenterId()));
         return "worker/client_detail";
     }
 
