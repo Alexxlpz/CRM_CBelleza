@@ -5,6 +5,7 @@
     <link rel="stylesheet" th:href="@{/css/clients.css}">
     <script th:src="@{/js/unsaved-changes.js}" defer></script>
     <script th:src="@{/js/treatment-summary.js}" defer></script>
+    <script th:src="@{/js/product-sale.js}" defer></script>
 </head>
 <body>
     <div th:replace="~{fragments/navbar :: worker('/worker/clients', 'Volver a lista de clientes', ${notifications})}"></div>
@@ -14,7 +15,7 @@
 
         <div class="alert alert-success" id="saveSuccessBanner" role="status" th:hidden="${successMessage == null}">
             <i class="lucide-check-circle" aria-hidden="true"></i>
-            <span id="saveSuccessMessageText" th:text="${successMessage != null ? successMessage : 'Ficha técnica guardada con éxito.'}">Ficha técnica guardada con éxito.</span>
+            <span id="saveSuccessMessageText" th:text="${successMessage != null ? successMessage : 'Ficha técnica guardada.'}">Ficha técnica guardada.</span>
         </div>
 
         <!-- Client Profile Header Card -->
@@ -57,6 +58,45 @@
                     <span th:text="${alert.treatmentSummary}">El sérum de vitamina C le irritó la piel.</span>
                 </li>
             </ul>
+        </section>
+
+        <div class="alert alert-error" role="alert" th:if="${errorMessage != null}">
+            <i class="lucide-alert-circle" aria-hidden="true"></i>
+            <span th:text="${errorMessage}">Solo quedan 2 unidades.</span>
+        </div>
+
+        <!-- Tarjeta de puntos del centro (si está activada en «Mi Centro») -->
+        <section class="loyalty-card" id="puntos" th:if="${loyalty.enabled()}" aria-labelledby="loyaltyTitle">
+            <div class="loyalty-main">
+                <h2 class="loyalty-title" id="loyaltyTitle"><i class="lucide-gift" aria-hidden="true"></i> Tarjeta de puntos</h2>
+                <p class="loyalty-balance"><strong th:text="${loyalty.balance()}">120</strong> puntos</p>
+                <progress class="loyalty-progress" th:max="${loyalty.rewardPoints()}" th:value="${loyalty.progress()}"
+                          max="150" value="120" aria-labelledby="loyaltyGoal"></progress>
+                <p class="loyalty-goal" id="loyaltyGoal">
+                    <th:block th:if="${loyalty.canRedeem()}">Ya puede canjear: <strong th:text="${loyalty.rewardText()}">Manicura gratis</strong></th:block>
+                    <th:block th:unless="${loyalty.canRedeem()}">Le faltan <strong th:text="${loyalty.missing()}">30</strong> puntos para:
+                        <strong th:text="${loyalty.rewardText()}">Manicura gratis</strong></th:block>
+                </p>
+            </div>
+            <form th:action="@{/worker/clients/{id}/loyalty/redeem(id=${client.id})}" method="post" class="loyalty-redeem"
+                  th:if="${loyalty.canRedeem()}"
+                  th:attr="data-confirm=${'Se restarán ' + loyalty.rewardPoints() + ' puntos de su tarjeta por: ' + loyalty.rewardText() + '.'}"
+                  data-confirm-title="¿Canjear la recompensa?" data-confirm-button="Canjear">
+                <button type="submit" class="btn btn-primary"><i class="lucide-award" aria-hidden="true"></i> Canjear recompensa</button>
+            </form>
+            <details class="loyalty-history" th:if="${!loyalty.recent().isEmpty()}">
+                <summary>Últimos movimientos</summary>
+                <ul>
+                    <li th:each="move : ${loyalty.recent()}">
+                        <span class="loyalty-move-text">
+                            <span th:text="${#temporals.format(move.createdAt, 'dd/MM/yyyy')}">13/10/2026</span> ·
+                            <span th:text="${move.reason.name() == 'REDEMPTION' ? 'Canje: ' + move.description : move.description}">Manicura rusa</span>
+                        </span>
+                        <strong class="loyalty-move-points" th:classappend="${move.points < 0} ? 'is-negative'"
+                                th:text="${move.points > 0 ? '+' + move.points : move.points}">+35</strong>
+                    </li>
+                </ul>
+            </details>
         </section>
 
         <!-- Split Layout: Ficha + Historial de Citas -->
@@ -162,6 +202,45 @@
                 </form>
             </section>
 
+            <div class="client-side-column">
+            <!-- Productos que ha comprado en el centro -->
+            <section class="card-panel" id="productos" aria-labelledby="salesTitle">
+                <div class="panel-header-row">
+                    <div>
+                        <h2 class="panel-title" id="salesTitle">Productos comprados</h2>
+                        <span class="client-appointments-count" th:if="${!sales.isEmpty()}"
+                              th:text="${sales.size()} + (${sales.size() == 1} ? ' compra · ' : ' compras · ') + ${#numbers.formatDecimal(salesTotal, 1, 'POINT', 2, 'COMMA')} + ' €'">3 compras · 45,00 €</span>
+                    </div>
+                    <button type="button" class="btn btn-primary btn-sm" data-modal-open="productSaleModal" th:disabled="${saleItems.isEmpty()}"
+                            th:title="${saleItems.isEmpty()} ? 'Añade productos al inventario para poder venderlos'">
+                        <i class="lucide-shopping-bag" aria-hidden="true"></i> Vender producto
+                    </button>
+                </div>
+
+                <ul class="sale-list" th:if="${!sales.isEmpty()}">
+                    <li class="sale-row" th:each="sale : ${sales}">
+                        <div class="sale-info">
+                            <span class="sale-product" th:text="${sale.product.name}">Sérum vitamina C</span>
+                            <span class="sale-meta"
+                                  th:text="${#temporals.format(sale.soldAt, 'dd/MM/yyyy')} + ' · ' + ${sale.quantity} + ' × ' + ${#numbers.formatDecimal(sale.unitPrice, 1, 'POINT', 2, 'COMMA')} + ' €' + (${sale.worker != null} ? ' · ' + ${sale.worker.name} : '')">13/10/2026 · 2 × 22,50 € · Carlos Mendoza</span>
+                        </div>
+                        <strong class="sale-total" th:text="${#numbers.formatDecimal(sale.total, 1, 'POINT', 2, 'COMMA')} + ' €'">45,00 €</strong>
+                        <form th:action="@{/worker/clients/{id}/sales/{saleId}/cancel(id=${client.id}, saleId=${sale.id})}" method="post"
+                              th:attr="data-confirm=${(sale.quantity == 1 ? 'La unidad de ' + sale.product.name + ' volverá' : 'Las ' + sale.quantity + ' unidades de ' + sale.product.name + ' volverán') + ' al inventario' + (loyalty.enabled() ? ' y se quitarán los puntos que dio.' : '.')}"
+                              data-confirm-title="¿Anular esta venta?" data-confirm-button="Anular venta">
+                            <button type="submit" class="btn btn-secondary btn-sm" title="Anular venta (devuelve las unidades al inventario)">
+                                <i class="lucide-undo-2" aria-hidden="true"></i> Anular
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+
+                <div class="notification-empty notification-empty--padded" th:if="${sales.isEmpty()}">
+                    <i class="lucide-shopping-bag" aria-hidden="true"></i>
+                    <span>Todavía no ha comprado productos en el centro.</span>
+                </div>
+            </section>
+
             <!-- Right Column: Historial de Citas en este Centro -->
             <section class="card-panel">
                 <div class="panel-header-row">
@@ -227,6 +306,7 @@
                     <span>No hay citas registradas para este cliente en este centro.</span>
                 </div>
             </section>
+            </div>
 
         </div>
 
@@ -255,6 +335,7 @@
     </div>
 
     <div th:replace="~{fragments/treatment-summary :: modal}"></div>
+    <div th:replace="~{fragments/product-sale :: modal(${client}, ${saleItems}, ${loyalty}, ${lowStockThreshold})}"></div>
 
     <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Panel de gestión de centros.')}"></div>
 
@@ -318,7 +399,7 @@
                 modalId: 'unsavedChangesModal',
                 exitUrl: '/worker/clients',
                 saveButton: document.getElementById('btnSaveFicha'),
-                successMessage: 'Ficha técnica del cliente guardada con éxito.',
+                successMessage: 'Ficha técnica guardada.',
                 onSaved: () => {
                     const now = new Date();
                     const pad = n => String(n).padStart(2, '0');

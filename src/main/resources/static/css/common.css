@@ -1849,6 +1849,12 @@ body.modal-open {
     color: var(--text-muted);
 }
 
+.form-help.settings-intro {
+    margin: 0 0 20px;
+    font-size: 14px;
+    max-width: 70ch;
+}
+
 .settings-actions {
     display: flex;
     justify-content: flex-end;
@@ -2676,3 +2682,70 @@ body.modal-open {
         display: none;
     }
 }
+
+/* ===== Tarjeta de puntos (ficha del cliente y «Mis citas») ===== */
+.loyalty-progress {
+    width: 100%;
+    max-width: 460px;
+    height: 10px;
+    border: none;
+    border-radius: var(--radius-pill);
+    background: var(--surface-muted);
+    overflow: hidden;
+    appearance: none;
+}
+
+.loyalty-progress::-webkit-progress-bar {
+    background: var(--surface-muted);
+    border-radius: var(--radius-pill);
+}
+
+.loyalty-progress::-webkit-progress-value {
+    background: var(--brand-solid);
+    border-radius: var(--radius-pill);
+}
+
+.loyalty-progress::-moz-progress-bar {
+    background: var(--brand-solid);
+    border-radius: var(--radius-pill);
+}
+
+.loyalty-history {
+    grid-column: 1 / -1;
+    font-size: 13.5px;
+}
+
+.loyalty-history summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--primary-text);
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+}
+
+.loyalty-history ul {
+    list-style: none;
+    margin: 4px 0 0;
+    padding: 0;
+    max-width: 560px;
+}
+
+.loyalty-history li {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 8px 0;
+    border-top: 1px solid var(--border-soft);
+    color: var(--text-muted);
+}
+
+.loyalty-move-points {
+    color: var(--success-text);
+    white-space: nowrap;
+}
+
+.loyalty-move-points.is-negative {
+    color: var(--text-main);
+}
+

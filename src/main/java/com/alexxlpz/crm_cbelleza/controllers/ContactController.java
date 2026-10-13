@@ -61,7 +61,7 @@ public class ContactController {
         }
         mailService.sendCenterRegistration(form);
         redirect.addFlashAttribute("successMessage",
-                "¡Solicitud enviada con éxito! Hemos enviado un correo de confirmación a " + form.email().trim()
+                "Solicitud enviada. Hemos enviado un correo de confirmación a " + form.email().trim()
                         + ". Revisaremos los datos de la empresa en un plazo máximo de una semana.");
         return "redirect:/register-center";
     }

@@ -2,6 +2,7 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <th:block th:replace="~{fragments/head :: meta('Mi Centro - Cuquora CRM')}"></th:block>
+    <script th:src="@{/js/loyalty-settings.js}" defer></script>
 </head>
 <body>
     <div th:replace="~{fragments/navbar :: worker('/worker/dashboard', 'Volver al panel', ${notifications})}"></div>
@@ -92,6 +93,56 @@
                 <div class="settings-actions">
                     <a href="/worker/dashboard" class="btn btn-secondary">Cancelar</a>
                     <button type="submit" class="btn btn-primary"><i class="lucide-save" aria-hidden="true"></i> Guardar Información</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="settings-card" id="puntos">
+            <form th:action="@{/worker/center/loyalty}" method="post" id="loyaltyForm"
+                  th:with="edited=${loyaltyForm != null}, modeValue=${loyaltyForm != null ? loyaltyForm.mode() : center.loyaltyMode.name()}">
+                <h2 class="settings-section-title"><i class="lucide-gift" aria-hidden="true"></i> Tarjeta de puntos</h2>
+                <p class="form-help settings-intro">Tus clientes suman puntos con cada tratamiento completado y cada producto que compran,
+                    y ven cómo la llevan en «Mis citas». Al llegar a la cifra que elijas, canjeas la recompensa desde su ficha.</p>
+
+                <div class="alert alert-success" role="status" th:if="${loyaltyMessage != null}">
+                    <i class="lucide-check-circle-2" aria-hidden="true"></i>
+                    <span th:text="${loyaltyMessage}">Tarjeta de puntos guardada.</span>
+                </div>
+                <div class="alert alert-error" role="alert" th:if="${loyaltyError != null}">
+                    <i class="lucide-alert-circle" aria-hidden="true"></i>
+                    <span th:text="${loyaltyError}">Escribe qué recompensa da el centro.</span>
+                </div>
+
+                <div class="settings-grid">
+                    <div class="span-full">
+                        <label for="loyaltyMode" class="form-label">Cómo se ganan los puntos</label>
+                        <select id="loyaltyMode" name="mode" class="form-control">
+                            <option th:each="mode : ${loyaltyModes}" th:value="${mode.name()}" th:text="${mode.label()}"
+                                    th:selected="${mode.name() == modeValue}">Desactivada</option>
+                        </select>
+                    </div>
+                    <div data-loyalty-field th:hidden="${modeValue == 'OFF'}">
+                        <label for="loyaltyPointsPerUnit" class="form-label" id="loyaltyPointsLabel"
+                               th:text="${modeValue == 'PER_ITEM'} ? 'Puntos por tratamiento o producto' : 'Puntos por cada euro'">Puntos por cada euro</label>
+                        <input type="number" id="loyaltyPointsPerUnit" name="pointsPerUnit" class="form-control"
+                               th:value="${edited ? loyaltyForm.pointsPerUnit() : center.loyaltyPointsPerUnit}" min="1" max="1000" step="1">
+                    </div>
+                    <div data-loyalty-field th:hidden="${modeValue == 'OFF'}">
+                        <label for="loyaltyRewardPoints" class="form-label">Puntos para la recompensa</label>
+                        <input type="number" id="loyaltyRewardPoints" name="rewardPoints" class="form-control"
+                               th:value="${edited ? loyaltyForm.rewardPoints() : center.loyaltyRewardPoints}" min="1" max="100000" step="1">
+                    </div>
+                    <div class="span-full" data-loyalty-field th:hidden="${modeValue == 'OFF'}">
+                        <label for="loyaltyRewardText" class="form-label">Recompensa</label>
+                        <input type="text" id="loyaltyRewardText" name="rewardText" class="form-control" maxlength="200"
+                               th:value="${edited ? loyaltyForm.rewardText() : center.loyaltyRewardText}" placeholder="Ej: Manicura semipermanente gratis"
+                               aria-describedby="loyaltyExample loyaltyKeepHelp">
+                        <p class="form-help" id="loyaltyExample" aria-live="polite"></p>
+                        <p class="form-help" id="loyaltyKeepHelp">Los cambios cuentan para las próximas citas y compras: los puntos que ya tiene cada cliente no cambian.</p>
+                    </div>
+                </div>
+                <div class="settings-actions">
+                    <button type="submit" class="btn btn-primary"><i class="lucide-save" aria-hidden="true"></i> Guardar tarjeta de puntos</button>
                 </div>
             </form>
         </section>

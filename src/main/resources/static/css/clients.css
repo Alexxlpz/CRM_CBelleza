@@ -24,7 +24,6 @@
     border-radius: 14px;
     border: 1px solid var(--card-border);
     background: var(--card-bg);
-    backdrop-filter: blur(16px);
     font-size: 14px;
     color: var(--text-main);
     outline: none;
@@ -38,6 +37,7 @@
 
 .clients-search-icon {
     position: absolute;
+    z-index: 1;
     left: 14px;
     top: 50%;
     transform: translateY(-50%);
@@ -978,3 +978,187 @@
 }
 
 /* Dark mode adjustments */
+
+/* ===== Ficha: productos comprados y tarjeta de puntos ===== */
+.client-side-column {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    min-width: 0;
+}
+
+.sale-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.sale-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border: 1px solid var(--border-soft);
+    border-radius: var(--border-radius-md);
+    background: var(--surface);
+}
+
+.sale-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.sale-product {
+    font-weight: 700;
+    color: var(--text-main);
+    overflow-wrap: anywhere;
+}
+
+.sale-meta {
+    font-size: 12.5px;
+    color: var(--text-muted);
+}
+
+.sale-total {
+    font-size: 14.5px;
+    color: var(--text-main);
+    white-space: nowrap;
+}
+
+/* En la columna estrecha de escritorio el total y «Anular» bajan a una segunda línea */
+.client-side-column {
+    container-type: inline-size;
+}
+
+@container (max-width: 480px) {
+    .sale-row {
+        grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .sale-info {
+        grid-column: 1 / -1;
+    }
+}
+
+.sale-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.sale-form .form-label:not(:first-child) {
+    margin-top: 8px;
+}
+
+.sale-preview {
+    margin: 12px 0 8px;
+    padding: 14px 16px;
+    border: 1px solid var(--border-soft);
+    border-radius: var(--border-radius-md);
+    background: var(--surface-muted);
+}
+
+.sale-preview-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 6px 16px;
+    margin: 0;
+    font-size: 14px;
+}
+
+.sale-preview-grid dt {
+    color: var(--text-muted);
+}
+
+.sale-preview-grid dd {
+    margin: 0;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.sale-stock-warning {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 12px 0 0;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--warning-text);
+}
+
+.sale-stock-warning.is-error {
+    color: var(--danger-text);
+}
+
+.loyalty-card {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px 24px;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+    border: 1px solid var(--card-border);
+    border-radius: 24px;
+    background: var(--card-bg);
+}
+
+.loyalty-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 4px;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-muted);
+}
+
+.loyalty-balance {
+    margin: 0 0 10px;
+    font-size: 15px;
+    color: var(--text-muted);
+}
+
+.loyalty-balance strong {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--text-main);
+}
+
+.loyalty-goal {
+    margin: 10px 0 0;
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+.loyalty-goal strong {
+    color: var(--text-main);
+}
+
+@media (max-width: 600px) {
+    .loyalty-card {
+        grid-template-columns: 1fr;
+        padding: 18px;
+    }
+
+    .loyalty-redeem .btn {
+        width: 100%;
+    }
+}
+
+.client-side-column .panel-header-row {
+    flex-wrap: wrap;
+}
+
+.client-side-column .panel-header-row .btn {
+    white-space: nowrap;
+}

@@ -2,10 +2,15 @@ package com.alexxlpz.crm_cbelleza.controllers;
 
 import com.alexxlpz.crm_cbelleza.dto.ClientSummaryDTO;
 import com.alexxlpz.crm_cbelleza.entities.Appointment;
+import com.alexxlpz.crm_cbelleza.entities.ProductSale;
 import com.alexxlpz.crm_cbelleza.exceptions.BusinessRuleException;
 import com.alexxlpz.crm_cbelleza.forms.NewClientForm;
 import com.alexxlpz.crm_cbelleza.security.AppUserDetails;
 import com.alexxlpz.crm_cbelleza.services.AppointmentService;
+import com.alexxlpz.crm_cbelleza.services.CenterService;
+import com.alexxlpz.crm_cbelleza.services.InventoryService;
+import com.alexxlpz.crm_cbelleza.services.LoyaltyService;
+import com.alexxlpz.crm_cbelleza.services.ProductSaleService;
 import com.alexxlpz.crm_cbelleza.services.ClientCardService;
 import com.alexxlpz.crm_cbelleza.services.ClientCardService.ClientCardView;
 import com.alexxlpz.crm_cbelleza.services.ClientCardTemplateService;
@@ -38,15 +43,27 @@ public class ClientCardController {
     private final ClientCardTemplateService templateService;
     private final AppointmentService appointmentService;
     private final TreatmentSummaryService summaryService;
+    private final ProductSaleService saleService;
+    private final LoyaltyService loyaltyService;
+    private final InventoryService inventoryService;
+    private final CenterService centerService;
 
     public ClientCardController(ClientCardService clientCardService,
                                 ClientCardTemplateService templateService,
                                 AppointmentService appointmentService,
-                                TreatmentSummaryService summaryService) {
+                                TreatmentSummaryService summaryService,
+                                ProductSaleService saleService,
+                                LoyaltyService loyaltyService,
+                                InventoryService inventoryService,
+                                CenterService centerService) {
         this.clientCardService = clientCardService;
         this.templateService = templateService;
         this.appointmentService = appointmentService;
         this.summaryService = summaryService;
+        this.saleService = saleService;
+        this.loyaltyService = loyaltyService;
+        this.inventoryService = inventoryService;
+        this.centerService = centerService;
     }
 
     @GetMapping
@@ -76,6 +93,12 @@ public class ClientCardController {
         model.addAttribute("appointments", appointments);
         model.addAttribute("alerts", appointments.stream().filter(Appointment::isTreatmentAlert).toList());
         model.addAttribute("centerNow", summaryService.centerNow(worker.getCenterId()));
+        List<ProductSale> sales = saleService.salesOf(worker.getCenterId(), clientId);
+        model.addAttribute("sales", sales);
+        model.addAttribute("salesTotal", sales.stream().mapToDouble(ProductSale::getTotal).sum());
+        model.addAttribute("saleItems", inventoryService.getInventoryByCenter(worker.getCenterId()));
+        model.addAttribute("lowStockThreshold", InventoryService.LOW_STOCK_THRESHOLD);
+        model.addAttribute("loyalty", loyaltyService.cardFor(centerService.getCenterById(worker.getCenterId()), view.client()));
         return "worker/client_detail";
     }
 
@@ -91,7 +114,7 @@ public class ClientCardController {
             }
         });
         clientCardService.saveCardData(worker.getCenterId(), clientId, values, worker.getId());
-        redirect.addFlashAttribute("successMessage", "Ficha técnica del cliente guardada con éxito.");
+        redirect.addFlashAttribute("successMessage", "Ficha técnica guardada.");
         return redirectAfter(params.get("redirectAfter"), "/worker/clients/" + clientId);
     }
 
@@ -103,7 +126,7 @@ public class ClientCardController {
             var created = clientCardService.createClientManually(worker.getCenterId(), form, worker.getId());
             redirect.addFlashAttribute("successMessage", created.emailSkipped()
                     ? "Cliente dado de alta sin correo: ese correo no se puede usar para un cliente nuevo. Ya puedes rellenar su ficha técnica."
-                    : "Cliente dado de alta con éxito. Ya puedes consultar o rellenar su ficha técnica.");
+                    : "Cliente dado de alta. Ya puedes consultar o rellenar su ficha técnica.");
             return "redirect:/worker/clients/" + created.clientId();
         } catch (BusinessRuleException e) {
             redirect.addFlashAttribute("errorMessage", e.getMessage());
@@ -127,7 +150,7 @@ public class ClientCardController {
                                RedirectAttributes redirect) {
         try {
             templateService.saveFields(worker.getCenterId(), ids, labels == null ? List.of() : labels, types, placeholders);
-            redirect.addFlashAttribute("successMessage", "Estructura de la ficha del centro actualizada con éxito.");
+            redirect.addFlashAttribute("successMessage", "Plantilla de la ficha guardada.");
         } catch (BusinessRuleException e) {
             redirect.addFlashAttribute("errorMessage", e.getMessage());
         }

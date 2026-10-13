@@ -1,7 +1,11 @@
 package com.alexxlpz.crm_cbelleza.controllers;
 
 import com.alexxlpz.crm_cbelleza.booking.CenterTimeZones;
+import com.alexxlpz.crm_cbelleza.entities.Center;
+import com.alexxlpz.crm_cbelleza.entities.LoyaltyMode;
 import com.alexxlpz.crm_cbelleza.entities.User;
+import com.alexxlpz.crm_cbelleza.forms.LoyaltySettingsForm;
+import com.alexxlpz.crm_cbelleza.services.LoyaltyService;
 import com.alexxlpz.crm_cbelleza.exceptions.BusinessRuleException;
 import com.alexxlpz.crm_cbelleza.forms.WorkerCenterForm;
 import com.alexxlpz.crm_cbelleza.googlecalendar.GoogleCalendarService;
@@ -29,12 +33,15 @@ public class WorkerCenterController {
     private final TreatmentService treatmentService;
     private final AuthenticationSessionService authSession;
     private final GoogleCalendarService googleCalendar;
+    private final LoyaltyService loyaltyService;
 
     public WorkerCenterController(CenterService centerService,
                                   UserService userService,
                                   TreatmentService treatmentService,
                                   AuthenticationSessionService authSession,
-                                  GoogleCalendarService googleCalendar) {
+                                  GoogleCalendarService googleCalendar,
+                                  LoyaltyService loyaltyService) {
+        this.loyaltyService = loyaltyService;
         this.centerService = centerService;
         this.userService = userService;
         this.treatmentService = treatmentService;
@@ -50,6 +57,7 @@ public class WorkerCenterController {
         model.addAttribute("treatmentsCount", treatmentService.countByCenter(centerId));
         model.addAttribute("workersCount", userService.countWorkersByCenter(centerId));
         model.addAttribute("timeZones", CenterTimeZones.OPTIONS);
+        model.addAttribute("loyaltyModes", LoyaltyMode.values());
         model.addAttribute("calendarSync", googleCalendar.status(worker.getId()));
         model.addAttribute("activePage", "center");
         return "worker/center";
@@ -71,5 +79,30 @@ public class WorkerCenterController {
             redirect.addFlashAttribute("errorMessage", e.getMessage());
         }
         return "redirect:/worker/center";
+    }
+
+    @PostMapping("/worker/center/loyalty")
+    public String updateLoyalty(@AuthenticationPrincipal AppUserDetails worker,
+                                @ModelAttribute LoyaltySettingsForm form,
+                                RedirectAttributes redirect) {
+        // El aviso va dentro de la propia tarjeta: al volver, la página baja a #puntos y no se vería el de arriba
+        boolean wasEnabled = centerService.getCenterById(worker.getCenterId()).isLoyaltyEnabled();
+        try {
+            Center center = loyaltyService.updateSettings(worker.getCenterId(), form);
+            String message;
+            if (!center.isLoyaltyEnabled()) {
+                message = "Tarjeta de puntos desactivada. Los puntos ya ganados se conservan.";
+            } else if (wasEnabled) {
+                message = "Tarjeta de puntos guardada. Los cambios cuentan desde ahora.";
+            } else {
+                message = "Tarjeta de puntos activada. Tus clientes suman puntos desde hoy.";
+            }
+            redirect.addFlashAttribute("loyaltyMessage", message);
+        } catch (BusinessRuleException e) {
+            // Se devuelve lo escrito para no perderlo
+            redirect.addFlashAttribute("loyaltyError", e.getMessage());
+            redirect.addFlashAttribute("loyaltyForm", form);
+        }
+        return "redirect:/worker/center#puntos";
     }
 }

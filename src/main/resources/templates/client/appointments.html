@@ -15,6 +15,42 @@
 
         <div th:replace="~{fragments/alerts :: flash}"></div>
 
+        <!-- Tarjetas de puntos de los centros que la tienen activada -->
+        <section class="client-loyalty" th:if="${!loyaltyCards.isEmpty()}" aria-labelledby="clientLoyaltyTitle">
+            <h2 class="client-loyalty-title" id="clientLoyaltyTitle"><i class="lucide-gift" aria-hidden="true"></i> Mis puntos</h2>
+            <div class="client-loyalty-grid">
+                <article class="client-loyalty-card" th:each="item : ${loyaltyCards}" th:with="card=${item.card()}">
+                    <h3 class="client-loyalty-center" th:text="${item.centerName()}">Centro Histórico</h3>
+                    <p class="client-loyalty-balance"><strong th:text="${card.balance()}">64</strong> de
+                        <span th:text="${card.rewardPoints()}">150</span> puntos</p>
+                    <progress class="loyalty-progress" th:max="${card.rewardPoints()}" th:value="${card.progress()}" max="150" value="64"
+                              th:attr="aria-label=${'Puntos en ' + item.centerName()}"></progress>
+                    <p class="client-loyalty-goal" th:if="${card.canRedeem()}">
+                        <i class="lucide-award" aria-hidden="true"></i>
+                        <span>Ya puedes canjear <strong th:text="${card.rewardText()}">Manicura gratis</strong>. Pídelo en tu próxima visita.</span>
+                    </p>
+                    <p class="client-loyalty-goal" th:unless="${card.canRedeem()}">
+                        Te faltan <strong th:text="${card.missing()}">86</strong> puntos para <strong th:text="${card.rewardText()}">Manicura gratis</strong>.
+                    </p>
+                    <p class="client-loyalty-rule"
+                       th:text="${card.mode().name() == 'PER_EURO'} ? ${card.pointsPerUnit() == 1 ? '1 punto por cada euro' : card.pointsPerUnit() + ' puntos por cada euro'} : ${card.pointsPerUnit() == 1 ? '1 punto por tratamiento o producto' : card.pointsPerUnit() + ' puntos por tratamiento o producto'}">1 punto por cada euro</p>
+                    <details class="loyalty-history" th:if="${!card.recent().isEmpty()}">
+                        <summary>Últimos movimientos</summary>
+                        <ul>
+                            <li th:each="move : ${card.recent()}">
+                                <span class="loyalty-move-text">
+                                    <span th:text="${#temporals.format(move.createdAt, 'dd/MM/yyyy')}">13/10/2026</span> ·
+                                    <span th:text="${move.reason.name() == 'REDEMPTION' ? 'Canje: ' + move.description : move.description}">Manicura rusa</span>
+                                </span>
+                                <strong class="loyalty-move-points" th:classappend="${move.points < 0} ? 'is-negative'"
+                                        th:text="${move.points > 0 ? '+' + move.points : move.points}">+35</strong>
+                            </li>
+                        </ul>
+                    </details>
+                </article>
+            </div>
+        </section>
+
         <div class="category-filter-bar" role="toolbar" aria-label="Filtrar citas por estado">
             <button type="button" class="category-pill active" data-filter="ALL" aria-pressed="true">
                 <i class="lucide-sparkles" aria-hidden="true"></i> Todas

@@ -158,3 +158,71 @@
 .btn-link-danger:focus-visible {
     border-bottom-color: currentColor;
 }
+
+/* ===== Mis puntos ===== */
+.client-loyalty {
+    margin-bottom: 28px;
+}
+
+.client-loyalty-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 12px;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.client-loyalty-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+    gap: 16px;
+}
+
+.client-loyalty-card {
+    padding: 18px 20px;
+    border: 1px solid var(--card-border);
+    border-radius: var(--border-radius-md);
+    background: var(--card-bg);
+}
+
+.client-loyalty-center {
+    margin: 0 0 6px;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--primary-text);
+}
+
+.client-loyalty-balance {
+    margin: 0 0 10px;
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+.client-loyalty-balance strong {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--text-main);
+}
+
+.client-loyalty-goal {
+    margin: 10px 0 4px;
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+.client-loyalty-goal i {
+    margin-right: 4px;
+    color: var(--primary-text);
+}
+
+.client-loyalty-goal strong {
+    color: var(--text-main);
+}
+
+.client-loyalty-rule {
+    margin: 0;
+    font-size: 12.5px;
+    color: var(--text-muted);
+}

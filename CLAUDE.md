@@ -55,7 +55,7 @@ Alex trabaja en dos máquinas:
 # En Linux, anteponer JAVA_HOME=/home/alejandro/.jdks/ms-25.0.4.1 a cada comando y usar mvn en vez de ./mvnw
 
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev   # desarrollo: H2 en memoria, /login-selector y consola H2
-./mvnw test                                             # todos los tests (134, verde a 12 oct 2026)
+./mvnw test                                             # todos los tests (144, verde a 13 oct 2026)
 ./mvnw -Dtest=CenterIsolationTests test                 # un solo test
 ./mvnw -DskipTests clean package                        # jar en target/
 docker compose up --build                               # app en :8080 + PostgreSQL 16 (necesita el .env, ver abajo)
@@ -64,6 +64,7 @@ docker compose up --build                               # app en :8080 + Postgre
 - En IntelliJ: Run Configuration > Active profiles = `dev`. La app escucha en `http://localhost:8080`.
 - Con `mvn spring-boot:run` la app sirve CSS, JS y plantillas desde `target/classes`: tras editarlos fuera de IntelliJ, ejecuta `mvn -o resources:resources` para verlos.
 - `application-dev.properties` desactiva las cachés de Thymeleaf y del hash de recursos: los cambios de plantillas, CSS y JS se ven sin reiniciar. CSS y JS se sirven con hash de contenido en la URL, así que tras un despliegue no hace falta Ctrl+F5.
+- En `dev` la BD H2 en memoria **se borra en cada reinicio** (también los de devtools al compilar). Con `DB_CLOSE_DELAY=-1` sobrevivía a medias y los UPDATE fallaban con «Check constraint invalid» / «La base de datos ha sido cerrada».
 - Usuarios demo: los crea `DatabaseSeeder` si la BD está vacía **y** `crm.seed-demo-data=true`, que solo activan el perfil `dev` y los tests (`src/test/resources/config/application.properties`). Contraseña `password123`, pública: nunca en producción.
   - Trabajadores: `carlos@cbelleza.com` y `lucia.romero@cbelleza.com` (Centro Histórico), `elena@cbelleza.com` (Plaza Norte), `marco@cbelleza.com` (Sarrià-Sant Gervasi), `ana@cbelleza.com` (Las Condes).
   - Clientes: `sofia@gmail.com` y otros.
@@ -99,14 +100,15 @@ src/main/java/com/alexxlpz/crm_cbelleza/
 src/main/resources/
   db/migration/  V1__esquema_inicial.sql, V2__eliminar_clientes_invitados.sql, V3__usuarios_google.sql,
                  V4__sesiones_recordadas.sql, V5__calendario_google.sql, V6__zona_horaria_centros.sql,
-                 V7__agenda_flexible.sql, V8__resumen_tratamiento.sql
+                 V7__agenda_flexible.sql, V8__resumen_tratamiento.sql,
+                 V9__ventas_productos.sql, V10__fidelizacion.sql
   templates/     públicas en la raíz, client/, worker/, fragments/, email/
   static/css/    tokens.css + common.css + un CSS por área
   static/js/     app.js, form-validation.js, sheets.js, unsaved-changes.js, booking-picker.js,
                  worker-calendar.js, worker-agenda-forms.js, treatment-summary.js, scroll-index.js
   static/icons/lucide/  fuente de Lucide (woff/woff2)
 src/test/java/…  BookingServiceTests, CenterIsolationTests, SecurityIntegrationTests, PageRenderingTests,
-                 UnitTests, CrmCBellezaApplicationTests, GoogleLoginTests, GoogleCalendarTests, AgendaTests, RegistrationTests, TreatmentSummaryTests, security/CurrentUserModelAdviceTest, TestUsers
+                 UnitTests, CrmCBellezaApplicationTests, GoogleLoginTests, GoogleCalendarTests, AgendaTests, RegistrationTests, TreatmentSummaryTests, ProductSaleAndLoyaltyTests, security/CurrentUserModelAdviceTest, TestUsers
 ```
 
 ### Reglas de backend
@@ -132,8 +134,10 @@ Tablas (ver `V1__esquema_inicial.sql`):
 - `google_calendar_links`: trabajadores con Google Calendar activado (token de actualización cifrado con `GOOGLE_TOKEN_KEY`, id del calendario «Cuquora» creado en su cuenta). `appointments.google_event_id` apunta el evento de cada cita.
 - **Resumen del tratamiento** (`TreatmentSummaryService`, `POST /worker/appointments/{id}/summary`, modal `fragments/treatment-summary.html` + `treatment-summary.js`): el trabajador lo escribe desde la agenda o el historial de la ficha cuando la cita confirmada **ya ha empezado** (hora del centro). Si lo marca como **aviso** (alergias, reacciones, productos que no le sientan bien), sale arriba en la ficha del cliente y en sus demás citas de la agenda (`AppointmentCalendarDTO.clientAlerts`). Es interno: el cliente nunca lo ve.
 - `client_cards`: ficha técnica por centro y cliente, `data_json` con los valores. `client_card_templates`: campos de la ficha por centro (`fields_json`).
+- **Venta de productos** (`product_sales`, `ProductSaleService`, `ClientSalesController`, modal `fragments/product-sale.html` + `product-sale.js`): desde la ficha del cliente el trabajador elige un producto del inventario y la cantidad; antes de confirmar ve el stock actual y el que quedará (aviso si queda bajo o se agota). Al guardar se resta del inventario con la fila bloqueada (`InventoryRepository.findForUpdate`); nunca se vende más que el stock. «Anular» devuelve las unidades y quita sus puntos. `unit_price` guarda el precio del momento.
+- **Tarjeta de puntos** (`centers.loyalty_*`, `loyalty_movements`, `LoyaltyService`): cada centro la configura en «Mi Centro» (`POST /worker/center/loyalty`): desactivada, puntos por euro (`PER_EURO`) o por tratamiento/unidad de producto (`PER_ITEM`), puntos para la recompensa y texto. Los productos suman al venderse; los tratamientos, cuando la cita está completada (se apuntan al abrir la ficha, porque el estado se calcula al leer; `appointment_id` único evita sumar dos veces) y solo desde `loyalty_since`. Canje desde la ficha (`POST /worker/clients/{id}/loyalty/redeem`, bloquea el centro). Los puntos se guardan al ganarse: cambiar la configuración no altera lo ya ganado. El cliente ve sus tarjetas en «Mis citas» (`LoyaltyService.cardsOfClient`: centros con la tarjeta activada donde tiene citas o puntos).
 
-**Migraciones:** todo cambio de esquema es un nuevo `V<n>__descripcion.sql` (nombre en español, SQL compatible con H2 y PostgreSQL). Nunca edites una migración ya aplicada. La siguiente libre es **`V9`**. En Docker, `SPRING_FLYWAY_BASELINE_ON_MIGRATE=true` adopta BD creadas antes de Flyway.
+**Migraciones:** todo cambio de esquema es un nuevo `V<n>__descripcion.sql` (nombre en español, SQL compatible con H2 y PostgreSQL). Nunca edites una migración ya aplicada. La siguiente libre es **`V11`**. En Docker, `SPRING_FLYWAY_BASELINE_ON_MIGRATE=true` adopta BD creadas antes de Flyway.
 
 ## Roles y aislamiento entre centros
 

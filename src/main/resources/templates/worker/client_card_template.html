@@ -22,7 +22,7 @@
         </div>
         <div class="alert alert-success" id="saveSuccessBanner" role="status" th:hidden="${successMessage == null}">
             <i class="lucide-check-circle" aria-hidden="true"></i>
-            <span id="saveSuccessMessageText" th:text="${successMessage != null ? successMessage : 'Estructura de la ficha actualizada con éxito.'}">Estructura de la ficha actualizada con éxito.</span>
+            <span id="saveSuccessMessageText" th:text="${successMessage != null ? successMessage : 'Plantilla de la ficha guardada.'}">Plantilla de la ficha guardada.</span>
         </div>
 
         <section class="card-panel card-panel--centered">
@@ -149,7 +149,7 @@
                 modalId: 'unsavedChangesModal',
                 exitUrl: '/worker/clients',
                 saveButton: document.getElementById('btnSaveTemplate'),
-                successMessage: 'Estructura de la ficha del centro actualizada con éxito.',
+                successMessage: 'Plantilla de la ficha guardada.',
                 // El estado incluye el orden y número de filas (añadir o quitar campos también cuenta como cambio).
                 snapshot: () => JSON.stringify(Array.from(container.querySelectorAll('.template-field-row')).map(row => [
                     row.querySelector('[name="fieldIds"]').value,

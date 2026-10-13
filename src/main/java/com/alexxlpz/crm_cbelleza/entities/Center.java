@@ -35,4 +35,31 @@ public class Center {
     @Column(nullable = false)
     @Builder.Default
     private Integer cabins = 1;
+
+    /** Fidelización: cómo se suman puntos (ver {@link LoyaltyMode}). */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "loyalty_mode", nullable = false, length = 16)
+    @Builder.Default
+    private LoyaltyMode loyaltyMode = LoyaltyMode.OFF;
+
+    /** Puntos por euro o por tratamiento/unidad de producto, según el modo. */
+    @Column(name = "loyalty_points_per_unit", nullable = false)
+    @Builder.Default
+    private Integer loyaltyPointsPerUnit = 1;
+
+    /** Puntos necesarios para canjear la recompensa. */
+    @Column(name = "loyalty_reward_points", nullable = false)
+    @Builder.Default
+    private Integer loyaltyRewardPoints = 100;
+
+    @Column(name = "loyalty_reward_text", length = 200)
+    private String loyaltyRewardText;
+
+    /** Desde cuándo suma puntos: las citas anteriores no cuentan. */
+    @Column(name = "loyalty_since")
+    private java.time.LocalDateTime loyaltySince;
+
+    public boolean isLoyaltyEnabled() {
+        return loyaltyMode != null && loyaltyMode != LoyaltyMode.OFF;
+    }
 }

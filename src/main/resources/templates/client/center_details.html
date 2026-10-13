@@ -38,7 +38,7 @@
                             <span class="treatment-card-desc" th:text="${t.description}">Descripción del
                                 servicio...</span>
                             <div class="treatment-card-meta">
-                                <span class="treatment-card-price" th:text="${t.price} + ' €'">0.00 €</span>
+                                <span class="treatment-card-price" th:text="${#numbers.formatDecimal(t.price, 1, 'POINT', 2, 'COMMA')} + ' €'">32,00 €</span>
                                 <span class="treatment-card-duration" th:text="${t.duration} + ' min'">30 min</span>
                             </div>
                         </label>

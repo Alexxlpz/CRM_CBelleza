@@ -27,6 +27,18 @@ Las reglas están en el skill `interfaz-cuquora`; esto es lo que hoy las incumpl
 5. **Código.** Comentarios en inglés que describen el CSS («Solid crisp white», «Hero Section», «100% visible at a glance»): pasarlos a español y solo donde expliquen un porqué; borrar `@keyframes` y clases sin uso. 9 plantillas con `<script>` en línea: mover a ficheros si crecen.
 6. **Inicio y Funcionalidades.** Estructura típica de plantilla (héroe con insignias, tarjetas de 3 en 3 con icono + frase, «Centro ejemplo» inventado, FAQ genérica). Mejor capturas reales de la agenda, la ficha y el inventario y menos texto.
 
+## Experiencia de uso (auditoría del 13 oct 2026)
+
+Propuestas pendientes de decidir, de más a menos impacto (detalle en el informe enviado a Alex):
+
+1. Panel del trabajador: abrir en la agenda semanal con barra lateral contraíble (propuesto, espera visto bueno) y quitar los enlaces públicos de su barra superior.
+3. «Mis reservas»: separar próximas e historial; tarjetas más compactas en móvil.
+4. Agenda en móvil: abrir en «Hoy» y plegar la leyenda.
+5. Recuperar la contraseña por correo (con Brevo; junto a seguridad #11). Quitar «Conexión segura» del login hasta tener HTTPS.
+6. Inventario: botones ±1 de 44 px, «Ver detalles», unidades vendidas por producto y facturación de productos del mes.
+7. Reservar cita: bajar al paso 2 al elegir tratamiento; botón «Solicitar cita».
+8. Ficha del cliente con contenedor ancho en escritorio.
+
 ## Legal y SEO
 
 - **Datos del titular.** La LSSI (art. 10) exige nombre o razón social, NIF y domicilio del titular. Términos y Privacidad ya los muestran: falta rellenar `LEGAL_OWNER_NAME`, `LEGAL_OWNER_NIF` y `LEGAL_OWNER_ADDRESS` en el `.env` (sin NIF, Términos no muestra la línea del titular y Privacidad dice solo «Cuquora»).

@@ -102,7 +102,7 @@
                 showSuccess(successMessage);
                 onSaved?.();
                 if (saveButton) {
-                    saveButton.innerHTML = '<i class="lucide-check-circle" aria-hidden="true"></i> <span>¡Guardado con éxito!</span>';
+                    saveButton.innerHTML = '<i class="lucide-check-circle" aria-hidden="true"></i> <span>Guardado</span>';
                     setTimeout(() => { saveButton.disabled = false; saveButton.innerHTML = original; }, 2000);
                 }
             } catch (err) {

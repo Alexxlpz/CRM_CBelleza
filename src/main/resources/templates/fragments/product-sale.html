@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<body>
+<!--/* Vender un producto del inventario a un cliente (ficha del cliente). La previsión de stock la calcula product-sale.js. */-->
+<div th:fragment="modal(client, items, loyalty, lowStock)" class="ui-modal-overlay" id="productSaleModal" hidden>
+    <div class="ui-modal ui-modal--form" role="dialog" aria-modal="true" aria-labelledby="productSaleTitle">
+        <button type="button" class="ui-modal-close" data-modal-close aria-label="Cerrar"><i class="lucide-x" aria-hidden="true"></i></button>
+        <h2 class="ui-modal-title" id="productSaleTitle"><i class="lucide-shopping-bag" aria-hidden="true"></i> Vender producto</h2>
+        <p class="ui-modal-text" th:text="'Se resta del inventario del centro y queda en el historial de ' + ${client.name} + '.'">Se resta del inventario del centro.</p>
+        <form th:action="@{/worker/clients/{id}/sales(id=${client.id})}" method="post" id="productSaleForm" class="sale-form"
+              th:data-low-stock="${lowStock}"
+              th:data-loyalty-mode="${loyalty.enabled()} ? ${loyalty.mode().name()} : 'OFF'"
+              th:data-loyalty-per-unit="${loyalty.pointsPerUnit()}">
+            <label class="form-label" for="saleInventoryId">Producto</label>
+            <select id="saleInventoryId" name="inventoryId" class="form-control">
+                <option value="">Elige un producto</option>
+                <option th:each="item : ${items}" th:value="${item.id}" th:disabled="${item.stock == 0}"
+                        th:data-stock="${item.stock}" th:data-price="${item.product.price}"
+                        th:text="${item.product.name} + ' · ' + (${item.stock == 0} ? 'agotado' : ${item.stock} + ' en stock')">Sérum vitamina C · 5 en stock</option>
+            </select>
+
+            <label class="form-label" for="saleQuantity">Cantidad</label>
+            <input type="number" id="saleQuantity" name="quantity" class="form-control" value="1" min="1" max="99" step="1" required>
+
+            <div class="sale-preview" id="salePreview" aria-live="polite" hidden>
+                <dl class="sale-preview-grid">
+                    <dt>Stock</dt>
+                    <dd><span id="saleStockNow">5</span> <i class="lucide-arrow-right" aria-hidden="true"></i> <strong id="saleStockAfter">3</strong> unidades</dd>
+                    <dt>Total</dt>
+                    <dd><strong id="saleTotal">25,00 €</strong></dd>
+                    <dt th:if="${loyalty.enabled()}">Puntos</dt>
+                    <dd th:if="${loyalty.enabled()}"><strong id="salePoints">+25</strong></dd>
+                </dl>
+                <p class="sale-stock-warning" id="saleStockWarning" hidden>
+                    <i class="lucide-alert-triangle" aria-hidden="true"></i> <span></span>
+                </p>
+            </div>
+            <p class="agenda-form-error" id="saleError" role="alert" hidden></p>
+
+            <div class="ui-modal-actions">
+                <button type="button" class="btn btn-secondary" data-modal-close>Cancelar</button>
+                <button type="submit" class="btn btn-primary" id="saleSubmit"><i class="lucide-check" aria-hidden="true"></i> Confirmar venta</button>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>

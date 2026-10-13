@@ -6,13 +6,16 @@
 // (útil para un modal abierto); sin él, de la página entera (hasta 4000 px de alto).
 import { spawn } from 'node:child_process';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 
 const args = Object.fromEntries(process.argv.slice(2).reduce((acc, v, i, all) =>
     v.startsWith('--') ? [...acc, [v.slice(2), all[i + 1]]] : acc, []));
 const base = args.base || 'http://localhost:8091';
 const widths = (args.widths || '1920,1440,1100,960,768,390').split(',').map(Number);
 const out = args.out || '.';
-const browserPath = ['/usr/bin/brave', '/opt/google/chrome/chrome', '/usr/bin/chromium', '/usr/bin/google-chrome']
+const browserPath = ['/usr/bin/brave', '/opt/google/chrome/chrome', '/usr/bin/chromium', '/usr/bin/google-chrome',
+    'C:/Program Files/BraveSoftware/Brave-Browser/Application/brave.exe', 'C:/Program Files/Google/Chrome/Application/chrome.exe']
     .find(p => existsSync(p));
 mkdirSync(out, { recursive: true });
 
@@ -26,13 +29,13 @@ async function login(user) {
         body: new URLSearchParams({ identifier: user, password: args.password || 'password123', _csrf: csrf })
     });
     const session = res.headers.getSetCookie().find(c => c.startsWith('JSESSIONID='));
-    if (!session || !String(res.headers.get('location')).match(/worker|client/)) throw new Error('No se pudo iniciar sesión como ' + user);
+    if (!session || /login/.test(String(res.headers.get('location')))) throw new Error('No se pudo iniciar sesión como ' + user);
     return session.split(';')[0].split('=')[1];
 }
 
 const port = 9300 + Math.floor(Math.random() * 500);
 const browser = spawn(browserPath, ['--headless=new', `--remote-debugging-port=${port}`, '--no-first-run',
-    '--hide-scrollbars', `--user-data-dir=/tmp/cuquora-shots-${port}`, 'about:blank'], { stdio: 'ignore' });
+    '--hide-scrollbars', `--user-data-dir=${join(tmpdir(), 'cuquora-shots-' + port)}`, 'about:blank'], { stdio: 'ignore' });
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 let ws;
 for (let i = 0; i < 50 && !ws; i++) {
@@ -52,7 +55,8 @@ try {
     for (const width of widths) {
         const mobile = width < 600;
         await send('Emulation.setDeviceMetricsOverride', { width, height: mobile ? 844 : 900, deviceScaleFactor: 1, mobile });
-        await send('Page.navigate', { url: base + args.path });
+        const nav = await send('Page.navigate', { url: base + args.path });
+        if (nav.error || nav.result?.errorText) console.error('Navegación fallida:', JSON.stringify(nav.error || nav.result));
         await sleep(Number(args.wait) || 2000);
         // El aviso de cookies tapa el pie: se oculta para la captura
         await send('Runtime.evaluate', { expression: "document.getElementById('cookieBanner')?.setAttribute('hidden','')" });

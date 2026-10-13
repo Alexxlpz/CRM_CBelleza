@@ -413,11 +413,13 @@ document.addEventListener('DOMContentLoaded', function () {
         const apps = appointmentsOn(selectedDayKey);
         const dayBlocks = blocksOn(selectedDayKey);
         const count = status => apps.filter(a => a.status === status).length;
-        dayCount.textContent = `${count('CONFIRMED')} confirmadas`
-            + (count('COMPLETED') ? `, ${count('COMPLETED')} completadas` : '')
-            + `, ${count('PENDING')} solicitudes pendientes`
-            + (count('PROPOSED') ? `, ${count('PROPOSED')} propuestas enviadas` : '')
-            + (dayBlocks.length ? `, ${plural(dayBlocks.length, 'bloqueo', 'bloqueos')}` : '');
+        dayCount.textContent = [
+            [count('CONFIRMED'), 'confirmada', 'confirmadas'],
+            [count('COMPLETED'), 'completada', 'completadas'],
+            [count('PENDING'), 'solicitud pendiente', 'solicitudes pendientes'],
+            [count('PROPOSED'), 'propuesta enviada', 'propuestas enviadas'],
+            [dayBlocks.length, 'bloqueo', 'bloqueos']
+        ].filter(([n]) => n > 0).map(([n, one, many]) => plural(n, one, many)).join(', ') || 'Sin citas este día';
 
         list.innerHTML = '';
         if (apps.length === 0 && dayBlocks.length === 0) {

@@ -6,6 +6,7 @@ import com.alexxlpz.crm_cbelleza.security.AppUserDetails;
 import com.alexxlpz.crm_cbelleza.services.AppointmentService;
 import com.alexxlpz.crm_cbelleza.services.BookingService;
 import com.alexxlpz.crm_cbelleza.services.CenterService;
+import com.alexxlpz.crm_cbelleza.services.LoyaltyService;
 import com.alexxlpz.crm_cbelleza.services.TreatmentService;
 import com.alexxlpz.crm_cbelleza.services.UserService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -30,13 +31,16 @@ public class ClientBookingController {
     private final AppointmentService appointmentService;
     private final BookingService bookingService;
     private final OpeningHoursPolicy openingHours;
+    private final LoyaltyService loyaltyService;
 
     public ClientBookingController(CenterService centerService,
                                    TreatmentService treatmentService,
                                    UserService userService,
                                    AppointmentService appointmentService,
                                    BookingService bookingService,
-                                   OpeningHoursPolicy openingHours) {
+                                   OpeningHoursPolicy openingHours,
+                                   LoyaltyService loyaltyService) {
+        this.loyaltyService = loyaltyService;
         this.centerService = centerService;
         this.treatmentService = treatmentService;
         this.userService = userService;
@@ -79,6 +83,7 @@ public class ClientBookingController {
     @GetMapping("/client/appointments")
     public String appointments(@AuthenticationPrincipal AppUserDetails client, Model model) {
         model.addAttribute("appointments", appointmentService.getClientAppointments(client.getId()));
+        model.addAttribute("loyaltyCards", loyaltyService.cardsOfClient(client.getId()));
         model.addAttribute("activePage", "appointments");
         return "client/appointments";
     }

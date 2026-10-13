@@ -40,6 +40,7 @@ node $S --user carlos@cbelleza.com --path "/worker/calendar?date=2026-10-12&view
 ```
 
 - Usuarios demo (contraseña `password123`): trabajadores `carlos@cbelleza.com`, `elena@cbelleza.com`; cliente `sofia@gmail.com`. Sin `--user`, páginas públicas.
+- **En Windows (Git Bash)** exporta antes `MSYS_NO_PATHCONV=1`: si no, `--path /worker/...` se convierte en una ruta de Git y la captura sale en blanco (el script avisa con «Navegación fallida»). El script busca Brave o Chrome también en `C:/Program Files`.
 - Ids útiles con datos demo: Sofía Martínez es el cliente 6 del centro de Carlos.
 - Mira las capturas con la herramienta de leer imágenes. Empieza por 1440 y 390; abre las demás solo si el cambio afecta al diseño en esos anchos (960-1100 es donde más se rompe).
 - La primera carga de una pantalla con mucho JS (la agenda) puede tardar más de 2 s: si la captura sale con el texto de ejemplo de la plantilla («Julio 2026») o sin la tipografía, repite con `--wait 4000`.

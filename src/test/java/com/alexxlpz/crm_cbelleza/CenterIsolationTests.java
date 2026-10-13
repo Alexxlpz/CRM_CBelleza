@@ -63,6 +63,34 @@ class CenterIsolationTests {
     }
 
     @Test
+    void workerCannotSellProductsOrRedeemPointsInAnotherCenter() throws Exception {
+        // Un cliente del centro 1 que no es cliente del centro 2
+        Long otherCenter = centerOf(TestUsers.WORKER_CENTER_2);
+        Long clientId = appointments.findByCenterIdOrderByDateTimeDesc(centerOf(TestUsers.WORKER_CENTER_1)).stream()
+                .map(app -> app.getClient().getId())
+                .filter(id -> {
+                    try {
+                        clientCards.requireClientOfCenter(otherCenter, id);
+                        return false;
+                    } catch (com.alexxlpz.crm_cbelleza.exceptions.ResourceNotFoundException e) {
+                        return true;
+                    }
+                })
+                .findFirst().orElseThrow();
+        Inventory foreignItem = inventory.findByCenterId(centerOf(TestUsers.WORKER_CENTER_1)).getFirst();
+        int stockBefore = foreignItem.getStock();
+
+        mvc.perform(post("/worker/clients/" + clientId + "/sales").param("inventoryId", foreignItem.getId().toString())
+                        .param("quantity", "1").with(csrf()).with(TestUsers.as(users, TestUsers.WORKER_CENTER_2)))
+                .andExpect(status().isNotFound());
+        mvc.perform(post("/worker/clients/" + clientId + "/loyalty/redeem").with(csrf())
+                        .with(TestUsers.as(users, TestUsers.WORKER_CENTER_2)))
+                .andExpect(status().isNotFound());
+
+        assertEquals(stockBefore, inventory.findById(foreignItem.getId()).orElseThrow().getStock());
+    }
+
+    @Test
     void workerCannotChangeStockOfAnotherCenter() throws Exception {
         Inventory foreign = inventory.findByCenterId(centerOf(TestUsers.WORKER_CENTER_1)).getFirst();
         int stockBefore = foreign.getStock();

@@ -64,6 +64,12 @@ public class DatabaseSeeder implements CommandLineRunner {
                 .latitude(40.4168)
                 .longitude(-3.7038)
                 .cabins(2)
+                // Tarjeta de puntos de ejemplo: 1 punto por euro, recompensa a los 150
+                .loyaltyMode(com.alexxlpz.crm_cbelleza.entities.LoyaltyMode.PER_EURO)
+                .loyaltyPointsPerUnit(1)
+                .loyaltyRewardPoints(150)
+                .loyaltyRewardText("Manicura semipermanente gratis")
+                .loyaltySince(java.time.LocalDateTime.now().minusMonths(2))
                 .build();
         Center c2 = Center.builder()
                 .name("Plaza Norte")
