@@ -45,7 +45,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/** Interruptor «Guardar mis citas en Google Calendar» de «Mi Centro», con Google simulado. */
+/** Interruptores de Google Calendar de «Mi Centro» (trabajador) y «Mi Perfil» (cliente), con Google simulado. */
 @SpringBootTest(properties = {
         "crm.security.google.client-id=test-client-id",
         "crm.security.google.client-secret=test-client-secret",
@@ -118,7 +118,7 @@ class GoogleCalendarTests {
 
         connect(TestUsers.WORKER_CENTER_1, "codigo-ok");
 
-        GoogleCalendarLink link = links.findByWorkerId(carlos.getId()).orElseThrow();
+        GoogleCalendarLink link = links.findByUserId(carlos.getId()).orElseThrow();
         assertEquals("calendario-cuquora", link.getCalendarId());
         assertEquals("carlos.personal@gmail.com", link.getGoogleEmail());
         assertNotEquals(REFRESH_TOKEN, link.getEncryptedRefreshToken(), "el token se guarda cifrado");
@@ -169,7 +169,7 @@ class GoogleCalendarTests {
                         .session(session).with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
                 .andExpect(redirectedUrl("/worker/center"));
 
-        assertTrue(links.findByWorkerId(carlos.getId()).isEmpty());
+        assertTrue(links.findByUserId(carlos.getId()).isEmpty());
         verify(google, never()).exchangeCode(anyString(), anyString());
     }
 
@@ -222,28 +222,130 @@ class GoogleCalendarTests {
         mvc.perform(post("/worker/google-calendar/disconnect").with(csrf())
                         .with(TestUsers.as(users, TestUsers.WORKER_CENTER_2)))
                 .andExpect(redirectedUrl("/worker/center"));
-        assertTrue(links.findByWorkerId(carlos.getId()).isPresent());
+        assertTrue(links.findByUserId(carlos.getId()).isPresent());
 
         mvc.perform(post("/worker/google-calendar/disconnect").with(csrf())
                         .with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
                 .andExpect(redirectedUrl("/worker/center"));
-        assertTrue(links.findByWorkerId(carlos.getId()).isEmpty());
+        assertTrue(links.findByUserId(carlos.getId()).isEmpty());
         verify(google).deleteCalendar(REFRESH_TOKEN, "calendario-cuquora");
         verify(google).revoke(REFRESH_TOKEN);
     }
 
+    // ---------- Cliente: interruptor en «Mi Perfil» ----------
+
+    @Test
+    void clientProfileShowsSwitchOff() throws Exception {
+        mvc.perform(get("/client/profile").with(TestUsers.as(users, TestUsers.CLIENT)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(allOf(
+                        containsString("Ver mis citas en Google Calendar"),
+                        containsString("role=\"switch\" aria-checked=\"false\""),
+                        containsString("/client/google-calendar/connect"))));
+    }
+
+    @Test
+    void clientSwitchUsesClientCallback() throws Exception {
+        mvc.perform(post("/client/google-calendar/connect").with(csrf())
+                        .with(TestUsers.as(users, TestUsers.CLIENT)))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(header().string("Location", allOf(
+                        startsWith("https://accounts.google.com/o/oauth2/v2/auth"),
+                        containsString("calendar.app.created"),
+                        containsString("redirect_uri=http://localhost/client/google-calendar/callback"))));
+    }
+
+    @Test
+    void workersCannotUseClientSwitch() throws Exception {
+        mvc.perform(post("/client/google-calendar/connect").with(csrf())
+                        .with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void clientCallbackCopiesOwnConfirmedAppointments() throws Exception {
+        User carlos = users.findByEmailIgnoreCase(TestUsers.WORKER_CENTER_1).orElseThrow();
+        User sofia = users.findByNameIgnoreCase(TestUsers.CLIENT).orElseThrow();
+        Appointment upcoming = confirmedAppointmentFor(carlos);
+
+        connectClient(TestUsers.CLIENT, "codigo-ok");
+
+        verify(google).createCalendar(REFRESH_TOKEN, "Mis citas · Cuquora", "Europe/Madrid");
+        verify(google, atLeastOnce()).insertEvent(eq(REFRESH_TOKEN), eq("calendario-cuquora"),
+                argThat(event -> event.summary().contains("Centro Histórico")));
+        // En su calendario no van datos de cliente pensados para el centro
+        verify(google, never()).insertEvent(anyString(), anyString(),
+                argThat(event -> event.description().contains("Cliente: ")));
+        Appointment saved = appointments.findById(upcoming.getId()).orElseThrow();
+        assertEquals("evento-1", saved.getClientGoogleEventId());
+        assertNull(saved.getGoogleEventId(), "Carlos no tiene Google Calendar: su lado no cambia");
+        assertTrue(links.findByUserId(sofia.getId()).isPresent());
+
+        mvc.perform(get("/client/profile").with(TestUsers.as(users, TestUsers.CLIENT)))
+                .andExpect(content().string(allOf(
+                        containsString("role=\"switch\" aria-checked=\"true\""),
+                        containsString("carlos.personal@gmail.com"))));
+    }
+
+    @Test
+    void cancelledAppointmentLeavesBothCalendars() throws Exception {
+        User carlos = users.findByEmailIgnoreCase(TestUsers.WORKER_CENTER_1).orElseThrow();
+        Appointment upcoming = confirmedAppointmentFor(carlos);
+        connect(TestUsers.WORKER_CENTER_1, "codigo-ok");
+        connectClient(TestUsers.CLIENT, "codigo-ok");
+        Appointment synced = appointments.findById(upcoming.getId()).orElseThrow();
+        assertEquals("evento-1", synced.getGoogleEventId());
+        assertEquals("evento-1", synced.getClientGoogleEventId());
+
+        upcoming.setStatus(AppointmentStatus.CANCELLED);
+        appointments.save(upcoming);
+        calendarService.syncAppointment(upcoming.getId());
+
+        verify(google, org.mockito.Mockito.times(2)).deleteEvent(REFRESH_TOKEN, "calendario-cuquora", "evento-1");
+        Appointment cancelled = appointments.findById(upcoming.getId()).orElseThrow();
+        assertNull(cancelled.getGoogleEventId());
+        assertNull(cancelled.getClientGoogleEventId());
+    }
+
+    @Test
+    void clientDisconnectKeepsWorkerCalendar() throws Exception {
+        User carlos = users.findByEmailIgnoreCase(TestUsers.WORKER_CENTER_1).orElseThrow();
+        User sofia = users.findByNameIgnoreCase(TestUsers.CLIENT).orElseThrow();
+        Appointment upcoming = confirmedAppointmentFor(carlos);
+        connect(TestUsers.WORKER_CENTER_1, "codigo-ok");
+        connectClient(TestUsers.CLIENT, "codigo-ok");
+
+        mvc.perform(post("/client/google-calendar/disconnect").with(csrf())
+                        .with(TestUsers.as(users, TestUsers.CLIENT)))
+                .andExpect(redirectedUrl("/client/profile"));
+
+        assertTrue(links.findByUserId(sofia.getId()).isEmpty());
+        assertTrue(links.findByUserId(carlos.getId()).isPresent());
+        Appointment saved = appointments.findById(upcoming.getId()).orElseThrow();
+        assertNull(saved.getClientGoogleEventId());
+        assertEquals("evento-1", saved.getGoogleEventId());
+    }
+
     /** Pulsa el interruptor y simula la vuelta de Google con el mismo "state". */
     private void connect(String worker, String code) throws Exception {
+        connect(worker, code, "/worker/google-calendar", "/worker/center");
+    }
+
+    private void connectClient(String client, String code) throws Exception {
+        connect(client, code, "/client/google-calendar", "/client/profile");
+    }
+
+    private void connect(String user, String code, String basePath, String page) throws Exception {
         MockHttpSession session = new MockHttpSession();
-        String location = mvc.perform(post("/worker/google-calendar/connect").with(csrf()).session(session)
-                        .with(TestUsers.as(users, worker)))
+        String location = mvc.perform(post(basePath + "/connect").with(csrf()).session(session)
+                        .with(TestUsers.as(users, user)))
                 .andReturn().getResponse().getHeader("Location");
         Matcher state = Pattern.compile("[?&]state=([^&]+)").matcher(location);
         assertTrue(state.find());
 
-        mvc.perform(get("/worker/google-calendar/callback").param("code", code).param("state", state.group(1))
-                        .session(session).with(TestUsers.as(users, worker)))
-                .andExpect(redirectedUrl("/worker/center"));
+        mvc.perform(get(basePath + "/callback").param("code", code).param("state", state.group(1))
+                        .session(session).with(TestUsers.as(users, user)))
+                .andExpect(redirectedUrl(page));
     }
 
     private Appointment confirmedAppointmentFor(User worker) {

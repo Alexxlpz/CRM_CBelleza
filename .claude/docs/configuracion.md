@@ -19,7 +19,7 @@ Se lee bajo demanda desde `CLAUDE.md` (variables de entorno, `.env`, Docker, Clo
 | `CRM_ADMIN_EMAIL`, `CRM_FROM_EMAIL` | Destinatario de contacto/altas y remitente (por defecto `cuquora@hotmail.com`) |
 | `REMEMBER_ME_KEY` | Firma de «Recordar mi sesión». Vacía = aleatoria en cada arranque (los dispositivos recordados dejan de valer al reiniciar) |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | «Iniciar sesión con Google» (ID de cliente OAuth tipo «Aplicación web»). Vacías = sin botón de Google |
-| `GOOGLE_TOKEN_KEY` | Cifra los tokens de Google Calendar guardados. Vacía (o sin las dos anteriores) = interruptor de Google Calendar apagado con «Próximamente» |
+| `GOOGLE_TOKEN_KEY` | Cifra los tokens de Google Calendar guardados. Vacía (o sin las dos anteriores) = interruptor de Google Calendar apagado con «Próximamente» (y sin bloque de Google Calendar en el perfil del cliente). URIs de redirección que hay que autorizar en Google Cloud: `/login/oauth2/code/google`, `/worker/google-calendar/callback` y `/client/google-calendar/callback` |
 | `SEED_DEMO_DATA` | `true` = carga los datos demo (por defecto `false`; el perfil `dev` los activa) |
 | `SITE_URL` | Dirección pública (p. ej. `https://cuquora.com`) para las etiquetas Open Graph y la vuelta de Google Calendar. Vacía = la de la petición |
 | `LEGAL_OWNER_NAME`, `LEGAL_OWNER_NIF`, `LEGAL_OWNER_ADDRESS` | Titular de la web en Términos y Privacidad (LSSI). Vacías = solo «Cuquora» |

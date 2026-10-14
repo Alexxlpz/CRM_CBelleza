@@ -10,45 +10,60 @@
     <!-- Navbar -->
     <div th:replace="~{fragments/navbar :: brand(true)}"></div>
 
-    <main class="public-page-container">
-        <!-- Hero Header -->
-        <header class="page-hero">
-            <h1>Contacto y Soporte Cuquora</h1>
-            <p>¿Tienes dudas sobre cómo funciona el CRM, necesitas ayuda con una reserva o quieres certificar tu salón? Nuestro equipo te atiende de forma personalizada.</p>
-        </header>
+    <main class="contact-split">
+        <!-- Panel con la foto: en escritorio ocupa la mitad izquierda; en móvil queda como cabecera -->
+        <section class="contact-panel" aria-labelledby="contactTitle">
+            <div class="contact-panel-inner">
+                <h1 id="contactTitle">Hablemos</h1>
+                <p>Escríbenos si tienes dudas sobre Cuquora, sobre una cita o si quieres usarlo en tu centro. Te respondemos por correo.</p>
 
-        <!-- Flash Message (Backend Fallback) -->
-        <div class="alert alert-success" role="status" th:if="${successMessage != null}">
-            <i class="lucide-check-circle-2" aria-hidden="true"></i>
-            <span th:text="${successMessage}">Gracias por contactar con nosotros.</span>
-        </div>
-
-        <div class="form-card-container">
-            <div class="alert alert-error" role="alert" th:if="${errorMessage != null}">
-                <i class="lucide-alert-circle" aria-hidden="true"></i>
-                <span th:text="${errorMessage}">Error</span>
+                <ul class="contact-shortcuts">
+                    <li>
+                        <i class="lucide-calendar-check" aria-hidden="true"></i>
+                        <span>¿Quieres cambiar o anular una cita? Hazlo desde <a href="/client/appointments">Mis citas</a>.</span>
+                    </li>
+                    <li>
+                        <i class="lucide-store" aria-hidden="true"></i>
+                        <span>¿Tienes un centro? <a href="/register-center">Dalo de alta</a> con tu equipo.</span>
+                    </li>
+                    <li>
+                        <i class="lucide-help-circle" aria-hidden="true"></i>
+                        <span>Mira antes las <a href="/home#faq">preguntas frecuentes</a>.</span>
+                    </li>
+                </ul>
             </div>
+        </section>
 
-            <!-- Contact Form Box -->
-            <div class="form-card">
+        <section class="contact-form-side">
+            <div class="contact-form-box">
+                <div class="alert alert-success" role="status" th:if="${successMessage != null}">
+                    <i class="lucide-check-circle-2" aria-hidden="true"></i>
+                    <span th:text="${successMessage}">Gracias por contactar con nosotros.</span>
+                </div>
+
+                <div class="alert alert-error" role="alert" th:if="${errorMessage != null}">
+                    <i class="lucide-alert-circle" aria-hidden="true"></i>
+                    <span th:text="${errorMessage}">Error</span>
+                </div>
+
                 <div class="form-card-header">
                     <h2>Envíanos un mensaje</h2>
-                    <p>Rellena el siguiente formulario y responderemos a tu consulta a través de tu correo electrónico.</p>
+                    <p>Responderemos a tu consulta en el correo que nos indiques.</p>
                 </div>
 
                 <form th:action="@{/contact}" method="post" id="contactForm" novalidate>
                     <div class="form-field">
-                        <label for="name">Nombre y Apellidos *</label>
+                        <label for="name">Nombre y apellidos *</label>
                         <input type="text" id="name" name="name" placeholder="Tu nombre" required>
                     </div>
 
                     <div class="form-field">
-                        <label for="email">Correo Electrónico *</label>
+                        <label for="email">Correo electrónico *</label>
                         <input type="email" id="email" name="email" placeholder="tu@correo.com" required>
                     </div>
 
                     <div class="form-field">
-                        <label for="subject">Motivo de Consulta *</label>
+                        <label for="subject">Motivo de consulta *</label>
                         <select id="subject" name="subject" required>
                             <option value="Información sobre Cuquora CRM">Información sobre Cuquora CRM</option>
                             <option value="Quiero certificar mi centro de belleza">Quiero certificar mi centro de belleza</option>
@@ -64,11 +79,11 @@
 
                     <button type="submit" id="contactSubmitBtn" class="btn btn-primary btn-block btn-lg btn-pill disabled" aria-disabled="true">
                         <i class="lucide-send" aria-hidden="true"></i>
-                        <span>Enviar Consulta</span>
+                        <span>Enviar consulta</span>
                     </button>
                 </form>
             </div>
-        </div>
+        </section>
     </main>
 
     <script>

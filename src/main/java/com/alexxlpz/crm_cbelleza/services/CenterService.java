@@ -30,6 +30,16 @@ public class CenterService {
                 .orElseThrow(() -> new ResourceNotFoundException("El centro solicitado no existe."));
     }
 
+    /** Centro visible para los clientes: uno pendiente de revisión responde como si no existiera. */
+    @Transactional(readOnly = true)
+    public Center getPublishedCenter(Long id) {
+        Center center = getCenterById(id);
+        if (!center.isPublished()) {
+            throw new ResourceNotFoundException("El centro solicitado no existe.");
+        }
+        return center;
+    }
+
     /** Actualiza solo los campos informados; un nombre vacío no borra el actual. */
     public Center updateCenter(Long centerId, CenterForm form) {
         Center center = getCenterById(centerId);

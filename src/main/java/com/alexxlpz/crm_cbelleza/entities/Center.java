@@ -59,6 +59,22 @@ public class Center {
     @Column(name = "loyalty_since")
     private java.time.LocalDateTime loyaltySince;
 
+    /** Sale en el buscador y admite reservas. Los centros dados de alta en /alta-centro esperan a la revisión. */
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean published = true;
+
+    /** CIF o NIF que se revisa antes de publicar el centro. */
+    @Column(name = "tax_id", length = 20)
+    private String taxId;
+
+    /** Huella del enlace «Publicar centro» que recibe administración; nula una vez publicado. */
+    @Column(name = "approval_token_hash", unique = true, length = 64)
+    private String approvalTokenHash;
+
+    @Column(name = "registered_at")
+    private java.time.LocalDateTime registeredAt;
+
     public boolean isLoyaltyEnabled() {
         return loyaltyMode != null && loyaltyMode != LoyaltyMode.OFF;
     }

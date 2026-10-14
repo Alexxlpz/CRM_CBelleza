@@ -57,7 +57,7 @@ public class ClientBookingController {
 
     @GetMapping("/client/centers/{id}")
     public String centerDetails(@PathVariable Long id, Model model) {
-        model.addAttribute("center", centerService.getCenterById(id));
+        model.addAttribute("center", centerService.getPublishedCenter(id));
         model.addAttribute("treatments", treatmentService.getTreatmentsByCenter(id));
         model.addAttribute("workers", userService.getWorkersByCenter(id));
         model.addAttribute("openingHoursLabel", openingHours.describe());

@@ -9,5 +9,5 @@ import java.util.Optional;
 @Repository
 public interface GoogleCalendarLinkRepository extends JpaRepository<GoogleCalendarLink, Long> {
 
-    Optional<GoogleCalendarLink> findByWorkerId(Long workerId);
+    Optional<GoogleCalendarLink> findByUserId(Long userId);
 }

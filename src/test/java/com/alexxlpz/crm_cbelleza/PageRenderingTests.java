@@ -81,7 +81,7 @@ class PageRenderingTests {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"/centers", "/client/appointments", "/client/profile", "/home", "/features"})
+    @ValueSource(strings = {"/centers", "/client/appointments", "/client/profile", "/home"})
     void clientPagesRender(String path) throws Exception {
         mvc.perform(get(path).with(TestUsers.as(users, TestUsers.CLIENT)))
                 .andExpect(status().isOk());

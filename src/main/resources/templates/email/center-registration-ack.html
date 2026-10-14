@@ -1,18 +1,25 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{email/layout :: layout('¡Hola, ' + ${form.contactName()} + '!', 'Solicitud de alta recibida', ~{::content})}">
+      th:replace="~{email/layout :: layout('Hola, ' + ${name}, 'Tu centro ya está en Cuquora', ~{::content})}">
 <body>
 <th:block th:fragment="content">
     <p style="font-size:15px; color:#5c5550; line-height:1.6; margin:0 0 16px;">
-        La solicitud de alta del centro <strong th:text="${form.centerName()}">Centro</strong> se ha registrado correctamente.
-        Nuestro equipo revisará los datos en un plazo máximo de <strong>una semana</strong>.
+        Hemos registrado <strong th:text="${centerName}">Centro</strong>. Crea tu contraseña para entrar y empezar a preparar
+        tratamientos, precios e inventario.
     </p>
-    <div style="background:#fdfcfb; border:1px solid #eee8e2; border-radius:12px; padding:18px; margin-bottom:20px;">
-        <p style="margin:0 0 6px; font-size:14px;"><strong>Centro:</strong> <span th:text="${form.centerName()}">Centro</span></p>
-        <p style="margin:0 0 6px; font-size:14px;"><strong>Fecha de registro:</strong> <span th:text="${timestamp}">fecha</span></p>
-        <p style="margin:0; font-size:14px;"><strong>Estado:</strong> en revisión</p>
+    <p style="margin:0 0 20px;">
+        <a th:href="${invitationUrl}" style="display:inline-block; padding:12px 22px; background:#8a6a45; color:#ffffff; text-decoration:none; border-radius:10px; font-weight:700; font-size:14px;">Crear mi contraseña</a>
+    </p>
+    <div style="background:#fdfcfb; border:1px solid #eee8e2; border-radius:12px; padding:18px; margin-bottom:20px; font-size:14px; line-height:1.6;">
+        <p style="margin:0 0 6px;" th:if="${teamSize > 0}">
+            También hemos enviado una invitación a <span th:text="${teamSize == 1 ? 'la otra persona' : 'las ' + teamSize + ' personas'}">tu equipo</span> de tu equipo.
+        </p>
+        <p style="margin:0;">El centro aparecerá en el buscador y en el mapa cuando lo revisemos, como mucho en una semana. Te avisaremos por correo.</p>
     </div>
-    <p style="font-size:13px; color:#857b74; margin:0;">Si quieres aportar documentación adicional, responde a este correo.</p>
+    <p style="font-size:13px; color:#857b74; margin:0;">
+        El enlace vale <span th:text="${validityDays}">7</span> días. Si caduca, ábrelo igualmente y pide uno nuevo.
+        Si quieres aportar documentación, responde a este correo.
+    </p>
 </th:block>
 </body>
 </html>

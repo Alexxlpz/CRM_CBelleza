@@ -35,6 +35,7 @@ public class CenterSearchService {
 
     public List<CenterSummaryDTO> search(CenterSearchCriteria criteria) {
         Stream<Center> centers = centerRepository.findAll().stream()
+                .filter(Center::isPublished)
                 .filter(insideBoundingBox(criteria))
                 .filter(matchesText(criteria.searchName(), true))
                 .filter(matchesText(criteria.searchLocation(), false))

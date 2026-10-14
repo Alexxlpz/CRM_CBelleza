@@ -1,24 +1,55 @@
 package com.alexxlpz.crm_cbelleza.forms;
 
-import com.alexxlpz.crm_cbelleza.exceptions.BusinessRuleException;
-
+import java.util.ArrayList;
 import java.util.List;
 
-/** Solicitud pública de alta de un centro. */
-public record CenterRegistrationForm(String centerName, String cif, String contactName, String phone, String email,
-                                     String city, List<String> specialties, String notes) {
-
-    public void validate() {
-        if (FormText.isBlank(centerName) || FormText.isBlank(cif) || FormText.isBlank(contactName)
-                || FormText.isBlank(phone) || FormText.isBlank(email)) {
-            throw new BusinessRuleException("Por favor, completa todos los campos obligatorios.");
-        }
-        if (!email.contains("@")) {
-            throw new BusinessRuleException("Introduce un correo electrónico válido.");
-        }
-    }
+/**
+ * Alta pública de un centro (/alta-centro): datos del centro, ubicación en el mapa, responsable y equipo,
+ * y la tarjeta de puntos opcional (mode, pointsPerUnit, rewardPoints y rewardText, como en «Mi Centro»).
+ * La validación está en {@code CenterRegistrationService}.
+ */
+public record CenterRegistrationForm(String centerName, String cif, String phone, String address,
+                                     Double latitude, Double longitude, String timeZone, Integer cabins,
+                                     String contactName, String email,
+                                     List<String> workerNames, List<String> workerEmails,
+                                     String mode, Integer pointsPerUnit, Integer rewardPoints, String rewardText,
+                                     List<String> specialties, String notes, Boolean terms) {
 
     public List<String> specialtiesOrEmpty() {
         return specialties == null ? List.of() : specialties;
+    }
+
+    public LoyaltySettingsForm loyalty() {
+        return new LoyaltySettingsForm(mode, pointsPerUnit, rewardPoints, rewardText);
+    }
+
+    /** Trabajadores además del responsable, tal como llegan (las filas vacías se descartan). */
+    public List<Member> extraWorkers() {
+        List<String> names = workerNames == null ? List.of() : workerNames;
+        List<String> emails = workerEmails == null ? List.of() : workerEmails;
+        List<Member> members = new ArrayList<>();
+        for (int i = 0; i < Math.max(names.size(), emails.size()); i++) {
+            String name = i < names.size() ? FormText.trimToNull(names.get(i)) : null;
+            String email = i < emails.size() ? FormText.trimToNull(emails.get(i)) : null;
+            if (name != null || email != null) {
+                members.add(new Member(name, email));
+            }
+        }
+        return members;
+    }
+
+    /** Filas que se vuelven a pintar si el formulario tiene un error (al menos una, vacía). */
+    public List<Member> workerRowsForView() {
+        List<Member> rows = extraWorkers();
+        return rows.isEmpty() ? List.of(new Member(null, null)) : rows;
+    }
+
+    public record Member(String name, String email) {
+    }
+
+    /** Formulario vacío para la primera visita. */
+    public static CenterRegistrationForm empty() {
+        return new CenterRegistrationForm(null, null, null, null, null, null, null, 1, null, null,
+                List.of(), List.of(), "OFF", 1, 100, null, List.of(), null, null);
     }
 }

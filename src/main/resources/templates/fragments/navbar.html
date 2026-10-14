@@ -67,7 +67,6 @@
 
     <div th:fragment="menuLinks" class="nav-links-menu">
         <a href="/home" class="nav-menu-link" th:classappend="${activePage == 'home'} ? ' active'" th:attr="aria-current=${activePage == 'home'} ? 'page'">Inicio</a>
-        <a href="/features" class="nav-menu-link" th:classappend="${activePage == 'features'} ? ' active'" th:attr="aria-current=${activePage == 'features'} ? 'page'">Funcionalidades</a>
         <a href="/centers" class="nav-menu-link" th:classappend="${activePage == 'centers'} ? ' active'" th:attr="aria-current=${activePage == 'centers'} ? 'page'">Centros</a>
         <a href="/register-center" class="nav-menu-link" th:classappend="${activePage == 'register-center'} ? ' active'" th:attr="aria-current=${activePage == 'register-center'} ? 'page'">Registra tu Centro</a>
         <a href="/contact" class="nav-menu-link" th:classappend="${activePage == 'contact'} ? ' active'" th:attr="aria-current=${activePage == 'contact'} ? 'page'">Contacto</a>
@@ -136,7 +135,6 @@
                     <div class="mobile-drawer-label">Navegación</div>
                     <nav class="mobile-drawer-nav">
                         <a th:replace="~{fragments/navbar :: drawerLink('/home', 'Inicio', ${activePage == 'home'}, false)}"></a>
-                        <a th:replace="~{fragments/navbar :: drawerLink('/features', 'Funcionalidades', ${activePage == 'features'}, false)}"></a>
                         <a th:replace="~{fragments/navbar :: drawerLink('/centers', 'Centros', ${activePage == 'centers'}, false)}"></a>
                         <a th:replace="~{fragments/navbar :: drawerLink('/register-center', 'Registra tu Centro', ${activePage == 'register-center'}, false)}"></a>
                         <a th:replace="~{fragments/navbar :: drawerLink('/contact', 'Contacto', ${activePage == 'contact'}, false)}"></a>

@@ -3,6 +3,7 @@ package com.alexxlpz.crm_cbelleza.controllers;
 import com.alexxlpz.crm_cbelleza.entities.User;
 import com.alexxlpz.crm_cbelleza.exceptions.BusinessRuleException;
 import com.alexxlpz.crm_cbelleza.forms.ProfileForm;
+import com.alexxlpz.crm_cbelleza.googlecalendar.GoogleCalendarService;
 import com.alexxlpz.crm_cbelleza.security.AppUserDetails;
 import com.alexxlpz.crm_cbelleza.security.AuthenticationSessionService;
 import com.alexxlpz.crm_cbelleza.services.AppointmentService;
@@ -24,13 +25,16 @@ public class ClientProfileController {
     private final UserService userService;
     private final AppointmentService appointmentService;
     private final AuthenticationSessionService authSession;
+    private final GoogleCalendarService googleCalendar;
 
     public ClientProfileController(UserService userService,
                                    AppointmentService appointmentService,
-                                   AuthenticationSessionService authSession) {
+                                   AuthenticationSessionService authSession,
+                                   GoogleCalendarService googleCalendar) {
         this.userService = userService;
         this.appointmentService = appointmentService;
         this.authSession = authSession;
+        this.googleCalendar = googleCalendar;
     }
 
     @GetMapping("/client/profile")
@@ -40,6 +44,7 @@ public class ClientProfileController {
         // Cuenta creada con Google: la sección de contraseña sirve para añadir una, no para cambiarla
         model.addAttribute("hasPassword", client.getPassword() != null);
         model.addAttribute("appointmentsCount", appointmentService.countClientAppointments(user.getId()));
+        model.addAttribute("calendarSync", googleCalendar.status(user.getId()));
         model.addAttribute("activePage", "profile");
         return "client/profile";
     }

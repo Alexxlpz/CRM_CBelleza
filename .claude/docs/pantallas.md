@@ -4,16 +4,16 @@ Se lee bajo demanda desde `CLAUDE.md` antes de tocar la pantalla correspondiente
 
 ## Pie, cookies y páginas legales
 - Pie común `fragments/footer :: footer('texto')` en todas las páginas: enlaces a Términos, Privacidad y Cookies y el **aviso de cookies** (`#cookieBanner`, lógica en `app.js`): barra fija a todo el ancho abajo, con botones grandes (`btn-lg`), «Más información» y «Entendido» a la derecha desde 1100 px, en su propia fila por debajo y apilados en móvil; mientras se ve, `body` reserva espacio abajo para no tapar el pie. Hoy solo hay cookies técnicas, así que el aviso es informativo («Entendido»). Si se añade analítica, hay que pedir consentimiento antes (Aceptar/Rechazar con el mismo peso), subir `COOKIE_NOTICE_VERSION` y actualizar `templates/cookies.html`.
-- Páginas legales (`terms.html`, `cookies.html`, `privacy.html`, CSS `legal.css`; titular desde `LegalOwner`): mismo índice lateral que Inicio y Funcionalidades (`scroll-index.js`) y, por debajo de 1200 px, índice dentro de la página.
+- Páginas legales (`terms.html`, `cookies.html`, `privacy.html`, CSS `legal.css`; titular desde `LegalOwner`): mismo índice lateral que Inicio (`scroll-index.js`) y, por debajo de 1200 px, índice dentro de la página.
 
 ## Layout de escritorio
-- `.main-container` llega a 1100 px. **`.main-container--wide`** crece hasta 1440 px desde 1100 px de ancho; lo usan tratamientos, inventario, clientes y centros. La agenda usa su propio contenedor ancho (hasta 1680 px).
+- `.main-container` llega a 1100 px. **`.main-container--wide`** crece hasta 1440 px desde 1100 px de ancho; lo usan tratamientos, inventario y clientes; Centros no tiene tope desde 1280 px. La agenda usa su propio contenedor ancho (hasta 1680 px).
 - **Vista Tarjetas / Lista** (solo desde 1100 px): `[data-view-toggle="idDelListado"]` con botones `[data-view="grid|list"]`; `app.js` añade `.is-list-view` al listado y recuerda la elección en el navegador. Por defecto Lista en inventario y clientes, Tarjetas en tratamientos. Las filas reutilizan el marcado de las tarjetas (no dupliques HTML).
 - **`.list-toolbar`**: barra entre el resumen y el listado, filtros de categoría a la izquierda y selector de vista a la derecha. Misma posición en las tres pantallas.
 - **`--list-row-height: 108px`** (en `common.css`): todas las filas en modo lista miden lo mismo en tratamientos, inventario y clientes (mismo relleno, radio y 12 px de separación). Si un texto largo lo necesita, la fila crece en vez de cortar.
 - Franja de resumen arriba (tratamientos: número, precio medio, duración media; inventario: productos, unidades, bajo stock, agotados; clientes: total, fichas al día, pendientes, citas). Se oculta por debajo de 600 px.
-- Centros: sin vista lista; 4 tarjetas por fila a 1440 px, 3 a 1100 px, 2 en tablet, 1 en móvil.
-- Inicio y Funcionalidades: con índice lateral (desde 1200 px) el contenido llega hasta 1400 px; FAQ y textos largos mantienen ancho de lectura.
+- Centros: sin vista lista; el mapa se abre con su botón en lugar del listado. Desde 1280 px el listado ocupa todo el ancho (tarjetas de 340 px mínimo: 5 por fila a 1920 px, 4 a 1440 px), 1 en móvil.
+- Inicio (incluye «Más funcionalidades»; `/features` redirige a `/home#funcionalidades`): con índice lateral (desde 1200 px) el contenido llega hasta 1400 px; FAQ y textos largos mantienen ancho de lectura.
 
 ## Agenda (`worker/calendar.html` + `worker-calendar.js`)
 - Dos disposiciones con el selector **Mes / Semana** en la `.list-toolbar` (a la derecha, con la leyenda de colores a la izquierda). Se ve en todos los anchos (`.view-toggle--always`) y se recuerda en el navegador (`cuquora.calendar.view`); también `?view=week` y `?date=AAAA-MM-DD`.
@@ -43,3 +43,14 @@ Se lee bajo demanda desde `CLAUDE.md` antes de tocar la pantalla correspondiente
 - Si alguien se registra con el correo de un cliente dado de alta a mano (sin contraseña ni Google), `UserService.registerClient` **completa esa cuenta** en vez de crear otra o rechazarlo: prevalecen los datos del cliente (nombre, contraseña y teléfono; el del centro solo se mantiene si deja el suyo vacío). Una cuenta de Google sin contraseña **ya tiene dueño**: no se registra encima, sale el aviso «Ya existe una cuenta… Continuar con Google» y la contraseña solo se añade desde el perfil (sección «Añadir Contraseña», `hasPassword` en el modelo). Aún no se verifica el correo: ver #11 en `PENDIENTES.md`.
 
 ---
+
+## Contacto (`contact.html`)
+- Pantalla partida desde 960 px: foto con texto y accesos (Mis citas, alta de centro, preguntas frecuentes) a la izquierda y formulario a la derecha. En móvil la foto queda como cabecera.
+
+## Alta de centro (`register-center.html` + `center-registration.js`)
+- Asistente de 5 pasos (centro, ubicación, equipo, puntos, enviar) con los pasos como cinta de flechas del mismo tamaño (la letra se ajusta con `cqi` y el nombre se corta con «…»): cada `fieldset.registration-section` es un paso; solo avanza si el paso actual es válido (`validateForm(...).check`). Sin JS se ven todos seguidos. A la derecha (debajo en móvil), vista previa del centro que se rellena al escribir. Al mostrar el paso de ubicación se lanza `resize` para que Leaflet recalcule el mapa.
+- Un solo formulario por bloques (`fieldset.registration-section`): el centro, dónde está (dirección + `fragments/location-picker`), tu equipo (responsable + filas de trabajadores que se añaden y quitan, máx. 20), tarjeta de puntos opcional (mismos ids que en «Mi Centro», la rellena `loyalty-settings.js`) y algo más (notas y términos).
+- Si el servidor rechaza el alta, la página se vuelve a pintar **con lo escrito** (no redirige). Al terminar, en lugar del formulario sale el resumen «Centro registrado: revisa tu correo».
+- `center-approval.html` (enlace del correo de administración) y `invitation.html` (crear contraseña; si caducó, botón para pedir otro enlace) llevan `noindex` y están excluidas en `robots.txt`.
+- El mapa (Leaflet + OpenStreetMap) no se arrastra con un dedo en móvil para no bloquear el scroll: se toca para poner el pin, se arrastra el pin y se acerca con + y -.
+- Al tocar el mapa, mover el pin o usar «Estoy en el centro», `location-picker.js` pide a Nominatim la dirección de ese punto (geocodificación inversa) y la escribe en el campo de dirección; si no la encuentra, lo dice y se escribe a mano.

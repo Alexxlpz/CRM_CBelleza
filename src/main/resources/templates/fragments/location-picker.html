@@ -1,0 +1,21 @@
+<!--/*
+  Ubicación de un centro en el mapa (alta de centro y «Mi Centro»). Necesita Leaflet y location-picker.js en la página.
+  addressId: id del campo de dirección que se busca en el mapa. Guarda latitude y longitude en campos ocultos.
+  La búsqueda usa Nominatim (OpenStreetMap): no hace falta que el centro esté en Google Maps.
+*/-->
+<div xmlns:th="http://www.thymeleaf.org" th:fragment="picker(addressId, lat, lon)"
+     class="location-picker" data-location-picker th:attr="data-address-input=${addressId}">
+    <div class="location-picker-actions">
+        <button type="button" class="btn btn-secondary btn-sm" data-location-search>
+            <i class="lucide-search" aria-hidden="true"></i> Buscar la dirección en el mapa
+        </button>
+        <button type="button" class="btn btn-secondary btn-sm" data-location-here>
+            <i class="lucide-locate-fixed" aria-hidden="true"></i> Estoy en el centro
+        </button>
+    </div>
+    <div class="location-picker-map" data-location-map role="region"
+         aria-label="Mapa: toca donde está el centro y arrastra el pin hasta la puerta"></div>
+    <p class="form-help" data-location-status aria-live="polite">Busca la dirección o toca el mapa donde está el centro: la dirección se escribe sola y puedes ajustar el pin arrastrándolo.</p>
+    <input type="hidden" name="latitude" th:value="${lat}" data-location-lat>
+    <input type="hidden" name="longitude" th:value="${lon}" data-location-lon>
+</div>

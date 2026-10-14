@@ -67,6 +67,10 @@ public class Appointment {
     @Column(name = "google_event_owner_id")
     private Long googleEventOwnerId;
 
+    /** Evento en el Google Calendar del cliente; nulo si no tiene la sincronización activada. */
+    @Column(name = "client_google_event_id")
+    private String clientGoogleEventId;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 

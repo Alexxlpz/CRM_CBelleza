@@ -1,6 +1,5 @@
 package com.alexxlpz.crm_cbelleza.mail;
 
-import com.alexxlpz.crm_cbelleza.forms.CenterRegistrationForm;
 import com.alexxlpz.crm_cbelleza.forms.ContactForm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +15,7 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * Correos de los formularios públicos (contacto y alta de centro): un aviso a administración
+ * Correos del formulario de contacto: un aviso a administración
  * y un acuse de recibo al remitente. Se envían en segundo plano para que la página responda al instante.
  * El HTML de cada correo está en templates/email/*.html.
  */
@@ -47,20 +46,6 @@ public class InquiryMailService {
         sendSafely(new EmailMessage(form.email(), null, null,
                 "Hemos recibido tu consulta: " + form.subject() + " - Cuquora",
                 render("email/contact-ack", vars)));
-    }
-
-    @Async
-    public void sendCenterRegistration(CenterRegistrationForm form) {
-        Map<String, Object> vars = Map.of(
-                "form", form,
-                "specialties", form.specialtiesOrEmpty().isEmpty() ? "No especificadas" : String.join(", ", form.specialtiesOrEmpty()),
-                "timestamp", now());
-        sendSafely(new EmailMessage(adminEmail, form.email(), form.contactName(),
-                "[Cuquora Auditoría] Nueva solicitud de centro: " + form.centerName() + " (" + form.cif() + ")",
-                render("email/center-registration-admin", vars)));
-        sendSafely(new EmailMessage(form.email(), null, null,
-                "Solicitud de certificación recibida: " + form.centerName() + " - Cuquora",
-                render("email/center-registration-ack", vars)));
     }
 
     private String render(String template, Map<String, Object> variables) {

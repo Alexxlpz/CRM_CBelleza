@@ -66,6 +66,12 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
     List<Appointment> findByGoogleEventOwnerId(Long workerId);
 
+    /** Citas confirmadas de un cliente desde una fecha (las que se copian al activar Google Calendar). */
+    @EntityGraph(attributePaths = {"treatment", "client", "worker", "center"})
+    List<Appointment> findByClientIdAndStatusAndDateTimeAfter(Long clientId, AppointmentStatus status, LocalDateTime dateTime);
+
+    List<Appointment> findByClientIdAndClientGoogleEventIdIsNotNull(Long clientId);
+
     /** Resúmenes marcados como aviso (se muestran en las demás citas del cliente). */
     @EntityGraph(attributePaths = {"treatment"})
     List<Appointment> findByCenterIdAndTreatmentAlertTrueOrderByDateTimeDesc(Long centerId);

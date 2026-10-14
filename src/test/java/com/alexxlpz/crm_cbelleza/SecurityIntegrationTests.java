@@ -32,9 +32,17 @@ class SecurityIntegrationTests {
     private UserRepository users;
 
     @ParameterizedTest
-    @ValueSource(strings = {"/home", "/features", "/centers", "/contact", "/register-center", "/login", "/register", "/api/centers"})
+    @ValueSource(strings = {"/home", "/centers", "/contact", "/register-center", "/login", "/register", "/api/centers"})
     void publicPagesAreAccessibleWithoutLogin(String path) throws Exception {
         mvc.perform(get(path)).andExpect(status().isOk());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"/features", "/funcionalidades"})
+    void oldFeaturesPageRedirectsToHome(String path) throws Exception {
+        mvc.perform(get(path))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/home#funcionalidades"));
     }
 
     @Test

@@ -87,6 +87,9 @@ public class BookingService {
     @Transactional
     public Appointment requestBooking(Long clientId, Long centerId, Long treatmentId, LocalDateTime start) {
         Center center = lockCenter(centerId);
+        if (!center.isPublished()) {
+            throw new ResourceNotFoundException("Centro no encontrado.");
+        }
         LocalDateTime now = CenterClock.now(clock, center);
         if (start.isBefore(now)) {
             throw new BusinessRuleException("No se puede reservar una fecha pasada.");

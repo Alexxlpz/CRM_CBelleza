@@ -13,7 +13,7 @@ Este fichero se carga en cada sesión; el detalle está aparte y se lee bajo dem
 | Antes de… | Lee / usa |
 |---|---|
 | Tocar cualquier cosa visual (CSS, plantillas, JS de interfaz, textos) | skill **`interfaz-cuquora`** (movimiento, componentes, textos que no suenen a IA) |
-| Tocar agenda, navegación, mapa, cartera, listados, pie o páginas legales | [`.claude/docs/pantallas.md`](.claude/docs/pantallas.md) |
+| Tocar agenda, navegación, mapa, cartera, listados, alta de centro, pie o páginas legales | [`.claude/docs/pantallas.md`](.claude/docs/pantallas.md) |
 | Tocar login, registro, sesión, Google o Google Calendar | [`.claude/docs/autenticacion.md`](.claude/docs/autenticacion.md) |
 | Tocar `.env`, variables de entorno, Docker o despliegue | [`.claude/docs/configuracion.md`](.claude/docs/configuracion.md) |
 | Añadir una funcionalidad con datos (migración, endpoint, pantalla) | skill **`nueva-funcionalidad`** |
@@ -48,14 +48,14 @@ Alex trabaja en dos máquinas:
 | | Windows (IntelliJ) | Linux (Arch) |
 |---|---|---|
 | Carpeta | `C:\Users\alexl\IdeaProjects\CRM_CBelleza` | `/home/alejandro/IdeaProjects/CRM_CBelleza` |
-| Maven | `mvnw.cmd` (wrapper local, no está en git) | `mvn` del sistema (no hay wrapper) |
+| Maven | `mvnw.cmd` | `./mvnw` o `mvn` del sistema |
 | JDK | 21 | **El `java` por defecto es OpenJDK 27 y no compila** (Lombok falla con `EndPosTable`). Usa siempre `JAVA_HOME=/home/alejandro/.jdks/ms-25.0.4.1` |
 
 ```bash
 # En Linux, anteponer JAVA_HOME=/home/alejandro/.jdks/ms-25.0.4.1 a cada comando y usar mvn en vez de ./mvnw
 
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev   # desarrollo: H2 en memoria, /login-selector y consola H2
-./mvnw test                                             # todos los tests (144, verde a 13 oct 2026)
+./mvnw test                                             # todos los tests (157, verde a 14 oct 2026)
 ./mvnw -Dtest=CenterIsolationTests test                 # un solo test
 ./mvnw -DskipTests clean package                        # jar en target/
 docker compose up --build                               # app en :8080 + PostgreSQL 16 (necesita el .env, ver abajo)
@@ -101,14 +101,16 @@ src/main/resources/
   db/migration/  V1__esquema_inicial.sql, V2__eliminar_clientes_invitados.sql, V3__usuarios_google.sql,
                  V4__sesiones_recordadas.sql, V5__calendario_google.sql, V6__zona_horaria_centros.sql,
                  V7__agenda_flexible.sql, V8__resumen_tratamiento.sql,
-                 V9__ventas_productos.sql, V10__fidelizacion.sql
+                 V9__ventas_productos.sql, V10__fidelizacion.sql, V11__alta_de_centros.sql,
+                 V12__calendario_google_clientes.sql
   templates/     públicas en la raíz, client/, worker/, fragments/, email/
   static/css/    tokens.css + common.css + un CSS por área
   static/js/     app.js, form-validation.js, sheets.js, unsaved-changes.js, booking-picker.js,
-                 worker-calendar.js, worker-agenda-forms.js, treatment-summary.js, scroll-index.js
+                 worker-calendar.js, worker-agenda-forms.js, treatment-summary.js, scroll-index.js,
+                 center-registration.js, location-picker.js, invitation.js, loyalty-settings.js
   static/icons/lucide/  fuente de Lucide (woff/woff2)
 src/test/java/…  BookingServiceTests, CenterIsolationTests, SecurityIntegrationTests, PageRenderingTests,
-                 UnitTests, CrmCBellezaApplicationTests, GoogleLoginTests, GoogleCalendarTests, AgendaTests, RegistrationTests, TreatmentSummaryTests, ProductSaleAndLoyaltyTests, security/CurrentUserModelAdviceTest, TestUsers
+                 UnitTests, CrmCBellezaApplicationTests, GoogleLoginTests, GoogleCalendarTests, AgendaTests, RegistrationTests, TreatmentSummaryTests, ProductSaleAndLoyaltyTests, CenterRegistrationTests, security/CurrentUserModelAdviceTest, TestUsers
 ```
 
 ### Reglas de backend
@@ -124,25 +126,26 @@ src/test/java/…  BookingServiceTests, CenterIsolationTests, SecurityIntegratio
 
 Tablas (ver `V1__esquema_inicial.sql`):
 
-- `centers`: nombre, dirección, teléfono, email, `latitude`/`longitude` (el mapa usa estas coordenadas, no geocodifica), `time_zone` (IANA, elegible en «Mi Centro» entre `CenterTimeZones.OPTIONS`; la usan las reservas y Google Calendar), `cabins` (citas a la vez, 1-50, en «Mi Centro»).
+- `centers`: nombre, dirección, teléfono, email, `latitude`/`longitude` (el mapa usa estas coordenadas, no geocodifica), `time_zone` (IANA, elegible en «Mi Centro» entre `CenterTimeZones.OPTIONS`; la usan las reservas y Google Calendar), `cabins` (citas a la vez, 1-50, en «Mi Centro»), `published` (sale en el buscador y admite reservas; los dados de alta en /alta-centro nacen ocultos), `tax_id` (CIF/NIF), `approval_token_hash`/`registered_at`.
 - `users`: `role` CLIENT | WORKER, `email` único, `password` (BCrypt, **nula en clientes dados de alta a mano y en cuentas solo de Google**), `google_id` único (claim `sub` de Google, nulo si no ha entrado nunca con Google), `center_id` solo para trabajadores. `User.hasAccount()` = tiene contraseña o Google. `notifications_seen_at`: última vez que el cliente abrió su campana.
 - `treatments`: por centro, `treatment_type` (MANICURA_PEDICURA, FACIAL, CORPORAL, MASAJES, PELUQUERIA, DEPILACION, OTRO), precio y duración en minutos.
 - `products`: catálogo **global** (sin centro). `inventories`: stock por centro y producto (único por par).
 - `appointments`: centro, tratamiento, cliente, trabajador, `status` PENDING | PROPOSED | CONFIRMED | REJECTED | CANCELLED | COMPLETED (etiquetas en `AppointmentStatus.label()`), `worker_message`, `last_change`/`last_change_at` (`AppointmentChange`: qué cambió y quién, para campanas y correos), `previous_date_time` (hora anterior si el centro la movió), `proposal_expires_at`, `reminder_sent_at`, `google_event_id`/`google_event_owner_id`, `treatment_summary` + `treatment_alert` + `summary_updated_at`/`summary_updated_by_id` (resumen del tratamiento realizado, ver abajo).
 - `appointment_proposals`: horas que el centro propone para una cita PROPOSED (máx. 3). `agenda_blocks`: bloqueos de agenda (`worker_id` nulo = todo el centro cerrado).
 - `persistent_logins`: dispositivos con «Recordar mi sesión» (tabla estándar de `JdbcTokenRepositoryImpl`, sin entidad JPA).
-- `google_calendar_links`: trabajadores con Google Calendar activado (token de actualización cifrado con `GOOGLE_TOKEN_KEY`, id del calendario «Cuquora» creado en su cuenta). `appointments.google_event_id` apunta el evento de cada cita.
+- `google_calendar_links`: trabajadores **y clientes** con Google Calendar activado (`user_id`; token de actualización cifrado con `GOOGLE_TOKEN_KEY`, id del calendario creado en su cuenta). `appointments.google_event_id` apunta el evento en el calendario del trabajador y `client_google_event_id` el del cliente.
 - **Resumen del tratamiento** (`TreatmentSummaryService`, `POST /worker/appointments/{id}/summary`, modal `fragments/treatment-summary.html` + `treatment-summary.js`): el trabajador lo escribe desde la agenda o el historial de la ficha cuando la cita confirmada **ya ha empezado** (hora del centro). Si lo marca como **aviso** (alergias, reacciones, productos que no le sientan bien), sale arriba en la ficha del cliente y en sus demás citas de la agenda (`AppointmentCalendarDTO.clientAlerts`). Es interno: el cliente nunca lo ve.
+- **Alta de centros** (`CenterRegistrationService`, `CenterRegistrationController`, `register-center.html`): crea el centro **oculto** (`published=false`: fuera del buscador y del mapa, `/client/centers/{id}` da 404 y `BookingService` no reserva), al responsable y a su equipo como trabajadores **sin contraseña** y, si se pide, la tarjeta de puntos (`LoyaltyService.updateSettings`). Ubicación con pin arrastrable (`fragments/location-picker.html` + `location-picker.js`, búsqueda en Nominatim; también en «Mi Centro»). Administración recibe un correo con el enlace `/register-center/approve/{token}` para revisar y publicar. Cada trabajador recibe una invitación (`account_invitations`, `InvitationService`: un solo uso, 7 días, se puede pedir otra desde la misma página) para poner su contraseña; también puede entrar con Google. En la BD solo va la huella SHA-256 de los enlaces (`SecureTokens`). Sin SMTP, `LoggingEmailGateway` imprime los enlaces de cada correo en la consola.
 - `client_cards`: ficha técnica por centro y cliente, `data_json` con los valores. `client_card_templates`: campos de la ficha por centro (`fields_json`).
 - **Venta de productos** (`product_sales`, `ProductSaleService`, `ClientSalesController`, modal `fragments/product-sale.html` + `product-sale.js`): desde la ficha del cliente el trabajador elige un producto del inventario y la cantidad; antes de confirmar ve el stock actual y el que quedará (aviso si queda bajo o se agota). Al guardar se resta del inventario con la fila bloqueada (`InventoryRepository.findForUpdate`); nunca se vende más que el stock. «Anular» devuelve las unidades y quita sus puntos. `unit_price` guarda el precio del momento.
 - **Tarjeta de puntos** (`centers.loyalty_*`, `loyalty_movements`, `LoyaltyService`): cada centro la configura en «Mi Centro» (`POST /worker/center/loyalty`): desactivada, puntos por euro (`PER_EURO`) o por tratamiento/unidad de producto (`PER_ITEM`), puntos para la recompensa y texto. Los productos suman al venderse; los tratamientos, cuando la cita está completada (se apuntan al abrir la ficha, porque el estado se calcula al leer; `appointment_id` único evita sumar dos veces) y solo desde `loyalty_since`. Canje desde la ficha (`POST /worker/clients/{id}/loyalty/redeem`, bloquea el centro). Los puntos se guardan al ganarse: cambiar la configuración no altera lo ya ganado. El cliente ve sus tarjetas en «Mis citas» (`LoyaltyService.cardsOfClient`: centros con la tarjeta activada donde tiene citas o puntos).
 
-**Migraciones:** todo cambio de esquema es un nuevo `V<n>__descripcion.sql` (nombre en español, SQL compatible con H2 y PostgreSQL). Nunca edites una migración ya aplicada. La siguiente libre es **`V11`**. En Docker, `SPRING_FLYWAY_BASELINE_ON_MIGRATE=true` adopta BD creadas antes de Flyway.
+**Migraciones:** todo cambio de esquema es un nuevo `V<n>__descripcion.sql` (nombre en español, SQL compatible con H2 y PostgreSQL). Nunca edites una migración ya aplicada. La siguiente libre es **`V13`**. En Docker, `SPRING_FLYWAY_BASELINE_ON_MIGRATE=true` adopta BD creadas antes de Flyway.
 
 ## Roles y aislamiento entre centros
 
 - `/client/**` solo `ROLE_CLIENT`. `/worker/**` solo trabajadores **con centro asignado** (`SecurityConfig.workerWithCenter`).
-- Públicas (`SecurityConfig.PUBLIC_PAGES`): `/`, `/home`, `/features` (`/funcionalidades`), `/centers`, `/contact` (`/contacto`), `/register-center` (`/alta-centro`), `/terms` (`/terminos`), `/cookies` (`/politica-cookies`), `/privacy` (`/privacidad`), `/login`, `/register`, `/error`, `/api/centers/**`, `/robots.txt` y estáticos.
+- Públicas (`SecurityConfig.PUBLIC_PAGES`): `/`, `/home`, `/features` (`/funcionalidades`, redirige a Inicio), `/centers`, `/contact` (`/contacto`), `/register-center` (`/alta-centro`), `/terms` (`/terminos`), `/cookies` (`/politica-cookies`), `/privacy` (`/privacidad`), `/login`, `/register`, `/error`, `/register-center/approve/{token}`, `/invitation/{token}` (y `/renew`), `/api/centers/**`, `/robots.txt` y estáticos.
 - Detalle de login, «Recordar mi sesión», Google y Google Calendar: [`.claude/docs/autenticacion.md`](.claude/docs/autenticacion.md).
 - **Aislamiento:** toda acción de `/worker/**` usa el `centerId` de la sesión y consultas `findByIdAndCenterId`; un recurso de otro centro responde 404. Las rutas de cliente usan el id de la sesión. Mantén esta regla en todo endpoint nuevo y añade un caso a `CenterIsolationTests`.
 - Cliente: `/client/appointments/{id}/accept-proposal|decline-proposal|cancel` buscan la cita con `findByIdAndClientId` (de otro cliente → 404). Campana del cliente: `ClientNotificationService` (citas de hoy/mañana y cambios del centro de los últimos 7 días); al abrirla, `POST /client/notifications/seen`.

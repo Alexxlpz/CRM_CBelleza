@@ -3,6 +3,9 @@
 <head>
     <th:block th:replace="~{fragments/head :: meta('Mi Centro - Cuquora CRM')}"></th:block>
     <script th:src="@{/js/loyalty-settings.js}" defer></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
+    <script th:src="@{/js/location-picker.js}" defer></script>
 </head>
 <body>
     <div th:replace="~{fragments/navbar :: worker('/worker/dashboard', 'Volver al panel', ${notifications})}"></div>
@@ -16,6 +19,11 @@
         </header>
 
         <div th:replace="~{fragments/alerts :: flash}"></div>
+
+        <div class="alert alert-warning" role="status" th:unless="${center.published}">
+            <i class="lucide-hourglass" aria-hidden="true"></i>
+            <span>Estamos revisando tu centro: todavía no sale en el buscador ni en el mapa. Mientras tanto, prepara tratamientos y precios para que los clientes puedan reservar desde el primer día.</span>
+        </div>
 
         <section class="settings-card">
             <form th:action="@{/worker/center}" method="post">
@@ -37,13 +45,9 @@
                         <label for="centerEmail" class="form-label">Correo Comercial de Contacto</label>
                         <input type="email" id="centerEmail" name="centerEmail" class="form-control" th:value="${center.email}" placeholder="info@tucentro.com">
                     </div>
-                    <div>
-                        <label for="latitude" class="form-label">Latitud GPS</label>
-                        <input type="number" id="latitude" name="latitude" class="form-control" th:value="${center.latitude}" step="any" placeholder="Ej: 40.4168">
-                    </div>
-                    <div>
-                        <label for="longitude" class="form-label">Longitud GPS</label>
-                        <input type="number" id="longitude" name="longitude" class="form-control" th:value="${center.longitude}" step="any" placeholder="Ej: -3.7038">
+                    <div class="span-full">
+                        <span class="form-label">Ubicación en el mapa</span>
+                        <div th:replace="~{fragments/location-picker :: picker('centerAddress', ${center.latitude}, ${center.longitude})}"></div>
                     </div>
                     <div>
                         <label for="cabins" class="form-label">Cabinas o Puestos de Trabajo</label>

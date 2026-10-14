@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{email/layout :: layout(${centerName} + ' ya aparece en Cuquora', 'Hemos revisado los datos del centro', ~{::content})}">
+<body>
+<th:block th:fragment="content">
+    <p style="font-size:15px; color:#5c5550; line-height:1.6; margin:0 0 16px;">
+        Los clientes ya pueden encontrar <strong th:text="${centerName}">Centro</strong> en el buscador y en el mapa, y pedir cita
+        con los tratamientos que tengáis dados de alta.
+    </p>
+    <p style="margin:0 0 20px;">
+        <a th:href="${loginUrl}" style="display:inline-block; padding:12px 22px; background:#8a6a45; color:#ffffff; text-decoration:none; border-radius:10px; font-weight:700; font-size:14px;">Entrar a Cuquora</a>
+    </p>
+    <p style="font-size:13px; color:#857b74; margin:0;">Si algún dato no es correcto, cámbialo desde «Mi Centro».</p>
+</th:block>
+</body>
+</html>

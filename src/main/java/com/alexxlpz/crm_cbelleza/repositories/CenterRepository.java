@@ -20,4 +20,6 @@ public interface CenterRepository extends JpaRepository<Center, Long> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT c FROM Center c WHERE c.id = :id")
     Optional<Center> findByIdForUpdate(@Param("id") Long id);
+
+    Optional<Center> findByApprovalTokenHash(String approvalTokenHash);
 }

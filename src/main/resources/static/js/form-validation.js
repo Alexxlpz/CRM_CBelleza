@@ -87,6 +87,21 @@
             else submitBtn?.setAttribute('aria-disabled', 'true');
         }
 
+        /** Marca los errores de los campos que cumplen el filtro (p. ej. un paso de un asistente) y dice si están bien. */
+        function check(filter) {
+            let ok = true;
+            fields.filter(f => filter(f.el)).forEach(f => {
+                const message = errorOf(f);
+                if (message) {
+                    showError(f.el, message);
+                    ok = false;
+                } else {
+                    clearError(f.el);
+                }
+            });
+            return ok;
+        }
+
         function highlightAll() {
             let first = null;
             fields.forEach(f => {
@@ -130,7 +145,7 @@
         refreshButton();
         // Los gestores de contraseñas rellenan los campos después de cargar la página.
         setTimeout(refreshButton, 300);
-        return { isValid, refresh: refreshButton };
+        return { isValid, refresh: refreshButton, check };
     }
 
     /** Muestra u oculta la contraseña del campo asociado al botón (data-toggle-password="idDelInput"). */

@@ -10,7 +10,7 @@
 <body>
     <div th:replace="~{fragments/navbar :: brand(true)}"></div>
 
-    <main class="main-container main-container--wide">
+    <main class="main-container main-container--wide centers-page">
         <div class="page-header">
             <h1>Nuestros Centros de Belleza</h1>
             <p>Elige el salón más conveniente y agenda tu experiencia de lujo</p>
@@ -327,6 +327,10 @@
                     clearTimeout(fallback);
                     userLat = pos.coords.latitude;
                     userLon = pos.coords.longitude;
+                    if (map) {
+                        map.setView([userLat, userLon], 12);
+                        L.marker([userLat, userLon], { icon: markerIcon('blue') }).addTo(map).bindPopup('Tu ubicación');
+                    }
                     resetAndFetch();
                 }, () => {
                     clearTimeout(fallback);

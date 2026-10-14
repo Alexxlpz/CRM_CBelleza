@@ -392,3 +392,11 @@
 .btn-debug-selector:active {
     transform: scale(0.97);
 }
+
+/* Invitación de trabajador: texto que explica el estado del enlace */
+.auth-note {
+    margin-bottom: 18px;
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.55;
+}

@@ -407,6 +407,18 @@
     }
 }
 
+/* Pantallas anchas: el listado de Centros ocupa todo el ancho de la pantalla */
+@media (min-width: 1280px) {
+    .main-container.centers-page {
+        max-width: none;
+    }
+
+    /* Tarjetas algo más anchas para que el botón de reservar quepa en una línea */
+    .centers-page .centers-grid {
+        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    }
+}
+
 /* Globo de un centro en el mapa (centers.html) */
 .map-popup-wrapper .leaflet-popup-content-wrapper,
 .map-popup-wrapper .leaflet-popup-tip {

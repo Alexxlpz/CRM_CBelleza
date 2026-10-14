@@ -12,8 +12,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class GoogleCalendarSettings {
 
-    /** Vuelta de Google tras dar permiso; con el dominio público, debe estar autorizada en Google Cloud. */
+    /** Vueltas de Google tras dar permiso; con el dominio público, las dos deben estar autorizadas en Google Cloud. */
     public static final String CALLBACK_PATH = "/worker/google-calendar/callback";
+    public static final String CLIENT_CALLBACK_PATH = "/client/google-calendar/callback";
 
     private final GoogleLoginSettings google;
     private final String tokenKey;

@@ -9,9 +9,26 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import java.util.List;
+
 /** Páginas públicas de información. */
 @Controller
 public class PublicPagesController {
+
+    /* Apartados de cada página legal: índice lateral e índice dentro de la página */
+    private static final List<String> TERMS_SECTIONS = List.of(
+            "Quiénes somos", "Objeto y aceptación", "Cuentas de usuario", "Reserva de citas", "Centros de belleza",
+            "Uso aceptable", "Datos personales", "Propiedad intelectual", "Responsabilidad", "Suspensión y baja",
+            "Cambios", "Ley aplicable");
+
+    private static final List<String> COOKIES_SECTIONS = List.of(
+            "Qué son", "Cookies que usamos", "Almacenamiento local", "Servicios externos",
+            "Por qué no pedimos permiso", "Cómo borrarlas");
+
+    private static final List<String> PRIVACY_SECTIONS = List.of(
+            "Responsable", "Qué datos tratamos", "Para qué y con qué base", "Fichas técnicas",
+            "Iniciar sesión con Google", "Google Calendar", "Con quién los compartimos",
+            "Cuánto tiempo los guardamos", "Seguridad", "Tus derechos", "Cambios");
 
     private final String contactEmail;
     private final LegalOwner legalOwner;
@@ -32,12 +49,10 @@ public class PublicPagesController {
         return "landing";
     }
 
+    /** La antigua página de funcionalidades ahora es una sección de Inicio; se mantiene la URL para no romper enlaces. */
     @GetMapping({"/features", "/funcionalidades"})
-    public String features(Model model) {
-        model.addAttribute("activePage", "features");
-        model.addAttribute("pageDescription",
-                "Agenda de citas online, fichas técnicas de clientes, inventario y gestión del centro: todo lo que incluye Cuquora.");
-        return "features";
+    public String features() {
+        return "redirect:/home#funcionalidades";
     }
 
     /** Buscador público de centros. Los resultados se cargan desde /api/centers. */
@@ -54,6 +69,7 @@ public class PublicPagesController {
         model.addAttribute("contactEmail", contactEmail);
         model.addAttribute("legalOwner", legalOwner);
         model.addAttribute("pageDescription", "Condiciones de uso de Cuquora para clientes y centros de belleza.");
+        model.addAttribute("sections", TERMS_SECTIONS);
         return "terms";
     }
 
@@ -61,6 +77,7 @@ public class PublicPagesController {
     public String cookies(Model model) {
         model.addAttribute("contactEmail", contactEmail);
         model.addAttribute("pageDescription", "Qué cookies usa Cuquora, para qué sirven y cómo borrarlas.");
+        model.addAttribute("sections", COOKIES_SECTIONS);
         return "cookies";
     }
 
@@ -70,6 +87,7 @@ public class PublicPagesController {
         model.addAttribute("legalOwner", legalOwner);
         model.addAttribute("pageDescription",
                 "Qué datos personales trata Cuquora, para qué, con quién los comparte y cómo ejercer tus derechos.");
+        model.addAttribute("sections", PRIVACY_SECTIONS);
         return "privacy";
     }
 }

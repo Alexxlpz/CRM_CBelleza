@@ -133,6 +133,135 @@
     padding: 8px 10px;
 }
 
+/* ---- Alta de centro: bloques del formulario ---- */
+.registration-section {
+    border: 0;
+    margin: 0 0 8px;
+    padding: 0 0 24px;
+    min-width: 0;
+}
+
+.registration-section + .registration-section {
+    border-top: 1px solid var(--border-soft);
+    padding-top: 24px;
+}
+
+/* Con float, la leyenda queda dentro del bloque y no corta el borde superior del fieldset */
+.registration-section legend {
+    float: left;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0;
+    margin-bottom: 18px;
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--text-main);
+}
+
+.registration-section legend + * {
+    clear: both;
+}
+
+.registration-section legend .form-label-hint {
+    font-size: 14px;
+}
+
+.registration-section legend i {
+    color: var(--primary-text);
+}
+
+.registration-intro {
+    margin: -8px 0 18px;
+    max-width: 70ch;
+}
+
+.form-field-label {
+    display: block;
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 7px;
+}
+
+.team-rows {
+    list-style: none;
+    margin: 0 0 12px;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.team-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 10px;
+    align-items: start;
+}
+
+.team-row .form-field {
+    margin-bottom: 0;
+}
+
+.team-row-remove {
+    min-height: 46px;
+}
+
+.registration-done h2 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 21px;
+    font-weight: 800;
+    margin-bottom: 14px;
+}
+
+.registration-done p {
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 14px;
+    max-width: 70ch;
+}
+
+/* ---- Revisión de un centro antes de publicarlo (center-approval.html) ---- */
+.approval-title {
+    font-size: 24px;
+    font-weight: 800;
+    margin-bottom: 6px;
+    overflow-wrap: anywhere;
+}
+
+.approval-data {
+    display: grid;
+    grid-template-columns: minmax(120px, max-content) 1fr;
+    gap: 10px 24px;
+    margin: 0 0 28px;
+    font-size: 14.5px;
+}
+
+.approval-data dt {
+    font-weight: 700;
+    color: var(--text-muted);
+}
+
+.approval-data dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.approval-data a {
+    color: var(--primary-text);
+    font-weight: 700;
+}
+
+.approval-team {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
 .center-lead-box--spaced {
     margin-top: 50px;
 }
@@ -150,5 +279,473 @@
 
     .page-hero h1 {
         font-size: 28px;
+    }
+
+    .approval-data {
+        grid-template-columns: 1fr;
+        gap: 2px;
+    }
+
+    .approval-data dd {
+        margin-bottom: 10px;
+    }
+
+    /* Nombre y correo uno encima del otro; el botón de quitar, a la derecha de los dos */
+    .team-row {
+        grid-template-columns: 1fr auto;
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--border-soft);
+    }
+
+    .team-row .form-field:nth-child(2) {
+        grid-row: 2;
+    }
+
+    .team-row-remove {
+        grid-row: 1 / span 2;
+        grid-column: 2;
+        align-self: center;
+    }
+}
+
+/* ==========================================================================
+   Contacto: pantalla partida. En escritorio la foto ocupa la mitad izquierda
+   y el formulario la derecha; en móvil la foto queda como cabecera.
+   ========================================================================== */
+.contact-split {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.contact-panel {
+    background:
+        linear-gradient(color-mix(in srgb, var(--ink-deep) 80%, transparent), color-mix(in srgb, var(--ink-deep) 80%, transparent)),
+        url('../images/beauty_salon_hero.webp') center / cover no-repeat;
+    color: var(--on-ink);
+    padding: 36px 24px;
+}
+
+.contact-panel-inner {
+    max-width: 520px;
+}
+
+.contact-panel h1 {
+    font-size: 34px;
+    font-weight: 800;
+    letter-spacing: -0.6px;
+    margin-bottom: 12px;
+    color: var(--on-ink);
+}
+
+.contact-panel p {
+    color: var(--on-ink-muted);
+    line-height: 1.6;
+    font-size: 16px;
+}
+
+.contact-shortcuts {
+    list-style: none;
+    margin: 28px 0 0;
+    padding: 0;
+    display: grid;
+    gap: 16px;
+}
+
+.contact-shortcuts li {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    color: var(--on-ink-muted);
+    line-height: 1.5;
+}
+
+.contact-shortcuts i {
+    font-size: 18px;
+    color: var(--on-ink);
+    margin-top: 2px;
+}
+
+.contact-shortcuts a {
+    color: var(--on-ink);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.contact-form-side {
+    position: relative;
+    padding: 36px 24px 64px;
+}
+
+/* Detalle discreto: el logo de Cuquora muy tenue en la esquina, detrás del formulario */
+.contact-form-side::before {
+    content: '';
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: min(420px, 60%);
+    aspect-ratio: 1;
+    background: url('../images/icon.svg') right bottom / contain no-repeat;
+    opacity: 0.1;
+    pointer-events: none;
+}
+
+.contact-form-box {
+    position: relative;
+    width: 100%;
+    max-width: 560px;
+    margin: 0 auto;
+}
+
+/* Raya corta de color sobre el título del formulario */
+.contact-form-box .form-card-header h2::before {
+    content: '';
+    display: block;
+    width: 44px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--brand-solid);
+    margin-bottom: 14px;
+}
+
+.contact-form-box .form-card-header h2 {
+    color: var(--primary-text);
+}
+
+@media (min-width: 960px) {
+    .contact-split {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        min-height: calc(100vh - 78px);
+    }
+
+    .contact-panel {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 64px clamp(32px, 5vw, 96px);
+    }
+
+    .contact-panel h1 {
+        font-size: 44px;
+    }
+
+    .contact-form-side {
+        display: flex;
+        align-items: center;
+        padding: 64px clamp(32px, 5vw, 96px);
+    }
+}
+
+/* ==========================================================================
+   Alta de centro: asistente por pasos con vista previa del centro.
+   La vista previa va al lado desde 1100px; por debajo, debajo del formulario.
+   ========================================================================== */
+.registration-page {
+    max-width: 1240px;
+}
+
+.registration-wizard {
+    display: grid;
+    gap: 24px;
+}
+
+.registration-wizard .form-card--wide {
+    margin-top: 0;
+}
+
+/* Todas las flechas miden lo mismo: la letra se ajusta al ancho de la cinta y,
+   si aun así no cabe, el nombre se corta con «…» (el paso actual se lee en el título del bloque) */
+.wizard-steps {
+    --notch: 14px;
+    container-type: inline-size;
+    list-style: none;
+    margin: 0 0 28px;
+    padding: 0;
+    display: flex;
+    gap: 4px;
+}
+
+.wizard-steps li {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+/* Cada paso es un tramo de cinta con forma de flecha que encaja en el siguiente */
+.wizard-steps button {
+    width: 100%;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 0 calc(var(--notch) + 2px);
+    border: 0;
+    background: var(--border-soft);
+    color: var(--text-muted);
+    font: inherit;
+    font-size: clamp(13px, 2.4cqi, 16px);
+    font-weight: 600;
+    cursor: pointer;
+    clip-path: polygon(0 0, calc(100% - var(--notch)) 0, 100% 50%, calc(100% - var(--notch)) 100%, 0 100%, var(--notch) 50%);
+    transition: var(--transition);
+}
+
+.wizard-steps li:first-child button {
+    clip-path: polygon(0 0, calc(100% - var(--notch)) 0, 100% 50%, calc(100% - var(--notch)) 100%, 0 100%);
+    border-radius: var(--border-radius-sm) 0 0 var(--border-radius-sm);
+}
+
+.wizard-steps li:last-child button {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, var(--notch) 50%);
+    border-radius: 0 var(--border-radius-sm) var(--border-radius-sm) 0;
+}
+
+.wizard-step-icon {
+    flex-shrink: 0;
+}
+
+/* Si la cinta es estrecha, los pasos se quedan sin icono para que quepa el nombre */
+@media (min-width: 601px) {
+    @container (max-width: 760px) {
+        .wizard-step-icon {
+            display: none;
+        }
+    }
+}
+
+.wizard-step-text {
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.wizard-steps button:disabled {
+    cursor: default;
+}
+
+.wizard-steps button.is-done {
+    background: var(--primary-light);
+    color: var(--text-main);
+}
+
+.wizard-steps button.is-done:hover {
+    background: var(--primary);
+    color: var(--on-primary);
+}
+
+.wizard-steps button.is-current {
+    background: var(--brand-solid);
+    color: var(--on-primary);
+}
+
+/* Con el asistente activo solo se ve un bloque: sin la raya que separa bloques seguidos */
+.wizard-steps:not([hidden]) ~ form .registration-section {
+    border-top: 0;
+    padding-top: 0;
+}
+
+.wizard-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: flex-end;
+    align-items: center;
+    margin-top: 8px;
+}
+
+.wizard-nav #wizardBack {
+    margin-right: auto;
+}
+
+.registration-preview {
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--border-radius-lg);
+    padding: 24px;
+    align-self: start;
+}
+
+.registration-preview-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin: 0 0 12px;
+}
+
+.registration-preview-card {
+    border: 1px solid var(--border-soft);
+    border-radius: var(--border-radius-md);
+    padding: 18px;
+    margin-bottom: 18px;
+}
+
+.registration-preview-card h2 {
+    font-size: 19px;
+    font-weight: 700;
+    margin: 0 0 12px;
+    overflow-wrap: anywhere;
+}
+
+.registration-preview-card ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 8px;
+    font-size: 14px;
+}
+
+.registration-preview-card li {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    overflow-wrap: anywhere;
+}
+
+.registration-preview-card li i {
+    color: var(--primary-text);
+    margin-top: 2px;
+}
+
+.registration-preview .is-empty {
+    color: var(--text-muted);
+}
+
+.registration-preview-summary {
+    margin: 0 0 16px;
+    display: grid;
+    gap: 8px;
+    font-size: 14px;
+}
+
+.registration-preview-summary div {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.registration-preview-summary dt {
+    color: var(--text-muted);
+}
+
+.registration-preview-summary dd {
+    margin: 0;
+    font-weight: 600;
+    text-align: right;
+}
+
+/* Escritorio: asistente y vista previa más grandes, con letra y campos más amplios */
+@media (min-width: 1100px) {
+    .registration-page {
+        max-width: 1520px;
+        padding-left: 40px;
+        padding-right: 40px;
+    }
+
+    .registration-wizard {
+        grid-template-columns: minmax(0, 1fr) 320px;
+        gap: 24px;
+        align-items: start;
+    }
+
+    .registration-wizard .form-card--wide {
+        padding: 40px;
+    }
+
+    .wizard-steps {
+        gap: 6px;
+        margin-bottom: 36px;
+    }
+
+    .wizard-steps {
+        --notch: 18px;
+    }
+
+    .wizard-steps button {
+        height: 52px;
+    }
+
+    .registration-wizard .registration-section legend {
+        font-size: 22px;
+        margin-bottom: 24px;
+    }
+
+    .registration-wizard .form-field label,
+    .registration-wizard .form-field-label {
+        font-size: 15px;
+    }
+
+    .registration-wizard .form-field input:not([type="checkbox"]):not([type="radio"]),
+    .registration-wizard .form-field select,
+    .registration-wizard .form-field textarea {
+        font-size: 16px;
+        padding: 15px 18px;
+    }
+
+    .registration-wizard .checkbox-chip {
+        font-size: 15px;
+    }
+
+    .registration-wizard .form-help {
+        font-size: 14px;
+    }
+
+    .registration-wizard .location-picker-map {
+        height: 440px;
+    }
+
+    .registration-wizard .wizard-nav .btn {
+        font-size: 16px;
+        padding: 14px 26px;
+    }
+
+    .registration-preview {
+        position: sticky;
+        top: 98px;
+        padding: 30px;
+    }
+
+    .registration-preview-label {
+        font-size: 15px;
+    }
+
+    .registration-preview-card {
+        padding: 24px;
+    }
+
+    .registration-preview-card h2 {
+        font-size: 24px;
+    }
+
+    .registration-preview-card ul,
+    .registration-preview-summary {
+        font-size: 16px;
+        gap: 12px;
+    }
+}
+
+/* En móvil los pasos caben en una fila: solo se lee el nombre del paso actual */
+@media (max-width: 600px) {
+    .wizard-steps li:has(.is-current) {
+        flex-grow: 3;
+    }
+
+    .wizard-steps button:not(.is-current) .wizard-step-text {
+        display: none;
+    }
+}
+
+/* Con más ancho, la vista previa y los márgenes del asistente crecen */
+@media (min-width: 1440px) {
+    .registration-wizard {
+        grid-template-columns: minmax(0, 1fr) 420px;
+        gap: 32px;
+    }
+
+    .registration-wizard .form-card--wide {
+        padding: 48px 56px;
     }
 }

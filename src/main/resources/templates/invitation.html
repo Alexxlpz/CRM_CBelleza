@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{fragments/head :: meta('Crear contraseña - Cuquora CRM')}"></th:block>
+    <meta name="robots" content="noindex">
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
+    <script th:src="@{/js/form-validation.js}" defer></script>
+</head>
+<body class="auth-page">
+    <div th:replace="~{fragments/navbar :: brand(true)}"></div>
+
+    <main class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1 th:text="${'Hola, ' + invitation.name()}">Hola, Lucía</h1>
+                <p th:if="${invitation.centerName() != null}">
+                    Te han dado de alta en <strong th:text="${invitation.centerName()}">Centro</strong>.
+                    Entrarás con <strong th:text="${invitation.email()}">correo</strong>.
+                </p>
+            </div>
+
+            <div class="alert alert-error" role="alert" th:if="${errorMessage != null}">
+                <i class="lucide-alert-circle" aria-hidden="true"></i>
+                <span th:text="${errorMessage}">Error</span>
+            </div>
+
+            <!--/* Enlace nuevo enviado */-->
+            <div class="alert alert-success" role="status" th:if="${renewedEmail != null}">
+                <i class="lucide-mail-check" aria-hidden="true"></i>
+                <span th:text="${'Te hemos enviado un enlace nuevo a ' + renewedEmail + '. Este ya no vale.'}">Enlace enviado.</span>
+            </div>
+
+            <th:block th:if="${renewedEmail == null and invitation.state().name() == 'USED'}">
+                <p class="auth-note">Ya has creado tu contraseña con este enlace.</p>
+                <a th:href="@{/login}" class="btn btn-primary btn-block btn-lg">
+                    <i class="lucide-log-in" aria-hidden="true"></i><span>Iniciar sesión</span>
+                </a>
+            </th:block>
+
+            <th:block th:if="${renewedEmail == null and invitation.state().name() == 'EXPIRED'}">
+                <p class="auth-note">Este enlace ha caducado. Te enviamos otro al mismo correo.</p>
+                <form th:action="@{/invitation/{token}/renew(token=${token})}" method="post">
+                    <button type="submit" class="btn btn-primary btn-block btn-lg">
+                        <i class="lucide-send" aria-hidden="true"></i><span>Enviarme un enlace nuevo</span>
+                    </button>
+                </form>
+            </th:block>
+
+            <th:block th:if="${invitation.state().name() == 'VALID'}">
+                <form th:action="@{/invitation/{token}(token=${token})}" method="post" id="invitationForm" novalidate>
+                    <!--/* Para que el gestor de contraseñas guarde la cuenta con su correo */-->
+                    <input type="email" name="username" th:value="${invitation.email()}" autocomplete="username" hidden>
+                    <div class="form-group">
+                        <label for="passwordInput" class="form-label">Contraseña</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="passwordInput" name="password" class="form-control"
+                                   autocomplete="new-password" th:placeholder="${'Mínimo ' + minPasswordLength + ' caracteres'}" autofocus>
+                            <button type="button" class="password-toggle-btn" data-toggle-password="passwordInput"
+                                    aria-label="Mostrar u ocultar contraseña" aria-pressed="false">
+                                <i class="lucide-eye" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPasswordInput" class="form-label">Repite la contraseña</label>
+                        <input type="password" id="confirmPasswordInput" name="confirmPassword" class="form-control"
+                               autocomplete="new-password">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block btn-lg disabled" id="submitBtn" aria-disabled="true"
+                            th:attr="data-min-length=${minPasswordLength}">
+                        <i class="lucide-key-round" aria-hidden="true"></i>
+                        <span>Crear contraseña</span>
+                    </button>
+                </form>
+
+                <th:block th:if="${googleLoginEnabled}">
+                    <div class="auth-divider"><span>o, si tu correo es de Google</span></div>
+                    <a th:href="@{${googleLoginUrl}}" class="btn btn-secondary btn-block btn-lg btn-google">
+                        <img th:src="@{/images/google-g.svg}" src="/images/google-g.svg" alt="" width="20" height="20">
+                        <span>Continuar con Google</span>
+                    </a>
+                </th:block>
+            </th:block>
+        </div>
+    </main>
+
+    <script th:src="@{/js/invitation.js}" defer></script>
+</body>
+</html>

@@ -1,29 +1,37 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{email/layout :: layout('Nueva solicitud de alta de centro', 'Recibida el ' + ${timestamp} + ' para su verificación', ~{::content})}">
+      th:replace="~{email/layout :: layout('Nuevo centro pendiente de revisión', 'Registrado el ' + ${timestamp} + '. No sale en el buscador hasta que lo publiques.', ~{::content})}">
 <body>
 <th:block th:fragment="content">
     <table style="width:100%; border-collapse:collapse; margin-bottom:24px; font-size:14.5px;">
         <tr><td style="padding:8px 0; color:#7a716a; width:170px; font-weight:600;">Nombre comercial:</td>
             <td style="padding:8px 0; font-weight:700;" th:text="${form.centerName()}">Centro</td></tr>
         <tr><td style="padding:8px 0; color:#7a716a; font-weight:600;">CIF / NIF:</td>
-            <td style="padding:8px 0; font-weight:700;" th:text="${form.cif()}">CIF</td></tr>
+            <td style="padding:8px 0; font-weight:700;" th:text="${taxId}">CIF</td></tr>
         <tr><td style="padding:8px 0; color:#7a716a; font-weight:600;">Responsable:</td>
-            <td style="padding:8px 0;" th:text="${form.contactName()}">Nombre</td></tr>
+            <td style="padding:8px 0;"><span th:text="${owner.name()}">Nombre</span> ·
+                <a th:href="'mailto:' + ${owner.email()}" th:text="${owner.email()}" style="color:#a87d4f; text-decoration:none; font-weight:600;">correo</a></td></tr>
         <tr><td style="padding:8px 0; color:#7a716a; font-weight:600;">Teléfono:</td>
             <td style="padding:8px 0;" th:text="${form.phone()}">Teléfono</td></tr>
-        <tr><td style="padding:8px 0; color:#7a716a; font-weight:600;">Correo:</td>
-            <td style="padding:8px 0;"><a th:href="'mailto:' + ${form.email()}" th:text="${form.email()}" style="color:#a87d4f; text-decoration:none; font-weight:600;">correo</a></td></tr>
-        <tr><td style="padding:8px 0; color:#7a716a; font-weight:600;">Ciudad / CP:</td>
-            <td style="padding:8px 0;" th:text="${#strings.isEmpty(form.city()) ? 'No especificada' : form.city()}">Ciudad</td></tr>
+        <tr><td style="padding:8px 0; color:#7a716a; font-weight:600;">Dirección:</td>
+            <td style="padding:8px 0;"><span th:text="${form.address()}">Dirección</span> ·
+                <a th:href="${mapUrl}" style="color:#a87d4f; text-decoration:none; font-weight:600;">ver el pin</a></td></tr>
+        <tr><td style="padding:8px 0; color:#7a716a; font-weight:600;">Equipo:</td>
+            <td style="padding:8px 0;" th:text="${team.size() == 1 ? 'Solo el responsable' : team.size() + ' personas con el responsable'}">Equipo</td></tr>
         <tr><td style="padding:8px 0; color:#7a716a; font-weight:600;">Especialidades:</td>
             <td style="padding:8px 0;" th:text="${specialties}">-</td></tr>
+        <tr><td style="padding:8px 0; color:#7a716a; font-weight:600;">Tarjeta de puntos:</td>
+            <td style="padding:8px 0;" th:text="${loyalty}">-</td></tr>
     </table>
-    <div style="background:#faf7f4; border-left:4px solid #c5a880; padding:18px 20px; border-radius:8px;">
-        <p style="margin:0 0 8px; font-size:12px; text-transform:uppercase; letter-spacing:0.5px; color:#857b74; font-weight:700;">Información adicional</p>
+    <div style="background:#faf7f4; border-left:4px solid #c5a880; padding:18px 20px; border-radius:8px; margin-bottom:24px;">
+        <p style="margin:0 0 8px; font-size:13px; color:#857b74; font-weight:700;">Información para la revisión</p>
         <p style="margin:0; font-size:14.5px; line-height:1.6; white-space:pre-wrap;"
-           th:text="${#strings.isEmpty(form.notes()) ? 'Sin observaciones adicionales' : form.notes()}">Notas</p>
+           th:text="${#strings.isEmpty(form.notes()) ? 'Sin observaciones' : form.notes()}">Notas</p>
     </div>
+    <p style="margin:0 0 12px;">
+        <a th:href="${publishUrl}" style="display:inline-block; padding:12px 22px; background:#8a6a45; color:#ffffff; text-decoration:none; border-radius:10px; font-weight:700; font-size:14px;">Revisar y publicar el centro</a>
+    </p>
+    <p style="font-size:13px; color:#857b74; margin:0;">El enlace abre una página con los datos y el botón para publicarlo. No lo reenvíes: quien lo tenga puede publicar el centro.</p>
 </th:block>
 </body>
 </html>

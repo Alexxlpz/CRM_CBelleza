@@ -6,7 +6,7 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 /**
- * Trabajador con la agenda sincronizada con Google Calendar: token de actualización de Google
+ * Trabajador o cliente con sus citas sincronizadas con Google Calendar: token de actualización de Google
  * (cifrado, ver {@code GoogleTokenCipher}) y calendario «Cuquora» creado en su cuenta.
  */
 @Entity
@@ -23,8 +23,8 @@ public class GoogleCalendarLink {
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "worker_id", nullable = false, unique = true)
-    private User worker;
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    private User user;
 
     /** Cuenta de Google en la que se guardan las citas (solo para mostrarla en el perfil). */
     @Column(name = "google_email")

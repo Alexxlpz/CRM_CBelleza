@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{email/layout :: layout('Hola, ' + ${name}, 'Te han dado de alta en ' + ${centerName}, ~{::content})}">
+<body>
+<th:block th:fragment="content">
+    <p style="font-size:15px; color:#5c5550; line-height:1.6; margin:0 0 16px;">
+        <strong th:text="${centerName}">Centro</strong> gestiona su agenda, sus clientes y su inventario con Cuquora y te ha añadido a su equipo.
+        Crea tu contraseña para entrar.
+    </p>
+    <p style="margin:0 0 20px;">
+        <a th:href="${invitationUrl}" style="display:inline-block; padding:12px 22px; background:#8a6a45; color:#ffffff; text-decoration:none; border-radius:10px; font-weight:700; font-size:14px;">Crear mi contraseña</a>
+    </p>
+    <p style="font-size:13px; color:#857b74; margin:0;">
+        El enlace vale <span th:text="${validityDays}">7</span> días. Si tu correo es de Google, también puedes entrar con «Continuar con Google».
+        Si no esperabas este correo, ignóralo.
+    </p>
+</th:block>
+</body>
+</html>

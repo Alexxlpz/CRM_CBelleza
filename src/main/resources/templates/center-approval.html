@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{fragments/head :: meta('Revisar centro - Cuquora CRM')}"></th:block>
+    <meta name="robots" content="noindex">
+    <link rel="stylesheet" th:href="@{/css/public.css}">
+</head>
+<body>
+    <div th:replace="~{fragments/navbar :: brand(true)}"></div>
+
+    <!--/* Página a la que llega administración desde el correo de alta: revisar los datos y publicar el centro */-->
+    <main class="public-page-container public-page-container--narrow">
+        <div class="alert alert-success" role="status" th:if="${justPublished != null}">
+            <i class="lucide-check-circle-2" aria-hidden="true"></i>
+            <span th:text="${center.name + ' ya aparece en el buscador y en el mapa. Hemos avisado al centro por correo.'}">Centro publicado.</span>
+        </div>
+
+        <section class="form-card form-card--wide">
+            <div class="form-card-header form-card-header--divided">
+                <h1 class="approval-title" th:text="${center.name}">Centro</h1>
+                <p th:if="${justPublished == null}">Pendiente de revisión. Comprueba el CIF o NIF y la ubicación antes de publicarlo.</p>
+            </div>
+
+            <dl class="approval-data">
+                <dt>CIF / NIF</dt>
+                <dd th:text="${center.taxId}">B12345678</dd>
+                <dt>Dirección</dt>
+                <dd>
+                    <span th:text="${center.address}">Calle Mayor 12, Madrid</span>
+                    · <a th:href="${mapUrl}" target="_blank" rel="noopener">Ver el pin en el mapa</a>
+                </dd>
+                <dt>Teléfono</dt>
+                <dd th:text="${center.phone}">912 345 678</dd>
+                <dt>Correo</dt>
+                <dd th:text="${center.email}">info@tucentro.com</dd>
+                <dt>Cabinas</dt>
+                <dd th:text="${center.cabins}">2</dd>
+                <dt>Zona horaria</dt>
+                <dd th:text="${timeZoneLabel}">España</dd>
+                <dt>Tarjeta de puntos</dt>
+                <dd th:text="${center.loyaltyEnabled ? center.loyaltyRewardPoints + ' puntos: ' + center.loyaltyRewardText : 'No'}">No</dd>
+                <dt>Equipo</dt>
+                <dd>
+                    <ul class="approval-team">
+                        <li th:each="worker : ${team}">
+                            <span th:text="${worker.name}">Nombre</span> · <span th:text="${worker.email}">correo</span>
+                        </li>
+                    </ul>
+                </dd>
+                <dt th:if="${center.registeredAt != null}">Alta</dt>
+                <dd th:if="${center.registeredAt != null}" th:text="${#temporals.format(center.registeredAt, 'dd/MM/yyyy HH:mm')}">14/10/2026</dd>
+            </dl>
+
+            <form th:if="${justPublished == null}" th:action="@{/register-center/approve/{token}(token=${token})}" method="post"
+                  data-confirm="El centro aparecerá en el buscador y los clientes podrán pedir cita. ¿Publicarlo?">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="lucide-badge-check" aria-hidden="true"></i> Publicar centro
+                </button>
+            </form>
+        </section>
+    </main>
+</body>
+</html>

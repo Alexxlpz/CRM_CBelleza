@@ -1,162 +1,260 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <th:block th:replace="~{fragments/head :: meta('Alta y Certificación de Centro - Cuquora CRM')}"></th:block>
+    <th:block th:replace="~{fragments/head :: meta('Alta de centro - Cuquora CRM')}"></th:block>
     <link rel="stylesheet" th:href="@{/css/home.css}">
     <link rel="stylesheet" th:href="@{/css/public.css}">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
     <script th:src="@{/js/form-validation.js}" defer></script>
+    <script th:src="@{/js/location-picker.js}" defer></script>
+    <script th:src="@{/js/loyalty-settings.js}" defer></script>
+    <script th:src="@{/js/center-registration.js}" defer></script>
 </head>
 <body>
-    <!-- Navbar -->
     <div th:replace="~{fragments/navbar :: brand(true)}"></div>
 
-    <main class="public-page-container public-page-container--narrow">
-        <!-- Hero Header -->
+    <main class="public-page-container registration-page">
         <header class="page-hero">
-            <h1>Registra tu Centro en Cuquora</h1>
-            <p>Suma tu centro a nuestra red profesional. Para garantizar un ecosistema exclusivo, sin intrusismo y con la máxima seguridad para los clientes, cada solicitud es auditada y certificada manualmente por nuestro equipo.</p>
+            <h1>Registra tu centro en Cuquora</h1>
+            <p>Da de alta tu centro y a tu equipo. Podréis entrar al momento para preparar tratamientos
+                e inventario; el centro aparecerá en el buscador y en el mapa cuando revisemos que es un negocio real.</p>
         </header>
 
-        <!-- 3 Steps Diagram -->
-        <div class="registration-steps-grid">
-            <div class="reg-step-card">
-                <div class="reg-step-badge">Paso 1</div>
-                <h3>1. Envío de Solicitud</h3>
-                <p>Facilita los datos de tu empresa (CIF/NIF), responsable, dirección del local y especialidades de servicio.</p>
-            </div>
-            <div class="reg-step-card">
-                <div class="reg-step-badge">Paso 2</div>
-                <h3>2. Auditoría Manual</h3>
-                <p>Verificamos que el negocio sea un centro real con titulación y habilitación sanitaria o estética legal.</p>
-            </div>
-            <div class="reg-step-card">
-                <div class="reg-step-badge">Paso 3</div>
-                <h3>3. Activación y Sello</h3>
-                <p>Recibes tu credencial de Centro Certificado, acceso al CRM y presencia destacada en el directorio de reservas.</p>
-            </div>
-        </div>
-
-        <!-- Success Alert Flash Message -->
-        <div class="alert alert-success" role="status" th:if="${successMessage != null}">
-            <i class="lucide-check-circle-2" aria-hidden="true"></i>
-            <span th:text="${successMessage}">Solicitud enviada.</span>
-        </div>
+        <!--/* Tras enviar: resumen de lo que ha pasado y qué hacer ahora */-->
+        <section class="form-card form-card--wide registration-done" th:if="${registered != null}" aria-labelledby="registrationDoneTitle">
+            <h2 id="registrationDoneTitle"><i class="lucide-mail-check" aria-hidden="true"></i> Centro registrado: revisa tu correo</h2>
+            <p>
+                Hemos enviado a <strong th:text="${registeredEmail}">info@tucentro.com</strong> el enlace para crear tu contraseña
+                <th:block th:if="${registeredTeam > 0}">y una invitación a
+                    <span th:text="${registeredTeam == 1 ? 'la otra persona de tu equipo' : 'cada una de las ' + registeredTeam + ' personas de tu equipo'}">tu equipo</span></th:block>.
+                El enlace vale <th:block th:text="${invitationDays}">7</th:block> días.
+            </p>
+            <p>
+                <strong th:text="${registeredCenter}">Tu centro</strong> no saldrá en el buscador hasta que lo revisemos (como mucho, una semana).
+                Aprovecha para añadir tratamientos y precios: así los clientes podrán reservar desde el primer día.
+            </p>
+            <a th:href="@{/login}" class="btn btn-primary"><i class="lucide-log-in" aria-hidden="true"></i> Ir a iniciar sesión</a>
+        </section>
 
         <div class="alert alert-error" role="alert" th:if="${errorMessage != null}">
             <i class="lucide-alert-circle" aria-hidden="true"></i>
             <span th:text="${errorMessage}">Error</span>
         </div>
 
-        <!-- Registration Form Card -->
+        <!--/* Asistente: center-registration.js enseña un bloque cada vez; sin JS se ven todos seguidos */-->
+        <div class="registration-wizard" th:if="${registered == null}">
         <div class="form-card form-card--wide">
-            <div class="form-card-header form-card-header--divided">
-                <h2>Formulario de Solicitud de Certificación</h2>
-                <p>Completa los datos de tu centro para que nuestro equipo inicie la validación.</p>
-            </div>
+            <!--/* Los pasos son una cinta de flechas: se va tiñendo del color de la marca según se avanza */-->
+            <ol class="wizard-steps" id="wizardSteps" hidden>
+                <li><button type="button" data-go-step="0"><i class="lucide-store wizard-step-icon" aria-hidden="true"></i> <span class="wizard-step-text">El centro</span></button></li>
+                <li><button type="button" data-go-step="1"><i class="lucide-map-pin wizard-step-icon" aria-hidden="true"></i> <span class="wizard-step-text">Ubicación</span></button></li>
+                <li><button type="button" data-go-step="2"><i class="lucide-users wizard-step-icon" aria-hidden="true"></i> <span class="wizard-step-text">Equipo</span></button></li>
+                <li><button type="button" data-go-step="3"><i class="lucide-gift wizard-step-icon" aria-hidden="true"></i> <span class="wizard-step-text">Puntos</span></button></li>
+                <li><button type="button" data-go-step="4"><i class="lucide-send wizard-step-icon" aria-hidden="true"></i> <span class="wizard-step-text">Enviar</span></button></li>
+            </ol>
 
-            <form th:action="@{/register-center}" method="post" id="registerCenterForm" novalidate>
-                <div class="form-grid-two">
-                    <div class="form-field">
-                        <label for="centerName">Nombre Comercial del Centro *</label>
-                        <input type="text" id="centerName" name="centerName" placeholder="Ej: Salón Bellas Artes, Spa Zen..." required>
+            <form th:action="@{/register-center}" method="post" id="registerCenterForm" novalidate
+                  th:attr="data-max-workers=${maxExtraWorkers}">
+
+                <fieldset class="registration-section">
+                    <legend><i class="lucide-store" aria-hidden="true"></i> El centro</legend>
+                    <div class="form-grid-two">
+                        <div class="form-field">
+                            <label for="centerName">Nombre comercial *</label>
+                            <input type="text" id="centerName" name="centerName" th:value="${form.centerName()}"
+                                   placeholder="Ej: Salón Bellas Artes" maxlength="120" required>
+                        </div>
+                        <div class="form-field">
+                            <label for="cif">CIF / NIF de la empresa o autónomo *</label>
+                            <input type="text" id="cif" name="cif" th:value="${form.cif()}" placeholder="Ej: B12345678 o 12345678Z"
+                                   maxlength="20" autocapitalize="characters" required>
+                        </div>
+                    </div>
+                    <div class="form-grid-two">
+                        <div class="form-field">
+                            <label for="phone">Teléfono del centro *</label>
+                            <input type="tel" id="phone" name="phone" th:value="${form.phone()}" placeholder="+34 912 345 678" required>
+                            <p class="form-help">Lo ven los clientes en la ficha del centro.</p>
+                        </div>
+                        <div class="form-field">
+                            <label for="cabins">Cabinas o puestos *</label>
+                            <input type="number" id="cabins" name="cabins" th:value="${form.cabins()}" min="1" max="50" step="1" required>
+                            <p class="form-help">Citas que podéis atender a la vez. Se puede cambiar después en «Mi Centro».</p>
+                        </div>
                     </div>
                     <div class="form-field">
-                        <label for="cif">CIF / NIF de la Empresa o Autónomo *</label>
-                        <input type="text" id="cif" name="cif" placeholder="Ej: B12345678 o 12345678Z" required>
+                        <span class="form-field-label" id="specialtiesLabel">Especialidades</span>
+                        <div class="specialties-checkbox-grid" role="group" aria-labelledby="specialtiesLabel">
+                            <label class="checkbox-chip" th:each="specialty : ${specialties}">
+                                <input type="checkbox" name="specialties" th:value="${specialty}"
+                                       th:checked="${form.specialtiesOrEmpty().contains(specialty)}">
+                                <span th:text="${specialty}">Manicura y uñas</span>
+                            </label>
+                        </div>
                     </div>
-                </div>
+                </fieldset>
 
-                <div class="form-grid-two">
+                <fieldset class="registration-section">
+                    <legend><i class="lucide-map-pin" aria-hidden="true"></i> Dónde está</legend>
                     <div class="form-field">
-                        <label for="contactName">Nombre del Titular o Responsable *</label>
-                        <input type="text" id="contactName" name="contactName" placeholder="Nombre y Apellidos" required>
-                    </div>
-                    <div class="form-field">
-                        <label for="phone">Teléfono de Contacto Profesional *</label>
-                        <input type="tel" id="phone" name="phone" placeholder="+34 600 000 000" required>
-                    </div>
-                </div>
-
-                <div class="form-grid-two">
-                    <div class="form-field">
-                        <label for="email">Correo Electrónico de Contacto *</label>
-                        <input type="email" id="email" name="email" placeholder="info@tucentro.com" required>
+                        <label for="address">Dirección completa *</label>
+                        <input type="text" id="address" name="address" th:value="${form.address()}"
+                               placeholder="Calle Mayor 12, 28013 Madrid" maxlength="255" autocomplete="street-address" required>
                     </div>
                     <div class="form-field">
-                        <label for="city">Ciudad y Código Postal *</label>
-                        <input type="text" id="city" name="city" placeholder="Ej: Madrid, 28001" required>
+                        <span class="form-field-label">Ubicación en el mapa *</span>
+                        <div th:replace="~{fragments/location-picker :: picker('address', ${form.latitude()}, ${form.longitude()})}"></div>
                     </div>
-                </div>
+                    <div class="form-field">
+                        <label for="timeZone">Zona horaria</label>
+                        <select id="timeZone" name="timeZone">
+                            <option th:each="zone : ${timeZones}" th:value="${zone.key}" th:text="${zone.value}"
+                                    th:selected="${zone.key == form.timeZone()}">España (península y Baleares)</option>
+                        </select>
+                        <p class="form-help">Las citas se guardan en la hora de tu centro.</p>
+                    </div>
+                </fieldset>
 
-                <div class="form-field">
-                    <label>Especialidades y Servicios que ofrecéis:</label>
-                    <div class="specialties-checkbox-grid">
+                <fieldset class="registration-section">
+                    <legend><i class="lucide-users" aria-hidden="true"></i> Tu equipo</legend>
+                    <p class="form-help registration-intro">Cada persona recibe un correo para crear su contraseña (o entrar con Google si usa ese correo).
+                        No escribas contraseñas aquí.</p>
+                    <div class="form-grid-two">
+                        <div class="form-field">
+                            <label for="contactName">Tu nombre (responsable) *</label>
+                            <input type="text" id="contactName" name="contactName" th:value="${form.contactName()}"
+                                   placeholder="Nombre y apellidos" autocomplete="name" required>
+                        </div>
+                        <div class="form-field">
+                            <label for="email">Tu correo *</label>
+                            <input type="email" id="email" name="email" th:value="${form.email()}"
+                                   placeholder="info@tucentro.com" autocomplete="email" required>
+                            <p class="form-help">Con él entrarás a Cuquora y será el correo de contacto del centro.</p>
+                        </div>
+                    </div>
+
+                    <span class="form-field-label" id="teamLabel">Más trabajadores</span>
+                    <ul class="team-rows" id="teamRows" aria-labelledby="teamLabel">
+                        <li class="team-row" th:each="member, it : ${form.workerRowsForView()}">
+                            <div class="form-field">
+                                <label th:for="${'workerName' + it.index}" class="visually-hidden">Nombre</label>
+                                <input type="text" th:id="${'workerName' + it.index}" name="workerNames" th:value="${member.name()}" placeholder="Nombre">
+                            </div>
+                            <div class="form-field">
+                                <label th:for="${'workerEmail' + it.index}" class="visually-hidden">Correo</label>
+                                <input type="email" th:id="${'workerEmail' + it.index}" name="workerEmails" th:value="${member.email()}" placeholder="correo@ejemplo.com">
+                            </div>
+                            <button type="button" class="btn btn-secondary btn-sm team-row-remove" data-remove-worker aria-label="Quitar trabajador">
+                                <i class="lucide-x" aria-hidden="true"></i>
+                            </button>
+                        </li>
+                    </ul>
+                    <button type="button" class="btn btn-secondary btn-sm" id="addWorkerBtn">
+                        <i class="lucide-user-plus" aria-hidden="true"></i> Añadir trabajador
+                    </button>
+                    <p class="form-help" id="teamLimitHelp" hidden th:text="${'Puedes añadir hasta ' + maxExtraWorkers + ' ahora; el resto, más adelante.'}">Límite</p>
+                    <template id="workerRowTemplate">
+                        <li class="team-row">
+                            <div class="form-field">
+                                <label class="visually-hidden">Nombre</label>
+                                <input type="text" name="workerNames" placeholder="Nombre">
+                            </div>
+                            <div class="form-field">
+                                <label class="visually-hidden">Correo</label>
+                                <input type="email" name="workerEmails" placeholder="correo@ejemplo.com">
+                            </div>
+                            <button type="button" class="btn btn-secondary btn-sm team-row-remove" data-remove-worker aria-label="Quitar trabajador">
+                                <i class="lucide-x" aria-hidden="true"></i>
+                            </button>
+                        </li>
+                    </template>
+                </fieldset>
+
+                <!--/* Mismos campos e ids que en «Mi Centro»: loyalty-settings.js los rellena igual */-->
+                <fieldset class="registration-section" id="loyaltyForm" th:with="modeValue=${form.mode() != null ? form.mode() : 'OFF'}">
+                    <legend><i class="lucide-gift" aria-hidden="true"></i> Tarjeta de puntos <span class="form-label-hint">(opcional)</span></legend>
+                    <p class="form-help registration-intro">Tus clientes suman puntos con cada tratamiento y cada producto, y al llegar a la cifra
+                        que elijas les das una recompensa. Puedes activarla o cambiarla cuando quieras desde «Mi Centro».</p>
+                    <div class="form-field">
+                        <label for="loyaltyMode">¿Quieres tarjeta de puntos?</label>
+                        <select id="loyaltyMode" name="mode">
+                            <option th:each="mode : ${loyaltyModes}" th:value="${mode.name()}"
+                                    th:text="${mode.name() == 'OFF' ? 'No, por ahora' : 'Sí: ' + #strings.toLowerCase(mode.label())}"
+                                    th:selected="${mode.name() == modeValue}">No, por ahora</option>
+                        </select>
+                    </div>
+                    <div class="form-grid-two">
+                        <div class="form-field" data-loyalty-field th:hidden="${modeValue == 'OFF'}">
+                            <label for="loyaltyPointsPerUnit" id="loyaltyPointsLabel">Puntos por cada euro</label>
+                            <input type="number" id="loyaltyPointsPerUnit" name="pointsPerUnit" th:value="${form.pointsPerUnit()}" min="1" max="1000" step="1">
+                        </div>
+                        <div class="form-field" data-loyalty-field th:hidden="${modeValue == 'OFF'}">
+                            <label for="loyaltyRewardPoints">Puntos para la recompensa</label>
+                            <input type="number" id="loyaltyRewardPoints" name="rewardPoints" th:value="${form.rewardPoints()}" min="1" max="100000" step="1">
+                        </div>
+                    </div>
+                    <div class="form-field" data-loyalty-field th:hidden="${modeValue == 'OFF'}">
+                        <label for="loyaltyRewardText">Recompensa</label>
+                        <input type="text" id="loyaltyRewardText" name="rewardText" th:value="${form.rewardText()}" maxlength="200"
+                               placeholder="Ej: Manicura semipermanente gratis" aria-describedby="loyaltyExample">
+                        <p class="form-help" id="loyaltyExample" aria-live="polite"></p>
+                    </div>
+                </fieldset>
+
+                <fieldset class="registration-section">
+                    <legend><i class="lucide-message-square" aria-hidden="true"></i> Algo más</legend>
+                    <div class="form-field">
+                        <label for="notes">Información para la revisión <span class="form-label-hint">(opcional)</span></label>
+                        <textarea id="notes" name="notes" rows="3" maxlength="2000" th:text="${form.notes()}"
+                                  placeholder="Web, Instagram o lo que nos ayude a comprobar que el centro es real"></textarea>
+                    </div>
+                    <div class="terms-check-row">
                         <label class="checkbox-chip">
-                            <input type="checkbox" name="specialties" value="ESTETICA_FACIAL"> Estética Facial y Corporal
-                        </label>
-                        <label class="checkbox-chip">
-                            <input type="checkbox" name="specialties" value="PELUQUERIA"> Peluquería y Coloración
-                        </label>
-                        <label class="checkbox-chip">
-                            <input type="checkbox" name="specialties" value="MANICURA_PEDICURA"> Manicura y Uñas
-                        </label>
-                        <label class="checkbox-chip">
-                            <input type="checkbox" name="specialties" value="SPA_MASAJES"> Spa y Masajes
-                        </label>
-                        <label class="checkbox-chip">
-                            <input type="checkbox" name="specialties" value="MEDICINA_ESTETICA"> Medicina Estética
-                        </label>
-                        <label class="checkbox-chip">
-                            <input type="checkbox" name="specialties" value="DEPILACION"> Depilación Láser / Cera
+                            <input type="checkbox" name="terms" value="true" required th:checked="${form.terms() == true}">
+                            <span>Confirmo que los datos corresponden a un centro con actividad legal en vigor y autorizo su verificación por el equipo de Cuquora. Acepto los <a th:href="@{/terms}" target="_blank" rel="noopener">términos y condiciones</a>.</span>
                         </label>
                     </div>
-                </div>
+                </fieldset>
 
-                <div class="form-field">
-                    <label for="notes">Información Adicional (Enlace web, Instagram o detalles):</label>
-                    <textarea id="notes" name="notes" rows="3" placeholder="Cuéntanos brevemente sobre tus instalaciones, número de cabinas o equipo..."></textarea>
+                <div class="wizard-nav">
+                    <button type="button" class="btn btn-secondary" id="wizardBack" hidden>
+                        <i class="lucide-arrow-left" aria-hidden="true"></i> Atrás
+                    </button>
+                    <button type="button" class="btn btn-primary" id="wizardNext" hidden>
+                        Siguiente <i class="lucide-arrow-right" aria-hidden="true"></i>
+                    </button>
+                    <button type="submit" id="submitCertBtn" class="btn btn-primary btn-lg disabled" aria-disabled="true">
+                        <i class="lucide-send" aria-hidden="true"></i>
+                        <span>Registrar centro y enviar invitaciones</span>
+                    </button>
                 </div>
-
-                <div class="terms-check-row">
-                    <label class="checkbox-chip">
-                        <input type="checkbox" name="terms" value="true" required>
-                        <span>Confirmo que los datos aportados corresponden a un centro de belleza con actividad legal en vigor y autorizo la verificación manual por el equipo de Cuquora. Acepto los <a href="/terms" target="_blank" rel="noopener">términos y condiciones</a>.</span>
-                    </label>
-                </div>
-
-                <button type="submit" id="submitCertBtn" class="btn btn-primary btn-block btn-lg btn-pill disabled" aria-disabled="true">
-                    <i class="lucide-sparkles" aria-hidden="true"></i>
-                    <span>Enviar Solicitud de Certificación</span>
-                </button>
             </form>
+        </div>
+
+        <!--/* Vista previa: se rellena desde center-registration.js mientras se escribe */-->
+        <aside class="registration-preview" id="registrationPreview" aria-label="Vista previa del centro" hidden>
+            <p class="registration-preview-label">Así te verán los clientes</p>
+            <div class="registration-preview-card">
+                <h2 data-preview="centerName" data-empty="Nombre de tu centro">Nombre de tu centro</h2>
+                <ul>
+                    <li><i class="lucide-map-pin" aria-hidden="true"></i> <span data-preview="address" data-empty="Dirección">Dirección</span></li>
+                    <li><i class="lucide-phone" aria-hidden="true"></i> <span data-preview="phone" data-empty="Teléfono">Teléfono</span></li>
+                    <li><i class="lucide-mail" aria-hidden="true"></i> <span data-preview="email" data-empty="Correo del centro">Correo del centro</span></li>
+                    <li><i class="lucide-scissors" aria-hidden="true"></i> <span data-preview="specialties" data-empty="Especialidades">Especialidades</span></li>
+                </ul>
+            </div>
+            <dl class="registration-preview-summary">
+                <div><dt>Cabinas o puestos</dt><dd data-preview="cabins" data-empty="-">-</dd></div>
+                <div><dt>Equipo</dt><dd data-preview="team">Solo tú</dd></div>
+                <div><dt>Tarjeta de puntos</dt><dd data-preview="loyalty">No</dd></div>
+            </dl>
+            <p class="form-help">Cada persona del equipo recibe un correo para crear su contraseña. El centro sale en el buscador
+                cuando comprobemos el CIF o NIF; mientras, ya podéis configurarlo todo.</p>
+        </aside>
         </div>
     </main>
 
-    <!-- Footer -->
     <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Software de gestión para centros de estética, salones y spas.')}"></div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const V = Cuquora.validators;
-            const form = document.getElementById('registerCenterForm');
-            const submitBtn = document.getElementById('submitCertBtn');
-            Cuquora.validateForm(form, {
-                centerName: [V.required('Por favor, introduce el nombre comercial de tu centro.')],
-                cif: [V.required('Por favor, indica el CIF o NIF de la empresa o autónomo.')],
-                contactName: [V.required('Por favor, introduce el nombre del titular o responsable.')],
-                phone: [V.required('Por favor, introduce un teléfono de contacto.'), V.phone()],
-                email: [V.required('Por favor, introduce tu correo electrónico.'), V.email()],
-                city: [V.required('Por favor, indica la ciudad y código postal.')],
-                terms: [V.required('Debes confirmar y autorizar la verificación para continuar.')]
-            }, {
-                submitButton: submitBtn,
-                onSubmit: () => {
-                    submitBtn.classList.add('is-loading');
-                    submitBtn.setAttribute('aria-busy', 'true');
-                    submitBtn.querySelector('span').textContent = 'Enviando solicitud...';
-                }
-            });
-        });
-    </script>
 </body>
 </html>

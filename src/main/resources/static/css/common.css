@@ -1593,6 +1593,12 @@ body.modal-open {
     color: var(--error);
 }
 
+.alert-warning {
+    background: var(--warning-bg);
+    border-color: var(--warning);
+    color: var(--warning-text);
+}
+
 /* ---------- Campos de formulario (páginas públicas) ---------- */
 .form-field {
     display: flex;
@@ -2749,3 +2755,30 @@ body.modal-open {
     color: var(--text-main);
 }
 
+
+/* ---------- Ubicación del centro en el mapa (fragments/location-picker.html) ---------- */
+.location-picker-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.location-picker-map {
+    height: 320px;
+    border: 1px solid var(--border-soft);
+    border-radius: var(--border-radius-sm);
+    /* Leaflet usa z-index altos: así no tapa menús ni modales */
+    position: relative;
+    z-index: 0;
+}
+
+.location-picker:has(.has-error) .location-picker-map {
+    border-color: var(--error);
+}
+
+@media (max-width: 768px) {
+    .location-picker-map {
+        height: 260px;
+    }
+}

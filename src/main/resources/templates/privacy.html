@@ -7,7 +7,7 @@
     <link rel="stylesheet" th:href="@{/css/legal.css}">
 </head>
 <!--/* Títulos del índice (lateral y en página); el orden coincide con los id privacidad-1…11 */-->
-<body th:with="sections=${ {'Responsable', 'Qué datos tratamos', 'Para qué y con qué base', 'Fichas técnicas', 'Iniciar sesión con Google', 'Google Calendar', 'Con quién los compartimos', 'Cuánto tiempo los guardamos', 'Seguridad', 'Tus derechos', 'Cambios'} }">
+<body>
     <div th:replace="~{fragments/navbar :: brand(true)}"></div>
 
     <aside class="desktop-left-rail" aria-label="Índice de la política de privacidad">
@@ -16,7 +16,7 @@
         </div>
         <nav class="rail-nav">
             <a th:each="item, it : ${sections}"
-               th:href="|#privacidad-${it.count}|" th:attr="data-target=|privacidad-${it.count}|"
+               th:href="${'#privacidad-' + it.count}" th:attr="data-target=${'privacidad-' + it.count}"
                class="rail-link" th:classappend="${it.first} ? ' active'">
                 <span class="rail-num" th:text="${#numbers.formatInteger(it.count, 2)}">01</span>
                 <span class="rail-text" th:text="${item}">Responsable</span>
@@ -37,7 +37,7 @@
                 <h2><i class="lucide-list" aria-hidden="true"></i> En esta página</h2>
                 <ol>
                     <li th:each="item, it : ${sections}">
-                        <a th:href="|#privacidad-${it.count}|" th:text="${item}">Responsable</a>
+                        <a th:href="${'#privacidad-' + it.count}" th:text="${item}">Responsable</a>
                     </li>
                 </ol>
             </nav>
@@ -53,7 +53,7 @@
                 <h2><span class="legal-section-num">02</span> Qué datos tratamos</h2>
                 <ul>
                     <li><strong>Cuenta:</strong> nombre, correo, teléfono y contraseña (guardada cifrada, nadie puede leerla). Si entras con Google, también el identificador de tu cuenta de Google.</li>
-                    <li><strong>Citas:</strong> centro, tratamiento, fecha y hora, estado y los mensajes del centro.</li>
+                    <li><strong>Citas:</strong> centro, tratamiento, fecha y hora, estado y los mensajes del centro. Si activas Google Calendar, también la cuenta de Google conectada.</li>
                     <li><strong>Fichas técnicas:</strong> lo que el centro anota sobre ti para atenderte (por ejemplo tipo de piel, alergias o contraindicaciones). Pueden incluir datos de salud.</li>
                     <li><strong>Personal de los centros:</strong> nombre, correo, teléfono y centro al que pertenecen; y, si activan Google Calendar, la cuenta de Google conectada.</li>
                     <li><strong>Formularios de contacto y de alta de centro:</strong> los datos que nos escribas.</li>
@@ -118,6 +118,7 @@
                     <li>El trabajador puede desactivarlo cuando quiera: se borra el calendario «Cuquora» de su cuenta y se retira el permiso. También puede retirarlo desde su cuenta de Google.</li>
                 </ul>
                 <p>Si eres cliente y no quieres que tus citas se copien al calendario del personal, díselo al centro o escríbenos y lo resolveremos.</p>
+                <p>Como cliente, también puedes activar «Ver mis citas en Google Calendar» en tu perfil. Cuquora crea entonces un calendario «Mis citas · Cuquora» en la cuenta de Google que elijas, con la misma limitación (solo puede tocar ese calendario). Cada cita confirmada aparece con el tratamiento, la fecha y la hora, el centro, su dirección y teléfono, el profesional que te atiende y el mensaje del centro; las notas internas del centro no se copian nunca. Si la cita se anula o se rechaza, el evento se borra, y al desactivarlo se borra el calendario y se retira el permiso.</p>
                 <p>El uso que hace Cuquora de la información recibida de las API de Google se ajusta a la <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener">Política de datos de usuario de los servicios de API de Google</a>, incluidos los requisitos de uso limitado: esos datos solo se usan para mostrar y sincronizar las citas, no se venden, no se usan para publicidad y ninguna persona los lee salvo que el propio usuario lo pida o lo exija la ley.</p>
             </section>
 
@@ -138,7 +139,7 @@
                     <li><strong>Fichas técnicas:</strong> lo que decida el centro responsable o hasta que este deje de usar Cuquora.</li>
                     <li><strong>Mensajes de contacto y de alta:</strong> el tiempo necesario para atenderlos y, como máximo, un año.</li>
                     <li><strong>Dispositivos recordados («Recordar mi sesión»):</strong> 14 días, o hasta que cierres sesión o cambies la contraseña.</li>
-                    <li><strong>Conexión con Google Calendar:</strong> hasta que el trabajador la desactive.</li>
+                    <li><strong>Conexión con Google Calendar:</strong> hasta que el trabajador o el cliente que la activó la desactive.</li>
                 </ul>
             </section>
 

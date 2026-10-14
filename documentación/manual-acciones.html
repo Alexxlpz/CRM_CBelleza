@@ -751,7 +751,7 @@
                         <div class="section-icon">📬</div>
                         <div>
                             <h2>Módulo 5: Contacto, Correos y Alta de Centros</h2>
-                            <p style="margin: 0; font-size: 0.95rem;">Controlador: <code>ContactController</code> · Correo: <code>EmailGateway</code>, <code>InquiryMailService</code>, <code>AppointmentMailService</code></p>
+                            <p style="margin: 0; font-size: 0.95rem;">Controladores: <code>ContactController</code>, <code>CenterRegistrationController</code> · Correo: <code>EmailGateway</code>, <code>InquiryMailService</code>, <code>AppointmentMailService</code></p>
                         </div>
                     </div>
                 </div>
@@ -759,11 +759,13 @@
                 <div class="card-feature" style="margin-bottom: 1.5rem;">
                     <div class="card-feature-header">
                         <span class="http-get">GET</span> <span class="http-post">POST</span>
-                        <strong>/register-center · /contact</strong>
+                        <strong>/register-center · /invitation · /contact</strong>
                         <span class="card-badge badge-guest">Público</span>
                     </div>
                     <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.9rem; margin-bottom: 0.8rem;">
-                        <li><strong>Alta de centro:</strong> <code>centerName</code>, <code>cif</code>, <code>contactName</code>, <code>phone</code>, <code>email</code>, ciudad, especialidades y notas. Se envía un acuse al solicitante y la solicitud al administrador (<code>CRM_ADMIN_EMAIL</code>).</li>
+                        <li><strong>Alta de centro</strong> (<code>CenterRegistrationController</code>): datos del centro y CIF/NIF, dirección con pin en el mapa, zona horaria, cabinas, responsable y más trabajadores (nombre y correo), tarjeta de puntos opcional, especialidades y notas. Crea el centro <strong>oculto</strong> y a todo el equipo como trabajadores sin contraseña.</li>
+                        <li><strong>Invitaciones</strong> (<code>/invitation/{token}</code>): cada trabajador recibe un enlace de un solo uso (7 días) para crear su contraseña; si caduca, pide otro desde la misma página. También puede entrar con Google.</li>
+                        <li><strong>Publicación</strong> (<code>/register-center/approve/{token}</code>): el administrador (<code>CRM_ADMIN_EMAIL</code>) recibe el enlace, revisa los datos y pulsa «Publicar centro»; entonces sale en el buscador y el mapa y admite reservas, y el centro recibe un aviso.</li>
                         <li><strong>Contacto:</strong> <code>name</code>, <code>email</code>, <code>phone</code>, <code>subject</code> y <code>message</code>, con acuse y aviso al administrador.</li>
                         <li><strong>Validación</strong> en el navegador (botón desactivado hasta que el formulario es válido) y en el servidor.</li>
                     </ul>

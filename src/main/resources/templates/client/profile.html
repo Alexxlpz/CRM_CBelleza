@@ -62,6 +62,38 @@
                 </div>
             </form>
         </section>
+
+        <!-- Solo si el servidor tiene las claves de Google: sin ellas no hay nada que activar -->
+        <section class="settings-card" id="google-calendar" th:if="${calendarSync.available}">
+            <h2 class="settings-section-title"><i class="lucide-calendar-check" aria-hidden="true"></i> Google Calendar</h2>
+            <div class="sync-setting">
+                <div class="sync-setting-text">
+                    <p class="sync-setting-title" id="googleCalendarLabel">Ver mis citas en Google Calendar</p>
+                    <p class="sync-setting-help" th:if="${calendarSync.connected}">
+                        Activado<th:block th:if="${calendarSync.googleEmail != null}"> con <strong th:text="${calendarSync.googleEmail}">sofia@gmail.com</strong></th:block>.
+                        Tus citas confirmadas están en el calendario «Mis citas · Cuquora» y se actualizan si el centro las mueve o se anulan.
+                    </p>
+                    <p class="sync-setting-help" th:unless="${calendarSync.connected}">
+                        Copia tus citas confirmadas a un calendario «Mis citas · Cuquora» en tu cuenta de Google, con la hora,
+                        el centro y su dirección. Cuquora solo podrá tocar ese calendario, nunca el resto de tu agenda.
+                    </p>
+                </div>
+                <form th:if="${calendarSync.connected}" th:action="@{/client/google-calendar/disconnect}" method="post"
+                      data-confirm="Tus citas dejarán de copiarse y se borrará el calendario «Mis citas · Cuquora» de tu cuenta de Google. Tus citas en Cuquora no cambian."
+                      data-confirm-title="¿Dejar de usar Google Calendar?" data-confirm-button="Desactivar">
+                    <button type="submit" class="switch" role="switch" aria-checked="true" aria-labelledby="googleCalendarLabel"
+                            title="Desactivar">
+                        <span class="switch-thumb" aria-hidden="true"></span>
+                    </button>
+                </form>
+                <form th:unless="${calendarSync.connected}" th:action="@{/client/google-calendar/connect}" method="post">
+                    <button type="submit" class="switch" role="switch" aria-checked="false" aria-labelledby="googleCalendarLabel"
+                            title="Activar: te pediremos permiso en Google">
+                        <span class="switch-thumb" aria-hidden="true"></span>
+                    </button>
+                </form>
+            </div>
+        </section>
     </main>
 
     <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Todos los derechos reservados.')}"></div>
