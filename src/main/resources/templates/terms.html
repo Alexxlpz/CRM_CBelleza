@@ -7,7 +7,7 @@
     <link rel="stylesheet" th:href="@{/css/legal.css}">
 </head>
 <!--/* Títulos del índice (lateral y en página); el orden coincide con los id terminos-1…12 */-->
-<body th:with="sections=${ {'Quiénes somos', 'Objeto y aceptación', 'Cuentas de usuario', 'Reserva de citas', 'Centros de belleza', 'Uso aceptable', 'Datos personales', 'Propiedad intelectual', 'Responsabilidad', 'Suspensión y baja', 'Cambios', 'Ley aplicable'} }">
+<body>
     <div th:replace="~{fragments/navbar :: brand(true)}"></div>
 
     <!--/* Índice lateral (desde 1200 px), igual que en Inicio y Funcionalidades */-->
@@ -17,7 +17,7 @@
         </div>
         <nav class="rail-nav">
             <a th:each="item, it : ${sections}"
-               th:href="|#terminos-${it.count}|" th:attr="data-target=|terminos-${it.count}|"
+               th:href="${'#terminos-' + it.count}" th:attr="data-target=${'terminos-' + it.count}"
                class="rail-link" th:classappend="${it.first} ? ' active'">
                 <span class="rail-num" th:text="${#numbers.formatInteger(it.count, 2)}">01</span>
                 <span class="rail-text" th:text="${item}">Quiénes somos</span>
@@ -38,7 +38,7 @@
                 <h2><i class="lucide-list" aria-hidden="true"></i> En esta página</h2>
                 <ol>
                     <li th:each="item, it : ${sections}">
-                        <a th:href="|#terminos-${it.count}|" th:text="${item}">Quiénes somos</a>
+                        <a th:href="${'#terminos-' + it.count}" th:text="${item}">Quiénes somos</a>
                     </li>
                 </ol>
             </nav>

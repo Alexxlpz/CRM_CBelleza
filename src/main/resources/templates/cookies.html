@@ -7,7 +7,7 @@
     <link rel="stylesheet" th:href="@{/css/legal.css}">
 </head>
 <!--/* Títulos del índice (lateral y en página); el orden coincide con los id cookies-1…6 */-->
-<body th:with="sections=${ {'Qué son', 'Cookies que usamos', 'Almacenamiento local', 'Servicios externos', 'Por qué no pedimos permiso', 'Cómo borrarlas'} }">
+<body>
     <div th:replace="~{fragments/navbar :: brand(true)}"></div>
 
     <aside class="desktop-left-rail" aria-label="Índice de la política de cookies">
@@ -16,7 +16,7 @@
         </div>
         <nav class="rail-nav">
             <a th:each="item, it : ${sections}"
-               th:href="|#cookies-${it.count}|" th:attr="data-target=|cookies-${it.count}|"
+               th:href="${'#cookies-' + it.count}" th:attr="data-target=${'cookies-' + it.count}"
                class="rail-link" th:classappend="${it.first} ? ' active'">
                 <span class="rail-num" th:text="${#numbers.formatInteger(it.count, 2)}">01</span>
                 <span class="rail-text" th:text="${item}">Qué son</span>
@@ -37,7 +37,7 @@
                 <h2><i class="lucide-list" aria-hidden="true"></i> En esta página</h2>
                 <ol>
                     <li th:each="item, it : ${sections}">
-                        <a th:href="|#cookies-${it.count}|" th:text="${item}">Qué son</a>
+                        <a th:href="${'#cookies-' + it.count}" th:text="${item}">Qué son</a>
                     </li>
                 </ol>
             </nav>
