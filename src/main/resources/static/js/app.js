@@ -44,6 +44,15 @@
             .replace(/'/g, '&#39;');
     }
 
+    /** Hasta dos iniciales de un nombre, como Center.getInitials() (hueco de la foto de un centro sin foto). */
+    function initials(name) {
+        return String(name ?? '').trim().split(/[\s-]+/)
+            .filter(word => /^[\p{L}\p{N}]/u.test(word))
+            .slice(0, 2)
+            .map(word => String.fromCodePoint(word.codePointAt(0)).toUpperCase())
+            .join('');
+    }
+
     /** Mantiene el foco del teclado dentro de `container` mientras está abierto. */
     function trapFocus(container, event) {
         if (event.key !== 'Tab') return;
@@ -146,6 +155,7 @@
 
     const Cuquora = Object.assign(window.Cuquora || {}, {
         escapeHtml,
+        initials,
         /** 'smooth' salvo si el sistema pide reducir el movimiento (el CSS no frena el scroll hecho con JS). */
         scrollBehavior() {
             return window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';

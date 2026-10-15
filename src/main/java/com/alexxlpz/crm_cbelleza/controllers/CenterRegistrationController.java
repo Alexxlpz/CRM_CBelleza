@@ -9,6 +9,7 @@ import com.alexxlpz.crm_cbelleza.exceptions.BusinessRuleException;
 import com.alexxlpz.crm_cbelleza.forms.CenterRegistrationForm;
 import com.alexxlpz.crm_cbelleza.forms.PasswordPolicy;
 import com.alexxlpz.crm_cbelleza.mail.CenterOnboardingMailService;
+import com.alexxlpz.crm_cbelleza.services.CenterPhotoService;
 import com.alexxlpz.crm_cbelleza.services.CenterRegistrationService;
 import com.alexxlpz.crm_cbelleza.services.CenterRegistrationService.Registration;
 import com.alexxlpz.crm_cbelleza.services.InvitationService;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
@@ -67,14 +69,18 @@ public class CenterRegistrationController {
     }
 
     @PostMapping({"/register-center", "/alta-centro"})
-    public String submitRegistration(@ModelAttribute CenterRegistrationForm form, Model model, RedirectAttributes redirect) {
+    public String submitRegistration(@ModelAttribute CenterRegistrationForm form,
+                                     @RequestParam(required = false) MultipartFile photo,
+                                     Model model, RedirectAttributes redirect) {
         Registration registration;
         try {
-            registration = registrationService.register(form);
+            registration = registrationService.register(form, photo);
         } catch (BusinessRuleException e) {
             // Se vuelve a pintar el formulario con lo escrito: es largo y no se debe perder nada
             model.addAttribute("form", form);
             model.addAttribute("errorMessage", e.getMessage());
+            // El navegador no deja volver a rellenar un campo de archivo: hay que avisar de que la elija otra vez
+            model.addAttribute("photoLost", photo != null && !photo.isEmpty());
             return registrationPage(model);
         }
         mailService.sendRegistration(form, registration, site.siteUrl());
@@ -152,6 +158,7 @@ public class CenterRegistrationController {
         model.addAttribute("timeZones", CenterTimeZones.OPTIONS);
         model.addAttribute("loyaltyModes", LoyaltyMode.values());
         model.addAttribute("maxExtraWorkers", CenterRegistrationService.MAX_EXTRA_WORKERS);
+        model.addAttribute("maxPhotoMb", CenterPhotoService.MAX_UPLOAD_MB);
         model.addAttribute("invitationDays", InvitationService.VALIDITY_DAYS);
         return "register-center";
     }

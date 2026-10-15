@@ -55,7 +55,7 @@ Alex trabaja en dos máquinas:
 # En Linux, anteponer JAVA_HOME=/home/alejandro/.jdks/ms-25.0.4.1 a cada comando y usar mvn en vez de ./mvnw
 
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev   # desarrollo: H2 en memoria, /login-selector y consola H2
-./mvnw test                                             # todos los tests (157, verde a 14 oct 2026)
+./mvnw test                                             # todos los tests (164, verde a 15 oct 2026)
 ./mvnw -Dtest=CenterIsolationTests test                 # un solo test
 ./mvnw -DskipTests clean package                        # jar en target/
 docker compose up --build                               # app en :8080 + PostgreSQL 16 (necesita el .env, ver abajo)
@@ -102,15 +102,15 @@ src/main/resources/
                  V4__sesiones_recordadas.sql, V5__calendario_google.sql, V6__zona_horaria_centros.sql,
                  V7__agenda_flexible.sql, V8__resumen_tratamiento.sql,
                  V9__ventas_productos.sql, V10__fidelizacion.sql, V11__alta_de_centros.sql,
-                 V12__calendario_google_clientes.sql
+                 V12__calendario_google_clientes.sql, V13__foto_centros.sql
   templates/     públicas en la raíz, client/, worker/, fragments/, email/
   static/css/    tokens.css + common.css + un CSS por área
   static/js/     app.js, form-validation.js, sheets.js, unsaved-changes.js, booking-picker.js,
                  worker-calendar.js, worker-agenda-forms.js, treatment-summary.js, scroll-index.js,
-                 center-registration.js, location-picker.js, invitation.js, loyalty-settings.js
+                 center-registration.js, location-picker.js, invitation.js, loyalty-settings.js, photo-picker.js
   static/icons/lucide/  fuente de Lucide (woff/woff2)
 src/test/java/…  BookingServiceTests, CenterIsolationTests, SecurityIntegrationTests, PageRenderingTests,
-                 UnitTests, CrmCBellezaApplicationTests, GoogleLoginTests, GoogleCalendarTests, AgendaTests, RegistrationTests, TreatmentSummaryTests, ProductSaleAndLoyaltyTests, CenterRegistrationTests, security/CurrentUserModelAdviceTest, TestUsers
+                 UnitTests, CrmCBellezaApplicationTests, GoogleLoginTests, GoogleCalendarTests, AgendaTests, RegistrationTests, TreatmentSummaryTests, ProductSaleAndLoyaltyTests, CenterRegistrationTests, CenterPhotoTests, security/CurrentUserModelAdviceTest, TestUsers
 ```
 
 ### Reglas de backend
@@ -136,11 +136,12 @@ Tablas (ver `V1__esquema_inicial.sql`):
 - `google_calendar_links`: trabajadores **y clientes** con Google Calendar activado (`user_id`; token de actualización cifrado con `GOOGLE_TOKEN_KEY`, id del calendario creado en su cuenta). `appointments.google_event_id` apunta el evento en el calendario del trabajador y `client_google_event_id` el del cliente.
 - **Resumen del tratamiento** (`TreatmentSummaryService`, `POST /worker/appointments/{id}/summary`, modal `fragments/treatment-summary.html` + `treatment-summary.js`): el trabajador lo escribe desde la agenda o el historial de la ficha cuando la cita confirmada **ya ha empezado** (hora del centro). Si lo marca como **aviso** (alergias, reacciones, productos que no le sientan bien), sale arriba en la ficha del cliente y en sus demás citas de la agenda (`AppointmentCalendarDTO.clientAlerts`). Es interno: el cliente nunca lo ve.
 - **Alta de centros** (`CenterRegistrationService`, `CenterRegistrationController`, `register-center.html`): crea el centro **oculto** (`published=false`: fuera del buscador y del mapa, `/client/centers/{id}` da 404 y `BookingService` no reserva), al responsable y a su equipo como trabajadores **sin contraseña** y, si se pide, la tarjeta de puntos (`LoyaltyService.updateSettings`). Ubicación con pin arrastrable (`fragments/location-picker.html` + `location-picker.js`, búsqueda en Nominatim; también en «Mi Centro»). Administración recibe un correo con el enlace `/register-center/approve/{token}` para revisar y publicar. Cada trabajador recibe una invitación (`account_invitations`, `InvitationService`: un solo uso, 7 días, se puede pedir otra desde la misma página) para poner su contraseña; también puede entrar con Google. En la BD solo va la huella SHA-256 de los enlaces (`SecureTokens`). Sin SMTP, `LoggingEmailGateway` imprime los enlaces de cada correo en la consola.
+- **Foto del centro** (`center_photos`, `CenterPhotoService`, `CenterPhotoController`, `fragments/photo-picker.html` + `photo-picker.js`): se sube en el alta y en «Mi Centro» (`POST /worker/center/photo`, `/photo/delete`). Se lee como imagen (JPG o PNG, hasta 8 MB, mínimo 400×250, se endereza con la orientación EXIF) y se guarda como JPEG de 1200 px como mucho en la BD (no en disco: entra en las copias de PostgreSQL y Docker no necesita otro volumen). `centers.photo_updated_at` dice si hay foto y versiona la URL `/centers/{id}/photo?v=…` (caché de un año). La de un centro sin publicar solo la ven su equipo y administración (`/register-center/approve/{token}/photo`). Sin foto, el hueco muestra las iniciales (`Center.getInitials()` / `Cuquora.initials`).
 - `client_cards`: ficha técnica por centro y cliente, `data_json` con los valores. `client_card_templates`: campos de la ficha por centro (`fields_json`).
 - **Venta de productos** (`product_sales`, `ProductSaleService`, `ClientSalesController`, modal `fragments/product-sale.html` + `product-sale.js`): desde la ficha del cliente el trabajador elige un producto del inventario y la cantidad; antes de confirmar ve el stock actual y el que quedará (aviso si queda bajo o se agota). Al guardar se resta del inventario con la fila bloqueada (`InventoryRepository.findForUpdate`); nunca se vende más que el stock. «Anular» devuelve las unidades y quita sus puntos. `unit_price` guarda el precio del momento.
 - **Tarjeta de puntos** (`centers.loyalty_*`, `loyalty_movements`, `LoyaltyService`): cada centro la configura en «Mi Centro» (`POST /worker/center/loyalty`): desactivada, puntos por euro (`PER_EURO`) o por tratamiento/unidad de producto (`PER_ITEM`), puntos para la recompensa y texto. Los productos suman al venderse; los tratamientos, cuando la cita está completada (se apuntan al abrir la ficha, porque el estado se calcula al leer; `appointment_id` único evita sumar dos veces) y solo desde `loyalty_since`. Canje desde la ficha (`POST /worker/clients/{id}/loyalty/redeem`, bloquea el centro). Los puntos se guardan al ganarse: cambiar la configuración no altera lo ya ganado. El cliente ve sus tarjetas en «Mis citas» (`LoyaltyService.cardsOfClient`: centros con la tarjeta activada donde tiene citas o puntos).
 
-**Migraciones:** todo cambio de esquema es un nuevo `V<n>__descripcion.sql` (nombre en español, SQL compatible con H2 y PostgreSQL). Nunca edites una migración ya aplicada. La siguiente libre es **`V13`**. En Docker, `SPRING_FLYWAY_BASELINE_ON_MIGRATE=true` adopta BD creadas antes de Flyway.
+**Migraciones:** todo cambio de esquema es un nuevo `V<n>__descripcion.sql` (nombre en español, SQL compatible con H2 y PostgreSQL). Nunca edites una migración ya aplicada. La siguiente libre es **`V14`**. En Docker, `SPRING_FLYWAY_BASELINE_ON_MIGRATE=true` adopta BD creadas antes de Flyway.
 
 ## Roles y aislamiento entre centros
 

@@ -54,7 +54,9 @@ public class SecurityConfig {
             "/terms", "/terminos", "/cookies", "/politica-cookies", "/privacy", "/privacidad",
             "/login", "/register", "/error",
             // Enlaces de los correos del alta de centros: el secreto va en la propia ruta
-            "/register-center/approve/*", "/invitation/*", "/invitation/*/renew",
+            "/register-center/approve/*", "/register-center/approve/*/photo", "/invitation/*", "/invitation/*/renew",
+            // Fotos de presentación de los centros (las de un centro sin publicar solo las sirve a su equipo)
+            "/centers/*/photo",
             // Solo existen con el perfil "dev" (DevLoginController); en producción devuelven 404.
             "/login-selector", "/select-session"
     };

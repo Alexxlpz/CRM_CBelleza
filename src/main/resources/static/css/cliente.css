@@ -29,6 +29,7 @@
 }
 
 .center-card {
+    overflow: hidden;
     padding: 24px;
     display: flex;
     flex-direction: column;
@@ -462,4 +463,27 @@
     margin-top: 6px;
     width: 100%;
     justify-content: center;
+}
+
+/* Foto del centro a sangre arriba de la tarjeta del buscador y de la cabecera de la ficha */
+.center-card-photo {
+    margin: -24px -24px 0;
+    border: 0;
+    border-bottom: 1px solid var(--border-soft);
+    border-radius: 0;
+}
+
+.center-hero-photo {
+    margin: -40px -40px 28px;
+    aspect-ratio: 3 / 1;
+    border: 0;
+    border-bottom: 1px solid var(--border-soft);
+    border-radius: 0;
+}
+
+@media (max-width: 768px) {
+    .center-hero-photo {
+        margin: -24px -16px 20px;
+        aspect-ratio: 2 / 1;
+    }
 }

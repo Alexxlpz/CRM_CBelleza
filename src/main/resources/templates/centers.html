@@ -262,7 +262,12 @@
                             <span>${esc(value || 'N/A')}</span>
                         </div>
                     </div>`;
+                // Sin foto, las iniciales ocupan el mismo hueco: todas las tarjetas miden lo mismo
+                const photo = center.photoUrl
+                    ? `<img src="${esc(center.photoUrl)}" alt="" loading="lazy" decoding="async">`
+                    : `<span class="center-photo-initials" aria-hidden="true">${esc(Cuquora.initials(center.name))}</span>`;
                 card.innerHTML = `
+                    <div class="center-photo center-card-photo">${photo}</div>
                     <div class="center-card-header">
                         <h2 class="center-card-title">${esc(center.name)}</h2>
                         ${distance}

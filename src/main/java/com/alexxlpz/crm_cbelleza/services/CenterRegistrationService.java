@@ -14,6 +14,7 @@ import com.alexxlpz.crm_cbelleza.repositories.CenterRepository;
 import com.alexxlpz.crm_cbelleza.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
@@ -21,6 +22,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -44,18 +46,25 @@ public class CenterRegistrationService {
     private final UserRepository users;
     private final InvitationService invitations;
     private final LoyaltyService loyalty;
+    private final CenterPhotoService photos;
     private final Clock clock;
 
     public CenterRegistrationService(CenterRepository centers, UserRepository users, InvitationService invitations,
-                                     LoyaltyService loyalty, Clock clock) {
+                                     LoyaltyService loyalty, CenterPhotoService photos, Clock clock) {
         this.centers = centers;
         this.users = users;
         this.invitations = invitations;
         this.loyalty = loyalty;
+        this.photos = photos;
         this.clock = clock;
     }
 
     public Registration register(CenterRegistrationForm form) {
+        return register(form, null);
+    }
+
+    /** Igual que {@link #register(CenterRegistrationForm)}, con la foto de presentación opcional. */
+    public Registration register(CenterRegistrationForm form, MultipartFile photo) {
         if (FormText.isBlank(form.centerName()) || FormText.isBlank(form.cif()) || FormText.isBlank(form.phone())
                 || FormText.isBlank(form.contactName()) || FormText.isBlank(form.email())) {
             throw new BusinessRuleException("Completa los datos del centro y del responsable.");
@@ -99,6 +108,8 @@ public class CenterRegistrationService {
             team.add(member);
         }
         List<Member> cleanTeam = checkEmails(team);
+        // La foto se comprueba antes de crear nada: si no vale, no queda un centro a medias
+        Optional<CenterPhotoService.PreparedPhoto> preparedPhoto = photos.prepare(photo);
 
         LocalDateTime now = LocalDateTime.now(clock);
         String approvalToken = SecureTokens.newToken();
@@ -120,6 +131,7 @@ public class CenterRegistrationService {
         if (form.mode() != null && !LoyaltyMode.OFF.name().equals(form.mode())) {
             loyalty.updateSettings(center.getId(), form.loyalty());
         }
+        preparedPhoto.ifPresent(p -> photos.save(center.getId(), p));
 
         List<Invitee> invitees = new ArrayList<>();
         for (int i = 0; i < cleanTeam.size(); i++) {

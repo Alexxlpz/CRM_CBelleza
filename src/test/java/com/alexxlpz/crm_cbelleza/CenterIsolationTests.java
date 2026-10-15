@@ -34,6 +34,10 @@ class CenterIsolationTests {
     private InventoryRepository inventory;
     @Autowired
     private ClientCardService clientCards;
+    @Autowired
+    private com.alexxlpz.crm_cbelleza.repositories.CenterRepository centers;
+    @Autowired
+    private com.alexxlpz.crm_cbelleza.repositories.CenterPhotoRepository centerPhotos;
 
     private Long centerOf(String email) {
         return users.findByEmailIgnoreCase(email).orElseThrow().getCenter().getId();
@@ -142,5 +146,26 @@ class CenterIsolationTests {
                         .with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
                 .andExpect(status().isOk());
         assertEquals(own.getStock() + 1, inventory.findById(own.getId()).orElseThrow().getStock());
+    }
+
+    @Test
+    void workerCannotSeePhotoOfAnotherCenterStillUnderReview() throws Exception {
+        var center = users.findByEmailIgnoreCase(TestUsers.WORKER_CENTER_1).orElseThrow().getCenter();
+        center.setPublished(false);
+        center.setPhotoUpdatedAt(java.time.LocalDateTime.now());
+        centers.save(center);
+        centerPhotos.save(new com.alexxlpz.crm_cbelleza.entities.CenterPhoto(center.getId(), "image/jpeg", new byte[]{1, 2, 3}));
+        try {
+            mvc.perform(get("/centers/" + center.getId() + "/photo").with(TestUsers.as(users, TestUsers.WORKER_CENTER_2)))
+                    .andExpect(status().isNotFound());
+            mvc.perform(get("/centers/" + center.getId() + "/photo").with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
+                    .andExpect(status().isOk());
+        } finally {
+            // Esta clase no es @Transactional: se deja el centro como estaba para los demás tests
+            centerPhotos.deleteById(center.getId());
+            center.setPublished(true);
+            center.setPhotoUpdatedAt(null);
+            centers.save(center);
+        }
     }
 }

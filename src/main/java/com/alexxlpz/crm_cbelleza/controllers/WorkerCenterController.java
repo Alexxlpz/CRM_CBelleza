@@ -11,6 +11,7 @@ import com.alexxlpz.crm_cbelleza.forms.WorkerCenterForm;
 import com.alexxlpz.crm_cbelleza.googlecalendar.GoogleCalendarService;
 import com.alexxlpz.crm_cbelleza.security.AppUserDetails;
 import com.alexxlpz.crm_cbelleza.security.AuthenticationSessionService;
+import com.alexxlpz.crm_cbelleza.services.CenterPhotoService;
 import com.alexxlpz.crm_cbelleza.services.CenterService;
 import com.alexxlpz.crm_cbelleza.services.TreatmentService;
 import com.alexxlpz.crm_cbelleza.services.UserService;
@@ -22,6 +23,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /** "Mi centro": datos públicos del centro y cuenta del profesional. */
@@ -34,14 +37,17 @@ public class WorkerCenterController {
     private final AuthenticationSessionService authSession;
     private final GoogleCalendarService googleCalendar;
     private final LoyaltyService loyaltyService;
+    private final CenterPhotoService photoService;
 
     public WorkerCenterController(CenterService centerService,
                                   UserService userService,
                                   TreatmentService treatmentService,
                                   AuthenticationSessionService authSession,
                                   GoogleCalendarService googleCalendar,
-                                  LoyaltyService loyaltyService) {
+                                  LoyaltyService loyaltyService,
+                                  CenterPhotoService photoService) {
         this.loyaltyService = loyaltyService;
+        this.photoService = photoService;
         this.centerService = centerService;
         this.userService = userService;
         this.treatmentService = treatmentService;
@@ -59,6 +65,7 @@ public class WorkerCenterController {
         model.addAttribute("timeZones", CenterTimeZones.OPTIONS);
         model.addAttribute("loyaltyModes", LoyaltyMode.values());
         model.addAttribute("calendarSync", googleCalendar.status(worker.getId()));
+        model.addAttribute("maxPhotoMb", CenterPhotoService.MAX_UPLOAD_MB);
         model.addAttribute("activePage", "center");
         return "worker/center";
     }
@@ -104,5 +111,27 @@ public class WorkerCenterController {
             redirect.addFlashAttribute("loyaltyForm", form);
         }
         return "redirect:/worker/center#puntos";
+    }
+
+    @PostMapping("/worker/center/photo")
+    public String updatePhoto(@AuthenticationPrincipal AppUserDetails worker,
+                              @RequestParam(required = false) MultipartFile photo,
+                              RedirectAttributes redirect) {
+        try {
+            var prepared = photoService.prepare(photo)
+                    .orElseThrow(() -> new BusinessRuleException("Elige una foto para subirla."));
+            photoService.save(worker.getCenterId(), prepared);
+            redirect.addFlashAttribute("photoMessage", "Foto guardada.");
+        } catch (BusinessRuleException e) {
+            redirect.addFlashAttribute("photoError", e.getMessage());
+        }
+        return "redirect:/worker/center#foto";
+    }
+
+    @PostMapping("/worker/center/photo/delete")
+    public String removePhoto(@AuthenticationPrincipal AppUserDetails worker, RedirectAttributes redirect) {
+        photoService.remove(worker.getCenterId());
+        redirect.addFlashAttribute("photoMessage", "Foto quitada.");
+        return "redirect:/worker/center#foto";
     }
 }

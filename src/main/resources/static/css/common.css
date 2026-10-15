@@ -2782,3 +2782,97 @@ body.modal-open {
         height: 260px;
     }
 }
+
+/* ---------- Foto de presentación del centro (buscador, ficha del centro, alta y «Mi Centro») ---------- */
+/* Mismo recorte 2:1 en todas partes: lo que el centro ve al subirla es lo que ven los clientes */
+.center-photo {
+    position: relative;
+    aspect-ratio: 2 / 1;
+    overflow: hidden;
+    border-radius: var(--border-radius-md);
+    background: var(--surface-muted);
+    border: 1px solid var(--border-soft);
+    display: grid;
+    place-items: center;
+}
+
+.center-photo img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.center-photo-initials {
+    font-size: 40px;
+    font-weight: 700;
+    color: var(--primary-text);
+}
+
+.photo-picker {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 20px;
+    align-items: start;
+}
+
+.photo-picker-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.photo-picker-controls .form-help {
+    margin: 0;
+}
+
+.photo-picker input[type="file"],
+.form-field .photo-picker input[type="file"] {
+    padding: 0;
+    border: 0;
+    background: none;
+    width: 100%;
+    font: inherit;
+    font-size: 14px;
+    /* El nombre del archivo lo pinta photo-picker.js: el del navegador se recorta con «…» en el móvil */
+    color: transparent;
+}
+
+.photo-picker input[type="file"]::file-selector-button {
+    margin-right: 12px;
+    padding: 9px 16px;
+    border: 1px solid var(--border-soft);
+    border-radius: var(--border-radius-sm);
+    background: var(--surface);
+    color: var(--text-main);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.photo-picker input[type="file"]::file-selector-button:hover {
+    border-color: var(--primary);
+}
+
+@media (max-width: 640px) {
+    .photo-picker {
+        grid-template-columns: 1fr;
+    }
+}
+
+.photo-picker-name {
+    margin: 0;
+    font-size: 13.5px;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+/* «Quitar foto» y «Guardar foto» no caben juntos a 390 px: uno encima del otro, el principal arriba */
+@media (max-width: 600px) {
+    .settings-actions--stack {
+        flex-direction: column-reverse;
+        align-items: stretch;
+    }
+}

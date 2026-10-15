@@ -75,6 +75,30 @@ public class Center {
     @Column(name = "registered_at")
     private java.time.LocalDateTime registeredAt;
 
+    /** Cuándo se subió la foto de presentación (nula = sin foto); versiona la URL de la imagen. */
+    @Column(name = "photo_updated_at")
+    private java.time.LocalDateTime photoUpdatedAt;
+
+    /** Dirección de la foto de presentación, o nula si el centro no tiene. */
+    public String getPhotoUrl() {
+        return photoUpdatedAt == null ? null
+                : "/centers/" + id + "/photo?v=" + photoUpdatedAt.toEpochSecond(java.time.ZoneOffset.UTC);
+    }
+
+    /** Iniciales del nombre (como mucho dos) para el hueco de la foto cuando el centro no tiene. */
+    public String getInitials() {
+        if (name == null) {
+            return "";
+        }
+        StringBuilder initials = new StringBuilder();
+        for (String word : name.trim().split("[\\s\\-]+")) {
+            if (!word.isEmpty() && Character.isLetterOrDigit(word.codePointAt(0)) && initials.length() < 2) {
+                initials.appendCodePoint(Character.toUpperCase(word.codePointAt(0)));
+            }
+        }
+        return initials.toString();
+    }
+
     public boolean isLoyaltyEnabled() {
         return loyaltyMode != null && loyaltyMode != LoyaltyMode.OFF;
     }

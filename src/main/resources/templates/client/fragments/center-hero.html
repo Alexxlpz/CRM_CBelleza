@@ -1,6 +1,9 @@
 <div xmlns:th="http://www.thymeleaf.org">
     <!-- Center Hero Banner Component -->
     <div class="center-hero-header glass-panel" th:fragment="hero(center)">
+        <div class="center-photo center-hero-photo" th:if="${center.photoUrl != null}">
+            <img th:src="${center.photoUrl}" th:alt="${'Foto de ' + center.name}" alt="Foto del centro">
+        </div>
         <h1 class="hero-title" th:text="${center.name}">Nombre del Centro</h1>
         <div class="hero-meta-container">
             <div class="hero-meta-item">

@@ -749,3 +749,12 @@
         padding: 48px 56px;
     }
 }
+
+/* Foto del centro en la vista previa del alta y en la revisión */
+.registration-preview-photo {
+    margin-bottom: 14px;
+}
+
+.approval-photo {
+    max-width: 360px;
+}

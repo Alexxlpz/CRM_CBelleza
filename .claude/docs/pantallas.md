@@ -33,6 +33,7 @@ Se lee bajo demanda desde `CLAUDE.md` antes de tocar la pantalla correspondiente
 - Hasta 992 px: menú hamburguesa (drawer accesible).
 
 ## Mapa de centros (`templates/centers.html`)
+- Cada tarjeta del listado lleva arriba la foto del centro a sangre (recorte 2:1, `.center-photo.center-card-photo`) o, sin foto, sus iniciales en el mismo hueco para que todas midan igual. La ficha del centro (`client/fragments/center-hero.html`) la enseña en 3:1 encima del nombre.
 - Leaflet 1.9.4 desde unpkg y teselas `https://tile.openstreetmap.org/{z}/{x}/{y}.png` con el crédito de OSM: **gratis y sin clave**. No uses CARTO (ahora pide API key) ni Google Maps.
 - Al tocar un marcador se abre primero un globo con nombre, dirección, distancia y «Ver tratamientos»; solo al pulsarlo se pide iniciar sesión si no la hay.
 
@@ -50,7 +51,8 @@ Se lee bajo demanda desde `CLAUDE.md` antes de tocar la pantalla correspondiente
 ## Alta de centro (`register-center.html` + `center-registration.js`)
 - Asistente de 5 pasos (centro, ubicación, equipo, puntos, enviar) con los pasos como cinta de flechas del mismo tamaño (la letra se ajusta con `cqi` y el nombre se corta con «…»): cada `fieldset.registration-section` es un paso; solo avanza si el paso actual es válido (`validateForm(...).check`). Sin JS se ven todos seguidos. A la derecha (debajo en móvil), vista previa del centro que se rellena al escribir. Al mostrar el paso de ubicación se lanza `resize` para que Leaflet recalcule el mapa.
 - Un solo formulario por bloques (`fieldset.registration-section`): el centro, dónde está (dirección + `fragments/location-picker`), tu equipo (responsable + filas de trabajadores que se añaden y quitan, máx. 20), tarjeta de puntos opcional (mismos ids que en «Mi Centro», la rellena `loyalty-settings.js`) y algo más (notas y términos).
-- Si el servidor rechaza el alta, la página se vuelve a pintar **con lo escrito** (no redirige). Al terminar, en lugar del formulario sale el resumen «Centro registrado: revisa tu correo».
+- El paso «El centro» lleva la foto opcional (`fragments/photo-picker`, la misma que en «Mi Centro»; la vista previa de la derecha la enseña al elegirla). El formulario es `multipart/form-data`.
+- Si el servidor rechaza el alta, la página se vuelve a pintar **con lo escrito** (no redirige); la foto no se puede rellenar de nuevo, así que sale un aviso para elegirla otra vez. Al terminar, en lugar del formulario sale el resumen «Centro registrado: revisa tu correo».
 - `center-approval.html` (enlace del correo de administración) y `invitation.html` (crear contraseña; si caducó, botón para pedir otro enlace) llevan `noindex` y están excluidas en `robots.txt`.
 - El mapa (Leaflet + OpenStreetMap) no se arrastra con un dedo en móvil para no bloquear el scroll: se toca para poner el pin, se arrastra el pin y se acerca con + y -.
 - Al tocar el mapa, mover el pin o usar «Estoy en el centro», `location-picker.js` pide a Nominatim la dirección de ese punto (geocodificación inversa) y la escribe en el campo de dirección; si no la encuentra, lo dice y se escribe a mano.

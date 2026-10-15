@@ -8,6 +8,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
     <script th:src="@{/js/form-validation.js}" defer></script>
     <script th:src="@{/js/location-picker.js}" defer></script>
+    <script th:src="@{/js/photo-picker.js}" defer></script>
     <script th:src="@{/js/loyalty-settings.js}" defer></script>
     <script th:src="@{/js/center-registration.js}" defer></script>
 </head>
@@ -54,7 +55,7 @@
                 <li><button type="button" data-go-step="4"><i class="lucide-send wizard-step-icon" aria-hidden="true"></i> <span class="wizard-step-text">Enviar</span></button></li>
             </ol>
 
-            <form th:action="@{/register-center}" method="post" id="registerCenterForm" novalidate
+            <form th:action="@{/register-center}" method="post" id="registerCenterForm" novalidate enctype="multipart/form-data"
                   th:attr="data-max-workers=${maxExtraWorkers}">
 
                 <fieldset class="registration-section">
@@ -92,6 +93,15 @@
                                 <span th:text="${specialty}">Manicura y uñas</span>
                             </label>
                         </div>
+                    </div>
+                    <div class="form-field">
+                        <!--/* th:for: el id lo pone el fragmento photo-picker y IntelliJ no lo ve */-->
+                        <label th:for="${'centerPhoto'}">Foto del centro <span class="form-label-hint">(opcional)</span></label>
+                        <div class="alert alert-warning" role="status" th:if="${photoLost == true}">
+                            <i class="lucide-image" aria-hidden="true"></i>
+                            <span>Vuelve a elegir la foto: el navegador no la guarda al corregir el formulario.</span>
+                        </div>
+                        <div th:replace="~{fragments/photo-picker :: picker('centerPhoto', null, '', ${maxPhotoMb})}"></div>
                     </div>
                 </fieldset>
 
@@ -236,6 +246,10 @@
         <aside class="registration-preview" id="registrationPreview" aria-label="Vista previa del centro" hidden>
             <p class="registration-preview-label">Así te verán los clientes</p>
             <div class="registration-preview-card">
+                <div class="center-photo registration-preview-photo">
+                    <img alt="" hidden data-photo-mirror>
+                    <span class="center-photo-initials" aria-hidden="true" data-photo-mirror-initials data-initials></span>
+                </div>
                 <h2 data-preview="centerName" data-empty="Nombre de tu centro">Nombre de tu centro</h2>
                 <ul>
                     <li><i class="lucide-map-pin" aria-hidden="true"></i> <span data-preview="address" data-empty="Dirección">Dirección</span></li>

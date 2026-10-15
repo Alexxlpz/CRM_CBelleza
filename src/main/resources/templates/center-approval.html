@@ -47,6 +47,15 @@
                         </li>
                     </ul>
                 </dd>
+                <dt>Foto</dt>
+                <dd>
+                    <!--/* Una vez publicado, el enlace con el token ya no vale: la foto es pública */-->
+                    <div class="center-photo approval-photo" th:if="${center.photoUrl != null}">
+                        <img th:src="${justPublished != null ? center.photoUrl : '/register-center/approve/' + token + '/photo'}"
+                             th:alt="${'Foto de ' + center.name}" alt="Foto del centro">
+                    </div>
+                    <span th:if="${center.photoUrl == null}">Sin foto</span>
+                </dd>
                 <dt th:if="${center.registeredAt != null}">Alta</dt>
                 <dd th:if="${center.registeredAt != null}" th:text="${#temporals.format(center.registeredAt, 'dd/MM/yyyy HH:mm')}">14/10/2026</dd>
             </dl>

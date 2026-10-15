@@ -141,6 +141,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function refreshPreview() {
         ['centerName', 'address', 'phone', 'email', 'cabins'].forEach(name => setPreview(name, field(name).value.trim()));
+        const initials = Cuquora.initials(field('centerName').value);
+        document.querySelectorAll('[data-initials]').forEach(el => { el.textContent = initials; });
         const specialties = [...form.querySelectorAll('input[name="specialties"]:checked')].map(c => c.value);
         setPreview('specialties', specialties.join(', '));
         const extra = [...form.querySelectorAll('input[name="workerEmails"]')].filter(i => i.value.trim()).length;

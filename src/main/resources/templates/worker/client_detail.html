@@ -11,7 +11,7 @@
     <div th:replace="~{fragments/navbar :: worker('/worker/clients', 'Volver a lista de clientes', ${notifications})}"></div>
 
     <!-- Main Container -->
-    <main class="main-container">
+    <main class="main-container client-detail-page">
 
         <div class="alert alert-success" id="saveSuccessBanner" role="status" th:hidden="${successMessage == null}">
             <i class="lucide-check-circle" aria-hidden="true"></i>
@@ -204,7 +204,7 @@
 
             <div class="client-side-column">
             <!-- Productos que ha comprado en el centro -->
-            <section class="card-panel" id="productos" aria-labelledby="salesTitle">
+            <section class="card-panel client-sales-panel" id="productos" aria-labelledby="salesTitle">
                 <div class="panel-header-row">
                     <div>
                         <h2 class="panel-title" id="salesTitle">Productos comprados</h2>
@@ -242,13 +242,25 @@
             </section>
 
             <!-- Right Column: Historial de Citas en este Centro -->
-            <section class="card-panel">
+            <section class="card-panel client-history-panel">
                 <div class="panel-header-row">
                     <h2 class="panel-title">Historial de Citas</h2>
-                    <span class="client-appointments-count"
+                    <span class="client-appointments-count" id="historyCount"
                           th:text="${appointments != null ? appointments.size() : 0} + ' citas en este centro'">
                         2 citas
                     </span>
+                </div>
+
+                <!-- Filtro en el navegador: busca en notas y resúmenes (p. ej. parámetros del láser de cada sesión) -->
+                <div class="history-filters" role="search" th:if="${appointments != null and appointments.size() > 1}">
+                    <div class="clients-search-box">
+                        <i class="lucide-search clients-search-icon" aria-hidden="true"></i>
+                        <input type="search" id="historySearch" class="clients-search-input" autocomplete="off"
+                               placeholder="Buscar en notas y resúmenes" aria-label="Buscar en el historial de citas">
+                    </div>
+                    <select id="historyTreatment" class="form-control history-treatment-filter" aria-label="Filtrar por tratamiento">
+                        <option value="">Todos los tratamientos</option>
+                    </select>
                 </div>
 
                 <div class="history-list" th:if="${appointments != null and !appointments.isEmpty()}">
@@ -299,6 +311,11 @@
                             <span th:text="${app.treatmentSummary != null} ? 'Editar resumen' : 'Añadir resumen del tratamiento'">Añadir resumen del tratamiento</span>
                         </button>
                     </div>
+                </div>
+
+                <div class="notification-empty notification-empty--padded" id="historyNoResults" hidden>
+                    <i class="lucide-search-x" aria-hidden="true"></i>
+                    <span>Ninguna cita coincide con la búsqueda.</span>
                 </div>
 
                 <div class="notification-empty notification-empty--padded" th:if="${appointments == null or appointments.isEmpty()}">
@@ -393,6 +410,44 @@
                     button.focus();
                 });
             }));
+
+            // Filtro del historial: por tratamiento y por texto, sin distinguir mayúsculas ni tildes
+            const historySearch = document.getElementById('historySearch');
+            const historyTreatment = document.getElementById('historyTreatment');
+            if (historySearch && historyTreatment) {
+                const items = [...document.querySelectorAll('.history-item')];
+                const count = document.getElementById('historyCount');
+                const total = count.textContent.trim();
+                const noResults = document.getElementById('historyNoResults');
+                const normalize = text => text.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+
+                [...new Set(items.map(item => item.dataset.treatment))]
+                    .sort((a, b) => a.localeCompare(b, 'es'))
+                    .forEach(name => historyTreatment.add(new Option(name, name)));
+
+                // El botón de resumen no cuenta: su texto («Añadir resumen del tratamiento») coincidiría en todas
+                const searchableText = item => normalize([...item.children]
+                    .filter(child => child.tagName !== 'BUTTON')
+                    .map(child => child.textContent).join(' '));
+
+                const applyFilter = () => {
+                    const words = normalize(historySearch.value).split(/\s+/).filter(Boolean);
+                    const treatment = historyTreatment.value;
+                    let visible = 0;
+                    items.forEach(item => {
+                        const text = searchableText(item);
+                        const matches = (!treatment || item.dataset.treatment === treatment)
+                            && words.every(word => text.includes(word));
+                        item.hidden = !matches;
+                        if (matches) visible++;
+                    });
+                    const filtered = words.length > 0 || treatment !== '';
+                    count.textContent = filtered ? `${visible} de ${items.length} citas` : total;
+                    noResults.hidden = visible > 0;
+                };
+                historySearch.addEventListener('input', applyFilter);
+                historyTreatment.addEventListener('change', applyFilter);
+            }
 
             Cuquora.guardUnsavedChanges({
                 form,

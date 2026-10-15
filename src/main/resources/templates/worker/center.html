@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
     <script th:src="@{/js/location-picker.js}" defer></script>
+    <script th:src="@{/js/photo-picker.js}" defer></script>
 </head>
 <body>
     <div th:replace="~{fragments/navbar :: worker('/worker/dashboard', 'Volver al panel', ${notifications})}"></div>
@@ -99,6 +100,33 @@
                     <button type="submit" class="btn btn-primary"><i class="lucide-save" aria-hidden="true"></i> Guardar Información</button>
                 </div>
             </form>
+        </section>
+
+        <section class="settings-card" id="foto">
+            <h2 class="settings-section-title"><i class="lucide-image" aria-hidden="true"></i> Foto del centro</h2>
+            <p class="form-help settings-intro">Sale en el buscador de centros y arriba de la ficha de tu centro: ayuda a que tus clientes lo reconozcan de un vistazo.</p>
+            <div class="alert alert-success" role="status" th:if="${photoMessage != null}">
+                <i class="lucide-check-circle-2" aria-hidden="true"></i>
+                <span th:text="${photoMessage}">Foto guardada.</span>
+            </div>
+            <div class="alert alert-error" role="alert" th:if="${photoError != null}">
+                <i class="lucide-alert-circle" aria-hidden="true"></i>
+                <span th:text="${photoError}">Sube la foto en JPG o PNG.</span>
+            </div>
+            <form th:action="@{/worker/center/photo}" method="post" enctype="multipart/form-data" id="centerPhotoForm">
+                <div th:replace="~{fragments/photo-picker :: picker('centerPhoto', ${center.photoUrl}, ${center.initials}, ${maxPhotoMb})}"></div>
+            </form>
+            <form th:if="${center.photoUrl != null}" th:action="@{/worker/center/photo/delete}" method="post" id="removePhotoForm"
+                  data-confirm="Tu centro saldrá en el buscador con sus iniciales hasta que subas otra." data-confirm-title="¿Quitar la foto?"
+                  data-confirm-button="Quitar foto"></form>
+            <div class="settings-actions settings-actions--stack">
+                <button type="submit" form="removePhotoForm" class="btn btn-secondary" th:if="${center.photoUrl != null}">
+                    <i class="lucide-trash-2" aria-hidden="true"></i> Quitar foto
+                </button>
+                <button type="submit" form="centerPhotoForm" class="btn btn-primary">
+                    <i class="lucide-upload" aria-hidden="true"></i> Guardar foto
+                </button>
+            </div>
         </section>
 
         <section class="settings-card" id="puntos">

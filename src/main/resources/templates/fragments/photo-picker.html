@@ -1,0 +1,24 @@
+<!--/*
+    Foto de presentación del centro (alta de centro y «Mi Centro»): vista previa con el mismo recorte que la
+    tarjeta del buscador y campo de archivo. photo-picker.js enseña la foto elegida y avisa si no vale.
+    El servidor la vuelve a comprobar y la redimensiona (CenterPhotoService).
+*/-->
+<div xmlns:th="http://www.thymeleaf.org">
+    <div th:fragment="picker(inputId, photoUrl, initials, maxMb)" class="photo-picker" data-photo-picker
+         th:attr="data-max-mb=${maxMb}">
+        <div class="center-photo photo-picker-preview">
+            <img th:src="${photoUrl}" alt="Foto actual del centro" th:hidden="${photoUrl == null}" data-photo-img>
+            <span class="center-photo-initials" aria-hidden="true" th:text="${initials}" th:hidden="${photoUrl != null}" data-initials
+                  data-photo-initials>CB</span>
+        </div>
+        <div class="photo-picker-controls">
+            <input type="file" th:id="${inputId}" name="photo" accept="image/jpeg,image/png"
+                   th:attr="aria-describedby=${inputId + 'Help'}">
+            <p class="form-help" th:id="${inputId + 'Help'}"
+               th:text="${'JPG o PNG de hasta ' + maxMb + ' MB. Mejor apaisada: la fachada, la recepción o una cabina. En el buscador sale recortada como en la vista previa.'}">
+                JPG o PNG de hasta 8 MB.</p>
+            <p class="photo-picker-name" data-photo-name hidden></p>
+            <p class="field-error-msg" role="alert" data-photo-error hidden></p>
+        </div>
+    </div>
+</div>

@@ -268,7 +268,8 @@
     }
 
     .clients-grid {
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        align-items: start;
     }
 
     .clients-grid .list-head,
@@ -1161,4 +1162,70 @@
 
 .client-side-column .panel-header-row .btn {
     white-space: nowrap;
+}
+
+/* ===== Ficha del cliente en escritorio =====
+   Ocupa todo el ancho, mitad y mitad: la ficha técnica y los productos a la
+   izquierda y el historial de citas a la derecha, en tantas columnas como quepan.
+   La columna lateral se deshace (display: contents) para que productos e historial
+   se coloquen por separado sin cambiar el orden del móvil. */
+@media (min-width: 1100px) {
+    .main-container.client-detail-page {
+        max-width: none;
+        padding: 32px 40px 48px;
+    }
+
+    .client-detail-layout {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-rows: auto 1fr;
+    }
+
+    .client-detail-layout .client-side-column {
+        display: contents;
+    }
+
+    .client-sales-panel {
+        grid-column: 1;
+        grid-row: 2;
+        align-self: start;
+        container-type: inline-size;
+    }
+
+    .client-history-panel {
+        grid-column: 2;
+        grid-row: 1 / span 2;
+    }
+
+    .client-history-panel .history-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        align-items: start;
+    }
+}
+
+/* Filtro del historial de citas de la ficha */
+.history-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+.history-filters .clients-search-box {
+    flex: 1 1 220px;
+    min-width: 0;
+    max-width: none;
+}
+
+.history-filters .clients-search-input {
+    height: 100%;
+    border-color: rgba(var(--primary-rgb), 0.25);
+}
+
+/* Mide lo que el tratamiento más largo; si no cabe junto al buscador, pasa a otra línea */
+.history-treatment-filter {
+    flex: 1 0 auto;
+    width: auto;
+    max-width: 100%;
+    padding-block: 10px;
 }
