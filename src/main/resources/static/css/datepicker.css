@@ -1,262 +1,271 @@
 /* ==========================================================================
-   Datepicker & Timepicker Component Styles
-   Used for booking datetime selection (centers, details, bookings)
+   Calendario de la reserva del cliente (fragments/datetime-picker.html + booking-picker.js)
+   El mes y las horas libres del día elegido se ven siempre: uno junto al otro si
+   caben (escritorio) y uno debajo del otro en pantallas estrechas.
    ========================================================================== */
 
-.booking-datetime {
+.booking-picker-panels {
     display: grid;
-    grid-template-columns: 1.2fr 0.8fr;
-    gap: 8px;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 290px), 1fr));
+    gap: 16px;
     align-items: start;
 }
 
-/* ---- Datepicker trigger ---- */
-.datepicker {
-    position: relative;
+.booking-calendar,
+.booking-times {
+    min-width: 0;
+    padding: 16px;
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--border-radius-md);
 }
 
-.datepicker-trigger {
+/* ---- Mes ---- */
+.booking-calendar-head {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
     gap: 8px;
-    width: 100%;
-    cursor: pointer;
-    background: var(--surface);
-    text-align: left;
+    margin-bottom: 14px;
 }
 
-.datepicker-trigger .datepicker-value {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.datepicker-trigger.is-empty .datepicker-value {
-    color: var(--text-muted);
-}
-
-/* ---- Calendar popover ---- */
-.calendar-popover {
-    position: absolute;
-    top: calc(100% + 6px);
-    left: 0;
-    z-index: 60;
-    width: 262px;
-    max-width: calc(100vw - 32px);
-    padding: 10px;
-    background: var(--surface);
-    border: 1px solid rgba(var(--primary-rgb), 0.45);
-    border-radius: var(--border-radius-sm);
-    box-shadow: 0 12px 28px rgba(60, 45, 30, 0.18);
-}
-
-.calendar-popover[hidden] {
-    display: none;
-}
-
-.calendar-popover.is-loading {
-    opacity: 0.55;
-    pointer-events: none;
-}
-
-.calendar-header,
-.calendar-weekdays,
-.calendar-days {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    align-items: center;
-    text-align: center;
-    gap: 2px;
-}
-
-.calendar-header {
-    grid-template-columns: 30px 1fr 30px;
-    margin-bottom: 8px;
-}
-
-.calendar-header strong {
-    font-size: 13px;
-    text-transform: capitalize;
-}
-
-.calendar-header button {
-    border: 0;
-    background: transparent;
-    font-size: 20px;
-    line-height: 1;
-    cursor: pointer;
-    color: var(--primary-text);
-    border-radius: 6px;
-}
-
-.calendar-header button:disabled {
-    color: var(--text-soft);
-    cursor: not-allowed;
-}
-
-.calendar-weekdays {
-    color: var(--text-muted);
-    font-size: 11px;
-    margin-bottom: 4px;
-}
-
-.calendar-days button {
-    border: 1px solid transparent;
-    border-radius: 6px;
-    min-height: 30px;
-    background: transparent;
-    cursor: pointer;
-    font-size: 13px;
-    position: relative;
-}
-
-.calendar-days button:not(:disabled):hover {
-    background: rgba(var(--primary-rgb), 0.25);
-}
-
-.calendar-days button.selected,
-.calendar-days button.selected:hover {
-    background: var(--brand-solid);
-    color: var(--on-primary);
-}
-
-.calendar-days button:focus-visible {
-    outline: none;
-    box-shadow: var(--focus-ring-primary-dark);
-}
-
-.calendar-days button.is-today {
-    border-color: var(--primary-dark);
-    font-weight: 700;
-}
-
-/* Blocked calendar days */
-.calendar-days button.is-past,
-.calendar-days button.is-closed {
-    color: var(--text-soft);
-    cursor: not-allowed;
-    background: transparent;
-}
-
-.calendar-days button.is-closed {
-    text-decoration: line-through;
-}
-
-.calendar-days button.is-full {
-    color: var(--danger-dark);
-    cursor: not-allowed;
-    background: rgba(185, 115, 111, 0.12);
-}
-
-.calendar-days button.is-full::after {
-    content: '';
-    position: absolute;
-    left: 50%;
-    bottom: 3px;
-    transform: translateX(-50%);
-    width: 4px;
-    height: 4px;
-    border-radius: 50%;
-    background: var(--danger-dark);
-}
-
-/* ---- Timepicker ---- */
-.timepicker {
-    position: relative;
-}
-
-.timepicker-trigger {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    cursor: pointer;
-    background: var(--surface);
-}
-
-.timepicker-trigger:disabled {
-    cursor: not-allowed;
-    opacity: 0.65;
-}
-
-.timepicker-popover {
-    position: absolute;
-    top: calc(100% + 6px);
-    left: 0;
-    right: 0;
-    z-index: 60;
-    max-height: 220px;
-    overflow-y: auto;
-    padding: 8px;
-    background: var(--surface);
-    border: 1px solid rgba(var(--primary-rgb), 0.45);
-    border-radius: var(--border-radius-sm);
-    box-shadow: 0 12px 28px rgba(60, 45, 30, 0.18);
-}
-
-.timepicker-popover[hidden] {
-    display: none;
-}
-
-.timepicker-options {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 6px;
-}
-
-.time-option {
-    border: 1px solid rgba(var(--primary-rgb), 0.35);
-    border-radius: 6px;
-    padding: 7px 4px;
-    background: var(--surface);
+.booking-calendar-month {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 800;
     color: var(--text-main);
+}
+
+.booking-calendar-nav {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--border-soft);
+    border-radius: 50%;
+    background: var(--surface);
+    color: var(--primary-text);
+    font-size: 16px;
     cursor: pointer;
-    font-size: 13px;
-    text-align: center;
     transition: var(--transition);
 }
 
-.time-option:hover {
-    background: rgba(var(--primary-rgb), 0.2);
+.booking-calendar-nav:hover:not(:disabled) {
+    background: rgba(var(--primary-rgb), 0.14);
 }
 
+.booking-calendar-nav:active:not(:disabled) {
+    transform: scale(0.96);
+}
+
+.booking-calendar-nav:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.booking-calendar-nav:focus-visible,
+.booking-day:focus-visible,
 .time-option:focus-visible {
-    background: rgba(var(--primary-rgb), 0.2);
     outline: none;
     box-shadow: var(--focus-ring);
 }
 
-.time-option.is-occupied,
-.time-option.is-past,
-.time-option.is-no-fit {
-    color: var(--text-soft);
-    background: var(--surface-muted);
-    cursor: not-allowed;
-    text-decoration: line-through;
+.booking-calendar-weekdays,
+.booking-calendar-days {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 4px;
 }
 
-.time-option.is-selected {
+.booking-calendar-weekdays {
+    margin-bottom: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+/* ---- Días ---- */
+.booking-day {
+    position: relative;
+    height: 40px;
+    border: 1px solid transparent;
+    border-radius: var(--border-radius-sm);
+    background: transparent;
+    color: var(--text-soft);
+    font: inherit;
+    font-size: 14px;
+    font-variant-numeric: tabular-nums;
+    cursor: not-allowed;
+    transition: var(--transition);
+}
+
+.booking-day.is-free {
+    border-color: rgba(var(--primary-rgb), 0.3);
+    background: var(--surface);
+    color: var(--text-main);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.booking-day.is-free:hover {
+    background: rgba(var(--primary-rgb), 0.14);
+}
+
+.booking-day.is-free:active {
+    transform: scale(0.96);
+}
+
+.booking-day.is-full {
+    background: var(--surface-muted);
+    color: var(--text-soft);
+}
+
+.booking-day.is-closed {
+    background: repeating-linear-gradient(135deg, rgba(var(--primary-rgb), 0.06) 0 6px, rgba(var(--primary-rgb), 0.16) 6px 8px);
+}
+
+.booking-day.is-selected,
+.booking-day.is-selected:hover {
+    border-color: var(--primary-dark);
     background: var(--brand-solid);
-    border-color: var(--primary);
     color: var(--on-primary);
 }
 
-/* ---- Availability message ---- */
-.availability-message {
-    display: block;
-    margin-top: 8px;
+/* Hoy: una raya corta bajo el número */
+.booking-day.is-today::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: 5px;
+    width: 14px;
+    height: 2px;
+    border-radius: 2px;
+    background: currentColor;
+    transform: translateX(-50%);
+}
+
+.booking-calendar-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    margin: 14px 0 0;
+    padding: 0;
+    list-style: none;
     font-size: 12px;
     color: var(--text-muted);
 }
 
-.availability-message.is-error {
+.booking-calendar-legend li {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.legend-swatch {
+    width: 12px;
+    height: 12px;
+    border: 1px solid transparent;
+    border-radius: 3px;
+}
+
+.legend-swatch--free {
+    border-color: rgba(var(--primary-rgb), 0.3);
+    background: var(--surface);
+}
+
+.legend-swatch--full {
+    background: var(--surface-muted);
+}
+
+.legend-swatch--closed {
+    background: repeating-linear-gradient(135deg, rgba(var(--primary-rgb), 0.06) 0 3px, rgba(var(--primary-rgb), 0.22) 3px 4px);
+}
+
+/* ---- Horas ---- */
+.booking-times-title {
+    margin: 0 0 14px;
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--text-main);
+}
+
+.booking-times-title::first-letter {
+    text-transform: uppercase;
+}
+
+.booking-times-group + .booking-times-group {
+    margin-top: 16px;
+}
+
+.booking-times-group-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0 0 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.booking-times-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+    gap: 8px;
+}
+
+.time-option {
+    height: 40px;
+    border: 1px solid rgba(var(--primary-rgb), 0.3);
+    border-radius: var(--border-radius-sm);
+    background: var(--surface);
+    color: var(--text-main);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.time-option:hover {
+    background: rgba(var(--primary-rgb), 0.14);
+}
+
+.time-option:active {
+    transform: scale(0.96);
+}
+
+.time-option.is-selected,
+.time-option.is-selected:hover {
+    border-color: var(--primary-dark);
+    background: var(--brand-solid);
+    color: var(--on-primary);
+}
+
+.booking-times-hint {
+    margin: 0;
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+/* ---- Avisos (cargando, sin conexión, falta elegir hora) ---- */
+.booking-picker-message {
+    margin: 10px 0 0;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.booking-picker-message:empty {
+    display: none;
+}
+
+.booking-picker-message.is-error {
     color: var(--danger-dark);
 }
 
-/* ---- Responsive adjustments ---- */
-@media (max-width: 520px) {
-    .booking-datetime {
-        grid-template-columns: 1fr;
-    }
+.booking-picker.is-loading .booking-calendar-days {
+    opacity: 0.55;
 }

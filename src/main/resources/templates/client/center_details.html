@@ -11,7 +11,7 @@
     <div th:replace="~{fragments/navbar :: brand(true)}"></div>
 
     <!-- Main Container -->
-    <main class="main-container">
+    <main class="main-container booking-page">
         <!-- Error Modal Component -->
         <div th:replace="~{fragments/modals :: bookingError(${bookingError})}"></div>
 
@@ -24,11 +24,12 @@
                 Solicitar Cita de Estética
             </h2>
 
-            <form th:action="@{/client/booking}" method="post" id="bookingForm">
+            <form th:action="@{/client/booking}" method="post" id="bookingForm"
+                  th:classappend="${not #lists.isEmpty(treatments)} ? 'booking-form--split'">
                 <input type="hidden" name="centerId" th:value="${center.id}">
 
                 <!-- 1. Selectable Treatments list -->
-                <div class="form-group">
+                <div class="form-group booking-services">
                     <label class="form-label booking-step-label">1. Elige un servicio disponible</label>
                     <div class="treatment-select-grid" th:if="${not #lists.isEmpty(treatments)}">
                         <label class="treatment-select-card" th:each="t, iter : ${treatments}">
@@ -43,22 +44,28 @@
                             </div>
                         </label>
                     </div>
+                    <!-- En móvil, tras elegir servicio la lista se pliega al elegido (booking-picker.js) -->
+                    <button type="button" class="btn btn-secondary btn-sm booking-change-service" id="changeService" hidden>
+                        <i class="lucide-pen-line" aria-hidden="true"></i> Cambiar de servicio
+                    </button>
                     <div th:if="${#lists.isEmpty(treatments)}" class="no-appointments-box">
                         <i class="lucide-sparkles" aria-hidden="true"></i>
                         <p>Este centro no dispone de tratamientos activos en este momento.</p>
                     </div>
                 </div>
 
-                <!-- 2. DateTime picker Component -->
+                <!-- 2. Día y hora -->
                 <div class="form-group booking-datetime-group" th:if="${not #lists.isEmpty(treatments)}">
-                    <label class="form-label booking-step-label" for="datepickerTrigger">2. Elige Fecha y Hora</label>
-                    <div id="datepickerTrigger" th:replace="~{fragments/datetime-picker :: picker}"></div>
+                    <p class="form-label booking-step-label">2. Elige día y hora</p>
+                    <div th:replace="~{fragments/datetime-picker :: picker}"></div>
                 </div>
 
-                <button type="submit" class="btn btn-primary btn-large-submit"
-                    th:if="${not #lists.isEmpty(treatments)}">
-                    <i class="lucide-check-circle" aria-hidden="true"></i> Confirmar y Reservar Cita
-                </button>
+                <div class="booking-confirm" th:if="${not #lists.isEmpty(treatments)}">
+                    <p class="booking-summary" id="bookingSummary">Elige un día y una hora para tu cita.</p>
+                    <button type="submit" class="btn btn-primary btn-large-submit">
+                        <i class="lucide-check-circle" aria-hidden="true"></i> Confirmar y reservar cita
+                    </button>
+                </div>
             </form>
         </section>
 

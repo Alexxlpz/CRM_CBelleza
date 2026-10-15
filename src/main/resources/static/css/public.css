@@ -736,6 +736,12 @@
     .wizard-steps button:not(.is-current) .wizard-step-text {
         display: none;
     }
+
+    /* A media altura la muesca se come el lado izquierdo de la flecha: el icono se
+       centra en la parte que se ve, entre la muesca y la punta */
+    .wizard-steps li:not(:first-child) button {
+        padding: 0 2px 0 calc(var(--notch) + 2px);
+    }
 }
 
 /* Con más ancho, la vista previa y los márgenes del asistente crecen */

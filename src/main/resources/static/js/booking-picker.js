@@ -1,5 +1,5 @@
 /*
- * Selector de fecha y hora de la reserva (client/center_details.html).
+ * Calendario de la reserva (client/center_details.html + fragments/datetime-picker.html).
  * Pide la disponibilidad a /api/centers/{id}/availability y solo deja elegir
  * franjas libres en las que el tratamiento seleccionado cabe completo.
  */
@@ -8,21 +8,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const form = document.getElementById('bookingForm');
     const dateInput = document.getElementById('dateTime');
-    const trigger = document.getElementById('datepickerTrigger');
-    if (!form || !trigger || !dateInput) return;
+    const picker = document.getElementById('bookingPicker');
+    if (!form || !picker || !dateInput) return;
 
     const centerId = form.elements.centerId.value;
-    const triggerValue = document.getElementById('datepickerValue');
-    const popover = document.getElementById('calendarPopover');
     const calendarDays = document.getElementById('calendarDays');
     const calendarMonth = document.getElementById('calendarMonth');
-    const message = document.getElementById('availabilityMessage');
     const previousMonth = document.getElementById('previousMonth');
     const nextMonth = document.getElementById('nextMonth');
-    const timeTrigger = document.getElementById('timepickerTrigger');
-    const timeValue = document.getElementById('timepickerValue');
-    const timePopover = document.getElementById('timepickerPopover');
-    const timeOptions = document.getElementById('timepickerOptions');
+    const timesTitle = document.getElementById('bookingTimesTitle');
+    const timeOptions = document.getElementById('timeOptions');
+    const message = document.getElementById('availabilityMessage');
+    const summary = document.getElementById('bookingSummary');
     const treatmentInputs = form.querySelectorAll('input[name="treatmentId"]');
 
     const fallback = { slotMinutes: 30, workingDays: [1, 2, 3, 4, 5], openHour: 9, closeHour: 20, closedDates: new Set() };
@@ -30,18 +27,24 @@ document.addEventListener('DOMContentLoaded', function () {
     today.setHours(0, 0, 0, 0);
     const firstMonth = new Date(today.getFullYear(), today.getMonth(), 1);
     const lastMonth = new Date(today.getFullYear(), today.getMonth() + 6, 1);
+    // Las horas desde las 14:00 se agrupan como «Tarde»
+    const afternoonFrom = 14 * 60;
 
     let month = new Date(firstMonth);
     let selectedDate = '';
+    let selectedTime = '';
     let config = fallback;
     let occupied = new Map();
-    let serviceDuration = Number(form.querySelector('input[name="treatmentId"]:checked')?.dataset.duration) || 30;
+    let loaded = false;
 
     const pad = n => String(n).padStart(2, '0');
     const key = date => `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
     const dayOfWeek = date => (date.getDay() === 0 ? 7 : date.getDay());
     const timeLabel = minutes => `${pad(Math.floor(minutes / 60))}:${pad(minutes % 60)}`;
-    const requiredSlots = () => Math.ceil(serviceDuration / config.slotMinutes);
+    const checkedTreatment = () => form.querySelector('input[name="treatmentId"]:checked');
+    const serviceDuration = () => Number(checkedTreatment()?.dataset.duration) || 30;
+    const requiredSlots = () => Math.ceil(serviceDuration() / config.slotMinutes);
+    const longDate = day => new Date(`${day}T00:00:00`).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' }).replace(',', '');
 
     function setMessage(text, isError) {
         message.textContent = text;
@@ -53,7 +56,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const result = [];
         for (let minutes = config.openHour * 60; minutes < config.closeHour * 60; minutes += config.slotMinutes) {
             const value = timeLabel(minutes);
-            result.push({ value, taken: taken.has(value), past: new Date(`${day}T${value}:00`) <= new Date() });
+            result.push({ value, minutes, taken: taken.has(value), past: new Date(`${day}T${value}:00`) <= new Date() });
         }
         return result;
     }
@@ -65,72 +68,89 @@ document.addEventListener('DOMContentLoaded', function () {
         return daySlots.slice(index, index + required).every(slot => !slot.taken && !slot.past);
     }
 
+    function freeSlots(day) {
+        const daySlots = slots(day);
+        return daySlots.filter((_, index) => canFit(index, daySlots));
+    }
+
     function state(date) {
         if (date < today) return 'past';
         const day = key(date);
         if (!config.workingDays.includes(dayOfWeek(date)) || config.closedDates.has(day)) return 'closed';
-        const daySlots = slots(day);
-        return daySlots.some((_, index) => canFit(index, daySlots)) ? 'free' : 'full';
+        return freeSlots(day).length > 0 ? 'free' : 'full';
     }
 
-    function closeTimePopover() {
-        timePopover.hidden = true;
-        timeTrigger.setAttribute('aria-expanded', 'false');
-    }
-
-    function closeDatePopover() {
-        popover.hidden = true;
-        trigger.setAttribute('aria-expanded', 'false');
-    }
-
-    function renderTimes(day) {
-        timeOptions.innerHTML = '';
-        const daySlots = slots(day);
-        const required = requiredSlots();
-        const visibleSlots = daySlots.filter((slot, index) => index + required <= daySlots.length && !slot.past);
-
-        if (visibleSlots.length === 0) {
-            timeTrigger.disabled = true;
-            timeValue.textContent = 'No quedan horas disponibles hoy';
+    function updateSummary() {
+        const treatment = checkedTreatment()?.closest('.treatment-select-card')?.querySelector('.treatment-card-title')?.textContent.trim();
+        if (!selectedDate || !selectedTime) {
+            summary.textContent = selectedDate ? 'Elige una hora para tu cita.' : 'Elige un día y una hora para tu cita.';
             return;
         }
+        summary.innerHTML = `<strong>${Cuquora.escapeHtml(treatment || 'Tu cita')}</strong> · ${Cuquora.escapeHtml(longDate(selectedDate))} a las ${selectedTime}`;
+    }
 
-        let anyValid = false;
-        visibleSlots.forEach(slot => {
-            const fits = canFit(daySlots.indexOf(slot), daySlots);
-            anyValid = anyValid || fits;
+    function hint(text) {
+        timeOptions.innerHTML = '';
+        const paragraph = document.createElement('p');
+        paragraph.className = 'booking-times-hint';
+        paragraph.textContent = text;
+        timeOptions.appendChild(paragraph);
+    }
+
+    function timeGroup(label, icon, groupSlots, day) {
+        const group = document.createElement('div');
+        group.className = 'booking-times-group';
+        const title = document.createElement('p');
+        title.className = 'booking-times-group-label';
+        title.innerHTML = `<i class="${icon}" aria-hidden="true"></i> ${label}`;
+        const grid = document.createElement('div');
+        grid.className = 'booking-times-grid';
+        groupSlots.forEach(slot => {
             const option = document.createElement('button');
             option.type = 'button';
             option.className = 'time-option';
-            option.setAttribute('role', 'option');
-            option.textContent = slot.value + (slot.taken ? ' (ocupada)' : !fits ? ' (sin tiempo suficiente)' : '');
-            if (!fits) {
-                option.disabled = true;
-                option.classList.add(slot.taken ? 'is-occupied' : 'is-no-fit');
-            } else {
-                option.addEventListener('click', () => {
-                    dateInput.value = `${day}T${slot.value}`;
-                    timeValue.textContent = slot.value;
-                    timeOptions.querySelectorAll('.time-option').forEach(item => {
-                        item.classList.remove('is-selected');
-                        item.setAttribute('aria-selected', 'false');
-                    });
-                    option.classList.add('is-selected');
-                    option.setAttribute('aria-selected', 'true');
-                    setMessage('');
-                    closeTimePopover();
-                    timeTrigger.focus();
+            option.textContent = slot.value;
+            option.setAttribute('aria-pressed', String(slot.value === selectedTime));
+            option.classList.toggle('is-selected', slot.value === selectedTime);
+            option.addEventListener('click', () => {
+                selectedTime = slot.value;
+                dateInput.value = `${day}T${slot.value}`;
+                timeOptions.querySelectorAll('.time-option').forEach(item => {
+                    item.classList.toggle('is-selected', item === option);
+                    item.setAttribute('aria-pressed', String(item === option));
                 });
-            }
-            timeOptions.appendChild(option);
+                setMessage('');
+                updateSummary();
+            });
+            grid.appendChild(option);
         });
-        timeTrigger.disabled = !anyValid;
-        timeValue.textContent = anyValid ? 'Selecciona una hora' : 'No hay horas disponibles';
+        group.append(title, grid);
+        return group;
+    }
+
+    function renderTimes() {
+        if (!selectedDate) {
+            timesTitle.textContent = 'Horas libres';
+            hint('Elige un día para ver las horas libres.');
+            return;
+        }
+        timesTitle.textContent = `Horas libres el ${longDate(selectedDate)}`;
+        const free = freeSlots(selectedDate);
+        if (free.length === 0) {
+            hint('Ese día ya no quedan horas libres. Prueba con otro.');
+            return;
+        }
+        timeOptions.innerHTML = '';
+        const morning = free.filter(slot => slot.minutes < afternoonFrom);
+        const afternoon = free.filter(slot => slot.minutes >= afternoonFrom);
+        if (morning.length) timeOptions.appendChild(timeGroup('Mañana', 'lucide-sun', morning, selectedDate));
+        if (afternoon.length) timeOptions.appendChild(timeGroup('Tarde', 'lucide-sunset', afternoon, selectedDate));
     }
 
     function render() {
         calendarDays.innerHTML = '';
-        calendarMonth.textContent = month.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+        const monthName = month.toLocaleDateString('es-ES', { month: 'long' });
+        calendarMonth.textContent = `${monthName.charAt(0).toUpperCase()}${monthName.slice(1)} ${month.getFullYear()}`;
         const offset = (new Date(month.getFullYear(), month.getMonth(), 1).getDay() + 6) % 7;
         for (let i = 0; i < offset; i++) calendarDays.appendChild(document.createElement('span'));
 
@@ -142,15 +162,15 @@ document.addEventListener('DOMContentLoaded', function () {
             const button = document.createElement('button');
             button.type = 'button';
             button.textContent = number;
-            button.dataset.date = day;
-            button.className = 'is-' + dayState;
+            button.className = `booking-day is-${dayState}`;
             button.disabled = dayState !== 'free';
-            button.setAttribute('aria-label', date.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })
+            button.setAttribute('aria-label', longDate(day)
                 + (dayState === 'full' ? ', completo' : dayState === 'closed' ? ', cerrado' : ''));
-            if (dayState === 'full') button.title = 'Día completo: no hay horas disponibles';
+            if (dayState === 'full') button.title = 'Completo: no quedan horas libres';
+            if (dayState === 'closed') button.title = 'El centro está cerrado';
             if (day === key(today)) button.classList.add('is-today');
             if (day === selectedDate) {
-                button.classList.add('selected');
+                button.classList.add('is-selected');
                 button.setAttribute('aria-pressed', 'true');
             }
             button.addEventListener('click', () => selectDate(day));
@@ -160,66 +180,93 @@ document.addEventListener('DOMContentLoaded', function () {
         nextMonth.disabled = month >= lastMonth;
     }
 
-    function selectDate(day) {
-        const date = new Date(`${day}T00:00:00`);
-        if (state(date) !== 'free') return;
-        selectedDate = day;
-        triggerValue.textContent = date.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
-        dateInput.value = '';
-        renderTimes(day);
-        render();
-        closeDatePopover();
-        if (!timeTrigger.disabled) timeTrigger.focus();
+    /** Primer día con horas libres para el tratamiento elegido, o '' si no hay ninguno en los próximos meses. */
+    function firstFreeDay() {
+        const end = new Date(lastMonth.getFullYear(), lastMonth.getMonth() + 1, 0);
+        for (const date = new Date(today); date <= end; date.setDate(date.getDate() + 1)) {
+            if (state(date) === 'free') return key(date);
+        }
+        return '';
     }
 
-    trigger.addEventListener('click', () => {
-        popover.hidden = !popover.hidden;
-        trigger.setAttribute('aria-expanded', String(!popover.hidden));
-        if (!popover.hidden) render();
-    });
-    timeTrigger.addEventListener('click', () => {
-        if (timeTrigger.disabled) return;
-        timePopover.hidden = !timePopover.hidden;
-        timeTrigger.setAttribute('aria-expanded', String(!timePopover.hidden));
-    });
+    /** Deja elegido el primer día libre y muestra su mes, sin mover la página. */
+    function selectFirstFreeDay() {
+        const day = firstFreeDay();
+        selectedDate = day;
+        selectedTime = '';
+        dateInput.value = '';
+        if (day) {
+            const date = new Date(`${day}T00:00:00`);
+            month = new Date(date.getFullYear(), date.getMonth(), 1);
+        }
+        render();
+        renderTimes();
+        updateSummary();
+    }
+
+    function selectDate(day) {
+        if (state(new Date(`${day}T00:00:00`)) !== 'free') return;
+        selectedDate = day;
+        selectedTime = '';
+        dateInput.value = '';
+        render();
+        renderTimes();
+        updateSummary();
+        // En pantallas estrechas las horas quedan debajo del mes: se acercan si no se ven
+        const times = timesTitle.closest('.booking-times');
+        if (times.getBoundingClientRect().top > window.innerHeight - 120) {
+            times.scrollIntoView({ behavior: Cuquora.scrollBehavior(), block: 'start' });
+        }
+    }
+
     previousMonth.addEventListener('click', () => { month = new Date(month.getFullYear(), month.getMonth() - 1, 1); render(); });
     nextMonth.addEventListener('click', () => { month = new Date(month.getFullYear(), month.getMonth() + 1, 1); render(); });
 
-    // Cerrar los desplegables al hacer clic fuera o con Escape
-    document.addEventListener('click', event => {
-        if (!popover.hidden && !popover.contains(event.target) && !trigger.contains(event.target)) closeDatePopover();
-        if (!timePopover.hidden && !timePopover.contains(event.target) && !timeTrigger.contains(event.target)) closeTimePopover();
+    // Móvil: al elegir servicio la lista se pliega al elegido y se ve el día y la hora
+    const services = form.querySelector('.booking-services');
+    const changeService = document.getElementById('changeService');
+    const narrowQuery = window.matchMedia('(max-width: 1099px)');
+
+    function setServicesCollapsed(collapsed) {
+        if (!services || !changeService) return;
+        services.classList.toggle('is-collapsed', collapsed);
+        changeService.hidden = !collapsed;
+    }
+
+    changeService?.addEventListener('click', () => {
+        setServicesCollapsed(false);
+        services.scrollIntoView({ behavior: Cuquora.scrollBehavior(), block: 'start' });
     });
-    document.addEventListener('keydown', event => {
-        if (event.key !== 'Escape') return;
-        if (!popover.hidden) { closeDatePopover(); trigger.focus(); }
-        if (!timePopover.hidden) { closeTimePopover(); timeTrigger.focus(); }
-    });
+    narrowQuery.addEventListener('change', () => { if (!narrowQuery.matches) setServicesCollapsed(false); });
 
     treatmentInputs.forEach(input => input.addEventListener('change', () => {
-        serviceDuration = Number(input.dataset.duration) || 30;
-        selectedDate = '';
+        if (!narrowQuery.matches) return;
+        setServicesCollapsed(true);
+        picker.closest('.booking-datetime-group').scrollIntoView({ behavior: Cuquora.scrollBehavior(), block: 'start' });
+    }));
+
+    // Otro tratamiento puede durar más: se recalcula qué días y horas caben
+    treatmentInputs.forEach(input => input.addEventListener('change', () => {
+        if (!selectedDate || state(new Date(`${selectedDate}T00:00:00`)) !== 'free') {
+            selectFirstFreeDay();
+            return;
+        }
+        selectedTime = '';
         dateInput.value = '';
-        triggerValue.textContent = 'Elige una fecha';
-        timeOptions.innerHTML = '';
-        timeValue.textContent = 'Selecciona una hora';
-        timeTrigger.disabled = true;
-        closeTimePopover();
         render();
-        setMessage(`Disponibilidad actualizada para un servicio de ${serviceDuration} minutos.`);
+        renderTimes();
+        updateSummary();
     }));
 
     form.addEventListener('submit', event => {
-        if (!dateInput.value) {
-            event.preventDefault();
-            setMessage('Selecciona una fecha y una hora disponibles.', true);
-            popover.hidden = false;
-            trigger.setAttribute('aria-expanded', 'true');
-            render();
-            trigger.focus();
-        }
+        if (dateInput.value) return;
+        event.preventDefault();
+        setMessage(selectedDate ? 'Elige una hora para tu cita.' : 'Elige un día y una hora para tu cita.', true);
+        picker.scrollIntoView({ behavior: Cuquora.scrollBehavior(), block: 'start' });
     });
 
+    picker.classList.add('is-loading');
+    setMessage('Consultando las horas libres…');
     fetch(`/api/centers/${encodeURIComponent(centerId)}/availability`, { headers: { Accept: 'application/json' } })
         .then(response => {
             if (!response.ok) throw new Error('HTTP ' + response.status);
@@ -239,13 +286,21 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (!occupied.has(day)) occupied.set(day, new Set());
                 occupied.get(day).add(value.slice(11, 16));
             });
-            setMessage('Selecciona un día y una hora disponibles.');
-            render();
+            setMessage('');
+            loaded = true;
         })
         .catch(error => {
-            setMessage('No se pudo cargar la disponibilidad. Inténtalo de nuevo más tarde.', true);
+            setMessage('No se pudieron cargar las horas libres. Recarga la página o inténtalo más tarde.', true);
             console.error(error);
-            render();
+        })
+        .finally(() => {
+            picker.classList.remove('is-loading');
+            if (loaded) {
+                selectFirstFreeDay();
+            } else {
+                render();
+                renderTimes();
+            }
         });
 
     render();

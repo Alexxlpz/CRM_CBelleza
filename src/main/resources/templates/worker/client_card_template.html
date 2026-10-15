@@ -9,7 +9,7 @@
     <div th:replace="~{fragments/navbar :: worker('/worker/clients', 'Volver a lista de clientes', ${notifications})}"></div>
 
     <!-- Main Container -->
-    <main class="main-container">
+    <main class="main-container card-template-page">
 
         <div class="page-header">
             <h1>Configuración de Plantilla de Ficha</h1>
@@ -56,7 +56,7 @@
                             </select>
                         </div>
 
-                        <div>
+                        <div class="template-field-help">
                             <label class="field-label">Texto de Ayuda / Placeholder</label>
                             <input type="text" name="fieldPlaceholders" class="field-input" aria-label="Texto de ayuda"
                                    th:value="${field.placeholder}" placeholder="Ej. Sensible, atópica...">
@@ -126,7 +126,7 @@
                     <option value="textarea">Área de Texto (Notas)</option>
                 </select>
             </div>
-            <div>
+            <div class="template-field-help">
                 <label class="field-label">Texto de Ayuda / Placeholder</label>
                 <input type="text" name="fieldPlaceholders" class="field-input" aria-label="Texto de ayuda" placeholder="Ej. Alta / Media / Ninguna">
             </div>

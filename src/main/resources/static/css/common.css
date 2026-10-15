@@ -1693,6 +1693,31 @@ body.modal-open {
     max-width: 860px;
 }
 
+.settings-side {
+    margin-top: 24px;
+}
+
+/* «Mi Centro» en escritorio: todo el ancho, mitad y mitad. El formulario largo
+   (datos del centro y la cuenta) a la izquierda; foto, puntos y Google Calendar,
+   que se guardan por separado, a la derecha. */
+@media (min-width: 1100px) {
+    .main-container.settings-page--split {
+        max-width: none;
+        padding: 32px 40px 48px;
+    }
+
+    .settings-columns {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 28px;
+        align-items: start;
+    }
+
+    .settings-side {
+        margin-top: 0;
+    }
+}
+
 .settings-header {
     display: flex;
     align-items: center;
@@ -2518,7 +2543,7 @@ body.modal-open {
 
 /* ==========================================================================
    Pantallas de gestión en escritorio (tratamientos, inventario, clientes)
-   - .main-container--wide: el contenedor crece hasta 1440px en pantallas grandes.
+   - .main-container--wide: el contenedor ocupa todo el ancho desde 1100px.
    - .stats-strip: resumen de cifras sobre el listado (se oculta en móvil).
    - .list-toolbar + .view-toggle: filtros y selector Tarjetas / Lista.
    - .is-list-view / .list-head: la vista lista solo se aplica desde 1100px;
@@ -2526,7 +2551,7 @@ body.modal-open {
    ========================================================================== */
 @media (min-width: 1100px) {
     .main-container--wide {
-        max-width: 1440px;
+        max-width: none;
         padding: 32px 40px 48px;
     }
 }

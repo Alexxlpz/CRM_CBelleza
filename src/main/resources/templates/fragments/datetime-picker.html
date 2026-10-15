@@ -1,44 +1,37 @@
 <div xmlns:th="http://www.thymeleaf.org">
-    <!-- Reusable Datetime Picker Component (Datepicker popover + Timepicker popover + Hidden dateTime input) -->
-    <div th:fragment="picker" class="booking-datetime-picker-wrapper">
-        <div class="booking-datetime">
-            <!-- Date Picker -->
-            <div class="datepicker" id="datepicker">
-                <button type="button" class="form-control datepicker-trigger" id="datepickerTrigger"
-                    aria-haspopup="dialog" aria-expanded="false" aria-controls="calendarPopover">
-                    <span id="datepickerValue" class="datepicker-value">Elige una fecha</span>
-                    <span aria-hidden="true">▾</span>
-                </button>
-                <div class="calendar-popover" id="calendarPopover" role="dialog"
-                    aria-label="Calendario de disponibilidad" hidden>
-                    <div class="calendar-header">
-                        <button type="button" id="previousMonth" aria-label="Mes anterior">&lsaquo;</button>
-                        <strong id="calendarMonth">—</strong>
-                        <button type="button" id="nextMonth" aria-label="Mes siguiente">&rsaquo;</button>
-                    </div>
-                    <div class="calendar-weekdays">
-                        <span>L</span><span>M</span><span>X</span><span>J</span><span>V</span><span>S</span><span>D</span>
-                    </div>
-                    <div class="calendar-days" id="calendarDays"></div>
-                    <small id="availabilityMessage" class="availability-message">
-                        Consultando disponibilidad...
-                    </small>
+    <!-- Calendario de la reserva: días del mes y horas libres del día elegido, siempre a la vista (booking-picker.js) -->
+    <div th:fragment="picker" class="booking-picker" id="bookingPicker">
+        <div class="booking-picker-panels">
+            <section class="booking-calendar" aria-labelledby="calendarMonth">
+                <header class="booking-calendar-head">
+                    <button type="button" class="booking-calendar-nav" id="previousMonth" aria-label="Mes anterior">
+                        <i class="lucide-chevron-left" aria-hidden="true"></i>
+                    </button>
+                    <h3 class="booking-calendar-month" id="calendarMonth" aria-live="polite">Octubre 2026</h3>
+                    <button type="button" class="booking-calendar-nav" id="nextMonth" aria-label="Mes siguiente">
+                        <i class="lucide-chevron-right" aria-hidden="true"></i>
+                    </button>
+                </header>
+                <div class="booking-calendar-weekdays" aria-hidden="true">
+                    <span>L</span><span>M</span><span>X</span><span>J</span><span>V</span><span>S</span><span>D</span>
                 </div>
-            </div>
+                <div class="booking-calendar-days" id="calendarDays"></div>
+                <ul class="booking-calendar-legend">
+                    <li><span class="legend-swatch legend-swatch--free" aria-hidden="true"></span> Con horas libres</li>
+                    <li><span class="legend-swatch legend-swatch--full" aria-hidden="true"></span> Completo</li>
+                    <li><span class="legend-swatch legend-swatch--closed" aria-hidden="true"></span> Cerrado</li>
+                </ul>
+            </section>
 
-            <!-- Time Picker -->
-            <div class="timepicker" id="timepicker">
-                <button type="button" class="form-control timepicker-trigger" id="timepickerTrigger"
-                    aria-haspopup="listbox" aria-expanded="false" disabled>
-                    <span id="timepickerValue">Selecciona una hora</span>
-                    <span aria-hidden="true">▾</span>
-                </button>
-                <div class="timepicker-popover" id="timepickerPopover" role="listbox"
-                    aria-label="Horas disponibles" hidden>
-                    <div class="timepicker-options" id="timepickerOptions"></div>
+            <section class="booking-times" aria-labelledby="bookingTimesTitle">
+                <h3 class="booking-times-title" id="bookingTimesTitle">Horas libres</h3>
+                <div class="booking-times-body" id="timeOptions">
+                    <p class="booking-times-hint">Elige un día para ver las horas libres.</p>
                 </div>
-            </div>
+            </section>
         </div>
+
+        <p class="booking-picker-message" id="availabilityMessage" role="status"></p>
         <input type="hidden" name="dateTime" id="dateTime" required>
     </div>
 </div>

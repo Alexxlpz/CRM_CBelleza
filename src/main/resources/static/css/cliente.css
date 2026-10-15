@@ -177,9 +177,26 @@
     align-items: center;
 }
 
+.booking-confirm {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 28px;
+}
+
+/* Resumen de lo elegido, justo encima del botón de reservar */
+.booking-summary {
+    margin: 0;
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+.booking-summary strong {
+    color: var(--text-main);
+}
+
 .btn-large-submit {
     width: 100%;
-    margin-top: 30px;
     padding: 16px;
     font-size: 16px;
     font-weight: 700;
@@ -370,6 +387,20 @@
 
 .booking-datetime-group {
     margin-top: 30px;
+    scroll-margin-top: 96px; /* que la barra de navegación fija no tape el paso 2 */
+}
+
+.booking-services {
+    scroll-margin-top: 96px;
+}
+
+/* Móvil: tras elegir servicio solo queda a la vista el elegido (booking-picker.js) */
+.booking-services.is-collapsed .treatment-select-card:not(:has(input:checked)) {
+    display: none;
+}
+
+.booking-services.is-collapsed .treatment-select-grid {
+    margin-bottom: 12px;
 }
 
 /* Estados controlados por JavaScript (centers.html) */
@@ -485,5 +516,42 @@
     .center-hero-photo {
         margin: -24px -16px 20px;
         aspect-ratio: 2 / 1;
+    }
+}
+
+/* Reserva en escritorio: todo el ancho, los servicios a la izquierda y la fecha,
+   la hora y el botón de reservar a la derecha. */
+@media (min-width: 1100px) {
+    .main-container.booking-page {
+        max-width: none;
+        padding: 32px 40px 48px;
+    }
+
+    .booking-form--split {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-rows: auto 1fr;
+        column-gap: 40px;
+        align-items: start;
+    }
+
+    .booking-form--split .treatment-select-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    }
+
+    .booking-form--split .booking-services {
+        grid-column: 1;
+        grid-row: 1 / span 2;
+        margin-bottom: 0;
+    }
+
+    .booking-form--split .booking-datetime-group {
+        grid-column: 2;
+        margin-top: 0;
+    }
+
+    .booking-form--split .booking-confirm {
+        grid-column: 2;
+        margin-top: 24px;
     }
 }

@@ -11,7 +11,7 @@
 <body>
     <div th:replace="~{fragments/navbar :: worker('/worker/dashboard', 'Volver al panel', ${notifications})}"></div>
 
-    <main class="main-container settings-page">
+    <main class="main-container settings-page settings-page--split">
         <header class="settings-header">
             <div>
                 <h1 th:text="${center.name}">Mi Centro</h1>
@@ -26,195 +26,199 @@
             <span>Estamos revisando tu centro: todavía no sale en el buscador ni en el mapa. Mientras tanto, prepara tratamientos y precios para que los clientes puedan reservar desde el primer día.</span>
         </div>
 
-        <section class="settings-card">
-            <form th:action="@{/worker/center}" method="post">
-                <h2 class="settings-section-title"><i class="lucide-building-2" aria-hidden="true"></i> Información Comercial del Centro</h2>
-                <div class="settings-grid">
-                    <div class="span-full">
-                        <label for="centerName" class="form-label">Nombre Oficial del Salón / Centro</label>
-                        <input type="text" id="centerName" name="centerName" class="form-control" th:value="${center.name}" required>
-                    </div>
-                    <div class="span-full">
-                        <label for="centerAddress" class="form-label">Dirección Completa</label>
-                        <input type="text" id="centerAddress" name="centerAddress" class="form-control" th:value="${center.address}" placeholder="Calle, número, código postal y ciudad">
-                    </div>
-                    <div>
-                        <label for="centerPhone" class="form-label">Teléfono de Atención al Cliente</label>
-                        <input type="tel" id="centerPhone" name="centerPhone" class="form-control" th:value="${center.phone}" placeholder="Ej: 912 345 678">
-                    </div>
-                    <div>
-                        <label for="centerEmail" class="form-label">Correo Comercial de Contacto</label>
-                        <input type="email" id="centerEmail" name="centerEmail" class="form-control" th:value="${center.email}" placeholder="info@tucentro.com">
-                    </div>
-                    <div class="span-full">
-                        <span class="form-label">Ubicación en el mapa</span>
-                        <div th:replace="~{fragments/location-picker :: picker('centerAddress', ${center.latitude}, ${center.longitude})}"></div>
-                    </div>
-                    <div>
-                        <label for="cabins" class="form-label">Cabinas o Puestos de Trabajo</label>
-                        <input type="number" id="cabins" name="cabins" class="form-control" th:value="${center.cabins}"
-                               min="1" max="50" step="1" required aria-describedby="cabinsHelp">
-                        <p class="form-help" id="cabinsHelp">Citas que podéis atender a la vez, si hay profesionales libres.</p>
-                    </div>
-                    <div>
-                        <label for="timeZone" class="form-label">Zona Horaria del Centro</label>
-                        <select id="timeZone" name="timeZone" class="form-control">
-                            <option th:each="zone : ${timeZones}" th:value="${zone.key}" th:text="${zone.value}"
-                                    th:selected="${zone.key == center.timeZone}">España (península y Baleares)</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="settings-section">
-                    <h2 class="settings-section-title"><i class="lucide-user-cog" aria-hidden="true"></i> Mi Cuenta de Profesional</h2>
+        <div class="settings-columns">
+            <section class="settings-card">
+                <form th:action="@{/worker/center}" method="post">
+                    <h2 class="settings-section-title"><i class="lucide-building-2" aria-hidden="true"></i> Información Comercial del Centro</h2>
                     <div class="settings-grid">
-                    <div>
-                        <label for="workerName" class="form-label">Nombre del Profesional / Gestor</label>
-                        <input type="text" id="workerName" name="workerName" class="form-control" th:value="${worker.name}" required autocomplete="name">
-                    </div>
-                    <div>
-                        <label for="workerPhone" class="form-label">Teléfono Profesional</label>
-                        <input type="tel" id="workerPhone" name="workerPhone" class="form-control" th:value="${worker.phone}" placeholder="Ej: 600 000 000" autocomplete="tel">
-                    </div>
-                    <div class="span-full">
-                        <label for="workerEmail" class="form-label">Correo de Acceso (Usuario)</label>
-                        <input type="email" id="workerEmail" class="form-control" th:value="${worker.email}" disabled>
-                    </div>
+                        <div class="span-full">
+                            <label for="centerName" class="form-label">Nombre Oficial del Salón / Centro</label>
+                            <input type="text" id="centerName" name="centerName" class="form-control" th:value="${center.name}" required>
+                        </div>
+                        <div class="span-full">
+                            <label for="centerAddress" class="form-label">Dirección Completa</label>
+                            <input type="text" id="centerAddress" name="centerAddress" class="form-control" th:value="${center.address}" placeholder="Calle, número, código postal y ciudad">
+                        </div>
+                        <div>
+                            <label for="centerPhone" class="form-label">Teléfono de Atención al Cliente</label>
+                            <input type="tel" id="centerPhone" name="centerPhone" class="form-control" th:value="${center.phone}" placeholder="Ej: 912 345 678">
+                        </div>
+                        <div>
+                            <label for="centerEmail" class="form-label">Correo Comercial de Contacto</label>
+                            <input type="email" id="centerEmail" name="centerEmail" class="form-control" th:value="${center.email}" placeholder="info@tucentro.com">
+                        </div>
+                        <div class="span-full">
+                            <span class="form-label">Ubicación en el mapa</span>
+                            <div th:replace="~{fragments/location-picker :: picker('centerAddress', ${center.latitude}, ${center.longitude})}"></div>
+                        </div>
+                        <div>
+                            <label for="cabins" class="form-label">Cabinas o Puestos de Trabajo</label>
+                            <input type="number" id="cabins" name="cabins" class="form-control" th:value="${center.cabins}"
+                                   min="1" max="50" step="1" required aria-describedby="cabinsHelp">
+                            <p class="form-help" id="cabinsHelp">Citas que podéis atender a la vez, si hay profesionales libres.</p>
+                        </div>
+                        <div>
+                            <label for="timeZone" class="form-label">Zona Horaria del Centro</label>
+                            <select id="timeZone" name="timeZone" class="form-control">
+                                <option th:each="zone : ${timeZones}" th:value="${zone.key}" th:text="${zone.value}"
+                                        th:selected="${zone.key == center.timeZone}">España (península y Baleares)</option>
+                            </select>
+                        </div>
                     </div>
 
-                    <h3 class="settings-subsection-title"><i class="lucide-key" aria-hidden="true"></i> Cambiar Contraseña <span class="settings-optional">(Opcional)</span></h3>
-                    <div class="settings-grid">
-                    <div>
-                        <label for="newPassword" class="form-label">Nueva Contraseña</label>
-                        <input type="password" id="newPassword" name="newPassword" class="form-control" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
-                    </div>
-                    <div>
-                        <label for="confirmPassword" class="form-label">Confirmar Contraseña</label>
-                        <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" placeholder="Repite la contraseña" autocomplete="new-password">
-                    </div>
-                    </div>
-                </div>
+                    <div class="settings-section">
+                        <h2 class="settings-section-title"><i class="lucide-user-cog" aria-hidden="true"></i> Mi Cuenta de Profesional</h2>
+                        <div class="settings-grid">
+                        <div>
+                            <label for="workerName" class="form-label">Nombre del Profesional / Gestor</label>
+                            <input type="text" id="workerName" name="workerName" class="form-control" th:value="${worker.name}" required autocomplete="name">
+                        </div>
+                        <div>
+                            <label for="workerPhone" class="form-label">Teléfono Profesional</label>
+                            <input type="tel" id="workerPhone" name="workerPhone" class="form-control" th:value="${worker.phone}" placeholder="Ej: 600 000 000" autocomplete="tel">
+                        </div>
+                        <div class="span-full">
+                            <label for="workerEmail" class="form-label">Correo de Acceso (Usuario)</label>
+                            <input type="email" id="workerEmail" class="form-control" th:value="${worker.email}" disabled>
+                        </div>
+                        </div>
 
-                <div class="settings-actions">
-                    <a href="/worker/dashboard" class="btn btn-secondary">Cancelar</a>
-                    <button type="submit" class="btn btn-primary"><i class="lucide-save" aria-hidden="true"></i> Guardar Información</button>
-                </div>
-            </form>
-        </section>
-
-        <section class="settings-card" id="foto">
-            <h2 class="settings-section-title"><i class="lucide-image" aria-hidden="true"></i> Foto del centro</h2>
-            <p class="form-help settings-intro">Sale en el buscador de centros y arriba de la ficha de tu centro: ayuda a que tus clientes lo reconozcan de un vistazo.</p>
-            <div class="alert alert-success" role="status" th:if="${photoMessage != null}">
-                <i class="lucide-check-circle-2" aria-hidden="true"></i>
-                <span th:text="${photoMessage}">Foto guardada.</span>
-            </div>
-            <div class="alert alert-error" role="alert" th:if="${photoError != null}">
-                <i class="lucide-alert-circle" aria-hidden="true"></i>
-                <span th:text="${photoError}">Sube la foto en JPG o PNG.</span>
-            </div>
-            <form th:action="@{/worker/center/photo}" method="post" enctype="multipart/form-data" id="centerPhotoForm">
-                <div th:replace="~{fragments/photo-picker :: picker('centerPhoto', ${center.photoUrl}, ${center.initials}, ${maxPhotoMb})}"></div>
-            </form>
-            <form th:if="${center.photoUrl != null}" th:action="@{/worker/center/photo/delete}" method="post" id="removePhotoForm"
-                  data-confirm="Tu centro saldrá en el buscador con sus iniciales hasta que subas otra." data-confirm-title="¿Quitar la foto?"
-                  data-confirm-button="Quitar foto"></form>
-            <div class="settings-actions settings-actions--stack">
-                <button type="submit" form="removePhotoForm" class="btn btn-secondary" th:if="${center.photoUrl != null}">
-                    <i class="lucide-trash-2" aria-hidden="true"></i> Quitar foto
-                </button>
-                <button type="submit" form="centerPhotoForm" class="btn btn-primary">
-                    <i class="lucide-upload" aria-hidden="true"></i> Guardar foto
-                </button>
-            </div>
-        </section>
-
-        <section class="settings-card" id="puntos">
-            <form th:action="@{/worker/center/loyalty}" method="post" id="loyaltyForm"
-                  th:with="edited=${loyaltyForm != null}, modeValue=${loyaltyForm != null ? loyaltyForm.mode() : center.loyaltyMode.name()}">
-                <h2 class="settings-section-title"><i class="lucide-gift" aria-hidden="true"></i> Tarjeta de puntos</h2>
-                <p class="form-help settings-intro">Tus clientes suman puntos con cada tratamiento completado y cada producto que compran,
-                    y ven cómo la llevan en «Mis citas». Al llegar a la cifra que elijas, canjeas la recompensa desde su ficha.</p>
-
-                <div class="alert alert-success" role="status" th:if="${loyaltyMessage != null}">
-                    <i class="lucide-check-circle-2" aria-hidden="true"></i>
-                    <span th:text="${loyaltyMessage}">Tarjeta de puntos guardada.</span>
-                </div>
-                <div class="alert alert-error" role="alert" th:if="${loyaltyError != null}">
-                    <i class="lucide-alert-circle" aria-hidden="true"></i>
-                    <span th:text="${loyaltyError}">Escribe qué recompensa da el centro.</span>
-                </div>
-
-                <div class="settings-grid">
-                    <div class="span-full">
-                        <label for="loyaltyMode" class="form-label">Cómo se ganan los puntos</label>
-                        <select id="loyaltyMode" name="mode" class="form-control">
-                            <option th:each="mode : ${loyaltyModes}" th:value="${mode.name()}" th:text="${mode.label()}"
-                                    th:selected="${mode.name() == modeValue}">Desactivada</option>
-                        </select>
+                        <h3 class="settings-subsection-title"><i class="lucide-key" aria-hidden="true"></i> Cambiar Contraseña <span class="settings-optional">(Opcional)</span></h3>
+                        <div class="settings-grid">
+                        <div>
+                            <label for="newPassword" class="form-label">Nueva Contraseña</label>
+                            <input type="password" id="newPassword" name="newPassword" class="form-control" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+                        </div>
+                        <div>
+                            <label for="confirmPassword" class="form-label">Confirmar Contraseña</label>
+                            <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" placeholder="Repite la contraseña" autocomplete="new-password">
+                        </div>
+                        </div>
                     </div>
-                    <div data-loyalty-field th:hidden="${modeValue == 'OFF'}">
-                        <label for="loyaltyPointsPerUnit" class="form-label" id="loyaltyPointsLabel"
-                               th:text="${modeValue == 'PER_ITEM'} ? 'Puntos por tratamiento o producto' : 'Puntos por cada euro'">Puntos por cada euro</label>
-                        <input type="number" id="loyaltyPointsPerUnit" name="pointsPerUnit" class="form-control"
-                               th:value="${edited ? loyaltyForm.pointsPerUnit() : center.loyaltyPointsPerUnit}" min="1" max="1000" step="1">
-                    </div>
-                    <div data-loyalty-field th:hidden="${modeValue == 'OFF'}">
-                        <label for="loyaltyRewardPoints" class="form-label">Puntos para la recompensa</label>
-                        <input type="number" id="loyaltyRewardPoints" name="rewardPoints" class="form-control"
-                               th:value="${edited ? loyaltyForm.rewardPoints() : center.loyaltyRewardPoints}" min="1" max="100000" step="1">
-                    </div>
-                    <div class="span-full" data-loyalty-field th:hidden="${modeValue == 'OFF'}">
-                        <label for="loyaltyRewardText" class="form-label">Recompensa</label>
-                        <input type="text" id="loyaltyRewardText" name="rewardText" class="form-control" maxlength="200"
-                               th:value="${edited ? loyaltyForm.rewardText() : center.loyaltyRewardText}" placeholder="Ej: Manicura semipermanente gratis"
-                               aria-describedby="loyaltyExample loyaltyKeepHelp">
-                        <p class="form-help" id="loyaltyExample" aria-live="polite"></p>
-                        <p class="form-help" id="loyaltyKeepHelp">Los cambios cuentan para las próximas citas y compras: los puntos que ya tiene cada cliente no cambian.</p>
-                    </div>
-                </div>
-                <div class="settings-actions">
-                    <button type="submit" class="btn btn-primary"><i class="lucide-save" aria-hidden="true"></i> Guardar tarjeta de puntos</button>
-                </div>
-            </form>
-        </section>
 
-        <section class="settings-card" id="google-calendar">
-            <h2 class="settings-section-title"><i class="lucide-calendar-check" aria-hidden="true"></i> Google Calendar</h2>
-            <div class="sync-setting">
-                <div class="sync-setting-text">
-                    <p class="sync-setting-title" id="googleCalendarLabel">Guardar mis citas en Google Calendar</p>
-                    <p class="sync-setting-help" th:if="${calendarSync.connected}">
-                        Activado<th:block th:if="${calendarSync.googleEmail != null}"> con <strong th:text="${calendarSync.googleEmail}">cuenta@gmail.com</strong></th:block>.
-                        Las citas que confirmes aparecen en el calendario «Cuquora» de tu Google y se borran si las rechazas.
-                    </p>
-                    <p class="sync-setting-help" th:if="${calendarSync.available and !calendarSync.connected}">
-                        Copia tus citas confirmadas a un calendario «Cuquora» en tu cuenta de Google. Puedes usar cualquier
-                        cuenta de Google, aunque entres en Cuquora con tu correo y contraseña. Cuquora solo podrá tocar ese calendario.
-                        Cada cita incluye el tratamiento y el nombre y teléfono del cliente: usa una cuenta de Google del centro
-                        o una que solo uses tú (más en la <a href="/privacy#privacidad-6">política de privacidad</a>).
-                    </p>
-                    <p class="sync-setting-help" th:unless="${calendarSync.available}">
-                        Próximamente: podrás copiar tus citas confirmadas a tu Google Calendar.
-                    </p>
-                </div>
-                <form th:if="${calendarSync.connected}" th:action="@{/worker/google-calendar/disconnect}" method="post"
-                      data-confirm="Se dejarán de copiar tus citas y se borrará el calendario «Cuquora» de tu cuenta de Google. Tus citas en Cuquora no cambian."
-                      data-confirm-title="¿Desactivar la sincronización?" data-confirm-button="Desactivar">
-                    <button type="submit" class="switch" role="switch" aria-checked="true" aria-labelledby="googleCalendarLabel"
-                            title="Desactivar la sincronización">
-                        <span class="switch-thumb" aria-hidden="true"></span>
-                    </button>
+                    <div class="settings-actions">
+                        <a href="/worker/dashboard" class="btn btn-secondary">Cancelar</a>
+                        <button type="submit" class="btn btn-primary"><i class="lucide-save" aria-hidden="true"></i> Guardar Información</button>
+                    </div>
                 </form>
-                <form th:unless="${calendarSync.connected}" th:action="@{/worker/google-calendar/connect}" method="post">
-                    <button type="submit" class="switch" role="switch" aria-checked="false" aria-labelledby="googleCalendarLabel"
-                            th:disabled="${!calendarSync.available}"
-                            th:title="${calendarSync.available} ? 'Activar: te pediremos permiso en Google' : 'Todavía no disponible'">
-                        <span class="switch-thumb" aria-hidden="true"></span>
-                    </button>
-                </form>
+            </section>
+
+            <div class="settings-side">
+                <section class="settings-card" id="foto">
+                    <h2 class="settings-section-title"><i class="lucide-image" aria-hidden="true"></i> Foto del centro</h2>
+                    <p class="form-help settings-intro">Sale en el buscador de centros y arriba de la ficha de tu centro: ayuda a que tus clientes lo reconozcan de un vistazo.</p>
+                    <div class="alert alert-success" role="status" th:if="${photoMessage != null}">
+                        <i class="lucide-check-circle-2" aria-hidden="true"></i>
+                        <span th:text="${photoMessage}">Foto guardada.</span>
+                    </div>
+                    <div class="alert alert-error" role="alert" th:if="${photoError != null}">
+                        <i class="lucide-alert-circle" aria-hidden="true"></i>
+                        <span th:text="${photoError}">Sube la foto en JPG o PNG.</span>
+                    </div>
+                    <form th:action="@{/worker/center/photo}" method="post" enctype="multipart/form-data" id="centerPhotoForm">
+                        <div th:replace="~{fragments/photo-picker :: picker('centerPhoto', ${center.photoUrl}, ${center.initials}, ${maxPhotoMb})}"></div>
+                    </form>
+                    <form th:if="${center.photoUrl != null}" th:action="@{/worker/center/photo/delete}" method="post" id="removePhotoForm"
+                          data-confirm="Tu centro saldrá en el buscador con sus iniciales hasta que subas otra." data-confirm-title="¿Quitar la foto?"
+                          data-confirm-button="Quitar foto"></form>
+                    <div class="settings-actions settings-actions--stack">
+                        <button type="submit" form="removePhotoForm" class="btn btn-secondary" th:if="${center.photoUrl != null}">
+                            <i class="lucide-trash-2" aria-hidden="true"></i> Quitar foto
+                        </button>
+                        <button type="submit" form="centerPhotoForm" class="btn btn-primary">
+                            <i class="lucide-upload" aria-hidden="true"></i> Guardar foto
+                        </button>
+                    </div>
+                </section>
+
+                <section class="settings-card" id="puntos">
+                    <form th:action="@{/worker/center/loyalty}" method="post" id="loyaltyForm"
+                          th:with="edited=${loyaltyForm != null}, modeValue=${loyaltyForm != null ? loyaltyForm.mode() : center.loyaltyMode.name()}">
+                        <h2 class="settings-section-title"><i class="lucide-gift" aria-hidden="true"></i> Tarjeta de puntos</h2>
+                        <p class="form-help settings-intro">Tus clientes suman puntos con cada tratamiento completado y cada producto que compran,
+                            y ven cómo la llevan en «Mis citas». Al llegar a la cifra que elijas, canjeas la recompensa desde su ficha.</p>
+
+                        <div class="alert alert-success" role="status" th:if="${loyaltyMessage != null}">
+                            <i class="lucide-check-circle-2" aria-hidden="true"></i>
+                            <span th:text="${loyaltyMessage}">Tarjeta de puntos guardada.</span>
+                        </div>
+                        <div class="alert alert-error" role="alert" th:if="${loyaltyError != null}">
+                            <i class="lucide-alert-circle" aria-hidden="true"></i>
+                            <span th:text="${loyaltyError}">Escribe qué recompensa da el centro.</span>
+                        </div>
+
+                        <div class="settings-grid">
+                            <div class="span-full">
+                                <label for="loyaltyMode" class="form-label">Cómo se ganan los puntos</label>
+                                <select id="loyaltyMode" name="mode" class="form-control">
+                                    <option th:each="mode : ${loyaltyModes}" th:value="${mode.name()}" th:text="${mode.label()}"
+                                            th:selected="${mode.name() == modeValue}">Desactivada</option>
+                                </select>
+                            </div>
+                            <div data-loyalty-field th:hidden="${modeValue == 'OFF'}">
+                                <label for="loyaltyPointsPerUnit" class="form-label" id="loyaltyPointsLabel"
+                                       th:text="${modeValue == 'PER_ITEM'} ? 'Puntos por tratamiento o producto' : 'Puntos por cada euro'">Puntos por cada euro</label>
+                                <input type="number" id="loyaltyPointsPerUnit" name="pointsPerUnit" class="form-control"
+                                       th:value="${edited ? loyaltyForm.pointsPerUnit() : center.loyaltyPointsPerUnit}" min="1" max="1000" step="1">
+                            </div>
+                            <div data-loyalty-field th:hidden="${modeValue == 'OFF'}">
+                                <label for="loyaltyRewardPoints" class="form-label">Puntos para la recompensa</label>
+                                <input type="number" id="loyaltyRewardPoints" name="rewardPoints" class="form-control"
+                                       th:value="${edited ? loyaltyForm.rewardPoints() : center.loyaltyRewardPoints}" min="1" max="100000" step="1">
+                            </div>
+                            <div class="span-full" data-loyalty-field th:hidden="${modeValue == 'OFF'}">
+                                <label for="loyaltyRewardText" class="form-label">Recompensa</label>
+                                <input type="text" id="loyaltyRewardText" name="rewardText" class="form-control" maxlength="200"
+                                       th:value="${edited ? loyaltyForm.rewardText() : center.loyaltyRewardText}" placeholder="Ej: Manicura semipermanente gratis"
+                                       aria-describedby="loyaltyExample loyaltyKeepHelp">
+                                <p class="form-help" id="loyaltyExample" aria-live="polite"></p>
+                                <p class="form-help" id="loyaltyKeepHelp">Los cambios cuentan para las próximas citas y compras: los puntos que ya tiene cada cliente no cambian.</p>
+                            </div>
+                        </div>
+                        <div class="settings-actions">
+                            <button type="submit" class="btn btn-primary"><i class="lucide-save" aria-hidden="true"></i> Guardar tarjeta de puntos</button>
+                        </div>
+                    </form>
+                </section>
+
+                <section class="settings-card" id="google-calendar">
+                    <h2 class="settings-section-title"><i class="lucide-calendar-check" aria-hidden="true"></i> Google Calendar</h2>
+                    <div class="sync-setting">
+                        <div class="sync-setting-text">
+                            <p class="sync-setting-title" id="googleCalendarLabel">Guardar mis citas en Google Calendar</p>
+                            <p class="sync-setting-help" th:if="${calendarSync.connected}">
+                                Activado<th:block th:if="${calendarSync.googleEmail != null}"> con <strong th:text="${calendarSync.googleEmail}">cuenta@gmail.com</strong></th:block>.
+                                Las citas que confirmes aparecen en el calendario «Cuquora» de tu Google y se borran si las rechazas.
+                            </p>
+                            <p class="sync-setting-help" th:if="${calendarSync.available and !calendarSync.connected}">
+                                Copia tus citas confirmadas a un calendario «Cuquora» en tu cuenta de Google. Puedes usar cualquier
+                                cuenta de Google, aunque entres en Cuquora con tu correo y contraseña. Cuquora solo podrá tocar ese calendario.
+                                Cada cita incluye el tratamiento y el nombre y teléfono del cliente: usa una cuenta de Google del centro
+                                o una que solo uses tú (más en la <a href="/privacy#privacidad-6">política de privacidad</a>).
+                            </p>
+                            <p class="sync-setting-help" th:unless="${calendarSync.available}">
+                                Próximamente: podrás copiar tus citas confirmadas a tu Google Calendar.
+                            </p>
+                        </div>
+                        <form th:if="${calendarSync.connected}" th:action="@{/worker/google-calendar/disconnect}" method="post"
+                              data-confirm="Se dejarán de copiar tus citas y se borrará el calendario «Cuquora» de tu cuenta de Google. Tus citas en Cuquora no cambian."
+                              data-confirm-title="¿Desactivar la sincronización?" data-confirm-button="Desactivar">
+                            <button type="submit" class="switch" role="switch" aria-checked="true" aria-labelledby="googleCalendarLabel"
+                                    title="Desactivar la sincronización">
+                                <span class="switch-thumb" aria-hidden="true"></span>
+                            </button>
+                        </form>
+                        <form th:unless="${calendarSync.connected}" th:action="@{/worker/google-calendar/connect}" method="post">
+                            <button type="submit" class="switch" role="switch" aria-checked="false" aria-labelledby="googleCalendarLabel"
+                                    th:disabled="${!calendarSync.available}"
+                                    th:title="${calendarSync.available} ? 'Activar: te pediremos permiso en Google' : 'Todavía no disponible'">
+                                <span class="switch-thumb" aria-hidden="true"></span>
+                            </button>
+                        </form>
+                    </div>
+                </section>
             </div>
-        </section>
+        </div>
     </main>
 
     <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Panel de gestión de centros.')}"></div>
