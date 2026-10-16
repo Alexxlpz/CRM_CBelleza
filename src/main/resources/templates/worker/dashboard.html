@@ -7,16 +7,18 @@
 <body>
     <div th:replace="~{fragments/navbar :: worker(null, null, ${notifications})}"></div>
 
-    <main class="main-container">
+    <main class="main-container main-container--wide">
         <div class="worker-dashboard-container">
-            <header class="worker-welcome-banner">
-                <h1 th:text="'Hola, ' + ${sessionUserName}">Hola</h1>
-                <p th:text="'Panel de gestión de ' + ${sessionCenterName}">Panel de gestión del centro</p>
+            <header class="worker-welcome-banner" th:classappend="${centerPhotoUrl != null} ? 'has-photo'">
+                <img class="worker-welcome-photo" th:if="${centerPhotoUrl != null}" th:src="${centerPhotoUrl}" alt="" loading="lazy">
+                <div class="worker-welcome-text">
+                    <h1 th:text="'Hola, ' + ${sessionUserName}">Hola</h1>
+                    <p th:text="'Panel de gestión de ' + ${sessionCenterName}">Panel de gestión del centro</p>
+                </div>
+                <div th:replace="~{worker/fragments/dashboard-counters :: counters(${todayAppointmentsCount}, ${tomorrowAppointmentsCount}, ${pendingAppointmentsCount}, ${lowStockCount})}"></div>
             </header>
 
             <div th:replace="~{fragments/alerts :: flash}"></div>
-
-            <div th:replace="~{worker/fragments/dashboard-counters :: counters(${todayAppointmentsCount}, ${tomorrowAppointmentsCount}, ${pendingAppointmentsCount}, ${lowStockCount})}"></div>
 
             <nav class="actions-grid" aria-label="Accesos directos">
                 <a href="/worker/calendar" class="action-card glass-panel">

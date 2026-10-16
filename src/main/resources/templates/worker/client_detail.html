@@ -3,6 +3,7 @@
 <head>
     <th:block th:replace="~{fragments/head :: meta('Ficha de Cliente - Cuquora CRM')}"></th:block>
     <link rel="stylesheet" th:href="@{/css/clients.css}">
+    <link rel="stylesheet" th:href="@{/css/product-sale.css}">
     <script th:src="@{/js/unsaved-changes.js}" defer></script>
     <script th:src="@{/js/treatment-summary.js}" defer></script>
     <script th:src="@{/js/product-sale.js}" defer></script>
@@ -352,7 +353,7 @@
     </div>
 
     <div th:replace="~{fragments/treatment-summary :: modal}"></div>
-    <div th:replace="~{fragments/product-sale :: modal(${client}, ${saleItems}, ${loyalty}, ${lowStockThreshold})}"></div>
+    <div th:replace="~{fragments/product-sale :: modal(${client}, null, ${saleItems}, ${loyalty})}"></div>
 
     <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Panel de gestión de centros.')}"></div>
 

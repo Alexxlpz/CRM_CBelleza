@@ -3,6 +3,8 @@
 <head>
     <th:block th:replace="~{fragments/head :: meta('Control de Inventario - Cuquora CRM')}"></th:block>
     <link rel="stylesheet" th:href="@{/css/inventario.css}">
+    <link rel="stylesheet" th:href="@{/css/product-sale.css}">
+    <script th:src="@{/js/product-sale.js}" defer></script>
     <script th:src="@{/js/sheets.js}" defer></script>
 </head>
 <body>
@@ -14,10 +16,15 @@
                 <h1>Gestión de Inventario</h1>
                 <p th:text="${#lists.size(inventoryItems)} + ' productos registrados en el stock del salón'">0 productos registrados</p>
             </div>
-            <button type="button" class="btn btn-primary btn-add-product" data-sheet-open="addProductModal">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                <span class="btn-add-label">Añadir Producto</span>
-            </button>
+            <div class="inventory-header-actions">
+                <button type="button" class="btn btn-secondary" data-modal-open="productSaleModal" th:disabled="${inventoryItems.isEmpty()}">
+                    <i class="lucide-shopping-bag" aria-hidden="true"></i> Vender producto
+                </button>
+                <button type="button" class="btn btn-primary btn-add-product" data-sheet-open="addProductModal">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    <span class="btn-add-label">Añadir Producto</span>
+                </button>
+            </div>
         </div>
 
         <div th:replace="~{fragments/alerts :: flash}"></div>
@@ -133,6 +140,7 @@
     </main>
 
     <div th:replace="~{worker/fragments/inventory-modals :: addProductSheet(${catalogProducts})}"></div>
+    <div th:replace="~{fragments/product-sale :: modal(null, ${saleClients}, ${inventoryItems}, ${loyalty})}"></div>
 
     <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Panel de gestión de centros.')}"></div>
 

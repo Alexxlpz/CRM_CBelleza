@@ -130,6 +130,35 @@ class ProductSaleAndLoyaltyTests {
     }
 
     @Test
+    void saleFromInventoryChoosesTheClient() throws Exception {
+        int stockBefore = item.getStock();
+
+        mvc.perform(post("/worker/inventory/sales").with(csrf())
+                        .param("clientId", String.valueOf(sofia.getId()))
+                        .param("inventoryId", String.valueOf(item.getId()))
+                        .param("quantity", "1")
+                        .with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(flash().attribute("successMessage", containsString("Venta guardada: 1 × " + item.getProduct().getName())));
+
+        assertEquals(stockBefore - 1, inventories.findById(item.getId()).orElseThrow().getStock());
+        assertEquals(1, sales.findByCenterIdAndClientIdOrderBySoldAtDesc(center.getId(), sofia.getId()).size());
+    }
+
+    @Test
+    void saleFromInventoryNeedsAClient() throws Exception {
+        int stockBefore = item.getStock();
+
+        mvc.perform(post("/worker/inventory/sales").with(csrf())
+                        .param("inventoryId", String.valueOf(item.getId()))
+                        .param("quantity", "1")
+                        .with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
+                .andExpect(flash().attribute("errorMessage", "Elige el cliente que se lleva el producto."));
+
+        assertEquals(stockBefore, inventories.findById(item.getId()).orElseThrow().getStock());
+    }
+
+    @Test
     void cancellingASaleReturnsStockAndPoints() throws Exception {
         int stock = item.getStock();
         int pointsBefore = balance();

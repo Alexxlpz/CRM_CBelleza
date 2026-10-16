@@ -24,7 +24,7 @@
                 Solicitar Cita de Estética
             </h2>
 
-            <form th:action="@{/client/booking}" method="post" id="bookingForm"
+            <form th:action="@{/client/booking}" method="post" id="bookingForm" novalidate
                   th:classappend="${not #lists.isEmpty(treatments)} ? 'booking-form--split'">
                 <input type="hidden" name="centerId" th:value="${center.id}">
 
@@ -32,9 +32,9 @@
                 <div class="form-group booking-services">
                     <label class="form-label booking-step-label">1. Elige un servicio disponible</label>
                     <div class="treatment-select-grid" th:if="${not #lists.isEmpty(treatments)}">
-                        <label class="treatment-select-card" th:each="t, iter : ${treatments}">
+                        <label class="treatment-select-card" th:each="t : ${treatments}">
                             <input type="radio" name="treatmentId" th:value="${t.id}"
-                                th:attr="data-duration=${t.duration}" th:checked="${iter.index == 0}" required>
+                                th:attr="data-duration=${t.duration}" required>
                             <span class="treatment-card-title" th:text="${t.name}">Manicura</span>
                             <span class="treatment-card-desc" th:text="${t.description}">Descripción del
                                 servicio...</span>
@@ -61,7 +61,7 @@
                 </div>
 
                 <div class="booking-confirm" th:if="${not #lists.isEmpty(treatments)}">
-                    <p class="booking-summary" id="bookingSummary">Elige un día y una hora para tu cita.</p>
+                    <p class="booking-summary" id="bookingSummary">Elige un servicio, un día y una hora para tu cita.</p>
                     <button type="submit" class="btn btn-primary btn-large-submit">
                         <i class="lucide-check-circle" aria-hidden="true"></i> Confirmar y reservar cita
                     </button>

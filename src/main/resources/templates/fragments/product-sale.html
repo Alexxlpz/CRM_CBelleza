@@ -1,16 +1,27 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <body>
-<!--/* Vender un producto del inventario a un cliente (ficha del cliente). La previsión de stock la calcula product-sale.js. */-->
-<div th:fragment="modal(client, items, loyalty, lowStock)" class="ui-modal-overlay" id="productSaleModal" hidden>
+<!--/* Vender un producto del inventario a un cliente. La previsión de stock la calcula product-sale.js.
+       Desde la ficha llega el cliente (clients nulo); desde el inventario, la cartera para elegirlo (client nulo). */-->
+<div th:fragment="modal(client, clients, items, loyalty)" class="ui-modal-overlay" id="productSaleModal" hidden>
     <div class="ui-modal ui-modal--form" role="dialog" aria-modal="true" aria-labelledby="productSaleTitle">
         <button type="button" class="ui-modal-close" data-modal-close aria-label="Cerrar"><i class="lucide-x" aria-hidden="true"></i></button>
         <h2 class="ui-modal-title" id="productSaleTitle"><i class="lucide-shopping-bag" aria-hidden="true"></i> Vender producto</h2>
-        <p class="ui-modal-text" th:text="'Se resta del inventario del centro y queda en el historial de ' + ${client.name} + '.'">Se resta del inventario del centro.</p>
-        <form th:action="@{/worker/clients/{id}/sales(id=${client.id})}" method="post" id="productSaleForm" class="sale-form"
-              th:data-low-stock="${lowStock}"
+        <p class="ui-modal-text" th:text="${client != null} ? 'Se resta del inventario del centro y queda en el historial de ' + ${client.name} + '.'
+                                                         : 'Se resta del inventario del centro y queda en el historial del cliente.'">Se resta del inventario del centro.</p>
+        <form th:action="${client != null} ? @{/worker/clients/{id}/sales(id=${client.id})} : @{/worker/inventory/sales}"
+              method="post" id="productSaleForm" class="sale-form"
               th:data-loyalty-mode="${loyalty.enabled()} ? ${loyalty.mode().name()} : 'OFF'"
               th:data-loyalty-per-unit="${loyalty.pointsPerUnit()}">
+            <th:block th:if="${client == null}">
+                <label class="form-label" for="saleClientId">Cliente</label>
+                <select id="saleClientId" name="clientId" class="form-control">
+                    <option value="">Elige un cliente</option>
+                    <option th:each="c : ${clients}" th:value="${c.id}"
+                            th:text="${c.phone != null and !#strings.isEmpty(c.phone)} ? ${c.name} + ' · ' + ${c.phone} : ${c.name}">Sofía Martínez · 600 123 456</option>
+                </select>
+            </th:block>
+
             <label class="form-label" for="saleInventoryId">Producto</label>
             <select id="saleInventoryId" name="inventoryId" class="form-control">
                 <option value="">Elige un producto</option>

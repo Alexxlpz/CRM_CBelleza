@@ -1,0 +1,55 @@
+/* Modal «Vender producto» (fragments/product-sale.html): ficha del cliente e inventario */
+
+.sale-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.sale-form .form-label:not(:first-child) {
+    margin-top: 8px;
+}
+
+.sale-preview {
+    margin: 12px 0 8px;
+    padding: 14px 16px;
+    border: 1px solid var(--border-soft);
+    border-radius: var(--border-radius-md);
+    background: var(--surface-muted);
+}
+
+.sale-preview-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 6px 16px;
+    margin: 0;
+    font-size: 14px;
+}
+
+.sale-preview-grid dt {
+    color: var(--text-muted);
+}
+
+.sale-preview-grid dd {
+    margin: 0;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.sale-stock-warning {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 12px 0 0;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--warning-text);
+}
+
+.sale-stock-warning.is-error {
+    color: var(--danger-text);
+}

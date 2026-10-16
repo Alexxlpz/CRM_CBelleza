@@ -1,6 +1,7 @@
 package com.alexxlpz.crm_cbelleza.controllers;
 
 import com.alexxlpz.crm_cbelleza.security.AppUserDetails;
+import com.alexxlpz.crm_cbelleza.services.CenterService;
 import com.alexxlpz.crm_cbelleza.services.DashboardService;
 import com.alexxlpz.crm_cbelleza.services.DashboardService.DashboardStats;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -13,9 +14,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class WorkerDashboardController {
 
     private final DashboardService dashboardService;
+    private final CenterService centerService;
 
-    public WorkerDashboardController(DashboardService dashboardService) {
+    public WorkerDashboardController(DashboardService dashboardService, CenterService centerService) {
         this.dashboardService = dashboardService;
+        this.centerService = centerService;
     }
 
     @GetMapping("/worker/dashboard")
@@ -25,6 +28,7 @@ public class WorkerDashboardController {
         model.addAttribute("tomorrowAppointmentsCount", stats.tomorrowAppointments());
         model.addAttribute("pendingAppointmentsCount", stats.pendingAppointments());
         model.addAttribute("lowStockCount", stats.lowStockCount());
+        model.addAttribute("centerPhotoUrl", centerService.getCenterById(worker.getCenterId()).getPhotoUrl());
         return "worker/dashboard";
     }
 }

@@ -55,7 +55,7 @@ Alex trabaja en dos máquinas:
 # En Linux, anteponer JAVA_HOME=/home/alejandro/.jdks/ms-25.0.4.1 a cada comando y usar mvn en vez de ./mvnw
 
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev   # desarrollo: H2 en memoria, /login-selector y consola H2
-./mvnw test                                             # todos los tests (164, verde a 15 oct 2026)
+./mvnw test                                             # todos los tests (167, verde a 16 oct 2026)
 ./mvnw -Dtest=CenterIsolationTests test                 # un solo test
 ./mvnw -DskipTests clean package                        # jar en target/
 docker compose up --build                               # app en :8080 + PostgreSQL 16 (necesita el .env, ver abajo)

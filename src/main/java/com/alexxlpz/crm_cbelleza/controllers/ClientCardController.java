@@ -97,7 +97,6 @@ public class ClientCardController {
         model.addAttribute("sales", sales);
         model.addAttribute("salesTotal", sales.stream().mapToDouble(ProductSale::getTotal).sum());
         model.addAttribute("saleItems", inventoryService.getInventoryByCenter(worker.getCenterId()));
-        model.addAttribute("lowStockThreshold", InventoryService.LOW_STOCK_THRESHOLD);
         model.addAttribute("loyalty", loyaltyService.cardFor(centerService.getCenterById(worker.getCenterId()), view.client()));
         return "worker/client_detail";
     }

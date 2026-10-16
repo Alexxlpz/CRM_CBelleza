@@ -1,20 +1,20 @@
 /*
- * Venta de productos desde la ficha del cliente (fragments/product-sale.html).
+ * Venta de productos desde la ficha del cliente o el inventario (fragments/product-sale.html).
  * Antes de confirmar enseña el stock actual y el que quedará, el total y los puntos,
- * y avisa si el producto queda bajo mínimos o agotado. La venta la valida el servidor.
+ * y avisa si la cantidad no es válida o no hay stock suficiente. La venta la valida el servidor.
  */
 document.addEventListener('DOMContentLoaded', () => {
     'use strict';
     const form = document.getElementById('productSaleForm');
     if (!form) return;
 
+    const clientSelect = document.getElementById('saleClientId');
     const select = document.getElementById('saleInventoryId');
     const quantity = document.getElementById('saleQuantity');
     const preview = document.getElementById('salePreview');
     const warning = document.getElementById('saleStockWarning');
     const error = document.getElementById('saleError');
     const submit = document.getElementById('saleSubmit');
-    const lowStock = Number(form.dataset.lowStock) || 0;
     const mode = form.dataset.loyaltyMode;
     const perUnit = Number(form.dataset.loyaltyPerUnit) || 0;
     const euros = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' });
@@ -49,7 +49,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (units < 1) message = 'La cantidad tiene que ser al menos 1.';
         else if (after < 0) message = stock === 1 ? 'Solo queda 1 unidad.' : `Solo quedan ${stock} unidades.`;
         else if (after === 0) message = 'Con esta venta el producto se agota.';
-        else if (after <= lowStock) message = after === 1 ? 'Quedará 1 unidad: stock bajo.' : `Quedarán ${after} unidades: stock bajo.`;
 
         const blocked = units < 1 || after < 0;
         warning.hidden = !message;
@@ -61,7 +60,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     select.addEventListener('change', update);
     quantity.addEventListener('input', update);
+    clientSelect?.addEventListener('change', () => { error.hidden = true; });
     form.addEventListener('submit', e => {
+        if (clientSelect && !clientSelect.value) {
+            e.preventDefault();
+            error.textContent = 'Elige el cliente que se lleva el producto.';
+            error.hidden = false;
+            clientSelect.focus();
+            return;
+        }
         if (!select.value) {
             e.preventDefault();
             error.textContent = 'Elige el producto que se lleva el cliente.';

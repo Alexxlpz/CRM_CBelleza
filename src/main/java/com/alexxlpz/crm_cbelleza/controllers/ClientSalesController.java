@@ -5,7 +5,6 @@ import com.alexxlpz.crm_cbelleza.forms.ProductSaleForm;
 import com.alexxlpz.crm_cbelleza.security.AppUserDetails;
 import com.alexxlpz.crm_cbelleza.services.CenterService;
 import com.alexxlpz.crm_cbelleza.services.ClientCardService;
-import com.alexxlpz.crm_cbelleza.services.InventoryService;
 import com.alexxlpz.crm_cbelleza.services.LoyaltyService;
 import com.alexxlpz.crm_cbelleza.services.ProductSaleService;
 import com.alexxlpz.crm_cbelleza.services.ProductSaleService.SaleResult;
@@ -40,8 +39,7 @@ public class ClientSalesController {
                        @ModelAttribute ProductSaleForm form, RedirectAttributes redirect) {
         try {
             SaleResult result = saleService.sell(worker.getCenterId(), clientId, form, worker.getId());
-            redirect.addFlashAttribute("successMessage", "Venta guardada: " + result.sale().getQuantity() + " × "
-                    + result.sale().getProduct().getName() + ". " + stockText(result.stockLeft()));
+            redirect.addFlashAttribute("successMessage", result.message());
         } catch (BusinessRuleException e) {
             redirect.addFlashAttribute("errorMessage", e.getMessage());
         }
@@ -69,13 +67,5 @@ public class ClientSalesController {
             redirect.addFlashAttribute("errorMessage", e.getMessage());
         }
         return "redirect:/worker/clients/" + clientId + "#puntos";
-    }
-
-    private static String stockText(int stockLeft) {
-        if (stockLeft == 0) {
-            return "El producto se ha agotado.";
-        }
-        String units = stockLeft == 1 ? "Queda 1 unidad" : "Quedan " + stockLeft + " unidades";
-        return stockLeft <= InventoryService.LOW_STOCK_THRESHOLD ? units + ": stock bajo." : units + ".";
     }
 }

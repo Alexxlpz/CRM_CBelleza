@@ -71,6 +71,15 @@ public class LoyaltyService {
                 history.stream().limit(RECENT_MOVEMENTS).toList());
     }
 
+    /** Cómo suma puntos el centro, sin saldo: para la previsión de la venta cuando aún no se ha elegido cliente. */
+    public LoyaltyCard settingsOf(Center center) {
+        if (!center.isLoyaltyEnabled()) {
+            return LoyaltyCard.disabled();
+        }
+        return new LoyaltyCard(true, 0, center.getLoyaltyRewardPoints(), center.getLoyaltyRewardText(),
+                center.getLoyaltyMode(), center.getLoyaltyPointsPerUnit(), List.of());
+    }
+
     /**
      * Tarjetas del propio cliente: una por cada centro con la tarjeta activada donde ha tenido citas o tiene puntos.
      * Con saldo primero; luego por nombre del centro.

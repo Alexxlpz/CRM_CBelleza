@@ -51,6 +51,9 @@ public class ProductSaleService {
 
     /** Registra la venta y resta las unidades del inventario. Devuelve la venta y el stock que queda. */
     public SaleResult sell(Long centerId, Long clientId, ProductSaleForm form, Long workerId) {
+        if (clientId == null) {
+            throw new BusinessRuleException("Elige el cliente que se lleva el producto.");
+        }
         User client = clientCards.requireClientOfCenter(centerId, clientId);
         if (form.inventoryId() == null) {
             throw new BusinessRuleException("Elige el producto que se lleva el cliente.");
@@ -102,5 +105,18 @@ public class ProductSaleService {
     }
 
     public record SaleResult(ProductSale sale, int stockLeft) {
+
+        /** Aviso tras vender, igual desde la ficha del cliente que desde el inventario. */
+        public String message() {
+            return "Venta guardada: " + sale.getQuantity() + " × " + sale.getProduct().getName() + ". " + stockText();
+        }
+
+        private String stockText() {
+            if (stockLeft == 0) {
+                return "El producto se ha agotado.";
+            }
+            String units = stockLeft == 1 ? "Queda 1 unidad" : "Quedan " + stockLeft + " unidades";
+            return stockLeft <= InventoryService.LOW_STOCK_THRESHOLD ? units + ": stock bajo." : units + ".";
+        }
     }
 }

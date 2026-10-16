@@ -7,11 +7,13 @@ Se lee bajo demanda desde `CLAUDE.md` antes de tocar la pantalla correspondiente
 - Páginas legales (`terms.html`, `cookies.html`, `privacy.html`, CSS `legal.css`; titular desde `LegalOwner`): mismo índice lateral que Inicio (`scroll-index.js`) y, por debajo de 1200 px, índice dentro de la página.
 
 ## Layout de escritorio
-- `.main-container` llega a 1100 px. **`.main-container--wide`** crece hasta 1440 px desde 1100 px de ancho; lo usan tratamientos, inventario y clientes; Centros no tiene tope desde 1280 px. La agenda usa su propio contenedor ancho (hasta 1680 px).
+- `.main-container` llega a 1100 px. **`.main-container--wide`** crece hasta 1440 px desde 1100 px de ancho; lo usan el panel del trabajador, tratamientos, inventario y clientes; Centros no tiene tope desde 1280 px. La agenda usa su propio contenedor ancho (hasta 1680 px).
 - **Vista Tarjetas / Lista** (solo desde 1100 px): `[data-view-toggle="idDelListado"]` con botones `[data-view="grid|list"]`; `app.js` añade `.is-list-view` al listado y recuerda la elección en el navegador. Por defecto Lista en inventario y clientes, Tarjetas en tratamientos. Las filas reutilizan el marcado de las tarjetas (no dupliques HTML).
 - **`.list-toolbar`**: barra entre el resumen y el listado, filtros de categoría a la izquierda y selector de vista a la derecha. Misma posición en las tres pantallas.
 - **`--list-row-height: 108px`** (en `common.css`): todas las filas en modo lista miden lo mismo en tratamientos, inventario y clientes (mismo relleno, radio y 12 px de separación). Si un texto largo lo necesita, la fila crece en vez de cortar.
 - Franja de resumen arriba (tratamientos: número, precio medio, duración media; inventario: productos, unidades, bajo stock, agotados; clientes: total, fichas al día, pendientes, citas). Se oculta por debajo de 600 px.
+- **Vender producto** (`fragments/product-sale.html` + `product-sale.js` + `product-sale.css`): el mismo modal en la ficha del cliente (cliente fijo, `POST /worker/clients/{id}/sales`) y en la cabecera del inventario (se elige el cliente, `POST /worker/inventory/sales`).
+- Panel del trabajador (`main-container--wide`): el saludo y los contadores van en el mismo cartel; si el centro tiene foto, sale tenue detrás de los dos (`.worker-welcome-photo`) y los contadores siguen opacos. Los cuatro accesos directos van en una fila desde 1366 px y en 2×2 por debajo.
 - Centros: sin vista lista; el mapa se abre con su botón en lugar del listado. Desde 1280 px el listado ocupa todo el ancho (tarjetas de 340 px mínimo: 5 por fila a 1920 px, 4 a 1440 px), 1 en móvil.
 - Inicio (incluye «Más funcionalidades»; `/features` redirige a `/home#funcionalidades`): con índice lateral (desde 1200 px) el contenido llega hasta 1400 px; FAQ y textos largos mantienen ancho de lectura.
 

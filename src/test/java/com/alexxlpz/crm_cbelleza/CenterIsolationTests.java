@@ -140,6 +140,19 @@ class CenterIsolationTests {
     }
 
     @Test
+    void workerCannotSellStockOfAnotherCenterFromInventory() throws Exception {
+        Inventory foreign = inventory.findByCenterId(centerOf(TestUsers.WORKER_CENTER_1)).getFirst();
+        var sofia = users.findByNameIgnoreCase(TestUsers.CLIENT).orElseThrow();
+        mvc.perform(post("/worker/inventory/sales").with(csrf())
+                        .param("clientId", String.valueOf(sofia.getId()))
+                        .param("inventoryId", String.valueOf(foreign.getId()))
+                        .param("quantity", "1")
+                        .with(TestUsers.as(users, TestUsers.WORKER_CENTER_2)))
+                .andExpect(status().isNotFound());
+        assertEquals(foreign.getStock(), inventory.findById(foreign.getId()).orElseThrow().getStock());
+    }
+
+    @Test
     void workerCanAdjustOwnStock() throws Exception {
         Inventory own = inventory.findByCenterId(centerOf(TestUsers.WORKER_CENTER_1)).getFirst();
         mvc.perform(post("/worker/inventory/" + own.getId() + "/adjust-stock").param("change", "1").with(csrf())

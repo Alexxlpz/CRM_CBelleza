@@ -15,6 +15,12 @@
     margin-bottom: 20px;
 }
 
+.inventory-header-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
 /* Inventory Grid */
 .inventory-grid {
     display: grid;
@@ -29,7 +35,11 @@
         align-items: stretch;
     }
 
-    .inventory-page-header .btn-add-product {
+    .inventory-header-actions {
+        flex-direction: column;
+    }
+
+    .inventory-page-header .inventory-header-actions .btn {
         width: 100%;
     }
 
