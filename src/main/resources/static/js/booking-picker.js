@@ -2,6 +2,7 @@
  * Calendario de la reserva (client/center_details.html + fragments/datetime-picker.html).
  * Pide la disponibilidad a /api/centers/{id}/availability y solo deja elegir
  * franjas libres en las que el tratamiento seleccionado cabe completo.
+ * Al entrar no hay servicio elegido: las horas aparecen al elegir uno.
  */
 document.addEventListener('DOMContentLoaded', function () {
     'use strict';
@@ -82,6 +83,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function updateSummary() {
         const treatment = checkedTreatment()?.closest('.treatment-select-card')?.querySelector('.treatment-card-title')?.textContent.trim();
+        if (!treatment) {
+            summary.textContent = 'Elige un servicio, un día y una hora para tu cita.';
+            return;
+        }
         if (!selectedDate || !selectedTime) {
             summary.textContent = selectedDate ? 'Elige una hora para tu cita.' : 'Elige un día y una hora para tu cita.';
             return;
@@ -129,6 +134,11 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function renderTimes() {
+        if (!checkedTreatment()) {
+            timesTitle.textContent = 'Horas libres';
+            hint('Elige un servicio para ver las horas libres.');
+            return;
+        }
         if (!selectedDate) {
             timesTitle.textContent = 'Horas libres';
             hint('Elige un día para ver las horas libres.');
@@ -247,6 +257,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Otro tratamiento puede durar más: se recalcula qué días y horas caben
     treatmentInputs.forEach(input => input.addEventListener('change', () => {
+        if (message.classList.contains('is-error') && loaded) setMessage('');
         if (!selectedDate || state(new Date(`${selectedDate}T00:00:00`)) !== 'free') {
             selectFirstFreeDay();
             return;
@@ -259,6 +270,12 @@ document.addEventListener('DOMContentLoaded', function () {
     }));
 
     form.addEventListener('submit', event => {
+        if (!checkedTreatment()) {
+            event.preventDefault();
+            setMessage('Elige un servicio para tu cita.', true);
+            services.scrollIntoView({ behavior: Cuquora.scrollBehavior(), block: 'start' });
+            return;
+        }
         if (dateInput.value) return;
         event.preventDefault();
         setMessage(selectedDate ? 'Elige una hora para tu cita.' : 'Elige un día y una hora para tu cita.', true);
@@ -295,7 +312,7 @@ document.addEventListener('DOMContentLoaded', function () {
         })
         .finally(() => {
             picker.classList.remove('is-loading');
-            if (loaded) {
+            if (loaded && checkedTreatment()) {
                 selectFirstFreeDay();
             } else {
                 render();
