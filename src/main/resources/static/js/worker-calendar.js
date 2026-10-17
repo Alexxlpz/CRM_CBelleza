@@ -10,6 +10,8 @@
  * Los formularios están en worker-agenda-forms.js y, tras cada cambio, la agenda se recarga desde
  * /worker/calendar/data.
  * La disposición elegida se recuerda en el navegador.
+ * «Pantalla completa» deja la semana a la vista en el ordenador del centro: el horario cabe sin scroll,
+ * sigue a la semana actual y las citas se recargan cada minuto.
  */
 document.addEventListener('DOMContentLoaded', function () {
     'use strict';
@@ -51,6 +53,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const weekSummary = document.getElementById('weekSummary');
     const viewButtons = document.querySelectorAll('[data-calendar-view]');
     const modalBody = document.getElementById('appointmentModalBody');
+    const fullscreenBtn = document.getElementById('weekFullscreenBtn');
+    const LIVE_RELOAD_MS = 60000;
 
     let currentYear;
     let currentMonth;
@@ -58,6 +62,8 @@ document.addEventListener('DOMContentLoaded', function () {
     let currentView = 'month';
     let weekStart = null;      // lunes de la semana visible
     let modalApp = null;       // cita abierta en el modal de la vista semanal
+    let followToday = false;   // en pantalla completa, pasar sola a la semana nueva el lunes
+    let liveTimer = null;
 
     const pad = n => String(n).padStart(2, '0');
     const dateKey = (day, month, year) => `${year}-${pad(month + 1)}-${pad(day)}`;
@@ -647,8 +653,24 @@ document.addEventListener('DOMContentLoaded', function () {
         weekGrid.replaceChildren(inner);
         weekGrid.dataset.firstMinute = String(firstMinute);
         weekGrid.dataset.span = String(span);
+        fitWeekToScreen();
         updateNowLine();
         renderWeekList(perDay, todayKey);
+    }
+
+    /** En pantalla completa, cada hora mide lo justo para que el horario entero quepa en el alto disponible. */
+    function fitWeekToScreen() {
+        if (!document.body.classList.contains('is-calendar-fullscreen')) {
+            weekView.style.removeProperty('--hour-height');
+            return;
+        }
+        const inner = weekGrid.querySelector('.week-grid-inner');
+        if (!inner) return;
+        const head = inner.querySelector('.week-day-head');
+        const rowGap = parseFloat(getComputedStyle(inner).rowGap) || 0;
+        const available = weekGrid.clientHeight - (head ? head.offsetHeight : 0) - rowGap;
+        const hoursShown = Number(weekGrid.dataset.span) / 60;
+        weekView.style.setProperty('--hour-height', `${Math.max(36, Math.floor(available / hoursShown))}px`);
     }
 
     /** Minuto del día (redondeado al hueco de reserva) en la altura y de una columna. */
@@ -865,6 +887,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     function openDayInMonth(date) {
+        if (document.fullscreenElement) document.exitFullscreen();
         currentYear = date.getFullYear();
         currentMonth = date.getMonth();
         setView('month');
@@ -886,16 +909,54 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     const moveWeek = days => {
+        followToday = false;
         weekStart = new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate() + days);
         renderWeek();
     };
     document.getElementById('prevWeekBtn').addEventListener('click', () => moveWeek(-7));
     document.getElementById('nextWeekBtn').addEventListener('click', () => moveWeek(7));
     document.getElementById('weekTodayBtn').addEventListener('click', () => {
+        followToday = true;
         weekStart = mondayOf(new Date());
         renderWeek();
     });
     viewButtons.forEach(b => b.addEventListener('click', () => setView(b.dataset.calendarView)));
+
+    // Pantalla completa de toda la página (no solo de la semana) para que los modales sigan viéndose encima
+    if (document.fullscreenEnabled) {
+        fullscreenBtn.hidden = false;
+        fullscreenBtn.addEventListener('click', () => {
+            if (document.fullscreenElement) document.exitFullscreen();
+            else document.documentElement.requestFullscreen().catch(err => console.error(err));
+        });
+        document.addEventListener('fullscreenchange', () => {
+            const on = Boolean(document.fullscreenElement);
+            document.body.classList.toggle('is-calendar-fullscreen', on);
+            fullscreenBtn.setAttribute('aria-pressed', String(on));
+            fullscreenBtn.querySelector('i').className = on ? 'lucide-minimize' : 'lucide-maximize';
+            fullscreenBtn.querySelector('span').textContent = on ? 'Salir de pantalla completa' : 'Pantalla completa';
+            clearInterval(liveTimer);
+            liveTimer = null;
+            if (on) {
+                followToday = true;
+                weekStart = mondayOf(new Date());
+                liveTimer = setInterval(liveReload, LIVE_RELOAD_MS);
+                reload();
+            } else {
+                renderWeek();
+            }
+        });
+        window.addEventListener('resize', () => {
+            if (document.fullscreenElement) fitWeekToScreen();
+        });
+    }
+
+    /** Recarga periódica en pantalla completa: trae las citas nuevas sin estorbar si se está usando la agenda. */
+    function liveReload() {
+        if (document.body.classList.contains('modal-open') || weekGrid.querySelector('.is-dragging')) return;
+        if (followToday) weekStart = mondayOf(new Date());
+        reload();
+    }
 
     document.getElementById('prevMonthBtn').addEventListener('click', () => {
         currentMonth--;

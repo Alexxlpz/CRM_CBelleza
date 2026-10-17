@@ -924,6 +924,42 @@ button.calendar-day-cell {
     box-shadow: var(--focus-ring);
 }
 
+.week-fullscreen-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* ---- Pantalla completa: la semana ocupa toda la pantalla (bajo los modales, que siguen funcionando).
+   worker-calendar.js ajusta --hour-height para que el horario entero quepa sin scroll ---- */
+.is-calendar-fullscreen .week-card {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    display: flex;
+    flex-direction: column;
+    padding: 18px 24px 20px;
+    border: 0;
+    border-radius: 0;
+    background: var(--bg-gradient);
+    box-shadow: none;
+}
+
+.is-calendar-fullscreen .week-header {
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+}
+
+.is-calendar-fullscreen .week-hint {
+    display: none;
+}
+
+.is-calendar-fullscreen .week-grid {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+}
+
 /* ---- Rejilla: columna de horas + 7 días; cada hora mide --hour-height ---- */
 .week-grid-inner {
     /* Valores por defecto: worker-calendar.js los sustituye según la semana */
@@ -1306,6 +1342,10 @@ button.calendar-day-cell {
 
 @media (max-width: 768px) {
     .week-grid {
+        display: none;
+    }
+
+    .week-fullscreen-btn {
         display: none;
     }
 

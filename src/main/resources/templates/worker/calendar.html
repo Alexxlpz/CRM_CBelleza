@@ -95,6 +95,10 @@
                     <ul class="week-summary" id="weekSummary"></ul>
                 </div>
                 <div class="calendar-header-nav">
+                    <!-- Solo con rejilla horaria (desde 769 px) y si el navegador admite pantalla completa -->
+                    <button type="button" class="week-today-btn week-fullscreen-btn" id="weekFullscreenBtn" aria-pressed="false" hidden>
+                        <i class="lucide-maximize" aria-hidden="true"></i> <span>Pantalla completa</span>
+                    </button>
                     <button type="button" class="week-today-btn" id="weekTodayBtn">Hoy</button>
                     <button type="button" class="calendar-nav-btn" id="prevWeekBtn" aria-label="Semana anterior">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
