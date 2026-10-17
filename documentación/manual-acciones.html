@@ -89,7 +89,7 @@
                         <div class="section-icon">🛡️</div>
                         <div>
                             <h2>Matriz de Permisos por Rol de Usuario</h2>
-                            <p style="margin: 0; font-size: 0.95rem;">Rutas reales de los controladores a 12 de octubre de 2026 y quién puede usarlas</p>
+                            <p style="margin: 0; font-size: 0.95rem;">Rutas reales de los controladores a 16 de octubre de 2026 y quién puede usarlas</p>
                         </div>
                     </div>
                 </div>
@@ -115,7 +115,7 @@
                             <tr>
                                 <td><code>/, /home, /features, /centers</code></td>
                                 <td><span class="http-get">GET</span></td>
-                                <td>Páginas públicas: inicio, funcionalidades y buscador de centros con mapa</td>
+                                <td>Páginas públicas: inicio (con «Más funcionalidades»; <code>/features</code> redirige a <code>/home#funcionalidades</code>) y buscador de centros con mapa</td>
                                 <td>✅ Permitido</td>
                                 <td>✅ Permitido</td>
                                 <td>✅ Permitido</td>
@@ -135,6 +135,30 @@
                                 <td>✅ Permitido</td>
                                 <td>✅ Permitido</td>
                                 <td>✅ Permitido</td>
+                            </tr>
+                            <tr>
+                                <td><code>/register-center/approve/{token}</code></td>
+                                <td><span class="http-get">GET</span> <span class="http-post">POST</span></td>
+                                <td>Revisar y publicar un centro nuevo (enlace del correo de administración); <code>/photo</code> enseña su foto</td>
+                                <td>✅ Con el enlace</td>
+                                <td>✅ Con el enlace</td>
+                                <td>✅ Con el enlace</td>
+                            </tr>
+                            <tr>
+                                <td><code>/invitation/{token}, /{token}/renew</code></td>
+                                <td><span class="http-get">GET</span> <span class="http-post">POST</span></td>
+                                <td>Invitación de un trabajador: crear su contraseña o pedir otro enlace</td>
+                                <td>✅ Permitido</td>
+                                <td>✅ Permitido</td>
+                                <td>✅ Permitido</td>
+                            </tr>
+                            <tr>
+                                <td><code>/centers/{id}/photo</code></td>
+                                <td><span class="http-get">GET</span></td>
+                                <td>Foto del centro (JPEG, caché de un año con <code>?v=</code>). La de un centro sin publicar solo la ve su equipo</td>
+                                <td>✅ Si está publicado</td>
+                                <td>✅ Si está publicado</td>
+                                <td>✅ Publicado o de su centro</td>
                             </tr>
                             <tr>
                                 <td><code>/api/centers, /api/centers/{id}/availability</code></td>
@@ -258,6 +282,14 @@
                                 <td>✅ Permitido</td>
                                 <td>❌ Bloqueado</td>
                             </tr>
+                            <tr>
+                                <td><code>/client/google-calendar/connect | disconnect, /callback</code></td>
+                                <td><span class="http-get">GET</span> <span class="http-post">POST</span></td>
+                                <td>Ver las citas del cliente en Google Calendar</td>
+                                <td>❌ Login</td>
+                                <td>✅ Permitido</td>
+                                <td>❌ Bloqueado</td>
+                            </tr>
                             <!-- Trabajador -->
                             <tr>
                                 <td><code>/worker/dashboard</code></td>
@@ -340,6 +372,14 @@
                                 <td>✅ Permitido</td>
                             </tr>
                             <tr>
+                                <td><code>/worker/inventory/sales</code></td>
+                                <td><span class="http-post">POST</span></td>
+                                <td>Vender un producto eligiendo el cliente en el modal</td>
+                                <td>❌ Login</td>
+                                <td>❌ Bloqueado</td>
+                                <td>✅ Permitido</td>
+                            </tr>
+                            <tr>
                                 <td><code>/worker/inventory/{id}/adjust-stock</code></td>
                                 <td><span class="http-post">POST</span></td>
                                 <td>Sumar o restar unidades (JSON)</td>
@@ -380,6 +420,22 @@
                                 <td>✅ Permitido</td>
                             </tr>
                             <tr>
+                                <td><code>/worker/clients/{clientId}/sales, /sales/{saleId}/cancel</code></td>
+                                <td><span class="http-post">POST</span></td>
+                                <td>Vender un producto al cliente o anular la venta (devuelve las unidades)</td>
+                                <td>❌ Login</td>
+                                <td>❌ Bloqueado</td>
+                                <td>✅ Permitido</td>
+                            </tr>
+                            <tr>
+                                <td><code>/worker/clients/{clientId}/loyalty/redeem</code></td>
+                                <td><span class="http-post">POST</span></td>
+                                <td>Canjear la recompensa de la tarjeta de puntos</td>
+                                <td>❌ Login</td>
+                                <td>❌ Bloqueado</td>
+                                <td>✅ Permitido</td>
+                            </tr>
+                            <tr>
                                 <td><code>/worker/appointments/{id}/summary</code></td>
                                 <td><span class="http-post">POST</span></td>
                                 <td>Resumen del tratamiento realizado (y aviso para próximas citas)</td>
@@ -399,6 +455,14 @@
                                 <td><code>/worker/center</code></td>
                                 <td><span class="http-get">GET</span> <span class="http-post">POST</span></td>
                                 <td>«Mi Centro»: datos del centro, foto, zona horaria, cabinas y perfil</td>
+                                <td>❌ Login</td>
+                                <td>❌ Bloqueado</td>
+                                <td>✅ Permitido</td>
+                            </tr>
+                            <tr>
+                                <td><code>/worker/center/loyalty, /photo, /photo/delete</code></td>
+                                <td><span class="http-post">POST</span></td>
+                                <td>Configurar la tarjeta de puntos; subir o quitar la foto del centro</td>
                                 <td>❌ Login</td>
                                 <td>❌ Bloqueado</td>
                                 <td>✅ Permitido</td>
@@ -494,7 +558,7 @@
                         <div class="section-icon">📅</div>
                         <div>
                             <h2>Módulo 2: Portal de Clientes y Agendamiento</h2>
-                            <p style="margin: 0; font-size: 0.95rem;">Controladores: <code>PublicPagesController</code>, <code>ClientBookingController</code>, <code>ClientNotificationController</code>, <code>ClientProfileController</code></p>
+                            <p style="margin: 0; font-size: 0.95rem;">Controladores: <code>PublicPagesController</code>, <code>ClientBookingController</code>, <code>ClientNotificationController</code>, <code>ClientProfileController</code>, <code>GoogleCalendarController</code></p>
                         </div>
                     </div>
                 </div>
@@ -514,7 +578,7 @@
                         <strong>/client/centers/{id}</strong>
                         <span class="card-badge badge-client">CLIENT</span>
                     </div>
-                    <p>Ficha del centro: datos, horario de reservas, tratamientos con duración y precio, y profesionales. Un trabajador que intenta ver un centro como cliente recibe un aviso con enlace a su panel.</p>
+                    <p>Ficha del centro: foto, datos, horario de reservas, tratamientos con duración y precio, y profesionales. El calendario de la reserva (<code>fragments/datetime-picker.html</code> + <code>booking-picker.js</code>) marca cada día como con horas libres, completo o cerrado y enseña las horas libres del día elegido. Un centro sin publicar responde 404. Un trabajador que intenta ver un centro como cliente recibe un aviso con enlace a su panel.</p>
                 </div>
 
                 <div class="card-feature" style="margin-bottom: 1.5rem;">
@@ -544,7 +608,7 @@
                         <strong>/client/appointments</strong>
                         <span class="card-badge badge-client">CLIENT</span>
                     </div>
-                    <p>«Mis Citas» con filtros por estado. Desde cada tarjeta:</p>
+                    <p>«Mis Citas» con filtros por estado y, arriba, «Mis puntos» (<code>LoyaltyService.cardsOfClient</code>: centros con la tarjeta activada donde tiene citas o puntos). Desde cada tarjeta:</p>
                     <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.9rem;">
                         <li><code>POST /client/appointments/{id}/accept-proposal</code> (<code>proposalId</code>): elige una hora propuesta y la cita queda confirmada.</li>
                         <li><code>POST /client/appointments/{id}/decline-proposal</code>: ninguna hora le viene bien; se avisa al centro.</li>
@@ -655,6 +719,21 @@
                 <div class="card-feature" style="margin-bottom: 1.5rem;">
                     <div class="card-feature-header">
                         <span class="http-post">POST</span>
+                        <strong>Venta de productos · /worker/clients/{clientId}/sales · /worker/inventory/sales</strong>
+                        <span class="card-badge badge-worker">WORKER</span>
+                    </div>
+                    <p>Las dos rutas llaman a <code>ProductSaleService.sell</code> con el mismo modal (<code>fragments/product-sale.html</code>): desde la ficha el cliente va fijo; desde el inventario se elige en el modal (<code>clientId</code>).</p>
+                    <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.9rem;">
+                        <li><strong>Parámetros:</strong> <code>inventoryId</code> y <code>quantity</code> (de 1 a 99).</li>
+                        <li>Bloquea la fila del inventario (<code>InventoryRepository.findForUpdate</code>), comprueba el stock y lo resta; guarda el precio del momento en <code>unit_price</code> y suma los puntos si el centro tiene la tarjeta activada.</li>
+                        <li><code>POST /sales/{saleId}/cancel</code>: anula la venta, devuelve las unidades al inventario y quita sus puntos.</li>
+                        <li><code>POST /worker/clients/{clientId}/loyalty/redeem</code>: canjea la recompensa (resta los puntos de la meta, con el centro bloqueado).</li>
+                    </ul>
+                </div>
+
+                <div class="card-feature" style="margin-bottom: 1.5rem;">
+                    <div class="card-feature-header">
+                        <span class="http-post">POST</span>
                         <strong>/worker/treatments/add</strong>
                         <span class="card-badge badge-worker">WORKER</span>
                     </div>
@@ -672,7 +751,7 @@
                     <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.9rem;">
                         <li><strong><code>GET /worker/clients</code>:</strong> cartera del centro con buscador (<code>?search=</code>) y resumen. <code>GET /worker/clients/search</code> devuelve JSON para el buscador de «Nueva cita».</li>
                         <li><strong><code>POST /worker/clients/create</code>:</strong> alta manual (<code>name</code>, <code>phone</code>, <code>email</code>, <code>initialNotes</code>). Solo reutiliza clientes del propio centro con ese teléfono o correo; si el correo ya es de otra cuenta, el cliente se guarda sin él. Sin correo recibe uno interno <code>cliente_&lt;teléfono&gt;@cbelleza.local</code>.</li>
-                        <li><strong><code>/worker/clients/{clientId}</code></strong> y <strong><code>POST /{clientId}/card</code>:</strong> ver y guardar la ficha técnica (valores en JSON en <code>client_cards.data_json</code>).</li>
+                        <li><strong><code>/worker/clients/{clientId}</code></strong> y <strong><code>POST /{clientId}/card</code>:</strong> ver y guardar la ficha técnica (valores en JSON en <code>client_cards.data_json</code>). La ficha incluye el historial de citas (con filtro por tratamiento y buscador en notas y resúmenes, en el navegador), las ventas y la tarjeta de puntos.</li>
                         <li><strong><code>/worker/clients/template</code>:</strong> campos de la ficha del centro (<code>text</code>, <code>textarea</code>, <code>select</code>, <code>checkbox</code>, <code>date</code>, <code>number</code>).</li>
                     </ul>
                 </div>
@@ -683,7 +762,11 @@
                         <strong>/worker/center</strong>
                         <span class="card-badge badge-worker">WORKER</span>
                     </div>
-                    <p>«Mi Centro»: datos del centro, zona horaria (entre las de <code>CenterTimeZones.OPTIONS</code>), cabinas (1-50), foto del centro (JPG o PNG hasta 8 MB; sale en el buscador y en la ficha del centro), datos personales y contraseña del trabajador.</p>
+                    <p>«Mi Centro»: datos del centro y ubicación con pin, zona horaria (entre las de <code>CenterTimeZones.OPTIONS</code>), cabinas (1-50), datos personales y contraseña del trabajador.</p>
+                    <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.9rem;">
+                        <li><code>POST /worker/center/photo</code> · <code>/photo/delete</code> (<code>CenterPhotoService</code>): JPG o PNG hasta 8 MB y al menos 400×250 px. Se endereza con la orientación EXIF y se guarda en la base de datos como JPEG de 1200 px como mucho. Sale en el buscador, en la ficha del centro y detrás del saludo del panel; sin foto, las iniciales del centro.</li>
+                        <li><code>POST /worker/center/loyalty</code> (<code>LoyaltyService.updateSettings</code>): modo (desactivada, <code>PER_EURO</code> o <code>PER_ITEM</code>), puntos que se ganan (1-1000), puntos para la recompensa (1-100.000) y su texto (hasta 200 caracteres). Los tratamientos suman cuando la cita está completada y solo desde que se activó la tarjeta.</li>
+                    </ul>
                 </div>
 
                 <div class="card-feature">
@@ -751,7 +834,7 @@
                         <div class="section-icon">📬</div>
                         <div>
                             <h2>Módulo 5: Contacto, Correos y Alta de Centros</h2>
-                            <p style="margin: 0; font-size: 0.95rem;">Controladores: <code>ContactController</code>, <code>CenterRegistrationController</code> · Correo: <code>EmailGateway</code>, <code>InquiryMailService</code>, <code>AppointmentMailService</code></p>
+                            <p style="margin: 0; font-size: 0.95rem;">Controladores: <code>ContactController</code>, <code>CenterRegistrationController</code>, <code>CenterPhotoController</code> · Correo: <code>EmailGateway</code>, <code>InquiryMailService</code>, <code>AppointmentMailService</code></p>
                         </div>
                     </div>
                 </div>
@@ -763,7 +846,7 @@
                         <span class="card-badge badge-guest">Público</span>
                     </div>
                     <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.9rem; margin-bottom: 0.8rem;">
-                        <li><strong>Alta de centro</strong> (<code>CenterRegistrationController</code>): datos del centro y CIF/NIF, dirección con pin en el mapa, zona horaria, cabinas, responsable y más trabajadores (nombre y correo), tarjeta de puntos opcional, especialidades y notas. Crea el centro <strong>oculto</strong> y a todo el equipo como trabajadores sin contraseña.</li>
+                        <li><strong>Alta de centro</strong> (<code>CenterRegistrationController</code>, asistente de 5 pasos con vista previa): datos del centro, foto opcional y CIF/NIF, dirección con pin en el mapa, zona horaria, cabinas, responsable y hasta 20 trabajadores más (nombre y correo), tarjeta de puntos opcional, especialidades y notas. Crea el centro <strong>oculto</strong> y a todo el equipo como trabajadores sin contraseña.</li>
                         <li><strong>Invitaciones</strong> (<code>/invitation/{token}</code>): cada trabajador recibe un enlace de un solo uso (7 días) para crear su contraseña; si caduca, pide otro desde la misma página. También puede entrar con Google.</li>
                         <li><strong>Publicación</strong> (<code>/register-center/approve/{token}</code>): el administrador (<code>CRM_ADMIN_EMAIL</code>) recibe el enlace, revisa los datos y pulsa «Publicar centro»; entonces sale en el buscador y el mapa y admite reservas, y el centro recibe un aviso.</li>
                         <li><strong>Contacto:</strong> <code>name</code>, <code>email</code>, <code>phone</code>, <code>subject</code> y <code>message</code>, con acuse y aviso al administrador.</li>
@@ -778,6 +861,7 @@
                     </div>
                     <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.9rem;">
                         <li>Plantillas Thymeleaf en <code>templates/email/</code> enviadas con <code>EmailGateway</code>: por SMTP (Brevo, <code>MAIL_HOST</code>…) o, si no hay SMTP configurado, escritas en la consola (<code>LoggingEmailGateway</code>). EmailJS se retiró el 6 de octubre.</li>
+                        <li><strong>Alta de centros</strong> (<code>CenterOnboardingMailService</code>): acuse al centro, aviso a administración con el enlace de revisión, invitación a cada trabajador y aviso de centro publicado. Sin SMTP, la consola imprime los enlaces.</li>
                         <li><strong>Correos de citas</strong> (<code>AppointmentMailService</code>): solicitud, confirmación, cambio de hora, propuesta, anulación y recordatorio 24 h antes (lo envía <code>AppointmentStatusScheduler</code>).</li>
                         <li>Remitente: <code>CRM_FROM_EMAIL</code>. Con <code>SITE_URL</code> los correos llevan el botón «Ver mis citas».</li>
                     </ul>
@@ -855,6 +939,31 @@
                                 <td><strong>Stock decremental en 0 unidades</strong></td>
                                 <td>El stock no baja de 0.</td>
                                 <td>Se queda en 0.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Venta sin stock suficiente</strong></td>
+                                <td>Nunca se vende más de lo que hay; la fila del inventario se bloquea al vender. Cantidad entre 1 y 99.</td>
+                                <td>«Solo quedan N unidades de &lt;producto&gt;.» / «No queda &lt;producto&gt; en el inventario.»</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Canje sin puntos suficientes</strong></td>
+                                <td>Hace falta la tarjeta activada y llegar a los puntos de la recompensa.</td>
+                                <td>«Le faltan N puntos para canjear la recompensa.» / «Tu centro no tiene activada la tarjeta de puntos…»</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Foto del centro no válida</strong></td>
+                                <td>JPG o PNG, hasta 8 MB, al menos 400×250 px y menos de 50 megapíxeles.</td>
+                                <td>«La foto pesa más de 8 MB…» / «La foto es muy pequeña (…)…» / «Sube la foto en JPG o PNG.»</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Alta de centro incompleta</strong></td>
+                                <td>CIF/NIF válido, dirección y pin en el mapa, zona horaria de la lista, cabinas entre 1 y 50, términos aceptados, hasta 20 trabajadores con correos válidos, distintos y sin cuenta en Cuquora.</td>
+                                <td>«Marca en el mapa dónde está tu centro…» / «El correo … está repetido…» / «Ya hay una cuenta de Cuquora con el correo …»</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Invitación usada o caducada</strong></td>
+                                <td>Un solo uso y 7 días de validez; se puede pedir otra desde la misma página.</td>
+                                <td>«Este enlace ya se ha usado…» / «El enlace ha caducado. Pide uno nuevo desde esta misma página.»</td>
                             </tr>
                         </tbody>
                     </table>

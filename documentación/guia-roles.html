@@ -115,7 +115,7 @@
                         <div class="step-body">
                             <h4>Ver los Tratamientos del Centro (/client/centers/{id})</h4>
                             <p>
-                                La ficha del centro muestra su información, el horario de reservas y la lista de tratamientos:
+                                La ficha del centro muestra su foto (o sus iniciales si no tiene), su información, el horario de reservas y la lista de tratamientos:
                             </p>
                             <ul class="text-secondary" style="margin-left: 1.5rem; margin-bottom: 0.8rem;">
                                 <li><strong>Nombre y descripción</strong> del tratamiento.</li>
@@ -132,12 +132,12 @@
                         <div class="step-body">
                             <h4>Elegir Día y Hora</h4>
                             <p>
-                                Al pulsar <strong>«Reservar»</strong> se abre el selector de fecha y hora:
+                                Primero se elige el servicio (no hay ninguno marcado de antemano) y después el día y la hora en el calendario de la reserva: los días del mes salen como <strong>con horas libres</strong>, <strong>completo</strong> o <strong>cerrado</strong>, y al lado aparecen las horas libres del día elegido. En móvil, al elegir el servicio la lista se pliega a ese servicio («Cambiar de servicio» la vuelve a abrir).
                             </p>
                             <ol class="text-secondary" style="margin-left: 1.5rem; margin-bottom: 0.8rem;">
-                                <li>El selector consulta <code>/api/centers/{id}/availability</code>: horario (de lunes a viernes, de 9 a 20 h, huecos de 30 min), días cerrados y horas llenas.</li>
+                                <li>El calendario consulta <code>/api/centers/{id}/availability</code>: horario (de lunes a viernes, de 9 a 20 h, huecos de 30 min), días cerrados y horas llenas.</li>
                                 <li>Una hora está llena si no queda cabina libre o ningún profesional disponible (por otra cita, un bloqueo o una hora propuesta a otro cliente).</li>
-                                <li>El cliente elige la hora y confirma. La solicitud queda <span class="card-badge badge-admin">PENDIENTE</span> hasta que el centro responda, y el cliente recibe un correo.</li>
+                                <li>El cliente elige la hora y pulsa «Confirmar y reservar cita». La solicitud queda <span class="card-badge badge-admin">PENDIENTE</span> hasta que el centro responda, y el cliente recibe un correo.</li>
                             </ol>
                         </div>
                     </div>
@@ -167,8 +167,9 @@
                                 <li><strong>Filtros por estado</strong> y tarjeta de cada cita con el mensaje del profesional.</li>
                                 <li><strong>Elegir una hora propuesta</strong> o rechazar la propuesta.</li>
                                 <li><strong>Anular</strong> una cita futura (se avisa al centro).</li>
+                                <li><strong>Mis puntos:</strong> arriba, la tarjeta de puntos de cada centro que la tiene activada y donde tiene citas o puntos: cuántos lleva y cuántos le faltan para la recompensa.</li>
                                 <li><strong>Campana:</strong> citas de hoy y mañana y cambios hechos por el centro en los últimos 7 días. Al abrirla se marcan como vistos.</li>
-                                <li><strong>Mi Perfil</strong> (<code>/client/profile</code>): datos personales, cambiar la contraseña o añadir una si la cuenta es solo de Google.</li>
+                                <li><strong>Mi Perfil</strong> (<code>/client/profile</code>): datos personales, cambiar la contraseña o añadir una si la cuenta es solo de Google, y el interruptor <strong>«Ver mis citas en Google Calendar»</strong> (solo si el servidor tiene las claves de Google).</li>
                             </ul>
                         </div>
                     </div>
@@ -207,7 +208,7 @@
                             <span class="card-badge badge-worker">Pantalla Principal</span>
                         </div>
                         <h4>1. Panel de Control (/worker/dashboard)</h4>
-                        <p>El terapeuta inicia su jornada con 4 métricas en tiempo real:</p>
+                        <p>El saludo y los contadores van en el mismo cartel; si el centro tiene foto, se ve tenue detrás. El terapeuta inicia su jornada con 4 métricas en tiempo real:</p>
                         <ul class="text-secondary" style="margin-left: 1.25rem; font-size: 0.88rem; margin-bottom: 0.8rem;">
                             <li><strong>Citas de Hoy:</strong> Número de clientes citados en el día en curso.</li>
                             <li><strong>Citas de Mañana:</strong> Previsión de carga de trabajo del día siguiente.</li>
@@ -257,6 +258,7 @@
                             <li><strong>Ajustes en 1 clic:</strong> Botones <code>+</code> y <code>-</code> para registrar consumos de cabina en tiempo real.</li>
                             <li><strong>Resumen y filtros:</strong> productos, unidades, bajo stock y agotados; filtros por categoría y vista Lista por defecto en escritorio.</li>
                             <li><strong>Modal de Añadir Producto:</strong> Permite incorporar existencias de productos ya catalogados o crear un producto nuevo.</li>
+                            <li><strong>«Vender»:</strong> el mismo modal de venta que en la ficha del cliente, eligiendo aquí el cliente que se lo lleva.</li>
                         </ul>
                     </div>
                 </div>
@@ -293,6 +295,11 @@
                         <p>
                             Lista de clientes del centro con buscador y resumen (total, fichas al día, pendientes y citas). La etiqueta «Registrado» indica que el cliente tiene cuenta. Desde aquí se da de alta un cliente a mano (también desde «Nueva cita»), se rellena su ficha técnica y se configuran los campos de la ficha del centro. El alta manual solo reutiliza clientes que ya son del centro; nunca enlaza cuentas de otros centros. Cuando una cita ya ha empezado, el trabajador puede escribir el <strong>resumen del tratamiento</strong> (desde la agenda o el historial de la ficha): qué se hizo y cómo fue. Si lo marca como aviso (una alergia, un producto que no le sentó bien), aparece arriba en la ficha del cliente y en todas sus citas de la agenda. El cliente no lo ve.
                         </p>
+                        <ul class="text-secondary" style="margin-left: 1.5rem;">
+                            <li><strong>Historial de citas</strong> con filtro por tratamiento y buscador en notas y resúmenes (sin distinguir mayúsculas ni tildes).</li>
+                            <li><strong>Vender producto:</strong> se elige un producto del inventario y la cantidad (de 1 a 99); antes de confirmar se ve el stock actual y el que quedará. Nunca se vende más de lo que hay. «Anular» devuelve las unidades al inventario y quita los puntos de esa venta.</li>
+                            <li><strong>Tarjeta de puntos:</strong> si el centro la tiene activada, la ficha muestra los puntos del cliente y, cuando llega a la meta, el botón para canjear la recompensa.</li>
+                        </ul>
                     </div>
                 </div>
 
@@ -301,7 +308,9 @@
                     <div class="step-body">
                         <h4>Mi Centro (/worker/center)</h4>
                         <ul class="text-secondary" style="margin-left: 1.5rem;">
-                            <li>Datos del centro, <strong>zona horaria</strong> (la usan las reservas y Google Calendar) y número de <strong>cabinas</strong> (citas a la vez, de 1 a 50).</li>
+                            <li>Datos del centro, ubicación con pin en el mapa, <strong>zona horaria</strong> (la usan las reservas y Google Calendar) y número de <strong>cabinas</strong> (citas a la vez, de 1 a 50).</li>
+                            <li><strong>Foto del centro</strong> (JPG o PNG, hasta 8 MB, mínimo 400×250 px): sale en el buscador, en la ficha del centro y detrás del saludo del panel. Se puede quitar.</li>
+                            <li><strong>Tarjeta de puntos:</strong> desactivada, puntos por euro gastado o por tratamiento/unidad de producto, puntos para la recompensa y qué recompensa es. Lo ya ganado no cambia al tocar la configuración.</li>
                             <li>Datos personales y contraseña del trabajador.</li>
                             <li>Interruptor <strong>«Guardar mis citas en Google Calendar»</strong>: el trabajador da permiso con la cuenta de Google que quiera y Cuquora crea un calendario «Cuquora» donde mantiene sus citas confirmadas. Si faltan las claves de Google en el servidor, sale apagado con «Próximamente».</li>
                         </ul>
@@ -342,6 +351,10 @@
                     <div class="card-feature">
                         <h4>📜 Páginas Legales</h4>
                         <p>Términos (<code>/terms</code>), Privacidad (<code>/privacy</code>) y Cookies (<code>/cookies</code>), enlazadas desde el pie de todas las páginas, con los datos del titular que exige la LSSI configurables por variables de entorno. Aviso de cookies informativo (solo hay cookies técnicas).</p>
+                    </div>
+                    <div class="card-feature">
+                        <h4>🆕 Alta de Centros Nuevos (/register-center)</h4>
+                        <p>Un centro se da de alta solo con un asistente de 5 pasos (centro y foto, ubicación en el mapa, equipo, tarjeta de puntos y envío). Nace <strong>oculto</strong>: administración (<code>CRM_ADMIN_EMAIL</code>) recibe un correo con el enlace para revisarlo y publicarlo. Cada trabajador recibe una invitación de un solo uso (7 días) para poner su contraseña, o entra con Google.</p>
                     </div>
                     <div class="card-feature">
                         <h4>🧪 Selector de Demostración (/login-selector)</h4>
@@ -399,8 +412,8 @@
                             </tr>
                             <tr>
                                 <td><strong>Gestión de Insumos</strong></td>
-                                <td>Sin acceso (oculto por seguridad y simplicidad).</td>
-                                <td>Ajuste directo de existencias y alta de productos en almacén.</td>
+                                <td>Sin acceso al stock; ve los puntos que lleva en cada centro.</td>
+                                <td>Ajuste directo de existencias, alta de productos y venta a clientes (con puntos si el centro tiene tarjeta).</td>
                                 <td>Auditoría de roturas de stock y optimización de compras.</td>
                             </tr>
                         </tbody>

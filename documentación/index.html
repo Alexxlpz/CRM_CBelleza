@@ -137,7 +137,7 @@
                         </div>
                         <h3>3. Evolución del Proyecto</h3>
                         <p>
-                            Crónica detallada del proceso de desarrollo apoyada en los <strong>commits de Git</strong> y el paso de los prototipos de <strong>Figma</strong> al código: hitos Beta 1 y Beta 2, modularización de CSS, algoritmo de citas, dockerización, Spring Security, Flyway, login con Google y agenda flexible.
+                            Crónica detallada del proceso de desarrollo apoyada en los <strong>commits de Git</strong> y el paso de los prototipos de <strong>Figma</strong> al código: hitos Beta 1 y Beta 2, modularización de CSS, algoritmo de citas, dockerización, Spring Security, Flyway, login con Google, agenda flexible, ventas con tarjeta de puntos y alta de centros.
                         </p>
                         <a href="evolucion-proyecto.html" style="font-weight: 600; display: inline-flex; align-items: center; gap: 0.4rem;">
                             Ver Historial de Commits & Figma →
@@ -189,13 +189,13 @@
                             </tr>
                             <tr>
                                 <td><strong>Lógica de Negocio (Servicios)</strong></td>
-                                <td><code>BookingService</code>, <code>AgendaAvailabilityService</code>, <code>AgendaBlockService</code>, <code>ClientCardService</code>, <code>InventoryService</code>, <code>UserService</code>, <code>ClientNotificationService</code></td>
+                                <td><code>BookingService</code>, <code>AgendaAvailabilityService</code>, <code>AgendaBlockService</code>, <code>ClientCardService</code>, <code>InventoryService</code>, <code>ProductSaleService</code>, <code>LoyaltyService</code>, <code>TreatmentSummaryService</code>, <code>CenterRegistrationService</code>, <code>InvitationService</code>, <code>CenterPhotoService</code>, <code>UserService</code>, <code>ClientNotificationService</code></td>
                                 <td>Toda la validación vive aquí y lanza <code>BusinessRuleException</code> (mensaje en español) o <code>ResourceNotFoundException</code> (404). <code>BookingService</code> concentra todos los cambios de cita con bloqueo por centro.</td>
                             </tr>
                             <tr>
                                 <td><strong>Integraciones</strong></td>
-                                <td><code>mail/</code> (<code>EmailGateway</code>, <code>AppointmentMailService</code>), <code>googlecalendar/</code>, <code>scheduler/</code></td>
-                                <td>Correos de citas y contacto por SMTP (Brevo) o por consola; sincronización con Google Calendar en segundo plano tras cada cambio de cita (<code>AppointmentChangedEvent</code>); tarea cada 60 s que completa citas pasadas, caduca propuestas y envía recordatorios.</td>
+                                <td><code>mail/</code> (<code>EmailGateway</code>, <code>AppointmentMailService</code>, <code>CenterOnboardingMailService</code>), <code>googlecalendar/</code>, <code>scheduler/</code>, Nominatim (dirección a partir del pin del mapa)</td>
+                                <td>Correos de citas, contacto y alta de centros por SMTP (Brevo) o por consola; sincronización con Google Calendar de trabajadores y clientes en segundo plano tras cada cambio de cita (<code>AppointmentChangedEvent</code>); tarea cada 60 s que completa citas pasadas, caduca propuestas y envía recordatorios.</td>
                             </tr>
                             <tr>
                                 <td><strong>Acceso a Datos (Repositorios)</strong></td>
@@ -205,7 +205,7 @@
                             <tr>
                                 <td><strong>Persistencia & Datos</strong></td>
                                 <td><code>PostgreSQL 16</code> (Docker) o <code>H2</code> en memoria (desarrollo y tests)</td>
-                                <td>Esquema creado por <strong>Flyway</strong> (<code>db/migration/V1</code> a <code>V7</code>) con <code>ddl-auto=validate</code>; datos demo solo con <code>crm.seed-demo-data=true</code>.</td>
+                                <td>Esquema creado por <strong>Flyway</strong> (<code>db/migration/V1</code> a <code>V13</code>) con <code>ddl-auto=validate</code>; datos demo solo con <code>crm.seed-demo-data=true</code>.</td>
                             </tr>
                         </tbody>
                     </table>
@@ -308,10 +308,22 @@
                                 <td>Eliminada la importación residual de <code>worker.css</code> en estas tres pantallas.</td>
                             </tr>
                             <tr>
+                                <td><code>public.css</code></td>
+                                <td>Páginas públicas de contenido: cabeceras, contacto en pantalla partida, asistente de alta de centro con vista previa y revisión de un alta antes de publicarla.</td>
+                                <td><code>contact.html</code>, <code>register-center.html</code>, <code>center-approval.html</code> y las páginas legales</td>
+                                <td><strong>Desde el 14 oct:</strong> recoge lo que quedaba de <code>features.css</code> al unir Funcionalidades con Inicio.</td>
+                            </tr>
+                            <tr>
+                                <td><code>product-sale.css</code></td>
+                                <td>Modal «Vender producto» con el stock actual y el que quedará.</td>
+                                <td><code>worker/client_detail.html</code>, <code>worker/inventory.html</code></td>
+                                <td><strong>Nuevo (16 oct):</strong> sale de <code>clients.css</code> para que el inventario lo reutilice.</td>
+                            </tr>
+                            <tr>
                                 <td><code>cliente.css</code> / <code>citas.css</code></td>
-                                <td>Portal de reservas de cliente, selección de centro, mapas y consulta de historial de citas confirmadas.</td>
+                                <td>Portal de reservas de cliente, selección de centro, mapas, consulta de historial de citas y «Mis puntos».</td>
                                 <td><code>centers.html</code>, <code>client/center_details.html</code>, <code>client/appointments.html</code></td>
-                                <td>Mantenidos independientes y combinados con <code>datepicker.css</code> según necesidad real (<code>modals.css</code> y <code>booking.html</code> se eliminaron el 6 oct).</td>
+                                <td>Mantenidos independientes y combinados con <code>datepicker.css</code> (el calendario de la reserva, rehecho el 15 oct) según necesidad real (<code>modals.css</code> y <code>booking.html</code> se eliminaron el 6 oct).</td>
                             </tr>
                         </tbody>
                     </table>
@@ -337,7 +349,7 @@
                 <div class="callout callout-success">
                     <div class="callout-icon">✅</div>
                     <div class="callout-content">
-                        <strong>Estado a 12 de octubre de 2026:</strong>
+                        <strong>Estado a 16 de octubre de 2026:</strong>
                         <p>La mayor parte de los hallazgos se resolvió en la refactorización del 6 de octubre: <code>BaseController</code> y <code>AppointmentController</code> se dividieron en un controlador por área; ningún controlador usa repositorios (salvo <code>DevLoginController</code>, que solo existe en <code>dev</code>); los roles los gestiona Spring Security; el horario está en <code>OpeningHoursPolicy</code> (<code>crm.booking.*</code>); las reglas de cita están en <code>BookingService</code>; el mapeo a DTO está en <code>AppointmentCalendarMapper</code>; las plantillas de ficha tienen su propio <code>ClientCardTemplateService</code>; y <code>ObjectMapper</code> se inyecta desde <code>JacksonConfig</code>. Queda pendiente separar los servicios en interfaces por caso de uso.</p>
                     </div>
                 </div>
@@ -428,7 +440,7 @@
                 <div class="grid-2">
                     <div class="card-feature">
                         <h4>🏢 Center (Centros de Belleza)</h4>
-                        <p>Representa una sede física. Contiene nombre, dirección física, teléfono, email de contacto, coordenadas (latitud y longitud) para el mapa y la distancia, <strong>zona horaria</strong> (<code>time_zone</code>) y número de <strong>cabinas</strong> (citas a la vez, de 1 a 50).</p>
+                        <p>Representa una sede física. Contiene nombre, dirección física, teléfono, email de contacto, coordenadas (latitud y longitud) para el mapa y la distancia, <strong>zona horaria</strong> (<code>time_zone</code>), número de <strong>cabinas</strong> (citas a la vez, de 1 a 50), CIF/NIF, si está <strong>publicado</strong> (los dados de alta nacen ocultos hasta que administración los revisa), la configuración de la tarjeta de puntos (<code>loyalty_*</code>) y la fecha de su foto (<code>photo_updated_at</code>; la imagen va en <code>center_photos</code>).</p>
                     </div>
                     <div class="card-feature">
                         <h4>👤 User & Role (Usuarios y Roles)</h4>
@@ -448,7 +460,7 @@
                     </div>
                     <div class="card-feature">
                         <h4>📅 Appointment (Citas y Reservas)</h4>
-                        <p>Registra el turno acordado. Vincula un <code>dateTime</code> (fecha y hora exacta), un <code>treatment</code>, un <code>center</code> y obligatoriamente un <code>client</code> registrado (cuenta de usuario activa), el <code>worker</code> asignado, su estado (<code>PENDING</code>, <code>PROPOSED</code>, <code>CONFIRMED</code>, <code>REJECTED</code>, <code>CANCELLED</code>, <code>COMPLETED</code>), el <code>workerMessage</code>, el último cambio y quién lo hizo (<code>last_change</code>), la hora anterior si el centro la movió y el evento de Google Calendar. <em>El flujo de clientes invitados se suprimió para garantizar la trazabilidad de las fichas.</em></p>
+                        <p>Registra el turno acordado. Vincula un <code>dateTime</code> (fecha y hora exacta), un <code>treatment</code>, un <code>center</code> y obligatoriamente un <code>client</code> registrado (cuenta de usuario activa), el <code>worker</code> asignado, su estado (<code>PENDING</code>, <code>PROPOSED</code>, <code>CONFIRMED</code>, <code>REJECTED</code>, <code>CANCELLED</code>, <code>COMPLETED</code>), el <code>workerMessage</code>, el último cambio y quién lo hizo (<code>last_change</code>), la hora anterior si el centro la movió, los eventos de Google Calendar del trabajador y del cliente y el <strong>resumen del tratamiento</strong> (<code>treatment_summary</code>, con <code>treatment_alert</code> si es un aviso para próximas citas; solo lo ve el centro). <em>El flujo de clientes invitados se suprimió para garantizar la trazabilidad de las fichas.</em></p>
                     </div>
                     <div class="card-feature">
                         <h4>🕒 AppointmentProposal & AgendaBlock</h4>
@@ -456,7 +468,15 @@
                     </div>
                     <div class="card-feature">
                         <h4>🔗 GoogleCalendarLink & persistent_logins</h4>
-                        <p><code>GoogleCalendarLink</code>: trabajadores con Google Calendar activado (token cifrado e id del calendario «Cuquora»). <code>persistent_logins</code>: dispositivos con «Recordar mi sesión».</p>
+                        <p><code>GoogleCalendarLink</code>: trabajadores y clientes con Google Calendar activado (token cifrado e id del calendario «Cuquora»). <code>persistent_logins</code>: dispositivos con «Recordar mi sesión».</p>
+                    </div>
+                    <div class="card-feature">
+                        <h4>🛍️ ProductSale & LoyaltyMovement</h4>
+                        <p><code>ProductSale</code>: venta de un producto del inventario a un cliente, con la cantidad y el precio del momento (<code>unit_price</code>); al anularla se devuelven las unidades. <code>LoyaltyMovement</code>: puntos ganados (por una venta o por una cita completada, que solo suma una vez) y canjeados, por centro y cliente.</p>
+                    </div>
+                    <div class="card-feature">
+                        <h4>✉️ AccountInvitation & CenterPhoto</h4>
+                        <p><code>AccountInvitation</code>: invitación de un solo uso (7 días) para que un trabajador de un centro nuevo ponga su contraseña; solo se guarda la huella SHA-256 del enlace. <code>CenterPhoto</code>: la foto del centro como JPEG de 1200 px como mucho, guardada en la base de datos.</p>
                     </div>
                 </div>
             </section>
@@ -529,7 +549,7 @@ mvnw.cmd spring-boot:run -Dspring-boot.run.profiles=dev
 # Linux (Maven del sistema)
 mvn spring-boot:run -Dspring-boot.run.profiles=dev
 
-# Tests (129)
+# Tests (167)
 mvn test</code></pre>
                 <p>
                     Con el perfil <code>dev</code> la aplicación usa H2 en memoria, carga los datos demo con <code>DatabaseSeeder</code> y activa <code>/login-selector</code> y la consola H2. Sin SMTP configurado, los correos se escriben en la consola. «Iniciar sesión con Google» y Google Calendar solo aparecen si están las variables <code>GOOGLE_CLIENT_ID</code>, <code>GOOGLE_CLIENT_SECRET</code> y <code>GOOGLE_TOKEN_KEY</code>.

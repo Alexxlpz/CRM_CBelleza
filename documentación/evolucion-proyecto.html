@@ -51,6 +51,7 @@
                     <li><a href="#fase-6">Fase 6: Notificaciones, Onboarding & UI Reactiva</a></li>
                     <li><a href="#fase-7">Fase 7: Spring Security, Flyway & Escritorio</a></li>
                     <li><a href="#fase-8">Fase 8: Legal, Google y Agenda Flexible</a></li>
+                    <li><a href="#fase-9">Fase 9: Ventas, Puntos y Alta de Centros</a></li>
                     <li><a href="#retos-superados">Retos Técnicos Superados</a></li>
                     <li><a href="#roadmap">Hoja de Ruta Futura</a></li>
                 </ul>
@@ -82,7 +83,7 @@
                     </div>
                     <div class="hero-meta-item">
                         <span>Commits Registrados:</span>
-                        <strong>36 commits (hasta el 11 oct 2026)</strong>
+                        <strong>45 commits (hasta el 16 oct 2026)</strong>
                     </div>
                     <div class="hero-meta-item">
                         <span>Metodología:</span>
@@ -693,6 +694,119 @@
                         </div>
                     </div>
 
+                    <!-- Commit 32 -->
+                    <div class="timeline-item" id="fase-9">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="commit-hash">aca39b8 · ec6e444</span>
+                                <span class="commit-date">📅 12 de Octubre, 2026</span>
+                                <span class="commit-author">👤 alejandro</span>
+                            </div>
+                            <h4>Resumen del tratamiento y avisos en la ficha</h4>
+                            <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.88rem;">
+                                <li><strong>Resumen del tratamiento</strong>: cuando una cita confirmada ya ha empezado, el trabajador escribe qué se hizo y cómo fue, desde la agenda o el historial de la ficha (migración <code>V8</code>).</li>
+                                <li>Si lo marca como <strong>aviso</strong> (alergias, reacciones, productos que no le sientan bien), sale arriba en la ficha del cliente y en sus demás citas de la agenda. El cliente nunca lo ve.</li>
+                                <li>Animaciones más cortas y coherentes: fuera los efectos al cargar, los bucles y las tarjetas que se levantan al pasar el ratón.</li>
+                                <li>Documentación actualizada (los cuatro documentos de esta carpeta) y <code>.env.example</code> versionado.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Commit 33 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="commit-hash">fbb19cf</span>
+                                <span class="commit-date">📅 13 de Octubre, 2026</span>
+                                <span class="commit-author">👤 alejandro</span>
+                            </div>
+                            <h4>Venta de productos y tarjeta de puntos</h4>
+                            <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.88rem;">
+                                <li><strong>Vender productos desde la ficha del cliente</strong>: se elige un producto del inventario y la cantidad, y antes de confirmar se ve el stock actual y el que quedará. Se resta del inventario con la fila bloqueada, así que nunca se vende más de lo que hay. «Anular» devuelve las unidades (migración <code>V9</code>).</li>
+                                <li><strong>Tarjeta de puntos por centro</strong> en «Mi Centro»: desactivada, puntos por euro o por tratamiento/unidad de producto, puntos para la recompensa y su texto. Los productos suman al venderse y los tratamientos cuando la cita se completa; el trabajador canjea la recompensa desde la ficha (migración <code>V10</code>).</li>
+                                <li>El cliente ve sus puntos de cada centro en «Mis citas».</li>
+                                <li>En el perfil <code>dev</code> la base H2 se crea de cero en cada arranque (se acabaron los errores «Check constraint invalid») y se lee el <code>.env</code>.</li>
+                                <li>Arreglos de interfaz: icono del buscador de clientes, formato de precios, resumen del día en la agenda y mensajes sin «con éxito».</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Commit 34 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="commit-hash">aca3e44 · 4a61d61</span>
+                                <span class="commit-date">📅 14 de Octubre, 2026</span>
+                                <span class="commit-author">👤 alejandro</span>
+                            </div>
+                            <h4>Alta de centros con invitaciones y aprobación</h4>
+                            <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.88rem;">
+                                <li><strong>Alta de centro</strong> (<code>/register-center</code>) como asistente de 5 pasos (centro, ubicación, equipo, puntos y envío) con vista previa de la tarjeta del centro mientras se escribe. La ubicación se marca con un pin en el mapa y la dirección se rellena sola (Nominatim).</li>
+                                <li>El centro nace <strong>oculto</strong>: no sale en el buscador ni admite reservas hasta que administración lo revisa y lo publica desde el enlace que recibe por correo.</li>
+                                <li>El responsable y su equipo se crean como trabajadores sin contraseña y cada uno recibe una <strong>invitación</strong> de un solo uso (7 días) para ponerla; también pueden entrar con Google (migración <code>V11</code>).</li>
+                                <li>Los <strong>clientes</strong> también pueden guardar sus citas en Google Calendar desde «Mi Perfil» (migración <code>V12</code>).</li>
+                                <li>Centros usa todo el ancho en escritorio; Contacto pasa a pantalla partida; «Funcionalidades» se une a Inicio y <code>/features</code> redirige allí.</li>
+                                <li>El wrapper de Maven entra en el repositorio y se arregla el icono de tratamientos.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Commit 35 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="commit-hash">3d7300c</span>
+                                <span class="commit-date">📅 15 de Octubre, 2026</span>
+                                <span class="commit-author">👤 alejandro</span>
+                            </div>
+                            <h4>Foto del centro y filtro del historial</h4>
+                            <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.88rem;">
+                                <li><strong>Foto del centro</strong>: se sube en el alta y en «Mi Centro» (JPG o PNG, hasta 8 MB y al menos 400×250 px). Se endereza según la orientación de la cámara y se guarda reducida en la base de datos (migración <code>V13</code>). Sale en las tarjetas del buscador y en la ficha del centro; sin foto, se ven las iniciales.</li>
+                                <li>El historial de citas de la ficha del cliente se puede filtrar por tratamiento y buscar en notas y resúmenes (por ejemplo, los parámetros del láser de cada sesión).</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Commit 36 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="commit-hash">34c176a</span>
+                                <span class="commit-date">📅 15 de Octubre, 2026</span>
+                                <span class="commit-author">👤 alejandro</span>
+                            </div>
+                            <h4>Nuevo calendario para pedir cita</h4>
+                            <p>
+                                La reserva del cliente estrena un calendario propio: los días del mes marcados como «con horas libres», «completo» o «cerrado» y, al lado, las horas libres del día elegido, siempre a la vista. En móvil, tras elegir el servicio la lista se pliega al elegido (con «Cambiar de servicio») y abajo queda el resumen con «Confirmar y reservar cita». También se mejoran «Mis citas» y «Mi Centro» en pantallas grandes.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Commit 37 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="commit-hash">c5a98f9 · a5cc5bc</span>
+                                <span class="commit-date">📅 16 de Octubre, 2026</span>
+                                <span class="commit-author">👤 alejandro</span>
+                            </div>
+                            <h4>Vender desde el inventario y foto en el panel</h4>
+                            <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.88rem;">
+                                <li><strong>Botón «Vender» en el inventario</strong>: el mismo modal de venta de la ficha, pero eligiendo el cliente en él.</li>
+                                <li>El panel del trabajador enseña la foto del centro, tenue, detrás del saludo y los contadores, y aprovecha más el ancho en escritorio.</li>
+                                <li>Al pedir cita ya no hay tratamiento elegido de antemano, y el botón de anular queda siempre al pie de la tarjeta.</li>
+                                <li>La vista previa de la venta deja de avisar de «stock bajo».</li>
+                                <li>Tests: 167 en total, todos en verde.</li>
+                            </ul>
+                        </div>
+                    </div>
+
                 </div>
             </section>
 
@@ -762,6 +876,20 @@
                         <h4>8. Google sin Romper el Resto</h4>
                         <p>
                             El login con Google tenía que convivir con el login por contraseña sin que el resto de la app notara la diferencia: el manejador de éxito cambia el usuario de Google por el mismo <code>AppUserDetails</code>. Google Calendar se sincroniza en segundo plano tras guardar la cita, así que si Google falla la cita no se ve afectada.
+                        </p>
+                    </div>
+
+                    <div class="card-feature">
+                        <h4>9. Vender sin Quedarse en Negativo</h4>
+                        <p>
+                            Dos trabajadores pueden vender el último bote a la vez. La venta bloquea la fila del inventario (<code>InventoryRepository.findForUpdate</code>) antes de restar, así que la segunda ve el stock real y recibe «Solo quedan N unidades…». Los puntos se guardan al ganarse: si el centro cambia la configuración de la tarjeta, lo ya ganado no cambia, y cada cita completada solo suma una vez.
+                        </p>
+                    </div>
+
+                    <div class="card-feature">
+                        <h4>10. Centros Nuevos sin Contraseñas por Correo</h4>
+                        <p>
+                            El alta crea a todo el equipo sin contraseña: cada uno la pone desde su invitación. En la base de datos solo se guarda la huella SHA-256 de los enlaces de invitación y de aprobación (<code>SecureTokens</code>), y el centro no es visible hasta que administración lo publica.
                         </p>
                     </div>
                 </div>
