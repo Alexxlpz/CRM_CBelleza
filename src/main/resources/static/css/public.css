@@ -637,6 +637,37 @@
     text-align: right;
 }
 
+/* Por debajo de 1100px la vista previa no va al lado: sale al final, dentro del asistente, para confirmar */
+@media (max-width: 1099px) {
+    .registration-wizard > .registration-preview {
+        display: none;
+    }
+}
+
+.registration-preview.is-confirming {
+    border: 0;
+    border-radius: 0;
+    padding: 0 0 8px;
+}
+
+.registration-confirm-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 8px;
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--text-main);
+}
+
+.registration-confirm-title i {
+    color: var(--primary-text);
+}
+
+.registration-confirm-intro .form-help {
+    margin: 0 0 18px;
+}
+
 /* Escritorio: asistente y vista previa más grandes, con letra y campos más amplios */
 @media (min-width: 1100px) {
     .registration-page {
@@ -737,10 +768,34 @@
         display: none;
     }
 
-    /* A media altura la muesca se come el lado izquierdo de la flecha: el icono se
-       centra en la parte que se ve, entre la muesca y la punta */
-    .wizard-steps li:not(:first-child) button {
-        padding: 0 2px 0 calc(var(--notch) + 2px);
+    /* Los pasos que solo llevan icono no caben con el relleno de la muesca: sin relleno,
+       el icono queda en el centro de la flecha (la muesca y la punta se compensan) */
+    .wizard-steps button:not(.is-current) {
+        padding: 0;
+    }
+
+    /* El último no tiene punta: se centra en lo que queda a la derecha de la muesca */
+    .wizard-steps li:last-child button:not(.is-current) {
+        padding-left: var(--notch);
+    }
+
+    /* «Atrás» y el botón para seguir van en la misma fila; el de seguir, más grande, ocupa el resto */
+    .wizard-nav {
+        flex-wrap: nowrap;
+    }
+
+    .wizard-nav #wizardBack {
+        flex-shrink: 0;
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+    .wizard-nav .btn-primary {
+        flex: 1;
+        min-width: 0;
+        padding-left: 16px;
+        padding-right: 16px;
+        text-align: center;
     }
 }
 

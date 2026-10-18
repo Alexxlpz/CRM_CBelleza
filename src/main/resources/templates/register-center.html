@@ -242,8 +242,13 @@
             </form>
         </div>
 
-        <!--/* Vista previa: se rellena desde center-registration.js mientras se escribe */-->
+        <!--/* Vista previa: se rellena desde center-registration.js mientras se escribe.
+             En móvil no se ve al lado: center-registration.js la enseña al final, como paso de confirmación */-->
         <aside class="registration-preview" id="registrationPreview" aria-label="Vista previa del centro" hidden>
+            <div class="registration-confirm-intro" hidden>
+                <h2 class="registration-confirm-title" tabindex="-1"><i class="lucide-clipboard-check" aria-hidden="true"></i> Revisa tu centro</h2>
+                <p class="form-help">Comprueba que está todo como quieres antes de registrarlo. Si algo no está bien, vuelve atrás y cámbialo.</p>
+            </div>
             <p class="registration-preview-label">Así te verán los clientes</p>
             <div class="registration-preview-card">
                 <div class="center-photo registration-preview-photo">

@@ -81,7 +81,48 @@ document.addEventListener('DOMContentLoaded', () => {
     let current = 0;
     let reached = 0;
 
+    // En móvil la vista previa no cabe al lado: antes de registrar se enseña como paso de confirmación
+    const preview = document.getElementById('registrationPreview');
+    const previewHome = preview.parentElement;
+    const confirmIntro = preview.querySelector('.registration-confirm-intro');
+    const wizardNav = form.querySelector('.wizard-nav');
+    const submitLabel = submitBtn.querySelector('span');
+    const submitText = submitLabel.textContent;
+    const submitIcon = submitBtn.querySelector('i');
+    const narrow = window.matchMedia('(max-width: 1099px)');
+    let confirming = false;
+
+    // En móvil el botón del último paso no registra todavía: lleva a la vista previa
+    function refreshSubmit() {
+        const toPreview = narrow.matches && !confirming;
+        submitLabel.textContent = confirming ? 'Sí, registrar' : toPreview ? 'Ver vista previa' : submitText;
+        submitIcon.className = toPreview ? 'lucide-eye' : 'lucide-send';
+    }
+
+    function showConfirm() {
+        // Se confirma desde el último paso (también si se envía con Intro en otro): «Atrás» vuelve a él
+        showStep(steps.length - 1);
+        confirming = true;
+        steps.forEach(step => { step.hidden = true; });
+        form.insertBefore(preview, wizardNav);
+        preview.classList.add('is-confirming');
+        confirmIntro.hidden = false;
+        backBtn.hidden = false;
+        refreshSubmit();
+        stepper.scrollIntoView({ behavior: Cuquora.scrollBehavior(), block: 'nearest' });
+        confirmIntro.querySelector('h2').focus({ preventScroll: true });
+    }
+
+    function leaveConfirm() {
+        confirming = false;
+        previewHome.appendChild(preview);
+        preview.classList.remove('is-confirming');
+        confirmIntro.hidden = true;
+        refreshSubmit();
+    }
+
     function showStep(index) {
+        if (confirming) leaveConfirm();
         current = index;
         reached = Math.max(reached, index);
         steps.forEach((step, i) => { step.hidden = i !== index; });
@@ -116,20 +157,34 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     nextBtn.addEventListener('click', () => goTo(current + 1));
-    backBtn.addEventListener('click', () => goTo(current - 1));
+    // Desde la confirmación, «Atrás» vuelve al último paso
+    backBtn.addEventListener('click', () => goTo(confirming ? current : current - 1));
     stepButtons.forEach((btn, i) => btn.addEventListener('click', () => goTo(i)));
 
-    // Si al enviar falta algo, se vuelve al primer paso con errores (antes que la validación general)
-    form.addEventListener('submit', () => {
+    // Si al enviar falta algo, se vuelve al primer paso con errores (antes que la validación general).
+    // Si está todo bien, en móvil se pide confirmar con la vista previa antes de registrar
+    form.addEventListener('submit', e => {
         const wrong = steps.findIndex((step, i) => !stepIsValid(i));
-        if (wrong >= 0) showStep(wrong);
+        if (wrong >= 0) {
+            showStep(wrong);
+        } else if (narrow.matches && !confirming) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            showConfirm();
+        }
     }, { capture: true });
+
+    // Si la ventana se ensancha durante la confirmación, la vista previa vuelve a su sitio al lado
+    narrow.addEventListener('change', () => {
+        if (confirming && !narrow.matches) showStep(current);
+        refreshSubmit();
+    });
+    refreshSubmit();
 
     stepper.hidden = false;
     showStep(0);
 
     // ---- Vista previa ----
-    const preview = document.getElementById('registrationPreview');
     const field = name => form.elements[name];
 
     function setPreview(key, text) {
