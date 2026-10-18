@@ -17,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /** Un trabajador no puede ver ni modificar datos de otro centro (antes bastaba con cambiar el id en la URL). */
@@ -180,5 +181,19 @@ class CenterIsolationTests {
             center.setPhotoUpdatedAt(null);
             centers.save(center);
         }
+    }
+
+    @Test
+    void analyticsOnlyShowClientsOfOwnCenter() throws Exception {
+        // Carmen Morales solo ha venido al centro 1
+        mvc.perform(get("/worker/analytics").with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Carmen Morales")));
+        mvc.perform(get("/worker/analytics").with(TestUsers.as(users, TestUsers.WORKER_CENTER_2)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("Carmen Morales"))));
+        mvc.perform(get("/worker/analytics").param("anio", "").with(TestUsers.as(users, TestUsers.WORKER_CENTER_2)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("Carmen Morales"))));
     }
 }

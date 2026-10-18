@@ -30,7 +30,7 @@
             </div>
             <div class="appointment-detail-item">
                 <i class="lucide-euro" aria-hidden="true"></i>
-                <span th:text="'Precio: ' + ${#numbers.formatDecimal(app.treatment.price, 1, 'POINT', 2, 'COMMA')} + ' € (' + ${app.treatment.duration} + ' min)'">25,00 €</span>
+                <span th:text="'Precio: ' + ${#numbers.formatDecimal(app.price, 1, 'POINT', 2, 'COMMA')} + ' € (' + ${app.treatment.duration} + ' min)'">25,00 €</span>
             </div>
 
             <div class="appointment-worker-note" th:if="${!#strings.isEmpty(app.workerMessage)}">

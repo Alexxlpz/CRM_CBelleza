@@ -56,6 +56,10 @@ public class Appointment {
     @Column(nullable = false)
     private AppointmentStatus status;
 
+    /** Lo que se cobra: el precio del tratamiento al reservar, que el trabajador corrige si hubo descuento o suplemento. */
+    @Column(nullable = false)
+    private Double price;
+
     @Column(name = "worker_message", length = 500)
     private String workerMessage;
 
@@ -117,6 +121,16 @@ public class Appointment {
 
     @Transient
     private Boolean isNewClient;
+
+    public static final double MAX_PRICE = 10_000;
+
+    /** Si nadie ha puesto precio, el de la carta en ese momento. */
+    @PrePersist
+    void defaultPrice() {
+        if (price == null && treatment != null) {
+            price = treatment.getPrice();
+        }
+    }
 
     public void recordChange(AppointmentChange change, LocalDateTime at) {
         this.lastChange = change;

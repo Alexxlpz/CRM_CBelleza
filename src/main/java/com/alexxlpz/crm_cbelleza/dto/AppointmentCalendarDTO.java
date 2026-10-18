@@ -20,6 +20,8 @@ public class AppointmentCalendarDTO {
     private ClientDTO client;
     private WorkerDTO worker;
     private TreatmentDTO treatment;
+    /** Lo que se cobra por la cita (puede no ser el precio de la carta). */
+    private Double price;
     /** Hora anterior si el centro la movió. */
     private String previousDateTime;
     /** Horas propuestas al cliente (solo en citas PROPOSED). */

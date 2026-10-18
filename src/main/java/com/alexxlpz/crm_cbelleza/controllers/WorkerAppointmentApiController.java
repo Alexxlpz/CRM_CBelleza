@@ -123,13 +123,14 @@ public class WorkerAppointmentApiController {
         return appointmentService.getCalendarAppointment(worker.getCenterId(), id);
     }
 
-    /** Resumen del tratamiento realizado (agenda y ficha del cliente). Texto vacío = se borra. */
+    /** Resumen del tratamiento realizado y precio cobrado (agenda y ficha del cliente). Texto vacío = se borra. */
     @PostMapping("/worker/appointments/{id}/summary")
     public AppointmentCalendarDTO saveSummary(@AuthenticationPrincipal AppUserDetails worker,
                                               @PathVariable Long id,
                                               @RequestParam(required = false) String summary,
-                                              @RequestParam(defaultValue = "false") boolean alert) {
-        summaryService.save(worker.getCenterId(), id, worker.getId(), summary, alert);
+                                              @RequestParam(defaultValue = "false") boolean alert,
+                                              @RequestParam(required = false) Double price) {
+        summaryService.save(worker.getCenterId(), id, worker.getId(), summary, alert, price);
         return appointmentService.getCalendarAppointment(worker.getCenterId(), id);
     }
 

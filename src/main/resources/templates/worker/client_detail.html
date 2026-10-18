@@ -283,7 +283,7 @@
                                 <span th:text="${app.worker != null ? app.worker.name : 'Sin asignar'}">Laura Gómez</span>
                             </span>
                             <span>
-                                <strong th:text="${#numbers.formatDecimal(app.treatment.price, 1, 'POINT', 2, 'COMMA') + ' €'}">35,00 €</strong>
+                                <strong class="history-price" th:text="${#numbers.formatDecimal(app.price, 1, 'POINT', 2, 'COMMA') + ' €'}">35,00 €</strong>
                                 <span th:text="'(' + ${app.treatment.duration} + ' min)'">(45 min)</span>
                             </span>
                         </div>
@@ -307,9 +307,11 @@
                                 th:data-summary-id="${app.id}"
                                 th:data-summary-context="${app.treatment.name} + ' · ' + ${#temporals.format(app.dateTime, 'dd/MM/yyyy HH:mm')}"
                                 th:data-summary-text="${app.treatmentSummary}"
-                                th:data-summary-alert="${app.treatmentAlert}">
+                                th:data-summary-alert="${app.treatmentAlert}"
+                                th:data-summary-price="${app.price}"
+                                th:data-summary-list-price="${app.treatment.price}">
                             <i class="lucide-clipboard-pen-line" aria-hidden="true"></i>
-                            <span th:text="${app.treatmentSummary != null} ? 'Editar resumen' : 'Añadir resumen del tratamiento'">Añadir resumen del tratamiento</span>
+                            <span th:text="${app.treatmentSummary != null} ? 'Editar resumen y precio' : 'Añadir resumen y precio'">Añadir resumen y precio</span>
                         </button>
                     </div>
                 </div>
@@ -400,13 +402,18 @@
                     id: button.dataset.summaryId,
                     context: button.dataset.summaryContext,
                     summary: button.dataset.summaryText,
-                    alert: button.dataset.summaryAlert === 'true'
+                    alert: button.dataset.summaryAlert === 'true',
+                    price: button.dataset.summaryPrice,
+                    listPrice: button.dataset.summaryListPrice
                 }, saved => {
                     button.closest('.history-item').querySelector('.treatment-summary')?.remove();
                     button.insertAdjacentHTML('beforebegin', summaryHtml(saved));
                     button.dataset.summaryText = saved.treatmentSummary || '';
                     button.dataset.summaryAlert = String(saved.treatmentAlert);
-                    button.querySelector('span').textContent = saved.treatmentSummary ? 'Editar resumen' : 'Añadir resumen del tratamiento';
+                    button.dataset.summaryPrice = String(saved.price);
+                    button.closest('.history-item').querySelector('.history-price').textContent =
+                        Number(saved.price).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+                    button.querySelector('span').textContent = saved.treatmentSummary ? 'Editar resumen y precio' : 'Añadir resumen y precio';
                     renderAlerts();
                     button.focus();
                 });
@@ -426,7 +433,7 @@
                     .sort((a, b) => a.localeCompare(b, 'es'))
                     .forEach(name => historyTreatment.add(new Option(name, name)));
 
-                // El botón de resumen no cuenta: su texto («Añadir resumen del tratamiento») coincidiría en todas
+                // El botón de resumen no cuenta: su texto («Añadir resumen y precio») coincidiría en todas
                 const searchableText = item => normalize([...item.children]
                     .filter(child => child.tagName !== 'BUTTON')
                     .map(child => child.textContent).join(' '));

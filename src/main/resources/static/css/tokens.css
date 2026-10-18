@@ -75,6 +75,12 @@
     --on-ink-muted: rgba(245, 240, 235, 0.72);
     --neutral-rgb: 100, 116, 139;
 
+    /* ---- Gráficos (pantalla «Análisis»): pareja validada para daltonismo y contraste 3:1 sobre la superficie ---- */
+    --chart-1: #916015;
+    --chart-2: #c4607e;
+    --chart-soft: rgba(var(--primary-rgb), 0.5);
+    --chart-grid: rgba(var(--primary-rgb), 0.22);
+
     /* ---- Forma ---- */
     --border-radius-lg: 24px;
     --border-radius-md: 16px;
@@ -157,6 +163,11 @@
         --neutral-text: #e2e8f0;
         --info-text: #9cc6f2;
         --neutral-rgb: 148, 163, 184;
+
+        --chart-1: #b5842f;
+        --chart-2: #d9658a;
+        --chart-soft: rgba(var(--primary-rgb), 0.42);
+        --chart-grid: rgba(var(--primary-rgb), 0.16);
 
         --shadow-soft: 0 12px 40px rgba(0, 0, 0, 0.3);
         --shadow-modal: 0 24px 60px rgba(0, 0, 0, 0.55);

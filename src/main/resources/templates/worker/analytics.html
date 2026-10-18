@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{fragments/head :: meta('Análisis del centro - Cuquora CRM')}"></th:block>
+    <link rel="stylesheet" th:href="@{/css/analytics.css}">
+</head>
+<body>
+    <div th:replace="~{fragments/navbar :: worker('/worker/dashboard', 'Volver al panel principal', ${notifications})}"></div>
+
+    <main class="main-container main-container--wide analytics-page">
+
+        <div class="page-header">
+            <h1>Análisis del centro</h1>
+            <p th:text="'Cómo va ' + ${sessionCenterName} + ': ingresos, visitas y clientes, mes a mes.'">Cómo va el centro</p>
+        </div>
+
+        <div class="analytics-empty" th:unless="${report.hasData}">
+            <i class="lucide-bar-chart-3" aria-hidden="true"></i>
+            <div>
+                <h2>Todavía no hay cifras</h2>
+                <p>Las cifras salen de las citas completadas y de los productos vendidos. En cuanto el centro tenga sus primeras visitas, aquí verás cómo evoluciona cada mes.</p>
+            </div>
+        </div>
+
+        <th:block th:if="${report.hasData}">
+
+        <!-- Periodo: últimos meses o un año entero frente al anterior -->
+        <div class="list-toolbar analytics-toolbar">
+            <p class="analytics-period-summary">
+                <strong th:text="${report.periodLabel}">Últimos 12 meses</strong>
+                <span th:text="${report.periodVisits} + ' visitas · ' + ${report.periodClients} + ' clientes · '
+                        + ${#numbers.formatDecimal(report.periodRevenue, 1, 'POINT', 0, 'COMMA')} + ' € · ticket medio '
+                        + ${#numbers.formatDecimal(report.periodAverageTicket(), 1, 'POINT', 2, 'COMMA')} + ' €'">320 visitas</span>
+            </p>
+            <div class="analytics-controls">
+                <nav class="year-nav" th:if="${report.yearView}" aria-label="Año">
+                    <a class="year-nav-btn" th:if="${report.previousYear != null}"
+                       th:href="@{/worker/analytics(anio=${report.previousYear})}"
+                       th:title="'Ver ' + ${report.previousYear}" th:aria-label="'Ver ' + ${report.previousYear}">
+                        <i class="lucide-chevron-left" aria-hidden="true"></i>
+                    </a>
+                    <span class="year-nav-btn is-disabled" th:if="${report.previousYear == null}" aria-disabled="true"
+                          th:title="'Antes de ' + ${report.year} + ' el centro no usaba Cuquora'">
+                        <i class="lucide-chevron-left" aria-hidden="true"></i>
+                    </span>
+                    <strong class="year-nav-current" th:text="${report.year}">2026</strong>
+                    <a class="year-nav-btn" th:if="${report.nextYear != null}"
+                       th:href="@{/worker/analytics(anio=${report.nextYear})}"
+                       th:title="'Ver ' + ${report.nextYear}" th:aria-label="'Ver ' + ${report.nextYear}">
+                        <i class="lucide-chevron-right" aria-hidden="true"></i>
+                    </a>
+                    <span class="year-nav-btn is-disabled" th:if="${report.nextYear == null}" aria-disabled="true" title="Es el año en curso">
+                        <i class="lucide-chevron-right" aria-hidden="true"></i>
+                    </span>
+                </nav>
+                <nav class="view-toggle view-toggle--always" aria-label="Periodo">
+                    <a th:each="option : ${periodOptions}" class="view-toggle-btn"
+                       th:href="@{/worker/analytics(meses=${option})}"
+                       th:attr="aria-current=${!report.yearView and option == report.months} ? 'page'"
+                       th:text="${option} + ' meses'">12 meses</a>
+                    <a class="view-toggle-btn" th:href="@{/worker/analytics(anio='')}"
+                       th:attr="aria-current=${report.yearView} ? 'page'">Por año</a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Cifras del periodo frente al tramo comparable -->
+        <section class="analytics-section" aria-labelledby="kpiTitle">
+            <div class="analytics-section-head">
+                <h2 id="kpiTitle" th:text="${report.headline}">Octubre hasta hoy</h2>
+                <p th:text="${report.comparisonLabel != null} ? ${report.comparisonLabel} : ${report.noComparisonText}">Comparado con el 1-18 sept</p>
+            </div>
+
+            <div class="kpi-grid">
+                <div class="kpi-tile" th:each="kpi : ${report.kpis}">
+                    <span class="kpi-label"><i th:class="${kpi.icon}" aria-hidden="true"></i> <span th:text="${kpi.label}">Ingresos</span></span>
+                    <span class="kpi-value" th:text="${kpi.displayValue()}">1.240 €</span>
+                    <span class="kpi-change" th:if="${kpi.changeLabel() != null}"
+                          th:classappend="${kpi.isImprovement()} ? 'is-better' : (${kpi.isWorsening()} ? 'is-worse')">
+                        <i th:if="${kpi.change > 0}" class="lucide-trending-up" aria-hidden="true"></i>
+                        <i th:if="${kpi.change < 0}" class="lucide-trending-down" aria-hidden="true"></i>
+                        <i th:if="${kpi.change == 0}" class="lucide-minus" aria-hidden="true"></i>
+                        <span th:text="${kpi.changeLabel()}">+12 %</span>
+                        <span class="kpi-change-note" th:text="'frente a ' + ${kpi.displayPrevious()}">frente a 1.100 €</span>
+                    </span>
+                    <span class="kpi-change" th:if="${kpi.changeLabel() == null and report.comparisonLabel != null}"
+                          th:text="'frente a ' + ${kpi.displayPrevious()}">frente a 0</span>
+                </div>
+            </div>
+
+            <p class="analytics-note" th:if="${report.comparisonNote != null}">
+                <i class="lucide-info" aria-hidden="true"></i>
+                <span th:text="${report.comparisonNote}">Solo se comparan los meses que hay en los dos años.</span>
+            </p>
+            <p class="analytics-note" th:if="${report.bookedRestOfMonth > 0}">
+                <i class="lucide-calendar-clock" aria-hidden="true"></i>
+                <span th:text="'Quedan ' + ${report.bookedRestOfMonth} + (${report.bookedRestOfMonth == 1} ? ' cita confirmada' : ' citas confirmadas')
+                        + ' este mes, por ' + ${#numbers.formatDecimal(report.bookedRevenueRestOfMonth, 1, 'POINT', 0, 'COMMA')} + ' € en tratamientos.'">Quedan 12 citas confirmadas este mes.</span>
+            </p>
+        </section>
+
+        <!-- Qué ha cambiado frente al año anterior (vista por año) -->
+        <section class="analytics-panel changes-panel" th:if="${report.changes != null}" aria-labelledby="changesTitle"
+                 th:with="ch=${report.changes}">
+            <header class="analytics-panel-head">
+                <h2 id="changesTitle"><i class="lucide-git-compare" aria-hidden="true"></i> <span th:text="'Qué ha cambiado frente a ' + ${report.previousSeriesLabel}">Qué ha cambiado</span></h2>
+                <p class="changes-verdict" th:if="${ch.verdict != null}" th:text="${ch.verdict}">Los ingresos bajan un 12 %, sobre todo porque viene menos gente.</p>
+            </header>
+            <div class="changes-grid">
+                <div class="changes-block">
+                    <h3>Ingresos = visitas × ticket medio</h3>
+                    <dl class="changes-figures">
+                        <div><dt>Ingresos</dt><dd th:text="${ch.revenueLabel()}" th:classappend="${ch.revenueChange != null and ch.revenueChange > 0} ? 'is-better' : (${ch.revenueChange != null and ch.revenueChange < 0} ? 'is-worse')">−12 %</dd></div>
+                        <div><dt>Visitas</dt><dd th:text="${ch.visitsLabel()}" th:classappend="${ch.visitsChange != null and ch.visitsChange > 0} ? 'is-better' : (${ch.visitsChange != null and ch.visitsChange < 0} ? 'is-worse')">−15 %</dd></div>
+                        <div><dt>Ticket medio</dt><dd th:text="${ch.ticketLabel()}" th:classappend="${ch.ticketChange != null and ch.ticketChange > 0} ? 'is-better' : (${ch.ticketChange != null and ch.ticketChange < 0} ? 'is-worse')">+4 %</dd></div>
+                    </dl>
+                </div>
+
+                <div class="changes-block">
+                    <h3>Clientes</h3>
+                    <dl class="changes-figures">
+                        <div><dt th:text="'Vinieron en ' + ${report.previousSeriesLabel} + ' y repiten'">Repiten</dt><dd th:text="${ch.returningClients}">40</dd></div>
+                        <div><dt>No han vuelto</dt><dd th:text="${ch.lostClients}" th:classappend="${ch.lostClients > 0} ? 'is-worse'">6</dd></div>
+                        <div><dt>Nuevos o que vuelven</dt><dd th:text="${ch.gainedClients}" th:classappend="${ch.gainedClients > 0} ? 'is-better'">9</dd></div>
+                    </dl>
+                    <ul class="changes-list" th:unless="${ch.lostTopClients.isEmpty()}" aria-label="Clientes que no han vuelto">
+                        <li th:each="c : ${ch.lostTopClients}">
+                            <a class="changes-list-name" th:href="@{/worker/clients/{id}(id=${c.id})}" th:text="${c.name}">Rosa Pérez</a>
+                            <span class="changes-list-meta" th:text="${c.visits} + (${c.visits == 1} ? ' visita' : ' visitas') + ' · ' + ${#numbers.formatDecimal(c.spent, 1, 'POINT', 0, 'COMMA')} + ' € en ' + ${report.previousSeriesLabel}">4 visitas · 160 €</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="changes-block">
+                    <h3>Tratamientos</h3>
+                    <p class="analytics-panel-empty" th:if="${ch.treatmentDrops.isEmpty() and ch.treatmentGains.isEmpty()}">Las mismas visitas en cada tratamiento.</p>
+                    <ul class="changes-list">
+                        <li th:each="row : ${ch.treatmentDrops}">
+                            <span class="changes-list-name" th:text="${row.name}">Depilación láser</span>
+                            <span class="changes-diff is-worse" th:text="${row.diffLabel()} + ' visitas'">−18 visitas</span>
+                        </li>
+                        <li th:each="row : ${ch.treatmentGains}">
+                            <span class="changes-list-name" th:text="${row.name}">Manicura rusa</span>
+                            <span class="changes-diff is-better" th:text="${row.diffLabel()} + ' visitas'">+7 visitas</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <div class="analytics-grid" th:with="paired=${report.yearView and report.previousYear != null}">
+
+            <!-- Ingresos por mes -->
+            <section class="analytics-panel" aria-labelledby="revenueTitle">
+                <header class="analytics-panel-head">
+                    <h2 id="revenueTitle"><i class="lucide-wallet" aria-hidden="true"></i> Ingresos por mes</h2>
+                    <p>Tratamientos completados y productos vendidos</p>
+                </header>
+                <ul class="chart-legend" aria-label="Leyenda" th:if="${paired or report.showsCuquoraStart()}">
+                    <li th:if="${paired}"><span class="chart-swatch" aria-hidden="true"></span> <span th:text="${report.currentSeriesLabel}">2026</span></li>
+                    <li th:if="${paired}"><span class="chart-swatch chart-swatch--previous" aria-hidden="true"></span> <span th:text="${report.previousSeriesLabel}">2025</span></li>
+                    <li th:if="${report.showsCuquoraStart()}"><span class="cuquora-dot cuquora-dot--legend" aria-hidden="true"></span> Primer mes con Cuquora</li>
+                </ul>
+                <div class="bar-chart" th:classappend="${#lists.size(report.monthly) <= 6} ? 'bar-chart--few'" th:style="'--columns:' + ${#lists.size(report.monthly)}">
+                    <div class="bar-chart-col" tabindex="0" th:each="point : ${report.monthly}" th:classappend="${!point.hasData()} ? 'is-empty'"
+                         th:aria-label="${point.label} + ': ' + (${point.hasData()} ? ${#numbers.formatDecimal(point.revenue, 1, 'POINT', 0, 'COMMA')} + ' €' : ${point.emptyNote})
+                                + (${point.previousRevenue != null} ? '; ' + ${report.previousSeriesLabel} + ': ' + ${#numbers.formatDecimal(point.previousRevenue, 1, 'POINT', 0, 'COMMA')} + ' €' : '')">
+                        <span class="bar-chart-bars" th:unless="${paired}">
+                            <span class="bar-chart-bar" th:if="${point.hasData()}" th:style="'--size:' + ${report.revenueHeight(point)} + '%'"></span>
+                        </span>
+                        <span class="bar-chart-pair" th:if="${paired}">
+                            <span class="bar-chart-bar bar-chart-bar--previous" th:classappend="${point.previousRevenue == null} ? 'is-missing'"
+                                  th:style="'--size:' + ${report.previousRevenueHeight(point)} + '%'"></span>
+                            <span class="bar-chart-bar" th:classappend="${!point.hasData()} ? 'is-missing'"
+                                  th:style="'--size:' + ${report.revenueHeight(point)} + '%'"></span>
+                        </span>
+                        <span class="cuquora-dot" th:if="${point.cuquoraStart}" aria-hidden="true"></span>
+                        <span class="bar-chart-label"><span class="bar-chart-label-long" th:text="${point.shortLabel}">oct</span><span class="bar-chart-label-short" aria-hidden="true" th:text="${point.initial()}">O</span></span>
+                        <span class="chart-tip" aria-hidden="true">
+                            <strong th:text="${point.label}">Octubre 2026</strong>
+                            <span th:if="${point.cuquoraStart}">Primer mes con Cuquora</span>
+                            <span th:unless="${point.hasData()}" th:text="${point.emptyNote}">Sin datos</span>
+                            <th:block th:if="${point.hasData()}">
+                                <span th:text="${#numbers.formatDecimal(point.revenue, 1, 'POINT', 0, 'COMMA')} + ' € en total'">1.240 €</span>
+                                <span th:text="'Tratamientos: ' + ${#numbers.formatDecimal(point.treatmentRevenue, 1, 'POINT', 0, 'COMMA')} + ' €'">Tratamientos</span>
+                                <span th:text="'Productos: ' + ${#numbers.formatDecimal(point.productRevenue, 1, 'POINT', 0, 'COMMA')} + ' €'">Productos</span>
+                            </th:block>
+                            <span th:if="${point.previousRevenue != null}"
+                                  th:text="${report.previousSeriesLabel} + ': ' + ${#numbers.formatDecimal(point.previousRevenue, 1, 'POINT', 0, 'COMMA')} + ' €'
+                                        + (${point.revenueChangeLabel() != null} ? ' (' + ${point.revenueChangeLabel()} + ')' : '')">2025: 1.410 €</span>
+                            <span th:if="${paired and point.previousRevenue == null}"
+                                  th:text="${report.previousSeriesLabel} + ': sin datos'">2025: sin datos</span>
+                        </span>
+                    </div>
+                </div>
+                <p class="bar-chart-scale" th:text="'Mes más alto: ' + ${#numbers.formatDecimal(report.maxMonthlyRevenue, 1, 'POINT', 0, 'COMMA')} + ' €'">Mes más alto</p>
+                <details class="analytics-table-toggle">
+                    <summary>Ver en tabla</summary>
+                    <table class="analytics-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Mes</th><th scope="col">Tratamientos</th><th scope="col">Productos</th><th scope="col">Total</th>
+                                <th scope="col" th:if="${paired}" th:text="${report.previousSeriesLabel}">2025</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="point : ${report.monthly}">
+                                <th scope="row" th:text="${point.label}">Octubre 2026</th>
+                                <th:block th:if="${point.hasData()}">
+                                    <td th:text="${#numbers.formatDecimal(point.treatmentRevenue, 1, 'POINT', 0, 'COMMA')} + ' €'">0 €</td>
+                                    <td th:text="${#numbers.formatDecimal(point.productRevenue, 1, 'POINT', 0, 'COMMA')} + ' €'">0 €</td>
+                                    <td th:text="${#numbers.formatDecimal(point.revenue, 1, 'POINT', 0, 'COMMA')} + ' €'">0 €</td>
+                                </th:block>
+                                <td th:unless="${point.hasData()}" colspan="3" class="analytics-table-empty" th:text="${point.emptyNote}">Sin datos</td>
+                                <td th:if="${paired}"
+                                    th:text="${point.previousRevenue != null} ? ${#numbers.formatDecimal(point.previousRevenue, 1, 'POINT', 0, 'COMMA')} + ' €' : 'Sin datos'">0 €</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </details>
+            </section>
+
+            <!-- Visitas por mes: primeras visitas y clientes que repiten (o el año anterior, en la vista por año) -->
+            <section class="analytics-panel" aria-labelledby="visitsTitle">
+                <header class="analytics-panel-head">
+                    <h2 id="visitsTitle"><i class="lucide-users" aria-hidden="true"></i> Visitas por mes</h2>
+                    <p th:text="${report.periodNewClients} + (${report.periodNewClients == 1} ? ' cliente nuevo' : ' clientes nuevos') + ' en el periodo'">24 clientes nuevos</p>
+                </header>
+                <ul class="chart-legend" aria-label="Leyenda">
+                    <th:block th:unless="${paired}">
+                        <li><span class="chart-swatch" aria-hidden="true"></span> Clientes que repiten</li>
+                        <li><span class="chart-swatch chart-swatch--new" aria-hidden="true"></span> Primera visita</li>
+                    </th:block>
+                    <th:block th:if="${paired}">
+                        <li><span class="chart-swatch" aria-hidden="true"></span> <span th:text="${report.currentSeriesLabel}">2026</span></li>
+                        <li><span class="chart-swatch chart-swatch--previous" aria-hidden="true"></span> <span th:text="${report.previousSeriesLabel}">2025</span></li>
+                    </th:block>
+                    <li th:if="${report.showsCuquoraStart()}"><span class="cuquora-dot cuquora-dot--legend" aria-hidden="true"></span> Primer mes con Cuquora</li>
+                </ul>
+                <div class="bar-chart" th:classappend="${#lists.size(report.monthly) <= 6} ? 'bar-chart--few'" th:style="'--columns:' + ${#lists.size(report.monthly)}">
+                    <div class="bar-chart-col" tabindex="0" th:each="point : ${report.monthly}" th:classappend="${!point.hasData()} ? 'is-empty'"
+                         th:aria-label="${point.label} + ': ' + (${point.hasData()} ? ${point.visits} + ' visitas, ' + ${point.newVisits} + ' de clientes nuevos' : ${point.emptyNote})
+                                + (${point.previousVisits != null} ? '; ' + ${report.previousSeriesLabel} + ': ' + ${point.previousVisits} + ' visitas' : '')">
+                        <span class="bar-chart-bars" th:unless="${paired}">
+                            <span class="bar-chart-bar bar-chart-bar--new" th:if="${point.newVisits > 0}" th:style="'--size:' + ${report.newVisitsHeight(point)} + '%'"></span>
+                            <span class="bar-chart-bar" th:if="${point.returningVisits > 0}" th:style="'--size:' + ${report.returningVisitsHeight(point)} + '%'"></span>
+                        </span>
+                        <span class="bar-chart-pair" th:if="${paired}">
+                            <span class="bar-chart-bar bar-chart-bar--previous" th:classappend="${point.previousVisits == null} ? 'is-missing'"
+                                  th:style="'--size:' + ${report.previousVisitsHeight(point)} + '%'"></span>
+                            <span class="bar-chart-bar" th:classappend="${!point.hasData()} ? 'is-missing'"
+                                  th:style="'--size:' + ${report.visitsHeight(point)} + '%'"></span>
+                        </span>
+                        <span class="cuquora-dot" th:if="${point.cuquoraStart}" aria-hidden="true"></span>
+                        <span class="bar-chart-label"><span class="bar-chart-label-long" th:text="${point.shortLabel}">oct</span><span class="bar-chart-label-short" aria-hidden="true" th:text="${point.initial()}">O</span></span>
+                        <span class="chart-tip" aria-hidden="true">
+                            <strong th:text="${point.label}">Octubre 2026</strong>
+                            <span th:if="${point.cuquoraStart}">Primer mes con Cuquora</span>
+                            <span th:unless="${point.hasData()}" th:text="${point.emptyNote}">Sin datos</span>
+                            <th:block th:if="${point.hasData()}">
+                                <span th:text="${point.visits} + (${point.visits == 1} ? ' visita' : ' visitas')">32 visitas</span>
+                                <span th:text="'Repiten: ' + ${point.returningVisits}">Repiten</span>
+                                <span th:text="'Primera visita: ' + ${point.newVisits}">Primera visita</span>
+                            </th:block>
+                            <span th:if="${point.previousVisits != null}"
+                                  th:text="${report.previousSeriesLabel} + ': ' + ${point.previousVisits} + ' visitas'
+                                        + (${point.visitsChangeLabel() != null} ? ' (' + ${point.visitsChangeLabel()} + ')' : '')">2025: 30 visitas</span>
+                            <span th:if="${paired and point.previousVisits == null}"
+                                  th:text="${report.previousSeriesLabel} + ': sin datos'">2025: sin datos</span>
+                        </span>
+                    </div>
+                </div>
+                <p class="bar-chart-scale" th:text="'Mes más alto: ' + ${report.maxMonthlyVisits} + ' visitas'">Mes más alto</p>
+                <details class="analytics-table-toggle">
+                    <summary>Ver en tabla</summary>
+                    <table class="analytics-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Mes</th><th scope="col">Repiten</th><th scope="col">Primera visita</th><th scope="col">Total</th>
+                                <th scope="col" th:if="${paired}" th:text="${report.previousSeriesLabel}">2025</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="point : ${report.monthly}">
+                                <th scope="row" th:text="${point.label}">Octubre 2026</th>
+                                <th:block th:if="${point.hasData()}">
+                                    <td th:text="${point.returningVisits}">0</td>
+                                    <td th:text="${point.newVisits}">0</td>
+                                    <td th:text="${point.visits}">0</td>
+                                </th:block>
+                                <td th:unless="${point.hasData()}" colspan="3" class="analytics-table-empty" th:text="${point.emptyNote}">Sin datos</td>
+                                <td th:if="${paired}"
+                                    th:text="${point.previousVisits != null} ? ${point.previousVisits} : 'Sin datos'">0</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </details>
+            </section>
+
+            <!-- Clientes más fieles -->
+            <section class="analytics-panel" aria-labelledby="topClientsTitle">
+                <header class="analytics-panel-head">
+                    <h2 id="topClientsTitle"><i class="lucide-heart" aria-hidden="true"></i> Clientes más fieles</h2>
+                    <p>Los que más vienen en el periodo, con lo que han gastado</p>
+                </header>
+                <p class="analytics-panel-empty" th:if="${report.topClients.isEmpty()}">Ninguna visita en el periodo.</p>
+                <ol class="client-rank" th:unless="${report.topClients.isEmpty()}">
+                    <li th:each="c, stat : ${report.topClients}">
+                        <a class="client-rank-row" th:href="@{/worker/clients/{id}(id=${c.id})}">
+                            <span class="client-rank-pos" th:text="${stat.count}">1</span>
+                            <span class="client-rank-main">
+                                <span class="client-rank-name" th:text="${c.name}">Sofía Martínez</span>
+                                <span class="client-rank-meta" th:text="'Última visita: ' + ${#temporals.format(c.lastVisit, 'dd/MM/yyyy')}">Última visita</span>
+                            </span>
+                            <span class="client-rank-figures">
+                                <strong th:text="${c.visits} + (${c.visits == 1} ? ' visita' : ' visitas')">8 visitas</strong>
+                                <span th:text="${#numbers.formatDecimal(c.spent, 1, 'POINT', 0, 'COMMA')} + ' €'">320 €</span>
+                            </span>
+                        </a>
+                    </li>
+                </ol>
+            </section>
+
+            <!-- Clientes a recuperar (es de hoy: no sale al ver años pasados) -->
+            <section class="analytics-panel" aria-labelledby="winBackTitle" th:if="${report.showWinBack}">
+                <header class="analytics-panel-head">
+                    <h2 id="winBackTitle"><i class="lucide-phone" aria-hidden="true"></i> Clientes a recuperar</h2>
+                    <p>Venían a menudo, llevan mucho sin venir y no tienen cita</p>
+                </header>
+                <p class="analytics-panel-empty" th:if="${report.clientsToWinBack.isEmpty()}">Ningún cliente habitual lleva demasiado tiempo sin venir.</p>
+                <ul class="client-rank" th:unless="${report.clientsToWinBack.isEmpty()}">
+                    <li th:each="c : ${report.clientsToWinBack}">
+                        <a class="client-rank-row" th:href="@{/worker/clients/{id}(id=${c.id})}">
+                            <span class="client-rank-pos client-rank-pos--away" aria-hidden="true"><i class="lucide-user-round-x"></i></span>
+                            <span class="client-rank-main">
+                                <span class="client-rank-name" th:text="${c.name}">Lucía Pérez</span>
+                                <span class="client-rank-meta" th:text="${c.usualGapLabel()} + ' · ' + ${c.visits} + ' visitas'">Venía cada 4 semanas</span>
+                            </span>
+                            <span class="client-rank-figures">
+                                <strong th:text="${c.awayLabel()}">Hace 3 meses</strong>
+                                <span th:text="${#numbers.formatDecimal(c.spent, 1, 'POINT', 0, 'COMMA')} + ' € gastados'">210 €</span>
+                            </span>
+                        </a>
+                    </li>
+                </ul>
+            </section>
+
+            <!-- Tratamientos más pedidos -->
+            <section class="analytics-panel" aria-labelledby="treatmentsTitle">
+                <header class="analytics-panel-head">
+                    <h2 id="treatmentsTitle"><i class="lucide-scissors" aria-hidden="true"></i> Tratamientos más pedidos</h2>
+                    <p th:text="${paired} ? 'Visitas completadas e ingresos; entre paréntesis, visitas frente a ' + ${report.previousSeriesLabel} : 'Visitas completadas e ingresos de cada tratamiento'">Visitas completadas e ingresos de cada tratamiento</p>
+                </header>
+                <p class="analytics-panel-empty" th:if="${report.treatments.isEmpty()}">Ningún tratamiento completado en el periodo.</p>
+                <ul class="rank-bars" th:unless="${report.treatments.isEmpty()}">
+                    <li th:each="row : ${report.treatments}">
+                        <span class="rank-bars-name" th:text="${row.name}">Manicura semipermanente</span>
+                        <span class="rank-bars-value">
+                            <span th:text="${row.count} + (${row.count == 1} ? ' visita · ' : ' visitas · ') + ${#numbers.formatDecimal(row.revenue, 1, 'POINT', 0, 'COMMA')} + ' €'">42 visitas · 1.050 €</span>
+                            <span class="rank-diff" th:if="${row.diff != null}" th:classappend="${row.diff > 0} ? 'is-better' : (${row.diff < 0} ? 'is-worse')"
+                                  th:text="'(' + ${row.diffLabel()} + ')'">(+3)</span>
+                        </span>
+                        <span class="rank-bars-track" aria-hidden="true"><span class="rank-bars-fill" th:style="'--size:' + ${row.share} + '%'"></span></span>
+                    </li>
+                </ul>
+            </section>
+
+            <!-- Productos más vendidos -->
+            <section class="analytics-panel" aria-labelledby="productsTitle">
+                <header class="analytics-panel-head">
+                    <h2 id="productsTitle"><i class="lucide-package" aria-hidden="true"></i> Productos más vendidos</h2>
+                    <p th:text="${paired} ? 'Unidades vendidas e ingresos; entre paréntesis, unidades frente a ' + ${report.previousSeriesLabel} : 'Unidades vendidas e ingresos de cada producto'">Unidades vendidas e ingresos de cada producto</p>
+                </header>
+                <p class="analytics-panel-empty" th:if="${report.products.isEmpty()}">Ningún producto vendido en el periodo. Las ventas se registran desde la ficha del cliente o el inventario.</p>
+                <ul class="rank-bars" th:unless="${report.products.isEmpty()}">
+                    <li th:each="row : ${report.products}">
+                        <span class="rank-bars-name" th:text="${row.name}">Sérum facial</span>
+                        <span class="rank-bars-value">
+                            <span th:text="${row.count} + (${row.count == 1} ? ' ud. · ' : ' uds. · ') + ${#numbers.formatDecimal(row.revenue, 1, 'POINT', 0, 'COMMA')} + ' €'">12 uds. · 342 €</span>
+                            <span class="rank-diff" th:if="${row.diff != null}" th:classappend="${row.diff > 0} ? 'is-better' : (${row.diff < 0} ? 'is-worse')"
+                                  th:text="'(' + ${row.diffLabel()} + ')'">(+3)</span>
+                        </span>
+                        <span class="rank-bars-track" aria-hidden="true"><span class="rank-bars-fill" th:style="'--size:' + ${row.share} + '%'"></span></span>
+                    </li>
+                </ul>
+            </section>
+
+            <!-- Equipo -->
+            <section class="analytics-panel" aria-labelledby="teamTitle">
+                <header class="analytics-panel-head">
+                    <h2 id="teamTitle"><i class="lucide-users-round" aria-hidden="true"></i> Equipo</h2>
+                    <p th:text="${paired} ? 'Visitas atendidas e ingresos en tratamientos; entre paréntesis, visitas frente a ' + ${report.previousSeriesLabel} : 'Visitas atendidas e ingresos en tratamientos por profesional'">Visitas atendidas e ingresos en tratamientos por profesional</p>
+                </header>
+                <ul class="rank-bars">
+                    <li th:each="row : ${report.team}">
+                        <span class="rank-bars-name" th:text="${row.name}">Carlos</span>
+                        <span class="rank-bars-value">
+                            <span th:text="${row.visits} + (${row.visits == 1} ? ' visita · ' : ' visitas · ') + ${row.clients} + (${row.clients == 1} ? ' cliente · ' : ' clientes · ') + ${#numbers.formatDecimal(row.revenue, 1, 'POINT', 0, 'COMMA')} + ' €'">40 visitas</span>
+                            <span class="rank-diff" th:if="${row.diff != null}" th:classappend="${row.diff > 0} ? 'is-better' : (${row.diff < 0} ? 'is-worse')"
+                                  th:text="'(' + ${row.diffLabel()} + ')'">(+3)</span>
+                        </span>
+                        <span class="rank-bars-track" aria-hidden="true"><span class="rank-bars-fill" th:style="'--size:' + ${row.share} + '%'"></span></span>
+                    </li>
+                </ul>
+            </section>
+
+            <!-- Días con más visitas -->
+            <section class="analytics-panel" aria-labelledby="weekdaysTitle">
+                <header class="analytics-panel-head">
+                    <h2 id="weekdaysTitle"><i class="lucide-calendar-days" aria-hidden="true"></i> Días con más visitas</h2>
+                    <p th:if="${report.busiestHour != null}" th:text="'La hora con más citas: de ' + ${report.busiestHour} + ':00 a ' + ${report.busiestHour + 1} + ':00'">De 10:00 a 11:00</p>
+                    <p th:if="${report.busiestHour == null}">Ninguna visita en el periodo</p>
+                </header>
+                <div class="bar-chart bar-chart--compact" th:style="'--columns:' + ${#lists.size(report.weekdays)}">
+                    <div class="bar-chart-col" tabindex="0" th:each="day : ${report.weekdays}"
+                         th:aria-label="${day.name} + ': ' + ${day.visits} + ' visitas'">
+                        <span class="bar-chart-bars">
+                            <span class="bar-chart-bar" th:classappend="${!day.busiest} ? 'bar-chart-bar--soft'" th:style="'--size:' + ${day.share} + '%'"></span>
+                        </span>
+                        <span class="bar-chart-label" th:text="${day.shortName}">Lun</span>
+                        <span class="chart-tip" aria-hidden="true">
+                            <strong th:text="${day.name}">Lunes</strong>
+                            <span th:text="${day.visits} + (${day.visits == 1} ? ' visita' : ' visitas')">12 visitas</span>
+                        </span>
+                    </div>
+                </div>
+            </section>
+        </div>
+        </th:block>
+    </main>
+
+    <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Panel de gestión de centros.')}"></div>
+</body>
+</html>

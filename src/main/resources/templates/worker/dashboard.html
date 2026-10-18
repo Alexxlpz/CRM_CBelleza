@@ -3,6 +3,7 @@
 <head>
     <th:block th:replace="~{fragments/head :: meta('Panel de Control - Cuquora CRM')}"></th:block>
     <link rel="stylesheet" th:href="@{/css/worker.css}">
+    <link rel="stylesheet" th:href="@{/css/analytics.css}">
 </head>
 <body>
     <div th:replace="~{fragments/navbar :: worker(null, null, ${notifications})}"></div>
@@ -52,6 +53,23 @@
                     <span class="action-card-badge">Fichas Técnicas</span>
                 </a>
             </nav>
+
+            <section class="month-summary" aria-labelledby="monthSummaryTitle">
+                <div class="month-summary-title">
+                    <h2 id="monthSummaryTitle" th:text="${monthReport.headline}">Octubre hasta hoy</h2>
+                    <p th:text="${monthReport.comparisonLabel != null} ? ${monthReport.comparisonLabel} : ${monthReport.noComparisonText}">Comparado con el 1-18 sept</p>
+                </div>
+                <ul class="month-summary-figures">
+                    <li th:each="kpi : ${monthKpis}">
+                        <span class="kpi-label" th:text="${kpi.label}">Ingresos</span>
+                        <span class="kpi-value" th:text="${kpi.displayValue()}">1.240 €</span>
+                        <span class="kpi-change" th:if="${kpi.changeLabel() != null}"
+                              th:classappend="${kpi.isImprovement()} ? 'is-better' : (${kpi.isWorsening()} ? 'is-worse')"
+                              th:text="${kpi.changeLabel()}">+12 %</span>
+                    </li>
+                </ul>
+                <a href="/worker/analytics" class="btn btn-secondary"><i class="lucide-bar-chart-3" aria-hidden="true"></i> Ver análisis del centro</a>
+            </section>
         </div>
     </main>
 

@@ -27,7 +27,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/** Resumen del tratamiento realizado: solo en citas que ya han empezado, y los avisos salen en las demás citas del cliente. */
+/**
+ * Resumen del tratamiento realizado y precio cobrado: solo en citas que ya han empezado, y los avisos salen en las
+ * demás citas del cliente.
+ */
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
@@ -122,5 +125,39 @@ class TreatmentSummaryTests {
         saveSummary(past, "", true).andExpect(status().isConflict());
         saveSummary(past, "x".repeat(Appointment.TREATMENT_SUMMARY_MAX_LENGTH + 1), false).andExpect(status().isConflict());
         assertNull(appointments.findById(past.getId()).orElseThrow().getTreatmentSummary());
+    }
+
+    @Test
+    void newAppointmentKeepsTheListPriceAndTheWorkerCanCorrectWhatWasCharged() throws Exception {
+        Appointment past = confirmedAt(LocalDateTime.now().minusDays(2).withHour(10).withMinute(0));
+        assertEquals(treatment.getPrice(), past.getPrice());
+
+        mvc.perform(post("/worker/appointments/" + past.getId() + "/summary").with(csrf())
+                        .param("summary", "").param("price", "31.499")
+                        .with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.price").value(31.5));
+
+        // Cambiar la carta no toca lo ya cobrado
+        double listPrice = treatment.getPrice();
+        treatment.setPrice(listPrice + 20);
+        treatments.saveAndFlush(treatment);
+        assertEquals(31.5, appointments.findById(past.getId()).orElseThrow().getPrice());
+    }
+
+    @Test
+    void chargedPriceOutOfRangeIsRejectedAndMissingPriceKeepsIt() throws Exception {
+        Appointment past = confirmedAt(LocalDateTime.now().minusDays(1).withHour(16).withMinute(0));
+        Double before = past.getPrice();
+
+        for (String price : new String[]{"-1", "10000.01"}) {
+            mvc.perform(post("/worker/appointments/" + past.getId() + "/summary").with(csrf())
+                            .param("summary", SUMMARY).param("price", price)
+                            .with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
+                    .andExpect(status().isConflict())
+                    .andExpect(jsonPath("$.message").value(containsString("entre 0 y 10.000")));
+        }
+        saveSummary(past, SUMMARY, false).andExpect(status().isOk());
+        assertEquals(before, appointments.findById(past.getId()).orElseThrow().getPrice());
     }
 }

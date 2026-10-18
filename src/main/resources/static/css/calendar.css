@@ -836,10 +836,6 @@ button.calendar-day-cell {
 }
 
 /* El selector de la agenda se ve en todos los anchos (el de Tarjetas / Lista solo desde 1100 px) */
-.view-toggle.view-toggle--always {
-    display: inline-flex;
-}
-
 /* =============================================================
    VISTA SEMANAL
    ============================================================= */

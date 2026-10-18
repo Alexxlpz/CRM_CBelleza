@@ -807,6 +807,27 @@
                         </div>
                     </div>
 
+                    <!-- Commit 38 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="commit-hash">sin commit</span>
+                                <span class="commit-date">📅 18 de Octubre, 2026</span>
+                                <span class="commit-author">👤 alejandro</span>
+                            </div>
+                            <h4>Análisis del centro</h4>
+                            <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.88rem;">
+                                <li>Nueva pantalla <code>/worker/analytics</code> (<code>AnalyticsService</code>): cifras del mes frente al mismo tramo del anterior, ingresos y visitas por mes, clientes más fieles, clientes a recuperar, tratamientos, productos, equipo y días con más visitas.</li>
+                                <li>El panel del trabajador resume el mes y enlaza al análisis.</li>
+                                <li><strong>Precio cobrado en cada cita</strong> (<code>V14__precio_citas.sql</code>): se guarda el de la carta al reservar y el trabajador lo corrige desde «Añadir resumen y precio». Subir una tarifa ya no cambia los ingresos ni los puntos de las citas hechas.</li>
+                                <li><strong>Vista por año</strong> (<code>?anio=</code>): el año frente al mismo tramo del anterior, barras de los dos años juntas y «Qué ha cambiado». No deja ir a años sin datos y marca con una bolita el primer mes con Cuquora.</li>
+                                <li>En desarrollo, el centro demo trae visitas y ventas desde enero del año anterior (<code>crm.seed-demo-history</code>).</li>
+                                <li>Tests: 182 en total, todos en verde.</li>
+                            </ul>
+                        </div>
+                    </div>
+
                 </div>
             </section>
 
@@ -927,8 +948,8 @@
                     <div class="step-card">
                         <div class="step-num">3</div>
                         <div class="step-body">
-                            <h4>Panel Analítico y Liquidación de Especialistas</h4>
-                            <p>Gráficos de facturación por cabina, rendimiento por profesional, comisiones y predicción de reposición de cosméticos mediante algoritmos de aprendizaje.</p>
+                            <h4>Análisis: siguiente fase</h4>
+                            <p>Ya hay análisis de ingresos, visitas y clientes, también año contra año. Falta la ocupación de la agenda (horas reservadas frente a horas abiertas) y las comisiones por profesional.</p>
                         </div>
                     </div>
 

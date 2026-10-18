@@ -2,6 +2,7 @@ package com.alexxlpz.crm_cbelleza.config;
 
 import com.alexxlpz.crm_cbelleza.entities.*;
 import com.alexxlpz.crm_cbelleza.repositories.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,6 +28,8 @@ public class DatabaseSeeder implements CommandLineRunner {
     private final PasswordEncoder passwordEncoder;
     private final ClientCardTemplateRepository clientCardTemplateRepository;
     private final ClientCardRepository clientCardRepository;
+    private final ProductSaleRepository productSaleRepository;
+    private final boolean seedHistory;
 
     public DatabaseSeeder(CenterRepository centerRepository,
                           UserRepository userRepository,
@@ -36,7 +39,9 @@ public class DatabaseSeeder implements CommandLineRunner {
                           TreatmentRepository treatmentRepository,
                           PasswordEncoder passwordEncoder,
                           ClientCardTemplateRepository clientCardTemplateRepository,
-                          ClientCardRepository clientCardRepository) {
+                          ClientCardRepository clientCardRepository,
+                          ProductSaleRepository productSaleRepository,
+                          @Value("${crm.seed-demo-history:false}") boolean seedHistory) {
         this.centerRepository = centerRepository;
         this.userRepository = userRepository;
         this.productRepository = productRepository;
@@ -46,6 +51,8 @@ public class DatabaseSeeder implements CommandLineRunner {
         this.passwordEncoder = passwordEncoder;
         this.clientCardTemplateRepository = clientCardTemplateRepository;
         this.clientCardRepository = clientCardRepository;
+        this.productSaleRepository = productSaleRepository;
+        this.seedHistory = seedHistory;
     }
 
     @Override
@@ -479,5 +486,12 @@ public class DatabaseSeeder implements CommandLineRunner {
                 .updatedAt(LocalDateTime.now().minusDays(1))
                 .updatedBy(w1)
                 .build());
+
+        if (seedHistory) {
+            new DemoHistory(appointmentRepository, productSaleRepository, userRepository).seed(c1,
+                    Arrays.asList(w1, w2), Arrays.asList(t1_1, t1_2, t1_3, t1_4, t1_5, t1_6),
+                    Arrays.asList(p1, p2, p5, p7, p9, p12, p13),
+                    Arrays.asList(client1, client2, client3, client4, client5), today);
+        }
     }
 }

@@ -41,8 +41,11 @@ public class TreatmentSummaryService {
         this.clock = clock;
     }
 
-    /** Guarda el resumen (texto vacío = lo borra). Solo en citas confirmadas que ya han empezado. */
-    public void save(Long centerId, Long appointmentId, Long workerId, String summary, boolean alert) {
+    /**
+     * Guarda el resumen (texto vacío = lo borra) y, si llega, el precio cobrado. Solo en citas confirmadas que ya han
+     * empezado: es cuando se sabe qué se ha hecho y cuánto se ha cobrado.
+     */
+    public void save(Long centerId, Long appointmentId, Long workerId, String summary, boolean alert, Double price) {
         Appointment appointment = appointmentRepository.findByIdAndCenterId(appointmentId, centerId)
                 .orElseThrow(() -> new ResourceNotFoundException("La cita no existe en tu centro."));
         LocalDateTime now = CenterClock.now(clock, appointment.getCenter());
@@ -55,6 +58,12 @@ public class TreatmentSummaryService {
         }
         if (text.isEmpty() && alert) {
             throw new BusinessRuleException("Escribe el resumen para poder marcarlo como aviso.");
+        }
+        if (price != null) {
+            if (price.isNaN() || price < 0 || price > Appointment.MAX_PRICE) {
+                throw new BusinessRuleException("El precio cobrado tiene que estar entre 0 y 10.000 €.");
+            }
+            appointment.setPrice(Math.round(price * 100) / 100.0);
         }
         User author = userRepository.getReferenceById(workerId);
         appointment.setTreatmentSummary(text.isEmpty() ? null : text);

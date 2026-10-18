@@ -30,6 +30,7 @@ public class AppointmentCalendarMapper {
                 .client(toClient(app.getClient()))
                 .worker(toWorker(app.getWorker()))
                 .treatment(toTreatment(app.getTreatment()))
+                .price(app.getPrice())
                 .previousDateTime(app.getPreviousDateTime() != null ? app.getPreviousDateTime().toString() : null)
                 // Las horas propuestas solo se cargan en las citas PROPOSED (pocas): así no hay una consulta por cita
                 .proposals(app.getStatus() == AppointmentStatus.PROPOSED

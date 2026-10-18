@@ -190,7 +190,7 @@ public class LoyaltyService {
                     || (since != null && app.getDateTime().isBefore(since))) {
                 continue;
             }
-            int points = center.getLoyaltyMode().pointsFor(app.getTreatment().getPrice(), 1, center.getLoyaltyPointsPerUnit());
+            int points = center.getLoyaltyMode().pointsFor(app.getPrice(), 1, center.getLoyaltyPointsPerUnit());
             if (points <= 0) {
                 continue;
             }

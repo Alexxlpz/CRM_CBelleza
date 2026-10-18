@@ -2397,6 +2397,14 @@ body.modal-open {
     margin-top: 20px;
 }
 
+.summary-price-label {
+    margin-top: 16px;
+}
+
+.summary-price {
+    max-width: 180px;
+}
+
 .treatment-summary {
     margin-top: 10px;
     padding: 10px 14px;
@@ -2646,6 +2654,10 @@ body.modal-open {
     border-radius: var(--border-radius-md);
 }
 
+.view-toggle.view-toggle--always {
+    display: inline-flex;
+}
+
 .view-toggle-btn {
     display: inline-flex;
     align-items: center;
@@ -2667,7 +2679,12 @@ body.modal-open {
     color: var(--primary-text);
 }
 
-.view-toggle-btn[aria-pressed="true"] {
+.view-toggle-btn {
+    text-decoration: none;
+}
+
+.view-toggle-btn[aria-pressed="true"],
+.view-toggle-btn[aria-current="page"] {
     background: var(--surface);
     color: var(--primary-text);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);

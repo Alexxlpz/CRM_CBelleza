@@ -264,7 +264,7 @@ document.addEventListener('DOMContentLoaded', function () {
             </div>` : '';
         const summaryButton = app.summaryEditable ? `
             <button type="button" class="btn btn-secondary btn-sm summary-button" data-action="summary">
-                <i class="lucide-clipboard-pen-line" aria-hidden="true"></i> ${app.treatmentSummary ? 'Editar resumen' : 'Añadir resumen del tratamiento'}
+                <i class="lucide-clipboard-pen-line" aria-hidden="true"></i> ${app.treatmentSummary ? 'Editar resumen y precio' : 'Añadir resumen y precio'}
             </button>` : '';
 
         let actions = '';
@@ -336,7 +336,7 @@ document.addEventListener('DOMContentLoaded', function () {
             </div>
             <div class="agenda-item-detail agenda-detail-margin">
                 <i class="lucide-badge-euro" aria-hidden="true"></i>
-                <span class="agenda-price-text">${euros(app.treatment?.price ?? 0)} €</span>
+                <span class="agenda-price-text">${euros(app.price ?? app.treatment?.price ?? 0)} €</span>
                 <span class="agenda-duration-text">(${esc(app.treatment?.duration)} min)</span>
             </div>
             ${clientCardLink ? `<div class="agenda-card-footer">${clientCardLink}</div>` : ''}
@@ -361,7 +361,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 id: app.id,
                 context: `${app.treatment?.name || 'Cita'} · ${app.client?.name || app.guestName || 'Cliente'} · ${capitalize(longDate(app.dateTime))}`,
                 summary: app.treatmentSummary,
-                alert: app.treatmentAlert
+                alert: app.treatmentAlert,
+                price: app.price,
+                listPrice: app.treatment?.price
             }, () => reload());
         }
 
@@ -689,7 +691,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const proposed = all.filter(app => app.status === 'PROPOSED').length;
         const income = all
             .filter(app => app.status === 'CONFIRMED' || app.status === 'COMPLETED')
-            .reduce((sum, app) => sum + Number(app.treatment?.price || 0), 0);
+            .reduce((sum, app) => sum + Number(app.price ?? app.treatment?.price ?? 0), 0);
         weekSummary.innerHTML = `
             <li><i class="lucide-calendar-check" aria-hidden="true"></i> ${plural(all.length, 'cita', 'citas')}</li>
             <li class="${pending ? 'is-pending' : ''}"><i class="lucide-bell" aria-hidden="true"></i> ${plural(pending, 'solicitud pendiente', 'solicitudes pendientes')}</li>

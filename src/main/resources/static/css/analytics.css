@@ -1,0 +1,846 @@
+/* Pantalla «Análisis» del trabajador (worker/analytics.html) y resumen del mes en el panel */
+
+.analytics-section {
+    margin-bottom: 28px;
+}
+
+.analytics-section-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 14px;
+    margin-bottom: 14px;
+}
+
+.analytics-section-head h2 {
+    font-size: 22px;
+}
+
+.analytics-section-head p {
+    color: var(--text-muted);
+    font-size: 14px;
+}
+
+/* ---- Cifras del mes ---- */
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+@media (min-width: 769px) {
+    .kpi-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 1366px) {
+    .kpi-grid {
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+}
+
+.kpi-tile {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+    padding: 16px 18px;
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--border-radius-md);
+}
+
+.kpi-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--text-muted);
+}
+
+.kpi-label i {
+    margin-top: 1px;
+    color: var(--primary-text);
+}
+
+.kpi-value {
+    font-size: 26px;
+    font-weight: 800;
+    line-height: 1.1;
+    color: var(--text-main);
+    font-variant-numeric: tabular-nums;
+}
+
+.kpi-change {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2px 6px;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--text-muted);
+}
+
+.kpi-change.is-better {
+    color: var(--success-strong);
+}
+
+.kpi-change.is-worse {
+    color: var(--error);
+}
+
+.kpi-change-note {
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.analytics-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-top: 12px;
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+.analytics-note i {
+    margin-top: 2px;
+    color: var(--primary-text);
+}
+
+/* ---- Periodo ---- */
+.analytics-toolbar {
+    flex-wrap: wrap;
+}
+
+.analytics-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 14px;
+}
+
+.year-nav {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.year-nav-current {
+    min-width: 52px;
+    font-size: 18px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+}
+
+.year-nav-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--border-radius-sm);
+    color: var(--primary-text);
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.year-nav-btn:hover {
+    background: rgba(var(--primary-rgb), 0.12);
+}
+
+.year-nav-btn:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+}
+
+.year-nav-btn.is-disabled {
+    color: var(--text-soft);
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.year-nav-btn.is-disabled:hover {
+    background: none;
+}
+
+.analytics-period-summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 12px;
+    min-width: 0;
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+.analytics-period-summary strong {
+    font-size: 18px;
+    color: var(--text-main);
+}
+
+/* ---- Paneles ---- */
+.analytics-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+}
+
+@media (min-width: 1100px) {
+    .analytics-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px;
+    }
+}
+
+.analytics-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-width: 0;
+    padding: 20px 22px;
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--border-radius-md);
+}
+
+.analytics-panel-head h2 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 17px;
+}
+
+.analytics-panel-head h2 i {
+    color: var(--primary-text);
+}
+
+.analytics-panel-head p {
+    margin-top: 2px;
+    font-size: 13.5px;
+    color: var(--text-muted);
+}
+
+.analytics-panel-empty {
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+.analytics-empty {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 24px;
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--border-radius-md);
+}
+
+.analytics-empty > i {
+    font-size: 28px;
+    color: var(--primary-text);
+}
+
+.analytics-empty h2 {
+    font-size: 18px;
+    margin-bottom: 4px;
+}
+
+.analytics-empty p {
+    max-width: 62ch;
+    color: var(--text-muted);
+}
+
+/* ---- Gráfico de barras verticales (meses y días de la semana) ---- */
+.bar-chart {
+    --columns: 12;
+    --chart-height: 180px;
+    display: grid;
+    grid-template-columns: repeat(var(--columns), minmax(0, 1fr));
+    gap: 6px;
+    padding-top: 6px;
+    background-image: linear-gradient(var(--chart-grid) 1px, transparent 1px);
+    background-size: 100% calc(var(--chart-height) / 4);
+    background-repeat: repeat-x;
+}
+
+.bar-chart--compact {
+    --chart-height: 140px;
+}
+
+/* Con pocos meses las columnas no se estiran a todo el ancho: barras anchas y juntas, centradas */
+.bar-chart--few {
+    grid-template-columns: repeat(var(--columns), minmax(0, 96px));
+    justify-content: center;
+    gap: 12px;
+}
+
+.bar-chart--few .bar-chart-bars {
+    max-width: none;
+}
+
+.bar-chart--few .bar-chart-bar {
+    border-radius: 6px 6px 0 0;
+}
+
+.bar-chart-col {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    border-radius: var(--border-radius-sm);
+    outline: none;
+}
+
+.bar-chart-bars {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 2px;
+    width: 100%;
+    max-width: 40px;
+    height: var(--chart-height);
+    border-bottom: 1px solid var(--border-soft);
+}
+
+.bar-chart-bar {
+    --size: 0%;
+    display: block;
+    height: var(--size);
+    min-height: 2px;
+    background: var(--chart-1);
+    border-radius: 4px 4px 0 0;
+    transition: var(--transition);
+}
+
+/* En la barra apilada solo se redondea el extremo de arriba */
+.bar-chart-bar--new {
+    background: var(--chart-2);
+}
+
+.bar-chart-bar--new + .bar-chart-bar {
+    border-radius: 0;
+}
+
+.bar-chart-bar--soft {
+    background: var(--chart-soft);
+}
+
+/* Vista por año: el mismo mes del año anterior (suave) junto al de este año */
+.bar-chart-pair {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    width: 100%;
+    max-width: 52px;
+    height: var(--chart-height);
+    border-bottom: 1px solid var(--border-soft);
+}
+
+.bar-chart-pair .bar-chart-bar {
+    flex: 1;
+    min-width: 0;
+}
+
+.bar-chart-bar--previous {
+    background: var(--chart-soft);
+}
+
+.bar-chart-bar.is-missing {
+    min-height: 0;
+    visibility: hidden;
+}
+
+.bar-chart-col.is-empty .bar-chart-label {
+    color: var(--text-soft);
+}
+
+/* Bolita sobre el eje: el primer mes del centro con Cuquora */
+.cuquora-dot {
+    position: absolute;
+    top: calc(var(--chart-height) - 5px);
+    left: 50%;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--text-main);
+    box-shadow: 0 0 0 2px var(--surface);
+    transform: translateX(-50%);
+    pointer-events: none;
+}
+
+.cuquora-dot.cuquora-dot--legend {
+    position: static;
+    transform: none;
+}
+
+.bar-chart-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.bar-chart-label-short {
+    display: none;
+}
+
+.bar-chart-col:hover .bar-chart-bar,
+.bar-chart-col:focus-visible .bar-chart-bar {
+    opacity: 0.8;
+}
+
+.bar-chart-col:focus-visible {
+    box-shadow: var(--focus-ring);
+}
+
+.bar-chart-scale {
+    font-size: 12.5px;
+    color: var(--text-muted);
+}
+
+/* Detalle al pasar el ratón o al enfocar con el teclado */
+.chart-tip {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 150px;
+    padding: 10px 12px;
+    background: var(--surface-inverse);
+    color: var(--on-inverse);
+    border-radius: var(--border-radius-sm);
+    box-shadow: var(--shadow-md);
+    font-size: 12.5px;
+    line-height: 1.4;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transform: translate(-50%, 4px);
+    transition: opacity var(--dur-fast) var(--ease-in), transform var(--dur-fast) var(--ease-in);
+}
+
+.chart-tip strong {
+    font-size: 13px;
+}
+
+.bar-chart-col:hover .chart-tip,
+.bar-chart-col:focus-visible .chart-tip {
+    opacity: 1;
+    transform: translate(-50%, 0);
+    transition-timing-function: var(--ease-out);
+}
+
+/* Las primeras y últimas columnas abren el detalle hacia dentro para que no se salga de la pantalla */
+.bar-chart-col:nth-child(-n+2) .chart-tip {
+    left: 0;
+    transform: translate(0, 4px);
+}
+
+.bar-chart-col:nth-last-child(-n+2) .chart-tip {
+    left: auto;
+    right: 0;
+    transform: translate(0, 4px);
+}
+
+.bar-chart-col:nth-child(-n+2):hover .chart-tip,
+.bar-chart-col:nth-child(-n+2):focus-visible .chart-tip,
+.bar-chart-col:nth-last-child(-n+2):hover .chart-tip,
+.bar-chart-col:nth-last-child(-n+2):focus-visible .chart-tip {
+    transform: translate(0, 0);
+}
+
+.chart-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    list-style: none;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.chart-legend li {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.chart-swatch {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    background: var(--chart-1);
+}
+
+.chart-swatch--new {
+    background: var(--chart-2);
+}
+
+.chart-swatch--previous {
+    background: var(--chart-soft);
+}
+
+/* ---- Tabla con los datos del gráfico ---- */
+.analytics-table-toggle summary {
+    width: fit-content;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--primary-text);
+    cursor: pointer;
+}
+
+.analytics-table {
+    width: 100%;
+    margin-top: 10px;
+    border-collapse: collapse;
+    font-size: 13.5px;
+    font-variant-numeric: tabular-nums;
+}
+
+.analytics-table th,
+.analytics-table td {
+    padding: 7px 8px;
+    text-align: right;
+    border-bottom: 1px solid var(--border-soft);
+}
+
+.analytics-table thead th {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.analytics-table th:first-child {
+    text-align: left;
+    font-weight: 600;
+}
+
+.analytics-table .analytics-table-empty {
+    text-align: center;
+    color: var(--text-soft);
+}
+
+/* ---- Listas de clientes ---- */
+.client-rank {
+    display: flex;
+    flex-direction: column;
+    list-style: none;
+}
+
+.client-rank li + li {
+    border-top: 1px solid var(--border-soft);
+}
+
+.client-rank-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 8px;
+    color: inherit;
+    text-decoration: none;
+    border-radius: var(--border-radius-sm);
+    transition: var(--transition);
+}
+
+.client-rank-row:hover {
+    background: var(--surface-muted);
+}
+
+.client-rank-pos {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: rgba(var(--primary-rgb), 0.16);
+    color: var(--primary-text);
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.client-rank-pos--away {
+    background: var(--warning-bg);
+    color: var(--warning-text);
+}
+
+.client-rank-main {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+}
+
+.client-rank-name {
+    font-weight: 700;
+    color: var(--text-main);
+    overflow-wrap: anywhere;
+}
+
+.client-rank-meta {
+    font-size: 12.5px;
+    color: var(--text-muted);
+}
+
+.client-rank-figures {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    flex-shrink: 0;
+    font-size: 12.5px;
+    color: var(--text-muted);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.client-rank-figures strong {
+    font-size: 14px;
+    color: var(--text-main);
+}
+
+/* ---- Barras horizontales (tratamientos, productos, equipo) ---- */
+.rank-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    list-style: none;
+}
+
+.rank-bars li {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 6px 12px;
+    font-size: 14px;
+}
+
+.rank-bars-name {
+    font-weight: 600;
+    color: var(--text-main);
+    overflow-wrap: anywhere;
+}
+
+.rank-bars-value {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0 6px;
+    color: var(--text-muted);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.rank-diff {
+    font-weight: 700;
+}
+
+.rank-diff.is-better,
+.changes-figures dd.is-better,
+.changes-diff.is-better {
+    color: var(--success-strong);
+}
+
+.rank-diff.is-worse,
+.changes-figures dd.is-worse,
+.changes-diff.is-worse {
+    color: var(--error);
+}
+
+/* ---- Qué ha cambiado (vista por año) ---- */
+.changes-panel {
+    margin-bottom: 20px;
+}
+
+.changes-verdict {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.changes-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+}
+
+@media (min-width: 900px) {
+    .changes-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 28px;
+    }
+}
+
+.changes-block h3 {
+    margin-bottom: 10px;
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+.changes-figures {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.changes-figures > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-soft);
+    font-size: 14px;
+}
+
+.changes-figures dt {
+    color: var(--text-main);
+}
+
+.changes-figures dd {
+    flex-shrink: 0;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+.changes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 12px;
+    list-style: none;
+    font-size: 14px;
+}
+
+.changes-list li {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 2px 12px;
+}
+
+.changes-list-name {
+    font-weight: 600;
+    color: var(--text-main);
+    overflow-wrap: anywhere;
+}
+
+a.changes-list-name {
+    color: var(--primary-text);
+    text-decoration: none;
+}
+
+a.changes-list-name:hover {
+    text-decoration: underline;
+}
+
+.changes-list-meta {
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.changes-diff {
+    flex-shrink: 0;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.rank-bars-track {
+    grid-column: 1 / -1;
+    height: 8px;
+    border-radius: 4px;
+    background: var(--chart-grid);
+}
+
+.rank-bars-fill {
+    --size: 0%;
+    display: block;
+    width: var(--size);
+    min-width: 2px;
+    height: 100%;
+    border-radius: 4px;
+    background: var(--chart-1);
+}
+
+@media (max-width: 600px) {
+    .analytics-panel {
+        padding: 16px;
+    }
+
+    .kpi-tile {
+        padding: 14px;
+    }
+
+    .kpi-value {
+        font-size: 22px;
+    }
+
+    .bar-chart {
+        --chart-height: 150px;
+        gap: 3px;
+    }
+
+    .bar-chart-label {
+        font-size: 10.5px;
+    }
+
+    /* Doce meses no caben con nombre: solo la inicial (el nombre completo sigue en el detalle y en la tabla) */
+    .bar-chart:not(.bar-chart--few) .bar-chart-label-long {
+        display: none;
+    }
+
+    .bar-chart:not(.bar-chart--few) .bar-chart-label-short {
+        display: inline;
+    }
+
+    .client-rank-row {
+        padding: 10px 2px;
+    }
+}
+
+/* ---- Resumen del mes en el panel principal ---- */
+.month-summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px 24px;
+    padding: 20px 24px;
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--border-radius-md);
+}
+
+.month-summary-title h2 {
+    font-size: 18px;
+}
+
+.month-summary-title p {
+    font-size: 13.5px;
+    color: var(--text-muted);
+}
+
+.month-summary-figures {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 32px;
+    list-style: none;
+}
+
+.month-summary-figures li {
+    display: flex;
+    flex-direction: column;
+}
+
+.month-summary-figures .kpi-value {
+    font-size: 22px;
+}
+
+.month-summary-figures .kpi-change {
+    font-size: 12px;
+}
