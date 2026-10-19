@@ -8,10 +8,12 @@ import com.alexxlpz.crm_cbelleza.forms.ContactForm;
 import com.alexxlpz.crm_cbelleza.mail.InquiryMailService;
 import com.alexxlpz.crm_cbelleza.repositories.UserRepository;
 import com.alexxlpz.crm_cbelleza.services.ClientCardService;
+import com.zaxxer.hikari.HikariDataSource;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import javax.sql.DataSource;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -29,8 +31,17 @@ class CrmCBellezaApplicationTests {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private DataSource dataSource;
+
     @Test
     void contextLoads() {
+    }
+
+    @Test
+    void inMemoryH2PoolNeverRetiresConnections() {
+        // H2 ata los CHECK a la conexión que usó Flyway: si Hikari la renovara, los UPDATE fallarían (H2PoolConfig)
+        assertEquals(0, ((HikariDataSource) dataSource).getMaxLifetime());
     }
 
     @Test

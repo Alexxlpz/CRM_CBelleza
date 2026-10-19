@@ -441,4 +441,22 @@ class AgendaTests {
         mail.notifyChange(app.getId(), AppointmentChange.CREATED_BY_CENTER);
         verify(emailGateway, org.mockito.Mockito.never()).send(any());
     }
+
+    @Test
+    void reminderIsMarkedBeforeSendingAndNeverSentTwice() {
+        cabins(5);
+        Appointment app = createByWorker(carlos, LocalDateTime.now().plusHours(3).withMinute(0).withSecond(0).withNano(0), true);
+        org.mockito.Mockito.clearInvocations(emailGateway);
+
+        assertTrue(mail.sendReminders() >= 1);
+        assertEquals(0, mail.sendReminders(), "una cita ya recordada no se vuelve a recordar");
+
+        ArgumentCaptor<EmailMessage> sent = ArgumentCaptor.forClass(EmailMessage.class);
+        verify(emailGateway, atLeastOnce()).send(sent.capture());
+        assertEquals(1, sent.getAllValues().stream()
+                .filter(m -> m.to().equals(sofia.getEmail()) && m.subject().startsWith("Recordatorio"))
+                .count());
+        assertTrue(appointments.findByStatusAndReminderSentAtIsNullAndDateTimeBetween(AppointmentStatus.CONFIRMED,
+                app.getDateTime().minusMinutes(1), app.getDateTime().plusMinutes(1)).isEmpty());
+    }
 }

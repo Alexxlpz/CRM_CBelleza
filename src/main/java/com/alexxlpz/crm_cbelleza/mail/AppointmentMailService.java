@@ -105,20 +105,26 @@ public class AppointmentMailService {
         }
     }
 
-    /** Recordatorio a los clientes con cita confirmada en las próximas 24 h. Devuelve cuántos se han enviado. */
-    @Transactional
+    /**
+     * Recordatorio a los clientes con cita confirmada en las próximas 24 h. Devuelve cuántos se han enviado.
+     * Cada cita se apunta como recordada antes de enviar el correo y en su propia transacción: si algo falla
+     * (la BD, el SMTP) se pierde como mucho ese recordatorio, pero nunca se reenvía cada minuto ni bloquea los demás.
+     */
     public int sendReminders() {
         LocalDateTime now = LocalDateTime.now(clock);
         List<Appointment> upcoming = appointments.findByStatusAndReminderSentAtIsNullAndDateTimeBetween(
                 AppointmentStatus.CONFIRMED, now, now.plusHours(24));
+        int sent = 0;
         for (Appointment app : upcoming) {
+            if (appointments.markReminderSent(app.getId(), now) == 0) {
+                continue;
+            }
             toClient(app, "Recordatorio: " + app.getTreatment().getName() + ", " + when(app.getDateTime()),
                     "Te esperamos pronto", "Te recordamos tu cita en " + app.getCenter().getName() + " el " + when(app.getDateTime())
                             + ". Si no puedes venir, anúlala desde «Mis Citas» para que otra persona pueda aprovechar el hueco.");
-            app.setReminderSentAt(now);
+            sent++;
         }
-        appointments.saveAll(upcoming);
-        return upcoming.size();
+        return sent;
     }
 
     private void toClient(Appointment app, String subject, String heading, String intro) {
