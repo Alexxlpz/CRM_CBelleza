@@ -18,6 +18,9 @@ public interface TreatmentRepository extends JpaRepository<Treatment, Long> {
 
     long countByCenterId(Long centerId);
 
+    /** Tratamientos con oferta (también vencidas: quien llama decide con el «hoy» de cada centro). */
+    List<Treatment> findByOfferPriceIsNotNull();
+
     Optional<Treatment> findByIdAndCenterId(Long id, Long centerId);
 
     @Query("SELECT DISTINCT t.center.id FROM Treatment t WHERE t.type = :type")

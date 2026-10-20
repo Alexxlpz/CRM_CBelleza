@@ -255,6 +255,16 @@ document.addEventListener('DOMContentLoaded', function () {
         picker.closest('.booking-datetime-group').scrollIntoView({ behavior: Cuquora.scrollBehavior(), block: 'start' });
     }));
 
+    // «Todos los servicios / En oferta»: solo esconde tarjetas, el servicio elegido sigue elegido
+    const filterButtons = form.querySelectorAll('[data-booking-filter]');
+    filterButtons.forEach(button => button.addEventListener('click', () => {
+        const onlyOffers = button.dataset.bookingFilter === 'offers';
+        filterButtons.forEach(b => b.setAttribute('aria-pressed', String(b === button)));
+        form.querySelectorAll('.treatment-select-card').forEach(card => {
+            card.hidden = onlyOffers && card.dataset.offer !== 'true';
+        });
+    }));
+
     // Otro tratamiento puede durar más: se recalcula qué días y horas caben
     treatmentInputs.forEach(input => input.addEventListener('change', () => {
         if (message.classList.contains('is-error') && loaded) setMessage('');

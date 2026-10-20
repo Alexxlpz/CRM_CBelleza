@@ -39,6 +39,8 @@ class CenterIsolationTests {
     private com.alexxlpz.crm_cbelleza.repositories.CenterRepository centers;
     @Autowired
     private com.alexxlpz.crm_cbelleza.repositories.CenterPhotoRepository centerPhotos;
+    @Autowired
+    private com.alexxlpz.crm_cbelleza.repositories.TreatmentRepository treatments;
 
     private Long centerOf(String email) {
         return users.findByEmailIgnoreCase(email).orElseThrow().getCenter().getId();
@@ -93,6 +95,20 @@ class CenterIsolationTests {
                 .andExpect(status().isNotFound());
 
         assertEquals(stockBefore, inventory.findById(foreignItem.getId()).orElseThrow().getStock());
+    }
+
+    @Test
+    void workerCannotPutOnOfferATreatmentOfAnotherCenter() throws Exception {
+        var foreign = treatments.findByCenterId(centerOf(TestUsers.WORKER_CENTER_1)).getFirst();
+
+        mvc.perform(post("/worker/treatments/" + foreign.getId() + "/offer").param("offerPrice", "1").with(csrf())
+                        .with(TestUsers.as(users, TestUsers.WORKER_CENTER_2)))
+                .andExpect(status().isNotFound());
+        mvc.perform(post("/worker/treatments/" + foreign.getId() + "/offer/delete").with(csrf())
+                        .with(TestUsers.as(users, TestUsers.WORKER_CENTER_2)))
+                .andExpect(status().isNotFound());
+
+        assertEquals(foreign.getOfferPrice(), treatments.findById(foreign.getId()).orElseThrow().getOfferPrice());
     }
 
     @Test

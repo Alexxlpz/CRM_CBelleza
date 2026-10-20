@@ -176,17 +176,78 @@
     color: var(--text-main);
 }
 
+.client-loyalty-count {
+    margin-left: 4px;
+    padding: 2px 10px;
+    border-radius: var(--radius-pill);
+    background: var(--surface-muted);
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+/* Móvil y tablet: carrusel horizontal con imán. La siguiente tarjeta asoma por la
+   derecha para que se note que hay más; así la página no crece con cada centro. */
 .client-loyalty-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
-    gap: 16px;
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+}
+
+.client-loyalty-grid::-webkit-scrollbar {
+    display: none;
 }
 
 .client-loyalty-card {
+    flex: 0 0 min(86%, 340px);
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
     padding: 18px 20px;
     border: 1px solid var(--card-border);
     border-radius: var(--border-radius-md);
     background: var(--card-bg);
+}
+
+/* Una sola tarjeta: ocupa todo el ancho, no hay nada que deslizar */
+.client-loyalty-card:only-child {
+    flex-basis: 100%;
+}
+
+.client-loyalty-dots {
+    display: flex;
+    justify-content: center;
+    gap: 2px;
+    margin-top: 6px;
+}
+
+/* El botón mide 24 px para tocarlo con el dedo; el punto visible es el ::before */
+.client-loyalty-dot {
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+
+.client-loyalty-dot::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: var(--radius-pill);
+    background: var(--border-soft);
+    transition: width 0.2s ease, background-color 0.2s ease;
+}
+
+.client-loyalty-dot.is-active::before {
+    width: 20px;
+    background: var(--brand-solid);
 }
 
 .client-loyalty-center {
@@ -253,8 +314,65 @@
         margin-bottom: 0;
     }
 
+    /* Escritorio: columna compacta. Centro y saldo en una línea y menos relleno,
+       para que quepan unos cinco centros a la vista; con más, la columna hace scroll. */
     .appointments-layout.has-points .client-loyalty-grid {
-        grid-template-columns: minmax(0, 1fr);
+        flex-direction: column;
+        gap: 10px;
+        overflow: visible;
+        scroll-snap-type: none;
+    }
+
+    .appointments-layout.has-points .client-loyalty-card {
+        flex: none;
+        padding: 14px 16px 6px;
+    }
+
+    .appointments-layout.has-points .client-loyalty-head {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 2px 12px;
+        margin-bottom: 8px;
+    }
+
+    .appointments-layout.has-points .client-loyalty-center,
+    .appointments-layout.has-points .client-loyalty-balance {
+        margin: 0;
+    }
+
+    .appointments-layout.has-points .client-loyalty-balance {
+        font-size: 13px;
+        white-space: nowrap;
+    }
+
+    .appointments-layout.has-points .client-loyalty-balance strong {
+        font-size: 18px;
+    }
+
+    .appointments-layout.has-points .loyalty-progress {
+        display: block;
+        height: 6px;
+    }
+
+    .appointments-layout.has-points .client-loyalty-goal {
+        margin-top: 8px;
+        font-size: 13px;
+        line-height: 1.45;
+    }
+
+    .appointments-layout.has-points .client-loyalty-rule {
+        font-size: 12px;
+    }
+
+    .appointments-layout.has-points .loyalty-history summary {
+        min-height: 36px;
+        font-size: 13px;
+    }
+
+    .appointments-layout.has-points .client-loyalty-dots {
+        display: none;
     }
 
     .appointments-layout.has-points .appointments-grid {

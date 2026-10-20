@@ -7,6 +7,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 
@@ -492,6 +493,17 @@ public class DatabaseSeeder implements CommandLineRunner {
                     Arrays.asList(w1, w2), Arrays.asList(t1_1, t1_2, t1_3, t1_4, t1_5, t1_6),
                     Arrays.asList(p1, p2, p5, p7, p9, p12, p13),
                     Arrays.asList(client1, client2, client3, client4, client5), today);
+            // Ofertas de ejemplo para ver la reserva y el buscador con descuentos (los tests no las cargan)
+            demoOffer(t1_2, 38.40, today.toLocalDate().plusDays(10));
+            demoOffer(t1_3, 36.00, null);
+            demoOffer(t2_3, 44.20, today.toLocalDate().plusDays(20));
+            demoOffer(t3_1, 49.30, today.toLocalDate().plusDays(5));
+            treatmentRepository.saveAll(Arrays.asList(t1_2, t1_3, t2_3, t3_1));
         }
+    }
+
+    private static void demoOffer(Treatment treatment, double offerPrice, LocalDate endsOn) {
+        treatment.setOfferPrice(offerPrice);
+        treatment.setOfferEndsOn(endsOn);
     }
 }

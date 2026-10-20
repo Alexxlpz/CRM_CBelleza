@@ -53,4 +53,32 @@
             </form>
         </div>
     </div>
+
+    <!-- Oferta de un tratamiento. treatment-offer.js rellena el formulario con el tratamiento pulsado. -->
+    <div th:fragment="offerModal(today)" class="ui-modal-overlay" id="treatmentOfferModal" hidden>
+        <div class="ui-modal ui-modal--form" role="dialog" aria-modal="true" aria-labelledby="treatmentOfferTitle">
+            <button type="button" class="ui-modal-close" data-modal-close aria-label="Cerrar"><i class="lucide-x" aria-hidden="true"></i></button>
+            <h2 class="ui-modal-title" id="treatmentOfferTitle"><i class="lucide-tag" aria-hidden="true"></i> Poner en oferta</h2>
+            <p class="ui-modal-text" id="treatmentOfferContext">Masaje relajante · precio de carta 42,00 €</p>
+            <form id="treatmentOfferForm" th:action="@{/worker/treatments/0/offer}" method="post" class="offer-form">
+                <label class="form-label" for="offerPrice">Precio de oferta (€)</label>
+                <input type="number" name="offerPrice" id="offerPrice" class="form-control" min="0.01" step="0.01"
+                       inputmode="decimal" required aria-describedby="offerPriceHint">
+                <span class="form-hint" id="offerPriceHint">Los clientes verán el precio de carta tachado y el descuento.</span>
+                <label class="form-label" for="offerEndsOn">Último día de la oferta</label>
+                <input type="date" name="endsOn" id="offerEndsOn" class="form-control" th:attr="min=${today}"
+                       aria-describedby="offerEndsHint">
+                <span class="form-hint" id="offerEndsHint">Vale para las citas que se pidan hasta ese día, aunque sean para más adelante. Déjalo vacío para quitarla a mano.</span>
+                <div class="ui-modal-actions">
+                    <button type="button" class="btn btn-secondary" data-modal-close>Cancelar</button>
+                    <button type="submit" class="btn btn-primary"><i class="lucide-save" aria-hidden="true"></i> Guardar oferta</button>
+                </div>
+            </form>
+            <form id="treatmentOfferRemoveForm" th:action="@{/worker/treatments/0/offer/delete}" method="post" class="offer-remove" hidden
+                  data-confirm="El tratamiento vuelve a su precio de carta. Las citas ya pedidas mantienen el precio con el que se pidieron."
+                  data-confirm-title="¿Quitar la oferta?" data-confirm-button="Quitar oferta">
+                <button type="submit" class="btn btn-secondary btn-sm"><i class="lucide-x" aria-hidden="true"></i> Quitar oferta</button>
+            </form>
+        </div>
+    </div>
 </div>

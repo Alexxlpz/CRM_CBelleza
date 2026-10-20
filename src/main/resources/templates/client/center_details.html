@@ -31,15 +31,36 @@
                 <!-- 1. Selectable Treatments list -->
                 <div class="form-group booking-services">
                     <label class="form-label booking-step-label">1. Elige un servicio disponible</label>
+                    <!-- Solo si hay ofertas: filtra la misma lista, el servicio elegido no se pierde al cambiar -->
+                    <div class="view-toggle view-toggle--always booking-filter" role="group" aria-label="Mostrar servicios"
+                         th:if="${offerCount > 0}">
+                        <button type="button" class="view-toggle-btn" data-booking-filter="all" aria-pressed="true">
+                            <i class="lucide-list" aria-hidden="true"></i> Todos los servicios
+                        </button>
+                        <button type="button" class="view-toggle-btn" data-booking-filter="offers" aria-pressed="false">
+                            <i class="lucide-tag" aria-hidden="true"></i> En oferta
+                            <span class="booking-filter-count" th:text="${offerCount}">2</span>
+                        </button>
+                    </div>
                     <div class="treatment-select-grid" th:if="${not #lists.isEmpty(treatments)}">
-                        <label class="treatment-select-card" th:each="t : ${treatments}">
+                        <label class="treatment-select-card" th:each="t : ${treatments}"
+                               th:with="onOffer=${t.hasActiveOffer(today)}"
+                               th:attr="data-offer=${onOffer}">
                             <input type="radio" name="treatmentId" th:value="${t.id}"
                                 th:attr="data-duration=${t.duration}" required>
+                            <span class="offer-badge" th:if="${onOffer}">
+                                <i class="lucide-tag" aria-hidden="true"></i>
+                                <span th:text="'-' + ${t.offerDiscountPercent()} + ' %' + (${t.offerEndsOn != null} ? ' · ' + ${t.offerEndsLabel()} : '')">-20 % · hasta el 30 oct</span>
+                            </span>
                             <span class="treatment-card-title" th:text="${t.name}">Manicura</span>
                             <span class="treatment-card-desc" th:text="${t.description}">Descripción del
                                 servicio...</span>
                             <div class="treatment-card-meta">
-                                <span class="treatment-card-price" th:text="${#numbers.formatDecimal(t.price, 1, 'POINT', 2, 'COMMA')} + ' €'">32,00 €</span>
+                                <span class="treatment-card-price">
+                                    <span th:text="${#numbers.formatDecimal(t.priceOn(today), 1, 'POINT', 2, 'COMMA')} + ' €'">32,00 €</span>
+                                    <s class="treatment-card-old-price" th:if="${onOffer}"
+                                       th:text="${#numbers.formatDecimal(t.price, 1, 'POINT', 2, 'COMMA')} + ' €'">40,00 €</s>
+                                </span>
                                 <span class="treatment-card-duration" th:text="${t.duration} + ' min'">30 min</span>
                             </div>
                         </label>

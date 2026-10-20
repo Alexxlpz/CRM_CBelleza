@@ -4,6 +4,7 @@
     <th:block th:replace="~{fragments/head :: meta('Tratamientos del Centro - Cuquora CRM')}"></th:block>
     <link rel="stylesheet" th:href="@{/css/treatments.css}">
     <script th:src="@{/js/sheets.js}" defer></script>
+    <script th:src="@{/js/treatment-offer.js}" defer></script>
 </head>
 <body>
     <div th:replace="~{fragments/navbar :: worker('/worker/dashboard', 'Volver al panel principal', ${notifications})}"></div>
@@ -49,6 +50,9 @@
         <div class="list-toolbar" th:if="${not #lists.isEmpty(treatments)}">
             <div class="category-filter-bar" role="toolbar" aria-label="Filtrar por categoría">
                 <button type="button" class="category-pill active" data-category-filter="ALL" aria-pressed="true">Todos</button>
+                <button type="button" class="category-pill" data-category-filter="OFFER" aria-pressed="false" th:if="${activeOfferCount > 0}">
+                    <i class="lucide-tag" aria-hidden="true"></i> <span th:text="'En oferta (' + ${activeOfferCount} + ')'">En oferta (2)</span>
+                </button>
                 <th:block th:each="type : ${treatmentTypes}">
                     <button type="button" class="category-pill"
                             th:data-category-filter="${type}" aria-pressed="false" th:text="${type.displayName}">Facial</button>
@@ -68,16 +72,36 @@
                         <span>Descripción</span>
                         <span>Categoría y duración</span>
                         <span class="list-head-end">Precio</span>
+                        <span class="list-head-end">Oferta</span>
                     </div>
-                    <article class="treatment-item-card glass-panel" th:each="t : ${treatments}" th:data-category="${t.type}">
+                    <article class="treatment-item-card glass-panel" th:each="t : ${treatments}" th:data-category="${t.type}"
+                             th:with="onOffer=${t.hasActiveOffer(today)}" th:attr="data-offer=${onOffer}">
                         <div class="treatment-item-header">
                             <h2 class="treatment-item-name" th:text="${t.name}">Manicura</h2>
-                            <span class="treatment-item-price" th:text="${#numbers.formatDecimal(t.price, 1, 'POINT', 2, 'COMMA')} + ' €'">0,00 €</span>
+                            <span class="treatment-item-price">
+                                <span th:text="${#numbers.formatDecimal(t.priceOn(today), 1, 'POINT', 2, 'COMMA')} + ' €'">0,00 €</span>
+                                <s class="treatment-item-old-price" th:if="${onOffer}"
+                                   th:text="${#numbers.formatDecimal(t.price, 1, 'POINT', 2, 'COMMA')} + ' €'">0,00 €</s>
+                            </span>
                         </div>
                         <p class="treatment-item-desc" th:text="${t.description}">Descripción del tratamiento...</p>
                         <div class="treatment-item-tags">
                             <span class="treatment-item-type" th:if="${t.type != null}" th:text="${t.type.displayName}">Facial</span>
                             <span class="treatment-item-meta"><i class="lucide-clock" aria-hidden="true"></i> <span th:text="${t.duration} + ' min'">30 min</span></span>
+                            <span class="offer-badge" th:if="${onOffer}">
+                                <i class="lucide-tag" aria-hidden="true"></i>
+                                <span th:text="'-' + ${t.offerDiscountPercent()} + ' %' + (${t.offerEndsOn != null} ? ' · ' + ${t.offerEndsLabel()} : ' · sin fecha de fin')">-20 % · hasta el 30 oct</span>
+                            </span>
+                            <span class="offer-ended" th:if="${t.hasOffer() and not onOffer}">
+                                <i class="lucide-calendar-x" aria-hidden="true"></i> Oferta terminada
+                            </span>
+                        </div>
+                        <div class="treatment-item-actions">
+                            <button type="button" class="btn btn-secondary btn-sm" data-offer-edit
+                                    th:attr="data-id=${t.id},data-name=${t.name},data-price=${t.price},data-offer-price=${t.offerPrice},data-ends-on=${t.offerEndsOn},data-has-offer=${t.hasOffer()}">
+                                <i class="lucide-tag" aria-hidden="true"></i>
+                                <span th:text="${t.hasOffer()} ? (${onOffer} ? 'Editar oferta' : 'Renovar oferta') : 'Poner en oferta'">Poner en oferta</span>
+                            </button>
                         </div>
                     </article>
                 </div>
@@ -95,6 +119,7 @@
     </main>
 
     <div th:replace="~{worker/fragments/treatment-modals :: addTreatmentSheet}"></div>
+    <div th:replace="~{worker/fragments/treatment-modals :: offerModal(${today})}"></div>
 
     <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Panel de gestión de centros.')}"></div>
 
@@ -109,7 +134,8 @@
                         b.setAttribute('aria-pressed', String(b === button));
                     });
                     document.querySelectorAll('#treatmentsList .treatment-item-card').forEach(card => {
-                        card.hidden = category !== 'ALL' && card.dataset.category !== category;
+                        const matches = category === 'OFFER' ? card.dataset.offer === 'true' : card.dataset.category === category;
+                        card.hidden = category !== 'ALL' && !matches;
                     });
                 });
             });

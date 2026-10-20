@@ -1026,6 +1026,20 @@ button.mobile-drawer-link {
     letter-spacing: 0.5px;
 }
 
+/* Etiqueta de oferta de un tratamiento (reserva del cliente y carta del trabajador) */
+.offer-badge {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: var(--radius-pill);
+    background: rgba(var(--secondary-rgb), 0.3);
+    color: var(--danger-text);
+    font-size: 11.5px;
+    font-weight: 700;
+}
+
 .badge-pending {
     background-color: var(--warning-bg);
     color: var(--warning-text);

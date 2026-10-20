@@ -290,6 +290,43 @@
     border-radius: 6px;
 }
 
+/* Ofertas en la reserva: filtro «Todos / En oferta» y precio de carta tachado (.offer-badge en common.css) */
+.booking-filter {
+    margin-bottom: 14px;
+}
+
+.booking-services.is-collapsed .booking-filter {
+    display: none;
+}
+
+.booking-filter-count {
+    min-width: 20px;
+    padding: 0 6px;
+    border-radius: var(--radius-pill);
+    background: rgba(var(--secondary-rgb), 0.3);
+    color: var(--danger-text);
+    font-size: 11px;
+    line-height: 18px;
+    text-align: center;
+}
+
+.treatment-select-card .offer-badge {
+    margin-right: 24px; /* el radio va en la esquina */
+}
+
+.treatment-card-price {
+    display: inline-flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.treatment-card-old-price {
+    color: var(--text-soft);
+    font-size: 12px;
+    font-weight: 500;
+}
+
 /* Centers list toolbar & infinite scroll */
 .filter-search-container {
     flex-direction: column;
@@ -412,6 +449,25 @@
     display: block;
 }
 
+/* «Con ofertas» en el buscador de centros */
+.filter-icon-btn.offers-toggle {
+    width: auto;
+    padding: 0 14px;
+    gap: 6px;
+}
+
+/* Móvil: el buscador conserva su ancho y «Con ofertas» baja a su propia línea */
+@media (max-width: 600px) {
+    .filter-search-row {
+        flex-wrap: wrap;
+    }
+
+    .filter-icon-btn.offers-toggle {
+        order: 1;
+        height: 36px;
+    }
+}
+
 .filter-icon-btn.is-active {
     background: var(--brand-solid);
     border-color: var(--primary);
@@ -494,6 +550,46 @@
     margin-top: 6px;
     width: 100%;
     justify-content: center;
+}
+
+/* Ofertas en la tarjeta del buscador y en el globo del mapa */
+.center-offers {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    padding: 8px 12px;
+    border-radius: var(--border-radius-sm);
+    background: var(--surface-muted);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.center-offers i {
+    color: var(--danger-text);
+}
+
+.center-offers-label {
+    flex: 1;
+    min-width: 0;
+}
+
+.center-offer-discount {
+    padding: 2px 8px;
+    border-radius: var(--radius-pill);
+    background: rgba(var(--secondary-rgb), 0.3);
+    color: var(--danger-text);
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.map-popup-offers {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--danger-text);
 }
 
 /* Foto del centro a sangre arriba de la tarjeta del buscador y de la cabecera de la ficha */

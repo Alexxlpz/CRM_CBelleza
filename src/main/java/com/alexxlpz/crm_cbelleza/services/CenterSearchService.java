@@ -2,18 +2,24 @@ package com.alexxlpz.crm_cbelleza.services;
 
 import com.alexxlpz.crm_cbelleza.dto.CenterSearchCriteria;
 import com.alexxlpz.crm_cbelleza.dto.CenterSummaryDTO;
+import com.alexxlpz.crm_cbelleza.booking.CenterClock;
 import com.alexxlpz.crm_cbelleza.entities.Center;
+import com.alexxlpz.crm_cbelleza.entities.Treatment;
 import com.alexxlpz.crm_cbelleza.entities.TreatmentType;
 import com.alexxlpz.crm_cbelleza.repositories.CenterRepository;
 import com.alexxlpz.crm_cbelleza.repositories.TreatmentRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Clock;
+import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Locale;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /** Búsqueda pública de centros: filtros, distancia al usuario, orden y paginación. */
@@ -27,13 +33,20 @@ public class CenterSearchService {
 
     private final CenterRepository centerRepository;
     private final TreatmentRepository treatmentRepository;
+    private final Clock clock;
 
-    public CenterSearchService(CenterRepository centerRepository, TreatmentRepository treatmentRepository) {
+    public CenterSearchService(CenterRepository centerRepository, TreatmentRepository treatmentRepository, Clock clock) {
         this.centerRepository = centerRepository;
         this.treatmentRepository = treatmentRepository;
+        this.clock = clock;
     }
 
     public List<CenterSummaryDTO> search(CenterSearchCriteria criteria) {
+        // Una sola consulta para las ofertas de todos los centros; cada una se filtra con el «hoy» de su centro
+        Map<Long, List<Treatment>> offeredByCenter = treatmentRepository.findByOfferPriceIsNotNull().stream()
+                .collect(Collectors.groupingBy(t -> t.getCenter().getId()));
+        boolean onlyWithOffers = Boolean.TRUE.equals(criteria.withOffers());
+
         Stream<Center> centers = centerRepository.findAll().stream()
                 .filter(Center::isPublished)
                 .filter(insideBoundingBox(criteria))
@@ -42,7 +55,9 @@ public class CenterSearchService {
                 .filter(offersTreatment(criteria.searchTreatment()));
 
         List<CenterSummaryDTO> sorted = centers
-                .map(center -> CenterSummaryDTO.of(center, distanceFrom(criteria, center)))
+                .map(center -> CenterSummaryDTO.of(center, distanceFrom(criteria, center),
+                        activeOffers(center, offeredByCenter.getOrDefault(center.getId(), List.of()))))
+                .filter(dto -> !onlyWithOffers || !dto.offers().isEmpty())
                 .sorted(BY_DISTANCE_THEN_NAME)
                 .toList();
 
@@ -52,6 +67,19 @@ public class CenterSearchService {
             return List.of();
         }
         return sorted.subList(from, Math.min(from + size, sorted.size()));
+    }
+
+    /** Ofertas en vigor hoy en el centro, de mayor a menor descuento. */
+    private List<CenterSummaryDTO.Offer> activeOffers(Center center, List<Treatment> offered) {
+        if (offered.isEmpty()) {
+            return List.of();
+        }
+        LocalDate today = CenterClock.now(clock, center).toLocalDate();
+        return offered.stream()
+                .filter(t -> t.hasActiveOffer(today))
+                .map(t -> new CenterSummaryDTO.Offer(t.getName(), t.getPrice(), t.getOfferPrice(), t.offerDiscountPercent()))
+                .sorted(Comparator.comparingInt(CenterSummaryDTO.Offer::discountPercent).reversed())
+                .toList();
     }
 
     private static Predicate<Center> insideBoundingBox(CenterSearchCriteria c) {

@@ -1,5 +1,6 @@
 package com.alexxlpz.crm_cbelleza.services;
 
+import com.alexxlpz.crm_cbelleza.booking.CenterClock;
 import com.alexxlpz.crm_cbelleza.entities.Center;
 import com.alexxlpz.crm_cbelleza.entities.Treatment;
 import com.alexxlpz.crm_cbelleza.entities.TreatmentType;
@@ -7,12 +8,17 @@ import com.alexxlpz.crm_cbelleza.exceptions.BusinessRuleException;
 import com.alexxlpz.crm_cbelleza.exceptions.ResourceNotFoundException;
 import com.alexxlpz.crm_cbelleza.forms.FormText;
 import com.alexxlpz.crm_cbelleza.forms.TreatmentForm;
+import com.alexxlpz.crm_cbelleza.forms.TreatmentOfferForm;
 import com.alexxlpz.crm_cbelleza.repositories.CenterRepository;
 import com.alexxlpz.crm_cbelleza.repositories.TreatmentRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Clock;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.Locale;
 
 /** Carta de tratamientos de cada centro. */
 @Service
@@ -21,10 +27,20 @@ public class TreatmentService {
 
     private final TreatmentRepository treatmentRepository;
     private final CenterRepository centerRepository;
+    private final Clock clock;
 
-    public TreatmentService(TreatmentRepository treatmentRepository, CenterRepository centerRepository) {
+    public TreatmentService(TreatmentRepository treatmentRepository, CenterRepository centerRepository, Clock clock) {
         this.treatmentRepository = treatmentRepository;
         this.centerRepository = centerRepository;
+        this.clock = clock;
+    }
+
+    /** Hoy en la zona del centro: decide si una oferta sigue en vigor. */
+    @Transactional(readOnly = true)
+    public LocalDate todayAt(Long centerId) {
+        Center center = centerRepository.findById(centerId)
+                .orElseThrow(() -> new ResourceNotFoundException("Centro no encontrado."));
+        return CenterClock.now(clock, center).toLocalDate();
     }
 
     @Transactional(readOnly = true)
@@ -51,6 +67,44 @@ public class TreatmentService {
                 .type(parseType(form.type()))
                 .center(center)
                 .build());
+    }
+
+    /** Pone o cambia la oferta de un tratamiento del centro. */
+    public void saveOffer(Long centerId, Long treatmentId, TreatmentOfferForm form) {
+        Treatment treatment = treatmentRepository.findByIdAndCenterId(treatmentId, centerId)
+                .orElseThrow(() -> new ResourceNotFoundException("Tratamiento no encontrado."));
+        Double offerPrice = form.offerPrice();
+        if (offerPrice == null || offerPrice <= 0) {
+            throw new BusinessRuleException("Escribe el precio de oferta.");
+        }
+        if (offerPrice >= treatment.getPrice()) {
+            throw new BusinessRuleException("El precio de oferta tiene que ser menor que el de carta ("
+                    + String.format(Locale.forLanguageTag("es"), "%.2f", treatment.getPrice()) + " €).");
+        }
+        LocalDate endsOn = parseDate(form.endsOn());
+        if (endsOn != null && endsOn.isBefore(todayAt(centerId))) {
+            throw new BusinessRuleException("La fecha de fin ya ha pasado. Elige hoy o un día posterior.");
+        }
+        treatment.setOfferPrice(Math.round(offerPrice * 100) / 100.0);
+        treatment.setOfferEndsOn(endsOn);
+    }
+
+    public void removeOffer(Long centerId, Long treatmentId) {
+        Treatment treatment = treatmentRepository.findByIdAndCenterId(treatmentId, centerId)
+                .orElseThrow(() -> new ResourceNotFoundException("Tratamiento no encontrado."));
+        treatment.setOfferPrice(null);
+        treatment.setOfferEndsOn(null);
+    }
+
+    private static LocalDate parseDate(String value) {
+        if (FormText.isBlank(value)) {
+            return null;
+        }
+        try {
+            return LocalDate.parse(value.trim());
+        } catch (DateTimeParseException e) {
+            throw new BusinessRuleException("La fecha de fin no es válida.");
+        }
     }
 
     private static TreatmentType parseType(String type) {

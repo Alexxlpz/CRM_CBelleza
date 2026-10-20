@@ -1,6 +1,7 @@
 package com.alexxlpz.crm_cbelleza.controllers;
 
 import com.alexxlpz.crm_cbelleza.booking.OpeningHoursPolicy;
+import com.alexxlpz.crm_cbelleza.entities.Treatment;
 import com.alexxlpz.crm_cbelleza.exceptions.BusinessRuleException;
 import com.alexxlpz.crm_cbelleza.security.AppUserDetails;
 import com.alexxlpz.crm_cbelleza.services.AppointmentService;
@@ -18,8 +19,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
+import java.util.List;
 
 /** Zona del cliente: ficha del centro, solicitud de cita e historial de citas. Solo rol CLIENT. */
 @Controller
@@ -58,7 +61,11 @@ public class ClientBookingController {
     @GetMapping("/client/centers/{id}")
     public String centerDetails(@PathVariable Long id, Model model) {
         model.addAttribute("center", centerService.getPublishedCenter(id));
-        model.addAttribute("treatments", treatmentService.getTreatmentsByCenter(id));
+        List<Treatment> treatments = treatmentService.getTreatmentsByCenter(id);
+        LocalDate today = treatmentService.todayAt(id);
+        model.addAttribute("treatments", treatments);
+        model.addAttribute("today", today);
+        model.addAttribute("offerCount", treatments.stream().filter(t -> t.hasActiveOffer(today)).count());
         model.addAttribute("workers", userService.getWorkersByCenter(id));
         model.addAttribute("openingHoursLabel", openingHours.describe());
         model.addAttribute("activePage", "centers");

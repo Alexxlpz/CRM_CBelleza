@@ -29,6 +29,10 @@
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
                     <span id="treatmentBadge" class="bell-badge" aria-hidden="true"></span>
                 </button>
+                <button type="button" class="btn btn-secondary filter-icon-btn offers-toggle" id="btnOffers" aria-pressed="false"
+                        title="Ver solo centros con ofertas">
+                    <i class="lucide-tag" aria-hidden="true"></i> Con ofertas
+                </button>
                 <button type="button" class="btn btn-secondary filter-icon-btn" id="btnMapToggle" aria-label="Ver en mapa" aria-pressed="false">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"></polygon><line x1="9" y1="3" x2="9" y2="21"></line><line x1="15" y1="3" x2="15" y2="21"></line></svg>
                 </button>
@@ -83,6 +87,8 @@
             const treatmentBadge = document.getElementById('treatmentBadge');
             const searchName = document.getElementById('searchName');
             const searchTreatment = document.getElementById('searchTreatment');
+            const btnOffers = document.getElementById('btnOffers');
+            let onlyOffers = false;
 
             let userLat = null;
             let userLon = null;
@@ -126,16 +132,33 @@
                 window.location.href = centerUrl(center);
             }
 
+            const offersLabel = count => count === 1 ? '1 tratamiento en oferta' : `${count} tratamientos en oferta`;
+
+            /** Una sola línea aunque el centro tenga muchas ofertas; el detalle se ve en la ficha del centro. */
+            function offersBlock(offers) {
+                if (!offers.length) return '';
+                const best = Math.max(...offers.map(o => o.discountPercent));
+                return `
+                    <p class="center-offers">
+                        <i class="lucide-tag" aria-hidden="true"></i>
+                        <span class="center-offers-label">${offersLabel(offers.length)}</span>
+                        <strong class="center-offer-discount">${offers.length === 1 ? '' : 'hasta '}-${best} %</strong>
+                    </p>`;
+            }
+
             /** Globo que aparece al tocar un centro en el mapa: primero se ve qué centro es y luego se decide entrar. */
             function centerPopup(center) {
                 const el = document.createElement('div');
                 el.className = 'map-popup';
                 const distance = center.distanceKm !== null && center.distanceKm !== undefined
                     ? `<span class="map-popup-distance">A ${center.distanceKm.toFixed(1)} km</span>` : '';
+                const offers = center.offers.length
+                    ? `<span class="map-popup-offers"><i class="lucide-tag" aria-hidden="true"></i> ${offersLabel(center.offers.length)}</span>` : '';
                 el.innerHTML = `
                     <strong class="map-popup-title">${esc(center.name)}</strong>
                     ${center.address ? `<span class="map-popup-address">${esc(center.address)}</span>` : ''}
                     ${distance}
+                    ${offers}
                     <button type="button" class="btn btn-primary btn-sm map-popup-btn">
                         <i class="lucide-calendar-plus" aria-hidden="true"></i> Ver tratamientos
                     </button>`;
@@ -167,6 +190,12 @@
                 clearTimeout(searchTimeout);
                 searchTimeout = setTimeout(resetAndFetch, 400);
             });
+            btnOffers.addEventListener('click', () => {
+                onlyOffers = !onlyOffers;
+                btnOffers.classList.toggle('is-active', onlyOffers);
+                btnOffers.setAttribute('aria-pressed', String(onlyOffers));
+                resetAndFetch();
+            });
             searchTreatment.addEventListener('change', () => {
                 treatmentBadge.classList.toggle('is-visible', searchTreatment.value !== '');
                 resetAndFetch();
@@ -176,6 +205,7 @@
                 const params = new URLSearchParams(extra);
                 if (searchName.value) params.append('searchName', searchName.value);
                 if (searchTreatment.value) params.append('searchTreatment', searchTreatment.value);
+                if (onlyOffers) params.append('withOffers', 'true');
                 return params;
             }
 
@@ -272,6 +302,7 @@
                         <h2 class="center-card-title">${esc(center.name)}</h2>
                         ${distance}
                     </div>
+                    ${offersBlock(center.offers)}
                     <div class="center-card-body">
                         ${meta('navigation', 'Dirección:', center.address)}
                         ${meta('phone', 'Número de teléfono:', center.phone)}
@@ -308,7 +339,7 @@
                         centersGrid.innerHTML = `
                             <div class="no-appointments-box glass-panel grid-col-full">
                                 <i class="lucide-map-pin-off" aria-hidden="true"></i>
-                                <p>No se encontraron centros de belleza que coincidan con tus criterios.</p>
+                                <p>${onlyOffers ? 'Ahora mismo ningún centro que coincida con tu búsqueda tiene ofertas.' : 'No se encontraron centros de belleza que coincidan con tus criterios.'}</p>
                             </div>`;
                     }
                     centers.forEach(center => centersGrid.appendChild(centerCard(center)));

@@ -18,12 +18,16 @@
         <div class="appointments-layout" th:classappend="${!loyaltyCards.isEmpty()} ? 'has-points'">
             <!-- Tarjetas de puntos de los centros que la tienen activada -->
             <section class="client-loyalty" th:if="${!loyaltyCards.isEmpty()}" aria-labelledby="clientLoyaltyTitle">
-                <h2 class="client-loyalty-title" id="clientLoyaltyTitle"><i class="lucide-gift" aria-hidden="true"></i> Mis puntos</h2>
-                <div class="client-loyalty-grid">
+                <h2 class="client-loyalty-title" id="clientLoyaltyTitle"><i class="lucide-gift" aria-hidden="true"></i> Mis puntos
+                    <span class="client-loyalty-count" th:if="${loyaltyCards.size() > 1}" th:text="${loyaltyCards.size() + ' centros'}">6 centros</span></h2>
+                <!-- En móvil y tablet es un carrusel horizontal con imán; en escritorio, una columna compacta -->
+                <div class="client-loyalty-grid" id="loyaltyCarousel">
                     <article class="client-loyalty-card" th:each="item : ${loyaltyCards}" th:with="card=${item.card()}">
-                        <h3 class="client-loyalty-center" th:text="${item.centerName()}">Centro Histórico</h3>
-                        <p class="client-loyalty-balance"><strong th:text="${card.balance()}">64</strong> de
-                            <span th:text="${card.rewardPoints()}">150</span> puntos</p>
+                        <div class="client-loyalty-head">
+                            <h3 class="client-loyalty-center" th:text="${item.centerName()}">Centro Histórico</h3>
+                            <p class="client-loyalty-balance"><strong th:text="${card.balance()}">64</strong> de
+                                <span th:text="${card.rewardPoints()}">150</span> puntos</p>
+                        </div>
                         <progress class="loyalty-progress" th:max="${card.rewardPoints()}" th:value="${card.progress()}" max="150" value="64"
                                   th:attr="aria-label=${'Puntos en ' + item.centerName()}"></progress>
                         <p class="client-loyalty-goal" th:if="${card.canRedeem()}">
@@ -49,6 +53,10 @@
                             </ul>
                         </details>
                     </article>
+                </div>
+                <div class="client-loyalty-dots" th:if="${loyaltyCards.size() > 1}">
+                    <button type="button" class="client-loyalty-dot" th:each="item, stat : ${loyaltyCards}"
+                            th:classappend="${stat.first} ? 'is-active'" th:attr="data-index=${stat.index},aria-label=${'Ver puntos de ' + item.centerName()}"></button>
                 </div>
             </section>
 
@@ -117,6 +125,27 @@
                 if (empty) empty.hidden = visible > 0 || !document.getElementById('appointmentsGrid');
             });
         });
+
+        // Carrusel de puntos (móvil y tablet): marca el punto de la tarjeta visible y lleva a la tarjeta al pulsarlo.
+        const loyaltyCarousel = document.getElementById('loyaltyCarousel');
+        const loyaltyDots = Array.from(document.querySelectorAll('.client-loyalty-dot'));
+        if (loyaltyCarousel && loyaltyDots.length) {
+            const loyaltyCards = Array.from(loyaltyCarousel.children);
+            const markDot = index => loyaltyDots.forEach((dot, i) => {
+                dot.classList.toggle('is-active', i === index);
+                if (i === index) dot.setAttribute('aria-current', 'true'); else dot.removeAttribute('aria-current');
+            });
+            loyaltyCarousel.addEventListener('scroll', () => {
+                const start = loyaltyCarousel.getBoundingClientRect().left;
+                const distances = loyaltyCards.map(card => Math.abs(card.getBoundingClientRect().left - start));
+                // Al final del carrusel la última tarjeta no llega al borde izquierdo: se marca igualmente
+                const atEnd = loyaltyCarousel.scrollLeft + loyaltyCarousel.clientWidth >= loyaltyCarousel.scrollWidth - 2;
+                markDot(atEnd ? loyaltyCards.length - 1 : distances.indexOf(Math.min(...distances)));
+            }, { passive: true });
+            loyaltyDots.forEach((dot, i) => dot.addEventListener('click', () => {
+                loyaltyCarousel.scrollTo({ left: loyaltyCarousel.scrollLeft + loyaltyCards[i].getBoundingClientRect().left - loyaltyCarousel.getBoundingClientRect().left, behavior: Cuquora.scrollBehavior() });
+            }));
+        }
     </script>
 </body>
 </html>
