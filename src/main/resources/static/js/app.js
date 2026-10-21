@@ -267,7 +267,9 @@
         e.preventDefault();
         const ok = await Cuquora.confirm(form.dataset.confirm, {
             title: form.dataset.confirmTitle || '¿Estás seguro?',
-            confirmText: form.dataset.confirmButton || 'Confirmar'
+            confirmText: form.dataset.confirmButton || 'Confirmar',
+            // data-confirm-tone="default" para lo que no borra ni anula nada (botón principal en vez de rojo)
+            tone: form.dataset.confirmTone || 'danger'
         });
         if (ok) {
             form.dataset.confirmed = 'true';

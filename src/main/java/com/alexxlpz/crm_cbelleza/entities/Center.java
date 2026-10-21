@@ -59,6 +59,11 @@ public class Center {
     @Column(name = "loyalty_since")
     private java.time.LocalDateTime loyaltySince;
 
+    /** Las citas que piden los clientes quedan confirmadas al momento, sin que nadie del centro las apruebe. */
+    @Column(name = "auto_accept_bookings", nullable = false)
+    @Builder.Default
+    private boolean autoAcceptBookings = false;
+
     /** Sale en el buscador y admite reservas. Los centros dados de alta en /alta-centro esperan a la revisión. */
     @Column(nullable = false)
     @Builder.Default

@@ -83,6 +83,12 @@
 
                 <div class="booking-confirm" th:if="${not #lists.isEmpty(treatments)}">
                     <p class="booking-summary" id="bookingSummary">Elige un servicio, un día y una hora para tu cita.</p>
+                    <p class="booking-mode" th:if="${center.autoAcceptBookings}">
+                        <i class="lucide-zap" aria-hidden="true"></i> Este centro confirma las citas al momento.
+                    </p>
+                    <p class="booking-mode" th:unless="${center.autoAcceptBookings}">
+                        <i class="lucide-hourglass" aria-hidden="true"></i> El centro revisará tu solicitud y te avisaremos cuando la confirme.
+                    </p>
                     <button type="submit" class="btn btn-primary btn-large-submit">
                         <i class="lucide-check-circle" aria-hidden="true"></i> Confirmar y reservar cita
                     </button>

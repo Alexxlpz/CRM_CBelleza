@@ -83,7 +83,11 @@ public class BookingService {
        Cliente
        ===================================================================== */
 
-    /** El cliente solicita una cita; queda PENDING hasta que el centro la apruebe. */
+    /**
+     * El cliente solicita una cita; queda PENDING hasta que el centro la apruebe. Si el centro acepta las citas
+     * automáticamente, nace CONFIRMED con el profesional libre que menos citas tiene ese día (si por lo que sea no
+     * queda ninguno libre, se queda pendiente como cualquier solicitud).
+     */
     @Transactional
     public Appointment requestBooking(Long clientId, Long centerId, Long treatmentId, LocalDateTime start) {
         Center center = lockCenter(centerId);
@@ -99,23 +103,32 @@ public class BookingService {
         if (!openingHours.fits(start, treatment.getDuration())) {
             throw new BusinessRuleException("El servicio no cabe completo dentro del horario del centro.");
         }
-        ensureFits(center, new AgendaSnapshot.Request(start, treatment.getDuration(), null, null, true));
+        AgendaSnapshot.Request slot = new AgendaSnapshot.Request(start, treatment.getDuration(), null, null, true);
+        AgendaSnapshot agenda = availability.snapshot(center, start.toLocalDate().atStartOfDay(), start.plusDays(1));
+        ensureFits(agenda, slot);
 
         User client = userRepository.findById(clientId)
                 .orElseThrow(() -> new BusinessRuleException("Cliente no encontrado en el sistema."));
+        User worker = center.isAutoAcceptBookings() ? agenda.freeWorker(slot).orElse(null) : null;
+        AppointmentChange change = worker != null ? AppointmentChange.BOOKED : AppointmentChange.REQUESTED;
 
         Appointment appointment = Appointment.builder()
                 .dateTime(start)
                 .treatment(treatment)
                 .center(center)
                 .client(client)
+                .worker(worker)
                 .price(treatment.priceOn(now.toLocalDate()))
-                .status(AppointmentStatus.PENDING)
+                .status(worker != null ? AppointmentStatus.CONFIRMED : AppointmentStatus.PENDING)
                 .workerMessage("")
                 .createdAt(LocalDateTime.now(clock))
                 .build();
-        appointment.recordChange(AppointmentChange.REQUESTED, LocalDateTime.now(clock));
-        return save(appointment, AppointmentChange.REQUESTED);
+        appointment.recordChange(change, LocalDateTime.now(clock));
+        Appointment saved = save(appointment, change);
+        if (worker != null) {
+            releaseTakenProposals(center, saved);
+        }
+        return saved;
     }
 
     /** El cliente elige una de las horas que le propuso el centro: la cita queda confirmada a esa hora. */
@@ -460,10 +473,6 @@ public class BookingService {
         }
         return userRepository.findByIdAndCenterIdAndRole(workerId, centerId, Role.WORKER)
                 .orElseThrow(() -> new ResourceNotFoundException("Ese profesional no es de tu centro."));
-    }
-
-    private void ensureFits(Center center, AgendaSnapshot.Request request) {
-        ensureFits(availability.snapshot(center, request.start(), request.start().plusDays(1)), request);
     }
 
     private static void ensureFits(AgendaSnapshot agenda, AgendaSnapshot.Request request) {

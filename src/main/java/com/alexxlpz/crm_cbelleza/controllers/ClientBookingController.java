@@ -1,6 +1,8 @@
 package com.alexxlpz.crm_cbelleza.controllers;
 
 import com.alexxlpz.crm_cbelleza.booking.OpeningHoursPolicy;
+import com.alexxlpz.crm_cbelleza.entities.Appointment;
+import com.alexxlpz.crm_cbelleza.entities.AppointmentStatus;
 import com.alexxlpz.crm_cbelleza.entities.Treatment;
 import com.alexxlpz.crm_cbelleza.exceptions.BusinessRuleException;
 import com.alexxlpz.crm_cbelleza.security.AppUserDetails;
@@ -79,7 +81,10 @@ public class ClientBookingController {
                        @RequestParam("dateTime") String dateTime,
                        RedirectAttributes redirect) {
         try {
-            bookingService.requestBooking(client.getId(), centerId, treatmentId, parse(dateTime));
+            Appointment appointment = bookingService.requestBooking(client.getId(), centerId, treatmentId, parse(dateTime));
+            redirect.addFlashAttribute("successMessage", appointment.getStatus() == AppointmentStatus.CONFIRMED
+                    ? "¡Cita confirmada! " + appointment.getCenter().getName() + " te espera."
+                    : "Solicitud enviada. Te avisaremos en cuanto " + appointment.getCenter().getName() + " la confirme.");
             return "redirect:/client/appointments";
         } catch (BusinessRuleException e) {
             redirect.addFlashAttribute("bookingError", e.getMessage());

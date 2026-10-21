@@ -7,6 +7,7 @@ import com.alexxlpz.crm_cbelleza.entities.User;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -110,6 +111,25 @@ public final class AgendaSnapshot {
 
     public boolean fits(Request request) {
         return problem(request).isEmpty();
+    }
+
+    /**
+     * Profesional que puede atender la cita sin chocar con sus citas, bloqueos u horas que ha propuesto a otros
+     * clientes. Si hay varios, el que menos citas tiene ese día, para repartir las reservas automáticas.
+     * Vacío si no queda ninguno libre.
+     */
+    public Optional<User> freeWorker(Request request) {
+        LocalDateTime start = request.start();
+        LocalDateTime end = request.end();
+        return workers.stream()
+                .filter(w -> fits(new Request(start, request.durationMinutes(), w.getId(), request.ignoredAppointmentId(), request.countHolds())))
+                .filter(w -> holds.stream().noneMatch(hold -> w.getId().equals(hold.workerId())
+                        && !hold.appointmentId().equals(request.ignoredAppointmentId())
+                        && start.isBefore(hold.end()) && end.isAfter(hold.start())))
+                .min(Comparator.comparingLong(w -> confirmed.stream()
+                        .filter(app -> app.getWorker() != null && app.getWorker().getId().equals(w.getId()))
+                        .filter(app -> app.getDateTime().toLocalDate().equals(start.toLocalDate()))
+                        .count()));
     }
 
     /** true si el intervalo cae dentro de un cierre de todo el centro. */

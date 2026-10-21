@@ -6,6 +6,8 @@ package com.alexxlpz.crm_cbelleza.entities;
  */
 public enum AppointmentChange {
     REQUESTED(Side.CLIENT),
+    /** El cliente ha pedido cita en un centro que las acepta automáticamente: nace confirmada. */
+    BOOKED(Side.CLIENT),
     CREATED_BY_CENTER(Side.CENTER),
     CONFIRMED(Side.CENTER),
     REJECTED(Side.CENTER),

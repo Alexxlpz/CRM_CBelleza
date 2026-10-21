@@ -113,6 +113,17 @@ public class WorkerCenterController {
         return "redirect:/worker/center#puntos";
     }
 
+    @PostMapping("/worker/center/bookings")
+    public String updateBookings(@AuthenticationPrincipal AppUserDetails worker,
+                                 @RequestParam boolean autoAccept,
+                                 RedirectAttributes redirect) {
+        centerService.setAutoAcceptBookings(worker.getCenterId(), autoAccept);
+        redirect.addFlashAttribute("bookingsMessage", autoAccept
+                ? "Activado: las citas que pidan tus clientes en un hueco libre quedarán confirmadas al momento."
+                : "Desactivado: las nuevas solicitudes esperarán a que alguien del equipo las acepte.");
+        return "redirect:/worker/center#reservas";
+    }
+
     @PostMapping("/worker/center/photo")
     public String updatePhoto(@AuthenticationPrincipal AppUserDetails worker,
                               @RequestParam(required = false) MultipartFile photo,

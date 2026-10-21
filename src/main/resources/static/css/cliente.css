@@ -195,6 +195,21 @@
     color: var(--text-main);
 }
 
+/* Si el centro confirma las citas al momento o las revisa antes */
+.booking-mode {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 0;
+    font-size: 13.5px;
+    color: var(--text-muted);
+}
+
+.booking-mode i {
+    margin-top: 2px;
+    color: var(--primary);
+}
+
 .btn-large-submit {
     width: 100%;
     padding: 16px;

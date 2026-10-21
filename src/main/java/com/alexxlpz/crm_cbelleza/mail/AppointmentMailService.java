@@ -26,7 +26,8 @@ import java.util.Map;
  * Correos de citas (con Brevo u otro SMTP; sin MAIL_HOST salen por consola).
  * <ul>
  *     <li>Al cliente, lo que hace el centro: confirmar, rechazar, crear, mover, proponer horas, anular.</li>
- *     <li>Al centro, lo que hace el cliente: nueva solicitud, aceptar o no una propuesta, anular.</li>
+ *     <li>Al centro, lo que hace el cliente: nueva solicitud (o cita ya confirmada si el centro las acepta
+ *     automáticamente), aceptar o no una propuesta, anular.</li>
  *     <li>Recordatorio al cliente unas 24 h antes de la cita.</li>
  * </ul>
  * Los clientes sin correo real (alta a mano sin correo) no reciben nada.
@@ -73,6 +74,13 @@ public class AppointmentMailService {
                         center + " revisará tu solicitud y te avisaremos en cuanto la confirme o te proponga otra hora.");
                 toCenter(app, "Nueva solicitud de cita: " + treatment + " (" + when + ")", "Nueva solicitud de cita",
                         clientName(app) + " ha pedido cita. Acéptala, recházala o propón otra hora desde la agenda.");
+            }
+            case BOOKED -> {
+                toClient(app, "Cita confirmada: " + treatment + ", " + when, "¡Tu cita está confirmada!",
+                        center + " te espera el " + when + ".");
+                toCenter(app, "Nueva cita: " + treatment + " (" + when + ")", "Nueva cita confirmada",
+                        clientName(app) + " ha reservado cita y ha quedado confirmada automáticamente"
+                                + (app.getWorker() != null ? " con " + app.getWorker().getName() : "") + ". Ya está en la agenda.");
             }
             case CONFIRMED -> toClient(app, "Cita confirmada: " + treatment + ", " + when, "¡Tu cita está confirmada!",
                     center + " te espera el " + when + ".");

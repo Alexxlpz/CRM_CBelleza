@@ -40,6 +40,13 @@ public class CenterService {
         return center;
     }
 
+    /** Activa o desactiva la confirmación automática de las citas que piden los clientes. */
+    public Center setAutoAcceptBookings(Long centerId, boolean enabled) {
+        Center center = getCenterById(centerId);
+        center.setAutoAcceptBookings(enabled);
+        return centerRepository.save(center);
+    }
+
     /** Actualiza solo los campos informados; un nombre vacío no borra el actual. */
     public Center updateCenter(Long centerId, CenterForm form) {
         Center center = getCenterById(centerId);

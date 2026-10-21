@@ -104,6 +104,44 @@
             </section>
 
             <div class="settings-side">
+                <section class="settings-card" id="reservas">
+                    <h2 class="settings-section-title"><i class="lucide-calendar-plus" aria-hidden="true"></i> Reservas de clientes</h2>
+                    <div class="alert alert-success" role="status" th:if="${bookingsMessage != null}">
+                        <i class="lucide-check-circle-2" aria-hidden="true"></i>
+                        <span th:text="${bookingsMessage}">Activado.</span>
+                    </div>
+                    <div class="sync-setting">
+                        <div class="sync-setting-text">
+                            <p class="sync-setting-title" id="autoAcceptLabel">Aceptar las citas automáticamente</p>
+                            <p class="sync-setting-help" th:if="${center.autoAcceptBookings}">
+                                Activado. Si un cliente pide cita en un hueco libre, queda confirmada al momento con el profesional
+                                que menos citas tiene ese día. Os avisamos en la campana y por correo.
+                            </p>
+                            <p class="sync-setting-help" th:unless="${center.autoAcceptBookings}">
+                                Desactivado. Cada solicitud espera a que alguien del equipo la acepte, la rechace o proponga otra hora
+                                desde la agenda. Actívalo para que las citas en huecos libres se confirmen solas.
+                            </p>
+                        </div>
+                        <form th:if="${center.autoAcceptBookings}" th:action="@{/worker/center/bookings}" method="post">
+                            <input type="hidden" name="autoAccept" value="false">
+                            <button type="submit" class="switch" role="switch" aria-checked="true" aria-labelledby="autoAcceptLabel"
+                                    title="Desactivar: revisaréis cada solicitud">
+                                <span class="switch-thumb" aria-hidden="true"></span>
+                            </button>
+                        </form>
+                        <form th:unless="${center.autoAcceptBookings}" th:action="@{/worker/center/bookings}" method="post"
+                              data-confirm="Las citas que pidan tus clientes en un hueco libre quedarán confirmadas sin que nadie las revise. Las solicitudes que ya tienes pendientes no cambian."
+                              data-confirm-title="¿Aceptar las citas automáticamente?" data-confirm-button="Activar"
+                              data-confirm-tone="default">
+                            <input type="hidden" name="autoAccept" value="true">
+                            <button type="submit" class="switch" role="switch" aria-checked="false" aria-labelledby="autoAcceptLabel"
+                                    title="Activar: las citas se confirmarán solas">
+                                <span class="switch-thumb" aria-hidden="true"></span>
+                            </button>
+                        </form>
+                    </div>
+                </section>
+
                 <section class="settings-card" id="foto">
                     <h2 class="settings-section-title"><i class="lucide-image" aria-hidden="true"></i> Foto del centro</h2>
                     <p class="form-help settings-intro">Sale en el buscador de centros y arriba de la ficha de tu centro: ayuda a que tus clientes lo reconozcan de un vistazo.</p>
