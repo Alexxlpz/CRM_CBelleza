@@ -14,7 +14,6 @@ services:
       DB_DRIVER_CLASS_NAME: org.postgresql.Driver
       DB_USERNAME: ${POSTGRES_USER:?Falta POSTGRES_USER en .env}
       DB_PASSWORD: ${POSTGRES_PASSWORD:?Falta POSTGRES_PASSWORD en .env}
-      DB_DIALECT: org.hibernate.dialect.PostgreSQLDialect
       H2_CONSOLE_ENABLED: "false"
       # Correo (vacío = los correos se escriben en la consola en lugar de enviarse)
       MAIL_HOST: ${MAIL_HOST:-}

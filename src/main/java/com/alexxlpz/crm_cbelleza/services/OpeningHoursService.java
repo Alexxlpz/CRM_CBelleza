@@ -181,7 +181,7 @@ public class OpeningHoursService {
         for (int i = 0; i < form.hoursDay().size() && i < froms.size() && i < tos.size(); i++) {
             try {
                 raw.add(new Period(DayOfWeek.of(form.hoursDay().get(i)), LocalTime.parse(froms.get(i)), LocalTime.parse(tos.get(i))));
-            } catch (RuntimeException e) {
+            } catch (RuntimeException ignored) {
                 // Un tramo ilegible no se vuelve a pintar
             }
         }

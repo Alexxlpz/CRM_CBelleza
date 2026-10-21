@@ -37,7 +37,7 @@ public class AppointmentCalendarMapper {
                         ? app.getProposals().stream()
                             .map(p -> new AppointmentCalendarDTO.ProposalDTO(p.getId(), p.getDateTime().toString()))
                             .toList()
-                        : java.util.List.of())
+                        : List.of())
                 .proposalExpiresAt(app.getProposalExpiresAt() != null ? app.getProposalExpiresAt().toString() : null)
                 .treatmentSummary(app.getTreatmentSummary())
                 .treatmentAlert(app.isTreatmentAlert())

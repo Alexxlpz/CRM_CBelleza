@@ -168,7 +168,6 @@ public class BookingService {
         if (appointment.getStatus() != AppointmentStatus.PROPOSED) {
             throw new BusinessRuleException("Esta propuesta ya no está disponible.");
         }
-        LocalDateTime now = CenterClock.now(clock, appointment.getCenter());
         appointment.setStatus(AppointmentStatus.CANCELLED);
         clearProposal(appointment);
         appointment.recordChange(AppointmentChange.PROPOSAL_DECLINED, LocalDateTime.now(clock));
@@ -205,7 +204,6 @@ public class BookingService {
         if (!appointment.getStatus().isOpen()) {
             throw new BusinessRuleException("Esta cita ya no está pendiente.");
         }
-        LocalDateTime now = CenterClock.now(clock, center);
         User worker = workerOfCenter(centerId, workerId != null ? workerId
                 : appointment.getWorker() != null ? appointment.getWorker().getId() : approverId);
         AgendaSnapshot agenda = availability.snapshot(center, appointment.getDateTime(), appointment.getDateTime().plusDays(1));
@@ -436,7 +434,6 @@ public class BookingService {
         if (proposed.isEmpty()) {
             return;
         }
-        LocalDateTime now = CenterClock.now(clock, center);
         AgendaSnapshot agenda = availability.snapshot(center, taken.getDateTime().minusDays(1), taken.getDateTime().plusDays(1));
         for (Appointment other : proposed) {
             if (other.getId().equals(taken.getId())) {

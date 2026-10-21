@@ -187,7 +187,7 @@ public class AnalyticsService {
                 + periodSales.stream().mapToDouble(AnalyticsService::amount).sum();
 
         ChangeBreakdown changes = view.changeWindow() == null || before == null ? null
-                : changes(shown, before, comparedVisits, previousVisits, data);
+                : changes(shown, before, comparedVisits, previousVisits);
 
         return new AnalyticsReport(
                 view.months(), view.year() != null, view.year(), view.previousYear(), view.nextYear(),
@@ -322,7 +322,7 @@ public class AnalyticsService {
      * suben o bajan. Siempre sobre los dos tramos comparables.
      */
     private static ChangeBreakdown changes(PeriodFigures now, PeriodFigures before, List<Appointment> currentVisits,
-                                           List<Appointment> previousVisits, CenterData data) {
+                                           List<Appointment> previousVisits) {
         Integer revenueChange = percentChange(now.revenue(), before.revenue());
         Integer visitsChange = percentChange(now.visits(), before.visits());
         Integer ticketChange = percentChange(now.averageTicket(), before.averageTicket());
