@@ -1,6 +1,5 @@
 package com.alexxlpz.crm_cbelleza.controllers;
 
-import com.alexxlpz.crm_cbelleza.booking.OpeningHoursPolicy;
 import com.alexxlpz.crm_cbelleza.entities.Appointment;
 import com.alexxlpz.crm_cbelleza.entities.AppointmentStatus;
 import com.alexxlpz.crm_cbelleza.entities.Treatment;
@@ -10,6 +9,7 @@ import com.alexxlpz.crm_cbelleza.services.AppointmentService;
 import com.alexxlpz.crm_cbelleza.services.BookingService;
 import com.alexxlpz.crm_cbelleza.services.CenterService;
 import com.alexxlpz.crm_cbelleza.services.LoyaltyService;
+import com.alexxlpz.crm_cbelleza.services.OpeningHoursService;
 import com.alexxlpz.crm_cbelleza.services.TreatmentService;
 import com.alexxlpz.crm_cbelleza.services.UserService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -35,7 +35,7 @@ public class ClientBookingController {
     private final UserService userService;
     private final AppointmentService appointmentService;
     private final BookingService bookingService;
-    private final OpeningHoursPolicy openingHours;
+    private final OpeningHoursService openingHours;
     private final LoyaltyService loyaltyService;
 
     public ClientBookingController(CenterService centerService,
@@ -43,7 +43,7 @@ public class ClientBookingController {
                                    UserService userService,
                                    AppointmentService appointmentService,
                                    BookingService bookingService,
-                                   OpeningHoursPolicy openingHours,
+                                   OpeningHoursService openingHours,
                                    LoyaltyService loyaltyService) {
         this.loyaltyService = loyaltyService;
         this.centerService = centerService;
@@ -69,7 +69,7 @@ public class ClientBookingController {
         model.addAttribute("today", today);
         model.addAttribute("offerCount", treatments.stream().filter(t -> t.hasActiveOffer(today)).count());
         model.addAttribute("workers", userService.getWorkersByCenter(id));
-        model.addAttribute("openingHoursLabel", openingHours.describe());
+        model.addAttribute("openingHoursLines", openingHours.forCenter(id).describe());
         model.addAttribute("activePage", "centers");
         return "client/center_details";
     }

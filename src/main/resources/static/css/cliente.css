@@ -164,6 +164,11 @@
     color: var(--text-muted);
 }
 
+/* Horario: una línea por grupo de días ("Lunes a viernes: 09:00 - 20:00") */
+.hero-meta-lines span {
+    display: block;
+}
+
 .booking-section {
     padding: 40px;
 }
@@ -464,14 +469,14 @@
     display: block;
 }
 
-/* «Con ofertas» en el buscador de centros */
+/* «Con ofertas» y «Abierto ahora» en el buscador de centros */
 .filter-icon-btn.offers-toggle {
     width: auto;
     padding: 0 14px;
     gap: 6px;
 }
 
-/* Móvil: el buscador conserva su ancho y «Con ofertas» baja a su propia línea */
+/* Móvil: el buscador conserva su ancho y «Con ofertas» y «Abierto ahora» bajan a su propia línea */
 @media (max-width: 600px) {
     .filter-search-row {
         flex-wrap: wrap;
@@ -565,6 +570,35 @@
     margin-top: 6px;
     width: 100%;
     justify-content: center;
+}
+
+/* Abierto o cerrado ahora, en la tarjeta del buscador y en el globo del mapa */
+.center-hours-status {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    margin: 0;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.center-hours-status i {
+    position: relative;
+    top: 1px;
+}
+
+.center-hours-status.is-open strong,
+.center-hours-status.is-open i {
+    color: var(--success-text);
+}
+
+.center-hours-status.is-closed strong,
+.center-hours-status.is-closed i {
+    color: var(--danger-text);
+}
+
+.map-popup-hours {
+    font-size: 12px;
 }
 
 /* Ofertas en la tarjeta del buscador y en el globo del mapa */

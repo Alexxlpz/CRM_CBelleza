@@ -14,6 +14,7 @@ import com.alexxlpz.crm_cbelleza.services.CenterRegistrationService;
 import com.alexxlpz.crm_cbelleza.services.CenterRegistrationService.Registration;
 import com.alexxlpz.crm_cbelleza.services.InvitationService;
 import com.alexxlpz.crm_cbelleza.services.InvitationService.Renewal;
+import com.alexxlpz.crm_cbelleza.services.OpeningHoursService;
 import com.alexxlpz.crm_cbelleza.services.UserService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -45,13 +46,16 @@ public class CenterRegistrationController {
     private final SiteModelAdvice site;
     private final GoogleLoginSettings google;
     private final UserService userService;
+    private final OpeningHoursService openingHours;
 
     public CenterRegistrationController(CenterRegistrationService registrationService,
                                         InvitationService invitationService,
                                         CenterOnboardingMailService mailService,
                                         SiteModelAdvice site,
                                         GoogleLoginSettings google,
-                                        UserService userService) {
+                                        UserService userService,
+                                        OpeningHoursService openingHours) {
+        this.openingHours = openingHours;
         this.registrationService = registrationService;
         this.invitationService = invitationService;
         this.mailService = mailService;
@@ -64,6 +68,7 @@ public class CenterRegistrationController {
     public String registerCenter(Model model) {
         if (!model.containsAttribute("registered")) {
             model.addAttribute("form", CenterRegistrationForm.empty());
+            model.addAttribute("hourRows", openingHours.rows(openingHours.defaults()));
         }
         return registrationPage(model);
     }
@@ -78,6 +83,7 @@ public class CenterRegistrationController {
         } catch (BusinessRuleException e) {
             // Se vuelve a pintar el formulario con lo escrito: es largo y no se debe perder nada
             model.addAttribute("form", form);
+            model.addAttribute("hourRows", openingHours.rows(form.openingHours()));
             model.addAttribute("errorMessage", e.getMessage());
             // El navegador no deja volver a rellenar un campo de archivo: hay que avisar de que la elija otra vez
             model.addAttribute("photoLost", photo != null && !photo.isEmpty());
@@ -148,6 +154,7 @@ public class CenterRegistrationController {
         model.addAttribute("mapUrl", "https://www.openstreetmap.org/?mlat=%s&mlon=%s#map=18/%s/%s"
                 .formatted(center.getLatitude(), center.getLongitude(), center.getLatitude(), center.getLongitude()));
         model.addAttribute("timeZoneLabel", CenterTimeZones.OPTIONS.getOrDefault(center.getTimeZone(), center.getTimeZone()));
+        model.addAttribute("openingHoursLines", openingHours.forCenter(center.getId()).describe());
         return "center-approval";
     }
 
@@ -158,6 +165,7 @@ public class CenterRegistrationController {
         model.addAttribute("timeZones", CenterTimeZones.OPTIONS);
         model.addAttribute("loyaltyModes", LoyaltyMode.values());
         model.addAttribute("maxExtraWorkers", CenterRegistrationService.MAX_EXTRA_WORKERS);
+        model.addAttribute("hourOptions", openingHours.timeOptions());
         model.addAttribute("maxPhotoMb", CenterPhotoService.MAX_UPLOAD_MB);
         model.addAttribute("invitationDays", InvitationService.VALIDITY_DAYS);
         return "register-center";

@@ -77,6 +77,9 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
     List<Appointment> findByWorkerIdAndGoogleEventIdIsNotNull(Long workerId);
 
+    /** Citas pendientes, propuestas o confirmadas de un trabajador que aún no han pasado (impiden quitarle del equipo). */
+    long countByWorkerIdAndStatusInAndDateTimeAfter(Long workerId, Collection<AppointmentStatus> statuses, LocalDateTime dateTime);
+
     List<Appointment> findByGoogleEventOwnerId(Long workerId);
 
     /** Citas confirmadas de un cliente desde una fecha (las que se copian al activar Google Calendar). */

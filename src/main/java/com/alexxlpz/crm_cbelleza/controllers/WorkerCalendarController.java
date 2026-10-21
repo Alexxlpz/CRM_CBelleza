@@ -1,19 +1,19 @@
 package com.alexxlpz.crm_cbelleza.controllers;
 
-import com.alexxlpz.crm_cbelleza.booking.OpeningHoursPolicy;
 import com.alexxlpz.crm_cbelleza.security.AppUserDetails;
 import com.alexxlpz.crm_cbelleza.services.AgendaBlockService;
 import com.alexxlpz.crm_cbelleza.services.AppointmentService;
 import com.alexxlpz.crm_cbelleza.services.CenterService;
+import com.alexxlpz.crm_cbelleza.services.OpeningHoursService;
 import com.alexxlpz.crm_cbelleza.services.TreatmentService;
 import com.alexxlpz.crm_cbelleza.services.UserService;
 import com.alexxlpz.crm_cbelleza.dto.AgendaBlockDTO;
+import com.alexxlpz.crm_cbelleza.entities.Center;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import java.time.DayOfWeek;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -29,14 +29,14 @@ public class WorkerCalendarController {
     private final TreatmentService treatmentService;
     private final UserService userService;
     private final CenterService centerService;
-    private final OpeningHoursPolicy openingHours;
+    private final OpeningHoursService openingHours;
 
     public WorkerCalendarController(AppointmentService appointmentService,
                                     AgendaBlockService blockService,
                                     TreatmentService treatmentService,
                                     UserService userService,
                                     CenterService centerService,
-                                    OpeningHoursPolicy openingHours) {
+                                    OpeningHoursService openingHours) {
         this.appointmentService = appointmentService;
         this.blockService = blockService;
         this.treatmentService = treatmentService;
@@ -50,9 +50,12 @@ public class WorkerCalendarController {
         Long centerId = worker.getCenterId();
         model.addAttribute("appointments", appointmentService.getCalendarAppointments(centerId));
         model.addAttribute("blocks", blockService.upcoming(centerId).stream().map(AgendaBlockDTO::of).toList());
-        model.addAttribute("openingHours", openingHours(centerService.getCenterById(centerId).getCabins()));
+        Center center = centerService.getCenterById(centerId);
+        model.addAttribute("openingHours", openingHours(centerId, center.getCabins()));
         model.addAttribute("calendarStaff", Map.of(
                 "currentWorkerId", worker.getId(),
+                // Solo el dueño cierra el centro o bloquea la agenda de otros (worker-agenda-forms.js)
+                "isOwner", center.isOwnedBy(worker.getId()),
                 "workers", userService.getWorkersByCenter(centerId).stream()
                         .map(w -> Map.of("id", w.getId(), "name", w.getName()))
                         .toList(),
@@ -62,13 +65,9 @@ public class WorkerCalendarController {
         return "worker/calendar";
     }
 
-    /** Horario de reservas para la rejilla (días ISO: 1 = lunes ... 7 = domingo) y cabinas del centro. */
-    private Map<String, Object> openingHours(Integer cabins) {
-        Map<String, Object> hours = new LinkedHashMap<>();
-        hours.put("openHour", openingHours.openHour());
-        hours.put("closeHour", openingHours.closeHour());
-        hours.put("slotMinutes", openingHours.slotMinutes());
-        hours.put("workingDays", openingHours.workingDays().stream().map(DayOfWeek::getValue).sorted().toList());
+    /** Horario del centro para la rejilla (días ISO: 1 = lunes ... 7 = domingo, con sus tramos) y cabinas. */
+    private Map<String, Object> openingHours(Long centerId, Integer cabins) {
+        Map<String, Object> hours = new LinkedHashMap<>(openingHours.forCenter(centerId).toJson());
         hours.put("cabins", cabins != null ? cabins : 1);
         return hours;
     }

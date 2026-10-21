@@ -31,7 +31,7 @@
                     <i class="lucide-user-plus" aria-hidden="true"></i>
                     <span>Nuevo Cliente</span>
                 </button>
-                <a href="/worker/clients/template" class="btn-template-config">
+                <a href="/worker/clients/template" class="btn-template-config" th:if="${isCenterOwner}">
                     <i class="lucide-settings" aria-hidden="true"></i>
                     <span>Plantilla de Ficha</span>
                 </a>

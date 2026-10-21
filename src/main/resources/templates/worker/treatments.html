@@ -15,13 +15,16 @@
                 <h1>Carta de Tratamientos</h1>
                 <p th:text="'Servicios de estética activos en ' + ${sessionCenterName}">Servicios de estética activos en tu centro</p>
             </div>
-            <button type="button" class="btn btn-primary btn-add-treatment" data-sheet-open="addTreatmentSheet">
+            <button type="button" class="btn btn-primary btn-add-treatment" data-sheet-open="addTreatmentSheet" th:if="${isCenterOwner}">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                 <span class="btn-add-label">Añadir Tratamiento</span>
             </button>
         </div>
 
         <div th:replace="~{fragments/alerts :: flash}"></div>
+        <th:block th:unless="${isCenterOwner}">
+            <div th:replace="~{fragments/alerts :: ownerOnly(${'La carta, los precios y las ofertas los cambia ' + ownerName + ', dueño del centro.'})}"></div>
+        </th:block>
 
         <div class="stats-strip" th:if="${not #lists.isEmpty(treatments)}">
             <div class="stat-tile">
@@ -97,7 +100,7 @@
                             </span>
                         </div>
                         <div class="treatment-item-actions">
-                            <button type="button" class="btn btn-secondary btn-sm" data-offer-edit
+                            <button type="button" class="btn btn-secondary btn-sm" data-offer-edit th:if="${isCenterOwner}"
                                     th:attr="data-id=${t.id},data-name=${t.name},data-price=${t.price},data-offer-price=${t.offerPrice},data-ends-on=${t.offerEndsOn},data-has-offer=${t.hasOffer()}">
                                 <i class="lucide-tag" aria-hidden="true"></i>
                                 <span th:text="${t.hasOffer()} ? (${onOffer} ? 'Editar oferta' : 'Renovar oferta') : 'Poner en oferta'">Poner en oferta</span>
@@ -108,18 +111,20 @@
 
                 <div class="no-appointments-box glass-panel" th:if="${#lists.isEmpty(treatments)}">
                     <i class="lucide-sparkles" aria-hidden="true"></i>
-                    <p>No se han registrado tratamientos en este centro. Pulsa «Añadir Tratamiento» para crear el primero.</p>
+                    <p th:text="${isCenterOwner} ? 'No se han registrado tratamientos en este centro. Pulsa «Añadir Tratamiento» para crear el primero.' : 'Todavía no hay tratamientos en la carta del centro.'">No se han registrado tratamientos en este centro. Pulsa «Añadir Tratamiento» para crear el primero.</p>
                 </div>
             </section>
         </div>
 
-        <button type="button" class="fab-add-btn" data-sheet-open="addTreatmentSheet" aria-label="Añadir tratamiento">
+        <button type="button" class="fab-add-btn" data-sheet-open="addTreatmentSheet" aria-label="Añadir tratamiento" th:if="${isCenterOwner}">
             <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
         </button>
     </main>
 
-    <div th:replace="~{worker/fragments/treatment-modals :: addTreatmentSheet}"></div>
-    <div th:replace="~{worker/fragments/treatment-modals :: offerModal(${today})}"></div>
+    <th:block th:if="${isCenterOwner}">
+        <div th:replace="~{worker/fragments/treatment-modals :: addTreatmentSheet}"></div>
+        <div th:replace="~{worker/fragments/treatment-modals :: offerModal(${today})}"></div>
+    </th:block>
 
     <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Panel de gestión de centros.')}"></div>
 

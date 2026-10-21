@@ -20,7 +20,7 @@
                 <button type="button" class="btn btn-secondary" data-modal-open="productSaleModal" th:disabled="${inventoryItems.isEmpty()}">
                     <i class="lucide-shopping-bag" aria-hidden="true"></i> Vender producto
                 </button>
-                <button type="button" class="btn btn-primary btn-add-product" data-sheet-open="addProductModal">
+                <button type="button" class="btn btn-primary btn-add-product" data-sheet-open="addProductModal" th:if="${isCenterOwner}">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                     <span class="btn-add-label">Añadir Producto</span>
                 </button>
@@ -28,6 +28,9 @@
         </div>
 
         <div th:replace="~{fragments/alerts :: flash}"></div>
+        <th:block th:unless="${isCenterOwner}">
+            <div th:replace="~{fragments/alerts :: ownerOnly(${'Puedes vender productos y ajustar el stock. Añadir o retirar productos lo hace ' + ownerName + ', dueño del centro.'})}"></div>
+        </th:block>
 
         <div class="stats-strip" th:if="${not #lists.isEmpty(inventoryItems)}">
             <div class="stat-tile">
@@ -99,7 +102,7 @@
                         <button type="button" class="btn-card-action" th:attr="data-sheet-open='detailModal_' + ${item.id}">
                             <i class="lucide-info" aria-hidden="true"></i> Ver Info
                         </button>
-                        <form th:action="@{/worker/inventory/{id}/delete(id=${item.id})}" method="post" class="delete-form"
+                        <form th:action="@{/worker/inventory/{id}/delete(id=${item.id})}" method="post" class="delete-form" th:if="${isCenterOwner}"
                               data-confirm="El producto se retirará del inventario de tu centro, pero se conservará en el catálogo general."
                               data-confirm-title="¿Eliminar este producto?" data-confirm-button="Eliminar">
                             <button type="submit" class="btn-card-action btn-delete" th:aria-label="'Eliminar ' + ${item.product.name} + ' del inventario'">
@@ -134,7 +137,7 @@
             <p>No hay existencias en stock. Comienza añadiendo productos desde el catálogo.</p>
         </div>
 
-        <button type="button" class="fab-add-btn" data-sheet-open="addProductModal" aria-label="Añadir producto">
+        <button type="button" class="fab-add-btn" data-sheet-open="addProductModal" aria-label="Añadir producto" th:if="${isCenterOwner}">
             <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
         </button>
     </main>

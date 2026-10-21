@@ -30,6 +30,7 @@ public class DatabaseSeeder implements CommandLineRunner {
     private final ClientCardTemplateRepository clientCardTemplateRepository;
     private final ClientCardRepository clientCardRepository;
     private final ProductSaleRepository productSaleRepository;
+    private final CenterOpeningPeriodRepository openingPeriodRepository;
     private final boolean seedHistory;
 
     public DatabaseSeeder(CenterRepository centerRepository,
@@ -42,6 +43,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                           ClientCardTemplateRepository clientCardTemplateRepository,
                           ClientCardRepository clientCardRepository,
                           ProductSaleRepository productSaleRepository,
+                          CenterOpeningPeriodRepository openingPeriodRepository,
                           @Value("${crm.seed-demo-history:false}") boolean seedHistory) {
         this.centerRepository = centerRepository;
         this.userRepository = userRepository;
@@ -53,6 +55,7 @@ public class DatabaseSeeder implements CommandLineRunner {
         this.clientCardTemplateRepository = clientCardTemplateRepository;
         this.clientCardRepository = clientCardRepository;
         this.productSaleRepository = productSaleRepository;
+        this.openingPeriodRepository = openingPeriodRepository;
         this.seedHistory = seedHistory;
     }
 
@@ -189,6 +192,26 @@ public class DatabaseSeeder implements CommandLineRunner {
                 .build();
 
         userRepository.saveAll(Arrays.asList(w1, w2, w3, w4, w5, client1, client2, client3, client4, client5));
+
+        // Dueños (quien dio de alta cada centro): Lucía es trabajadora estándar de Centro Histórico
+        c1.setOwnerId(w1.getId());
+        c2.setOwnerId(w3.getId());
+        c3.setOwnerId(w4.getId());
+        c4.setOwnerId(w5.getId());
+        centerRepository.saveAll(Arrays.asList(c1, c2, c3, c4));
+
+        // Horarios: Centro Histórico abre también el sábado por la mañana y Plaza Norte hace jornada partida
+        for (Center center : Arrays.asList(c1, c2, c3, c4)) {
+            for (int day = 1; day <= 5; day++) {
+                if (center == c2) {
+                    openingPeriodRepository.save(openingPeriod(center, day, 10, 0, 14, 0));
+                    openingPeriodRepository.save(openingPeriod(center, day, 16, 30, 20, 30));
+                } else {
+                    openingPeriodRepository.save(openingPeriod(center, day, 9, 0, 20, 0));
+                }
+            }
+        }
+        openingPeriodRepository.save(openingPeriod(c1, 6, 10, 0, 14, 0));
 
         // 3. Seed Center-Specific Treatments (all TreatmentType values)
         // Center 1 (Madrid Centro Histórico)
@@ -505,5 +528,15 @@ public class DatabaseSeeder implements CommandLineRunner {
     private static void demoOffer(Treatment treatment, double offerPrice, LocalDate endsOn) {
         treatment.setOfferPrice(offerPrice);
         treatment.setOfferEndsOn(endsOn);
+    }
+
+    private static CenterOpeningPeriod openingPeriod(Center center, int day, int openHour, int openMinute,
+                                                     int closeHour, int closeMinute) {
+        return CenterOpeningPeriod.builder()
+                .center(center)
+                .dayOfWeek(day)
+                .opensAt(java.time.LocalTime.of(openHour, openMinute))
+                .closesAt(java.time.LocalTime.of(closeHour, closeMinute))
+                .build();
     }
 }

@@ -146,7 +146,7 @@ public class WorkerAppointmentApiController {
 
     @PostMapping("/worker/agenda-blocks/{id}/delete")
     public Map<String, String> deleteBlock(@AuthenticationPrincipal AppUserDetails worker, @PathVariable Long id) {
-        blockService.delete(worker.getCenterId(), id);
+        blockService.delete(worker.getCenterId(), worker.getId(), id);
         return Map.of("status", "DELETED");
     }
 }

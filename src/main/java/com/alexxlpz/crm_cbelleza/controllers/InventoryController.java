@@ -1,5 +1,6 @@
 package com.alexxlpz.crm_cbelleza.controllers;
 
+import com.alexxlpz.crm_cbelleza.security.CenterOwnerOnly;
 import com.alexxlpz.crm_cbelleza.dto.ClientSummaryDTO;
 import com.alexxlpz.crm_cbelleza.entities.Inventory;
 import com.alexxlpz.crm_cbelleza.exceptions.BusinessRuleException;
@@ -79,6 +80,7 @@ public class InventoryController {
         return "redirect:/worker/inventory";
     }
 
+    @CenterOwnerOnly
     @PostMapping("/worker/inventory/add")
     public String add(@AuthenticationPrincipal AppUserDetails worker,
                       @ModelAttribute InventoryItemForm form,
@@ -92,6 +94,7 @@ public class InventoryController {
         return "redirect:/worker/inventory";
     }
 
+    @CenterOwnerOnly
     @PostMapping("/worker/inventory/{id}/delete")
     public String delete(@AuthenticationPrincipal AppUserDetails worker,
                          @PathVariable Long id,

@@ -1,5 +1,6 @@
 package com.alexxlpz.crm_cbelleza.controllers;
 
+import com.alexxlpz.crm_cbelleza.security.CenterOwnerOnly;
 import com.alexxlpz.crm_cbelleza.entities.Treatment;
 import com.alexxlpz.crm_cbelleza.entities.TreatmentType;
 import com.alexxlpz.crm_cbelleza.exceptions.BusinessRuleException;
@@ -51,6 +52,7 @@ public class TreatmentController {
         return "worker/treatments";
     }
 
+    @CenterOwnerOnly
     @PostMapping("/worker/treatments/add")
     public String add(@AuthenticationPrincipal AppUserDetails worker,
                       @ModelAttribute TreatmentForm form,
@@ -64,6 +66,7 @@ public class TreatmentController {
         return "redirect:/worker/treatments";
     }
 
+    @CenterOwnerOnly
     @PostMapping("/worker/treatments/{id}/offer")
     public String saveOffer(@AuthenticationPrincipal AppUserDetails worker,
                             @PathVariable Long id,
@@ -78,6 +81,7 @@ public class TreatmentController {
         return "redirect:/worker/treatments";
     }
 
+    @CenterOwnerOnly
     @PostMapping("/worker/treatments/{id}/offer/delete")
     public String removeOffer(@AuthenticationPrincipal AppUserDetails worker,
                               @PathVariable Long id,

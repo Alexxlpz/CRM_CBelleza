@@ -21,6 +21,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     long countByCenterIdAndRole(Long centerId, Role role);
 
+    /** Sigue en ese centro: se consulta en cada petición del panel por si le han sacado del equipo. */
+    boolean existsByIdAndCenterId(Long id, Long centerId);
+
     @EntityGraph(attributePaths = {"center"})
     Optional<User> findByEmailIgnoreCase(String email);
 

@@ -64,6 +64,13 @@ public class Center {
     @Builder.Default
     private boolean autoAcceptBookings = false;
 
+    /**
+     * Dueño del centro: el trabajador que lo dio de alta. Es el único que cambia los datos, el horario, la foto,
+     * la carta, la tarjeta de puntos y las reservas automáticas (ver {@code CenterAccess}).
+     */
+    @Column(name = "owner_id")
+    private Long ownerId;
+
     /** Sale en el buscador y admite reservas. Los centros dados de alta en /alta-centro esperan a la revisión. */
     @Column(nullable = false)
     @Builder.Default
@@ -102,6 +109,10 @@ public class Center {
             }
         }
         return initials.toString();
+    }
+
+    public boolean isOwnedBy(Long userId) {
+        return ownerId != null && ownerId.equals(userId);
     }
 
     public boolean isLoyaltyEnabled() {

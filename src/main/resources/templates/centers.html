@@ -33,6 +33,10 @@
                         title="Ver solo centros con ofertas">
                     <i class="lucide-tag" aria-hidden="true"></i> Con ofertas
                 </button>
+                <button type="button" class="btn btn-secondary filter-icon-btn offers-toggle" id="btnOpenNow" aria-pressed="false"
+                        title="Ver solo centros abiertos ahora">
+                    <i class="lucide-clock" aria-hidden="true"></i> Abierto ahora
+                </button>
                 <button type="button" class="btn btn-secondary filter-icon-btn" id="btnMapToggle" aria-label="Ver en mapa" aria-pressed="false">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"></polygon><line x1="9" y1="3" x2="9" y2="21"></line><line x1="15" y1="3" x2="15" y2="21"></line></svg>
                 </button>
@@ -89,6 +93,8 @@
             const searchTreatment = document.getElementById('searchTreatment');
             const btnOffers = document.getElementById('btnOffers');
             let onlyOffers = false;
+            const btnOpenNow = document.getElementById('btnOpenNow');
+            let onlyOpen = false;
 
             let userLat = null;
             let userLon = null;
@@ -146,6 +152,17 @@
                     </p>`;
             }
 
+            /** «Abierto · cierra a las 20:00» o «Cerrado · abre mañana a las 9:00», con el estado destacado. */
+            function hoursStatus(center, className) {
+                if (!center.hoursLabel) return '';
+                const [state, ...rest] = center.hoursLabel.split(' · ');
+                return `
+                    <p class="${className} ${center.openNow ? 'is-open' : 'is-closed'}">
+                        <i class="lucide-clock" aria-hidden="true"></i>
+                        <span><strong>${esc(state)}</strong>${rest.length ? ' · ' + esc(rest.join(' · ')) : ''}</span>
+                    </p>`;
+            }
+
             /** Globo que aparece al tocar un centro en el mapa: primero se ve qué centro es y luego se decide entrar. */
             function centerPopup(center) {
                 const el = document.createElement('div');
@@ -158,6 +175,7 @@
                     <strong class="map-popup-title">${esc(center.name)}</strong>
                     ${center.address ? `<span class="map-popup-address">${esc(center.address)}</span>` : ''}
                     ${distance}
+                    ${hoursStatus(center, 'center-hours-status map-popup-hours')}
                     ${offers}
                     <button type="button" class="btn btn-primary btn-sm map-popup-btn">
                         <i class="lucide-calendar-plus" aria-hidden="true"></i> Ver tratamientos
@@ -196,6 +214,12 @@
                 btnOffers.setAttribute('aria-pressed', String(onlyOffers));
                 resetAndFetch();
             });
+            btnOpenNow.addEventListener('click', () => {
+                onlyOpen = !onlyOpen;
+                btnOpenNow.classList.toggle('is-active', onlyOpen);
+                btnOpenNow.setAttribute('aria-pressed', String(onlyOpen));
+                resetAndFetch();
+            });
             searchTreatment.addEventListener('change', () => {
                 treatmentBadge.classList.toggle('is-visible', searchTreatment.value !== '');
                 resetAndFetch();
@@ -206,6 +230,7 @@
                 if (searchName.value) params.append('searchName', searchName.value);
                 if (searchTreatment.value) params.append('searchTreatment', searchTreatment.value);
                 if (onlyOffers) params.append('withOffers', 'true');
+                if (onlyOpen) params.append('openNow', 'true');
                 return params;
             }
 
@@ -302,6 +327,7 @@
                         <h2 class="center-card-title">${esc(center.name)}</h2>
                         ${distance}
                     </div>
+                    ${hoursStatus(center, 'center-hours-status')}
                     ${offersBlock(center.offers)}
                     <div class="center-card-body">
                         ${meta('navigation', 'Dirección:', center.address)}
@@ -323,6 +349,13 @@
                 return card;
             }
 
+            function emptyMessage() {
+                if (onlyOpen && onlyOffers) return 'Ahora mismo no hay ningún centro abierto con ofertas que coincida con tu búsqueda.';
+                if (onlyOpen) return 'Ahora mismo no hay ningún centro abierto que coincida con tu búsqueda. Quita «Abierto ahora» para ver también los cerrados y reservar para otro día.';
+                if (onlyOffers) return 'Ahora mismo ningún centro que coincida con tu búsqueda tiene ofertas.';
+                return 'No se encontraron centros de belleza que coincidan con tus criterios.';
+            }
+
             async function fetchCenters() {
                 if (isLoading || !hasMore) return;
                 isLoading = true;
@@ -339,7 +372,7 @@
                         centersGrid.innerHTML = `
                             <div class="no-appointments-box glass-panel grid-col-full">
                                 <i class="lucide-map-pin-off" aria-hidden="true"></i>
-                                <p>${onlyOffers ? 'Ahora mismo ningún centro que coincida con tu búsqueda tiene ofertas.' : 'No se encontraron centros de belleza que coincidan con tus criterios.'}</p>
+                                <p>${emptyMessage()}</p>
                             </div>`;
                     }
                     centers.forEach(center => centersGrid.appendChild(centerCard(center)));

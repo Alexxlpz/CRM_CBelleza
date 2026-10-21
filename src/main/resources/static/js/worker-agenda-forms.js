@@ -17,12 +17,15 @@
     const OPEN = Number.isInteger(hours.openHour) ? hours.openHour : 9;
     const CLOSE = Number.isInteger(hours.closeHour) ? hours.closeHour : 20;
     const WORKING_DAYS = Array.isArray(hours.workingDays) ? hours.workingDays : [1, 2, 3, 4, 5];
+    // Tramos de cada día (1 = lunes) en minutos: [[540, 840], [960, 1200]] es jornada partida
+    const DAYS = hours.days || {};
     // El trabajador puede poner citas algo antes o después del horario de reservas (con confirmación)
     const FIRST_MINUTE = Math.min(OPEN, 7) * 60;
     const LAST_MINUTE = Math.max(CLOSE, 22) * 60;
     const workers = Array.isArray(staff.workers) ? staff.workers : [];
     const treatments = Array.isArray(staff.treatments) ? staff.treatments : [];
     const me = staff.currentWorkerId;
+    const isOwner = staff.isOwner === true;
 
     const pad = n => String(n).padStart(2, '0');
     const clock = minutes => `${pad(Math.floor(minutes / 60))}:${pad(minutes % 60)}`;
@@ -41,7 +44,9 @@
 
     function isOpenAt(dateKey, minute, duration) {
         const iso = ((new Date(dateKey + 'T00:00:00').getDay() + 6) % 7) + 1;
-        return WORKING_DAYS.includes(iso) && minute >= OPEN * 60 && minute + duration <= CLOSE * 60;
+        const periods = DAYS[iso];
+        if (!periods) return WORKING_DAYS.includes(iso) && minute >= OPEN * 60 && minute + duration <= CLOSE * 60;
+        return periods.some(([from, to]) => minute >= from && minute + duration <= to);
     }
 
     /** Rellena un select de horas cada SLOT minutos; las de fuera del horario de reservas lo indican. */
@@ -358,9 +363,11 @@
     function openBlock({ date } = {}) {
         blockForm.reset();
         showError(blockForm, '');
-        blockWho.innerHTML = workers.map(w =>
+        // Un trabajador estándar solo bloquea su agenda; cerrar el centro o bloquear a otros es cosa del dueño
+        blockWho.innerHTML = workers.filter(w => isOwner || w.id === me).map(w =>
             `<option value="${esc(String(w.id))}"${w.id === me ? ' selected' : ''}>${esc(w.name)}${w.id === me ? ' (tú)' : ''}</option>`).join('')
-            + '<option value="center">Todo el centro (cerrado)</option>';
+            + (isOwner ? '<option value="center">Todo el centro (cerrado)</option>' : '');
+        blockWho.disabled = !isOwner;
         const day = date && date >= todayKey() ? date : todayKey();
         document.getElementById('blockStartDate').value = day;
         document.getElementById('blockEndDate').value = day;

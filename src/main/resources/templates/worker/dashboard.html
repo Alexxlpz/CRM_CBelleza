@@ -54,7 +54,7 @@
                 </a>
             </nav>
 
-            <section class="month-summary" aria-labelledby="monthSummaryTitle">
+            <section class="month-summary" aria-labelledby="monthSummaryTitle" th:if="${isCenterOwner}">
                 <div class="month-summary-title">
                     <h2 id="monthSummaryTitle" th:text="${monthReport.headline}">Octubre hasta hoy</h2>
                     <p th:text="${monthReport.comparisonLabel != null} ? ${monthReport.comparisonLabel} : ${monthReport.noComparisonText}">Comparado con el 1-18 sept</p>

@@ -508,7 +508,7 @@
 
 /* Si la cinta es estrecha, los pasos se quedan sin icono para que quepa el nombre */
 @media (min-width: 601px) {
-    @container (max-width: 760px) {
+    @container (max-width: 900px) {
         .wizard-step-icon {
             display: none;
         }

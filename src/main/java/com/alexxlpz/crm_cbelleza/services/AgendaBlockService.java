@@ -25,6 +25,8 @@ import java.util.List;
  * Bloqueos de agenda: vacaciones o descansos de un trabajador y cierres de todo el centro.
  * Mientras dura un bloqueo no se pueden poner citas a esa persona (o en el centro). No se puede bloquear
  * un periodo que ya tiene citas confirmadas: primero hay que moverlas o anularlas.
+ * Cada trabajador bloquea y desbloquea su propia agenda; cerrar el centro o tocar la agenda de otra persona
+ * es cosa del dueño del centro.
  */
 @Service
 public class AgendaBlockService {
@@ -33,13 +35,16 @@ public class AgendaBlockService {
     private final AppointmentRepository appointments;
     private final CenterRepository centers;
     private final UserRepository users;
+    private final CenterAccess access;
     private final Clock clock;
 
     public AgendaBlockService(AgendaBlockRepository blocks,
                               AppointmentRepository appointments,
                               CenterRepository centers,
                               UserRepository users,
+                              CenterAccess access,
                               Clock clock) {
+        this.access = access;
         this.blocks = blocks;
         this.appointments = appointments;
         this.centers = centers;
@@ -75,6 +80,11 @@ public class AgendaBlockService {
             throw new BusinessRuleException("Un bloqueo no puede durar más de un año.");
         }
         User worker = wholeCenter ? null : workerOfCenter(centerId, workerId != null ? workerId : creatorId);
+        if ((worker == null || !worker.getId().equals(creatorId)) && !access.isOwner(centerId, creatorId)) {
+            throw new BusinessRuleException(wholeCenter
+                    ? "Solo el dueño del centro puede cerrarlo. Bloquea tu propia agenda o pídeselo a " + access.ownerName(centerId) + "."
+                    : "Solo puedes bloquear tu propia agenda. Para la de otra persona, pídeselo a " + access.ownerName(centerId) + ".");
+        }
 
         long clashes = appointments.findByCenterIdAndStatusAndDateTimeBetween(centerId, AppointmentStatus.CONFIRMED, start.minusDays(1), end)
                 .stream()
@@ -96,10 +106,15 @@ public class AgendaBlockService {
                 .build());
     }
 
+    /** Quita un bloqueo: el suyo cualquier trabajador; un cierre del centro o el de otra persona, solo el dueño. */
     @Transactional
-    public void delete(Long centerId, Long blockId) {
+    public void delete(Long centerId, Long actorId, Long blockId) {
         AgendaBlock block = blocks.findByIdAndCenterId(blockId, centerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Ese bloqueo no existe en tu centro."));
+        boolean own = block.getWorker() != null && block.getWorker().getId().equals(actorId);
+        if (!own && !access.isOwner(centerId, actorId)) {
+            throw new BusinessRuleException("Solo puedes quitar tus propios bloqueos. Este pídeselo a " + access.ownerName(centerId) + ".");
+        }
         blocks.delete(block);
     }
 

@@ -1,0 +1,59 @@
+<!--/*
+  Horario de apertura del centro (alta de centros y «Mi Centro»): un día por fila, abierto o cerrado,
+  con un tramo y, si hace jornada partida, otro de tarde. Cada tramo envía hoursDay, hoursFrom y hoursTo;
+  los días cerrados y el tramo de tarde quitado van deshabilitados y no se envían (opening-hours.js).
+  rows: OpeningHoursService.DayRow; options: horas de media en media hora.
+*/-->
+<th:block xmlns:th="http://www.thymeleaf.org" th:fragment="editor(rows, options)">
+    <div class="hours-editor" data-hours-editor>
+        <div class="hours-row" th:each="row : ${rows}" th:classappend="${row.open()} ? '' : 'is-closed'"
+             th:attr="data-day=${row.day()}">
+            <label class="checkbox-row hours-day">
+                <input type="checkbox" data-hours-open th:checked="${row.open()}">
+                <span th:text="${row.name()}">Lunes</span>
+            </label>
+            <div class="hours-periods">
+                <div class="hours-period" data-hours-period="1" th:hidden="${!row.open()}">
+                    <input type="hidden" name="hoursDay" th:value="${row.day()}" th:disabled="${!row.open()}">
+                    <select name="hoursFrom" class="form-control hours-select" th:disabled="${!row.open()}"
+                            th:attr="aria-label=${row.name() + ': abre a las'}">
+                        <option th:each="time : ${options}" th:value="${time}" th:text="${time}"
+                                th:selected="${time == row.from1()}">09:00</option>
+                    </select>
+                    <span class="hours-sep">a</span>
+                    <select name="hoursTo" class="form-control hours-select" th:disabled="${!row.open()}"
+                            th:attr="aria-label=${row.name() + (row.split() ? ': cierra a mediodía a las' : ': cierra a las')}">
+                        <option th:each="time : ${options}" th:value="${time}" th:text="${time}"
+                                th:selected="${time == row.to1()}">20:00</option>
+                    </select>
+                </div>
+                <div class="hours-period" data-hours-period="2" th:hidden="${!row.open() or !row.split()}">
+                    <input type="hidden" name="hoursDay" th:value="${row.day()}" th:disabled="${!row.open() or !row.split()}">
+                    <select name="hoursFrom" class="form-control hours-select" th:disabled="${!row.open() or !row.split()}"
+                            th:attr="aria-label=${row.name() + ': vuelve a abrir a las'}">
+                        <option th:each="time : ${options}" th:value="${time}" th:text="${time}"
+                                th:selected="${time == row.from2()}">16:00</option>
+                    </select>
+                    <span class="hours-sep">a</span>
+                    <select name="hoursTo" class="form-control hours-select" th:disabled="${!row.open() or !row.split()}"
+                            th:attr="aria-label=${row.name() + ': cierra por la tarde a las'}">
+                        <option th:each="time : ${options}" th:value="${time}" th:text="${time}"
+                                th:selected="${time == row.to2()}">20:00</option>
+                    </select>
+                    <button type="button" class="hours-icon-btn" data-hours-remove
+                            th:attr="aria-label=${'Quitar el tramo de tarde del ' + #strings.toLowerCase(row.name())}"
+                            title="Quitar el tramo de tarde">
+                        <i class="lucide-x" aria-hidden="true"></i>
+                    </button>
+                </div>
+                <button type="button" class="hours-add" data-hours-add th:hidden="${!row.open() or row.split()}">
+                    <i class="lucide-plus" aria-hidden="true"></i> Jornada partida
+                </button>
+                <span class="hours-closed" th:hidden="${row.open()}">Cerrado</span>
+            </div>
+        </div>
+        <button type="button" class="btn btn-secondary btn-sm hours-copy" data-hours-copy hidden>
+            <i class="lucide-copy" aria-hidden="true"></i> Usar el horario del primer día abierto en todos los abiertos
+        </button>
+    </div>
+</th:block>

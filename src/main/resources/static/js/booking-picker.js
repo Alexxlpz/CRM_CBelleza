@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const summary = document.getElementById('bookingSummary');
     const treatmentInputs = form.querySelectorAll('input[name="treatmentId"]');
 
-    const fallback = { slotMinutes: 30, workingDays: [1, 2, 3, 4, 5], openHour: 9, closeHour: 20, closedDates: new Set() };
+    const fallback = { slotMinutes: 30, workingDays: [1, 2, 3, 4, 5], openHour: 9, closeHour: 20, days: {}, closedDates: new Set() };
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const firstMonth = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -52,21 +52,30 @@ document.addEventListener('DOMContentLoaded', function () {
         message.classList.toggle('is-error', !!isError);
     }
 
+    /** Tramos en los que abre el centro ese día (en minutos); dos tramos = jornada partida. */
+    function periodsOf(day) {
+        const periods = config.days[dayOfWeek(new Date(`${day}T00:00:00`))];
+        return periods || [[config.openHour * 60, config.closeHour * 60]];
+    }
+
     function slots(day) {
         const taken = occupied.get(day) || new Set();
         const result = [];
-        for (let minutes = config.openHour * 60; minutes < config.closeHour * 60; minutes += config.slotMinutes) {
-            const value = timeLabel(minutes);
-            result.push({ value, minutes, taken: taken.has(value), past: new Date(`${day}T${value}:00`) <= new Date() });
-        }
+        periodsOf(day).forEach(([from, to]) => {
+            for (let minutes = from; minutes < to; minutes += config.slotMinutes) {
+                const value = timeLabel(minutes);
+                result.push({ value, minutes, taken: taken.has(value), past: new Date(`${day}T${value}:00`) <= new Date() });
+            }
+        });
         return result;
     }
 
-    /** ¿Cabe el tratamiento empezando en la franja `index`? */
+    /** ¿Cabe el tratamiento empezando en la franja `index`? (sin saltar el cierre de mediodía) */
     function canFit(index, daySlots) {
         const required = requiredSlots();
         if (index + required > daySlots.length) return false;
-        return daySlots.slice(index, index + required).every(slot => !slot.taken && !slot.past);
+        return daySlots.slice(index, index + required)
+            .every((slot, i) => !slot.taken && !slot.past && slot.minutes === daySlots[index].minutes + i * config.slotMinutes);
     }
 
     function freeSlots(day) {
@@ -305,6 +314,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 workingDays: data.workingDays || fallback.workingDays,
                 openHour: Number(data.openHour),
                 closeHour: Number(data.closeHour),
+                days: data.days || {},
                 closedDates: new Set(data.closedDates || [])
             };
             occupied = new Map();

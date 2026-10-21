@@ -2,7 +2,7 @@ package com.alexxlpz.crm_cbelleza.services;
 
 import com.alexxlpz.crm_cbelleza.booking.AgendaSnapshot;
 import com.alexxlpz.crm_cbelleza.booking.CenterClock;
-import com.alexxlpz.crm_cbelleza.booking.OpeningHoursPolicy;
+import com.alexxlpz.crm_cbelleza.booking.OpeningHours;
 import com.alexxlpz.crm_cbelleza.entities.AppointmentStatus;
 import com.alexxlpz.crm_cbelleza.entities.Center;
 import com.alexxlpz.crm_cbelleza.entities.Role;
@@ -31,14 +31,14 @@ public class AgendaAvailabilityService {
     private final AgendaBlockRepository blocks;
     private final UserRepository users;
     private final CenterRepository centers;
-    private final OpeningHoursPolicy openingHours;
+    private final OpeningHoursService openingHours;
     private final Clock clock;
 
     public AgendaAvailabilityService(AppointmentRepository appointments,
                                      AgendaBlockRepository blocks,
                                      UserRepository users,
                                      CenterRepository centers,
-                                     OpeningHoursPolicy openingHours,
+                                     OpeningHoursService openingHours,
                                      Clock clock) {
         this.appointments = appointments;
         this.blocks = blocks;
@@ -71,29 +71,32 @@ public class AgendaAvailabilityService {
         LocalDate today = CenterClock.now(clock, center).toLocalDate();
         LocalDate last = today.plusDays(BOOKING_HORIZON_DAYS);
         AgendaSnapshot agenda = snapshot(center, today.atStartOfDay(), last.plusDays(1).atStartOfDay());
-        int slot = openingHours.slotMinutes();
+        OpeningHours hours = openingHours.forCenter(centerId);
+        int slot = hours.slotMinutes();
 
         List<String> full = new ArrayList<>();
         List<String> closedDates = new ArrayList<>();
         for (LocalDate day = today; !day.isAfter(last); day = day.plusDays(1)) {
-            if (!openingHours.workingDays().contains(day.getDayOfWeek())) {
+            List<OpeningHours.Period> periods = hours.periods(day.getDayOfWeek());
+            if (periods.isEmpty()) {
                 continue;
             }
-            LocalDateTime open = day.atTime(openingHours.openHour(), 0);
-            LocalDateTime close = day.atTime(openingHours.closeHour(), 0);
-            if (agenda.centerClosed(open, close)) {
+            if (agenda.centerClosed(day.atTime(periods.getFirst().opens()), day.atTime(periods.getLast().closes()))) {
                 closedDates.add(day.toString());
                 continue;
             }
-            for (LocalDateTime start = open; start.isBefore(close); start = start.plusMinutes(slot)) {
-                if (!agenda.fits(new AgendaSnapshot.Request(start, slot, null, null, true))) {
-                    full.add(start.toString());
+            for (OpeningHours.Period period : periods) {
+                LocalDateTime close = day.atTime(period.closes());
+                for (LocalDateTime start = day.atTime(period.opens()); start.isBefore(close); start = start.plusMinutes(slot)) {
+                    if (!agenda.fits(new AgendaSnapshot.Request(start, slot, null, null, true))) {
+                        full.add(start.toString());
+                    }
                 }
             }
         }
-        return new Availability(full, closedDates);
+        return new Availability(hours, full, closedDates);
     }
 
-    public record Availability(List<String> occupied, List<String> closedDates) {
+    public record Availability(OpeningHours hours, List<String> occupied, List<String> closedDates) {
     }
 }

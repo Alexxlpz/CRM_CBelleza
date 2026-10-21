@@ -141,7 +141,10 @@ document.addEventListener('DOMContentLoaded', () => {
         window.dispatchEvent(new Event('resize'));
     }
 
-    const stepIsValid = index => validator.check(el => steps[index].contains(el));
+    // El horario lo comprueba su propio editor (opening-hours.js): días abiertos y tramos que no se pisan
+    const hoursEditor = form.querySelector('[data-hours-editor]');
+    const stepIsValid = index => validator.check(el => steps[index].contains(el))
+        && !(hoursEditor && steps[index].contains(hoursEditor) && window.OpeningHoursEditor.problem(hoursEditor));
 
     function goTo(index) {
         // Hacia delante solo si los pasos que se dejan atrás están bien
@@ -202,6 +205,9 @@ document.addEventListener('DOMContentLoaded', () => {
         setPreview('specialties', specialties.join(', '));
         const extra = [...form.querySelectorAll('input[name="workerEmails"]')].filter(i => i.value.trim()).length;
         setPreview('team', extra === 0 ? 'Solo tú' : `Tú y ${extra} ${extra === 1 ? 'persona más' : 'personas más'}`);
+        const openDays = [...form.querySelectorAll('[data-hours-open]')].filter(box => box.checked).length;
+        const split = [...form.querySelectorAll('[data-hours-period="2"]')].some(period => !period.hidden);
+        setPreview('hours', openDays === 0 ? '' : `${openDays} ${openDays === 1 ? 'día' : 'días'} a la semana${split ? ', con jornada partida' : ''}`);
         const mode = field('mode');
         setPreview('loyalty', mode.value === 'OFF' ? 'No' : mode.selectedOptions[0].textContent.replace(/^Sí: /, 'Sí, '));
     }
@@ -209,6 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
     form.addEventListener('input', refreshPreview);
     form.addEventListener('change', refreshPreview);
     rows.addEventListener('click', () => setTimeout(refreshPreview));
+    form.querySelector('[data-hours-editor]')?.addEventListener('click', () => setTimeout(refreshPreview));
     preview.hidden = false;
     refreshPreview();
 });

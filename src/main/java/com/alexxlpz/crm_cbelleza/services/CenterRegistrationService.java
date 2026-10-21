@@ -1,6 +1,7 @@
 package com.alexxlpz.crm_cbelleza.services;
 
 import com.alexxlpz.crm_cbelleza.booking.CenterTimeZones;
+import com.alexxlpz.crm_cbelleza.booking.OpeningHours;
 import com.alexxlpz.crm_cbelleza.entities.Center;
 import com.alexxlpz.crm_cbelleza.entities.LoyaltyMode;
 import com.alexxlpz.crm_cbelleza.entities.Role;
@@ -27,8 +28,8 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
- * Alta de un centro desde /alta-centro. Crea el centro, su responsable y su equipo como trabajadores sin
- * contraseña (cada uno la pone desde su invitación) y, si se pidió, la tarjeta de puntos.
+ * Alta de un centro desde /alta-centro. Crea el centro con su horario, su responsable (el dueño del centro) y su
+ * equipo como trabajadores sin contraseña (cada uno la pone desde su invitación) y, si se pidió, la tarjeta de puntos.
  * El centro nace oculto: no sale en el buscador ni admite reservas hasta que administración lo publica
  * desde el enlace de su correo. Mientras tanto el equipo ya puede entrar y preparar tratamientos e inventario.
  */
@@ -39,7 +40,7 @@ public class CenterRegistrationService {
     /** Trabajadores que se pueden añadir en el alta además del responsable. */
     public static final int MAX_EXTRA_WORKERS = 20;
 
-    private static final Pattern EMAIL = Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
+    static final Pattern EMAIL = Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
     private static final Pattern TAX_ID = Pattern.compile("^[A-Z0-9]{5,20}$");
 
     private final CenterRepository centers;
@@ -47,15 +48,18 @@ public class CenterRegistrationService {
     private final InvitationService invitations;
     private final LoyaltyService loyalty;
     private final CenterPhotoService photos;
+    private final OpeningHoursService openingHours;
     private final Clock clock;
 
     public CenterRegistrationService(CenterRepository centers, UserRepository users, InvitationService invitations,
-                                     LoyaltyService loyalty, CenterPhotoService photos, Clock clock) {
+                                     LoyaltyService loyalty, CenterPhotoService photos, OpeningHoursService openingHours,
+                                     Clock clock) {
         this.centers = centers;
         this.users = users;
         this.invitations = invitations;
         this.loyalty = loyalty;
         this.photos = photos;
+        this.openingHours = openingHours;
         this.clock = clock;
     }
 
@@ -90,6 +94,7 @@ public class CenterRegistrationService {
         if (cabins < 1 || cabins > CenterService.MAX_CABINS) {
             throw new BusinessRuleException("El número de cabinas tiene que estar entre 1 y " + CenterService.MAX_CABINS + ".");
         }
+        OpeningHours hours = openingHours.parse(form.openingHours());
         if (!Boolean.TRUE.equals(form.terms())) {
             throw new BusinessRuleException("Confirma que el centro tiene actividad legal y acepta los términos para continuar.");
         }
@@ -132,6 +137,7 @@ public class CenterRegistrationService {
             loyalty.updateSettings(center.getId(), form.loyalty());
         }
         preparedPhoto.ifPresent(p -> photos.save(center.getId(), p));
+        openingHours.save(center.getId(), hours);
 
         List<Invitee> invitees = new ArrayList<>();
         for (int i = 0; i < cleanTeam.size(); i++) {
@@ -144,6 +150,10 @@ public class CenterRegistrationService {
                     .center(center)
                     .build());
             invitees.add(new Invitee(worker.getName(), worker.getEmail(), invitations.invite(worker)));
+            if (i == 0) {
+                // Quien da de alta el centro es su dueño
+                center.setOwnerId(worker.getId());
+            }
         }
         return new Registration(center.getId(), center.getName(), approvalToken, invitees);
     }

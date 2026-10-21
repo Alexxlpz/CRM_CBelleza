@@ -22,4 +22,8 @@ public interface CenterRepository extends JpaRepository<Center, Long> {
     Optional<Center> findByIdForUpdate(@Param("id") Long id);
 
     Optional<Center> findByApprovalTokenHash(String approvalTokenHash);
+
+    /** Dueño del centro (nulo si no tiene) sin cargar el centro entero: se consulta en cada petición del panel. */
+    @Query("SELECT c.ownerId FROM Center c WHERE c.id = :id")
+    Optional<Long> findOwnerId(@Param("id") Long id);
 }

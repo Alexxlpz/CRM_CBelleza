@@ -37,13 +37,19 @@
                 <dd th:text="${center.cabins}">2</dd>
                 <dt>Zona horaria</dt>
                 <dd th:text="${timeZoneLabel}">España</dd>
+                <dt>Horario</dt>
+                <dd>
+                    <ul class="approval-team">
+                        <li th:each="line : ${openingHoursLines}" th:text="${line}">Lunes a viernes: 09:00 - 20:00</li>
+                    </ul>
+                </dd>
                 <dt>Tarjeta de puntos</dt>
                 <dd th:text="${center.loyaltyEnabled ? center.loyaltyRewardPoints + ' puntos: ' + center.loyaltyRewardText : 'No'}">No</dd>
                 <dt>Equipo</dt>
                 <dd>
                     <ul class="approval-team">
                         <li th:each="worker : ${team}">
-                            <span th:text="${worker.name}">Nombre</span> · <span th:text="${worker.email}">correo</span>
+                            <span th:text="${worker.name}">Nombre</span> · <span th:text="${worker.email}">correo</span><th:block th:if="${center.isOwnedBy(worker.id)}"> · dueño</th:block>
                         </li>
                     </ul>
                 </dd>

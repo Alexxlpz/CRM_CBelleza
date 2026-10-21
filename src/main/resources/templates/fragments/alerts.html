@@ -9,3 +9,11 @@
         <span th:text="${errorMessage}">Ha ocurrido un error.</span>
     </div>
 </th:block>
+
+<!--/* Aviso para un trabajador estándar: esa parte de la pantalla la gestiona el dueño del centro (ownerName). */-->
+<th:block xmlns:th="http://www.thymeleaf.org" th:fragment="ownerOnly(text)">
+    <div class="alert alert-info" role="note">
+        <i class="lucide-lock" aria-hidden="true"></i>
+        <span th:text="${text}">Solo el dueño del centro puede cambiar esto.</span>
+    </div>
+</th:block>

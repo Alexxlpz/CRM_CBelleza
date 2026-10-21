@@ -1,5 +1,6 @@
 package com.alexxlpz.crm_cbelleza.controllers;
 
+import com.alexxlpz.crm_cbelleza.security.CenterOwnerOnly;
 import com.alexxlpz.crm_cbelleza.security.AppUserDetails;
 import com.alexxlpz.crm_cbelleza.services.AnalyticsService;
 import com.alexxlpz.crm_cbelleza.services.AnalyticsService.AnalyticsReport;
@@ -35,13 +36,17 @@ public class WorkerDashboardController {
         model.addAttribute("pendingAppointmentsCount", stats.pendingAppointments());
         model.addAttribute("lowStockCount", stats.lowStockCount());
         model.addAttribute("centerPhotoUrl", centerService.getCenterById(worker.getCenterId()).getPhotoUrl());
-        // Resumen del mes en el panel: las tres primeras cifras del análisis (ingresos, visitas y clientes nuevos)
-        AnalyticsReport report = analyticsService.reportFor(worker.getCenterId(), 3);
-        model.addAttribute("monthReport", report);
-        model.addAttribute("monthKpis", report.kpis().subList(0, 3));
+        // Resumen del mes en el panel: las tres primeras cifras del análisis (ingresos, visitas y clientes nuevos).
+        // Las cifras del negocio solo las ve el dueño del centro
+        if (centerService.getCenterById(worker.getCenterId()).isOwnedBy(worker.getId())) {
+            AnalyticsReport report = analyticsService.reportFor(worker.getCenterId(), 3);
+            model.addAttribute("monthReport", report);
+            model.addAttribute("monthKpis", report.kpis().subList(0, 3));
+        }
         return "worker/dashboard";
     }
 
+    @CenterOwnerOnly
     @GetMapping("/worker/analytics")
     public String analytics(@AuthenticationPrincipal AppUserDetails worker,
                             @RequestParam(name = "meses", required = false) Integer months,

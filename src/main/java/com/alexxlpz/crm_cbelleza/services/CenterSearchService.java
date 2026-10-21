@@ -3,9 +3,13 @@ package com.alexxlpz.crm_cbelleza.services;
 import com.alexxlpz.crm_cbelleza.dto.CenterSearchCriteria;
 import com.alexxlpz.crm_cbelleza.dto.CenterSummaryDTO;
 import com.alexxlpz.crm_cbelleza.booking.CenterClock;
+import com.alexxlpz.crm_cbelleza.booking.OpeningHours;
+import com.alexxlpz.crm_cbelleza.booking.OpeningHours.Closure;
+import com.alexxlpz.crm_cbelleza.booking.OpeningHours.OpenState;
 import com.alexxlpz.crm_cbelleza.entities.Center;
 import com.alexxlpz.crm_cbelleza.entities.Treatment;
 import com.alexxlpz.crm_cbelleza.entities.TreatmentType;
+import com.alexxlpz.crm_cbelleza.repositories.AgendaBlockRepository;
 import com.alexxlpz.crm_cbelleza.repositories.CenterRepository;
 import com.alexxlpz.crm_cbelleza.repositories.TreatmentRepository;
 import org.springframework.stereotype.Service;
@@ -13,6 +17,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.TextStyle;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -20,9 +27,8 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-/** Búsqueda pública de centros: filtros, distancia al usuario, orden y paginación. */
+/** Búsqueda pública de centros: filtros, distancia al usuario, abierto o cerrado ahora, orden y paginación. */
 @Service
 @Transactional(readOnly = true)
 public class CenterSearchService {
@@ -31,13 +37,21 @@ public class CenterSearchService {
             .comparing(CenterSummaryDTO::distanceKm, Comparator.nullsLast(Comparator.naturalOrder()))
             .thenComparing(CenterSummaryDTO::name, String.CASE_INSENSITIVE_ORDER);
 
+    private static final DateTimeFormatter TIME = DateTimeFormatter.ofPattern("H:mm");
+    private static final Locale SPANISH = Locale.forLanguageTag("es");
+
     private final CenterRepository centerRepository;
     private final TreatmentRepository treatmentRepository;
+    private final AgendaBlockRepository agendaBlocks;
+    private final OpeningHoursService openingHours;
     private final Clock clock;
 
-    public CenterSearchService(CenterRepository centerRepository, TreatmentRepository treatmentRepository, Clock clock) {
+    public CenterSearchService(CenterRepository centerRepository, TreatmentRepository treatmentRepository,
+                               AgendaBlockRepository agendaBlocks, OpeningHoursService openingHours, Clock clock) {
         this.centerRepository = centerRepository;
         this.treatmentRepository = treatmentRepository;
+        this.agendaBlocks = agendaBlocks;
+        this.openingHours = openingHours;
         this.clock = clock;
     }
 
@@ -46,18 +60,31 @@ public class CenterSearchService {
         Map<Long, List<Treatment>> offeredByCenter = treatmentRepository.findByOfferPriceIsNotNull().stream()
                 .collect(Collectors.groupingBy(t -> t.getCenter().getId()));
         boolean onlyWithOffers = Boolean.TRUE.equals(criteria.withOffers());
+        boolean onlyOpen = Boolean.TRUE.equals(criteria.openNow());
 
-        Stream<Center> centers = centerRepository.findAll().stream()
+        List<Center> centers = centerRepository.findAll().stream()
                 .filter(Center::isPublished)
                 .filter(insideBoundingBox(criteria))
                 .filter(matchesText(criteria.searchName(), true))
                 .filter(matchesText(criteria.searchLocation(), false))
-                .filter(offersTreatment(criteria.searchTreatment()));
+                .filter(offersTreatment(criteria.searchTreatment()))
+                .toList();
 
-        List<CenterSummaryDTO> sorted = centers
-                .map(center -> CenterSummaryDTO.of(center, distanceFrom(criteria, center),
-                        activeOffers(center, offeredByCenter.getOrDefault(center.getId(), List.of()))))
+        // Horarios y cierres de todos los centros encontrados, también en una consulta cada uno
+        Map<Long, OpeningHours> hoursByCenter = openingHours.forCenters(centers.stream().map(Center::getId).toList());
+        Map<Long, List<Closure>> closuresByCenter = centerClosures();
+
+        List<CenterSummaryDTO> sorted = centers.stream()
+                .map(center -> {
+                    LocalDateTime now = CenterClock.now(clock, center);
+                    OpenState state = hoursByCenter.get(center.getId())
+                            .stateAt(now, closuresByCenter.getOrDefault(center.getId(), List.of()));
+                    return CenterSummaryDTO.of(center, distanceFrom(criteria, center),
+                            activeOffers(center, offeredByCenter.getOrDefault(center.getId(), List.of())),
+                            state.open(), hoursLabel(state, now));
+                })
                 .filter(dto -> !onlyWithOffers || !dto.offers().isEmpty())
+                .filter(dto -> !onlyOpen || dto.openNow())
                 .sorted(BY_DISTANCE_THEN_NAME)
                 .toList();
 
@@ -67,6 +94,40 @@ public class CenterSearchService {
             return List.of();
         }
         return sorted.subList(from, Math.min(from + size, sorted.size()));
+    }
+
+    /**
+     * Cierres de todo el centro (festivos, vacaciones) de aquí a dos semanas, por centro. Las horas de los bloqueos
+     * son locales de cada centro: la ventana se amplía un día por cada lado para cubrir cualquier zona horaria.
+     */
+    private Map<Long, List<Closure>> centerClosures() {
+        LocalDateTime now = LocalDateTime.now(clock);
+        return agendaBlocks.findCenterClosuresBetween(now.minusDays(1), now.plusDays(16)).stream()
+                .collect(Collectors.groupingBy(b -> b.getCenter().getId(),
+                        Collectors.mapping(b -> new Closure(b.getStartsAt(), b.getEndsAt()), Collectors.toList())));
+    }
+
+    /** «Abierto · cierra a las 20:00», «Cerrado · abre mañana a las 9:00», «Cerrado · abre el lunes a las 10:00»... */
+    public static String hoursLabel(OpenState state, LocalDateTime now) {
+        LocalDateTime at = state.changesAt();
+        if (state.open()) {
+            return "Abierto · cierra a las " + TIME.format(at);
+        }
+        if (at == null) {
+            return "Cerrado";
+        }
+        long days = at.toLocalDate().toEpochDay() - now.toLocalDate().toEpochDay();
+        String when;
+        if (days == 0) {
+            when = "";
+        } else if (days == 1) {
+            when = "mañana ";
+        } else if (days < 7) {
+            when = "el " + at.getDayOfWeek().getDisplayName(TextStyle.FULL, SPANISH) + " ";
+        } else {
+            when = "el " + at.getDayOfMonth() + " de " + at.getMonth().getDisplayName(TextStyle.FULL, SPANISH) + " ";
+        }
+        return "Cerrado · abre " + when + "a las " + TIME.format(at);
     }
 
     /** Ofertas en vigor hoy en el centro, de mayor a menor descuento. */

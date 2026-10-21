@@ -10,6 +10,7 @@
     <script th:src="@{/js/location-picker.js}" defer></script>
     <script th:src="@{/js/photo-picker.js}" defer></script>
     <script th:src="@{/js/loyalty-settings.js}" defer></script>
+    <script th:src="@{/js/opening-hours.js}" defer></script>
     <script th:src="@{/js/center-registration.js}" defer></script>
 </head>
 <body>
@@ -50,9 +51,10 @@
             <ol class="wizard-steps" id="wizardSteps" hidden>
                 <li><button type="button" data-go-step="0"><i class="lucide-store wizard-step-icon" aria-hidden="true"></i> <span class="wizard-step-text">El centro</span></button></li>
                 <li><button type="button" data-go-step="1"><i class="lucide-map-pin wizard-step-icon" aria-hidden="true"></i> <span class="wizard-step-text">Ubicación</span></button></li>
-                <li><button type="button" data-go-step="2"><i class="lucide-users wizard-step-icon" aria-hidden="true"></i> <span class="wizard-step-text">Equipo</span></button></li>
-                <li><button type="button" data-go-step="3"><i class="lucide-gift wizard-step-icon" aria-hidden="true"></i> <span class="wizard-step-text">Puntos</span></button></li>
-                <li><button type="button" data-go-step="4"><i class="lucide-send wizard-step-icon" aria-hidden="true"></i> <span class="wizard-step-text">Enviar</span></button></li>
+                <li><button type="button" data-go-step="2"><i class="lucide-clock wizard-step-icon" aria-hidden="true"></i> <span class="wizard-step-text">Horario</span></button></li>
+                <li><button type="button" data-go-step="3"><i class="lucide-users wizard-step-icon" aria-hidden="true"></i> <span class="wizard-step-text">Equipo</span></button></li>
+                <li><button type="button" data-go-step="4"><i class="lucide-gift wizard-step-icon" aria-hidden="true"></i> <span class="wizard-step-text">Puntos</span></button></li>
+                <li><button type="button" data-go-step="5"><i class="lucide-send wizard-step-icon" aria-hidden="true"></i> <span class="wizard-step-text">Enviar</span></button></li>
             </ol>
 
             <form th:action="@{/register-center}" method="post" id="registerCenterForm" novalidate enctype="multipart/form-data"
@@ -127,12 +129,22 @@
                 </fieldset>
 
                 <fieldset class="registration-section">
+                    <legend><i class="lucide-clock" aria-hidden="true"></i> Horario de apertura</legend>
+                    <p class="form-help registration-intro">Tus clientes solo podrán pedir cita dentro de este horario. Si cerráis a mediodía,
+                        pulsa «Jornada partida». Lo puedes cambiar cuando quieras desde «Mi Centro».</p>
+                    <div th:replace="~{fragments/opening-hours :: editor(${hourRows}, ${hourOptions})}"></div>
+                </fieldset>
+
+                <fieldset class="registration-section">
                     <legend><i class="lucide-users" aria-hidden="true"></i> Tu equipo</legend>
                     <p class="form-help registration-intro">Cada persona recibe un correo para crear su contraseña (o entrar con Google si usa ese correo).
                         No escribas contraseñas aquí.</p>
+                    <p class="form-help registration-intro"><i class="lucide-crown" aria-hidden="true"></i> Tú quedas como <strong>dueño del centro</strong>:
+                        eres quien cambia sus datos, horario, carta y precios. El resto del equipo entra como trabajadores: llevan la agenda
+                        y los clientes, y cada uno su cuenta y su Google Calendar.</p>
                     <div class="form-grid-two">
                         <div class="form-field">
-                            <label for="contactName">Tu nombre (responsable) *</label>
+                            <label for="contactName">Tu nombre (dueño del centro) *</label>
                             <input type="text" id="contactName" name="contactName" th:value="${form.contactName()}"
                                    placeholder="Nombre y apellidos" autocomplete="name" required>
                         </div>
@@ -265,6 +277,7 @@
             </div>
             <dl class="registration-preview-summary">
                 <div><dt>Cabinas o puestos</dt><dd data-preview="cabins" data-empty="-">-</dd></div>
+                <div><dt>Horario</dt><dd data-preview="hours" data-empty="Sin días abiertos">-</dd></div>
                 <div><dt>Equipo</dt><dd data-preview="team">Solo tú</dd></div>
                 <div><dt>Tarjeta de puntos</dt><dd data-preview="loyalty">No</dd></div>
             </dl>

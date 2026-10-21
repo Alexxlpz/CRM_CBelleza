@@ -1,10 +1,10 @@
 package com.alexxlpz.crm_cbelleza.dto;
 
-/** Filtros del buscador público de centros (/api/centers). Todos son opcionales. */
+/** Filtros del buscador público de centros (/api/centers). Todos son opcionales; {@code openNow} deja solo los abiertos ahora. */
 public record CenterSearchCriteria(Double lat, Double lon,
                                    Double north, Double south, Double east, Double west,
                                    String searchName, String searchLocation, String searchTreatment,
-                                   Boolean withOffers, Integer page, Integer size) {
+                                   Boolean withOffers, Boolean openNow, Integer page, Integer size) {
 
     public boolean hasBoundingBox() {
         return north != null && south != null && east != null && west != null;

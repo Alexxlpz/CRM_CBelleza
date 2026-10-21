@@ -26,6 +26,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const CLOSE_HOUR = Number.isInteger(hours.closeHour) ? hours.closeHour : 20;
     const SLOT = Number.isInteger(hours.slotMinutes) ? hours.slotMinutes : 30;
     const WORKING_DAYS = Array.isArray(hours.workingDays) ? hours.workingDays : [1, 2, 3, 4, 5];
+    // Tramos de apertura de cada día (1 = lunes) en minutos; dos tramos = jornada partida
+    const DAY_PERIODS = hours.days || {};
     const WORKERS = Array.isArray(staff.workers) ? staff.workers : [];
     const ME = staff.currentWorkerId;
     const WEEKDAYS_SHORT = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
@@ -589,10 +591,19 @@ document.addEventListener('DOMContentLoaded', function () {
             column.setAttribute('role', 'list');
             column.setAttribute('aria-label', capitalize(day.date.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })));
 
-            // Horas fuera del horario de apertura (solo se ven si alguna cita amplía la rejilla)
+            // Horas en las que ese día el centro no abre: antes de abrir, el cierre de mediodía y después de cerrar
             // (no en días cerrados ni con un bloqueo de todo el día, que ya van rayados enteros)
             if (!day.closed && !day.blocks.some(part => part.allDay)) {
-                [[firstMinute, OPEN_HOUR * 60], [CLOSE_HOUR * 60, lastMinute]].forEach(([from, to]) => {
+                const isoDay = ((day.date.getDay() + 6) % 7) + 1;
+                const periods = DAY_PERIODS[isoDay] || [[OPEN_HOUR * 60, CLOSE_HOUR * 60]];
+                const gaps = [];
+                let cursor = firstMinute;
+                periods.forEach(([from, to]) => {
+                    gaps.push([cursor, from]);
+                    cursor = to;
+                });
+                gaps.push([cursor, lastMinute]);
+                gaps.forEach(([from, to]) => {
                     if (to <= from) return;
                     const band = document.createElement('div');
                     band.className = 'week-closed-band';

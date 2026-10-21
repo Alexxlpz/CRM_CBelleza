@@ -1,6 +1,5 @@
 package com.alexxlpz.crm_cbelleza.controllers;
 
-import com.alexxlpz.crm_cbelleza.booking.OpeningHoursPolicy;
 import com.alexxlpz.crm_cbelleza.dto.CenterSearchCriteria;
 import com.alexxlpz.crm_cbelleza.dto.CenterSummaryDTO;
 import com.alexxlpz.crm_cbelleza.exceptions.ApiEndpoint;
@@ -12,7 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.DayOfWeek;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -24,14 +23,11 @@ public class CenterApiController {
 
     private final CenterSearchService searchService;
     private final AgendaAvailabilityService availability;
-    private final OpeningHoursPolicy openingHours;
 
     public CenterApiController(CenterSearchService searchService,
-                               AgendaAvailabilityService availability,
-                               OpeningHoursPolicy openingHours) {
+                               AgendaAvailabilityService availability) {
         this.searchService = searchService;
         this.availability = availability;
-        this.openingHours = openingHours;
     }
 
     @GetMapping
@@ -39,16 +35,16 @@ public class CenterApiController {
         return searchService.search(criteria);
     }
 
-    /** Horario y huecos llenos (sin cabina o sin profesional libre) para el selector de hora del cliente. */
+    /**
+     * Horario del centro (tramos de cada día, ver {@code OpeningHours.toJson}) y huecos llenos (sin cabina o sin
+     * profesional libre) para el selector de hora del cliente.
+     */
     @GetMapping("/{id}/availability")
     public Map<String, Object> availability(@PathVariable Long id) {
         var free = availability.availability(id);
-        return Map.of(
-                "slotMinutes", openingHours.slotMinutes(),
-                "workingDays", openingHours.workingDays().stream().map(DayOfWeek::getValue).sorted().toList(),
-                "openHour", openingHours.openHour(),
-                "closeHour", openingHours.closeHour(),
-                "closedDates", free.closedDates(),
-                "occupied", free.occupied());
+        Map<String, Object> json = new LinkedHashMap<>(free.hours().toJson());
+        json.put("closedDates", free.closedDates());
+        json.put("occupied", free.occupied());
+        return json;
     }
 }

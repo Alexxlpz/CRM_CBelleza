@@ -43,7 +43,7 @@
             </div>
 
             <div class="profile-header-actions">
-                <a href="/worker/clients/template" class="btn-template-config">
+                <a href="/worker/clients/template" class="btn-template-config" th:if="${isCenterOwner}">
                     <i class="lucide-sliders" aria-hidden="true"></i>
                     <span>Configurar Plantilla</span>
                 </a>

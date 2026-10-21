@@ -1,10 +1,19 @@
 package com.alexxlpz.crm_cbelleza.controllers;
 
+import com.alexxlpz.crm_cbelleza.config.SiteModelAdvice;
+import com.alexxlpz.crm_cbelleza.mail.CenterOnboardingMailService;
+import com.alexxlpz.crm_cbelleza.security.CenterOwnerOnly;
 import com.alexxlpz.crm_cbelleza.booking.CenterTimeZones;
+import com.alexxlpz.crm_cbelleza.booking.OpeningHours;
 import com.alexxlpz.crm_cbelleza.entities.Center;
 import com.alexxlpz.crm_cbelleza.entities.LoyaltyMode;
 import com.alexxlpz.crm_cbelleza.entities.User;
 import com.alexxlpz.crm_cbelleza.forms.LoyaltySettingsForm;
+import com.alexxlpz.crm_cbelleza.forms.OpeningHoursForm;
+import com.alexxlpz.crm_cbelleza.services.CenterAccess;
+import com.alexxlpz.crm_cbelleza.services.OpeningHoursService;
+import com.alexxlpz.crm_cbelleza.services.TeamService;
+import com.alexxlpz.crm_cbelleza.services.TeamService.Invitee;
 import com.alexxlpz.crm_cbelleza.services.LoyaltyService;
 import com.alexxlpz.crm_cbelleza.exceptions.BusinessRuleException;
 import com.alexxlpz.crm_cbelleza.forms.WorkerCenterForm;
@@ -22,12 +31,16 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-/** "Mi centro": datos públicos del centro y cuenta del profesional. */
+/**
+ * "Mi centro": datos públicos del centro, horario, equipo y configuración (solo el dueño los cambia; el resto del
+ * equipo los ve) y la cuenta del profesional (cada uno la suya).
+ */
 @Controller
 public class WorkerCenterController {
 
@@ -38,6 +51,11 @@ public class WorkerCenterController {
     private final GoogleCalendarService googleCalendar;
     private final LoyaltyService loyaltyService;
     private final CenterPhotoService photoService;
+    private final OpeningHoursService openingHours;
+    private final CenterAccess access;
+    private final TeamService team;
+    private final CenterOnboardingMailService onboardingMail;
+    private final SiteModelAdvice site;
 
     public WorkerCenterController(CenterService centerService,
                                   UserService userService,
@@ -45,7 +63,17 @@ public class WorkerCenterController {
                                   AuthenticationSessionService authSession,
                                   GoogleCalendarService googleCalendar,
                                   LoyaltyService loyaltyService,
-                                  CenterPhotoService photoService) {
+                                  CenterPhotoService photoService,
+                                  OpeningHoursService openingHours,
+                                  CenterAccess access,
+                                  TeamService team,
+                                  CenterOnboardingMailService onboardingMail,
+                                  SiteModelAdvice site) {
+        this.team = team;
+        this.onboardingMail = onboardingMail;
+        this.site = site;
+        this.openingHours = openingHours;
+        this.access = access;
         this.loyaltyService = loyaltyService;
         this.photoService = photoService;
         this.centerService = centerService;
@@ -58,7 +86,25 @@ public class WorkerCenterController {
     @GetMapping("/worker/center")
     public String view(@AuthenticationPrincipal AppUserDetails worker, Model model) {
         Long centerId = worker.getCenterId();
-        model.addAttribute("center", centerService.getCenterById(centerId));
+        Center center = centerService.getCenterById(centerId);
+        OpeningHours hours = openingHours.forCenter(centerId);
+        boolean owner = center.isOwnedBy(worker.getId());
+        model.addAttribute("center", center);
+        model.addAttribute("isOwner", owner);
+        model.addAttribute("ownerName", access.ownerName(centerId));
+        model.addAttribute("openingHoursLines", hours.describe());
+        if (!model.containsAttribute("hourRows")) {
+            model.addAttribute("hourRows", openingHours.rows(hours));
+        }
+        model.addAttribute("hourOptions", openingHours.timeOptions());
+        model.addAttribute("teamMembers", team.members(centerId));
+        model.addAttribute("maxTeamSize", TeamService.MAX_TEAM_SIZE);
+        if (owner) {
+            // Quien puede quedarse con el centro: el resto del equipo con la cuenta ya activada
+            model.addAttribute("transferCandidates", userService.getWorkersByCenter(centerId).stream()
+                    .filter(w -> !w.getId().equals(worker.getId()) && w.hasAccount())
+                    .toList());
+        }
         model.addAttribute("worker", userService.getUser(worker.getId()));
         model.addAttribute("treatmentsCount", treatmentService.countByCenter(centerId));
         model.addAttribute("workersCount", userService.countWorkersByCenter(centerId));
@@ -77,17 +123,113 @@ public class WorkerCenterController {
                          HttpServletResponse response,
                          RedirectAttributes redirect) {
         try {
+            boolean owner = access.isOwner(worker.getCenterId(), worker.getId());
+            if (!owner && form.hasCenterData()) {
+                throw new BusinessRuleException(access.ownerOnlyMessage(worker.getCenterId()));
+            }
             User updatedWorker = userService.updateProfile(worker.getId(), form.worker());
-            centerService.updateCenter(worker.getCenterId(), form.center());
+            if (owner) {
+                centerService.updateCenter(worker.getCenterId(), form.center());
+            }
             // Recarga nombre de usuario y de centro mostrados en la navbar.
             authSession.refresh(userService.getUser(updatedWorker.getId()), request, response);
-            redirect.addFlashAttribute("successMessage", "Los datos de tu centro y tu cuenta se han actualizado correctamente.");
+            redirect.addFlashAttribute("successMessage", owner
+                    ? "Los datos de tu centro y tu cuenta se han actualizado correctamente."
+                    : "Los datos de tu cuenta se han actualizado correctamente.");
         } catch (BusinessRuleException e) {
             redirect.addFlashAttribute("errorMessage", e.getMessage());
         }
         return "redirect:/worker/center";
     }
 
+    @CenterOwnerOnly
+    @PostMapping("/worker/center/hours")
+    public String updateHours(@AuthenticationPrincipal AppUserDetails worker,
+                              @ModelAttribute OpeningHoursForm form,
+                              RedirectAttributes redirect) {
+        // Igual que la tarjeta de puntos: el aviso va dentro de su tarjeta (#horario)
+        try {
+            openingHours.replace(worker.getCenterId(), form);
+            redirect.addFlashAttribute("hoursMessage", "Horario guardado. Los clientes ya solo pueden reservar dentro de él.");
+        } catch (BusinessRuleException e) {
+            redirect.addFlashAttribute("hoursError", e.getMessage());
+            redirect.addFlashAttribute("hourRows", openingHours.rows(form));
+        }
+        return "redirect:/worker/center#horario";
+    }
+
+    @CenterOwnerOnly
+    @PostMapping("/worker/center/owner")
+    public String transferOwnership(@AuthenticationPrincipal AppUserDetails worker,
+                                    @RequestParam(required = false) Long newOwnerId,
+                                    RedirectAttributes redirect) {
+        try {
+            User newOwner = access.transferOwnership(worker.getCenterId(), worker.getId(), newOwnerId);
+            redirect.addFlashAttribute("successMessage", newOwner.getName()
+                    + " es ahora el dueño del centro. Tú sigues en el equipo como trabajador.");
+        } catch (BusinessRuleException e) {
+            redirect.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:/worker/center";
+    }
+
+    @CenterOwnerOnly
+    @PostMapping("/worker/center/team")
+    public String invite(@AuthenticationPrincipal AppUserDetails worker,
+                         @RequestParam(required = false) String name,
+                         @RequestParam(required = false) String email,
+                         RedirectAttributes redirect) {
+        // Los avisos van dentro de la tarjeta del equipo (#equipo)
+        try {
+            Invitee invitee = team.invite(worker.getCenterId(), worker.getId(), name, email);
+            if (invitee.token() != null) {
+                onboardingMail.sendInvitationAsync(invitee.name(), invitee.email(), invitee.centerName(), invitee.token(), site.siteUrl());
+                redirect.addFlashAttribute("teamMessage", "Invitación enviada a " + invitee.email()
+                        + ". " + invitee.name() + " entrará en cuanto cree su contraseña.");
+            } else {
+                redirect.addFlashAttribute("teamMessage", invitee.name()
+                        + " ya tenía cuenta en Cuquora: desde ahora entra en tu centro con su correo y su contraseña.");
+            }
+        } catch (BusinessRuleException e) {
+            redirect.addFlashAttribute("teamError", e.getMessage());
+            redirect.addFlashAttribute("inviteName", name);
+            redirect.addFlashAttribute("inviteEmail", email);
+        }
+        return "redirect:/worker/center#equipo";
+    }
+
+    @CenterOwnerOnly
+    @PostMapping("/worker/center/team/{workerId}/resend")
+    public String resendInvitation(@AuthenticationPrincipal AppUserDetails worker,
+                                   @PathVariable Long workerId,
+                                   RedirectAttributes redirect) {
+        try {
+            Invitee invitee = team.resend(worker.getCenterId(), worker.getId(), workerId);
+            onboardingMail.sendInvitationAsync(invitee.name(), invitee.email(), invitee.centerName(), invitee.token(), site.siteUrl());
+            redirect.addFlashAttribute("teamMessage", "Invitación enviada de nuevo a " + invitee.email() + ". El enlace anterior ya no vale.");
+        } catch (BusinessRuleException e) {
+            redirect.addFlashAttribute("teamError", e.getMessage());
+        }
+        return "redirect:/worker/center#equipo";
+    }
+
+    @CenterOwnerOnly
+    @PostMapping("/worker/center/team/{workerId}/remove")
+    public String removeFromTeam(@AuthenticationPrincipal AppUserDetails worker,
+                                 @PathVariable Long workerId,
+                                 RedirectAttributes redirect) {
+        try {
+            User removed = team.remove(worker.getCenterId(), worker.getId(), workerId);
+            redirect.addFlashAttribute("teamMessage", removed.getName() + (removed.hasAccount()
+                    ? " ya no está en el equipo. Sus citas pasadas siguen en la agenda y en las fichas."
+                    : " ya no está en el equipo y su invitación ha dejado de valer."));
+        } catch (BusinessRuleException e) {
+            redirect.addFlashAttribute("teamError", e.getMessage());
+        }
+        return "redirect:/worker/center#equipo";
+    }
+
+    @CenterOwnerOnly
     @PostMapping("/worker/center/loyalty")
     public String updateLoyalty(@AuthenticationPrincipal AppUserDetails worker,
                                 @ModelAttribute LoyaltySettingsForm form,
@@ -113,6 +255,7 @@ public class WorkerCenterController {
         return "redirect:/worker/center#puntos";
     }
 
+    @CenterOwnerOnly
     @PostMapping("/worker/center/bookings")
     public String updateBookings(@AuthenticationPrincipal AppUserDetails worker,
                                  @RequestParam boolean autoAccept,
@@ -124,6 +267,7 @@ public class WorkerCenterController {
         return "redirect:/worker/center#reservas";
     }
 
+    @CenterOwnerOnly
     @PostMapping("/worker/center/photo")
     public String updatePhoto(@AuthenticationPrincipal AppUserDetails worker,
                               @RequestParam(required = false) MultipartFile photo,
@@ -139,6 +283,7 @@ public class WorkerCenterController {
         return "redirect:/worker/center#foto";
     }
 
+    @CenterOwnerOnly
     @PostMapping("/worker/center/photo/delete")
     public String removePhoto(@AuthenticationPrincipal AppUserDetails worker, RedirectAttributes redirect) {
         photoService.remove(worker.getCenterId());

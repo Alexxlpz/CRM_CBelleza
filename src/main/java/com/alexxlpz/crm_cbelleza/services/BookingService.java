@@ -2,7 +2,7 @@ package com.alexxlpz.crm_cbelleza.services;
 
 import com.alexxlpz.crm_cbelleza.booking.AgendaSnapshot;
 import com.alexxlpz.crm_cbelleza.booking.CenterClock;
-import com.alexxlpz.crm_cbelleza.booking.OpeningHoursPolicy;
+import com.alexxlpz.crm_cbelleza.booking.OpeningHours;
 import com.alexxlpz.crm_cbelleza.entities.Appointment;
 import com.alexxlpz.crm_cbelleza.entities.AppointmentChange;
 import com.alexxlpz.crm_cbelleza.entities.AppointmentProposal;
@@ -52,7 +52,7 @@ public class BookingService {
     private final UserRepository userRepository;
     private final ClientCardService clientCardService;
     private final AgendaAvailabilityService availability;
-    private final OpeningHoursPolicy openingHours;
+    private final OpeningHoursService openingHours;
     private final ApplicationEventPublisher events;
     private final Clock clock;
     private final int proposalHours;
@@ -63,7 +63,7 @@ public class BookingService {
                           UserRepository userRepository,
                           ClientCardService clientCardService,
                           AgendaAvailabilityService availability,
-                          OpeningHoursPolicy openingHours,
+                          OpeningHoursService openingHours,
                           ApplicationEventPublisher events,
                           Clock clock,
                           @Value("${crm.booking.proposal-hours:48}") int proposalHours) {
@@ -100,7 +100,7 @@ public class BookingService {
         }
         Treatment treatment = treatmentRepository.findByIdAndCenterId(treatmentId, centerId)
                 .orElseThrow(() -> new BusinessRuleException("El tratamiento seleccionado no pertenece a este centro."));
-        if (!openingHours.fits(start, treatment.getDuration())) {
+        if (!openingHours.forCenter(centerId).fits(start, treatment.getDuration())) {
             throw new BusinessRuleException("El servicio no cabe completo dentro del horario del centro.");
         }
         AgendaSnapshot.Request slot = new AgendaSnapshot.Request(start, treatment.getDuration(), null, null, true);
@@ -258,11 +258,12 @@ public class BookingService {
         User worker = workerOfCenter(centerId, appointment.getWorker() != null ? appointment.getWorker().getId() : proposerId);
         int duration = duration(appointment);
         AgendaSnapshot agenda = availability.snapshot(center, times.getFirst(), times.getLast().plusDays(1));
+        OpeningHours hours = openingHours.forCenter(centerId);
         for (LocalDateTime time : times) {
             if (!time.isAfter(now)) {
                 throw new BusinessRuleException("Las horas propuestas tienen que ser futuras.");
             }
-            if (!openingHours.fits(time, duration)) {
+            if (!hours.fits(time, duration)) {
                 throw new BusinessRuleException("La hora " + label(time) + " queda fuera del horario de reservas.");
             }
             String problem = agenda.problem(new AgendaSnapshot.Request(time, duration, worker.getId(), appointment.getId(), true)).orElse(null);
@@ -419,7 +420,7 @@ public class BookingService {
         if (!start.isAfter(now)) {
             throw new BusinessRuleException("No se pueden poner citas en una hora que ya ha pasado.");
         }
-        if (!allowOutsideHours && !openingHours.fits(start, duration)) {
+        if (!allowOutsideHours && !openingHours.forCenter(center.getId()).fits(start, duration)) {
             throw new OutsideOpeningHoursException();
         }
         AgendaSnapshot agenda = availability.snapshot(center, start, start.plusDays(1));

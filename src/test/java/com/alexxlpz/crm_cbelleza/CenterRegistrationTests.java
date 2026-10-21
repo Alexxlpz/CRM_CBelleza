@@ -14,6 +14,7 @@ import com.alexxlpz.crm_cbelleza.repositories.UserRepository;
 import com.alexxlpz.crm_cbelleza.entities.Treatment;
 import com.alexxlpz.crm_cbelleza.entities.TreatmentType;
 import com.alexxlpz.crm_cbelleza.services.BookingService;
+import com.alexxlpz.crm_cbelleza.services.OpeningHoursService;
 import com.alexxlpz.crm_cbelleza.services.CenterRegistrationService;
 import com.alexxlpz.crm_cbelleza.services.CenterRegistrationService.Registration;
 import com.alexxlpz.crm_cbelleza.services.SecureTokens;
@@ -69,9 +70,12 @@ class CenterRegistrationTests {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private OpeningHoursService openingHours;
+
     private static CenterRegistrationForm form(String ownerEmail, List<String> workerNames, List<String> workerEmails) {
         return new CenterRegistrationForm("Estudio Alba", "b-1234567.8", "+34 911 222 333", "Calle Mayor 12, 28013 Madrid",
-                40.4155, -3.7074, "Europe/Madrid", 2, "Alba Ruiz", ownerEmail,
+                40.4155, -3.7074, "Europe/Madrid", 2, TestHours.DAYS, TestHours.FROM, TestHours.TO, "Alba Ruiz", ownerEmail,
                 workerNames, workerEmails, "PER_ITEM", 10, 100, "Manicura gratis",
                 List.of("Manicura y uñas"), "Instagram: @estudioalba", true);
     }
@@ -83,6 +87,10 @@ class CenterRegistrationTests {
                         .param("cif", "B12345678")
                         .param("phone", "911 222 333")
                         .param("cabins", "2")
+                        // Martes con jornada partida y sábado por la mañana
+                        .param("hoursDay", "2", "2", "6")
+                        .param("hoursFrom", "09:30", "16:00", "10:00")
+                        .param("hoursTo", "14:00", "20:30", "14:00")
                         .param("address", "Calle Mayor 12, 28013 Madrid")
                         .param("latitude", "40.4155")
                         .param("longitude", "-3.7074")
@@ -111,6 +119,9 @@ class CenterRegistrationTests {
         assertNotNull(center.getApprovalTokenHash());
         assertEquals(LoyaltyMode.PER_EURO, center.getLoyaltyMode());
         assertEquals(200, center.getLoyaltyRewardPoints());
+        assertEquals(owner.getId(), center.getOwnerId(), "Quien da de alta el centro es su dueño");
+        assertEquals(List.of("Martes: 09:30 - 14:00 y 16:00 - 20:30", "Sábado: 10:00 - 14:00"),
+                openingHours.forCenter(center.getId()).describe());
 
         for (User worker : List.of(owner, nerea)) {
             assertEquals(Role.WORKER, worker.getRole());
@@ -205,6 +216,7 @@ class CenterRegistrationTests {
         mvc.perform(post("/register-center").with(csrf())
                         .param("centerName", "Estudio Alba").param("cif", "B12345678").param("phone", "911222333")
                         .param("cabins", "1").param("address", "Calle Mayor 12, Madrid")
+                        .param("hoursDay", "1").param("hoursFrom", "09:00").param("hoursTo", "20:00")
                         .param("latitude", "40.4").param("longitude", "-3.7")
                         .param("contactName", "Alba Ruiz").param("email", "alba@estudioalba.es")
                         .param("workerNames", "Carlos").param("workerEmails", TestUsers.WORKER_CENTER_1)
@@ -220,16 +232,28 @@ class CenterRegistrationTests {
     @Test
     void invalidRegistrationsExplainWhatToFix() {
         assertRejected(new CenterRegistrationForm("Estudio Alba", "B12345678", "911222333", "Calle Mayor 12", null, null,
-                null, 1, "Alba", "alba@estudioalba.es", List.of(), List.of(), "OFF", null, null, null, null, null, true),
+                null, 1, TestHours.DAYS, TestHours.FROM, TestHours.TO, "Alba", "alba@estudioalba.es", List.of(), List.of(), "OFF", null, null, null, null, null, true),
                 "Marca en el mapa");
         assertRejected(form("alba@estudioalba.es", List.of("Nerea"), List.of("ALBA@estudioalba.es")), "está repetido");
         assertRejected(form("alba@estudioalba.es", List.of("Nerea"), List.of("")), "falta el nombre o el correo");
         assertRejected(new CenterRegistrationForm("Estudio Alba", "B12345678", "911222333", "Calle Mayor 12", 40.4, -3.7,
-                null, 1, "Alba", "alba@estudioalba.es", List.of(), List.of(), "OFF", null, null, null, null, null, null),
+                null, 1, TestHours.DAYS, TestHours.FROM, TestHours.TO, "Alba", "alba@estudioalba.es", List.of(), List.of(), "OFF", null, null, null, null, null, null),
                 "acepta los términos");
         assertRejected(new CenterRegistrationForm("Estudio Alba", "B12345678", "911222333", "Calle Mayor 12", 40.4, -3.7,
-                null, 1, "Alba", "alba@estudioalba.es", List.of(), List.of(), "PER_ITEM", 1, 10, " ", null, null, true),
+                null, 1, TestHours.DAYS, TestHours.FROM, TestHours.TO, "Alba", "alba@estudioalba.es", List.of(), List.of(), "PER_ITEM", 1, 10, " ", null, null, true),
                 "qué recompensa");
+        assertRejected(new CenterRegistrationForm("Estudio Alba", "B12345678", "911222333", "Calle Mayor 12", 40.4, -3.7,
+                null, 1, List.of(), List.of(), List.of(), "Alba", "alba@estudioalba.es", List.of(), List.of(), "OFF", null, null, null, null, null, true),
+                "al menos un día");
+        assertRejected(new CenterRegistrationForm("Estudio Alba", "B12345678", "911222333", "Calle Mayor 12", 40.4, -3.7,
+                null, 1, List.of(1), List.of("20:00"), List.of("09:00"), "Alba", "alba@estudioalba.es", List.of(), List.of(), "OFF", null, null, null, null, null, true),
+                "posterior a la de apertura");
+        assertRejected(new CenterRegistrationForm("Estudio Alba", "B12345678", "911222333", "Calle Mayor 12", 40.4, -3.7,
+                null, 1, List.of(3, 3), List.of("09:00", "13:00"), List.of("14:00", "20:00"), "Alba", "alba@estudioalba.es", List.of(), List.of(), "OFF", null, null, null, null, null, true),
+                "se pisan");
+        assertRejected(new CenterRegistrationForm("Estudio Alba", "B12345678", "911222333", "Calle Mayor 12", 40.4, -3.7,
+                null, 1, List.of(1), List.of("09:15"), List.of("14:00"), "Alba", "alba@estudioalba.es", List.of(), List.of(), "OFF", null, null, null, null, null, true),
+                "de 30 en 30 minutos");
         assertEquals(0, users.findByEmailIgnoreCase("alba@estudioalba.es").stream().count());
     }
 

@@ -7,6 +7,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
     <script th:src="@{/js/location-picker.js}" defer></script>
     <script th:src="@{/js/photo-picker.js}" defer></script>
+    <script th:src="@{/js/opening-hours.js}" defer></script>
 </head>
 <body>
     <div th:replace="~{fragments/navbar :: worker('/worker/dashboard', 'Volver al panel', ${notifications})}"></div>
@@ -15,7 +16,7 @@
         <header class="settings-header">
             <div>
                 <h1 th:text="${center.name}">Mi Centro</h1>
-                <p>Actualiza los datos públicos de tu salón y la configuración de tu cuenta</p>
+                <p th:text="${isOwner} ? 'Actualiza los datos públicos de tu salón y la configuración de tu cuenta' : 'Los datos de tu centro y la configuración de tu cuenta'">Actualiza los datos públicos de tu salón y la configuración de tu cuenta</p>
             </div>
         </header>
 
@@ -26,11 +27,26 @@
             <span>Estamos revisando tu centro: todavía no sale en el buscador ni en el mapa. Mientras tanto, prepara tratamientos y precios para que los clientes puedan reservar desde el primer día.</span>
         </div>
 
+        <th:block th:unless="${isOwner}">
+            <div th:replace="~{fragments/alerts :: ownerOnly(${'Los datos, el horario y la configuración del centro los gestiona ' + ownerName + ', dueño del centro. Aquí puedes cambiar tu cuenta y tu Google Calendar.'})}"></div>
+        </th:block>
+
         <div class="settings-columns">
+            <div class="settings-main">
             <section class="settings-card">
                 <form th:action="@{/worker/center}" method="post">
                     <h2 class="settings-section-title"><i class="lucide-building-2" aria-hidden="true"></i> Información Comercial del Centro</h2>
-                    <div class="settings-grid">
+                    <!--/* Trabajador estándar: los datos del centro, de solo lectura */-->
+                    <dl class="center-info-list" th:unless="${isOwner}">
+                        <div><dt>Nombre</dt><dd th:text="${center.name}">Centro</dd></div>
+                        <div><dt>Dirección</dt><dd th:text="${center.address}">Calle</dd></div>
+                        <div><dt>Teléfono</dt><dd th:text="${center.phone ?: '-'}">912 345 678</dd></div>
+                        <div><dt>Correo</dt><dd th:text="${center.email ?: '-'}">info@centro.com</dd></div>
+                        <div><dt>Cabinas o puestos</dt><dd th:text="${center.cabins}">2</dd></div>
+                        <div><dt>Zona horaria</dt><dd th:text="${timeZones.get(center.timeZone) ?: center.timeZone}">España</dd></div>
+                        <div><dt>Dueño del centro</dt><dd th:text="${ownerName}">Carlos</dd></div>
+                    </dl>
+                    <div class="settings-grid" th:if="${isOwner}">
                         <div class="span-full">
                             <label for="centerName" class="form-label">Nombre Oficial del Salón / Centro</label>
                             <input type="text" id="centerName" name="centerName" class="form-control" th:value="${center.name}" required>
@@ -98,10 +114,102 @@
 
                     <div class="settings-actions">
                         <a href="/worker/dashboard" class="btn btn-secondary">Cancelar</a>
-                        <button type="submit" class="btn btn-primary"><i class="lucide-save" aria-hidden="true"></i> Guardar Información</button>
+                        <button type="submit" class="btn btn-primary"><i class="lucide-save" aria-hidden="true"></i>
+                            <span th:text="${isOwner} ? 'Guardar Información' : 'Guardar mi cuenta'">Guardar Información</span></button>
                     </div>
                 </form>
             </section>
+
+            <section class="settings-card" id="horario">
+                <h2 class="settings-section-title"><i class="lucide-clock" aria-hidden="true"></i> Horario de apertura</h2>
+                <div class="alert alert-success" role="status" th:if="${hoursMessage != null}">
+                    <i class="lucide-check-circle-2" aria-hidden="true"></i>
+                    <span th:text="${hoursMessage}">Horario guardado.</span>
+                </div>
+                <div class="alert alert-error" role="alert" th:if="${hoursError != null}">
+                    <i class="lucide-alert-circle" aria-hidden="true"></i>
+                    <span th:text="${hoursError}">Revisa el horario.</span>
+                </div>
+                <th:block th:if="${isOwner}">
+                    <p class="form-help settings-intro">Tus clientes solo pueden pedir cita dentro de este horario, y la agenda lo marca.
+                        Las citas que ya tienes no cambian. Para un festivo o unas vacaciones, mejor bloquea esos días en la agenda.</p>
+                    <form th:action="@{/worker/center/hours}" method="post" id="hoursForm">
+                        <div th:replace="~{fragments/opening-hours :: editor(${hourRows}, ${hourOptions})}"></div>
+                        <div class="settings-actions">
+                            <button type="submit" class="btn btn-primary"><i class="lucide-save" aria-hidden="true"></i> Guardar horario</button>
+                        </div>
+                    </form>
+                </th:block>
+                <ul class="hours-list" th:unless="${isOwner}">
+                    <li th:each="line : ${openingHoursLines}"><i class="lucide-clock" aria-hidden="true"></i> <span th:text="${line}">Lunes a viernes: 09:00 - 20:00</span></li>
+                </ul>
+            </section>
+
+            <section class="settings-card" id="equipo">
+                <h2 class="settings-section-title"><i class="lucide-users" aria-hidden="true"></i> Equipo</h2>
+                <div class="alert alert-success" role="status" th:if="${teamMessage != null}">
+                    <i class="lucide-check-circle-2" aria-hidden="true"></i>
+                    <span th:text="${teamMessage}">Invitación enviada.</span>
+                </div>
+                <div class="alert alert-error" role="alert" th:if="${teamError != null}">
+                    <i class="lucide-alert-circle" aria-hidden="true"></i>
+                    <span th:text="${teamError}">Revisa los datos.</span>
+                </div>
+                <p class="form-help settings-intro" th:if="${isOwner}">Invita a quien se incorpore: le llegará un correo para crear su contraseña.
+                    Si alguien se va, quítalo del equipo y dejará de entrar en el panel al momento; sus citas pasadas no se borran.</p>
+                <p class="form-help settings-intro" th:unless="${isOwner}"
+                   th:text="${'Quién trabaja en el centro. ' + ownerName + ' invita a gente nueva y quita a quien se va.'}">Quién trabaja en el centro.</p>
+                <ul class="team-list">
+                    <li class="team-member" th:each="member : ${teamMembers}">
+                        <span class="team-avatar" aria-hidden="true" th:text="${#strings.toUpperCase(#strings.substring(member.name(), 0, 1))}">C</span>
+                        <div class="team-member-info">
+                            <p class="team-member-name">
+                                <span th:text="${member.name()}">Carlos Mendoza</span>
+                                <span class="team-tag" th:if="${member.owner()}"><i class="lucide-crown" aria-hidden="true"></i> Dueño</span>
+                                <span class="team-tag" th:if="${member.id() == worker.id}">Tú</span>
+                            </p>
+                            <p class="team-member-email" th:text="${member.email()}">carlos@cbelleza.com</p>
+                        </div>
+                        <span class="badge team-status"
+                              th:classappend="${member.status().name() == 'ACTIVE'} ? 'badge-confirmed' : (${member.status().name() == 'INVITED'} ? 'badge-pending' : 'badge-rejected')"
+                              th:text="${member.status().label()}">Cuenta activa</span>
+                        <div class="team-member-actions" th:if="${isOwner and !member.owner()}">
+                            <form th:if="${member.pending()}" th:action="@{/worker/center/team/{id}/resend(id=${member.id()})}" method="post">
+                                <button type="submit" class="btn btn-secondary btn-sm">
+                                    <i class="lucide-send" aria-hidden="true"></i> Reenviar invitación
+                                </button>
+                            </form>
+                            <form th:action="@{/worker/center/team/{id}/remove(id=${member.id()})}" method="post"
+                                  th:attr="data-confirm=${member.pending()} ? ${member.name() + ' saldrá del equipo y su invitación dejará de valer.'} : ${member.name() + ' dejará de entrar en el panel del centro. Sus citas pasadas y las fichas que rellenó se conservan.'}"
+                                  data-confirm-title="¿Quitar del equipo?" data-confirm-button="Quitar del equipo">
+                                <button type="submit" class="btn btn-secondary btn-sm team-remove"
+                                        th:attr="aria-label=${'Quitar a ' + member.name() + ' del equipo'}">
+                                    <i class="lucide-user-minus" aria-hidden="true"></i> Quitar
+                                </button>
+                            </form>
+                        </div>
+                    </li>
+                </ul>
+                <form th:if="${isOwner}" th:action="@{/worker/center/team}" method="post" class="team-invite">
+                    <h3 class="settings-subsection-title"><i class="lucide-user-plus" aria-hidden="true"></i> Invitar a alguien al equipo</h3>
+                    <div class="settings-grid">
+                        <div>
+                            <label for="inviteName" class="form-label">Nombre</label>
+                            <input type="text" id="inviteName" name="name" class="form-control" maxlength="100" required
+                                   th:value="${inviteName}" placeholder="Ej: Marta López" autocomplete="off">
+                        </div>
+                        <div>
+                            <label for="inviteEmail" class="form-label">Correo</label>
+                            <input type="email" id="inviteEmail" name="email" class="form-control" required
+                                   th:value="${inviteEmail}" placeholder="marta@correo.com" autocomplete="off">
+                        </div>
+                    </div>
+                    <div class="settings-actions">
+                        <button type="submit" class="btn btn-primary"><i class="lucide-send" aria-hidden="true"></i> Enviar invitación</button>
+                    </div>
+                </form>
+            </section>
+            </div>
 
             <div class="settings-side">
                 <section class="settings-card" id="reservas">
@@ -119,17 +227,18 @@
                             </p>
                             <p class="sync-setting-help" th:unless="${center.autoAcceptBookings}">
                                 Desactivado. Cada solicitud espera a que alguien del equipo la acepte, la rechace o proponga otra hora
-                                desde la agenda. Actívalo para que las citas en huecos libres se confirmen solas.
+                                desde la agenda.<th:block th:if="${isOwner}"> Actívalo para que las citas en huecos libres se confirmen solas.</th:block>
                             </p>
+                            <p class="sync-setting-help" th:unless="${isOwner}" th:text="${'Lo decide ' + ownerName + ', dueño del centro.'}">Lo decide el dueño del centro.</p>
                         </div>
-                        <form th:if="${center.autoAcceptBookings}" th:action="@{/worker/center/bookings}" method="post">
+                        <form th:if="${isOwner and center.autoAcceptBookings}" th:action="@{/worker/center/bookings}" method="post">
                             <input type="hidden" name="autoAccept" value="false">
                             <button type="submit" class="switch" role="switch" aria-checked="true" aria-labelledby="autoAcceptLabel"
                                     title="Desactivar: revisaréis cada solicitud">
                                 <span class="switch-thumb" aria-hidden="true"></span>
                             </button>
                         </form>
-                        <form th:unless="${center.autoAcceptBookings}" th:action="@{/worker/center/bookings}" method="post"
+                        <form th:if="${isOwner and !center.autoAcceptBookings}" th:action="@{/worker/center/bookings}" method="post"
                               data-confirm="Las citas que pidan tus clientes en un hueco libre quedarán confirmadas sin que nadie las revise. Las solicitudes que ya tienes pendientes no cambian."
                               data-confirm-title="¿Aceptar las citas automáticamente?" data-confirm-button="Activar"
                               data-confirm-tone="default">
@@ -142,7 +251,7 @@
                     </div>
                 </section>
 
-                <section class="settings-card" id="foto">
+                <section class="settings-card" id="foto" th:if="${isOwner}">
                     <h2 class="settings-section-title"><i class="lucide-image" aria-hidden="true"></i> Foto del centro</h2>
                     <p class="form-help settings-intro">Sale en el buscador de centros y arriba de la ficha de tu centro: ayuda a que tus clientes lo reconozcan de un vistazo.</p>
                     <div class="alert alert-success" role="status" th:if="${photoMessage != null}">
@@ -169,7 +278,7 @@
                     </div>
                 </section>
 
-                <section class="settings-card" id="puntos">
+                <section class="settings-card" id="puntos" th:if="${isOwner}">
                     <form th:action="@{/worker/center/loyalty}" method="post" id="loyaltyForm"
                           th:with="edited=${loyaltyForm != null}, modeValue=${loyaltyForm != null ? loyaltyForm.mode() : center.loyaltyMode.name()}">
                         <h2 class="settings-section-title"><i class="lucide-gift" aria-hidden="true"></i> Tarjeta de puntos</h2>
@@ -254,6 +363,25 @@
                             </button>
                         </form>
                     </div>
+                </section>
+
+                <section class="settings-card" id="dueno" th:if="${isOwner}">
+                    <h2 class="settings-section-title"><i class="lucide-crown" aria-hidden="true"></i> Dueño del centro</h2>
+                    <p class="form-help settings-intro">Eres el dueño del centro: solo tú cambias sus datos, horario, foto, carta, inventario,
+                        ficha de clientes, tarjeta de puntos y reservas automáticas, y ves el análisis. El resto del equipo lleva la agenda
+                        y los clientes, y cada uno su cuenta y su Google Calendar.</p>
+                    <form th:if="${not #lists.isEmpty(transferCandidates)}" th:action="@{/worker/center/owner}" method="post"
+                          data-confirm="Pasará a ser quien gestiona el centro y tú seguirás en el equipo como trabajador, sin poder cambiar los datos del centro."
+                          data-confirm-title="¿Ceder el centro?" data-confirm-button="Ceder el centro">
+                        <label for="newOwnerId" class="form-label">Ceder el centro a otra persona del equipo</label>
+                        <div class="owner-transfer-row">
+                            <select id="newOwnerId" name="newOwnerId" class="form-control" required>
+                                <option th:each="candidate : ${transferCandidates}" th:value="${candidate.id}" th:text="${candidate.name}">Lucía</option>
+                            </select>
+                            <button type="submit" class="btn btn-secondary"><i class="lucide-repeat" aria-hidden="true"></i> Ceder</button>
+                        </div>
+                    </form>
+                    <p class="form-help" th:if="${#lists.isEmpty(transferCandidates)}">Cuando alguien de tu equipo active su cuenta, podrás cederle el centro desde aquí.</p>
                 </section>
             </div>
         </div>

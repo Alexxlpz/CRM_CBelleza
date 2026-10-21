@@ -31,7 +31,7 @@
                 <i class="lucide-clock" aria-hidden="true"></i>
                 <div>
                     <span class="hero-meta-label">Horario:</span>
-                    <span class="hero-meta-value" th:text="${openingHoursLabel}">Lunes a Viernes: 09:00 - 20:00</span>
+                    <span class="hero-meta-value hero-meta-lines"><th:block th:each="line : ${openingHoursLines}"><span th:text="${line}">Lunes a viernes: 09:00 - 20:00</span></th:block></span>
                 </div>
             </div>
         </div>
