@@ -85,17 +85,21 @@ docker compose up --build                               # app en :8080 + Postgre
 ```
 src/main/java/com/alexxlpz/crm_cbelleza/
   booking/       OpeningHours (horario de un centro), BookingProperties, ClientVisitAnalyzer, AgendaSnapshot (¿cabe una cita?), CenterClock, CenterTimeZones
-  config/        SecurityConfig, DatabaseSeeder (+ DemoHistory), JacksonConfig, TimeConfig
+  config/        SecurityConfig, WebConfig (interceptores), DatabaseSeeder (+ DemoHistory), JacksonConfig, TimeConfig,
+                 H2PoolConfig, GoogleLoginSettings, LegalOwner + SiteModelAdvice (datos del titular y del sitio en las vistas)
   controllers/   un controlador por área (sin lógica de negocio ni repositorios); DevLoginController solo en dev
   dto/           DTOs de lectura (ClientSummaryDTO, CenterSummaryDTO, AppointmentCalendarDTO…)
   entities/      entidades JPA + enums
   exceptions/    BusinessRuleException, ResourceNotFoundException, handlers MVC y JSON (@ApiEndpoint)
   forms/         formularios como records; PasswordPolicy, FormText
   googlecalendar/ sincronización de citas con Google Calendar (GoogleCalendarService, Gateway HTTP, cifrado de tokens)
-  mail/          EmailGateway (Smtp / Logging), InquiryMailService, AppointmentMailService (+ Listener), MailConfig
+  mail/          EmailGateway (Smtp / Logging), InquiryMailService, AppointmentMailService (+ Listener),
+                 CenterOnboardingMailService (alta de centro e invitaciones del equipo), MailConfig
   repositories/  Spring Data JPA
-  scheduler/     AppointmentStatusScheduler (cada 60 s marca citas pasadas como COMPLETED)
-  security/      AppUserDetails(Service), handlers de login/acceso, RoleHomes, CurrentUserModelAdvice
+  scheduler/     AppointmentStatusScheduler (cada 60 s: marca como COMPLETED las citas terminadas, anula las
+                 propuestas caducadas y envía los recordatorios de 24 h)
+  security/      AppUserDetails(Service), handlers de login/acceso, RoleHomes, CurrentUserModelAdvice,
+                 CenterOwnerOnly + CenterOwnerInterceptor, CenterMembershipInterceptor, Google OIDC, «Recordar mi sesión»
   services/      lógica de negocio y validación
 src/main/resources/
   db/migration/  V1__esquema_inicial.sql, V2__eliminar_clientes_invitados.sql, V3__usuarios_google.sql,
@@ -110,10 +114,12 @@ src/main/resources/
   static/js/     app.js, form-validation.js, sheets.js, unsaved-changes.js, booking-picker.js,
                  worker-calendar.js, worker-agenda-forms.js, treatment-summary.js, scroll-index.js,
                  center-registration.js, location-picker.js, invitation.js, loyalty-settings.js, photo-picker.js,
-                 treatment-offer.js
+                 treatment-offer.js, opening-hours.js, product-sale.js
   static/icons/lucide/  fuente de Lucide (woff/woff2)
 src/test/java/…  BookingServiceTests, CenterIsolationTests, SecurityIntegrationTests, PageRenderingTests,
-                 UnitTests, CrmCBellezaApplicationTests, GoogleLoginTests, GoogleCalendarTests, AgendaTests, RegistrationTests, TreatmentSummaryTests, ProductSaleAndLoyaltyTests, CenterRegistrationTests, CenterPhotoTests, AnalyticsTests, TreatmentOfferTests, security/CurrentUserModelAdviceTest, TestUsers
+                 UnitTests, CrmCBellezaApplicationTests, GoogleLoginTests, GoogleCalendarTests, AgendaTests, RegistrationTests, TreatmentSummaryTests, ProductSaleAndLoyaltyTests, CenterRegistrationTests, CenterPhotoTests, AnalyticsTests, TreatmentOfferTests,
+                 AutoAcceptBookingTests, CenterOwnershipTests, TeamTests, OpenNowTests, NoShowAndRebookTests,
+                 security/CurrentUserModelAdviceTest, TestUsers, TestHours
 ```
 
 ### Reglas de backend
@@ -129,7 +135,7 @@ src/test/java/…  BookingServiceTests, CenterIsolationTests, SecurityIntegratio
 
 Tablas (ver `V1__esquema_inicial.sql`):
 
-- `centers`: nombre, dirección, teléfono, email, `latitude`/`longitude` (el mapa usa estas coordenadas, no geocodifica), `time_zone` (IANA, elegible en «Mi Centro» entre `CenterTimeZones.OPTIONS`; la usan las reservas y Google Calendar), `cabins` (citas a la vez, 1-50, en «Mi Centro»), `published` (sale en el buscador y admite reservas; los dados de alta en /alta-centro nacen ocultos), `tax_id` (CIF/NIF), `approval_token_hash`/`registered_at`.
+- `centers`: nombre, dirección, teléfono, email, `latitude`/`longitude` (el mapa usa estas coordenadas, no geocodifica), `time_zone` (IANA, elegible en «Mi Centro» entre `CenterTimeZones.OPTIONS`; la usan las reservas y Google Calendar), `cabins` (citas a la vez, 1-50, en «Mi Centro»), `published` (sale en el buscador y admite reservas; los dados de alta en /alta-centro nacen ocultos), `tax_id` (CIF/NIF), `approval_token_hash`/`registered_at`, `auto_accept_bookings` (V16, «Mi Centro» > Reservas de clientes, `POST /worker/center/bookings`, solo el dueño: la cita que pide un cliente en un hueco libre nace CONFIRMED con el profesional libre que menos citas tiene ese día; si no queda ninguno, se queda pendiente. Tests: `AutoAcceptBookingTests`), `owner_id` y `photo_updated_at` (ver abajo).
 - `users`: `role` CLIENT | WORKER, `email` único, `password` (BCrypt, **nula en clientes dados de alta a mano y en cuentas solo de Google**), `google_id` único (claim `sub` de Google, nulo si no ha entrado nunca con Google), `center_id` solo para trabajadores. `User.hasAccount()` = tiene contraseña o Google. `notifications_seen_at`: última vez que el cliente abrió su campana.
 - `treatments`: por centro, `treatment_type` (MANICURA_PEDICURA, FACIAL, CORPORAL, MASAJES, PELUQUERIA, DEPILACION, OTRO), precio y duración en minutos, y oferta opcional: `offer_price` (menor que el de carta) y `offer_ends_on` (último día, hora del centro; nulo = hasta que se quite).
 - **Ofertas de tratamientos** (`TreatmentService.saveOffer/removeOffer`, `POST /worker/treatments/{id}/offer` y `/offer/delete`, modal `offerModal` en `worker/fragments/treatment-modals.html` + `treatment-offer.js`): el trabajador las pone desde la carta (botón «Poner en oferta» en cada tratamiento y filtro «En oferta»). Valen para las citas que se **piden** mientras dura la oferta (`Treatment.priceOn(hoy)` en `BookingService`, se guarda en `appointments.price`), aunque la cita sea para después. Una oferta vencida no se borra: sale como «Oferta terminada» y se puede renovar. El cliente las ve en la reserva (filtro «Todos los servicios / En oferta», etiqueta «-20 % · hasta el 30 oct» y precio de carta tachado) y en el buscador de Centros (`CenterSummaryDTO.offers`, una sola línea «3 tratamientos en oferta · hasta -20 %» en la tarjeta y en el globo del mapa (no se listan para que no se líe con muchas), botón «Con ofertas» = `withOffers=true`). Cada tarjeta y globo del mapa dice si el centro está abierto ahora y cuándo cierra o vuelve a abrir (`CenterSummaryDTO.openNow`/`hoursLabel`, de `OpeningHours.stateAt` con su horario, sus cierres de todo el centro y su zona horaria); el botón «Abierto ahora» = `openNow=true`. Tests: `OpenNowTests`. En `dev` hay ofertas de ejemplo (con `crm.seed-demo-history`). Packs y bonos: pendientes.

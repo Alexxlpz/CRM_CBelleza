@@ -104,7 +104,7 @@
                         <div class="step-body">
                             <h4>Buscar un Centro (/centers)</h4>
                             <p>
-                                La página de centros es pública: tarjetas con los centros y un mapa (OpenStreetMap). Se puede buscar por nombre (con filtros avanzados) y, si el navegador comparte la ubicación, cada centro muestra a cuántos kilómetros está. Al tocar un marcador del mapa se abre un globo con nombre, dirección, distancia y <strong>«Ver tratamientos»</strong>; si no hay sesión, al pulsarlo se va al login y después se vuelve a ese centro.
+                                La página de centros es pública: tarjetas con los centros y un mapa (OpenStreetMap). Se puede buscar por nombre (con filtros avanzados), quedarse solo con los centros <strong>«Abierto ahora»</strong> o <strong>«Con ofertas»</strong> y, si el navegador comparte la ubicación, cada centro muestra a cuántos kilómetros está. Cada tarjeta dice si el centro está abierto y cuándo cierra o vuelve a abrir, y cuántos tratamientos tiene en oferta. Al tocar un marcador del mapa se abre un globo con nombre, dirección, distancia y <strong>«Ver tratamientos»</strong>; si no hay sesión, al pulsarlo se va al login y después se vuelve a ese centro.
                             </p>
                         </div>
                     </div>
@@ -115,12 +115,12 @@
                         <div class="step-body">
                             <h4>Ver los Tratamientos del Centro (/client/centers/{id})</h4>
                             <p>
-                                La ficha del centro muestra su foto (o sus iniciales si no tiene), su información, el horario de reservas y la lista de tratamientos:
+                                La ficha del centro muestra su foto (o sus iniciales si no tiene), su información, su horario de apertura (cada centro tiene el suyo, también sábados o jornada partida) y la lista de tratamientos:
                             </p>
                             <ul class="text-secondary" style="margin-left: 1.5rem; margin-bottom: 0.8rem;">
                                 <li><strong>Nombre y descripción</strong> del tratamiento.</li>
                                 <li><strong>Duración</strong> en minutos (decide cuántos huecos ocupa).</li>
-                                <li><strong>Precio</strong> en euros.</li>
+                                <li><strong>Precio</strong> en euros. Si está en oferta, sale la etiqueta con el descuento y hasta cuándo dura, y el precio de carta tachado; el filtro «En oferta» deja solo esos.</li>
                                 <li><strong>Categoría:</strong> manicura y pedicura, facial, corporal, masajes, peluquería, depilación u otro.</li>
                             </ul>
                         </div>
@@ -135,9 +135,9 @@
                                 Primero se elige el servicio (no hay ninguno marcado de antemano) y después el día y la hora en el calendario de la reserva: los días del mes salen como <strong>con horas libres</strong>, <strong>completo</strong> o <strong>cerrado</strong>, y al lado aparecen las horas libres del día elegido. En móvil, al elegir el servicio la lista se pliega a ese servicio («Cambiar de servicio» la vuelve a abrir).
                             </p>
                             <ol class="text-secondary" style="margin-left: 1.5rem; margin-bottom: 0.8rem;">
-                                <li>El calendario consulta <code>/api/centers/{id}/availability</code>: horario (de lunes a viernes, de 9 a 20 h, huecos de 30 min), días cerrados y horas llenas.</li>
+                                <li>El calendario consulta <code>/api/centers/{id}/availability</code>: el horario de ese centro (huecos de 30 min), días cerrados y horas llenas.</li>
                                 <li>Una hora está llena si no queda cabina libre o ningún profesional disponible (por otra cita, un bloqueo o una hora propuesta a otro cliente).</li>
-                                <li>El cliente elige la hora y pulsa «Confirmar y reservar cita». La solicitud queda <span class="card-badge badge-admin">PENDIENTE</span> hasta que el centro responda, y el cliente recibe un correo.</li>
+                                <li>El cliente elige la hora y pulsa «Solicitar cita». La solicitud queda <span class="card-badge badge-admin">PENDIENTE</span> hasta que el centro responda, y el cliente recibe un correo. Si el centro <strong>acepta las citas automáticamente</strong>, el botón dice «Reservar cita» y la cita queda <span class="card-badge badge-client">CONFIRMADA</span> al momento con un profesional libre.</li>
                             </ol>
                         </div>
                     </div>
@@ -151,7 +151,7 @@
                             <ul class="text-secondary" style="margin-left: 1.5rem;">
                                 <li><strong>Aceptar</strong> la cita: pasa a <span class="card-badge badge-client">CONFIRMADA</span>.</li>
                                 <li><strong>Rechazarla</strong>, con un mensaje para el cliente.</li>
-                                <li><strong>Proponer otras horas</strong> (de 1 a 3). El cliente elige una en «Mis Citas» o responde que ninguna le viene bien. La propuesta caduca a las 48 h o 2 h antes de la primera hora propuesta.</li>
+                                <li><strong>Proponer otras horas</strong> (de 1 a 3). El cliente elige una en «Mis reservas» o responde que ninguna le viene bien. La propuesta caduca a las 48 h o 2 h antes de la primera hora propuesta.</li>
                                 <li><strong>Cambiar la hora</strong> de una cita ya confirmada (el cliente ve «antes: …») o <strong>anularla</strong>.</li>
                             </ul>
                             <p>Cada cambio llega por correo y a la campana. Un día antes se envía un recordatorio.</p>
@@ -162,9 +162,10 @@
                     <div class="step-card">
                         <div class="step-num">5</div>
                         <div class="step-body">
-                            <h4>«Mis Citas» y la Campana (/client/appointments)</h4>
+                            <h4>«Mis reservas» y la Campana (/client/appointments)</h4>
                             <ul class="text-secondary" style="margin-left: 1.5rem;">
-                                <li><strong>Filtros por estado</strong> y tarjeta de cada cita con el mensaje del profesional.</li>
+                                <li><strong>Próximas citas</strong> arriba (solicitudes, propuestas y confirmadas), con la más cercana destacada, y el <strong>historial</strong> plegado debajo en filas compactas.</li>
+                                <li><strong>Volver a reservar:</strong> en cada cita del historial, abre la reserva del centro con el mismo tratamiento ya elegido.</li>
                                 <li><strong>Elegir una hora propuesta</strong> o rechazar la propuesta.</li>
                                 <li><strong>Anular</strong> una cita futura (se avisa al centro).</li>
                                 <li><strong>Mis puntos:</strong> arriba, la tarjeta de puntos de cada centro que la tiene activada y donde tiene citas o puntos: cuántos lleva y cuántos le faltan para la recompensa.</li>
@@ -260,8 +261,9 @@
                             <li><strong>Solicitud pendiente:</strong> Aceptar (eligiendo profesional), Rechazar con un mensaje u <strong>«Otra hora»</strong> (propone de 1 a 3 horas).</li>
                             <li><strong>«Nueva cita»</strong> (botón de la barra o pulsar un hueco libre de la semana): cliente de la cartera o uno nuevo, tratamiento, día, hora y profesional. Nace confirmada.</li>
                             <li><strong>Cita confirmada futura:</strong> «Cambiar hora» (y profesional) o «Anular». En escritorio también se puede arrastrar en la vista semana.</li>
+                            <li><strong>«No se presentó»:</strong> en una cita que ya ha empezado o terminado, si el cliente no vino. No suma puntos, sale tachada en la semana y se puede deshacer («Sí vino: deshacer»). La ficha del cliente muestra cuántas veces ha faltado y sus próximas citas lo avisan.</li>
                             <li><strong>«Bloquear horario»:</strong> vacaciones o descansos de un profesional, o cierre del centro. No se puede bloquear un periodo con citas confirmadas.</li>
-                            <li>Fuera del horario de reservas la app pregunta si guardar igualmente; los solapes nunca se permiten.</li>
+                            <li>Fuera del horario del centro la app pregunta si guardar igualmente; los solapes nunca se permiten.</li>
                         </ul>
                     </div>
 
@@ -293,6 +295,7 @@
                             <li><strong>Nombre y Descripción:</strong> Procedimiento técnico y beneficios.</li>
                             <li><strong>Precio (€) y Duración (minutos):</strong> Determina el tiempo exacto que reservará el algoritmo.</li>
                             <li><strong>Tipología:</strong> Selector con las categorías autorizadas (<code>FACIAL</code>, <code>CORPORAL</code>, <code>DEPILACION</code>, <code>MANICURA_PEDICURA</code>, <code>MASAJES</code>, <code>PELUQUERIA</code>, <code>OTRO</code>).</li>
+                            <li><strong>«Poner en oferta»:</strong> precio rebajado y, si se quiere, último día. Vale para las citas que se piden mientras dura; al terminar sale como «Oferta terminada» y se puede renovar. El filtro «En oferta» deja solo esos tratamientos.</li>
                         </ul>
                     </div>
                 </div>
@@ -328,9 +331,13 @@
                         <h4>Mi Centro (/worker/center)</h4>
                         <ul class="text-secondary" style="margin-left: 1.5rem;">
                             <li>Datos del centro, ubicación con pin en el mapa, <strong>zona horaria</strong> (la usan las reservas y Google Calendar) y número de <strong>cabinas</strong> (citas a la vez, de 1 a 50).</li>
+                        <li><strong>Horario de apertura:</strong> uno o dos tramos por día de la semana (jornada partida), sábados y domingos incluidos. Es el que ven los clientes al reservar y el que pinta la agenda.</li>
+                        <li><strong>Equipo:</strong> quién trabaja en el centro y el estado de su cuenta. El dueño invita por correo, reenvía la invitación o saca a alguien del equipo (no si tiene citas por delante; conserva su historial).</li>
+                        <li><strong>Reservas de clientes:</strong> «Aceptar automáticamente» hace que las citas pedidas en un hueco libre queden confirmadas al momento con el profesional libre que menos citas tiene ese día.</li>
                             <li><strong>Foto del centro</strong> (JPG o PNG, hasta 8 MB, mínimo 400×250 px): sale en el buscador, en la ficha del centro y detrás del saludo del panel. Se puede quitar.</li>
                             <li><strong>Tarjeta de puntos:</strong> desactivada, puntos por euro gastado o por tratamiento/unidad de producto, puntos para la recompensa y qué recompensa es. Lo ya ganado no cambia al tocar la configuración.</li>
                             <li>Datos personales y contraseña del trabajador.</li>
+                        <li><strong>Dueño del centro:</strong> quien lo dio de alta. Solo él cambia los datos, el horario, la foto, la carta, la tarjeta de puntos, las reservas automáticas, la plantilla de ficha y el inventario, y ve el análisis; puede ceder el centro a otra persona del equipo. El resto ve esos bloques en lectura y trabaja con la agenda, los clientes, las ventas y su cuenta.</li>
                             <li>Interruptor <strong>«Guardar mis citas en Google Calendar»</strong>: el trabajador da permiso con la cuenta de Google que quiera y Cuquora crea un calendario «Cuquora» donde mantiene sus citas confirmadas. Si faltan las claves de Google en el servidor, sale apagado con «Próximamente».</li>
                         </ul>
                     </div>
@@ -365,7 +372,7 @@
                     </div>
                     <div class="card-feature">
                         <h4>👥 Gestión de Especialistas</h4>
-                        <p>Asignación de trabajadores cualificados a cada centro de trabajo mediante la clave foránea <code>center_id</code> en la tabla <code>users</code>. Un especialista solo gestiona citas de su sede designada.</p>
+                        <p>Cada trabajador pertenece a un centro (<code>center_id</code> en <code>users</code>) y solo gestiona las citas de ese centro. El dueño del centro (<code>centers.owner_id</code>) gestiona el equipo desde «Mi Centro»; quien sale del equipo pierde el acceso al panel al momento.</p>
                     </div>
                     <div class="card-feature">
                         <h4>📜 Páginas Legales</h4>
@@ -373,7 +380,7 @@
                     </div>
                     <div class="card-feature">
                         <h4>🆕 Alta de Centros Nuevos (/register-center)</h4>
-                        <p>Un centro se da de alta solo con un asistente de 5 pasos (centro y foto, ubicación en el mapa, equipo, tarjeta de puntos y envío). En escritorio la vista previa del centro se rellena a la derecha mientras se escribe; en móvil y tablet sale al final como paso de confirmación («Ver vista previa» y luego «Sí, registrar»). Nace <strong>oculto</strong>: administración (<code>CRM_ADMIN_EMAIL</code>) recibe un correo con el enlace para revisarlo y publicarlo. Cada trabajador recibe una invitación de un solo uso (7 días) para poner su contraseña, o entra con Google.</p>
+                        <p>Un centro se da de alta solo con un asistente de 6 pasos (centro y foto, ubicación en el mapa, horario de apertura, equipo, tarjeta de puntos y envío). Quien lo da de alta queda como dueño. En escritorio la vista previa del centro se rellena a la derecha mientras se escribe; en móvil y tablet sale al final como paso de confirmación («Ver vista previa» y luego «Sí, registrar»). Nace <strong>oculto</strong>: administración (<code>CRM_ADMIN_EMAIL</code>) recibe un correo con el enlace para revisarlo y publicarlo. Cada trabajador recibe una invitación de un solo uso (7 días) para poner su contraseña, o entra con Google.</p>
                     </div>
                     <div class="card-feature">
                         <h4>🧪 Selector de Demostración (/login-selector)</h4>

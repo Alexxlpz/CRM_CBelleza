@@ -205,7 +205,7 @@
                             <tr>
                                 <td><strong>Persistencia & Datos</strong></td>
                                 <td><code>PostgreSQL 16</code> (Docker) o <code>H2</code> en memoria (desarrollo y tests)</td>
-                                <td>Esquema creado por <strong>Flyway</strong> (<code>db/migration/V1</code> a <code>V13</code>) con <code>ddl-auto=validate</code>; datos demo solo con <code>crm.seed-demo-data=true</code>.</td>
+                                <td>Esquema creado por <strong>Flyway</strong> (<code>db/migration/V1</code> a <code>V18</code>) con <code>ddl-auto=validate</code>; datos demo solo con <code>crm.seed-demo-data=true</code>.</td>
                             </tr>
                         </tbody>
                     </table>
@@ -349,8 +349,8 @@
                 <div class="callout callout-success">
                     <div class="callout-icon">✅</div>
                     <div class="callout-content">
-                        <strong>Estado a 16 de octubre de 2026:</strong>
-                        <p>La mayor parte de los hallazgos se resolvió en la refactorización del 6 de octubre: <code>BaseController</code> y <code>AppointmentController</code> se dividieron en un controlador por área; ningún controlador usa repositorios (salvo <code>DevLoginController</code>, que solo existe en <code>dev</code>); los roles los gestiona Spring Security; el horario está en <code>OpeningHoursPolicy</code> (<code>crm.booking.*</code>); las reglas de cita están en <code>BookingService</code>; el mapeo a DTO está en <code>AppointmentCalendarMapper</code>; las plantillas de ficha tienen su propio <code>ClientCardTemplateService</code>; y <code>ObjectMapper</code> se inyecta desde <code>JacksonConfig</code>. Queda pendiente separar los servicios en interfaces por caso de uso.</p>
+                        <strong>Estado a 22 de octubre de 2026:</strong>
+                        <p>La mayor parte de los hallazgos se resolvió en la refactorización del 6 de octubre: <code>BaseController</code> y <code>AppointmentController</code> se dividieron en un controlador por área; ningún controlador usa repositorios (salvo <code>DevLoginController</code>, que solo existe en <code>dev</code>); los roles los gestiona Spring Security; el horario estaba en <code>OpeningHoursPolicy</code> (<code>crm.booking.*</code>; desde V17 cada centro tiene el suyo en <code>OpeningHoursService</code>); las reglas de cita están en <code>BookingService</code>; el mapeo a DTO está en <code>AppointmentCalendarMapper</code>; las plantillas de ficha tienen su propio <code>ClientCardTemplateService</code>; y <code>ObjectMapper</code> se inyecta desde <code>JacksonConfig</code>. Queda pendiente separar los servicios en interfaces por caso de uso.</p>
                     </div>
                 </div>
 

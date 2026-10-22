@@ -89,7 +89,7 @@
                         <div class="section-icon">🛡️</div>
                         <div>
                             <h2>Matriz de Permisos por Rol de Usuario</h2>
-                            <p style="margin: 0; font-size: 0.95rem;">Rutas reales de los controladores a 16 de octubre de 2026 y quién puede usarlas</p>
+                            <p style="margin: 0; font-size: 0.95rem;">Rutas reales de los controladores a 22 de octubre de 2026 y quién puede usarlas. 👑 = solo el dueño del centro (quien lo dio de alta); el resto del equipo lo ve en lectura</p>
                         </div>
                     </div>
                 </div>
@@ -221,7 +221,7 @@
                             <tr>
                                 <td><code>/client/centers/{id}</code></td>
                                 <td><span class="http-get">GET</span></td>
-                                <td>Ficha del centro y tratamientos (/client/centers redirige a /centers)</td>
+                                <td>Ficha del centro y tratamientos; <code>?tratamiento={id}</code> lo deja elegido (/client/centers redirige a /centers)</td>
                                 <td>❌ Login</td>
                                 <td>✅ Permitido</td>
                                 <td>⚠️ Aviso</td>
@@ -229,7 +229,7 @@
                             <tr>
                                 <td><code>/client/booking</code></td>
                                 <td><span class="http-post">POST</span></td>
-                                <td>Solicitud de cita (queda pendiente)</td>
+                                <td>Solicitud de cita (pendiente, o confirmada al momento si el centro acepta automáticamente)</td>
                                 <td>❌ Login</td>
                                 <td>✅ Permitido</td>
                                 <td>❌ Bloqueado</td>
@@ -237,7 +237,7 @@
                             <tr>
                                 <td><code>/client/appointments</code></td>
                                 <td><span class="http-get">GET</span></td>
-                                <td>«Mis Citas»</td>
+                                <td>«Mis reservas»: próximas citas e historial con «Volver a reservar»</td>
                                 <td>❌ Login</td>
                                 <td>✅ Permitido</td>
                                 <td>❌ Bloqueado</td>
@@ -305,7 +305,7 @@
                                 <td>Análisis del centro: ingresos, visitas, clientes nuevos, fieles y a recuperar; por año, frente al año anterior</td>
                                 <td>❌ Login</td>
                                 <td>❌ Bloqueado</td>
-                                <td>✅ Permitido</td>
+                                <td>👑 Solo el dueño</td>
                             </tr>
                             <tr>
                                 <td><code>/worker/calendar</code></td>
@@ -356,6 +356,14 @@
                                 <td>✅ Permitido</td>
                             </tr>
                             <tr>
+                                <td><code>/worker/appointments/{id}/no-show</code></td>
+                                <td><span class="http-post">POST</span></td>
+                                <td>Marcar «No se presentó» en una cita que ya ha empezado, o deshacerlo con <code>undo=true</code> (JSON)</td>
+                                <td>❌ Login</td>
+                                <td>❌ Bloqueado</td>
+                                <td>✅ Permitido</td>
+                            </tr>
+                            <tr>
                                 <td><code>/worker/agenda-blocks, /worker/agenda-blocks/{id}/delete</code></td>
                                 <td><span class="http-post">POST</span></td>
                                 <td>Crear o quitar un bloqueo de horario (JSON)</td>
@@ -377,7 +385,7 @@
                                 <td>Añadir producto (existente o nuevo) o quitarlo del centro</td>
                                 <td>❌ Login</td>
                                 <td>❌ Bloqueado</td>
-                                <td>✅ Permitido</td>
+                                <td>👑 Solo el dueño</td>
                             </tr>
                             <tr>
                                 <td><code>/worker/inventory/sales</code></td>
@@ -401,7 +409,15 @@
                                 <td>Tratamientos del centro y alta de uno nuevo</td>
                                 <td>❌ Login</td>
                                 <td>❌ Bloqueado</td>
-                                <td>✅ Permitido</td>
+                                <td>✅ Ver · 👑 alta, solo el dueño</td>
+                            </tr>
+                            <tr>
+                                <td><code>/worker/treatments/{id}/offer, /offer/delete</code></td>
+                                <td><span class="http-post">POST</span></td>
+                                <td>Poner un tratamiento en oferta (precio y último día opcional) o quitar la oferta</td>
+                                <td>❌ Login</td>
+                                <td>❌ Bloqueado</td>
+                                <td>👑 Solo el dueño</td>
                             </tr>
                             <tr>
                                 <td><code>/worker/clients, /worker/clients/search</code></td>
@@ -457,23 +473,39 @@
                                 <td>Campos de la ficha técnica del centro</td>
                                 <td>❌ Login</td>
                                 <td>❌ Bloqueado</td>
-                                <td>✅ Permitido</td>
+                                <td>👑 Solo el dueño</td>
                             </tr>
                             <tr>
                                 <td><code>/worker/center</code></td>
                                 <td><span class="http-get">GET</span> <span class="http-post">POST</span></td>
-                                <td>«Mi Centro»: datos del centro, foto, zona horaria, cabinas y perfil</td>
+                                <td>«Mi Centro»: datos del centro, zona horaria, cabinas y perfil propio</td>
                                 <td>❌ Login</td>
                                 <td>❌ Bloqueado</td>
-                                <td>✅ Permitido</td>
+                                <td>✅ Su perfil · 👑 datos del centro, solo el dueño</td>
                             </tr>
                             <tr>
-                                <td><code>/worker/center/loyalty, /photo, /photo/delete</code></td>
+                                <td><code>/worker/center/loyalty, /photo, /photo/delete, /hours, /bookings</code></td>
                                 <td><span class="http-post">POST</span></td>
-                                <td>Configurar la tarjeta de puntos; subir o quitar la foto del centro</td>
+                                <td>Configurar la tarjeta de puntos; subir o quitar la foto del centro; horario de apertura; aceptar automáticamente las citas de los clientes</td>
                                 <td>❌ Login</td>
                                 <td>❌ Bloqueado</td>
-                                <td>✅ Permitido</td>
+                                <td>👑 Solo el dueño</td>
+                            </tr>
+                            <tr>
+                                <td><code>/worker/center/team, /team/{id}/resend, /team/{id}/remove</code></td>
+                                <td><span class="http-post">POST</span></td>
+                                <td>Equipo: invitar a alguien, reenviar la invitación o sacarlo del centro</td>
+                                <td>❌ Login</td>
+                                <td>❌ Bloqueado</td>
+                                <td>👑 Solo el dueño</td>
+                            </tr>
+                            <tr>
+                                <td><code>/worker/center/owner</code></td>
+                                <td><span class="http-post">POST</span></td>
+                                <td>Ceder el centro a otra persona del equipo con cuenta activa</td>
+                                <td>❌ Login</td>
+                                <td>❌ Bloqueado</td>
+                                <td>👑 Solo el dueño</td>
                             </tr>
                             <tr>
                                 <td><code>/worker/google-calendar/connect | disconnect, /callback</code></td>
@@ -601,11 +633,11 @@
                         <li><strong>Validaciones</strong> (con bloqueo por centro):
                             <ol style="margin-left: 1.25rem; margin-top: 0.4rem;">
                                 <li>No es una hora pasada, según la hora local del centro (<code>CenterClock</code>).</li>
-                                <li>Cabe completa en el horario de reservas (<code>OpeningHoursPolicy</code>: lunes a viernes, de 9 a 20 h, huecos de 30 min).</li>
+                                <li>Cabe completa en el horario de apertura del centro (<code>OpeningHoursService.forCenter</code>, configurable por día en «Mi Centro»; huecos de 30 min).</li>
                                 <li>Cabe en la agenda (<code>AgendaSnapshot</code>): centro no cerrado, no más citas a la vez que cabinas y al menos un profesional libre.</li>
                             </ol>
                         </li>
-                        <li><strong>Éxito:</strong> cita <code>PENDING</code>, correo al cliente y redirección a <code>/client/appointments</code>.</li>
+                        <li><strong>Éxito:</strong> cita <code>PENDING</code> (o <code>CONFIRMED</code> si el centro tiene activadas las reservas automáticas), correo al cliente y redirección a <code>/client/appointments</code>.</li>
                         <li><strong>Error:</strong> <code>BusinessRuleException</code> → vuelve a la ficha del centro con el mensaje en <code>bookingError</code>.</li>
                     </ul>
                 </div>
@@ -616,7 +648,7 @@
                         <strong>/client/appointments</strong>
                         <span class="card-badge badge-client">CLIENT</span>
                     </div>
-                    <p>«Mis Citas» con filtros por estado y, arriba, «Mis puntos» (<code>LoyaltyService.cardsOfClient</code>: centros con la tarjeta activada donde tiene citas o puntos). Desde cada tarjeta:</p>
+                    <p>«Mis reservas», separada en «Próximas citas» (la primera destacada como «Tu próxima cita») e «Historial» con «Volver a reservar» (abre el centro con el tratamiento ya elegido, <code>?tratamiento=</code>) y, arriba, «Mis puntos» (<code>LoyaltyService.cardsOfClient</code>: centros con la tarjeta activada donde tiene citas o puntos). Desde cada tarjeta:</p>
                     <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.9rem;">
                         <li><code>POST /client/appointments/{id}/accept-proposal</code> (<code>proposalId</code>): elige una hora propuesta y la cita queda confirmada.</li>
                         <li><code>POST /client/appointments/{id}/decline-proposal</code>: ninguna hora le viene bien; se avisa al centro.</li>
@@ -855,7 +887,7 @@
                         <span class="card-badge badge-guest">Público</span>
                     </div>
                     <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.9rem; margin-bottom: 0.8rem;">
-                        <li><strong>Alta de centro</strong> (<code>CenterRegistrationController</code>, asistente de 5 pasos con vista previa a la derecha desde 1100 px; por debajo, «Ver vista previa» la añade como paso final de confirmación antes de enviar): datos del centro, foto opcional y CIF/NIF, dirección con pin en el mapa, zona horaria, cabinas, responsable y hasta 20 trabajadores más (nombre y correo), tarjeta de puntos opcional, especialidades y notas. Crea el centro <strong>oculto</strong> y a todo el equipo como trabajadores sin contraseña.</li>
+                        <li><strong>Alta de centro</strong> (<code>CenterRegistrationController</code>, asistente de 6 pasos con vista previa a la derecha desde 1100 px; por debajo, «Ver vista previa» la añade como paso final de confirmación antes de enviar): datos del centro, foto opcional y CIF/NIF, dirección con pin en el mapa, zona horaria, horario de apertura por día, cabinas, responsable (queda como dueño del centro) y hasta 20 trabajadores más (nombre y correo), tarjeta de puntos opcional, especialidades y notas. Crea el centro <strong>oculto</strong> y a todo el equipo como trabajadores sin contraseña.</li>
                         <li><strong>Invitaciones</strong> (<code>/invitation/{token}</code>): cada trabajador recibe un enlace de un solo uso (7 días) para crear su contraseña; si caduca, pide otro desde la misma página. También puede entrar con Google.</li>
                         <li><strong>Publicación</strong> (<code>/register-center/approve/{token}</code>): el administrador (<code>CRM_ADMIN_EMAIL</code>) recibe el enlace, revisa los datos y pulsa «Publicar centro»; entonces sale en el buscador y el mapa y admite reservas, y el centro recibe un aviso.</li>
                         <li><strong>Contacto:</strong> <code>name</code>, <code>email</code>, <code>phone</code>, <code>subject</code> y <code>message</code>, con acuse y aviso al administrador.</li>
@@ -906,7 +938,7 @@
                             </tr>
                             <tr>
                                 <td><strong>Fuera del horario de reservas</strong></td>
-                                <td>Lunes a viernes, de 9 a 20 h; el tratamiento debe terminar dentro del horario. El trabajador puede saltárselo confirmándolo.</td>
+                                <td>El horario de apertura de cada centro (por día, editable por el dueño en «Mi Centro»); el tratamiento debe terminar dentro del horario. El trabajador puede saltárselo confirmándolo.</td>
                                 <td>Cliente: «El servicio no cabe completo dentro del horario del centro.» Trabajador: 409 <code>OUTSIDE_HOURS</code>.</td>
                             </tr>
                             <tr>

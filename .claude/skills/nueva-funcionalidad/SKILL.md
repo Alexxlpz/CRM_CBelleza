@@ -12,7 +12,7 @@ Orden recomendado. Ejemplo completo y reciente: el resumen del tratamiento (`V8_
 3. **Entidad**: campos con comentario de una línea sobre su porqué. Si la regla depende de la hora, recibe `now` (`CenterClock.now(clock, center)`), no uses `LocalDateTime.now()`.
 4. **Servicio** (`@Transactional`): toda la validación aquí, con `BusinessRuleException` en español (dice qué hacer) o `ResourceNotFoundException`. Busca siempre con `findByIdAndCenterId` / `findByIdAndClientId`. Si es un cambio de cita que afecta a la agenda, va en `BookingService` y publica `AppointmentChangedEvent`; si no (notas, resúmenes), servicio propio.
 5. **Repositorio**: `@EntityGraph` con todo lo que pinte la vista (sin N+1; `open-in-view=false`).
-6. **Controlador** fino: `@AuthenticationPrincipal AppUserDetails`, `centerId` de la sesión. JSON en controladores `@ApiEndpoint` (errores 404/409 en JSON). Totales y filtros para la vista se calculan aquí, no con proyecciones en Thymeleaf.
+6. **Controlador** fino (si el endpoint de `/worker` cambia algo del centro que solo debe tocar el dueño, `@CenterOwnerOnly` y un caso en `CenterOwnershipTests`): `@AuthenticationPrincipal AppUserDetails`, `centerId` de la sesión. JSON en controladores `@ApiEndpoint` (errores 404/409 en JSON). Totales y filtros para la vista se calculan aquí, no con proyecciones en Thymeleaf.
 7. **Interfaz**: aplica el skill `interfaz-cuquora`. Reutiliza fragmentos y clases; si dos pantallas usan lo mismo, fragmento + JS compartido. Textos del servidor en `innerHTML` siempre con `Cuquora.escapeHtml`.
 8. **Tests** (`src/test/java/...`, `@SpringBootTest @AutoConfigureMockMvc @Transactional`, usuarios de `TestUsers`):
    - el caso feliz y cada `BusinessRuleException`;

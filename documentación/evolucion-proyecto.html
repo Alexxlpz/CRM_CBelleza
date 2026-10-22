@@ -83,7 +83,7 @@
                     </div>
                     <div class="hero-meta-item">
                         <span>Commits Registrados:</span>
-                        <strong>45 commits (hasta el 16 oct 2026)</strong>
+                        <strong>56 commits (hasta el 22 oct 2026)</strong>
                     </div>
                     <div class="hero-meta-item">
                         <span>Metodología:</span>
@@ -846,6 +846,113 @@
                         </div>
                     </div>
 
+                    <!-- Commit 40 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="commit-hash">34b29a2</span>
+                                <span class="commit-date">📅 19 de Octubre, 2026</span>
+                                <span class="commit-author">👤 alejandro</span>
+                            </div>
+                            <h4>Recordatorios de cita</h4>
+                            <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.88rem;">
+                                <li>Arreglado el envío de recordatorios, que fallaba con «Check constraint invalid».</li>
+                                <li>Tests nuevos en <code>AgendaTests</code> para ese caso.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Commit 41 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="commit-hash">07104e5</span>
+                                <span class="commit-date">📅 20 de Octubre, 2026</span>
+                                <span class="commit-author">👤 alejandro</span>
+                            </div>
+                            <h4>Ofertas en tratamientos</h4>
+                            <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.88rem;">
+                                <li>El trabajador pone un tratamiento en oferta con precio y fecha de fin opcional (<code>V15__ofertas_tratamientos.sql</code>).</li>
+                                <li>Al reservar hay filtro «En oferta», etiqueta de descuento y el precio de carta tachado; la cita guarda el precio de oferta.</li>
+                                <li>Las tarjetas de centro dicen cuántos tratamientos tienen en oferta, con filtro «Con ofertas».</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Commit 42 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="commit-hash">8ff17fe</span>
+                                <span class="commit-date">📅 21 de Octubre, 2026</span>
+                                <span class="commit-author">👤 alejandro</span>
+                            </div>
+                            <h4>Reservas automáticas</h4>
+                            <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.88rem;">
+                                <li>El dueño puede hacer que las reservas de clientes nazcan confirmadas (<code>V16__auto_aceptar_citas.sql</code>, «Mi Centro»).</li>
+                                <li>El cliente ve «Reservar cita» en lugar de «Solicitar cita» en esos centros.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Commit 43 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="commit-hash">91f313b</span>
+                                <span class="commit-date">📅 21 de Octubre, 2026</span>
+                                <span class="commit-author">👤 alejandro</span>
+                            </div>
+                            <h4>Horario por centro, dueño, equipo y «Abierto ahora»</h4>
+                            <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.88rem;">
+                                <li>Cada centro tiene su horario de apertura por día (<code>V17</code>, <code>OpeningHoursService</code>), con paso propio en el alta de centro (ahora de 6 pasos); la agenda y las reservas lo usan.</li>
+                                <li>Quien da de alta el centro es su <strong>dueño</strong>: solo él cambia datos, carta, inventario, análisis, horario y reservas automáticas (<code>@CenterOwnerOnly</code>).</li>
+                                <li>Tarjeta «Equipo» en «Mi Centro»: invitar, reenviar invitación y quitar trabajadores; quien sale pierde el acceso en su siguiente petición.</li>
+                                <li>El buscador de centros dice si cada centro está abierto ahora y cuándo cierra o abre, con filtro «Abierto ahora».</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Commit 44 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="commit-hash">34aa416</span>
+                                <span class="commit-date">📅 21 de Octubre, 2026</span>
+                                <span class="commit-author">👤 alejandro</span>
+                            </div>
+                            <h4>Limpieza de avisos</h4>
+                            <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.88rem;">
+                                <li>Fuera variables y parámetros sin usar y nombres completos redundantes.</li>
+                                <li>Se quita el dialecto de Hibernate explícito (se detecta solo) y Mockito se carga como agente de la JVM de tests.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Commit 45 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="commit-hash">5c8ad79</span>
+                                <span class="commit-date">📅 22 de Octubre, 2026</span>
+                                <span class="commit-author">👤 alejandro</span>
+                            </div>
+                            <h4>«Mis reservas», «Volver a reservar» y «No se presentó»</h4>
+                            <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.88rem;">
+                                <li>«Mis reservas» separa «Próximas citas» (la primera destacada) del «Historial».</li>
+                                <li>«Volver a reservar» abre el centro con el mismo tratamiento ya elegido (<code>?tratamiento=</code>).</li>
+                                <li>El trabajador marca «No se presentó» en una cita ya empezada (<code>V18__citas_no_presentado.sql</code>, estado <code>NO_SHOW</code>); se puede deshacer, quita los puntos de esa cita y la ficha del cliente y la agenda avisan de cuántas veces ha faltado.</li>
+                                <li>Tests: 225 en total, todos en verde.</li>
+                            </ul>
+                        </div>
+                    </div>
+
                 </div>
             </section>
 
@@ -865,7 +972,7 @@
                     <div class="card-feature">
                         <h4>1. Algoritmo de Turnos Continuos y Multi-Slot</h4>
                         <p>
-                            Un tratamiento no dura siempre 30 minutos: los hay de 45, 60 o 90 minutos. El sistema no podía limitarse a comprobar un punto en el tiempo; debía verificar que todo el intervalo <code>[inicio, inicio + duracion]</code> estuviera libre de citas confirmadas y cupiera dentro del horario laboral (09:00 - 20:00).
+                            Un tratamiento no dura siempre 30 minutos: los hay de 45, 60 o 90 minutos. El sistema no podía limitarse a comprobar un punto en el tiempo; debía verificar que todo el intervalo <code>[inicio, inicio + duracion]</code> estuviera libre de citas confirmadas y cupiera dentro del horario de apertura de ese centro (al principio fijo de 09:00 a 20:00; desde el 21 de octubre, configurable por día).
                         </p>
                     </div>
 
