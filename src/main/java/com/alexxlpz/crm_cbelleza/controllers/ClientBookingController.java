@@ -60,12 +60,20 @@ public class ClientBookingController {
         return "redirect:/centers";
     }
 
+    /** Ficha del centro con la reserva. {@code tratamiento}: «Volver a reservar» lo deja ya elegido (si sigue en la carta). */
     @GetMapping("/client/centers/{id}")
-    public String centerDetails(@PathVariable Long id, Model model) {
+    public String centerDetails(@PathVariable Long id,
+                                @RequestParam(name = "tratamiento", required = false) Long treatmentId,
+                                Model model) {
         model.addAttribute("center", centerService.getPublishedCenter(id));
         List<Treatment> treatments = treatmentService.getTreatmentsByCenter(id);
         LocalDate today = treatmentService.todayAt(id);
         model.addAttribute("treatments", treatments);
+        model.addAttribute("selectedTreatmentId", treatments.stream()
+                .map(Treatment::getId)
+                .filter(candidate -> candidate.equals(treatmentId))
+                .findFirst()
+                .orElse(null));
         model.addAttribute("today", today);
         model.addAttribute("offerCount", treatments.stream().filter(t -> t.hasActiveOffer(today)).count());
         model.addAttribute("workers", userService.getWorkersByCenter(id));
@@ -94,7 +102,7 @@ public class ClientBookingController {
 
     @GetMapping("/client/appointments")
     public String appointments(@AuthenticationPrincipal AppUserDetails client, Model model) {
-        model.addAttribute("appointments", appointmentService.getClientAppointments(client.getId()));
+        model.addAttribute("appointments", appointmentService.getClientAppointmentsSplit(client.getId()));
         model.addAttribute("loyaltyCards", loyaltyService.cardsOfClient(client.getId()));
         model.addAttribute("activePage", "appointments");
         return "client/appointments";

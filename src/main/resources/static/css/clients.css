@@ -160,6 +160,12 @@
     color: var(--primary-text);
 }
 
+.client-sub-badge.no-show {
+    background: var(--warning-bg);
+    color: var(--warning-text);
+    text-decoration: none;
+}
+
 .client-details-list {
     display: flex;
     flex-direction: column;

@@ -3,6 +3,7 @@ package com.alexxlpz.crm_cbelleza.controllers;
 import com.alexxlpz.crm_cbelleza.security.CenterOwnerOnly;
 import com.alexxlpz.crm_cbelleza.dto.ClientSummaryDTO;
 import com.alexxlpz.crm_cbelleza.entities.Appointment;
+import com.alexxlpz.crm_cbelleza.entities.AppointmentStatus;
 import com.alexxlpz.crm_cbelleza.entities.ProductSale;
 import com.alexxlpz.crm_cbelleza.exceptions.BusinessRuleException;
 import com.alexxlpz.crm_cbelleza.forms.NewClientForm;
@@ -93,6 +94,7 @@ public class ClientCardController {
         List<Appointment> appointments = appointmentService.getClientAppointmentsInCenter(worker.getCenterId(), clientId);
         model.addAttribute("appointments", appointments);
         model.addAttribute("alerts", appointments.stream().filter(Appointment::isTreatmentAlert).toList());
+        model.addAttribute("noShows", appointments.stream().filter(a -> a.getStatus() == AppointmentStatus.NO_SHOW).count());
         model.addAttribute("centerNow", summaryService.centerNow(worker.getCenterId()));
         List<ProductSale> sales = saleService.salesOf(worker.getCenterId(), clientId);
         model.addAttribute("sales", sales);

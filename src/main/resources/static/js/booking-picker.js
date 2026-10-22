@@ -264,6 +264,12 @@ document.addEventListener('DOMContentLoaded', function () {
         picker.closest('.booking-datetime-group').scrollIntoView({ behavior: Cuquora.scrollBehavior(), block: 'start' });
     }));
 
+    // «Volver a reservar»: el servicio llega elegido; en móvil se pliega la lista y se ve el servicio con el día y la hora
+    if (form.dataset.rebook === 'true' && checkedTreatment() && narrowQuery.matches) {
+        setServicesCollapsed(true);
+        services.scrollIntoView({ block: 'start' });
+    }
+
     // «Todos los servicios / En oferta»: solo esconde tarjetas, el servicio elegido sigue elegido
     const filterButtons = form.querySelectorAll('[data-booking-filter]');
     filterButtons.forEach(button => button.addEventListener('click', () => {

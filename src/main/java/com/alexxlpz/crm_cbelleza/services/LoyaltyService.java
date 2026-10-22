@@ -126,6 +126,11 @@ public class LoyaltyService {
         movements.deleteByProductSaleId(saleId);
     }
 
+    /** Quita los puntos de una cita que al final no se hizo (el cliente no se presentó). */
+    public void revokeAppointment(Long appointmentId) {
+        movements.deleteByAppointmentId(appointmentId);
+    }
+
     /** Canjea la recompensa del centro: resta el umbral del saldo. */
     public void redeem(Center center, User client, Long workerId) {
         // Bloquea el centro: dos pulsaciones seguidas no pueden canjear dos veces el mismo saldo

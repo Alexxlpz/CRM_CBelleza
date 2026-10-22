@@ -1,7 +1,8 @@
 <div xmlns:th="http://www.thymeleaf.org">
-    <!-- Tarjeta de cita del cliente. data-status permite filtrar por estado sin depender del texto. -->
-    <article class="appointment-card glass-panel" th:fragment="card(app)" th:attr="data-status=${app.status.name()}"
-             th:classappend="${app.status.name() == 'PROPOSED'} ? ' appointment-card--proposed'">
+    <!-- Tarjeta de una cita próxima del cliente. next: es la más cercana (va destacada). -->
+    <article class="appointment-card glass-panel" th:fragment="card(app, next)" th:attr="data-status=${app.status.name()}"
+             th:classappend="${(app.status.name() == 'PROPOSED' ? ' appointment-card--proposed' : '') + (next ? ' appointment-card--next' : '')}">
+        <p class="appointment-next-label" th:if="${next}">Tu próxima cita</p>
         <div class="appointment-card-header">
             <h2 class="appointment-service" th:text="${app.treatment.name}">Tratamiento</h2>
             <span class="badge" th:classappend="${'badge-' + #strings.toLowerCase(app.status.name())}"
@@ -75,4 +76,23 @@
             </form>
         </div>
     </article>
+
+    <!-- Fila del historial: lo justo para reconocer la cita y repetirla. -->
+    <li class="history-row" th:fragment="historyRow(app)" th:attr="data-status=${app.status.name()}">
+        <div class="history-row-main">
+            <p class="history-row-treatment" th:text="${app.treatment.name}">Manicura rusa</p>
+            <p class="history-row-meta">
+                <time th:datetime="${app.dateTime}" th:text="${#temporals.format(app.dateTime, 'd MMM yyyy · HH:mm')}">7 sept 2026 · 12:30</time>
+                · <span th:text="${app.center.name}">Centro Histórico</span>
+                <th:block th:if="${app.worker != null}"> · <span th:text="${app.worker.name}">Carlos Mendoza</span></th:block>
+            </p>
+        </div>
+        <span class="badge" th:classappend="${'badge-' + #strings.toLowerCase(app.status.name())}"
+              th:text="${app.status.name() == 'NO_SHOW' ? 'No asististe' : app.status.label()}">Completada</span>
+        <a class="btn btn-secondary btn-sm history-row-rebook" th:if="${app.center.published}"
+           th:href="@{/client/centers/{id}(id=${app.center.id}, tratamiento=${app.treatment.id})}"
+           th:attr="aria-label=${'Volver a reservar ' + app.treatment.name + ' en ' + app.center.name}">
+            <i class="lucide-rotate-ccw" aria-hidden="true"></i> Volver a reservar
+        </a>
+    </li>
 </div>

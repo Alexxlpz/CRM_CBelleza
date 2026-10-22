@@ -123,6 +123,19 @@ public class WorkerAppointmentApiController {
         return appointmentService.getCalendarAppointment(worker.getCenterId(), id);
     }
 
+    /** El cliente no vino a una cita que ya ha empezado (o se deshace si se marcó por error). */
+    @PostMapping("/worker/appointments/{id}/no-show")
+    public AppointmentCalendarDTO noShow(@AuthenticationPrincipal AppUserDetails worker,
+                                         @PathVariable Long id,
+                                         @RequestParam(defaultValue = "false") boolean undo) {
+        if (undo) {
+            bookingService.undoNoShow(worker.getCenterId(), id);
+        } else {
+            bookingService.markNoShow(worker.getCenterId(), id);
+        }
+        return appointmentService.getCalendarAppointment(worker.getCenterId(), id);
+    }
+
     /** Resumen del tratamiento realizado y precio cobrado (agenda y ficha del cliente). Texto vacío = se borra. */
     @PostMapping("/worker/appointments/{id}/summary")
     public AppointmentCalendarDTO saveSummary(@AuthenticationPrincipal AppUserDetails worker,

@@ -28,9 +28,14 @@ Se lee bajo demanda desde `CLAUDE.md` antes de tocar la pantalla correspondiente
   - «Nueva cita» (botón de la barra o pulsar un hueco libre de la semana): cliente de la cartera (buscador `/worker/clients/search`) o nuevo, tratamiento, día, hora y profesional. Nace **confirmada**.
   - Solicitud pendiente: Aceptar (eligiendo profesional), Rechazar u «Otra hora» (propuesta de 1 a 3 horas; el cliente elige en «Mis Citas»; caduca a las 48 h o 2 h antes de la primera). En la semana las horas propuestas son bloques discontinuos azules.
   - Cita confirmada futura: «Cambiar hora» (y profesional) o «Anular»; en escritorio también se arrastra en la semana. Sigue confirmada y el cliente ve «antes: …».
+  - Cita que ya ha empezado o completada: «No se presentó» (pide confirmación; en la semana sale tachada) y «Sí vino: deshacer». Si el cliente ya faltó alguna vez, sus otras citas lo avisan en «Avisos de este cliente».
   - Fuera del horario de reservas el servidor responde 409 con `code: OUTSIDE_HOURS` y se pregunta si guardar igualmente (`allowOutsideHours`). Los solapes nunca se permiten.
   - «Bloquear horario»: vacaciones o descansos de un profesional o cierre del centro (rayado en la agenda; se quita pulsándolo). No se puede bloquear un periodo con citas confirmadas.
 - Las posiciones de los bloques se calculan en JS y se pasan como variables CSS (`--top`, `--height`, `--left`, `--width`, `--week-columns`, `--hours`), con un valor por defecto declarado en `calendar.css` para que IntelliJ las resuelva; no dividas por `var()` dentro de `calc()`.
+
+## Mis reservas del cliente (`client/appointments.html` + `fragments/appointment-card.html`)
+- «Próximas citas» (solicitudes, propuestas y confirmadas que aún no han empezado; `AppointmentService.getClientAppointmentsSplit`) en tarjetas, con la más cercana destacada («Tu próxima cita»).
+- «Historial» plegado (`<details>`, abierto solo si no hay próximas) en filas compactas (`historyRow`): tratamiento, fecha, centro, profesional, estado y «Volver a reservar», que abre `/client/centers/{id}?tratamiento={id}` con el servicio ya elegido (en móvil, la lista de servicios plegada al elegido).
 
 ## Navegación
 - Por encima de 1365 px: botones de sesión con icono y texto. Sin sesión, «Iniciar Sesión» y «Registrarse» conservan siempre el texto (entre 993 y 1199 px se compactan los rellenos para que quepan).

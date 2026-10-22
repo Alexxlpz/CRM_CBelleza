@@ -38,6 +38,8 @@
                         <span class="client-sub-badge registered" th:if="${client.hasAccount()}">
                             <i class="lucide-shield-check" aria-hidden="true"></i> Registrado
                         </span>
+                        <a class="client-sub-badge no-show" th:if="${noShows > 0}" href="#historial"
+                           th:text="${noShows == 1 ? 'No se presentó a 1 cita' : 'No se presentó a ' + noShows + ' citas'}">No se presentó a 2 citas</a>
                     </div>
                 </div>
             </div>
@@ -243,7 +245,7 @@
             </section>
 
             <!-- Right Column: Historial de Citas en este Centro -->
-            <section class="card-panel client-history-panel">
+            <section class="card-panel client-history-panel" id="historial">
                 <div class="panel-header-row">
                     <h2 class="panel-title">Historial de Citas</h2>
                     <span class="client-appointments-count" id="historyCount"

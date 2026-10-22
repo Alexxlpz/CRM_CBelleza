@@ -25,7 +25,8 @@
             </h2>
 
             <form th:action="@{/client/booking}" method="post" id="bookingForm" novalidate
-                  th:classappend="${not #lists.isEmpty(treatments)} ? 'booking-form--split'">
+                  th:classappend="${not #lists.isEmpty(treatments)} ? 'booking-form--split'"
+                  th:attr="data-rebook=${selectedTreatmentId != null}">
                 <input type="hidden" name="centerId" th:value="${center.id}">
 
                 <!-- 1. Selectable Treatments list -->
@@ -47,7 +48,7 @@
                                th:with="onOffer=${t.hasActiveOffer(today)}"
                                th:attr="data-offer=${onOffer}">
                             <input type="radio" name="treatmentId" th:value="${t.id}"
-                                th:attr="data-duration=${t.duration}" required>
+                                th:attr="data-duration=${t.duration}" th:checked="${t.id == selectedTreatmentId}" required>
                             <span class="offer-badge" th:if="${onOffer}">
                                 <i class="lucide-tag" aria-hidden="true"></i>
                                 <span th:text="'-' + ${t.offerDiscountPercent()} + ' %' + (${t.offerEndsOn != null} ? ' · ' + ${t.offerEndsLabel()} : '')">-20 % · hasta el 30 oct</span>
@@ -90,7 +91,7 @@
                         <i class="lucide-hourglass" aria-hidden="true"></i> El centro revisará tu solicitud y te avisaremos cuando la confirme.
                     </p>
                     <button type="submit" class="btn btn-primary btn-large-submit">
-                        <i class="lucide-check-circle" aria-hidden="true"></i> Confirmar y reservar cita
+                        <i class="lucide-check-circle" aria-hidden="true"></i> <span th:text="${center.autoAcceptBookings} ? 'Reservar cita' : 'Solicitar cita'">Solicitar cita</span>
                     </button>
                 </div>
             </form>

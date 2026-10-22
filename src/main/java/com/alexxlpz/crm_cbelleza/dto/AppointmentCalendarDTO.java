@@ -34,6 +34,8 @@ public class AppointmentCalendarDTO {
     private boolean summaryEditable;
     /** Avisos que el cliente tiene en otras citas del centro (reacciones, productos que no le sientan bien...). */
     private java.util.List<ClientAlertDTO> clientAlerts;
+    /** Citas del centro a las que el cliente no se presentó. */
+    private int clientNoShows;
 
     @Data
     @Builder

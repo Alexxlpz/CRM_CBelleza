@@ -9,7 +9,7 @@
 
     <main class="main-container appointments-page">
         <div class="page-header">
-            <h1>Mis Reservas</h1>
+            <h1>Mis reservas</h1>
             <p>Estado y agenda de tus citas en Cuquora</p>
         </div>
 
@@ -61,45 +61,34 @@
             </section>
 
             <div class="appointments-list">
-                <div class="category-filter-bar" role="toolbar" aria-label="Filtrar citas por estado">
-                    <button type="button" class="category-pill active" data-filter="ALL" aria-pressed="true">
-                        <i class="lucide-sparkles" aria-hidden="true"></i> Todas
-                    </button>
-                    <button type="button" class="category-pill" data-filter="CONFIRMED" aria-pressed="false">
-                        <i class="lucide-smile" aria-hidden="true"></i> Confirmadas
-                    </button>
-                    <button type="button" class="category-pill" data-filter="COMPLETED" aria-pressed="false">
-                        <i class="lucide-check-circle-2" aria-hidden="true"></i> Completadas
-                    </button>
-                    <button type="button" class="category-pill" data-filter="PROPOSED" aria-pressed="false">
-                        <i class="lucide-calendar-clock" aria-hidden="true"></i> Propuestas
-                    </button>
-                    <button type="button" class="category-pill" data-filter="PENDING" aria-pressed="false">
-                        <i class="lucide-hourglass" aria-hidden="true"></i> Pendientes
-                    </button>
-                    <button type="button" class="category-pill" data-filter="REJECTED" aria-pressed="false">
-                        <i class="lucide-x-circle" aria-hidden="true"></i> Rechazadas
-                    </button>
-                    <button type="button" class="category-pill" data-filter="CANCELLED" aria-pressed="false">
-                        <i class="lucide-ban" aria-hidden="true"></i> Anuladas
-                    </button>
-                </div>
+                <!-- Próximas: lo que el cliente tiene que mirar o hacer. La más cercana, destacada -->
+                <section class="appointments-block" aria-labelledby="upcomingTitle">
+                    <h2 class="appointments-block-title" id="upcomingTitle">Próximas citas
+                        <span class="appointments-block-count" th:if="${!appointments.upcoming().isEmpty()}"
+                              th:text="${appointments.upcoming().size()}">9</span></h2>
+                    <div class="appointments-grid" th:if="${!appointments.upcoming().isEmpty()}">
+                        <th:block th:each="app, stat : ${appointments.upcoming()}">
+                            <div th:replace="~{fragments/appointment-card :: card(${app}, ${stat.first})}"></div>
+                        </th:block>
+                    </div>
+                    <div class="no-appointments-box glass-panel" th:if="${appointments.upcoming().isEmpty()}">
+                        <i class="lucide-calendar-off" aria-hidden="true"></i>
+                        <p th:if="${appointments.history().isEmpty()}">Todavía no tienes citas. <a href="/centers">Busca un centro</a> y reserva tu primera cita.</p>
+                        <p th:unless="${appointments.history().isEmpty()}">No tienes citas próximas. Repite un tratamiento desde el historial o <a href="/centers">busca un centro</a>.</p>
+                    </div>
+                </section>
 
-                <div class="appointments-grid" id="appointmentsGrid" th:if="${not #lists.isEmpty(appointments)}">
-                    <th:block th:each="app : ${appointments}">
-                        <div th:replace="~{fragments/appointment-card :: card(${app})}"></div>
-                    </th:block>
-                </div>
-
-                <div class="no-appointments-box glass-panel" id="noFilterResults" hidden>
-                    <i class="lucide-filter-x" aria-hidden="true"></i>
-                    <p>No tienes citas con este estado.</p>
-                </div>
-
-                <div class="no-appointments-box glass-panel" th:if="${#lists.isEmpty(appointments)}">
-                    <i class="lucide-calendar-off" aria-hidden="true"></i>
-                    <p>Todavía no tienes citas. <a href="/centers">Busca un centro</a> y reserva tu primera cita.</p>
-                </div>
+                <!-- Historial: plegado y en filas compactas; se abre solo si no hay próximas -->
+                <details class="appointments-history" th:if="${!appointments.history().isEmpty()}"
+                         th:open="${appointments.upcoming().isEmpty()}">
+                    <summary class="appointments-block-title">Historial
+                        <span class="appointments-block-count" th:text="${appointments.history().size()}">22</span></summary>
+                    <ul class="history-rows">
+                        <th:block th:each="app : ${appointments.history()}">
+                            <li th:replace="~{fragments/appointment-card :: historyRow(${app})}"></li>
+                        </th:block>
+                    </ul>
+                </details>
             </div>
         </div>
     </main>
@@ -107,25 +96,6 @@
     <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Software de gestión para centros de estética, salones y spas.')}"></div>
 
     <script>
-        // Filtro por estado: usa data-status (valor del enum), no el texto visible de la etiqueta.
-        document.querySelectorAll('[data-filter]').forEach(button => {
-            button.addEventListener('click', () => {
-                const filter = button.dataset.filter;
-                document.querySelectorAll('[data-filter]').forEach(b => {
-                    b.classList.toggle('active', b === button);
-                    b.setAttribute('aria-pressed', String(b === button));
-                });
-                let visible = 0;
-                document.querySelectorAll('.appointment-card').forEach(card => {
-                    const show = filter === 'ALL' || card.dataset.status === filter;
-                    card.hidden = !show;
-                    if (show) visible++;
-                });
-                const empty = document.getElementById('noFilterResults');
-                if (empty) empty.hidden = visible > 0 || !document.getElementById('appointmentsGrid');
-            });
-        });
-
         // Carrusel de puntos (móvil y tablet): marca el punto de la tarjeta visible y lleva a la tarjeta al pulsarlo.
         const loyaltyCarousel = document.getElementById('loyaltyCarousel');
         const loyaltyDots = Array.from(document.querySelectorAll('.client-loyalty-dot'));

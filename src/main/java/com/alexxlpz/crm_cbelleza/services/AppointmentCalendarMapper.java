@@ -17,8 +17,9 @@ public class AppointmentCalendarMapper {
     /**
      * @param now         «ahora» en la hora del centro (decide si ya se puede escribir el resumen)
      * @param clientAlerts avisos del cliente en el centro (se excluye el de esta misma cita)
+     * @param clientNoShows citas del centro a las que el cliente no se presentó
      */
-    public AppointmentCalendarDTO toDto(Appointment app, LocalDateTime now, List<Appointment> clientAlerts) {
+    public AppointmentCalendarDTO toDto(Appointment app, LocalDateTime now, List<Appointment> clientAlerts, int clientNoShows) {
         return AppointmentCalendarDTO.builder()
                 .id(app.getId())
                 .dateTime(app.getDateTime() != null ? app.getDateTime().toString() : null)
@@ -47,6 +48,7 @@ public class AppointmentCalendarMapper {
                         .map(alert -> new AppointmentCalendarDTO.ClientAlertDTO(
                                 alert.getDateTime().toString(), alert.getTreatment().getName(), alert.getTreatmentSummary()))
                         .toList())
+                .clientNoShows(clientNoShows)
                 .build();
     }
 

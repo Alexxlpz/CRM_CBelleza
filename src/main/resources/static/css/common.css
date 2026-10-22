@@ -1076,6 +1076,12 @@ button.mobile-drawer-link {
     color: var(--neutral-text);
     border: 1px solid rgba(var(--neutral-rgb), 0.35);
 }
+
+.badge-no_show {
+    background-color: var(--warning-bg);
+    color: var(--warning-text);
+    border: 1px dashed currentColor;
+}
 /* Forms */
 .form-group {
     margin-bottom: 20px;

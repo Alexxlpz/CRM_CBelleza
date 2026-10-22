@@ -24,4 +24,7 @@ public interface LoyaltyMovementRepository extends JpaRepository<LoyaltyMovement
 
     @Modifying
     void deleteByProductSaleId(Long productSaleId);
+
+    @Modifying
+    void deleteByAppointmentId(Long appointmentId);
 }

@@ -94,6 +94,8 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
     long countByClientId(Long clientId);
 
+    long countByCenterIdAndClientIdAndStatus(Long centerId, Long clientId, AppointmentStatus status);
+
     boolean existsByCenterIdAndClientIdAndStatusIn(Long centerId, Long clientId, Collection<AppointmentStatus> statuses);
 
     @EntityGraph(attributePaths = {"treatment"})

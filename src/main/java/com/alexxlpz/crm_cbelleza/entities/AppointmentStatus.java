@@ -11,7 +11,9 @@ public enum AppointmentStatus {
     REJECTED("Rechazada"),
     /** Anulada por el cliente o por el centro, o propuesta sin respuesta. */
     CANCELLED("Anulada"),
-    COMPLETED("Completada");
+    COMPLETED("Completada"),
+    /** El cliente no vino a una cita confirmada (lo marca el centro): no suma puntos ni cuenta como visita. */
+    NO_SHOW("No se presentó");
 
     private final String label;
 

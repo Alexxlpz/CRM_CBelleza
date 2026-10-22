@@ -39,7 +39,8 @@ document.addEventListener('DOMContentLoaded', function () {
         CONFIRMED: { css: 'badge-confirmed', label: 'Confirmada' },
         COMPLETED: { css: 'badge-completed', label: 'Completada' },
         REJECTED: { css: 'badge-rejected', label: 'Rechazada' },
-        CANCELLED: { css: 'badge-cancelled', label: 'Anulada' }
+        CANCELLED: { css: 'badge-cancelled', label: 'Anulada' },
+        NO_SHOW: { css: 'badge-no_show', label: 'No se presentó' }
     };
 
     const grid = document.getElementById('calendarDays');
@@ -231,7 +232,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const newClient = app.isNewClient
             ? '<span class="badge-new-client"><i class="lucide-sparkles" aria-hidden="true"></i> Nuevo Cliente</span>' : '';
-        const clientCardLink = (app.status === 'CONFIRMED' || app.status === 'COMPLETED') && client.id ? `
+        const clientCardLink = (app.status === 'CONFIRMED' || app.status === 'COMPLETED' || app.status === 'NO_SHOW') && client.id ? `
             <a href="/worker/clients/${encodeURIComponent(client.id)}" class="btn-template-config btn-template-config--sm">
                 <i class="lucide-file-text" aria-hidden="true"></i> Ficha del Cliente
             </a>` : '';
@@ -250,11 +251,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 ${app.proposalExpiresAt ? `<p class="agenda-proposals-expiry">Si no responde, se anulará el ${esc(longDate(app.proposalExpiresAt))}.</p>` : ''}
             </div>` : '';
 
-        // Avisos de otras citas del cliente (reacciones, productos que no le sientan bien...)
-        const alerts = occupiesAgenda(app) && app.clientAlerts?.length ? `
+        // Avisos de otras citas del cliente (reacciones, productos que no le sientan bien...) y veces que no vino
+        const noShows = app.status !== 'NO_SHOW' && app.clientNoShows > 0
+            ? `<li><strong>No se ha presentado ${app.clientNoShows === 1 ? 'a 1 cita' : `a ${esc(String(app.clientNoShows))} citas`}.</strong></li>` : '';
+        const alerts = occupiesAgenda(app) && (app.clientAlerts?.length || noShows) ? `
             <div class="client-alerts">
                 <p class="client-alerts-title"><i class="lucide-alert-triangle" aria-hidden="true"></i> Avisos de este cliente</p>
-                <ul>${app.clientAlerts.map(a => `<li><strong>${esc(shortDate(a.dateTime))} · ${esc(a.treatmentName)}:</strong> <span>${esc(a.summary)}</span></li>`).join('')}</ul>
+                <ul>${noShows}${(app.clientAlerts || []).map(a => `<li><strong>${esc(shortDate(a.dateTime))} · ${esc(a.treatmentName)}:</strong> <span>${esc(a.summary)}</span></li>`).join('')}</ul>
             </div>` : '';
         const summary = app.treatmentSummary ? `
             <div class="treatment-summary${app.treatmentAlert ? ' is-alert' : ''}">
@@ -308,6 +311,20 @@ document.addEventListener('DOMContentLoaded', function () {
                 </button>
                 <button type="button" class="btn-agenda-action neutral" data-action="reschedule">
                     <i class="lucide-calendar-clock agenda-action-icon" aria-hidden="true"></i> Cambiar hora
+                </button>
+            </div>`;
+        } else if ((app.status === 'CONFIRMED' || app.status === 'COMPLETED') && client.id) {
+            actions = `
+            <div class="agenda-card-actions">
+                <button type="button" class="btn-agenda-action neutral" data-action="no-show">
+                    <i class="lucide-user-x agenda-action-icon" aria-hidden="true"></i> No se presentó
+                </button>
+            </div>`;
+        } else if (app.status === 'NO_SHOW') {
+            actions = `
+            <div class="agenda-card-actions">
+                <button type="button" class="btn-agenda-action neutral" data-action="undo-no-show">
+                    <i class="lucide-undo-2 agenda-action-icon" aria-hidden="true"></i> Sí vino: deshacer
                 </button>
             </div>`;
         }
@@ -377,8 +394,16 @@ document.addEventListener('DOMContentLoaded', function () {
             });
             if (!ok) return;
         }
-        const endpoints = { approve: 'approve', reject: 'reject', withdraw: 'withdraw-proposal', cancel: 'cancel' };
-        const params = { message };
+        if (action === 'no-show') {
+            const ok = await Cuquora.confirm(`La cita de ${app.client?.name || 'este cliente'} del ${longDate(app.dateTime)} quedará como «No se presentó»: no sumará puntos y lo verás en su ficha.`, {
+                title: '¿No se presentó?',
+                confirmText: 'No se presentó'
+            });
+            if (!ok) return;
+        }
+        const endpoints = { approve: 'approve', reject: 'reject', withdraw: 'withdraw-proposal', cancel: 'cancel',
+            'no-show': 'no-show', 'undo-no-show': 'no-show' };
+        const params = action === 'no-show' ? {} : action === 'undo-no-show' ? { undo: 'true' } : { message };
         if (action === 'approve') params.workerId = card.querySelector('.agenda-worker-select')?.value;
         const buttons = card.querySelectorAll('[data-action]');
         buttons.forEach(b => { b.disabled = true; });
@@ -426,6 +451,7 @@ document.addEventListener('DOMContentLoaded', function () {
         dayCount.textContent = [
             [count('CONFIRMED'), 'confirmada', 'confirmadas'],
             [count('COMPLETED'), 'completada', 'completadas'],
+            [count('NO_SHOW'), 'no se presentó', 'no se presentaron'],
             [count('PENDING'), 'solicitud pendiente', 'solicitudes pendientes'],
             [count('PROPOSED'), 'propuesta enviada', 'propuestas enviadas'],
             [dayBlocks.length, 'bloqueo', 'bloqueos']
@@ -742,7 +768,8 @@ document.addEventListener('DOMContentLoaded', function () {
         button.className = `${className} status-${app.status.toLowerCase()}`;
         button.dataset.appointmentId = String(app.id);
         const flag = app.status === 'PENDING' ? '<span class="week-event-flag">Solicitud</span>'
-            : app.status === 'PROPOSED' ? '<span class="week-event-flag">Propuesta enviada</span>' : '';
+            : app.status === 'PROPOSED' ? '<span class="week-event-flag">Propuesta enviada</span>'
+            : app.status === 'NO_SHOW' ? '<span class="week-event-flag">No se presentó</span>' : '';
         button.innerHTML = `
             <span class="week-event-time">${clock(start)} – ${clock(start + durationOf(app))}</span>
             <span class="week-event-title">${esc(app.treatment?.name)}</span>

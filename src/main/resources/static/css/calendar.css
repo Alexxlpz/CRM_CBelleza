@@ -1154,6 +1154,22 @@ button.calendar-day-cell {
     color: var(--text-muted);
 }
 
+/* No se presentó: como completada, pero tachada para que no cuente al mirar la semana */
+.status-no_show {
+    background: var(--surface-muted);
+    border-left-color: var(--warning);
+    color: var(--text-muted);
+    box-shadow: inset 0 0 0 1px var(--border-soft);
+}
+
+.status-no_show .week-event-time {
+    color: var(--text-muted);
+}
+
+.status-no_show .week-event-title {
+    text-decoration: line-through;
+}
+
 /* En el bloque solo cabe un resumen: el detalle completo está en el modal al pulsarlo */
 .week-event-title,
 .week-event-client {

@@ -51,6 +51,7 @@ public class BookingService {
     private final TreatmentRepository treatmentRepository;
     private final UserRepository userRepository;
     private final ClientCardService clientCardService;
+    private final LoyaltyService loyaltyService;
     private final AgendaAvailabilityService availability;
     private final OpeningHoursService openingHours;
     private final ApplicationEventPublisher events;
@@ -62,6 +63,7 @@ public class BookingService {
                           TreatmentRepository treatmentRepository,
                           UserRepository userRepository,
                           ClientCardService clientCardService,
+                          LoyaltyService loyaltyService,
                           AgendaAvailabilityService availability,
                           OpeningHoursService openingHours,
                           ApplicationEventPublisher events,
@@ -72,6 +74,7 @@ public class BookingService {
         this.treatmentRepository = treatmentRepository;
         this.userRepository = userRepository;
         this.clientCardService = clientCardService;
+        this.loyaltyService = loyaltyService;
         this.availability = availability;
         this.openingHours = openingHours;
         this.events = events;
@@ -382,6 +385,35 @@ public class BookingService {
         }
         appointment.recordChange(AppointmentChange.CANCELLED_BY_CENTER, LocalDateTime.now(clock));
         save(appointment, AppointmentChange.CANCELLED_BY_CENTER);
+    }
+
+    /**
+     * El cliente no vino: la cita confirmada que ya ha empezado pasa a «No se presentó». Pierde los puntos que
+     * hubiera sumado y no avisa a nadie (el cliente lo ve en su historial).
+     */
+    @Transactional
+    public void markNoShow(Long centerId, Long appointmentId) {
+        Appointment appointment = findInCenter(centerId, appointmentId);
+        LocalDateTime now = CenterClock.now(clock, appointment.getCenter());
+        AppointmentStatus status = appointment.getStatus();
+        if ((status != AppointmentStatus.CONFIRMED && status != AppointmentStatus.COMPLETED)
+                || appointment.getDateTime().isAfter(now)) {
+            throw new BusinessRuleException("Solo se puede marcar «No se presentó» en una cita confirmada que ya ha empezado.");
+        }
+        appointment.setStatus(AppointmentStatus.NO_SHOW);
+        appointmentRepository.save(appointment);
+        loyaltyService.revokeAppointment(appointment.getId());
+    }
+
+    /** Se marcó por error: la cita vuelve a contar como hecha (y sus puntos se apuntan de nuevo al consultarlos). */
+    @Transactional
+    public void undoNoShow(Long centerId, Long appointmentId) {
+        Appointment appointment = findInCenter(centerId, appointmentId);
+        if (appointment.getStatus() != AppointmentStatus.NO_SHOW) {
+            throw new BusinessRuleException("Esta cita no está marcada como «No se presentó».");
+        }
+        appointment.setStatus(AppointmentStatus.CONFIRMED);
+        appointmentRepository.save(appointment);
     }
 
     /* =====================================================================
