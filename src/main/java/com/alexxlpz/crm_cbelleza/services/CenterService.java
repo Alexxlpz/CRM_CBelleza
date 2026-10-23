@@ -10,6 +10,8 @@ import com.alexxlpz.crm_cbelleza.repositories.CenterRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 /** Datos de los centros. */
 @Service
 @Transactional
@@ -44,6 +46,19 @@ public class CenterService {
     public Center setAutoAcceptBookings(Long centerId, boolean enabled) {
         Center center = getCenterById(centerId);
         center.setAutoAcceptBookings(enabled);
+        return centerRepository.save(center);
+    }
+
+    /** Plazos que puede elegir el dueño para que el cliente cambie la hora él mismo (0 = no puede). */
+    public static final List<Integer> CLIENT_RESCHEDULE_OPTIONS = List.of(0, 2, 12, 24, 48);
+
+    /** Hasta cuántas horas antes de la cita puede el cliente cambiarla desde «Mis reservas». */
+    public Center setClientRescheduleHours(Long centerId, int hours) {
+        if (!CLIENT_RESCHEDULE_OPTIONS.contains(hours)) {
+            throw new BusinessRuleException("Elige uno de los plazos de la lista.");
+        }
+        Center center = getCenterById(centerId);
+        center.setClientRescheduleHours(hours);
         return centerRepository.save(center);
     }
 

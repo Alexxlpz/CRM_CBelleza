@@ -444,8 +444,18 @@ class AgendaTests {
 
     @Test
     void reminderIsMarkedBeforeSendingAndNeverSentTwice() {
-        cabins(5);
-        Appointment app = createByWorker(carlos, LocalDateTime.now().plusHours(3).withMinute(0).withSecond(0).withNano(0), true);
+        // Se guarda directamente: con la agenda, el profesional podría tener a esa hora una cita de los datos demo
+        Appointment app = appointments.saveAndFlush(Appointment.builder()
+                .dateTime(LocalDateTime.now().plusHours(3).withMinute(0).withSecond(0).withNano(0))
+                .treatment(treatment)
+                .center(center)
+                .client(sofia)
+                .worker(carlos)
+                .status(AppointmentStatus.CONFIRMED)
+                .price(treatment.getPrice())
+                .workerMessage("")
+                .createdAt(LocalDateTime.now())
+                .build());
         org.mockito.Mockito.clearInvocations(emailGateway);
 
         assertTrue(mail.sendReminders() >= 1);

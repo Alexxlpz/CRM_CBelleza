@@ -279,7 +279,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 <label class="form-label agenda-note-label" for="message-${app.id}">Nota opcional para el cliente:</label>
                 <textarea id="message-${app.id}" class="approval-msg-input" rows="2"
                           placeholder="Ej. Por favor ven 5 minutos antes o motivo del rechazo..."></textarea>
-                <label class="form-label agenda-note-label" for="worker-${app.id}">La atiende:</label>
+                <label class="form-label agenda-note-label" for="worker-${app.id}">La atiende:${app.workerChosenByClient && app.worker ? ` <span class="agenda-worker-asked">el cliente ha pedido a ${Cuquora.escapeHtml(app.worker.name || '')}</span>` : ''}</label>
                 <select id="worker-${app.id}" class="approval-msg-input agenda-worker-select">${workerOptions(app.worker?.id ?? ME)}</select>
                 <div class="agenda-card-actions agenda-card-actions--three">
                     <button type="button" class="btn-agenda-action reject" data-action="reject">

@@ -3,7 +3,9 @@ package com.alexxlpz.crm_cbelleza.services;
 import com.alexxlpz.crm_cbelleza.booking.CenterClock;
 import com.alexxlpz.crm_cbelleza.entities.Center;
 import com.alexxlpz.crm_cbelleza.entities.Treatment;
+import com.alexxlpz.crm_cbelleza.entities.Role;
 import com.alexxlpz.crm_cbelleza.entities.TreatmentType;
+import com.alexxlpz.crm_cbelleza.entities.User;
 import com.alexxlpz.crm_cbelleza.exceptions.BusinessRuleException;
 import com.alexxlpz.crm_cbelleza.exceptions.ResourceNotFoundException;
 import com.alexxlpz.crm_cbelleza.forms.FormText;
@@ -11,14 +13,18 @@ import com.alexxlpz.crm_cbelleza.forms.TreatmentForm;
 import com.alexxlpz.crm_cbelleza.forms.TreatmentOfferForm;
 import com.alexxlpz.crm_cbelleza.repositories.CenterRepository;
 import com.alexxlpz.crm_cbelleza.repositories.TreatmentRepository;
+import com.alexxlpz.crm_cbelleza.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 /** Carta de tratamientos de cada centro. */
 @Service
@@ -27,11 +33,14 @@ public class TreatmentService {
 
     private final TreatmentRepository treatmentRepository;
     private final CenterRepository centerRepository;
+    private final UserRepository userRepository;
     private final Clock clock;
 
-    public TreatmentService(TreatmentRepository treatmentRepository, CenterRepository centerRepository, Clock clock) {
+    public TreatmentService(TreatmentRepository treatmentRepository, CenterRepository centerRepository,
+                            UserRepository userRepository, Clock clock) {
         this.treatmentRepository = treatmentRepository;
         this.centerRepository = centerRepository;
+        this.userRepository = userRepository;
         this.clock = clock;
     }
 
@@ -66,7 +75,29 @@ public class TreatmentService {
                 .duration(form.duration())
                 .type(parseType(form.type()))
                 .center(center)
+                .workerIds(teamSelection(centerId, form.workerIds()))
                 .build());
+    }
+
+    /** Quién hace el tratamiento. Sin nadie marcado, o con todo el equipo, lo hace todo el equipo. */
+    public void setWorkers(Long centerId, Long treatmentId, List<Long> workerIds) {
+        Treatment treatment = treatmentRepository.findByIdAndCenterId(treatmentId, centerId)
+                .orElseThrow(() -> new ResourceNotFoundException("Tratamiento no encontrado."));
+        treatment.getWorkerIds().clear();
+        treatment.getWorkerIds().addAll(teamSelection(centerId, workerIds));
+    }
+
+    /** Los marcados que son del equipo; vacío si no hay ninguno o están todos (= todo el equipo, también los que lleguen). */
+    private Set<Long> teamSelection(Long centerId, Collection<Long> workerIds) {
+        if (workerIds == null || workerIds.isEmpty()) {
+            return new HashSet<>();
+        }
+        List<Long> team = userRepository.findByCenterIdAndRole(centerId, Role.WORKER).stream().map(User::getId).toList();
+        Set<Long> selected = new HashSet<>(workerIds);
+        if (!team.containsAll(selected)) {
+            throw new ResourceNotFoundException("Ese profesional no es de tu centro.");
+        }
+        return selected.size() == team.size() ? new HashSet<>() : selected;
     }
 
     /** Pone o cambia la oferta de un tratamiento del centro. */

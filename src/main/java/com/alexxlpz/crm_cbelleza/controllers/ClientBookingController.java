@@ -25,10 +25,15 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /** Zona del cliente: ficha del centro, solicitud de cita e historial de citas. Solo rol CLIENT. */
 @Controller
 public class ClientBookingController {
+
+    private static final java.time.format.DateTimeFormatter CHANGED_AT =
+            java.time.format.DateTimeFormatter.ofPattern("EEEE d 'de' MMMM 'a las' HH:mm", java.util.Locale.forLanguageTag("es"));
 
     private final CenterService centerService;
     private final TreatmentService treatmentService;
@@ -77,6 +82,7 @@ public class ClientBookingController {
         model.addAttribute("today", today);
         model.addAttribute("offerCount", treatments.stream().filter(t -> t.hasActiveOffer(today)).count());
         model.addAttribute("workers", userService.getWorkersByCenter(id));
+        model.addAttribute("selectedWorkerId", null);
         model.addAttribute("openingHoursLines", openingHours.forCenter(id).describe());
         model.addAttribute("activePage", "centers");
         return "client/center_details";
@@ -86,10 +92,11 @@ public class ClientBookingController {
     public String book(@AuthenticationPrincipal AppUserDetails client,
                        @RequestParam Long centerId,
                        @RequestParam Long treatmentId,
+                       @RequestParam(required = false) Long workerId,
                        @RequestParam("dateTime") String dateTime,
                        RedirectAttributes redirect) {
         try {
-            Appointment appointment = bookingService.requestBooking(client.getId(), centerId, treatmentId, parse(dateTime));
+            Appointment appointment = bookingService.requestBooking(client.getId(), centerId, treatmentId, workerId, parse(dateTime));
             redirect.addFlashAttribute("successMessage", appointment.getStatus() == AppointmentStatus.CONFIRMED
                     ? "¡Cita confirmada! " + appointment.getCenter().getName() + " te espera."
                     : "Solicitud enviada. Te avisaremos en cuanto " + appointment.getCenter().getName() + " la confirme.");
@@ -102,10 +109,57 @@ public class ClientBookingController {
 
     @GetMapping("/client/appointments")
     public String appointments(@AuthenticationPrincipal AppUserDetails client, Model model) {
-        model.addAttribute("appointments", appointmentService.getClientAppointmentsSplit(client.getId()));
+        AppointmentService.ClientAppointments appointments = appointmentService.getClientAppointmentsSplit(client.getId());
+        model.addAttribute("appointments", appointments);
+        // Las que el cliente puede cambiar de hora él mismo (plazo de cada centro)
+        Set<Long> changeable = appointments.upcoming().stream()
+                .filter(app -> bookingService.clientRescheduleProblem(app).isEmpty())
+                .map(Appointment::getId)
+                .collect(Collectors.toSet());
+        model.addAttribute("changeableIds", changeable);
         model.addAttribute("loyaltyCards", loyaltyService.cardsOfClient(client.getId()));
         model.addAttribute("activePage", "appointments");
         return "client/appointments";
+    }
+
+    /** Cambiar la hora (y el profesional) de una solicitud o cita confirmada, con el mismo selector que al reservar. */
+    @GetMapping("/client/appointments/{id}/cambiar")
+    public String changeForm(@AuthenticationPrincipal AppUserDetails client,
+                             @PathVariable Long id,
+                             Model model,
+                             RedirectAttributes redirect) {
+        Appointment appointment = appointmentService.getClientAppointment(client.getId(), id);
+        String problem = bookingService.clientRescheduleProblem(appointment).orElse(null);
+        if (problem != null) {
+            redirect.addFlashAttribute("errorMessage", problem);
+            return "redirect:/client/appointments";
+        }
+        Long centerId = appointment.getCenter().getId();
+        model.addAttribute("appointment", appointment);
+        model.addAttribute("center", appointment.getCenter());
+        model.addAttribute("treatment", appointment.getTreatment());
+        model.addAttribute("workers", appointment.getTreatment().doneBy(userService.getWorkersByCenter(centerId)));
+        model.addAttribute("selectedWorkerId", appointment.getWorker() != null ? appointment.getWorker().getId() : null);
+        model.addAttribute("openingHoursLines", openingHours.forCenter(centerId).describe());
+        model.addAttribute("activePage", "appointments");
+        return "client/change_appointment";
+    }
+
+    @PostMapping("/client/appointments/{id}/cambiar")
+    public String change(@AuthenticationPrincipal AppUserDetails client,
+                         @PathVariable Long id,
+                         @RequestParam(required = false) Long workerId,
+                         @RequestParam("dateTime") String dateTime,
+                         RedirectAttributes redirect) {
+        try {
+            Appointment appointment = bookingService.rescheduleByClient(client.getId(), id, workerId, parse(dateTime));
+            redirect.addFlashAttribute("successMessage", "Listo: tu cita es ahora el "
+                    + appointment.getDateTime().format(CHANGED_AT) + ". Hemos avisado a " + appointment.getCenter().getName() + ".");
+            return "redirect:/client/appointments";
+        } catch (BusinessRuleException e) {
+            redirect.addFlashAttribute("bookingError", e.getMessage());
+            return "redirect:/client/appointments/" + id + "/cambiar";
+        }
     }
 
     /** El cliente elige una de las horas que le propuso el centro. */

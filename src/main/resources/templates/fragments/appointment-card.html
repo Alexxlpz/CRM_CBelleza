@@ -23,7 +23,7 @@
             </div>
             <div class="appointment-detail-item appointment-moved" th:if="${app.previousDateTime != null and app.status.name() == 'CONFIRMED'}">
                 <i class="lucide-history" aria-hidden="true"></i>
-                <span>El centro cambió la hora (antes: <time th:datetime="${app.previousDateTime}" th:text="${#temporals.format(app.previousDateTime, 'dd/MM/yyyy HH:mm')}">17/07/2026 10:00</time>)</span>
+                <span><th:block th:text="${app.lastChange != null and app.lastChange.name() == 'RESCHEDULED_BY_CLIENT'} ? 'Cambiaste la hora' : 'El centro cambió la hora'">El centro cambió la hora</th:block> (antes: <time th:datetime="${app.previousDateTime}" th:text="${#temporals.format(app.previousDateTime, 'dd/MM/yyyy HH:mm')}">17/07/2026 10:00</time>)</span>
             </div>
             <div class="appointment-detail-item">
                 <i class="lucide-user-cog" aria-hidden="true"></i>
@@ -63,8 +63,16 @@
             </div>
         </div>
 
-        <!-- Anular: solicitudes y citas confirmadas que aún no han empezado -->
+        <!-- Cambiar la hora (dentro del plazo del centro) y anular: solicitudes y citas confirmadas que aún no han empezado -->
         <div class="appointment-card-footer" th:if="${(app.status.name() == 'PENDING' or app.status.name() == 'CONFIRMED') and app.upcoming}">
+            <a class="btn btn-secondary btn-sm" th:if="${changeableIds != null and changeableIds.contains(app.id)}"
+               th:href="@{/client/appointments/{id}/cambiar(id=${app.id})}">
+                <i class="lucide-calendar-clock" aria-hidden="true"></i> Cambiar hora
+            </a>
+            <p class="appointment-change-hint" th:unless="${changeableIds != null and changeableIds.contains(app.id)}">
+                <i class="lucide-phone" aria-hidden="true"></i>
+                <span th:text="${'Para cambiar la hora, llama a ' + app.center.name + (#strings.isEmpty(app.center.phone) ? '' : ' (' + app.center.phone + ')') + '.'}">Para cambiar la hora, llama al centro.</span>
+            </p>
             <form th:action="@{/client/appointments/{id}/cancel(id=${app.id})}" method="post"
                   th:attr="data-confirm=${app.status.name() == 'PENDING'} ? 'Se retirará tu solicitud y avisaremos al centro.' : 'Avisaremos al centro de que no vas a ir y el hueco quedará libre para otra persona.'"
                   th:data-confirm-title="${app.status.name() == 'PENDING'} ? '¿Retirar la solicitud?' : '¿Anular la cita?'"

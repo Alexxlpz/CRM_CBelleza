@@ -2,6 +2,7 @@ package com.alexxlpz.crm_cbelleza.services;
 
 import com.alexxlpz.crm_cbelleza.dto.AppointmentCalendarDTO;
 import com.alexxlpz.crm_cbelleza.entities.Appointment;
+import com.alexxlpz.crm_cbelleza.entities.AppointmentChange;
 import com.alexxlpz.crm_cbelleza.entities.AppointmentStatus;
 import com.alexxlpz.crm_cbelleza.entities.Treatment;
 import com.alexxlpz.crm_cbelleza.entities.User;
@@ -49,6 +50,8 @@ public class AppointmentCalendarMapper {
                                 alert.getDateTime().toString(), alert.getTreatment().getName(), alert.getTreatmentSummary()))
                         .toList())
                 .clientNoShows(clientNoShows)
+                .workerChosenByClient(app.getStatus() == AppointmentStatus.PENDING && app.getWorker() != null
+                        && (app.getLastChange() == AppointmentChange.REQUESTED || app.getLastChange() == AppointmentChange.RESCHEDULED_BY_CLIENT))
                 .build();
     }
 

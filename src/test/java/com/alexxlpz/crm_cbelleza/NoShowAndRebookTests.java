@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.matchesRegex;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -188,6 +189,6 @@ class NoShowAndRebookTests {
                         .with(TestUsers.as(users, TestUsers.CLIENT)))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("data-rebook=\"false\"")))
-                .andExpect(content().string(not(containsString("checked=\"checked\""))));
+                .andExpect(content().string(not(matchesRegex("(?s).*data-duration=\"\\d+\" checked=\"checked\".*"))));
     }
 }

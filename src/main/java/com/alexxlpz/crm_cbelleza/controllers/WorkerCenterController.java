@@ -268,6 +268,18 @@ public class WorkerCenterController {
     }
 
     @CenterOwnerOnly
+    @PostMapping("/worker/center/reschedule")
+    public String updateClientReschedule(@AuthenticationPrincipal AppUserDetails worker,
+                                         @RequestParam int hours,
+                                         RedirectAttributes redirect) {
+        centerService.setClientRescheduleHours(worker.getCenterId(), hours);
+        redirect.addFlashAttribute("bookingsMessage", hours == 0
+                ? "Guardado: los clientes tendrán que llamaros para cambiar la hora de una cita."
+                : "Guardado: los clientes podrán cambiar la hora de sus citas hasta " + hours + " h antes.");
+        return "redirect:/worker/center#reservas";
+    }
+
+    @CenterOwnerOnly
     @PostMapping("/worker/center/photo")
     public String updatePhoto(@AuthenticationPrincipal AppUserDetails worker,
                               @RequestParam(required = false) MultipartFile photo,

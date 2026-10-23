@@ -107,6 +107,10 @@ public class AppointmentMailService {
                     clientName(app) + " no puede venir a ninguna de las horas que le propusisteis.");
             case CANCELLED_BY_CLIENT -> toCenter(app, "Cita anulada por el cliente: " + clientName(app) + ", " + when, "Cita anulada",
                     clientName(app) + " ha anulado su cita del " + when + ". El hueco vuelve a estar libre.");
+            case RESCHEDULED_BY_CLIENT -> toCenter(app, "Cita cambiada por el cliente: " + clientName(app) + ", " + when, "El cliente ha cambiado su cita",
+                    clientName(app) + " ha cambiado su cita de " + treatment + ". Ahora es el " + when
+                            + (app.getPreviousDateTime() != null ? " (antes era el " + when(app.getPreviousDateTime()) + ")" : "")
+                            + (app.getWorker() != null ? " con " + app.getWorker().getName() : "") + ".");
             default -> {
                 // PROPOSAL_WITHDRAWN: basta con la campana
             }

@@ -64,6 +64,11 @@ public class Center {
     @Builder.Default
     private boolean autoAcceptBookings = false;
 
+    /** Hasta cuántas horas antes de la cita puede el cliente cambiarla de hora desde «Mis reservas»; 0 = no puede. */
+    @Column(name = "client_reschedule_hours", nullable = false)
+    @Builder.Default
+    private int clientRescheduleHours = 24;
+
     /**
      * Dueño del centro: el trabajador que lo dio de alta. Es el único que cambia los datos, el horario, la foto,
      * la carta, la tarjeta de puntos y las reservas automáticas (ver {@code CenterAccess}).

@@ -3217,3 +3217,24 @@ body.modal-open {
         align-items: stretch;
     }
 }
+
+/* Segundo ajuste de la misma tarjeta («Cambios de hora por el cliente» en Mi Centro) */
+.sync-setting--stacked {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    margin-top: 18px;
+    padding-top: 18px;
+    border-top: 1px dashed rgba(var(--primary-rgb), 0.25);
+}
+
+.reschedule-setting {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.reschedule-setting .form-control {
+    flex: 1;
+    min-width: 0;
+}

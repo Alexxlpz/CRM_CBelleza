@@ -119,9 +119,14 @@ public final class AgendaSnapshot {
      * Vacío si no queda ninguno libre.
      */
     public Optional<User> freeWorker(Request request) {
+        return freeWorker(request, workers);
+    }
+
+    /** Como {@link #freeWorker(Request)}, pero solo entre {@code candidates} (quienes hacen el tratamiento o el elegido). */
+    public Optional<User> freeWorker(Request request, List<User> candidates) {
         LocalDateTime start = request.start();
         LocalDateTime end = request.end();
-        return workers.stream()
+        return candidates.stream()
                 .filter(w -> fits(new Request(start, request.durationMinutes(), w.getId(), request.ignoredAppointmentId(), request.countHolds())))
                 .filter(w -> holds.stream().noneMatch(hold -> w.getId().equals(hold.workerId())
                         && !hold.appointmentId().equals(request.ignoredAppointmentId())

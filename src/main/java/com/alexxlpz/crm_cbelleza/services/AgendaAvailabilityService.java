@@ -6,10 +6,13 @@ import com.alexxlpz.crm_cbelleza.booking.OpeningHours;
 import com.alexxlpz.crm_cbelleza.entities.AppointmentStatus;
 import com.alexxlpz.crm_cbelleza.entities.Center;
 import com.alexxlpz.crm_cbelleza.entities.Role;
+import com.alexxlpz.crm_cbelleza.entities.Treatment;
+import com.alexxlpz.crm_cbelleza.entities.User;
 import com.alexxlpz.crm_cbelleza.exceptions.ResourceNotFoundException;
 import com.alexxlpz.crm_cbelleza.repositories.AgendaBlockRepository;
 import com.alexxlpz.crm_cbelleza.repositories.AppointmentRepository;
 import com.alexxlpz.crm_cbelleza.repositories.CenterRepository;
+import com.alexxlpz.crm_cbelleza.repositories.TreatmentRepository;
 import com.alexxlpz.crm_cbelleza.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +34,7 @@ public class AgendaAvailabilityService {
     private final AgendaBlockRepository blocks;
     private final UserRepository users;
     private final CenterRepository centers;
+    private final TreatmentRepository treatments;
     private final OpeningHoursService openingHours;
     private final Clock clock;
 
@@ -38,12 +42,14 @@ public class AgendaAvailabilityService {
                                      AgendaBlockRepository blocks,
                                      UserRepository users,
                                      CenterRepository centers,
+                                     TreatmentRepository treatments,
                                      OpeningHoursService openingHours,
                                      Clock clock) {
         this.appointments = appointments;
         this.blocks = blocks;
         this.users = users;
         this.centers = centers;
+        this.treatments = treatments;
         this.openingHours = openingHours;
         this.clock = clock;
     }
@@ -66,8 +72,28 @@ public class AgendaAvailabilityService {
      */
     @Transactional(readOnly = true)
     public Availability availability(Long centerId) {
+        return availability(centerId, null, null, null, null);
+    }
+
+    /**
+     * Igual, para un tratamiento y profesional concretos: un hueco también está lleno si no queda libre el profesional
+     * elegido ({@code workerId}) o, con «Cualquiera», nadie de los que hacen el tratamiento. {@code changingAppointmentId}:
+     * cita del cliente {@code clientId} que se está cambiando de hora, cuyo hueco cuenta como libre.
+     */
+    @Transactional(readOnly = true)
+    public Availability availability(Long centerId, Long treatmentId, Long workerId, Long changingAppointmentId, Long clientId) {
         Center center = centers.findById(centerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Centro no encontrado."));
+        Long ignored = changingAppointmentId != null && clientId != null
+                && appointments.findByIdAndClientId(changingAppointmentId, clientId)
+                        .filter(app -> app.getCenter().getId().equals(centerId)).isPresent()
+                ? changingAppointmentId : null;
+        List<User> team = users.findByCenterIdAndRole(centerId, Role.WORKER);
+        Treatment treatment = treatmentId != null ? treatments.findByIdAndCenterId(treatmentId, centerId).orElse(null) : null;
+        List<User> candidates = workerId != null
+                ? team.stream().filter(w -> w.getId().equals(workerId) && (treatment == null || treatment.isDoneBy(workerId))).toList()
+                : treatment != null ? treatment.doneBy(team) : team;
+        boolean restricted = candidates.size() < team.size();
         LocalDate today = CenterClock.now(clock, center).toLocalDate();
         LocalDate last = today.plusDays(BOOKING_HORIZON_DAYS);
         AgendaSnapshot agenda = snapshot(center, today.atStartOfDay(), last.plusDays(1).atStartOfDay());
@@ -88,7 +114,8 @@ public class AgendaAvailabilityService {
             for (OpeningHours.Period period : periods) {
                 LocalDateTime close = day.atTime(period.closes());
                 for (LocalDateTime start = day.atTime(period.opens()); start.isBefore(close); start = start.plusMinutes(slot)) {
-                    if (!agenda.fits(new AgendaSnapshot.Request(start, slot, null, null, true))) {
+                    AgendaSnapshot.Request request = new AgendaSnapshot.Request(start, slot, null, ignored, true);
+                    if (!agenda.fits(request) || (restricted && agenda.freeWorker(request, candidates).isEmpty())) {
                         full.add(start.toString());
                     }
                 }

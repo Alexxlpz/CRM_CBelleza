@@ -1810,3 +1810,9 @@ button.calendar-day-cell {
         flex: 1 1 auto;
     }
 }
+
+/* Solicitud con profesional elegido por el cliente */
+.agenda-worker-asked {
+    font-weight: 500;
+    color: var(--text-muted);
+}

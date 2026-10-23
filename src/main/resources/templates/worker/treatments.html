@@ -5,6 +5,7 @@
     <link rel="stylesheet" th:href="@{/css/treatments.css}">
     <script th:src="@{/js/sheets.js}" defer></script>
     <script th:src="@{/js/treatment-offer.js}" defer></script>
+    <script th:src="@{/js/treatment-workers.js}" defer></script>
 </head>
 <body>
     <div th:replace="~{fragments/navbar :: worker('/worker/dashboard', 'Volver al panel principal', ${notifications})}"></div>
@@ -91,6 +92,10 @@
                         <div class="treatment-item-tags">
                             <span class="treatment-item-type" th:if="${t.type != null}" th:text="${t.type.displayName}">Facial</span>
                             <span class="treatment-item-meta"><i class="lucide-clock" aria-hidden="true"></i> <span th:text="${t.duration} + ' min'">30 min</span></span>
+                            <span class="treatment-item-meta" th:if="${#lists.size(team) > 1}">
+                                <i class="lucide-users" aria-hidden="true"></i>
+                                <span th:text="${t.isDoneByWholeTeam(team)} ? 'Todo el equipo' : ${t.doneByNames(team)}">Todo el equipo</span>
+                            </span>
                             <span class="offer-badge" th:if="${onOffer}">
                                 <i class="lucide-tag" aria-hidden="true"></i>
                                 <span th:text="'-' + ${t.offerDiscountPercent()} + ' %' + (${t.offerEndsOn != null} ? ' · ' + ${t.offerEndsLabel()} : ' · sin fecha de fin')">-20 % · hasta el 30 oct</span>
@@ -104,6 +109,10 @@
                                     th:attr="data-id=${t.id},data-name=${t.name},data-price=${t.price},data-offer-price=${t.offerPrice},data-ends-on=${t.offerEndsOn},data-has-offer=${t.hasOffer()}">
                                 <i class="lucide-tag" aria-hidden="true"></i>
                                 <span th:text="${t.hasOffer()} ? (${onOffer} ? 'Editar oferta' : 'Renovar oferta') : 'Poner en oferta'">Poner en oferta</span>
+                            </button>
+                            <button type="button" class="btn btn-secondary btn-sm" data-workers-edit th:if="${isCenterOwner and #lists.size(team) > 1}"
+                                    th:attr="data-id=${t.id},data-name=${t.name},data-workers=${t.isDoneByWholeTeam(team) ? '' : t.doneByIds(team)}">
+                                <i class="lucide-users" aria-hidden="true"></i> Quién lo hace
                             </button>
                         </div>
                     </article>
@@ -124,6 +133,9 @@
     <th:block th:if="${isCenterOwner}">
         <div th:replace="~{worker/fragments/treatment-modals :: addTreatmentSheet}"></div>
         <div th:replace="~{worker/fragments/treatment-modals :: offerModal(${today})}"></div>
+        <th:block th:if="${#lists.size(team) > 1}">
+            <div th:replace="~{worker/fragments/treatment-modals :: workersModal(${team})}"></div>
+        </th:block>
     </th:block>
 
     <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Panel de gestión de centros.')}"></div>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <th:block th:replace="~{fragments/head :: meta('Cambiar la hora - Cuquora')}"></th:block>
+    <link rel="stylesheet" th:href="@{/css/datepicker.css}">
+    <link rel="stylesheet" th:href="@{/css/cliente.css}">
+</head>
+
+<body>
+    <div th:replace="~{fragments/navbar :: brand(true)}"></div>
+
+    <!-- Cambiar la hora (y el profesional) de una cita desde «Mis reservas», con el mismo selector que al reservar -->
+    <main class="main-container booking-page booking-page--change">
+        <div th:replace="~{fragments/modals :: bookingError(${bookingError})}"></div>
+
+        <a class="back-link" th:href="@{/client/appointments}">
+            <i class="lucide-arrow-left" aria-hidden="true"></i> Volver a Mis reservas
+        </a>
+
+        <section class="glass-panel booking-section">
+            <h1 class="booking-section-title">
+                <i class="lucide-calendar-clock" aria-hidden="true"></i>
+                Cambiar la hora de tu cita
+            </h1>
+
+            <div class="change-current">
+                <strong th:text="${treatment.name}">Manicura rusa</strong>
+                <span><i class="lucide-map-pin" aria-hidden="true"></i> <span th:text="${center.name}">Centro Histórico</span></span>
+                <span><i class="lucide-calendar" aria-hidden="true"></i>
+                    <span>Ahora: <time th:datetime="${appointment.dateTime}" th:text="${#temporals.format(appointment.dateTime, 'EEEE d MMM · HH:mm')}">jueves 30 oct · 10:00</time></span></span>
+                <span><i class="lucide-user-cog" aria-hidden="true"></i>
+                    <span th:text="${appointment.worker != null} ? ${appointment.worker.name} : 'Sin profesional asignado'">Lucía Romero</span></span>
+            </div>
+
+            <form th:action="@{/client/appointments/{id}/cambiar(id=${appointment.id})}" method="post" id="bookingForm" novalidate
+                  th:attr="data-changing=${appointment.id}">
+                <input type="hidden" name="centerId" th:value="${center.id}">
+                <input type="radio" name="treatmentId" th:value="${treatment.id}" checked hidden
+                       th:attr="data-duration=${treatment.duration},data-workers=${treatment.doneByIds(workers)},data-name=${treatment.name}">
+
+                <th:block th:if="${#lists.size(workers) > 1}">
+                    <fieldset th:replace="~{fragments/booking-workers :: workers(${workers}, ${selectedWorkerId}, 1)}"></fieldset>
+                </th:block>
+
+                <div class="form-group booking-datetime-group">
+                    <p class="form-label booking-step-label" th:text="${#lists.size(workers) > 1 ? '2' : '1'} + '. Elige el nuevo día y hora'">2. Elige el nuevo día y hora</p>
+                    <div th:replace="~{fragments/datetime-picker :: picker}"></div>
+                </div>
+
+                <div class="booking-confirm">
+                    <p class="booking-summary" id="bookingSummary">Elige un día y una hora para tu cita.</p>
+                    <p class="booking-mode" th:if="${appointment.status.name() == 'CONFIRMED'}">
+                        <i class="lucide-zap" aria-hidden="true"></i> Tu cita sigue confirmada a la nueva hora y avisamos al centro del cambio.
+                    </p>
+                    <p class="booking-mode" th:unless="${appointment.status.name() == 'CONFIRMED'}">
+                        <i class="lucide-hourglass" aria-hidden="true"></i> Tu solicitud sigue pendiente: el centro la revisará con la nueva hora.
+                    </p>
+                    <button type="submit" class="btn btn-primary btn-large-submit">
+                        <i class="lucide-check-circle" aria-hidden="true"></i> Guardar el cambio
+                    </button>
+                </div>
+            </form>
+        </section>
+    </main>
+
+    <script th:src="@{/js/booking-picker.js}" defer></script>
+
+    <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Software de gestión para centros de estética, salones y spas.')}"></div>
+</body>
+
+</html>

@@ -1,0 +1,23 @@
+<div xmlns:th="http://www.thymeleaf.org">
+    <!--
+        Paso «¿Con quién?» de la reserva y del cambio de hora. «Cualquiera» deja que el centro elija (o, si acepta
+        las citas al momento, el profesional más libre). booking-picker.js esconde a quien no hace el servicio elegido
+        y vuelve a pedir las horas libres de ese profesional.
+    -->
+    <fieldset class="form-group booking-workers" th:fragment="workers(workers, selectedWorkerId, step)">
+        <legend class="form-label booking-step-label" th:text="${step} + '. ¿Con quién?'">2. ¿Con quién?</legend>
+        <div class="booking-worker-options">
+            <label class="booking-worker-option">
+                <input type="radio" name="workerId" value="" th:checked="${selectedWorkerId == null}">
+                <span class="booking-worker-avatar booking-worker-avatar--any" aria-hidden="true"><i class="lucide-users"></i></span>
+                <span class="booking-worker-name">Cualquiera</span>
+            </label>
+            <label class="booking-worker-option" th:each="w : ${workers}" th:attr="data-worker-id=${w.id}">
+                <input type="radio" name="workerId" th:value="${w.id}" th:checked="${w.id == selectedWorkerId}">
+                <span class="booking-worker-avatar" aria-hidden="true"
+                      th:text="${#strings.toUpperCase(#strings.substring(w.name, 0, 1))}">L</span>
+                <span class="booking-worker-name" th:text="${w.name}">Lucía Romero</span>
+            </label>
+        </div>
+    </fieldset>
+</div>

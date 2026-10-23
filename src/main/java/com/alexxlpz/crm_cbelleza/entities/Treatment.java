@@ -5,7 +5,10 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 @Entity
 @Table(name = "treatments")
@@ -47,6 +50,39 @@ public class Treatment {
     /** Último día (hora del centro) en que se reserva con el precio de oferta; nulo = hasta que se quite. */
     @Column(name = "offer_ends_on")
     private LocalDate offerEndsOn;
+
+    /** Profesionales que lo hacen; vacío = todo el equipo. */
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "treatment_workers", joinColumns = @JoinColumn(name = "treatment_id"))
+    @Column(name = "worker_id")
+    @Builder.Default
+    private Set<Long> workerIds = new HashSet<>();
+
+    /** true si lo hace ese profesional (o lo hace todo el equipo). */
+    public boolean isDoneBy(Long workerId) {
+        return workerIds.isEmpty() || workerIds.contains(workerId);
+    }
+
+    /** Los del equipo que lo hacen. Si los elegidos ya no están en el centro, lo hace todo el equipo. */
+    public List<User> doneBy(List<User> team) {
+        List<User> chosen = team.stream().filter(w -> workerIds.contains(w.getId())).toList();
+        return chosen.isEmpty() ? team : chosen;
+    }
+
+    /** true si lo hace todo el equipo (para las plantillas). */
+    public boolean isDoneByWholeTeam(List<User> team) {
+        return doneBy(team).size() == team.size();
+    }
+
+    /** Ids de quienes lo hacen separados por comas, para data-workers (booking-picker.js y treatment-workers.js). */
+    public String doneByIds(List<User> team) {
+        return String.join(",", doneBy(team).stream().map(w -> String.valueOf(w.getId())).toList());
+    }
+
+    /** Nombres de quienes lo hacen («Lucía Romero, Carlos Mendoza»). */
+    public String doneByNames(List<User> team) {
+        return String.join(", ", doneBy(team).stream().map(User::getName).toList());
+    }
 
     public boolean hasOffer() {
         return offerPrice != null;

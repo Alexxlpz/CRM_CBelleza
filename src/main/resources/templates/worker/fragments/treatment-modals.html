@@ -46,10 +46,37 @@
                     <input type="number" name="duration" id="treatmentDuration" class="form-control" 
                            value="45" min="5" required>
                 </div>
+
+                <fieldset class="form-group treatment-workers-field" th:if="${#lists.size(team) > 1}">
+                    <legend class="form-label">¿Quién lo hace?</legend>
+                    <label class="checkbox-row" th:each="w : ${team}">
+                        <input type="checkbox" name="workerIds" th:value="${w.id}"> <span th:text="${w.name}">Lucía Romero</span>
+                    </label>
+                    <span class="form-hint">Sin marcar a nadie, lo hace todo el equipo. Al reservar, el cliente solo elige entre quienes lo hacen.</span>
+                </fieldset>
                 
                 <button type="submit" class="btn btn-primary btn-block">
                     <i class="lucide-plus" aria-hidden="true"></i> Guardar Tratamiento
                 </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Quién hace un tratamiento. treatment-workers.js marca a los del tratamiento pulsado. -->
+    <div th:fragment="workersModal(team)" class="ui-modal-overlay" id="treatmentWorkersModal" hidden>
+        <div class="ui-modal ui-modal--form" role="dialog" aria-modal="true" aria-labelledby="treatmentWorkersTitle">
+            <button type="button" class="ui-modal-close" data-modal-close aria-label="Cerrar"><i class="lucide-x" aria-hidden="true"></i></button>
+            <h2 class="ui-modal-title" id="treatmentWorkersTitle"><i class="lucide-users" aria-hidden="true"></i> Quién lo hace</h2>
+            <p class="ui-modal-text" id="treatmentWorkersContext">Masaje relajante</p>
+            <form id="treatmentWorkersForm" th:action="@{/worker/treatments/0/workers}" method="post" class="treatment-workers-form">
+                <label class="checkbox-row" th:each="w : ${team}">
+                    <input type="checkbox" name="workerIds" th:value="${w.id}"> <span th:text="${w.name}">Lucía Romero</span>
+                </label>
+                <span class="form-hint">Sin marcar a nadie, lo hace todo el equipo. Al reservar, el cliente solo elige entre quienes lo hacen y solo ve las horas en que alguno está libre.</span>
+                <div class="ui-modal-actions">
+                    <button type="button" class="btn btn-secondary" data-modal-close>Cancelar</button>
+                    <button type="submit" class="btn btn-primary"><i class="lucide-save" aria-hidden="true"></i> Guardar</button>
+                </div>
             </form>
         </div>
     </div>

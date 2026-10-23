@@ -36,6 +36,8 @@ public class AppointmentCalendarDTO {
     private java.util.List<ClientAlertDTO> clientAlerts;
     /** Citas del centro a las que el cliente no se presentó. */
     private int clientNoShows;
+    /** Solicitud en la que el cliente ha elegido profesional (sale en «La atiende»). */
+    private boolean workerChosenByClient;
 
     @Data
     @Builder

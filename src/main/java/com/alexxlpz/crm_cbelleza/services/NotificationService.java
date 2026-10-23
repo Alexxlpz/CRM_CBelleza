@@ -120,6 +120,8 @@ public class NotificationService {
                 case PROPOSAL_ACCEPTED -> client + " ha aceptado tu propuesta: " + app.getDateTime().format(when) + ".";
                 case PROPOSAL_DECLINED -> client + " no puede venir a ninguna de las horas que le propusiste.";
                 case CANCELLED_BY_CLIENT -> client + " ha anulado su cita del " + app.getDateTime().format(when) + ".";
+                case RESCHEDULED_BY_CLIENT -> client + " ha cambiado su cita de " + app.getTreatment().getName() + ": ahora es el "
+                        + app.getDateTime().format(when) + ".";
                 case PROPOSAL_EXPIRED -> "La propuesta a " + client + " ha caducado sin respuesta.";
                 default -> null;
             };

@@ -79,6 +79,14 @@ public class AppointmentService {
         return new ClientAppointments(upcoming, history);
     }
 
+    /** Una cita del cliente, con tratamiento (y quién lo hace), centro y profesional. */
+    public Appointment getClientAppointment(Long clientId, Long appointmentId) {
+        Appointment appointment = appointmentRepository.findByIdAndClientId(appointmentId, clientId)
+                .orElseThrow(() -> new com.alexxlpz.crm_cbelleza.exceptions.ResourceNotFoundException("La cita no existe."));
+        appointment.getTreatment().getWorkerIds().size();
+        return appointment;
+    }
+
     public record ClientAppointments(List<Appointment> upcoming, List<Appointment> history) {
         public boolean isEmpty() {
             return upcoming.isEmpty() && history.isEmpty();

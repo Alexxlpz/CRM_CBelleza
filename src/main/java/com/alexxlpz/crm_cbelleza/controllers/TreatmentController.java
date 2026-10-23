@@ -8,6 +8,7 @@ import com.alexxlpz.crm_cbelleza.forms.TreatmentForm;
 import com.alexxlpz.crm_cbelleza.forms.TreatmentOfferForm;
 import com.alexxlpz.crm_cbelleza.security.AppUserDetails;
 import com.alexxlpz.crm_cbelleza.services.TreatmentService;
+import com.alexxlpz.crm_cbelleza.services.UserService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
@@ -27,9 +29,11 @@ import java.util.Objects;
 public class TreatmentController {
 
     private final TreatmentService treatmentService;
+    private final UserService userService;
 
-    public TreatmentController(TreatmentService treatmentService) {
+    public TreatmentController(TreatmentService treatmentService, UserService userService) {
         this.treatmentService = treatmentService;
+        this.userService = userService;
     }
 
     @GetMapping("/worker/treatments")
@@ -37,6 +41,7 @@ public class TreatmentController {
         List<Treatment> treatments = treatmentService.getTreatmentsByCenter(worker.getCenterId());
         LocalDate today = treatmentService.todayAt(worker.getCenterId());
         model.addAttribute("treatments", treatments);
+        model.addAttribute("team", userService.getWorkersByCenter(worker.getCenterId()));
         model.addAttribute("today", today);
         model.addAttribute("activeOfferCount", treatments.stream().filter(t -> t.hasActiveOffer(today)).count());
         // Resumen y filtros calculados aquí para no meter lógica de colecciones en la plantilla
@@ -63,6 +68,19 @@ public class TreatmentController {
         } catch (BusinessRuleException e) {
             redirect.addFlashAttribute("errorMessage", e.getMessage());
         }
+        return "redirect:/worker/treatments";
+    }
+
+    @CenterOwnerOnly
+    @PostMapping("/worker/treatments/{id}/workers")
+    public String saveWorkers(@AuthenticationPrincipal AppUserDetails worker,
+                              @PathVariable Long id,
+                              @RequestParam(name = "workerIds", required = false) List<Long> workerIds,
+                              RedirectAttributes redirect) {
+        treatmentService.setWorkers(worker.getCenterId(), id, workerIds);
+        redirect.addFlashAttribute("successMessage", workerIds == null || workerIds.isEmpty()
+                ? "Guardado: lo hace todo el equipo."
+                : "Guardado. Al reservar, los clientes solo verán a quien lo hace.");
         return "redirect:/worker/treatments";
     }
 

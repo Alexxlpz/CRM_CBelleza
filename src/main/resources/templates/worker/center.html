@@ -249,6 +249,31 @@
                             </button>
                         </form>
                     </div>
+
+                    <!-- Hasta cuándo puede el cliente cambiar la hora él mismo desde «Mis reservas» -->
+                    <div class="sync-setting sync-setting--stacked">
+                        <div class="sync-setting-text">
+                            <p class="sync-setting-title">Cambios de hora por el cliente</p>
+                            <p class="sync-setting-help" th:if="${center.clientRescheduleHours > 0}"
+                               th:text="${'Tus clientes pueden cambiar la hora de su cita desde «Mis reservas» hasta ' + center.clientRescheduleHours + ' h antes. Os avisamos en la campana y por correo.'}">
+                                Tus clientes pueden cambiar la hora de su cita hasta 24 h antes.
+                            </p>
+                            <p class="sync-setting-help" th:unless="${center.clientRescheduleHours > 0}">
+                                Tus clientes no pueden cambiar la hora desde la web: tendrán que llamaros.
+                            </p>
+                        </div>
+                        <form th:if="${isOwner}" th:action="@{/worker/center/reschedule}" method="post" class="reschedule-setting">
+                            <label class="visually-hidden" for="rescheduleHours">Plazo para cambiar la hora</label>
+                            <select id="rescheduleHours" name="hours" class="form-control">
+                                <option value="0" th:selected="${center.clientRescheduleHours == 0}">No dejar cambiarla</option>
+                                <option value="2" th:selected="${center.clientRescheduleHours == 2}">Hasta 2 h antes</option>
+                                <option value="12" th:selected="${center.clientRescheduleHours == 12}">Hasta 12 h antes</option>
+                                <option value="24" th:selected="${center.clientRescheduleHours == 24}">Hasta 24 h antes</option>
+                                <option value="48" th:selected="${center.clientRescheduleHours == 48}">Hasta 48 h antes</option>
+                            </select>
+                            <button type="submit" class="btn btn-secondary btn-sm">Guardar</button>
+                        </form>
+                    </div>
                 </section>
 
                 <section class="settings-card" id="foto" th:if="${isOwner}">

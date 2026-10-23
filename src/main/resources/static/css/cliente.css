@@ -700,3 +700,146 @@
         margin-top: 24px;
     }
 }
+
+/* Paso «¿Con quién?» (fragments/booking-workers.html) */
+.booking-workers {
+    margin: 30px 0 0;
+    padding: 0;
+    border: 0;
+    min-width: 0;
+}
+
+.booking-worker-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.booking-worker-option {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    padding: 6px 14px 6px 6px;
+    border-radius: var(--radius-pill);
+    border: 1px solid rgba(var(--primary-rgb), 0.25);
+    background: rgba(var(--surface-rgb), 0.5);
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.booking-worker-option[hidden] {
+    display: none;
+}
+
+.booking-worker-option input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.booking-worker-option:hover {
+    border-color: var(--primary);
+}
+
+.booking-worker-option:has(input:checked) {
+    background: var(--surface);
+    border-color: var(--primary-dark);
+    box-shadow: 0 0 0 1px var(--primary-dark);
+}
+
+.booking-worker-option:has(input:focus-visible) {
+    outline: 2px solid var(--primary-dark);
+    outline-offset: 2px;
+}
+
+.booking-worker-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(var(--primary-rgb), 0.18);
+    color: var(--primary-text);
+    font-size: 14px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.booking-worker-avatar--any {
+    background: rgba(var(--secondary-rgb), 0.25);
+}
+
+/* Cambiar la hora de una cita: resumen de la cita que se cambia */
+.change-current {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    margin: 0 0 8px;
+    padding: 14px 16px;
+    border-radius: var(--border-radius-md);
+    background: rgba(var(--primary-rgb), 0.08);
+    font-size: 14px;
+}
+
+.change-current strong {
+    color: var(--text-main);
+}
+
+.change-current span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-muted);
+}
+
+@media (min-width: 1100px) {
+    .booking-form--split {
+        grid-template-rows: auto auto 1fr;
+    }
+
+    .booking-form--split .booking-services {
+        grid-row: 1 / span 3;
+    }
+
+    .booking-form--split .booking-workers {
+        grid-column: 2;
+        margin: 0 0 24px;
+    }
+}
+
+@media (min-width: 1100px) {
+    .main-container.booking-page.booking-page--change {
+        max-width: 1040px;
+    }
+}
+
+.booking-page--change .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 16px;
+    color: var(--primary-text);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+/* Se pulsa un día (o «Solicitar cita») sin haber elegido servicio: los servicios vibran y se ponen en rojo
+   (.has-error y .shake-field de common.css, como los campos de los formularios) */
+.treatment-select-grid.has-error {
+    border-color: transparent;
+    background: none;
+    box-shadow: none;
+}
+
+.treatment-select-grid.has-error .treatment-select-card {
+    border-color: var(--error);
+    background: var(--error-bg);
+}
+
+.booking-services .field-error-msg {
+    margin: -8px 0 14px;
+}

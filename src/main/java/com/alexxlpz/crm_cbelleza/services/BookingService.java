@@ -30,6 +30,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Todo lo que cambia una cita: solicitud del cliente, respuesta del centro, citas creadas y movidas por el
@@ -93,6 +94,15 @@ public class BookingService {
      */
     @Transactional
     public Appointment requestBooking(Long clientId, Long centerId, Long treatmentId, LocalDateTime start) {
+        return requestBooking(clientId, centerId, treatmentId, null, start);
+    }
+
+    /**
+     * Igual, con el profesional que ha elegido el cliente ({@code workerId}; nulo = «Cualquiera»). La cita queda a su
+     * nombre aunque esté pendiente, y el centro la aprueba con él salvo que la cambie.
+     */
+    @Transactional
+    public Appointment requestBooking(Long clientId, Long centerId, Long treatmentId, Long workerId, LocalDateTime start) {
         Center center = lockCenter(centerId);
         if (!center.isPublished()) {
             throw new ResourceNotFoundException("Centro no encontrado.");
@@ -109,11 +119,13 @@ public class BookingService {
         AgendaSnapshot.Request slot = new AgendaSnapshot.Request(start, treatment.getDuration(), null, null, true);
         AgendaSnapshot agenda = availability.snapshot(center, start.toLocalDate().atStartOfDay(), start.plusDays(1));
         ensureFits(agenda, slot);
+        User free = freeCandidate(agenda, slot, treatment, workerId);
 
         User client = userRepository.findById(clientId)
                 .orElseThrow(() -> new BusinessRuleException("Cliente no encontrado en el sistema."));
-        User worker = center.isAutoAcceptBookings() ? agenda.freeWorker(slot).orElse(null) : null;
-        AppointmentChange change = worker != null ? AppointmentChange.BOOKED : AppointmentChange.REQUESTED;
+        boolean confirmed = center.isAutoAcceptBookings() && free != null;
+        User worker = confirmed || workerId != null ? free : null;
+        AppointmentChange change = confirmed ? AppointmentChange.BOOKED : AppointmentChange.REQUESTED;
 
         Appointment appointment = Appointment.builder()
                 .dateTime(start)
@@ -122,13 +134,13 @@ public class BookingService {
                 .client(client)
                 .worker(worker)
                 .price(treatment.priceOn(now.toLocalDate()))
-                .status(worker != null ? AppointmentStatus.CONFIRMED : AppointmentStatus.PENDING)
+                .status(confirmed ? AppointmentStatus.CONFIRMED : AppointmentStatus.PENDING)
                 .workerMessage("")
                 .createdAt(LocalDateTime.now(clock))
                 .build();
         appointment.recordChange(change, LocalDateTime.now(clock));
         Appointment saved = save(appointment, change);
-        if (worker != null) {
+        if (confirmed) {
             releaseTakenProposals(center, saved);
         }
         return saved;
@@ -190,6 +202,93 @@ public class BookingService {
         clearProposal(appointment);
         appointment.recordChange(AppointmentChange.CANCELLED_BY_CLIENT, LocalDateTime.now(clock));
         save(appointment, AppointmentChange.CANCELLED_BY_CLIENT);
+    }
+
+    /**
+     * El cliente cambia la hora (y, si quiere, el profesional) de su solicitud o cita confirmada desde «Mis reservas»,
+     * hasta {@link Center#getClientRescheduleHours()} horas antes. Una cita confirmada sigue confirmada si a la nueva
+     * hora queda libre el profesional elegido o, con «Cualquiera», alguien que haga el tratamiento; una solicitud
+     * sigue pendiente. El centro recibe un aviso.
+     */
+    @Transactional
+    public Appointment rescheduleByClient(Long clientId, Long appointmentId, Long workerId, LocalDateTime start) {
+        Appointment appointment = findForClient(clientId, appointmentId);
+        Center center = lockCenter(appointment.getCenter().getId());
+        LocalDateTime now = CenterClock.now(clock, center);
+        ensureClientCanReschedule(appointment, center, now);
+        if (!start.isAfter(now)) {
+            throw new BusinessRuleException("Elige una hora que no haya pasado.");
+        }
+        Treatment treatment = appointment.getTreatment();
+        if (!openingHours.forCenter(center.getId()).fits(start, treatment.getDuration())) {
+            throw new BusinessRuleException("El servicio no cabe completo dentro del horario del centro.");
+        }
+        AgendaSnapshot.Request slot = new AgendaSnapshot.Request(start, treatment.getDuration(), null, appointment.getId(), true);
+        AgendaSnapshot agenda = availability.snapshot(center, start.toLocalDate().atStartOfDay(), start.plusDays(1));
+        ensureFits(agenda, slot);
+        boolean confirmed = appointment.getStatus() == AppointmentStatus.CONFIRMED;
+        User free = confirmed && workerId == null ? keepWorkerIfFree(agenda, slot, appointment)
+                : freeCandidate(agenda, slot, treatment, workerId);
+        if (confirmed && free == null) {
+            throw new SlotUnavailableException("No hay ningún profesional libre a esa hora para este servicio.");
+        }
+        User worker = confirmed || workerId != null ? free : null;
+
+        boolean timeChanged = !start.equals(appointment.getDateTime());
+        boolean workerChanged = !Objects.equals(worker != null ? worker.getId() : null,
+                appointment.getWorker() != null ? appointment.getWorker().getId() : null);
+        if (!timeChanged && !workerChanged) {
+            return appointment;
+        }
+        if (timeChanged) {
+            appointment.setPreviousDateTime(appointment.getDateTime());
+            appointment.setDateTime(start);
+            appointment.setReminderSentAt(null);
+        }
+        appointment.setWorker(worker);
+        appointment.recordChange(AppointmentChange.RESCHEDULED_BY_CLIENT, LocalDateTime.now(clock));
+        Appointment saved = save(appointment, AppointmentChange.RESCHEDULED_BY_CLIENT);
+        if (confirmed) {
+            releaseTakenProposals(center, saved);
+        }
+        return saved;
+    }
+
+    /** Con «Cualquiera» en una cita confirmada se queda quien la tenía si sigue libre a la nueva hora. */
+    private User keepWorkerIfFree(AgendaSnapshot agenda, AgendaSnapshot.Request slot, Appointment appointment) {
+        User current = appointment.getWorker();
+        if (current != null && appointment.getTreatment().isDoneBy(current.getId())) {
+            try {
+                return freeCandidate(agenda, slot, appointment.getTreatment(), current.getId());
+            } catch (BusinessRuleException e) {
+                // Ya no está libre (o no está en el centro): cualquiera que haga el tratamiento
+            }
+        }
+        return freeCandidate(agenda, slot, appointment.getTreatment(), null);
+    }
+
+    /** Por qué el cliente no puede cambiar él mismo la hora de esta cita (estado o plazo del centro); vacío si puede. */
+    public Optional<String> clientRescheduleProblem(Appointment appointment) {
+        try {
+            ensureClientCanReschedule(appointment, appointment.getCenter(), CenterClock.now(clock, appointment.getCenter()));
+            return Optional.empty();
+        } catch (BusinessRuleException e) {
+            return Optional.of(e.getMessage());
+        }
+    }
+
+    private static void ensureClientCanReschedule(Appointment appointment, Center center, LocalDateTime now) {
+        AppointmentStatus status = appointment.getStatus();
+        if ((status != AppointmentStatus.PENDING && status != AppointmentStatus.CONFIRMED) || !appointment.getDateTime().isAfter(now)) {
+            throw new BusinessRuleException("Esta cita ya no se puede cambiar.");
+        }
+        int hours = center.getClientRescheduleHours();
+        if (hours <= 0) {
+            throw new BusinessRuleException(center.getName() + " no deja cambiar la hora desde la web. Llama al centro para cambiarla.");
+        }
+        if (appointment.getDateTime().isBefore(now.plusHours(hours))) {
+            throw new BusinessRuleException("Solo se puede cambiar hasta " + hours + " h antes de la cita. Llama al centro si necesitas cambiarla.");
+        }
     }
 
     /* =====================================================================
@@ -495,6 +594,34 @@ public class BookingService {
         var created = clientCardService.createClientManually(centerId,
                 new NewClientForm(form.newClientName(), form.newClientPhone(), form.newClientEmail(), null), creatorId);
         return userRepository.findById(created.clientId()).orElseThrow();
+    }
+
+    /**
+     * Quién puede atender la cita del cliente: el profesional que ha elegido o, con «Cualquiera», el más libre de
+     * los que hacen el tratamiento. Si el cliente ha elegido a alguien o el tratamiento no lo hace todo el equipo,
+     * tiene que quedar uno libre; si no, puede ser nulo (la solicitud espera a que el centro la organice).
+     */
+    private User freeCandidate(AgendaSnapshot agenda, AgendaSnapshot.Request slot, Treatment treatment, Long workerId) {
+        Long centerId = treatment.getCenter().getId();
+        List<User> team = userRepository.findByCenterIdAndRole(centerId, Role.WORKER);
+        List<User> candidates;
+        if (workerId != null) {
+            User chosen = team.stream().filter(w -> w.getId().equals(workerId)).findFirst()
+                    .orElseThrow(() -> new BusinessRuleException("Ese profesional ya no está en el centro. Elige otro."));
+            if (!treatment.doneBy(team).contains(chosen)) {
+                throw new BusinessRuleException(chosen.getName() + " no hace " + treatment.getName() + ". Elige otro profesional.");
+            }
+            candidates = List.of(chosen);
+        } else {
+            candidates = treatment.doneBy(team);
+        }
+        User free = agenda.freeWorker(slot, candidates).orElse(null);
+        if (free == null && (workerId != null || candidates.size() < team.size())) {
+            throw new SlotUnavailableException(workerId != null
+                    ? candidates.getFirst().getName() + " no está libre a esa hora. Elige otra hora u otro profesional."
+                    : "No hay ningún profesional libre a esa hora para este servicio.");
+        }
+        return free;
     }
 
     private User workerOfCenter(Long centerId, Long workerId) {

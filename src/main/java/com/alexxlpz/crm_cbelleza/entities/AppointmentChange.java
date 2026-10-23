@@ -18,6 +18,8 @@ public enum AppointmentChange {
     PROPOSAL_ACCEPTED(Side.CLIENT),
     PROPOSAL_DECLINED(Side.CLIENT),
     CANCELLED_BY_CLIENT(Side.CLIENT),
+    /** El cliente ha cambiado la hora (o el profesional) desde «Mis reservas». */
+    RESCHEDULED_BY_CLIENT(Side.CLIENT),
     PROPOSAL_EXPIRED(Side.SYSTEM);
 
     /** Quién provoca el cambio: se avisa a la otra parte. */
