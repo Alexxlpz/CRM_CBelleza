@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{fragments/head :: meta('Horario del profesional - Cuquora CRM')}"></th:block>
+    <script th:src="@{/js/opening-hours.js}" defer></script>
+</head>
+<body>
+    <div th:replace="~{fragments/navbar :: worker('/worker/center#equipo', 'Volver al equipo', ${notifications})}"></div>
+
+    <main class="main-container settings-page">
+        <header class="settings-header">
+            <div>
+                <h1 th:text="'Horario de ' + ${member.name}">Horario de Lucía Romero</h1>
+                <p>Los días y horas en los que trabaja. Los clientes solo podrán pedirle cita dentro de ellos y la agenda no le dará citas fuera.</p>
+            </div>
+        </header>
+
+        <div th:replace="~{fragments/alerts :: flash}"></div>
+
+        <form class="settings-card worker-hours-form" th:action="@{/worker/center/team/{id}/horario(id=${member.id})}" method="post">
+            <fieldset class="worker-hours-choice">
+                <legend class="visually-hidden">¿Cuándo trabaja?</legend>
+                <label class="worker-hours-option">
+                    <input type="radio" name="custom" value="false" th:checked="${!customHours}">
+                    <span>
+                        <strong>Todo el horario del centro</strong>
+                        <span class="worker-hours-option-help" th:text="${#strings.listJoin(centerHoursLines, ' · ')}">Lunes a viernes: 09:00 - 20:00</span>
+                    </span>
+                </label>
+                <label class="worker-hours-option">
+                    <input type="radio" name="custom" value="true" th:checked="${customHours}">
+                    <span>
+                        <strong>Un horario propio</strong>
+                        <span class="worker-hours-option-help">Media jornada, días libres o jornada partida. Siempre dentro del horario del centro.</span>
+                    </span>
+                </label>
+            </fieldset>
+
+            <div class="worker-hours-editor" id="workerHoursEditor" th:hidden="${!customHours}"
+                 th:attr="data-hours-empty=${'Marca al menos un día en el que trabaje ' + member.name + '.'}">
+                <div th:replace="~{fragments/opening-hours :: editor(${hourRows}, ${hourOptions})}"></div>
+            </div>
+
+            <p class="form-help">Las citas que ya tiene no cambian. Para unas vacaciones o un día suelto, mejor bloquea su agenda.</p>
+            <div class="settings-actions">
+                <a class="btn btn-secondary" th:href="@{/worker/center#equipo}">Cancelar</a>
+                <button type="submit" class="btn btn-primary"><i class="lucide-save" aria-hidden="true"></i> Guardar horario</button>
+            </div>
+        </form>
+    </main>
+
+    <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Panel de gestión de centros.')}"></div>
+
+    <script>
+        // «Todo el horario del centro» esconde el editor y no envía sus tramos
+        (function () {
+            const editor = document.getElementById('workerHoursEditor');
+            const sync = () => {
+                const custom = document.querySelector('input[name="custom"]:checked')?.value === 'true';
+                editor.hidden = !custom;
+                editor.querySelectorAll('.hours-row').forEach(row => {
+                    const open = row.querySelector('[data-hours-open]').checked;
+                    row.querySelectorAll('[data-hours-period]').forEach(period => {
+                        period.querySelectorAll('input, select').forEach(field => {
+                            field.disabled = !custom || !open || period.hidden;
+                        });
+                    });
+                });
+            };
+            document.querySelectorAll('input[name="custom"]').forEach(radio => radio.addEventListener('change', sync));
+            sync();
+        })();
+    </script>
+</body>
+</html>

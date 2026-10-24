@@ -8,6 +8,7 @@ import com.alexxlpz.crm_cbelleza.entities.User;
 import com.alexxlpz.crm_cbelleza.repositories.AppointmentRepository;
 import com.alexxlpz.crm_cbelleza.repositories.ClientCardRepository;
 import com.alexxlpz.crm_cbelleza.repositories.InventoryRepository;
+import com.alexxlpz.crm_cbelleza.repositories.ReviewRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,13 +32,16 @@ public class NotificationService {
     private final AppointmentRepository appointmentRepository;
     private final ClientCardRepository clientCardRepository;
     private final ClientCardJson json;
+    private final ReviewRepository reviewRepository;
     private final Clock clock;
 
     public NotificationService(InventoryRepository inventoryRepository,
                                AppointmentRepository appointmentRepository,
                                ClientCardRepository clientCardRepository,
                                ClientCardJson json,
+                               ReviewRepository reviewRepository,
                                Clock clock) {
+        this.reviewRepository = reviewRepository;
         this.inventoryRepository = inventoryRepository;
         this.appointmentRepository = appointmentRepository;
         this.clientCardRepository = clientCardRepository;
@@ -52,6 +56,7 @@ public class NotificationService {
         List<NotificationItem> notifications = new ArrayList<>(stockAlerts(centerId));
         List<Appointment> appointments = appointmentRepository.findByCenterIdOrderByDateTimeDesc(centerId);
         notifications.addAll(clientResponseAlerts(appointments));
+        notifications.addAll(reviewAlerts(centerId));
         notifications.addAll(appointmentAlerts(appointments));
         pendingCardsAlert(centerId, appointments).ifPresent(notifications::add);
         return notifications;
@@ -132,6 +137,14 @@ public class NotificationService {
         return alerts;
     }
 
+    /** Reseñas recibidas en las últimas 24 h. */
+    private List<NotificationItem> reviewAlerts(Long centerId) {
+        return reviewRepository.findByCenterIdAndCreatedAtAfter(centerId, java.time.LocalDateTime.now(clock).minusHours(24)).stream()
+                .map(review -> new NotificationItem(review.getAuthorName() + " ha valorado su cita con " + review.getRating()
+                        + (review.getRating() == 1 ? " estrella." : " estrellas."), "/worker/reviews"))
+                .toList();
+    }
+
     /** Clientes atendidos (hasta hoy) cuya ficha sigue vacía. */
     private java.util.Optional<NotificationItem> pendingCardsAlert(Long centerId, List<Appointment> appointments) {
         LocalDate today = LocalDate.now(clock);
@@ -174,6 +187,10 @@ public class NotificationService {
         return n == 1 ? singular : pluralForm;
     }
 
-    public record NotificationItem(String message, String url) {
+    /** {@code key}: huella para poder quitarlo de la campana ({@link NotificationKeys}). */
+    public record NotificationItem(String key, String message, String url) {
+        public NotificationItem(String message, String url) {
+            this(NotificationKeys.of(message, url), message, url);
+        }
     }
 }

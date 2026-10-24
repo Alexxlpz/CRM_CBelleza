@@ -10,14 +10,17 @@ import java.util.List;
  */
 public record CenterSummaryDTO(Long id, String name, String address, String phone, String email,
                                Double distanceKm, Double latitude, Double longitude, String photoUrl,
-                               List<Offer> offers, boolean openNow, String hoursLabel) {
+                               List<Offer> offers, boolean openNow, String hoursLabel,
+                               Double rating, long reviewCount) {
 
     /** Tratamiento en oferta, para la tarjeta del buscador. */
     public record Offer(String treatment, Double price, Double offerPrice, int discountPercent) {
     }
 
-    public static CenterSummaryDTO of(Center c, Double distanceKm, List<Offer> offers, boolean openNow, String hoursLabel) {
+    public static CenterSummaryDTO of(Center c, Double distanceKm, List<Offer> offers, boolean openNow, String hoursLabel,
+                                      CenterRating rating) {
         return new CenterSummaryDTO(c.getId(), c.getName(), c.getAddress(), c.getPhone(), c.getEmail(),
-                distanceKm, c.getLatitude(), c.getLongitude(), c.getPhotoUrl(), offers, openNow, hoursLabel);
+                distanceKm, c.getLatitude(), c.getLongitude(), c.getPhotoUrl(), offers, openNow, hoursLabel,
+                rating.hasReviews() ? Math.round(rating.average() * 10) / 10.0 : null, rating.count());
     }
 }

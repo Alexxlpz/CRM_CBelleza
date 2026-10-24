@@ -2,11 +2,17 @@ package com.alexxlpz.crm_cbelleza.controllers;
 
 import com.alexxlpz.crm_cbelleza.security.CenterOwnerOnly;
 import com.alexxlpz.crm_cbelleza.security.AppUserDetails;
+import com.alexxlpz.crm_cbelleza.services.AnalyticsCsv;
 import com.alexxlpz.crm_cbelleza.services.AnalyticsService;
 import com.alexxlpz.crm_cbelleza.services.AnalyticsService.AnalyticsReport;
 import com.alexxlpz.crm_cbelleza.services.CenterService;
 import com.alexxlpz.crm_cbelleza.services.DashboardService;
 import com.alexxlpz.crm_cbelleza.services.DashboardService.DashboardStats;
+import com.alexxlpz.crm_cbelleza.services.ReviewService;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,9 +26,11 @@ public class WorkerDashboardController {
     private final DashboardService dashboardService;
     private final CenterService centerService;
     private final AnalyticsService analyticsService;
+    private final ReviewService reviewService;
 
     public WorkerDashboardController(DashboardService dashboardService, CenterService centerService,
-                                     AnalyticsService analyticsService) {
+                                     AnalyticsService analyticsService, ReviewService reviewService) {
+        this.reviewService = reviewService;
         this.dashboardService = dashboardService;
         this.centerService = centerService;
         this.analyticsService = analyticsService;
@@ -36,6 +44,8 @@ public class WorkerDashboardController {
         model.addAttribute("pendingAppointmentsCount", stats.pendingAppointments());
         model.addAttribute("lowStockCount", stats.lowStockCount());
         model.addAttribute("centerPhotoUrl", centerService.getCenterById(worker.getCenterId()).getPhotoUrl());
+        model.addAttribute("rating", reviewService.rating(worker.getCenterId()));
+        model.addAttribute("unansweredReviews", reviewService.countUnanswered(worker.getCenterId()));
         // Resumen del mes en el panel: las tres primeras cifras del análisis (ingresos, visitas y clientes nuevos).
         // Las cifras del negocio solo las ve el dueño del centro
         if (centerService.getCenterById(worker.getCenterId()).isOwnedBy(worker.getId())) {
@@ -59,6 +69,24 @@ public class WorkerDashboardController {
         model.addAttribute("periodOptions", AnalyticsService.PERIOD_OPTIONS);
         model.addAttribute("pageDescription", "Ingresos, visitas, clientes nuevos y clientes fieles de tu centro, mes a mes.");
         return "worker/analytics";
+    }
+
+    /** La misma vista de «Análisis» (?meses= o ?anio=) en CSV para Excel. */
+    @CenterOwnerOnly
+    @GetMapping("/worker/analytics/export")
+    public ResponseEntity<byte[]> export(@AuthenticationPrincipal AppUserDetails worker,
+                                         @RequestParam(name = "meses", required = false) Integer months,
+                                         @RequestParam(name = "anio", required = false) String year) {
+        AnalyticsReport report = year != null
+                ? analyticsService.yearReportFor(worker.getCenterId(), parseYear(year))
+                : analyticsService.reportFor(worker.getCenterId(), AnalyticsService.normalizeMonths(months));
+        String centerName = centerService.getCenterById(worker.getCenterId()).getName();
+        return ResponseEntity.ok()
+                .contentType(new MediaType("text", "csv", java.nio.charset.StandardCharsets.UTF_8))
+                .header(HttpHeaders.CONTENT_DISPOSITION, ContentDisposition.attachment()
+                        .filename(AnalyticsCsv.fileName(centerName, report), java.nio.charset.StandardCharsets.UTF_8)
+                        .build().toString())
+                .body(AnalyticsCsv.of(centerName, report).getBytes(java.nio.charset.StandardCharsets.UTF_8));
     }
 
     private static Integer parseYear(String year) {

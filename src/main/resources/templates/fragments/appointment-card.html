@@ -86,7 +86,8 @@
     </article>
 
     <!-- Fila del historial: lo justo para reconocer la cita y repetirla. -->
-    <li class="history-row" th:fragment="historyRow(app)" th:attr="data-status=${app.status.name()}">
+    <!--/* myRating: estrellas que le puso el cliente (null si no la valoró); canReview: aún puede valorarla. */-->
+    <li class="history-row" th:fragment="historyRow(app, myRating, canReview)" th:attr="data-status=${app.status.name()}">
         <div class="history-row-main">
             <p class="history-row-treatment" th:text="${app.treatment.name}">Manicura rusa</p>
             <p class="history-row-meta">
@@ -94,13 +95,24 @@
                 · <span th:text="${app.center.name}">Centro Histórico</span>
                 <th:block th:if="${app.worker != null}"> · <span th:text="${app.worker.name}">Carlos Mendoza</span></th:block>
             </p>
+            <p class="history-row-rating" th:if="${myRating != null}">
+                Tu valoración <span th:replace="~{fragments/reviews :: stars(${myRating})}"></span>
+                <span class="visually-hidden" th:text="${myRating + ' de 5 estrellas'}">4 de 5 estrellas</span>
+            </p>
         </div>
         <span class="badge" th:classappend="${'badge-' + #strings.toLowerCase(app.status.name())}"
               th:text="${app.status.name() == 'NO_SHOW' ? 'No asististe' : app.status.label()}">Completada</span>
-        <a class="btn btn-secondary btn-sm history-row-rebook" th:if="${app.center.published}"
-           th:href="@{/client/centers/{id}(id=${app.center.id}, tratamiento=${app.treatment.id})}"
-           th:attr="aria-label=${'Volver a reservar ' + app.treatment.name + ' en ' + app.center.name}">
-            <i class="lucide-rotate-ccw" aria-hidden="true"></i> Volver a reservar
-        </a>
+        <div class="history-row-actions" th:if="${canReview or app.center.published}">
+            <button type="button" class="btn btn-primary btn-sm" th:if="${canReview}" data-review-open
+                    th:attr="data-id=${app.id}, data-context=${app.treatment.name + ' · ' + app.center.name + ' · ' + #temporals.format(app.dateTime, 'd MMM yyyy')},
+                             aria-label=${'Valorar ' + app.treatment.name + ' en ' + app.center.name}">
+                <i class="lucide-star" aria-hidden="true"></i> Valorar
+            </button>
+            <a class="btn btn-secondary btn-sm" th:if="${app.center.published}"
+               th:href="@{/client/centers/{id}(id=${app.center.id}, tratamiento=${app.treatment.id})}"
+               th:attr="aria-label=${'Volver a reservar ' + app.treatment.name + ' en ' + app.center.name}">
+                <i class="lucide-rotate-ccw" aria-hidden="true"></i> Volver a reservar
+            </a>
+        </div>
     </li>
 </div>

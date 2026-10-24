@@ -105,6 +105,21 @@ public final class OpeningHours {
                 .anyMatch(period -> from >= period.opensMinute() && to <= period.closesMinute());
     }
 
+    /**
+     * true si [start, end) cae entero dentro de un tramo, sin exigir que empiece en una franja
+     * (el horario de un profesional frente a citas puestas a mano a cualquier hora).
+     */
+    public boolean covers(LocalDateTime start, LocalDateTime end) {
+        return start.toLocalDate().equals(end.toLocalDate())
+                && covers(start.getDayOfWeek(), start.toLocalTime(), end.toLocalTime());
+    }
+
+    /** true si el tramo [opens, closes) del día cabe entero dentro de alguno de los tramos de ese día. */
+    public boolean covers(DayOfWeek day, java.time.LocalTime opens, java.time.LocalTime closes) {
+        return byDay.get(day).stream()
+                .anyMatch(period -> !opens.isBefore(period.opens()) && !closes.isAfter(period.closes()));
+    }
+
     /** Días por delante en los que se busca la próxima apertura de un centro cerrado. */
     static final int LOOKAHEAD_DAYS = 14;
 

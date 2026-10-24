@@ -59,6 +59,8 @@
     --warning-text: #59451d;
     --warning-bg: rgba(236, 210, 155, 0.25);
 
+    --star: #c08a1e;                 /* estrellas de las reseñas */
+
     --error: #b3261e;                /* validación y mensajes de error */
     --error-rgb: 179, 38, 30;
     --error-bg: #fdf1f0;
@@ -154,6 +156,8 @@
         --warning: #cfa861;
         --warning-text: #ffefcd;
         --warning-bg: rgba(207, 168, 97, 0.2);
+
+        --star: #e8c070;
 
         --error: #ff9d94;
         --error-rgb: 255, 157, 148;

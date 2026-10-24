@@ -10,6 +10,7 @@ import com.alexxlpz.crm_cbelleza.services.BookingService;
 import com.alexxlpz.crm_cbelleza.services.CenterService;
 import com.alexxlpz.crm_cbelleza.services.LoyaltyService;
 import com.alexxlpz.crm_cbelleza.services.OpeningHoursService;
+import com.alexxlpz.crm_cbelleza.services.ReviewService;
 import com.alexxlpz.crm_cbelleza.services.TreatmentService;
 import com.alexxlpz.crm_cbelleza.services.UserService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -25,6 +26,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -42,6 +44,7 @@ public class ClientBookingController {
     private final BookingService bookingService;
     private final OpeningHoursService openingHours;
     private final LoyaltyService loyaltyService;
+    private final ReviewService reviewService;
 
     public ClientBookingController(CenterService centerService,
                                    TreatmentService treatmentService,
@@ -49,7 +52,9 @@ public class ClientBookingController {
                                    AppointmentService appointmentService,
                                    BookingService bookingService,
                                    OpeningHoursService openingHours,
-                                   LoyaltyService loyaltyService) {
+                                   LoyaltyService loyaltyService,
+                                   ReviewService reviewService) {
+        this.reviewService = reviewService;
         this.loyaltyService = loyaltyService;
         this.centerService = centerService;
         this.treatmentService = treatmentService;
@@ -84,6 +89,9 @@ public class ClientBookingController {
         model.addAttribute("workers", userService.getWorkersByCenter(id));
         model.addAttribute("selectedWorkerId", null);
         model.addAttribute("openingHoursLines", openingHours.forCenter(id).describe());
+        model.addAttribute("rating", reviewService.rating(id));
+        model.addAttribute("ratingDistribution", reviewService.distribution(id));
+        model.addAttribute("reviews", reviewService.forCenter(id));
         model.addAttribute("activePage", "centers");
         return "client/center_details";
     }
@@ -117,6 +125,10 @@ public class ClientBookingController {
                 .map(Appointment::getId)
                 .collect(Collectors.toSet());
         model.addAttribute("changeableIds", changeable);
+        // Valoraciones: la nota de las que ya valoró y las completadas que aún puede valorar
+        Map<Long, Integer> ratings = reviewService.ratingsOfClient(client.getId());
+        model.addAttribute("reviewRatings", ratings);
+        model.addAttribute("reviewableIds", reviewService.reviewableAmong(appointments.history(), ratings.keySet()));
         model.addAttribute("loyaltyCards", loyaltyService.cardsOfClient(client.getId()));
         model.addAttribute("activePage", "appointments");
         return "client/appointments";
@@ -160,6 +172,17 @@ public class ClientBookingController {
             redirect.addFlashAttribute("bookingError", e.getMessage());
             return "redirect:/client/appointments/" + id + "/cambiar";
         }
+    }
+
+    /** Reseña verificada de una cita completada: de 1 a 5 estrellas y un comentario opcional. */
+    @PostMapping("/client/appointments/{id}/review")
+    public String review(@AuthenticationPrincipal AppUserDetails client,
+                         @PathVariable Long id,
+                         @RequestParam(required = false) Integer rating,
+                         @RequestParam(required = false) String comment,
+                         RedirectAttributes redirect) {
+        return clientAction(redirect, "¡Gracias por tu valoración! Ya aparece en la ficha del centro.",
+                () -> reviewService.create(client.getId(), id, rating, comment));
     }
 
     /** El cliente elige una de las horas que le propuso el centro. */

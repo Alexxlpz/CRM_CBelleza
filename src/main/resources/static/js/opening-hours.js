@@ -35,7 +35,9 @@
     /** Primer problema del horario, o '' si está bien. */
     function problem(editor) {
         const rows = [...editor.querySelectorAll('.hours-row')];
-        if (!rows.some(row => dayState(row).open)) return 'Marca al menos un día en el que abra el centro.';
+        // El horario de un profesional (worker/worker_hours.html) cambia el texto con data-hours-empty
+        const empty = editor.closest('[data-hours-empty]')?.dataset.hoursEmpty || 'Marca al menos un día en el que abra el centro.';
+        if (!rows.some(row => dayState(row).open)) return empty;
         for (const row of rows) {
             const { open, split } = dayState(row);
             if (!open) continue;
@@ -102,6 +104,8 @@
         });
         // Si el horario no cuadra, no se envía: el aviso explica qué cambiar
         editor.closest('form')?.addEventListener('submit', e => {
+            // Un editor escondido (profesional que trabaja todo el horario del centro) no se envía ni se valida
+            if (editor.closest('[hidden]')) return;
             if (refresh(editor)) {
                 e.preventDefault();
                 e.stopImmediatePropagation();

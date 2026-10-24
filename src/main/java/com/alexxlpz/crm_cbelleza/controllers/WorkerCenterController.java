@@ -16,6 +16,7 @@ import com.alexxlpz.crm_cbelleza.services.TeamService;
 import com.alexxlpz.crm_cbelleza.services.TeamService.Invitee;
 import com.alexxlpz.crm_cbelleza.services.LoyaltyService;
 import com.alexxlpz.crm_cbelleza.exceptions.BusinessRuleException;
+import com.alexxlpz.crm_cbelleza.exceptions.ResourceNotFoundException;
 import com.alexxlpz.crm_cbelleza.forms.WorkerCenterForm;
 import com.alexxlpz.crm_cbelleza.googlecalendar.GoogleCalendarService;
 import com.alexxlpz.crm_cbelleza.security.AppUserDetails;
@@ -24,6 +25,7 @@ import com.alexxlpz.crm_cbelleza.services.CenterPhotoService;
 import com.alexxlpz.crm_cbelleza.services.CenterService;
 import com.alexxlpz.crm_cbelleza.services.TreatmentService;
 import com.alexxlpz.crm_cbelleza.services.UserService;
+import com.alexxlpz.crm_cbelleza.services.WorkerHoursService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -36,6 +38,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * "Mi centro": datos públicos del centro, horario, equipo y configuración (solo el dueño los cambia; el resto del
@@ -56,6 +63,7 @@ public class WorkerCenterController {
     private final TeamService team;
     private final CenterOnboardingMailService onboardingMail;
     private final SiteModelAdvice site;
+    private final WorkerHoursService workerHours;
 
     public WorkerCenterController(CenterService centerService,
                                   UserService userService,
@@ -68,7 +76,9 @@ public class WorkerCenterController {
                                   CenterAccess access,
                                   TeamService team,
                                   CenterOnboardingMailService onboardingMail,
-                                  SiteModelAdvice site) {
+                                  SiteModelAdvice site,
+                                  WorkerHoursService workerHours) {
+        this.workerHours = workerHours;
         this.team = team;
         this.onboardingMail = onboardingMail;
         this.site = site;
@@ -98,6 +108,10 @@ public class WorkerCenterController {
         }
         model.addAttribute("hourOptions", openingHours.timeOptions());
         model.addAttribute("teamMembers", team.members(centerId));
+        // Horario propio de quien lo tiene («Lunes a viernes: 09:00 - 14:00»); el resto trabaja todo el del centro
+        Map<Long, List<String>> teamHours = new HashMap<>();
+        workerHours.forCenter(centerId).forEach((id, ownHours) -> teamHours.put(id, ownHours.describe()));
+        model.addAttribute("teamHours", teamHours);
         model.addAttribute("maxTeamSize", TeamService.MAX_TEAM_SIZE);
         if (owner) {
             // Quien puede quedarse con el centro: el resto del equipo con la cuenta ya activada
@@ -140,6 +154,50 @@ public class WorkerCenterController {
             redirect.addFlashAttribute("errorMessage", e.getMessage());
         }
         return "redirect:/worker/center";
+    }
+
+    /** Horario de un profesional del equipo: todo el del centro o uno propio (solo el dueño lo cambia). */
+    @CenterOwnerOnly
+    @GetMapping("/worker/center/team/{workerId}/horario")
+    public String workerHoursForm(@AuthenticationPrincipal AppUserDetails worker,
+                                  @PathVariable Long workerId, Model model) {
+        Long centerId = worker.getCenterId();
+        User member = userService.getWorkersByCenter(centerId).stream()
+                .filter(w -> w.getId().equals(workerId)).findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("Ese profesional no es de tu centro."));
+        OpeningHours centerHours = openingHours.forCenter(centerId);
+        Optional<OpeningHours> own = workerHours.forWorker(workerId);
+        model.addAttribute("member", member);
+        model.addAttribute("customHours", model.containsAttribute("customHours") ? model.getAttribute("customHours") : own.isPresent());
+        model.addAttribute("centerHoursLines", centerHours.describe());
+        if (!model.containsAttribute("hourRows")) {
+            model.addAttribute("hourRows", openingHours.rows(own.orElse(centerHours)));
+        }
+        model.addAttribute("hourOptions", openingHours.timeOptions());
+        model.addAttribute("activePage", "center");
+        return "worker/worker_hours";
+    }
+
+    @CenterOwnerOnly
+    @PostMapping("/worker/center/team/{workerId}/horario")
+    public String updateWorkerHours(@AuthenticationPrincipal AppUserDetails worker,
+                                    @PathVariable Long workerId,
+                                    @RequestParam(name = "custom", defaultValue = "false") boolean custom,
+                                    @ModelAttribute OpeningHoursForm form,
+                                    RedirectAttributes redirect) {
+        try {
+            workerHours.replace(worker.getCenterId(), workerId, custom, form);
+            String name = userService.getUser(workerId).getName();
+            redirect.addFlashAttribute("teamMessage", custom
+                    ? "Horario de " + name + " guardado. Solo recibirá citas dentro de él."
+                    : name + " vuelve a trabajar todo el horario del centro.");
+            return "redirect:/worker/center#equipo";
+        } catch (BusinessRuleException e) {
+            redirect.addFlashAttribute("errorMessage", e.getMessage());
+            redirect.addFlashAttribute("customHours", custom);
+            redirect.addFlashAttribute("hourRows", openingHours.rows(form));
+            return "redirect:/worker/center/team/" + workerId + "/horario";
+        }
     }
 
     @CenterOwnerOnly

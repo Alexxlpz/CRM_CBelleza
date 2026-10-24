@@ -13,6 +13,8 @@ import com.alexxlpz.crm_cbelleza.repositories.AppointmentRepository;
 import com.alexxlpz.crm_cbelleza.repositories.CenterRepository;
 import com.alexxlpz.crm_cbelleza.repositories.InventoryRepository;
 import com.alexxlpz.crm_cbelleza.repositories.ProductSaleRepository;
+import com.alexxlpz.crm_cbelleza.repositories.ReviewRepository;
+import com.alexxlpz.crm_cbelleza.entities.Review;
 import com.alexxlpz.crm_cbelleza.repositories.TreatmentRepository;
 import com.alexxlpz.crm_cbelleza.repositories.UserRepository;
 import com.alexxlpz.crm_cbelleza.services.AnalyticsService;
@@ -34,6 +36,8 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /** Pantalla «Análisis»: cifras del mes, clientes fieles y clientes a recuperar. */
@@ -58,6 +62,8 @@ class AnalyticsTests {
     private InventoryRepository inventories;
     @Autowired
     private ProductSaleRepository sales;
+    @Autowired
+    private ReviewRepository reviews;
     @Autowired
     private Clock clock;
 
@@ -151,7 +157,7 @@ class AnalyticsTests {
 
     @Test
     void moreCancellationsCountAsWorseAndMoreRevenueAsBetter() {
-        assertEquals("Citas anuladas o rechazadas", analytics.reportFor(center.getId(), 3).kpis().get(5).label());
+        assertEquals("Anuladas, rechazadas o no vino", analytics.reportFor(center.getId(), 3).kpis().get(7).label());
 
         Kpi worse = new Kpi("x", "i", 20, 10, AnalyticsService.Format.PERCENT, 10, false);
         assertTrue(worse.isWorsening());
@@ -212,6 +218,63 @@ class AnalyticsTests {
             assertFalse(previous.monthly().getFirst().hasData());
         }
         assertNull(previous.previousYear());
+    }
+
+    @Test
+    void noShowsCountAsLostAndShowUpInTheTeamTable() {
+        AnalyticsReport before = analytics.reportFor(center.getId(), 3);
+        User absent = newClient("Pepa Faltona", "611800020");
+        visit(absent, now.minusMinutes(1), AppointmentStatus.NO_SHOW);
+        appointments.flush();
+
+        AnalyticsReport after = analytics.reportFor(center.getId(), 3);
+        assertTrue(after.kpis().get(7).value() > before.kpis().get(7).value(), "El no presentado sube «Anuladas, rechazadas o no vino»");
+        AnalyticsService.TeamRow carlosRow = after.team().stream().filter(r -> r.name().equals("Carlos Mendoza")).findFirst().orElseThrow();
+        AnalyticsService.TeamRow carlosBefore = before.team().stream().filter(r -> r.name().equals("Carlos Mendoza")).findFirst().orElseThrow();
+        assertEquals(carlosBefore.noShows() + 1, carlosRow.noShows());
+        assertEquals("Ocupación de la agenda", after.kpis().get(4).label());
+        assertEquals("Clientes atendidos", after.kpis().get(5).label());
+        assertEquals(8, after.kpis().size());
+    }
+
+    @Test
+    void theTeamTableShowsTicketAndReviews() throws Exception {
+        User regular = newClient("Marisa Contenta", "611800021");
+        Appointment done = visit(regular, now.minusDays(1), AppointmentStatus.COMPLETED);
+        done.setPrice(40.0);
+        reviews.save(Review.builder().appointment(done).center(center).client(regular).rating(4)
+                .createdAt(now).build());
+        appointments.flush();
+
+        AnalyticsService.TeamRow row = analytics.reportFor(center.getId(), 12).team().stream()
+                .filter(r -> r.name().equals("Carlos Mendoza")).findFirst().orElseThrow();
+        assertNotNull(row.rating());
+        assertTrue(row.reviewCount() >= 1);
+        assertEquals(row.visits() == 0 ? 0 : row.revenue() / row.visits(), row.averageTicket(), 0.001);
+
+        mvc.perform(get("/worker/analytics").with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
+                .andExpect(content().string(containsString("Rendimiento por profesional")))
+                .andExpect(content().string(containsString("Ocupación de la agenda")))
+                .andExpect(content().string(containsString("/worker/analytics/export?meses=12")));
+    }
+
+    @Test
+    void ownerDownloadsTheAnalyticsAsCsv() throws Exception {
+        String csv = mvc.perform(get("/worker/analytics/export").param("meses", "3").with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Content-Type", containsString("text/csv")))
+                .andExpect(header().string("Content-Disposition", containsString("analisis-centro-historico-ultimos-3-meses.csv")))
+                .andReturn().getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8);
+        assertTrue(csv.startsWith("\uFEFFAnálisis de Centro Histórico;Últimos 3 meses"));
+        assertTrue(csv.contains("Mes;Ingresos (€);Tratamientos (€);Productos (€);Visitas"));
+        assertTrue(csv.contains("Profesional;Visitas;Clientes;Ingresos (€);Ticket medio (€);Ocupación (%);No vinieron;Nota media;Reseñas"));
+        assertTrue(csv.contains("\r\nCarlos Mendoza;"));
+
+        mvc.perform(get("/worker/analytics/export").param("anio", "").with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Content-Disposition", containsString(".csv")));
+        mvc.perform(get("/worker/analytics/export").with(TestUsers.as(users, "lucia.romero@cbelleza.com")))
+                .andExpect(redirectedUrl("/worker/dashboard"));
     }
 
     @Test

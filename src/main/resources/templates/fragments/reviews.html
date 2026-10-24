@@ -1,0 +1,63 @@
+<!--/* Reseñas verificadas: estrellas, ficha del centro, valorar desde «Mis citas» y respuestas del centro. */-->
+<div xmlns:th="http://www.thymeleaf.org">
+
+    <!--/* Cinco estrellas rellenas hasta «value» (admite medias: 4,5). Solo dibujo: el texto lo pone quien lo usa. */-->
+    <span th:fragment="stars(value)" class="stars" aria-hidden="true"
+          th:style="'--stars: ' + ${value}"><span class="stars-fill"></span></span>
+
+    <!--/* Modal único para valorar una cita del historial; el botón «Valorar» lo rellena (centro, tratamiento y fecha). */-->
+    <div th:fragment="reviewModal" class="ui-modal-overlay" id="reviewModal" hidden>
+        <div class="ui-modal ui-modal--form" role="dialog" aria-modal="true" aria-labelledby="reviewModalTitle" aria-describedby="reviewModalContext">
+            <button type="button" class="ui-modal-close" data-modal-close aria-label="Cerrar"><i class="lucide-x" aria-hidden="true"></i></button>
+            <h2 class="ui-modal-title" id="reviewModalTitle">Valora tu cita</h2>
+            <p class="ui-modal-text" id="reviewModalContext">Manicura rusa · Centro Histórico · 7 sept 2026</p>
+            <form id="reviewForm" th:action="@{/client/appointments/0/review}" method="post" class="review-form" novalidate>
+                <fieldset class="star-input" id="reviewStars">
+                    <legend class="form-label">¿Qué tal fue? <span class="required-star">*</span></legend>
+                    <div class="star-input-options">
+                        <th:block th:each="n : ${#numbers.sequence(5, 1)}">
+                            <input type="radio" name="rating" th:id="'reviewRating' + ${n}" th:value="${n}" class="visually-hidden">
+                            <label th:for="'reviewRating' + ${n}" th:title="${n == 1 ? '1 estrella' : n + ' estrellas'}">
+                                <span aria-hidden="true">★</span><span class="visually-hidden" th:text="${n == 1 ? '1 estrella' : n + ' estrellas'}">5 estrellas</span>
+                            </label>
+                        </th:block>
+                    </div>
+                    <span class="star-input-label" id="reviewStarsLabel" aria-live="polite">Elige de 1 a 5 estrellas</span>
+                </fieldset>
+                <label class="form-label" for="reviewComment">Cuéntanos más <span class="optional-tag">(opcional)</span></label>
+                <textarea name="comment" id="reviewComment" class="form-control" rows="4" maxlength="1000"
+                          placeholder="¿Qué te gustó? ¿Qué mejorarías? Lo leerán el centro y otros clientes."></textarea>
+                <span class="form-hint">Se publica con tu nombre y la inicial de tu apellido. El centro puede responderte.</span>
+                <div class="ui-modal-actions">
+                    <button type="button" class="btn btn-secondary" data-modal-close>Cancelar</button>
+                    <button type="submit" class="btn btn-primary"><i class="lucide-send" aria-hidden="true"></i> Publicar valoración</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!--/* Una reseña tal y como la ven todos: autor, estrellas, tratamiento, comentario y la respuesta del centro. */-->
+    <article th:fragment="review(review, centerName)" class="review-item">
+        <header class="review-item-head">
+            <span class="review-avatar" aria-hidden="true" th:text="${#strings.substring(review.authorName, 0, 1)}">S</span>
+            <div class="review-item-who">
+                <p class="review-author">
+                    <strong th:text="${review.authorName}">Sofía M.</strong>
+                    <span class="review-verified"><i class="lucide-badge-check" aria-hidden="true"></i> Cita verificada</span>
+                </p>
+                <p class="review-meta">
+                    <span th:replace="~{fragments/reviews :: stars(${review.rating})}"></span>
+                    <span class="visually-hidden" th:text="${review.rating + ' de 5 estrellas'}">5 de 5 estrellas</span>
+                    <span th:text="${review.appointment.treatment.name}">Manicura rusa</span>
+                    · <time th:datetime="${review.createdAt}" th:text="${#temporals.format(review.createdAt, 'd MMM yyyy')}">7 sept 2026</time>
+                </p>
+            </div>
+        </header>
+        <p class="review-comment" th:if="${review.comment != null}" th:text="${review.comment}">Genial.</p>
+        <div class="review-reply" th:if="${review.hasReply()}">
+            <p class="review-reply-who"><i class="lucide-message-square-reply" aria-hidden="true"></i>
+                Respuesta de <strong th:text="${centerName}">Centro Histórico</strong></p>
+            <p class="review-reply-text" th:text="${review.reply}">¡Gracias, Sofía!</p>
+        </div>
+    </article>
+</div>

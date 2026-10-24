@@ -553,6 +553,14 @@ public class BookingService {
             throw new OutsideOpeningHoursException();
         }
         AgendaSnapshot agenda = availability.snapshot(center, start, start.plusDays(1));
+        // Fuera del horario propio del profesional, igual: se pregunta y, si lo confirma, se pone
+        if (workerId != null && agenda.offDuty(workerId, start, start.plusMinutes(duration))) {
+            if (!allowOutsideHours) {
+                String name = userRepository.findById(workerId).map(User::getName).orElse("Ese profesional");
+                throw new OutsideOpeningHoursException(name + " no trabaja a esa hora según su horario.");
+            }
+            agenda = agenda.ignoringWorkerHours();
+        }
         ensureFits(agenda, new AgendaSnapshot.Request(start, duration, workerId, ignoredAppointmentId, false));
     }
 
@@ -617,9 +625,12 @@ public class BookingService {
         }
         User free = agenda.freeWorker(slot, candidates).orElse(null);
         if (free == null && (workerId != null || candidates.size() < team.size())) {
-            throw new SlotUnavailableException(workerId != null
-                    ? candidates.getFirst().getName() + " no está libre a esa hora. Elige otra hora u otro profesional."
-                    : "No hay ningún profesional libre a esa hora para este servicio.");
+            String chosenName = workerId != null ? candidates.getFirst().getName() : null;
+            throw new SlotUnavailableException(workerId == null
+                    ? "No hay ningún profesional libre a esa hora para este servicio."
+                    : agenda.offDuty(workerId, slot.start(), slot.end())
+                    ? chosenName + " no trabaja a esa hora. Elige otra hora u otro profesional."
+                    : chosenName + " no está libre a esa hora. Elige otra hora u otro profesional.");
         }
         return free;
     }
@@ -699,7 +710,11 @@ public class BookingService {
     /** La hora queda fuera del horario de reservas: la agenda pregunta si se quiere guardar igualmente. */
     public static class OutsideOpeningHoursException extends BusinessRuleException {
         public OutsideOpeningHoursException() {
-            super("La cita queda fuera del horario de reservas del centro.");
+            this("La cita queda fuera del horario de reservas del centro.");
+        }
+
+        public OutsideOpeningHoursException(String message) {
+            super(message);
         }
     }
 }

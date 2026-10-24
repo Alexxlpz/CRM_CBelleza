@@ -266,6 +266,21 @@
     color: var(--text-muted);
 }
 
+.history-row-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.history-row-rating {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 4px 0 0;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
 /* Móvil: el estado sube junto al nombre y el botón ocupa su propia línea, a 44 px */
 @media (max-width: 600px) {
     .history-row {
@@ -273,9 +288,12 @@
         align-items: start;
     }
 
-    .history-row-rebook {
+    .history-row-actions {
         grid-column: 1 / -1;
         justify-self: start;
+    }
+
+    .history-row-actions .btn {
         min-height: 44px;
     }
 }

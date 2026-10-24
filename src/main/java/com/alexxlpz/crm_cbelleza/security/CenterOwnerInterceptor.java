@@ -58,7 +58,7 @@ public class CenterOwnerInterceptor implements HandlerInterceptor {
 
     /** Pantalla a la que se vuelve tras un intento sin permiso. */
     static String screenOf(String uri) {
-        for (String screen : new String[]{"/worker/center", "/worker/treatments", "/worker/inventory", "/worker/clients"}) {
+        for (String screen : new String[]{"/worker/center", "/worker/treatments", "/worker/inventory", "/worker/clients", "/worker/reviews"}) {
             if (uri.equals(screen) || uri.startsWith(screen + "/")) {
                 return screen;
             }

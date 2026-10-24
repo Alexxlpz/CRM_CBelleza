@@ -37,6 +37,10 @@
                         title="Ver solo centros abiertos ahora">
                     <i class="lucide-clock" aria-hidden="true"></i> Abierto ahora
                 </button>
+                <button type="button" class="btn btn-secondary filter-icon-btn offers-toggle" id="btnTopRated" aria-pressed="false"
+                        title="Ver solo centros con 4 estrellas o más">
+                    <i class="lucide-star" aria-hidden="true"></i> 4 o más
+                </button>
                 <button type="button" class="btn btn-secondary filter-icon-btn" id="btnMapToggle" aria-label="Ver en mapa" aria-pressed="false">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"></polygon><line x1="9" y1="3" x2="9" y2="21"></line><line x1="15" y1="3" x2="15" y2="21"></line></svg>
                 </button>
@@ -95,6 +99,8 @@
             let onlyOffers = false;
             const btnOpenNow = document.getElementById('btnOpenNow');
             let onlyOpen = false;
+            const btnTopRated = document.getElementById('btnTopRated');
+            let onlyTopRated = false;
 
             let userLat = null;
             let userLon = null;
@@ -152,6 +158,18 @@
                     </p>`;
             }
 
+            /** Nota media de las reseñas verificadas («★ 4,7 · 23 reseñas»); nada si el centro aún no tiene. */
+            function ratingBlock(center, className) {
+                if (!center.reviewCount) return '';
+                const average = center.rating.toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+                const count = center.reviewCount === 1 ? '1 reseña' : `${center.reviewCount} reseñas`;
+                return `
+                    <p class="${className}" aria-label="Nota media ${average} de 5, ${count}">
+                        <i class="lucide-star" aria-hidden="true"></i>
+                        <strong>${average}</strong> <span>· ${count}</span>
+                    </p>`;
+            }
+
             /** «Abierto · cierra a las 20:00» o «Cerrado · abre mañana a las 9:00», con el estado destacado. */
             function hoursStatus(center, className) {
                 if (!center.hoursLabel) return '';
@@ -176,6 +194,7 @@
                     ${center.address ? `<span class="map-popup-address">${esc(center.address)}</span>` : ''}
                     ${distance}
                     ${hoursStatus(center, 'center-hours-status map-popup-hours')}
+                    ${ratingBlock(center, 'center-rating map-popup-rating')}
                     ${offers}
                     <button type="button" class="btn btn-primary btn-sm map-popup-btn">
                         <i class="lucide-calendar-plus" aria-hidden="true"></i> Ver tratamientos
@@ -220,6 +239,12 @@
                 btnOpenNow.setAttribute('aria-pressed', String(onlyOpen));
                 resetAndFetch();
             });
+            btnTopRated.addEventListener('click', () => {
+                onlyTopRated = !onlyTopRated;
+                btnTopRated.classList.toggle('is-active', onlyTopRated);
+                btnTopRated.setAttribute('aria-pressed', String(onlyTopRated));
+                resetAndFetch();
+            });
             searchTreatment.addEventListener('change', () => {
                 treatmentBadge.classList.toggle('is-visible', searchTreatment.value !== '');
                 resetAndFetch();
@@ -231,6 +256,7 @@
                 if (searchTreatment.value) params.append('searchTreatment', searchTreatment.value);
                 if (onlyOffers) params.append('withOffers', 'true');
                 if (onlyOpen) params.append('openNow', 'true');
+                if (onlyTopRated) params.append('topRated', 'true');
                 return params;
             }
 
@@ -328,6 +354,7 @@
                         ${distance}
                     </div>
                     ${hoursStatus(center, 'center-hours-status')}
+                    ${ratingBlock(center, 'center-rating')}
                     ${offersBlock(center.offers)}
                     <div class="center-card-body">
                         ${meta('navigation', 'Dirección:', center.address)}
@@ -350,6 +377,7 @@
             }
 
             function emptyMessage() {
+                if (onlyTopRated) return 'Ningún centro que coincida con tu búsqueda tiene todavía 4 estrellas o más. Quita «4 o más» para verlos todos.';
                 if (onlyOpen && onlyOffers) return 'Ahora mismo no hay ningún centro abierto con ofertas que coincida con tu búsqueda.';
                 if (onlyOpen) return 'Ahora mismo no hay ningún centro abierto que coincida con tu búsqueda. Quita «Abierto ahora» para ver también los cerrados y reservar para otro día.';
                 if (onlyOffers) return 'Ahora mismo ningún centro que coincida con tu búsqueda tiene ofertas.';

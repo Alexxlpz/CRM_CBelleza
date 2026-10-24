@@ -258,6 +258,60 @@
         dropdown.addEventListener('keydown', e => {
             if (e.key === 'Escape') { setOpen(false); toggle.focus(); }
         });
+        initNotificationDismiss(toggle, dropdown);
+    }
+
+    /* «x» en cada aviso y «Limpiar todas»: el servidor recuerda los quitados y no vuelven a salir */
+    function initNotificationDismiss(toggle, dropdown) {
+        const url = dropdown.dataset.dismissUrl;
+        if (!url) return;
+        const clearAll = dropdown.querySelector('[data-notifications-clear]');
+        const empty = dropdown.querySelector('.notification-empty');
+        const rows = () => Array.from(dropdown.querySelectorAll('.notification-row:not(.is-leaving)'));
+
+        // La insignia del trabajador cuenta los avisos; la del cliente, los nuevos (ya se quita al abrir)
+        const refresh = () => {
+            const left = rows().length;
+            if (clearAll) clearAll.hidden = left === 0;
+            if (empty) empty.hidden = left > 0;
+            if (!toggle.dataset.seenUrl) {
+                const badge = toggle.querySelector('.bell-badge');
+                if (left === 0) badge?.remove();
+                else if (badge) badge.textContent = String(left);
+                toggle.setAttribute('aria-label', left === 0 ? 'Notificaciones' : 'Notificaciones (' + left + ' nuevas)');
+            }
+        };
+        const remove = list => {
+            list.forEach(row => {
+                row.classList.add('is-leaving');
+                setTimeout(() => row.remove(), Cuquora.scrollBehavior() === 'auto' ? 0 : 200);
+            });
+            refresh();
+        };
+        const send = keys => fetch(url, { method: 'POST', body: new URLSearchParams(keys.map(k => ['key', k])) })
+            .then(res => { if (!res.ok) throw new Error('HTTP ' + res.status); })
+            .catch(err => console.error(err));
+
+        dropdown.addEventListener('click', e => {
+            const button = e.target.closest('[data-notification-dismiss]');
+            if (!button) return;
+            e.preventDefault();
+            const row = button.closest('.notification-row');
+            // El foco pasa a la siguiente «x» (o a «Limpiar todas» / la campana) para seguir con el teclado
+            const next = row.nextElementSibling?.querySelector('[data-notification-dismiss]')
+                || row.previousElementSibling?.querySelector('[data-notification-dismiss]');
+            send([row.dataset.notificationKey]);
+            remove([row]);
+            (next || toggle).focus();
+        });
+        clearAll?.addEventListener('click', e => {
+            e.stopPropagation();
+            const list = rows();
+            if (list.length === 0) return;
+            send(list.map(row => row.dataset.notificationKey));
+            remove(list);
+            toggle.focus();
+        });
     }
 
     /* ---------- 4. Formularios con confirmación ---------- */

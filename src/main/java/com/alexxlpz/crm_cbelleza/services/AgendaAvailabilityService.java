@@ -36,6 +36,7 @@ public class AgendaAvailabilityService {
     private final CenterRepository centers;
     private final TreatmentRepository treatments;
     private final OpeningHoursService openingHours;
+    private final WorkerHoursService workerHours;
     private final Clock clock;
 
     public AgendaAvailabilityService(AppointmentRepository appointments,
@@ -44,7 +45,9 @@ public class AgendaAvailabilityService {
                                      CenterRepository centers,
                                      TreatmentRepository treatments,
                                      OpeningHoursService openingHours,
+                                     WorkerHoursService workerHours,
                                      Clock clock) {
+        this.workerHours = workerHours;
         this.appointments = appointments;
         this.blocks = blocks;
         this.users = users;
@@ -63,7 +66,8 @@ public class AgendaAvailabilityService {
                 users.findByCenterIdAndRole(center.getId(), Role.WORKER),
                 appointments.findByCenterIdAndStatusAndDateTimeBetween(center.getId(), AppointmentStatus.CONFIRMED, since, to),
                 appointments.findByCenterIdAndStatus(center.getId(), AppointmentStatus.PROPOSED),
-                blocks.findByCenterIdAndEndsAtAfterAndStartsAtBeforeOrderByStartsAtAsc(center.getId(), since, to));
+                blocks.findByCenterIdAndEndsAtAfterAndStartsAtBeforeOrderByStartsAtAsc(center.getId(), since, to),
+                workerHours.forCenter(center.getId()));
     }
 
     /**

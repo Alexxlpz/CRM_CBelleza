@@ -2,6 +2,7 @@ package com.alexxlpz.crm_cbelleza.security;
 
 import com.alexxlpz.crm_cbelleza.services.CenterAccess;
 import com.alexxlpz.crm_cbelleza.services.ClientNotificationService;
+import com.alexxlpz.crm_cbelleza.services.NotificationDismissalService;
 import com.alexxlpz.crm_cbelleza.services.NotificationService;
 import com.alexxlpz.crm_cbelleza.services.NotificationService.NotificationItem;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,13 +25,16 @@ public class CurrentUserModelAdvice {
 
     private final NotificationService notificationService;
     private final ClientNotificationService clientNotificationService;
+    private final NotificationDismissalService dismissals;
     private final CenterAccess centerAccess;
     private final boolean devLoginEnabled;
 
     public CurrentUserModelAdvice(NotificationService notificationService,
                                   ClientNotificationService clientNotificationService,
+                                  NotificationDismissalService dismissals,
                                   CenterAccess centerAccess,
                                   Environment environment) {
+        this.dismissals = dismissals;
         this.centerAccess = centerAccess;
         this.notificationService = notificationService;
         this.clientNotificationService = clientNotificationService;
@@ -59,7 +63,9 @@ public class CurrentUserModelAdvice {
                 model.addAttribute("ownerName", centerAccess.ownerName(user.getCenterId()));
             }
             if ("GET".equalsIgnoreCase(request.getMethod()) && user.getCenterId() != null) {
-                List<NotificationItem> notifications = notificationService.getNotificationsForCenter(user.getCenterId());
+                // Cada trabajador quita los avisos de su campana sin quitárselos a sus compañeros
+                List<NotificationItem> notifications = dismissals.visible(user.getId(),
+                        notificationService.getNotificationsForCenter(user.getCenterId()), NotificationItem::key);
                 model.addAttribute("notifications", notifications);
             }
         } else if ("GET".equalsIgnoreCase(request.getMethod())) {

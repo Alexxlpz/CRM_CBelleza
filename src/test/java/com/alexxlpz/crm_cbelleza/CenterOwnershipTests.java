@@ -130,6 +130,8 @@ class CenterOwnershipTests {
                 .andExpect(redirectedUrl("/worker/dashboard"));
         mvc.perform(get("/worker/clients/template").with(TestUsers.as(users, LUCIA)))
                 .andExpect(redirectedUrl("/worker/clients"));
+        mvc.perform(post("/worker/reviews/1/reply").with(csrf()).with(TestUsers.as(users, LUCIA)).param("reply", "Gracias"))
+                .andExpect(redirectedUrl("/worker/reviews"));
 
         // Los datos del centro tampoco entran por el formulario de su cuenta
         mvc.perform(post("/worker/center").with(csrf()).with(TestUsers.as(users, LUCIA))

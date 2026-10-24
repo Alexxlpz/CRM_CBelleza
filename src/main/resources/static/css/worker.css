@@ -93,9 +93,19 @@
     gap: 24px;
 }
 
+/* Con un número impar de accesos, el último ocupa la fila entera en vez de quedarse cojo */
+.actions-grid > .action-card:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+}
+
 @media (min-width: 1366px) {
     .actions-grid {
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(5, 1fr);
+        gap: 20px;
+    }
+
+    .actions-grid > .action-card:last-child:nth-child(odd) {
+        grid-column: auto;
     }
 }
 

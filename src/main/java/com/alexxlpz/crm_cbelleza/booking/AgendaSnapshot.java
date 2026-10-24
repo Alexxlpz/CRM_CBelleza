@@ -20,7 +20,8 @@ import java.util.stream.Collectors;
  * abiertas, bloqueos y trabajadores. Responde si cabe una cita más en un intervalo:
  * <ul>
  *     <li>el centro no puede estar cerrado (bloqueo de todo el centro);</li>
- *     <li>el profesional elegido no puede tener otra cita ni un bloqueo a esa hora;</li>
+ *     <li>el profesional elegido tiene que trabajar a esa hora (su horario, si tiene uno propio) y no puede tener
+ *     otra cita ni un bloqueo;</li>
  *     <li>a la vez no puede haber más citas que cabinas ni que profesionales disponibles.</li>
  * </ul>
  * Las horas propuestas a un cliente reservan hueco frente a otras solicitudes y propuestas,
@@ -33,6 +34,8 @@ public final class AgendaSnapshot {
     private final List<Appointment> confirmed;
     private final List<Hold> holds;
     private final List<AgendaBlock> blocks;
+    /** Horario propio de los profesionales que lo tienen; los demás trabajan todo el horario del centro. */
+    private final Map<Long, OpeningHours> workerHours;
 
     /** Hora propuesta a otra cita, ocupada mientras el cliente decide. */
     public record Hold(Long appointmentId, Long workerId, LocalDateTime start, LocalDateTime end) {
@@ -46,7 +49,8 @@ public final class AgendaSnapshot {
     }
 
     public AgendaSnapshot(int cabins, List<User> workers, List<Appointment> confirmed,
-                          List<Appointment> proposed, List<AgendaBlock> blocks) {
+                          List<Appointment> proposed, List<AgendaBlock> blocks, Map<Long, OpeningHours> workerHours) {
+        this.workerHours = workerHours;
         this.cabins = Math.max(1, cabins);
         this.workers = workers;
         this.confirmed = confirmed;
@@ -61,6 +65,20 @@ public final class AgendaSnapshot {
         }
     }
 
+    private AgendaSnapshot(AgendaSnapshot other, Map<Long, OpeningHours> workerHours) {
+        this.cabins = other.cabins;
+        this.workers = other.workers;
+        this.confirmed = other.confirmed;
+        this.holds = other.holds;
+        this.blocks = other.blocks;
+        this.workerHours = workerHours;
+    }
+
+    /** La misma agenda sin los horarios propios: el trabajador ha confirmado poner la cita fuera de horario. */
+    public AgendaSnapshot ignoringWorkerHours() {
+        return new AgendaSnapshot(this, Map.of());
+    }
+
     /** Motivo por el que no cabe la cita, o vacío si cabe. */
     public Optional<String> problem(Request request) {
         LocalDateTime start = request.start();
@@ -71,6 +89,9 @@ public final class AgendaSnapshot {
         }
         if (request.workerId() != null) {
             String name = workerName(request.workerId());
+            if (offDuty(request.workerId(), start, end)) {
+                return Optional.of(name + " no trabaja a esa hora.");
+            }
             if (blocks.stream().anyMatch(b -> !b.isWholeCenter() && b.getWorker().getId().equals(request.workerId()) && b.overlaps(start, end))) {
                 return Optional.of(name + " no está disponible en ese horario.");
             }
@@ -95,6 +116,7 @@ public final class AgendaSnapshot {
         }
 
         long freeWorkers = workers.stream()
+                .filter(w -> !offDuty(w.getId(), start, end))
                 .filter(w -> blocks.stream().noneMatch(b -> !b.isWholeCenter() && b.getWorker().getId().equals(w.getId()) && b.overlaps(start, end)))
                 .count();
         int busyAtOnce = maxConcurrent(occupying, start, end);
@@ -135,6 +157,12 @@ public final class AgendaSnapshot {
                         .filter(app -> app.getWorker() != null && app.getWorker().getId().equals(w.getId()))
                         .filter(app -> app.getDateTime().toLocalDate().equals(start.toLocalDate()))
                         .count()));
+    }
+
+    /** true si el profesional tiene horario propio y el intervalo se sale de él. */
+    public boolean offDuty(Long workerId, LocalDateTime start, LocalDateTime end) {
+        OpeningHours hours = workerHours.get(workerId);
+        return hours != null && !hours.covers(start, end);
     }
 
     /** true si el intervalo cae dentro de un cierre de todo el centro. */

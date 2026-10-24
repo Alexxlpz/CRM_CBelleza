@@ -169,17 +169,26 @@
                                 <span class="team-tag" th:if="${member.id() == worker.id}">Tú</span>
                             </p>
                             <p class="team-member-email" th:text="${member.email()}">carlos@cbelleza.com</p>
+                            <p class="team-member-hours" th:with="own=${teamHours.get(member.id())}">
+                                <i class="lucide-clock" aria-hidden="true"></i>
+                                <span th:if="${own == null}">Todo el horario del centro</span>
+                                <span th:unless="${own == null}" th:text="${#strings.listJoin(own, ' · ')}">Lunes a viernes: 09:00 - 14:00</span>
+                            </p>
                         </div>
                         <span class="badge team-status"
                               th:classappend="${member.status().name() == 'ACTIVE'} ? 'badge-confirmed' : (${member.status().name() == 'INVITED'} ? 'badge-pending' : 'badge-rejected')"
                               th:text="${member.status().label()}">Cuenta activa</span>
-                        <div class="team-member-actions" th:if="${isOwner and !member.owner()}">
-                            <form th:if="${member.pending()}" th:action="@{/worker/center/team/{id}/resend(id=${member.id()})}" method="post">
+                        <div class="team-member-actions" th:if="${isOwner}">
+                            <a class="btn btn-secondary btn-sm" th:href="@{/worker/center/team/{id}/horario(id=${member.id()})}"
+                               th:attr="aria-label=${'Horario de ' + member.name()}">
+                                <i class="lucide-calendar-clock" aria-hidden="true"></i> Horario
+                            </a>
+                            <form th:if="${member.pending() and !member.owner()}" th:action="@{/worker/center/team/{id}/resend(id=${member.id()})}" method="post">
                                 <button type="submit" class="btn btn-secondary btn-sm">
                                     <i class="lucide-send" aria-hidden="true"></i> Reenviar invitación
                                 </button>
                             </form>
-                            <form th:action="@{/worker/center/team/{id}/remove(id=${member.id()})}" method="post"
+                            <form th:if="${!member.owner()}" th:action="@{/worker/center/team/{id}/remove(id=${member.id()})}" method="post"
                                   th:attr="data-confirm=${member.pending()} ? ${member.name() + ' saldrá del equipo y su invitación dejará de valer.'} : ${member.name() + ' dejará de entrar en el panel del centro. Sus citas pasadas y las fichas que rellenó se conservan.'}"
                                   data-confirm-title="¿Quitar del equipo?" data-confirm-button="Quitar del equipo">
                                 <button type="submit" class="btn btn-secondary btn-sm team-remove"

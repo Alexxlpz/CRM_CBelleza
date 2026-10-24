@@ -1,0 +1,440 @@
+/*
+ * Reseñas verificadas: estrellas, valorar desde «Mis citas», opiniones de la ficha del centro
+ * y la pantalla «Reseñas» del trabajador.
+ */
+
+/* ---------- Estrellas (fragments/reviews :: stars): cinco estrellas rellenas hasta --stars (admite medias) ---------- */
+.stars {
+    --stars: 0; /* lo sustituye el style="--stars: …" de cada valoración */
+    position: relative;
+    display: inline-block;
+    font-size: 15px;
+    line-height: 1;
+    white-space: nowrap;
+    color: var(--border-soft);
+    vertical-align: -1px;
+}
+
+.stars::before {
+    content: "★★★★★";
+}
+
+.stars-fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: calc(var(--stars, 0) / 5 * 100%);
+    overflow: hidden;
+    color: var(--star);
+}
+
+.stars-fill::before {
+    content: "★★★★★";
+}
+
+/* ---------- Cabecera de la ficha del centro ---------- */
+.hero-rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: -14px 0 22px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 14px;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: background var(--dur-base) var(--ease-out);
+}
+
+.hero-rating:hover,
+.hero-rating:focus-visible {
+    background: rgba(var(--primary-rgb), 0.1);
+}
+
+.hero-rating strong {
+    color: var(--primary-text);
+}
+
+/* ---------- Opiniones de la ficha del centro ---------- */
+.reviews-section {
+    margin-top: 30px;
+    padding: 40px;
+    scroll-margin-top: 90px;
+}
+
+.reviews-empty {
+    margin: 0;
+    color: var(--text-muted);
+}
+
+.reviews-layout {
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    gap: 40px;
+    align-items: start;
+}
+
+.reviews-summary {
+    position: sticky;
+    top: 90px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.reviews-summary .stars {
+    font-size: 20px;
+}
+
+.reviews-average {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    margin: 0;
+    color: var(--text-muted);
+}
+
+.reviews-average strong {
+    font-size: 44px;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--primary-text);
+}
+
+.reviews-count {
+    margin: 0 0 8px;
+    font-size: 13.5px;
+    color: var(--text-muted);
+}
+
+.reviews-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.reviews-bars li {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr) 28px;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.reviews-bar {
+    height: 8px;
+    border-radius: 999px;
+    background: var(--border-soft);
+    overflow: hidden;
+}
+
+.reviews-bar > span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--star);
+}
+
+.reviews-bar-count {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.reviews-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.reviews-more > summary {
+    margin-top: 16px;
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--primary-text);
+}
+
+.reviews-more[open] > summary {
+    margin-bottom: 4px;
+}
+
+/* ---------- Una reseña (fragments/reviews :: review) ---------- */
+.review-item {
+    padding: 18px 0;
+    border-bottom: 1px solid var(--border-soft);
+}
+
+.review-item:first-child {
+    padding-top: 0;
+}
+
+.reviews-list > .review-item:last-of-type,
+.reviews-more .review-item:last-child {
+    border-bottom: none;
+}
+
+.review-item-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.review-avatar {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(var(--primary-rgb), 0.16);
+    font-weight: 700;
+    color: var(--primary-text);
+}
+
+.review-item-who {
+    min-width: 0;
+}
+
+.review-author {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 10px;
+    margin: 0;
+    color: var(--text-main);
+}
+
+.review-verified {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--success-text);
+}
+
+.review-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2px 8px;
+    margin: 4px 0 0;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.review-comment {
+    margin: 10px 0 0;
+    line-height: 1.55;
+    color: var(--text-main);
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+}
+
+.review-reply {
+    margin: 12px 0 0 50px;
+    padding: 12px 14px;
+    border-left: 3px solid var(--primary);
+    border-radius: 0 var(--border-radius-md) var(--border-radius-md) 0;
+    background: rgba(var(--primary-rgb), 0.08);
+}
+
+.review-reply-who {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0 0 4px;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.review-reply-text {
+    margin: 0;
+    line-height: 1.5;
+    color: var(--text-main);
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+}
+
+/* ---------- Valorar una cita (modal de «Mis citas») ---------- */
+.review-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.star-input {
+    margin: 0 0 8px;
+    padding: 0;
+    border: none;
+}
+
+.star-input.has-error {
+    background: none;
+    box-shadow: none;
+}
+
+.star-input legend {
+    padding: 0;
+}
+
+/* En el HTML van de 5 a 1 y se ven de 1 a 5: así «~» ilumina las anteriores al pasar o elegir */
+.star-input-options {
+    display: inline-flex;
+    margin-left: -8px;
+    flex-direction: row-reverse;
+    gap: 2px;
+}
+
+.star-input-options label {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 30px;
+    line-height: 1;
+    color: var(--border-soft);
+    transition: color var(--dur-fast, 0.12s) ease, transform var(--dur-fast, 0.12s) ease;
+}
+
+.star-input-options input:checked ~ label,
+.star-input-options label:hover,
+.star-input-options label:hover ~ label {
+    color: var(--star);
+}
+
+.star-input-options label:hover {
+    transform: scale(1.12);
+}
+
+.star-input-options input:focus-visible + label {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+.star-input-label {
+    display: block;
+    margin-top: 2px;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.star-input.has-error .star-input-label {
+    font-weight: 600;
+    color: var(--error);
+}
+
+:where(.star-input.has-error) .star-input-options label {
+    color: rgba(var(--error-rgb), 0.35);
+}
+
+/* ---------- Pantalla «Reseñas» del trabajador ---------- */
+.reviews-empty-panel {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 28px;
+}
+
+.reviews-empty-panel > i {
+    font-size: 28px;
+    color: var(--star);
+}
+
+.reviews-empty-panel h2 {
+    margin: 0 0 6px;
+    font-size: 18px;
+}
+
+.reviews-empty-panel p {
+    margin: 0;
+    color: var(--text-muted);
+}
+
+.stat-tile--bars {
+    padding: 12px 18px;
+}
+
+.stat-tile--bars .reviews-bars {
+    flex: 1;
+    gap: 3px;
+}
+
+.stat-tile--bars .reviews-bars li {
+    font-size: 12px;
+}
+
+.worker-review {
+    padding: 22px 24px;
+}
+
+.worker-review + .worker-review {
+    margin-top: 14px;
+}
+
+.worker-review .review-item {
+    padding: 0;
+    border: none;
+}
+
+.worker-review.is-unanswered {
+    border-left: 3px solid var(--warning);
+}
+
+.review-reply-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.review-reply-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.review-meta--worker {
+    margin: 10px 0 0 50px;
+}
+
+.review-reply-editor {
+    margin: 14px 0 0 50px;
+}
+
+.review-reply-editor > summary {
+    list-style: none;
+}
+
+.review-reply-editor > summary::-webkit-details-marker {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .reviews-section {
+        margin-top: 16px;
+        padding: 24px 16px;
+    }
+
+    .reviews-layout {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+
+    .reviews-summary {
+        position: static;
+    }
+
+    .review-reply,
+    .review-meta--worker,
+    .review-reply-editor {
+        margin-left: 0;
+    }
+
+    .worker-review {
+        padding: 18px 16px;
+    }
+}

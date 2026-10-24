@@ -820,7 +820,7 @@ button.mobile-drawer-link {
     position: absolute;
     right: 0;
     top: 48px;
-    width: 330px;
+    width: 360px;
     background: var(--surface); /* 100% solid non-transparent background */
     border: 1px solid rgba(var(--primary-rgb), 0.35);
     border-radius: var(--border-radius-md);
@@ -852,6 +852,45 @@ button.mobile-drawer-link {
     text-transform: uppercase;
     letter-spacing: 0.5px;
     background: var(--surface-muted); /* Solid header background */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+/* «Limpiar todas»: quita de la campana todos los avisos que se ven */
+.notifications-clear {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    gap: 5px;
+    padding: 4px 10px;
+    white-space: nowrap;
+    border: none;
+    border-radius: 999px;
+    background: transparent;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--primary-text);
+    cursor: pointer;
+    transition: background var(--dur-fast) ease;
+}
+
+.notifications-clear:hover {
+    background: rgba(var(--primary-rgb), 0.14);
+}
+
+.notifications-clear:focus-visible,
+.notification-dismiss:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+}
+
+.notifications-clear i {
+    font-size: 15px;
 }
 
 .notifications-body {
@@ -860,9 +899,46 @@ button.mobile-drawer-link {
     background: var(--surface); /* Solid body background */
 }
 
-.notification-item {
-    padding: 14px 18px;
+/* Un aviso: el enlace ocupa la fila y la «x» de la derecha lo marca como visto y lo quita */
+.notification-row {
+    position: relative;
     border-bottom: 1px solid rgba(var(--primary-rgb), 0.12);
+    transition: opacity var(--dur-base) ease, transform var(--dur-base) var(--ease-out);
+}
+
+.notification-row.is-leaving {
+    opacity: 0;
+    transform: translateX(24px);
+}
+
+.notification-dismiss {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: background var(--dur-fast) ease, color var(--dur-fast) ease;
+}
+
+.notification-dismiss:hover {
+    background: rgba(var(--primary-rgb), 0.14);
+    color: var(--text-main);
+}
+
+.notification-dismiss i {
+    font-size: 16px;
+}
+
+.notification-item {
+    padding: 14px 44px 14px 18px;
     font-size: 13px;
     font-weight: 600;
     color: var(--text-main);
@@ -3237,4 +3313,70 @@ body.modal-open {
 .reschedule-setting .form-control {
     flex: 1;
     min-width: 0;
+}
+
+/* ---------- Horario de cada profesional (worker/worker_hours.html y lista del equipo) ---------- */
+.team-member-hours {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    margin: 4px 0 0;
+    font-size: 12.5px;
+    color: var(--text-muted);
+}
+
+.team-member-hours i {
+    position: relative;
+    top: 1px;
+}
+
+.worker-hours-form {
+    max-width: 760px;
+}
+
+.worker-hours-choice {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 12px;
+    margin: 0 0 20px;
+    padding: 0;
+    border: none;
+}
+
+.worker-hours-option {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    border: 1px solid var(--border-soft);
+    border-radius: var(--border-radius-md);
+    background: var(--surface-muted);
+    cursor: pointer;
+    transition: border-color var(--dur-base) var(--ease-out), background var(--dur-base) var(--ease-out);
+}
+
+.worker-hours-option:has(input:checked) {
+    border-color: var(--primary);
+    background: rgba(var(--primary-rgb), 0.1);
+}
+
+.worker-hours-option input {
+    margin-top: 3px;
+    accent-color: var(--primary-dark, var(--primary));
+}
+
+.worker-hours-option strong {
+    display: block;
+    color: var(--text-main);
+}
+
+.worker-hours-option-help {
+    display: block;
+    margin-top: 2px;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.worker-hours-editor {
+    margin-bottom: 16px;
 }

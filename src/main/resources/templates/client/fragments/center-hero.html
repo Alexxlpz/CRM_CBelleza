@@ -5,6 +5,12 @@
             <img th:src="${center.photoUrl}" th:alt="${'Foto de ' + center.name}" alt="Foto del centro">
         </div>
         <h1 class="hero-title" th:text="${center.name}">Nombre del Centro</h1>
+        <a class="hero-rating" href="#resenas" th:if="${rating != null and rating.hasReviews()}"
+           th:attr="aria-label=${'Nota media ' + rating.averageLabel() + ' de 5, ' + rating.countLabel() + '. Ver opiniones'}">
+            <span th:replace="~{fragments/reviews :: stars(${rating.roundedToHalf()})}"></span>
+            <strong th:text="${rating.averageLabel()}">4,7</strong>
+            <span th:text="${'· ' + rating.countLabel()}">· 23 reseñas</span>
+        </a>
         <div class="hero-meta-container">
             <div class="hero-meta-item">
                 <i class="lucide-map-pin" aria-hidden="true"></i>

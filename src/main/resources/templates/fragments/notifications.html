@@ -1,5 +1,6 @@
 <div xmlns:th="http://www.thymeleaf.org">
-    <!-- Campana de notificaciones del trabajador (el comportamiento está en /js/app.js) -->
+    <!-- Campana de notificaciones del trabajador (el comportamiento está en /js/app.js).
+         Cada aviso se puede quitar con su «x» y «Limpiar todas» los quita todos (solo para quien lo hace). -->
     <div class="notifications-container" th:fragment="menu(items)">
         <button type="button" class="bell-btn" data-notifications-toggle id="workerNotificationsToggle" aria-haspopup="true" aria-expanded="false"
                 aria-controls="workerNotificationsDropdown"
@@ -10,14 +11,25 @@
                 <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg>
             <span class="bell-badge" aria-hidden="true" th:if="${not #lists.isEmpty(items)}" th:text="${#lists.size(items)}">0</span>
         </button>
-        <div class="notifications-dropdown" id="workerNotificationsDropdown" hidden>
-            <div class="notifications-header">Notificaciones de Gestión</div>
+        <div class="notifications-dropdown" id="workerNotificationsDropdown" hidden data-dismiss-url="/worker/notifications/dismiss">
+            <div class="notifications-header">
+                <span>Notificaciones de Gestión</span>
+                <button type="button" class="notifications-clear" data-notifications-clear th:hidden="${#lists.isEmpty(items)}">
+                    <i class="lucide-check-check" aria-hidden="true"></i> Limpiar todas
+                </button>
+            </div>
             <div class="notifications-body">
-                <a class="notification-item" th:each="notification : ${items}" th:href="${notification.url}">
-                    <i class="lucide-alert-circle" aria-hidden="true"></i>
-                    <span th:text="${notification.message}">Alerta de prueba</span>
-                </a>
-                <div class="notification-empty" th:if="${#lists.isEmpty(items)}">
+                <div class="notification-row" th:each="notification : ${items}" th:attr="data-notification-key=${notification.key}">
+                    <a class="notification-item" th:href="${notification.url}">
+                        <i class="lucide-alert-circle" aria-hidden="true"></i>
+                        <span th:text="${notification.message}">Alerta de prueba</span>
+                    </a>
+                    <button type="button" class="notification-dismiss" data-notification-dismiss
+                            title="Marcar como visto" aria-label="Marcar como visto y quitar el aviso">
+                        <i class="lucide-x" aria-hidden="true"></i>
+                    </button>
+                </div>
+                <div class="notification-empty" th:hidden="${not #lists.isEmpty(items)}">
                     <i class="lucide-bell-off" aria-hidden="true"></i>
                     <span>No hay notificaciones activas</span>
                 </div>
@@ -25,7 +37,8 @@
         </div>
     </div>
 
-    <!-- Campana del cliente: citas de hoy y mañana y cambios del centro. Al abrirla se marca como vista (app.js). -->
+    <!-- Campana del cliente: citas de hoy y mañana y cambios del centro. Al abrirla se marca como vista (app.js).
+         Igual que la del trabajador, cada aviso se puede quitar y «Limpiar todas» los quita todos. -->
     <div class="notifications-container" th:fragment="clientMenu(data)">
         <button type="button" class="bell-btn" data-notifications-toggle id="clientNotificationsToggle" aria-haspopup="true" aria-expanded="false"
                 aria-controls="clientNotificationsDropdown" data-seen-url="/client/notifications/seen"
@@ -37,15 +50,26 @@
                 <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg>
             <span class="bell-badge" aria-hidden="true" th:if="${data.unseen() > 0}" th:text="${data.unseen()}">0</span>
         </button>
-        <div class="notifications-dropdown" id="clientNotificationsDropdown" hidden>
-            <div class="notifications-header">Avisos de tus citas</div>
+        <div class="notifications-dropdown" id="clientNotificationsDropdown" hidden data-dismiss-url="/client/notifications/dismiss">
+            <div class="notifications-header">
+                <span>Avisos de tus citas</span>
+                <button type="button" class="notifications-clear" data-notifications-clear th:hidden="${data.items().isEmpty()}">
+                    <i class="lucide-check-check" aria-hidden="true"></i> Limpiar todas
+                </button>
+            </div>
             <div class="notifications-body">
-                <a class="notification-item" th:each="notification : ${data.items()}" th:href="${notification.url()}"
-                   th:classappend="${notification.unseen()} ? ' is-unseen'">
-                    <i th:class="${notification.icon()}" aria-hidden="true"></i>
-                    <span th:text="${notification.message()}">Aviso</span>
-                </a>
-                <div class="notification-empty" th:if="${data.items().isEmpty()}">
+                <div class="notification-row" th:each="notification : ${data.items()}" th:attr="data-notification-key=${notification.key()}">
+                    <a class="notification-item" th:href="${notification.url()}"
+                       th:classappend="${notification.unseen()} ? ' is-unseen'">
+                        <i th:class="${notification.icon()}" aria-hidden="true"></i>
+                        <span th:text="${notification.message()}">Aviso</span>
+                    </a>
+                    <button type="button" class="notification-dismiss" data-notification-dismiss
+                            title="Marcar como visto" aria-label="Marcar como visto y quitar el aviso">
+                        <i class="lucide-x" aria-hidden="true"></i>
+                    </button>
+                </div>
+                <div class="notification-empty" th:hidden="${not data.items().isEmpty()}">
                     <i class="lucide-bell-off" aria-hidden="true"></i>
                     <span>No tienes avisos de citas</span>
                 </div>

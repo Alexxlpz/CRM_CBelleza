@@ -53,6 +53,14 @@
                         <i class="lucide-chevron-right" aria-hidden="true"></i>
                     </span>
                 </nav>
+                <a class="btn btn-secondary btn-sm analytics-export" th:if="${report.yearView}"
+                   th:href="@{/worker/analytics/export(anio=${report.year})}">
+                    <i class="lucide-download" aria-hidden="true"></i> Descargar CSV
+                </a>
+                <a class="btn btn-secondary btn-sm analytics-export" th:unless="${report.yearView}"
+                   th:href="@{/worker/analytics/export(meses=${report.months})}">
+                    <i class="lucide-download" aria-hidden="true"></i> Descargar CSV
+                </a>
                 <nav class="view-toggle view-toggle--always" aria-label="Periodo">
                     <a th:each="option : ${periodOptions}" class="view-toggle-btn"
                        th:href="@{/worker/analytics(meses=${option})}"
@@ -145,6 +153,59 @@
                         </li>
                     </ul>
                 </div>
+            </div>
+        </section>
+
+        <!-- Rendimiento de cada profesional en el periodo -->
+        <section class="analytics-panel team-panel" aria-labelledby="teamTitle"
+                 th:with="paired=${report.yearView and report.previousYear != null}">
+            <header class="analytics-panel-head">
+                <h2 id="teamTitle"><i class="lucide-users-round" aria-hidden="true"></i> Rendimiento por profesional</h2>
+                <p th:text="${report.periodLabel} + (${paired} ? ' · entre paréntesis, visitas frente a ' + ${report.previousSeriesLabel} : '') + '. La ocupación es el tiempo con cita dentro de su horario.'">Últimos 12 meses</p>
+            </header>
+            <div class="team-table-wrap">
+                <table class="team-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Profesional</th>
+                            <th scope="col">Visitas</th>
+                            <th scope="col">Clientes</th>
+                            <th scope="col">Ingresos</th>
+                            <th scope="col">Ticket medio</th>
+                            <th scope="col">Ocupación</th>
+                            <th scope="col">No vinieron</th>
+                            <th scope="col">Nota</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="row : ${report.team}">
+                            <th scope="row" class="team-table-name" th:text="${row.name}">Carlos Mendoza</th>
+                            <td data-label="Visitas">
+                                <span th:text="${row.visits}">40</span>
+                                <span class="rank-diff" th:if="${row.diff != null}" th:classappend="${row.diff > 0} ? 'is-better' : (${row.diff < 0} ? 'is-worse')"
+                                      th:text="'(' + ${row.diffLabel()} + ')'">(+3)</span>
+                            </td>
+                            <td data-label="Clientes" th:text="${row.clients}">25</td>
+                            <td data-label="Ingresos" th:text="${#numbers.formatDecimal(row.revenue, 1, 'POINT', 0, 'COMMA')} + ' €'">1.240 €</td>
+                            <td data-label="Ticket medio" th:text="${row.visits == 0} ? '—' : ${#numbers.formatDecimal(row.averageTicket, 1, 'POINT', 2, 'COMMA')} + ' €'">38,50 €</td>
+                            <td data-label="Ocupación">
+                                <span class="team-occupancy" th:if="${row.occupancy != null}">
+                                    <span class="team-occupancy-track" aria-hidden="true"><span th:style="'--size:' + ${row.occupancy} + '%'"></span></span>
+                                    <span th:text="${row.occupancy} + ' %'">62 %</span>
+                                </span>
+                                <span th:if="${row.occupancy == null}">—</span>
+                            </td>
+                            <td data-label="No vinieron" th:text="${row.noShows}" th:classappend="${row.noShows > 0} ? 'is-worse'">1</td>
+                            <td data-label="Nota">
+                                <span th:if="${row.rating != null}" th:title="${row.reviewCount == 1 ? '1 reseña' : row.reviewCount + ' reseñas'}">
+                                    <span class="team-star" aria-hidden="true">★</span> <span th:text="${row.ratingLabel()}">4,8</span>
+                                    <span class="team-reviews" th:text="'(' + ${row.reviewCount} + ')'">(12)</span>
+                                </span>
+                                <span th:if="${row.rating == null}">—</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </section>
 
@@ -377,25 +438,6 @@
                         <span class="rank-bars-name" th:text="${row.name}">Sérum facial</span>
                         <span class="rank-bars-value">
                             <span th:text="${row.count} + (${row.count == 1} ? ' ud. · ' : ' uds. · ') + ${#numbers.formatDecimal(row.revenue, 1, 'POINT', 0, 'COMMA')} + ' €'">12 uds. · 342 €</span>
-                            <span class="rank-diff" th:if="${row.diff != null}" th:classappend="${row.diff > 0} ? 'is-better' : (${row.diff < 0} ? 'is-worse')"
-                                  th:text="'(' + ${row.diffLabel()} + ')'">(+3)</span>
-                        </span>
-                        <span class="rank-bars-track" aria-hidden="true"><span class="rank-bars-fill" th:style="'--size:' + ${row.share} + '%'"></span></span>
-                    </li>
-                </ul>
-            </section>
-
-            <!-- Equipo -->
-            <section class="analytics-panel" aria-labelledby="teamTitle">
-                <header class="analytics-panel-head">
-                    <h2 id="teamTitle"><i class="lucide-users-round" aria-hidden="true"></i> Equipo</h2>
-                    <p th:text="${paired} ? 'Visitas atendidas e ingresos en tratamientos; entre paréntesis, visitas frente a ' + ${report.previousSeriesLabel} : 'Visitas atendidas e ingresos en tratamientos por profesional'">Visitas atendidas e ingresos en tratamientos por profesional</p>
-                </header>
-                <ul class="rank-bars">
-                    <li th:each="row : ${report.team}">
-                        <span class="rank-bars-name" th:text="${row.name}">Carlos</span>
-                        <span class="rank-bars-value">
-                            <span th:text="${row.visits} + (${row.visits == 1} ? ' visita · ' : ' visitas · ') + ${row.clients} + (${row.clients == 1} ? ' cliente · ' : ' clientes · ') + ${#numbers.formatDecimal(row.revenue, 1, 'POINT', 0, 'COMMA')} + ' €'">40 visitas</span>
                             <span class="rank-diff" th:if="${row.diff != null}" th:classappend="${row.diff > 0} ? 'is-better' : (${row.diff < 0} ? 'is-worse')"
                                   th:text="'(' + ${row.diffLabel()} + ')'">(+3)</span>
                         </span>

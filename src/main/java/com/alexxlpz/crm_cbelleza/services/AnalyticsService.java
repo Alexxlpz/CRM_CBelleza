@@ -1,13 +1,17 @@
 package com.alexxlpz.crm_cbelleza.services;
 
 import com.alexxlpz.crm_cbelleza.booking.CenterClock;
+import com.alexxlpz.crm_cbelleza.booking.OpeningHours;
+import com.alexxlpz.crm_cbelleza.entities.AgendaBlock;
 import com.alexxlpz.crm_cbelleza.entities.Appointment;
 import com.alexxlpz.crm_cbelleza.entities.AppointmentStatus;
 import com.alexxlpz.crm_cbelleza.entities.Center;
 import com.alexxlpz.crm_cbelleza.entities.ProductSale;
 import com.alexxlpz.crm_cbelleza.entities.Role;
 import com.alexxlpz.crm_cbelleza.entities.User;
+import com.alexxlpz.crm_cbelleza.repositories.AgendaBlockRepository;
 import com.alexxlpz.crm_cbelleza.repositories.AppointmentRepository;
+import com.alexxlpz.crm_cbelleza.repositories.ReviewRepository;
 import com.alexxlpz.crm_cbelleza.repositories.ProductSaleRepository;
 import com.alexxlpz.crm_cbelleza.repositories.UserRepository;
 import org.springframework.stereotype.Service;
@@ -41,6 +45,10 @@ import java.util.stream.Stream;
  * Una visita es una cita completada. Los ingresos son lo cobrado en cada visita ({@code appointments.price})
  * más las ventas de productos a su precio de venta.
  * <p>
+ * La ocupación es el tiempo con cita (completadas, confirmadas y las de quien no vino, que también ocuparon el hueco)
+ * frente al tiempo que se podía atender: en cada franja del horario actual del centro, tantas citas a la vez como
+ * cabinas y profesionales trabajando (con su horario propio y sin sus bloqueos). Los cierres del centro no cuentan.
+ * <p>
  * Dos vistas: los últimos meses (el mes en curso frente al anterior) y un año entero frente al anterior.
  * Nunca se compara con meses en los que el centro aún no usaba Cuquora: saldrían a cero y parecería que crece.
  */
@@ -58,15 +66,30 @@ public class AnalyticsService {
     static final int CHANGE_LIST_SIZE = 3;
 
     private static final Locale ES = Locale.forLanguageTag("es-ES");
+    /** Citas que ocupan su hueco en la agenda (también la de quien no se presentó). */
+    private static final Set<AppointmentStatus> OCCUPYING = Set.of(AppointmentStatus.COMPLETED, AppointmentStatus.CONFIRMED,
+            AppointmentStatus.NO_SHOW);
+    /** Citas que se pierden: anuladas, rechazadas o en las que el cliente no vino. */
+    private static final Set<AppointmentStatus> LOST = Set.of(AppointmentStatus.CANCELLED, AppointmentStatus.REJECTED,
+            AppointmentStatus.NO_SHOW);
 
     private final AppointmentRepository appointments;
     private final ProductSaleRepository sales;
     private final UserRepository users;
     private final CenterService centerService;
+    private final OpeningHoursService openingHours;
+    private final WorkerHoursService workerHours;
+    private final AgendaBlockRepository blocks;
+    private final ReviewRepository reviews;
     private final Clock clock;
 
     public AnalyticsService(AppointmentRepository appointments, ProductSaleRepository sales, UserRepository users,
-                            CenterService centerService, Clock clock) {
+                            CenterService centerService, OpeningHoursService openingHours, WorkerHoursService workerHours,
+                            AgendaBlockRepository blocks, ReviewRepository reviews, Clock clock) {
+        this.openingHours = openingHours;
+        this.workerHours = workerHours;
+        this.blocks = blocks;
+        this.reviews = reviews;
         this.appointments = appointments;
         this.sales = sales;
         this.users = users;
@@ -166,6 +189,7 @@ public class AnalyticsService {
         Window period = view.period();
         PeriodFigures shown = figures(data, view.current());
         PeriodFigures before = view.previous() == null ? null : figures(data, view.previous());
+        Occupancy periodOccupancy = occupancy(data, period);
         List<Kpi> kpis = kpis(shown, before);
 
         List<Appointment> periodVisits = visitsIn(data, period);
@@ -206,9 +230,10 @@ public class AnalyticsService {
                 view.showWinBack(),
                 treatmentRanking(periodVisits, comparedVisits, previousVisits),
                 productRanking(periodSales, comparedSales, previousSales),
-                team(data.centerId(), periodVisits, comparedVisits, previousVisits),
+                team(data, period, periodVisits, comparedVisits, previousVisits, periodOccupancy),
                 weekdays(periodVisits),
                 busiestHour(periodVisits),
+                periodOccupancy.share(),
                 !data.visits().isEmpty() || !data.sales().isEmpty());
     }
 
@@ -234,7 +259,13 @@ public class AnalyticsService {
         for (ProductSale sale : centerSales) {
             first = min(first, sale.getSoldAt());
         }
-        return new CenterData(centerId, now, all, visits, centerSales, firstVisit, YearMonth.from(first));
+        YearMonth start = YearMonth.from(first);
+        return new CenterData(centerId, now, all, visits, centerSales, firstVisit, start,
+                center.getCabins() != null ? Math.max(1, center.getCabins()) : 1,
+                openingHours.forCenter(centerId), workerHours.forCenter(centerId),
+                users.findByCenterIdAndRole(centerId, Role.WORKER),
+                blocks.findByCenterIdAndEndsAtAfterAndStartsAtBeforeOrderByStartsAtAsc(centerId,
+                        start.atDay(1).atStartOfDay(), now));
     }
 
     private static List<Kpi> kpis(PeriodFigures shown, PeriodFigures before) {
@@ -245,11 +276,14 @@ public class AnalyticsService {
                 Kpi.of("Visitas", "lucide-calendar-check-2", shown.visits(), base.visits(), Format.NUMBER, true, compare),
                 Kpi.of("Clientes nuevos", "lucide-user-plus", shown.newClients(), base.newClients(), Format.NUMBER, true, compare),
                 Kpi.of("Ticket medio", "lucide-receipt", shown.averageTicket(), base.averageTicket(), Format.MONEY, true, compare),
+                Kpi.of("Ocupación de la agenda", "lucide-gauge", shown.occupancy(), base.occupancy(), Format.PERCENT, true, compare),
+                Kpi.of("Clientes atendidos", "lucide-users", shown.clients(), base.clients(), Format.NUMBER, true, compare),
                 Kpi.of("Visitas de clientes que repiten", "lucide-repeat", shown.returningShare(), base.returningShare(), Format.PERCENT, true, compare),
-                Kpi.of("Citas anuladas o rechazadas", "lucide-calendar-x-2", shown.cancelledShare(), base.cancelledShare(), Format.PERCENT, false, compare));
+                Kpi.of("Anuladas, rechazadas o no vino", "lucide-calendar-x-2", shown.cancelledShare(), base.cancelledShare(), Format.PERCENT, false, compare));
     }
 
     private static PeriodFigures figures(CenterData data, Window window) {
+        Occupancy occupancy = occupancy(data, window);
         List<Appointment> inWindow = visitsIn(data, window);
         double revenue = inWindow.stream().mapToDouble(AnalyticsService::price).sum()
                 + salesIn(data, window).stream().mapToDouble(AnalyticsService::amount).sum();
@@ -264,14 +298,81 @@ public class AnalyticsService {
                 continue;
             }
             decided++;
-            if (appointment.getStatus() == AppointmentStatus.CANCELLED || appointment.getStatus() == AppointmentStatus.REJECTED) {
+            if (LOST.contains(appointment.getStatus())) {
                 lost++;
             }
         }
         return new PeriodFigures(revenue, inWindow.size(), newClients,
                 inWindow.isEmpty() ? 0 : revenue / inWindow.size(),
                 inWindow.isEmpty() ? 0 : 100.0 * returningVisits / inWindow.size(),
-                decided == 0 ? 0 : 100.0 * lost / decided);
+                decided == 0 ? 0 : 100.0 * lost / decided,
+                (int) inWindow.stream().map(a -> a.getClient().getId()).distinct().count(),
+                occupancy.share() == null ? 0 : occupancy.share());
+    }
+
+    /**
+     * Tiempo con cita frente al que se podía atender en {@code window} (ver la nota de la clase), en total y por
+     * profesional. Las franjas que aún no han terminado no cuentan.
+     */
+    static Occupancy occupancy(CenterData data, Window window) {
+        OpeningHours hours = data.hours();
+        int slot = hours.slotMinutes();
+        long capacity = 0;
+        Map<Long, Long> onDuty = new HashMap<>();
+        for (LocalDate day = window.from().toLocalDate(); !day.isAfter(window.to().toLocalDate()); day = day.plusDays(1)) {
+            for (OpeningHours.Period period : hours.periods(day.getDayOfWeek())) {
+                for (int minute = period.opensMinute(); minute + slot <= period.closesMinute(); minute += slot) {
+                    LocalDateTime start = day.atStartOfDay().plusMinutes(minute);
+                    LocalDateTime end = start.plusMinutes(slot);
+                    if (start.isBefore(window.from()) || end.isAfter(window.to()) || closed(data, start, end)) {
+                        continue;
+                    }
+                    int working = 0;
+                    for (User worker : data.team()) {
+                        if (works(data, worker.getId(), start, end)) {
+                            working++;
+                            onDuty.merge(worker.getId(), (long) slot, Long::sum);
+                        }
+                    }
+                    capacity += (long) Math.min(data.cabins(), working) * slot;
+                }
+            }
+        }
+        long booked = 0;
+        Map<Long, Long> bookedByWorker = new HashMap<>();
+        for (Appointment appointment : data.all()) {
+            if (!OCCUPYING.contains(appointment.getStatus()) || !window.contains(appointment.getDateTime())
+                    || appointment.getTreatment() == null) {
+                continue;
+            }
+            long minutes = appointment.getTreatment().getDuration();
+            booked += minutes;
+            if (appointment.getWorker() != null) {
+                bookedByWorker.merge(appointment.getWorker().getId(), minutes, Long::sum);
+            }
+        }
+        Map<Long, Integer> byWorker = new HashMap<>();
+        onDuty.forEach((workerId, minutes) -> byWorker.put(workerId, share(bookedByWorker.getOrDefault(workerId, 0L), minutes)));
+        return new Occupancy(capacity == 0 ? null : share(booked, capacity), byWorker);
+    }
+
+    private static boolean closed(CenterData data, LocalDateTime start, LocalDateTime end) {
+        return data.blocks().stream().anyMatch(b -> b.isWholeCenter() && b.overlaps(start, end));
+    }
+
+    /** El profesional trabaja en la franja: dentro de su horario (si tiene uno propio) y sin un bloqueo suyo. */
+    private static boolean works(CenterData data, Long workerId, LocalDateTime start, LocalDateTime end) {
+        OpeningHours own = data.workerHours().get(workerId);
+        if (own != null && !own.covers(start, end)) {
+            return false;
+        }
+        return data.blocks().stream().noneMatch(b -> !b.isWholeCenter() && b.getWorker() != null
+                && workerId.equals(b.getWorker().getId()) && b.overlaps(start, end));
+    }
+
+    /** Porcentaje entero, como mucho 100 (una cita puesta fuera de horario no debe pasar del lleno). */
+    private static int share(long part, long whole) {
+        return whole <= 0 ? 0 : (int) Math.min(100, Math.round(100.0 * part / whole));
     }
 
     /**
@@ -498,8 +599,8 @@ public class AnalyticsService {
                 .toList();
     }
 
-    private List<TeamRow> team(Long centerId, List<Appointment> periodVisits, List<Appointment> compared,
-                               List<Appointment> previous) {
+    private List<TeamRow> team(CenterData data, Window period, List<Appointment> periodVisits, List<Appointment> compared,
+                               List<Appointment> previous, Occupancy occupancy) {
         Map<Long, Integer> visitsByWorker = visitsByWorker(periodVisits);
         Map<Long, Integer> comparedByWorker = compared == null ? null : visitsByWorker(compared);
         Map<Long, Integer> previousByWorker = previous == null ? null : visitsByWorker(previous);
@@ -511,14 +612,32 @@ public class AnalyticsService {
                 clientsByWorker.computeIfAbsent(visit.getWorker().getId(), id -> new HashSet<>()).add(visit.getClient().getId());
             }
         }
+        Map<Long, Integer> noShows = new HashMap<>();
+        for (Appointment appointment : data.all()) {
+            if (appointment.getStatus() == AppointmentStatus.NO_SHOW && appointment.getWorker() != null
+                    && period.contains(appointment.getDateTime())) {
+                noShows.merge(appointment.getWorker().getId(), 1, Integer::sum);
+            }
+        }
+        Map<Long, double[]> ratings = new HashMap<>();
+        for (Object[] row : reviews.ratingByWorker(data.centerId(), period.from(), period.to())) {
+            ratings.put((Long) row[0], new double[]{((Number) row[1]).doubleValue(), ((Number) row[2]).doubleValue()});
+        }
         double top = revenueByWorker.values().stream().mapToDouble(Double::doubleValue).max().orElse(0);
-        return users.findByCenterIdAndRole(centerId, Role.WORKER).stream()
+        return data.team().stream()
                 .map(worker -> {
                     double revenue = revenueByWorker.getOrDefault(worker.getId(), 0.0);
-                    return new TeamRow(worker.getName(), visitsByWorker.getOrDefault(worker.getId(), 0),
+                    int visits = visitsByWorker.getOrDefault(worker.getId(), 0);
+                    double[] rating = ratings.get(worker.getId());
+                    return new TeamRow(worker.getName(), visits,
                             clientsByWorker.getOrDefault(worker.getId(), Set.of()).size(), revenue, percent(revenue, top),
                             previousByWorker == null ? null
-                                    : comparedByWorker.getOrDefault(worker.getId(), 0) - previousByWorker.getOrDefault(worker.getId(), 0));
+                                    : comparedByWorker.getOrDefault(worker.getId(), 0) - previousByWorker.getOrDefault(worker.getId(), 0),
+                            visits == 0 ? 0 : revenue / visits,
+                            occupancy.byWorker().get(worker.getId()),
+                            noShows.getOrDefault(worker.getId(), 0),
+                            rating == null ? null : rating[0],
+                            rating == null ? 0 : (int) rating[1]);
                 })
                 .sorted(Comparator.comparingDouble(TeamRow::revenue).reversed().thenComparing(TeamRow::name))
                 .toList();
@@ -621,15 +740,21 @@ public class AnalyticsService {
     }
 
     /** Intervalo cerrado [from, to] en hora del centro. */
-    private record Window(LocalDateTime from, LocalDateTime to) {
+    record Window(LocalDateTime from, LocalDateTime to) {
         boolean contains(LocalDateTime moment) {
             return moment != null && !moment.isBefore(from) && !moment.isAfter(to);
         }
     }
 
     /** Todo lo del centro que hace falta para cualquier vista; {@code start}: primer mes con Cuquora. */
-    private record CenterData(Long centerId, LocalDateTime now, List<Appointment> all, List<Appointment> visits,
-                              List<ProductSale> sales, Map<Long, LocalDateTime> firstVisit, YearMonth start) {
+    record CenterData(Long centerId, LocalDateTime now, List<Appointment> all, List<Appointment> visits,
+                      List<ProductSale> sales, Map<Long, LocalDateTime> firstVisit, YearMonth start,
+                      int cabins, OpeningHours hours, Map<Long, OpeningHours> workerHours, List<User> team,
+                      List<AgendaBlock> blocks) {
+    }
+
+    /** {@code share}: % de ocupación del centro (null si no había nada que atender); {@code byWorker}: el de cada uno. */
+    record Occupancy(Integer share, Map<Long, Integer> byWorker) {
     }
 
     /**
@@ -645,7 +770,7 @@ public class AnalyticsService {
     }
 
     private record PeriodFigures(double revenue, int visits, int newClients, double averageTicket,
-                                 double returningShare, double cancelledShare) {
+                                 double returningShare, double cancelledShare, int clients, double occupancy) {
     }
 
     private static final class MonthTotals {
@@ -795,9 +920,18 @@ public class AnalyticsService {
         }
     }
 
-    public record TeamRow(String name, int visits, int clients, double revenue, int share, Integer diff) {
+    /**
+     * Rendimiento de un profesional en el periodo. {@code occupancy}: % de su tiempo de trabajo con cita (null si no
+     * trabajó ninguna franja); {@code rating}: nota media de las reseñas de sus citas (null si no tiene).
+     */
+    public record TeamRow(String name, int visits, int clients, double revenue, int share, Integer diff,
+                          double averageTicket, Integer occupancy, int noShows, Double rating, int reviewCount) {
         public String diffLabel() {
             return diff == null ? null : signed(diff);
+        }
+
+        public String ratingLabel() {
+            return rating == null ? null : String.format(ES, "%.1f", rating);
         }
     }
 
@@ -873,6 +1007,7 @@ public class AnalyticsService {
             List<TeamRow> team,
             List<WeekdayRow> weekdays,
             Integer busiestHour,
+            Integer occupancy,
             boolean hasData) {
 
         /** Alto de cada barra del gráfico mensual, en % del mes más alto (de los dos años si se comparan). */

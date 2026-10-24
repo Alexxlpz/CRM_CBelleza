@@ -28,15 +28,10 @@
     gap: 12px;
 }
 
+/* Ocho cifras: dos filas de cuatro desde tableta */
 @media (min-width: 769px) {
     .kpi-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-}
-
-@media (min-width: 1366px) {
-    .kpi-grid {
-        grid-template-columns: repeat(6, minmax(0, 1fr));
+        grid-template-columns: repeat(4, minmax(0, 1fr));
     }
 }
 
@@ -193,6 +188,11 @@
     .analytics-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 20px;
+    }
+
+    /* Si queda un panel suelto al final (sin «Clientes a recuperar»), ocupa la fila entera */
+    .analytics-grid > .analytics-panel:last-child:nth-child(odd) {
+        grid-column: 1 / -1;
     }
 }
 
@@ -843,4 +843,141 @@ a.changes-list-name:hover {
 
 .month-summary-figures .kpi-change {
     font-size: 12px;
+}
+
+/* ---- Rendimiento por profesional ---- */
+.team-panel {
+    margin-bottom: 20px;
+}
+
+.team-table-wrap {
+    overflow-x: auto;
+}
+
+.team-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    font-variant-numeric: tabular-nums;
+}
+
+.team-table th,
+.team-table td {
+    padding: 10px 12px;
+    text-align: right;
+    white-space: nowrap;
+    border-bottom: 1px solid var(--border-soft);
+}
+
+.team-table thead th {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.team-table th:first-child,
+.team-table td:first-child {
+    padding-left: 0;
+    text-align: left;
+}
+
+.team-table tbody tr:last-child th,
+.team-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.team-table-name {
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.team-table td.is-worse {
+    color: var(--error);
+    font-weight: 700;
+}
+
+.team-occupancy {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.team-occupancy-track {
+    width: 64px;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--border-soft);
+    overflow: hidden;
+}
+
+.team-occupancy-track > span {
+    display: block;
+    width: var(--size, 0%);
+    height: 100%;
+    border-radius: inherit;
+    background: var(--primary);
+}
+
+.team-star {
+    color: var(--star);
+}
+
+.team-reviews {
+    color: var(--text-muted);
+    font-size: 12.5px;
+}
+
+/* Móvil: cada profesional en su tarjeta, con la etiqueta de cada cifra */
+@media (max-width: 768px) {
+    .team-table thead {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+    }
+
+    .team-table,
+    .team-table tbody,
+    .team-table tr,
+    .team-table th,
+    .team-table td {
+        display: block;
+    }
+
+    .team-table tr {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 6px 16px;
+        padding: 14px 0;
+        border-bottom: 1px solid var(--border-soft);
+    }
+
+    .team-table tbody tr:last-child {
+        border-bottom: none;
+    }
+
+    .team-table th,
+    .team-table td,
+    .team-table tbody tr:last-child th,
+    .team-table tbody tr:last-child td {
+        padding: 0;
+        border: none;
+        text-align: left;
+    }
+
+    .team-table-name {
+        grid-column: 1 / -1;
+        font-size: 15px;
+    }
+
+    .team-table td::before {
+        content: attr(data-label);
+        display: block;
+        font-size: 11.5px;
+        font-weight: 600;
+        color: var(--text-muted);
+    }
 }

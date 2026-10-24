@@ -47,6 +47,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const monthTitle = document.getElementById('calendarMonthYear');
     const dayTitle = document.getElementById('selectedDateTitle');
     const dayCount = document.getElementById('selectedDateCount');
+    const dayShifts = document.getElementById('selectedDateShifts');
+    // Profesionales con horario propio: por día (1 = lunes) sus horas en texto; sin entrada, no trabaja ese día
+    const SHIFTS = Array.isArray(staff.shifts) ? staff.shifts : [];
     const list = document.getElementById('agendaList');
     const monthView = document.getElementById('monthView');
     const weekView = document.getElementById('weekView');
@@ -438,6 +441,19 @@ document.addEventListener('DOMContentLoaded', function () {
         return card;
     }
 
+    /** «Turnos: Lucía 09:00 - 14:00 · Marta no trabaja» en la cabecera del día (solo si alguien tiene horario propio). */
+    function renderShifts(date) {
+        if (!dayShifts) return;
+        const isoDay = String(date.getDay() === 0 ? 7 : date.getDay());
+        const parts = SHIFTS.map(shift => shift.days[isoDay]
+            ? `${shift.name} ${shift.days[isoDay]}`
+            : `${shift.name} no trabaja`);
+        dayShifts.hidden = parts.length === 0;
+        dayShifts.innerHTML = parts.length
+            ? `<i class="lucide-calendar-clock" aria-hidden="true"></i> <span>Horarios propios: ${esc(parts.join(' · '))}</span>`
+            : '';
+    }
+
     function selectDay(day, month, year, isUserClick) {
         selectedDayKey = dateKey(day, month, year);
         renderCalendar();
@@ -456,6 +472,7 @@ document.addEventListener('DOMContentLoaded', function () {
             [count('PROPOSED'), 'propuesta enviada', 'propuestas enviadas'],
             [dayBlocks.length, 'bloqueo', 'bloqueos']
         ].filter(([n]) => n > 0).map(([n, one, many]) => plural(n, one, many)).join(', ') || 'Sin citas este día';
+        renderShifts(new Date(year, month, day));
 
         list.innerHTML = '';
         if (apps.length === 0 && dayBlocks.length === 0) {

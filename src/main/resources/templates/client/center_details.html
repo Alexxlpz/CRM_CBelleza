@@ -5,6 +5,7 @@
     <th:block th:replace="~{fragments/head :: meta('Detalles del Centro - Cuquora')}"></th:block>
     <link rel="stylesheet" th:href="@{/css/datepicker.css}">
     <link rel="stylesheet" th:href="@{/css/cliente.css}">
+    <link rel="stylesheet" th:href="@{/css/reviews.css}">
 </head>
 
 <body>
@@ -101,6 +102,43 @@
                     </button>
                 </div>
             </form>
+        </section>
+
+        <!-- Opiniones: solo de clientes con una cita completada en el centro -->
+        <section class="glass-panel reviews-section" id="resenas" aria-labelledby="reviewsTitle">
+            <h2 class="booking-section-title" id="reviewsTitle">
+                <i class="lucide-star" aria-hidden="true"></i>
+                Opiniones de clientes
+            </h2>
+            <p class="reviews-empty" th:unless="${rating.hasReviews()}">
+                Este centro todavía no tiene opiniones. Podrás valorarlo desde «Mis citas» cuando hayas tenido tu cita.
+            </p>
+            <div class="reviews-layout" th:if="${rating.hasReviews()}">
+                <div class="reviews-summary">
+                    <p class="reviews-average"><strong th:text="${rating.averageLabel()}">4,7</strong> <span>de 5</span></p>
+                    <span th:replace="~{fragments/reviews :: stars(${rating.roundedToHalf()})}"></span>
+                    <p class="reviews-count" th:text="${rating.count == 1 ? '1 opinión verificada' : rating.count + ' opiniones verificadas'}">23 opiniones verificadas</p>
+                    <ul class="reviews-bars" aria-label="Opiniones por número de estrellas">
+                        <li th:each="entry : ${ratingDistribution}">
+                            <span class="reviews-bar-label" th:text="${entry.key + ' ★'}">5 ★</span>
+                            <span class="reviews-bar" aria-hidden="true"><span th:style="'width: ' + ${entry.value * 100 / rating.count} + '%'"></span></span>
+                            <span class="reviews-bar-count" th:text="${entry.value}">12</span>
+                            <span class="visually-hidden" th:text="${entry.key == 1 ? 'con 1 estrella' : 'con ' + entry.key + ' estrellas'}">con 5 estrellas</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="reviews-list">
+                    <th:block th:each="review, stat : ${reviews}" th:if="${stat.index < 5}">
+                        <article th:replace="~{fragments/reviews :: review(${review}, ${center.name})}"></article>
+                    </th:block>
+                    <details class="reviews-more" th:if="${reviews.size() > 5}">
+                        <summary th:text="${reviews.size() - 5 == 1 ? 'Ver 1 opinión más' : 'Ver ' + (reviews.size() - 5) + ' opiniones más'}">Ver 8 opiniones más</summary>
+                        <th:block th:each="review, stat : ${reviews}" th:if="${stat.index >= 5}">
+                            <article th:replace="~{fragments/reviews :: review(${review}, ${center.name})}"></article>
+                        </th:block>
+                    </details>
+                </div>
+            </div>
         </section>
 
     </main>

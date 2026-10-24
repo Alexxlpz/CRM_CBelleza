@@ -843,3 +843,23 @@
 .booking-services .field-error-msg {
     margin: -8px 0 14px;
 }
+
+/* Nota media de las reseñas, en la tarjeta del buscador y en el globo del mapa */
+.center-rating {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    margin: 0;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.center-rating i {
+    position: relative;
+    top: 1px;
+    color: var(--star);
+}
+
+.center-rating strong {
+    color: var(--primary-text);
+}

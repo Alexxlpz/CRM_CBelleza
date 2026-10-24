@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{fragments/head :: meta('Reseñas del centro - Cuquora CRM')}"></th:block>
+    <link rel="stylesheet" th:href="@{/css/reviews.css}">
+</head>
+<body>
+    <div th:replace="~{fragments/navbar :: worker('/worker/dashboard', 'Volver al panel principal', ${notifications})}"></div>
+
+    <main class="main-container main-container--wide worker-reviews-page">
+        <div class="page-header">
+            <h1>Reseñas</h1>
+            <p th:text="'Lo que opinan los clientes de ' + ${sessionCenterName} + ' tras sus citas. Se ven en la ficha pública del centro.'">Lo que opinan los clientes</p>
+        </div>
+
+        <div th:replace="~{fragments/alerts :: flash}"></div>
+        <th:block th:unless="${isCenterOwner}">
+            <div th:replace="~{fragments/alerts :: ownerOnly(${'Puedes leer todas las reseñas. Responderlas en público lo hace ' + ownerName + ', dueño del centro.'})}"></div>
+        </th:block>
+
+        <div class="glass-panel reviews-empty-panel" th:if="${totalCount == 0}">
+            <i class="lucide-star" aria-hidden="true"></i>
+            <div>
+                <h2>Todavía no hay reseñas</h2>
+                <p>Cuando completes una cita, el cliente podrá valorarla desde «Mis citas» durante 90 días. Solo opinan clientes que han venido de verdad.</p>
+            </div>
+        </div>
+
+        <th:block th:if="${totalCount > 0}">
+            <div class="stats-strip">
+                <div class="stat-tile">
+                    <span class="stat-tile-icon" aria-hidden="true"><i class="lucide-star"></i></span>
+                    <div class="stat-tile-text">
+                        <span class="stat-tile-value" th:text="${rating.averageLabel()} + ' / 5'">4,7 / 5</span>
+                        <span class="stat-tile-label">Nota media</span>
+                    </div>
+                </div>
+                <div class="stat-tile">
+                    <span class="stat-tile-icon" aria-hidden="true"><i class="lucide-message-square-text"></i></span>
+                    <div class="stat-tile-text">
+                        <span class="stat-tile-value" th:text="${totalCount}">23</span>
+                        <span class="stat-tile-label" th:text="${totalCount == 1 ? 'Reseña verificada' : 'Reseñas verificadas'}">Reseñas verificadas</span>
+                    </div>
+                </div>
+                <div class="stat-tile" th:classappend="${unansweredCount > 0} ? 'stat-tile--warning'">
+                    <span class="stat-tile-icon" aria-hidden="true"><i class="lucide-message-square-reply"></i></span>
+                    <div class="stat-tile-text">
+                        <span class="stat-tile-value" th:text="${unansweredCount}">3</span>
+                        <span class="stat-tile-label">Sin responder</span>
+                    </div>
+                </div>
+                <div class="stat-tile stat-tile--bars">
+                    <ul class="reviews-bars" aria-label="Reseñas por número de estrellas">
+                        <li th:each="entry : ${ratingDistribution}">
+                            <span class="reviews-bar-label" th:text="${entry.key + ' ★'}">5 ★</span>
+                            <span class="reviews-bar" aria-hidden="true"><span th:style="'width: ' + ${entry.value * 100 / totalCount} + '%'"></span></span>
+                            <span class="reviews-bar-count" th:text="${entry.value}">12</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="list-toolbar">
+                <nav class="view-toggle view-toggle--always" aria-label="Filtrar reseñas">
+                    <a class="view-toggle-btn" th:href="@{/worker/reviews}"
+                       th:attr="aria-current=${!onlyUnanswered} ? 'page'" th:text="'Todas (' + ${totalCount} + ')'">Todas (23)</a>
+                    <a class="view-toggle-btn" th:href="@{/worker/reviews(filtro='sin-responder')}"
+                       th:attr="aria-current=${onlyUnanswered} ? 'page'" th:text="'Sin responder (' + ${unansweredCount} + ')'">Sin responder (3)</a>
+                </nav>
+            </div>
+
+            <p class="reviews-empty" th:if="${reviews.isEmpty()}">¡Todo al día! Has respondido a todas las reseñas.</p>
+
+            <div class="worker-reviews-list">
+                <section class="glass-panel worker-review" th:each="review : ${reviews}" th:id="'resena-' + ${review.id}"
+                         th:classappend="${!review.hasReply()} ? 'is-unanswered'">
+                    <article th:replace="~{fragments/reviews :: review(${review}, ${sessionCenterName})}"></article>
+                    <p class="review-meta review-meta--worker" th:if="${review.appointment.worker != null}">
+                        <i class="lucide-user" aria-hidden="true"></i>
+                        <span th:text="'Le atendió ' + ${review.appointment.worker.name} + ' el ' + ${#temporals.format(review.appointment.dateTime, 'd MMM yyyy')}">Le atendió Lucía</span>
+                    </p>
+
+                    <details class="review-reply-editor" th:if="${isCenterOwner}" th:open="${!review.hasReply() and onlyUnanswered}">
+                        <summary class="btn btn-secondary btn-sm">
+                            <i class="lucide-message-square-reply" aria-hidden="true"></i>
+                            <span th:text="${review.hasReply()} ? 'Editar respuesta' : 'Responder'">Responder</span>
+                        </summary>
+                        <form class="review-reply-form" method="post" th:action="@{/worker/reviews/{id}/reply(id=${review.id})}">
+                            <input type="hidden" name="filtro" th:if="${onlyUnanswered}" value="sin-responder">
+                            <label class="form-label" th:for="'reply' + ${review.id}">Respuesta pública del centro</label>
+                            <textarea class="form-control" name="reply" rows="3" maxlength="1000" required
+                                      th:id="'reply' + ${review.id}" th:text="${review.reply}"
+                                      th:placeholder="'Gracias, ' + ${review.authorName} + '...'"></textarea>
+                            <span class="form-hint">La verán el cliente y cualquiera que visite la ficha del centro.</span>
+                            <div class="review-reply-actions">
+                                <button type="submit" class="btn btn-primary btn-sm"><i class="lucide-send" aria-hidden="true"></i>
+                                    <span th:text="${review.hasReply()} ? 'Guardar respuesta' : 'Publicar respuesta'">Publicar respuesta</span></button>
+                            </div>
+                        </form>
+                        <form class="review-reply-form" method="post" th:if="${review.hasReply()}"
+                              th:action="@{/worker/reviews/{id}/reply(id=${review.id})}"
+                              data-confirm="La reseña se queda publicada, pero sin tu respuesta." data-confirm-title="¿Quitar la respuesta?" data-confirm-button="Quitar respuesta">
+                            <input type="hidden" name="reply" value="">
+                            <input type="hidden" name="filtro" th:if="${onlyUnanswered}" value="sin-responder">
+                            <div class="review-reply-actions">
+                                <button type="submit" class="btn btn-secondary btn-sm"><i class="lucide-x" aria-hidden="true"></i> Quitar respuesta</button>
+                            </div>
+                        </form>
+                    </details>
+                </section>
+            </div>
+        </th:block>
+    </main>
+
+    <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Panel de gestión de centros.')}"></div>
+</body>
+</html>

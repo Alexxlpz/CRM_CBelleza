@@ -96,7 +96,7 @@
             try { payload = await response.json(); } catch (e) { /* respuesta sin JSON */ }
             if (askOutsideHours && payload.code === 'OUTSIDE_HOURS') {
                 const go = await Cuquora.confirm(`${payload.message} ¿Quieres guardarla igualmente?`, {
-                    title: 'Fuera del horario de reservas',
+                    title: 'Fuera de horario',
                     confirmText: 'Guardar igualmente',
                     tone: 'default'
                 });

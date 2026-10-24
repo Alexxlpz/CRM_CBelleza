@@ -1,5 +1,6 @@
 package com.alexxlpz.crm_cbelleza.services;
 
+import com.alexxlpz.crm_cbelleza.dto.CenterRating;
 import com.alexxlpz.crm_cbelleza.dto.CenterSearchCriteria;
 import com.alexxlpz.crm_cbelleza.dto.CenterSummaryDTO;
 import com.alexxlpz.crm_cbelleza.booking.CenterClock;
@@ -44,10 +45,13 @@ public class CenterSearchService {
     private final TreatmentRepository treatmentRepository;
     private final AgendaBlockRepository agendaBlocks;
     private final OpeningHoursService openingHours;
+    private final ReviewService reviewService;
     private final Clock clock;
 
     public CenterSearchService(CenterRepository centerRepository, TreatmentRepository treatmentRepository,
-                               AgendaBlockRepository agendaBlocks, OpeningHoursService openingHours, Clock clock) {
+                               AgendaBlockRepository agendaBlocks, OpeningHoursService openingHours,
+                               ReviewService reviewService, Clock clock) {
+        this.reviewService = reviewService;
         this.centerRepository = centerRepository;
         this.treatmentRepository = treatmentRepository;
         this.agendaBlocks = agendaBlocks;
@@ -61,6 +65,7 @@ public class CenterSearchService {
                 .collect(Collectors.groupingBy(t -> t.getCenter().getId()));
         boolean onlyWithOffers = Boolean.TRUE.equals(criteria.withOffers());
         boolean onlyOpen = Boolean.TRUE.equals(criteria.openNow());
+        boolean onlyTopRated = Boolean.TRUE.equals(criteria.topRated());
 
         List<Center> centers = centerRepository.findAll().stream()
                 .filter(Center::isPublished)
@@ -73,6 +78,7 @@ public class CenterSearchService {
         // Horarios y cierres de todos los centros encontrados, también en una consulta cada uno
         Map<Long, OpeningHours> hoursByCenter = openingHours.forCenters(centers.stream().map(Center::getId).toList());
         Map<Long, List<Closure>> closuresByCenter = centerClosures();
+        Map<Long, CenterRating> ratings = reviewService.ratings();
 
         List<CenterSummaryDTO> sorted = centers.stream()
                 .map(center -> {
@@ -81,10 +87,11 @@ public class CenterSearchService {
                             .stateAt(now, closuresByCenter.getOrDefault(center.getId(), List.of()));
                     return CenterSummaryDTO.of(center, distanceFrom(criteria, center),
                             activeOffers(center, offeredByCenter.getOrDefault(center.getId(), List.of())),
-                            state.open(), hoursLabel(state, now));
+                            state.open(), hoursLabel(state, now), ratings.getOrDefault(center.getId(), CenterRating.NONE));
                 })
                 .filter(dto -> !onlyWithOffers || !dto.offers().isEmpty())
                 .filter(dto -> !onlyOpen || dto.openNow())
+                .filter(dto -> !onlyTopRated || (dto.rating() != null && dto.rating() >= CenterSearchCriteria.TOP_RATED))
                 .sorted(BY_DISTANCE_THEN_NAME)
                 .toList();
 

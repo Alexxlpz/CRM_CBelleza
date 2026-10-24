@@ -52,6 +52,14 @@
                     <p class="action-card-desc">Consulta el historial de clientes, sus citas y sus fichas técnicas personalizadas.</p>
                     <span class="action-card-badge">Fichas Técnicas</span>
                 </a>
+
+                <a href="/worker/reviews" class="action-card glass-panel">
+                    <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M11.5 2.6a.6.6 0 0 1 1 0l2.6 5.3a2 2 0 0 0 1.5 1.1l5.8.8a.6.6 0 0 1 .3 1l-4.2 4.1a2 2 0 0 0-.6 1.8l1 5.8a.6.6 0 0 1-.8.6l-5.2-2.7a2 2 0 0 0-1.9 0L5.8 23a.6.6 0 0 1-.8-.6l1-5.8a2 2 0 0 0-.6-1.8L1.2 10.8a.6.6 0 0 1 .3-1l5.8-.8a2 2 0 0 0 1.5-1.1Z"/></svg>
+                    <span class="action-card-title">Reseñas</span>
+                    <p class="action-card-desc" th:text="${rating.hasReviews()} ? ${'Nota media ' + rating.averageLabel() + ' de 5 con ' + rating.countLabel() + ' de clientes que han venido al centro.'} : 'Las opiniones de los clientes tras sus citas, con la nota media del centro.'">Opiniones de los clientes.</p>
+                    <span class="action-card-badge badge-warning" th:if="${unansweredReviews > 0}"
+                          th:text="${unansweredReviews} + (${unansweredReviews == 1} ? ' sin responder' : ' sin responder')">2 sin responder</span>
+                </a>
             </nav>
 
             <section class="month-summary" aria-labelledby="monthSummaryTitle" th:if="${isCenterOwner}">

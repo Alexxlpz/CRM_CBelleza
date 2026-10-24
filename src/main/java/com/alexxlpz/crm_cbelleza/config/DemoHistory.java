@@ -11,6 +11,7 @@ import com.alexxlpz.crm_cbelleza.entities.Treatment;
 import com.alexxlpz.crm_cbelleza.entities.User;
 import com.alexxlpz.crm_cbelleza.repositories.AppointmentRepository;
 import com.alexxlpz.crm_cbelleza.repositories.ProductSaleRepository;
+import com.alexxlpz.crm_cbelleza.repositories.ReviewRepository;
 import com.alexxlpz.crm_cbelleza.repositories.UserRepository;
 
 import java.time.DayOfWeek;
@@ -19,6 +20,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 /**
  * Visitas y ventas pasadas en un centro demo desde enero del año anterior, para que la pantalla «Análisis» tenga
@@ -41,9 +43,12 @@ final class DemoHistory {
     private final AppointmentRepository appointments;
     private final ProductSaleRepository sales;
     private final UserRepository users;
+    private final ReviewRepository reviews;
     private final Random random = new Random(20261018L);
 
-    DemoHistory(AppointmentRepository appointments, ProductSaleRepository sales, UserRepository users) {
+    DemoHistory(AppointmentRepository appointments, ProductSaleRepository sales, UserRepository users,
+                ReviewRepository reviews) {
+        this.reviews = reviews;
         this.appointments = appointments;
         this.sales = sales;
         this.users = users;
@@ -89,10 +94,12 @@ final class DemoHistory {
                 User worker = workers.get(random.nextInt(workers.size()));
                 boolean cancelled = random.nextInt(100) < 7
                         && visitDay.isBefore(lastDay.minusDays(NO_CANCELLATIONS_LAST_DAYS));
+                // Alguna vez el cliente no se presenta (para «No vinieron» del análisis)
+                boolean noShow = !cancelled && random.nextInt(100) < 3;
 
                 Appointment appointment = Appointment.builder()
                         .dateTime(at).treatment(treatment).center(center).client(client).worker(worker)
-                        .status(cancelled ? AppointmentStatus.CANCELLED : AppointmentStatus.COMPLETED)
+                        .status(cancelled ? AppointmentStatus.CANCELLED : noShow ? AppointmentStatus.NO_SHOW : AppointmentStatus.COMPLETED)
                         // Alguna visita con descuento del 10 %, como cuando se cobra menos que en la carta
                         .price(random.nextInt(10) == 0 ? Math.round(treatment.getPrice() * 90) / 100.0 : treatment.getPrice())
                         .createdAt(at.minusDays(3 + random.nextInt(10)))
@@ -102,7 +109,7 @@ final class DemoHistory {
                 }
                 history.add(appointment);
 
-                if (!cancelled && random.nextInt(100) < 30) {
+                if (!cancelled && !noShow && random.nextInt(100) < 30) {
                     Product product = products.get(random.nextInt(products.size()));
                     productSales.add(ProductSale.builder()
                             .center(center).client(client).product(product).worker(worker)
@@ -115,5 +122,7 @@ final class DemoHistory {
         }
         appointments.saveAll(history);
         sales.saveAll(productSales);
+        new DemoReviews(reviews).seed(history,
+                existingClients.stream().map(User::getId).collect(Collectors.toSet()), today);
     }
 }

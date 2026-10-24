@@ -9,7 +9,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Datos de demostración (centros, tratamientos y cuentas con la contraseña "password123").
@@ -31,6 +34,8 @@ public class DatabaseSeeder implements CommandLineRunner {
     private final ClientCardRepository clientCardRepository;
     private final ProductSaleRepository productSaleRepository;
     private final CenterOpeningPeriodRepository openingPeriodRepository;
+    private final ReviewRepository reviewRepository;
+    private final WorkerHoursRepository workerHoursRepository;
     private final boolean seedHistory;
 
     public DatabaseSeeder(CenterRepository centerRepository,
@@ -44,6 +49,8 @@ public class DatabaseSeeder implements CommandLineRunner {
                           ClientCardRepository clientCardRepository,
                           ProductSaleRepository productSaleRepository,
                           CenterOpeningPeriodRepository openingPeriodRepository,
+                          ReviewRepository reviewRepository,
+                          WorkerHoursRepository workerHoursRepository,
                           @Value("${crm.seed-demo-history:false}") boolean seedHistory) {
         this.centerRepository = centerRepository;
         this.userRepository = userRepository;
@@ -56,6 +63,8 @@ public class DatabaseSeeder implements CommandLineRunner {
         this.clientCardRepository = clientCardRepository;
         this.productSaleRepository = productSaleRepository;
         this.openingPeriodRepository = openingPeriodRepository;
+        this.reviewRepository = reviewRepository;
+        this.workerHoursRepository = workerHoursRepository;
         this.seedHistory = seedHistory;
     }
 
@@ -512,7 +521,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                 .build());
 
         if (seedHistory) {
-            new DemoHistory(appointmentRepository, productSaleRepository, userRepository).seed(c1,
+            new DemoHistory(appointmentRepository, productSaleRepository, userRepository, reviewRepository).seed(c1,
                     Arrays.asList(w1, w2), Arrays.asList(t1_1, t1_2, t1_3, t1_4, t1_5, t1_6),
                     Arrays.asList(p1, p2, p5, p7, p9, p12, p13),
                     Arrays.asList(client1, client2, client3, client4, client5), today);
@@ -522,6 +531,15 @@ public class DatabaseSeeder implements CommandLineRunner {
             demoOffer(t2_3, 44.20, today.toLocalDate().plusDays(20));
             demoOffer(t3_1, 49.30, today.toLocalDate().plusDays(5));
             treatmentRepository.saveAll(Arrays.asList(t1_2, t1_3, t2_3, t3_1));
+            // Lucía hace media jornada: mañanas de lunes a jueves y el viernes por la tarde
+            List<WorkerHoursPeriod> luciaHours = new ArrayList<>();
+            for (int day = 1; day <= 4; day++) {
+                luciaHours.add(WorkerHoursPeriod.builder().worker(w2).dayOfWeek(day)
+                        .startsAt(LocalTime.of(9, 0)).endsAt(LocalTime.of(15, 0)).build());
+            }
+            luciaHours.add(WorkerHoursPeriod.builder().worker(w2).dayOfWeek(5)
+                    .startsAt(LocalTime.of(14, 0)).endsAt(LocalTime.of(20, 0)).build());
+            workerHoursRepository.saveAll(luciaHours);
         }
     }
 

@@ -3,6 +3,7 @@
 <head>
     <th:block th:replace="~{fragments/head :: meta('Mis Citas - Cuquora')}"></th:block>
     <link rel="stylesheet" th:href="@{/css/citas.css}">
+    <link rel="stylesheet" th:href="@{/css/reviews.css}">
 </head>
 <body>
     <div th:replace="~{fragments/navbar :: brand(true)}"></div>
@@ -85,7 +86,7 @@
                         <span class="appointments-block-count" th:text="${appointments.history().size()}">22</span></summary>
                     <ul class="history-rows">
                         <th:block th:each="app : ${appointments.history()}">
-                            <li th:replace="~{fragments/appointment-card :: historyRow(${app})}"></li>
+                            <li th:replace="~{fragments/appointment-card :: historyRow(${app}, ${reviewRatings.get(app.id)}, ${reviewableIds.contains(app.id)})}"></li>
                         </th:block>
                     </ul>
                 </details>
@@ -93,9 +94,41 @@
         </div>
     </main>
 
+    <div th:replace="~{fragments/reviews :: reviewModal}"></div>
+
     <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Software de gestión para centros de estética, salones y spas.')}"></div>
 
     <script>
+        // Valorar una cita del historial: un solo modal que se rellena con la cita del botón pulsado
+        const reviewForm = document.getElementById('reviewForm');
+        const reviewStarsLabel = document.getElementById('reviewStarsLabel');
+        const starWords = ['', 'Mal', 'Regular', 'Bien', 'Muy bien', 'Excelente'];
+        document.querySelectorAll('[data-review-open]').forEach(button => button.addEventListener('click', () => {
+            reviewForm.reset();
+            reviewForm.action = `/client/appointments/${encodeURIComponent(button.dataset.id)}/review`;
+            document.getElementById('reviewModalContext').textContent = button.dataset.context;
+            reviewStarsLabel.textContent = 'Elige de 1 a 5 estrellas';
+            document.getElementById('reviewStars').classList.remove('has-error');
+            Cuquora.openModal('reviewModal');
+            document.getElementById('reviewRating5').focus();
+        }));
+        reviewForm?.addEventListener('change', e => {
+            if (e.target.name !== 'rating') return;
+            const n = Number(e.target.value);
+            reviewStarsLabel.textContent = `${starWords[n]} · ${n === 1 ? '1 estrella' : n + ' estrellas'}`;
+            document.getElementById('reviewStars').classList.remove('has-error');
+        });
+        reviewForm?.addEventListener('submit', e => {
+            if (reviewForm.querySelector('input[name="rating"]:checked')) return;
+            e.preventDefault();
+            const stars = document.getElementById('reviewStars');
+            stars.classList.add('has-error');
+            reviewStarsLabel.textContent = 'Elige cuántas estrellas le das antes de publicar';
+            stars.classList.remove('shake-field');
+            void stars.offsetWidth;
+            stars.classList.add('shake-field');
+        });
+
         // Carrusel de puntos (móvil y tablet): marca el punto de la tarjeta visible y lleva a la tarjeta al pulsarlo.
         const loyaltyCarousel = document.getElementById('loyaltyCarousel');
         const loyaltyDots = Array.from(document.querySelectorAll('.client-loyalty-dot'));
