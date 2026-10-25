@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <th:block th:replace="~{fragments/head :: meta('Opiniones del centro - Cuquora')}"></th:block>
+    <link rel="stylesheet" th:href="@{/css/cliente.css}">
+    <link rel="stylesheet" th:href="@{/css/reviews.css}">
+</head>
+
+<body>
+    <div th:replace="~{fragments/navbar :: brand(true)}"></div>
+
+    <!--/* «Ver las N opiniones» de la ficha: todas las reseñas del centro con orden y filtros (formulario GET). */-->
+    <main class="main-container all-reviews-page">
+        <header class="all-reviews-head">
+            <a class="all-reviews-back" th:with="centerUrl=@{/client/centers/{id}(id=${center.id})}"
+               th:href="${centerUrl + '#resenas'}"
+               th:attr="aria-label=${'Volver a ' + center.name}">
+                <i class="lucide-chevron-left" aria-hidden="true"></i>
+            </a>
+            <div>
+                <h1 class="all-reviews-title" th:text="${rating.count == 1 ? '1 opinión' : rating.count + ' opiniones'}">49 opiniones</h1>
+                <p class="all-reviews-sub">
+                    <span class="all-reviews-star" aria-hidden="true">★</span>
+                    <span th:if="${rating.hasReviews()}" th:text="${rating.averageLabel() + ' de 5 · '}">4,5 de 5 · </span>
+                    <span th:text="${center.name}">Centro Histórico</span>
+                </p>
+            </div>
+        </header>
+
+        <form class="all-reviews-filters" method="get" th:action="@{/client/centers/{id}/opiniones(id=${center.id})}"
+              aria-label="Ordenar y filtrar opiniones" th:if="${rating.hasReviews()}" data-auto-submit>
+            <label class="review-chip review-chip--select">
+                <span class="visually-hidden">Ordenar</span>
+                <select name="orden">
+                    <option th:each="o : ${orders}" th:value="${o.param}" th:text="${o.label}"
+                            th:selected="${o == filter.order()}">Más recientes</option>
+                </select>
+            </label>
+            <label class="review-chip" th:classappend="${filter.withComment()} ? 'is-on'">
+                <input type="checkbox" name="comentario" value="true" th:checked="${filter.withComment()}">
+                Con comentario
+            </label>
+            <label class="review-chip review-chip--select" th:classappend="${filter.stars() != null} ? 'is-on'">
+                <span class="visually-hidden">Estrellas</span>
+                <select name="estrellas">
+                    <option value="">Estrellas</option>
+                    <option th:each="n : ${#numbers.sequence(5, 1)}" th:value="${n}" th:selected="${n == filter.stars()}"
+                            th:text="${n == 1 ? '1 estrella' : n + ' estrellas'}">5 estrellas</option>
+                </select>
+            </label>
+            <label class="review-chip review-chip--select" th:classappend="${filter.treatmentId() != null} ? 'is-on'"
+                   th:if="${reviewedTreatments.size() > 1}">
+                <span class="visually-hidden">Tratamiento</span>
+                <select name="tratamiento">
+                    <option value="">Tratamiento</option>
+                    <option th:each="t : ${reviewedTreatments}" th:value="${t.key}" th:text="${t.value}"
+                            th:selected="${t.key == filter.treatmentId()}">Manicura rusa</option>
+                </select>
+            </label>
+            <noscript><button type="submit" class="btn btn-secondary">Aplicar</button></noscript>
+        </form>
+
+        <section class="glass-panel all-reviews-list" aria-labelledby="allReviewsCount">
+            <p class="all-reviews-count" id="allReviewsCount" aria-live="polite">
+                <span th:text="${filter.isFiltered()
+                        ? 'Mostrando ' + reviews.size() + ' de ' + rating.count
+                        : (rating.count == 1 ? '1 opinión verificada' : rating.count + ' opiniones verificadas')}">Mostrando 9 de 49</span>
+                <a th:if="${filter.isFiltered()}" th:href="@{/client/centers/{id}/opiniones(id=${center.id})}">Quitar filtros</a>
+            </p>
+            <p class="reviews-empty" th:if="${!rating.hasReviews()}">
+                Este centro todavía no tiene opiniones.
+            </p>
+            <p class="reviews-empty" th:if="${rating.hasReviews() and reviews.isEmpty()}">
+                Ninguna opinión cumple estos filtros.
+            </p>
+            <th:block th:each="review : ${reviews}">
+                <article th:replace="~{fragments/reviews :: review(${review}, ${center.name})}"></article>
+            </th:block>
+        </section>
+
+        <a class="btn btn-primary all-reviews-book" th:href="@{/client/centers/{id}(id=${center.id})}">
+            <i class="lucide-calendar-plus" aria-hidden="true"></i> Reservar en <span th:text="${center.name}">Centro Histórico</span>
+        </a>
+    </main>
+
+    <script th:src="@{/js/reviews-carousel.js}" defer></script>
+
+    <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Software de gestión para centros de estética, salones y spas.')}"></div>
+
+</body>
+
+</html>

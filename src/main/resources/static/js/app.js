@@ -10,6 +10,7 @@
  *  7. Selector de vista Tarjetas / Lista: [data-view-toggle="idDelListado"] con botones
  *     [data-view="grid|list"]. Añade .is-list-view al listado y recuerda la elección.
  *  8. Aviso de cookies (#cookieBanner, en fragments/footer): se muestra hasta que se pulsa «Entendido».
+ *  9. «¿Qué tal tu cita?» (#reviewPrompt, en fragments/footer): sale una vez por cita, después del aviso de cookies.
  */
 (function () {
     'use strict';
@@ -371,11 +372,42 @@
         });
     }
 
+    /* ---------- 9. «¿Qué tal tu cita?» ---------- */
+    // Al enseñarlo se avisa al servidor, que no lo vuelve a poner para esa cita (la campana sí lo sigue recordando)
+    function initReviewPrompt() {
+        const prompt = document.getElementById('reviewPrompt');
+        if (!prompt) return;
+        const show = () => {
+            prompt.hidden = false;
+            fetch(prompt.dataset.seenUrl, { method: 'POST' }).catch(() => { /* sin conexión: saldrá otra vez */ });
+        };
+        prompt.querySelectorAll('[data-review-prompt-close]').forEach(button =>
+            button.addEventListener('click', () => { prompt.hidden = true; }));
+        // «No mostrar más»: no vuelve a salir para ninguna cita
+        prompt.querySelector('[data-review-prompt-off]')?.addEventListener('click', e => {
+            prompt.hidden = true;
+            fetch(e.currentTarget.dataset.reviewPromptOff, { method: 'POST' }).catch(() => { /* sin conexión: saldrá con la próxima cita */ });
+        });
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape' && !prompt.hidden && !document.querySelector('.ui-modal-overlay:not([hidden])')) {
+                prompt.hidden = true;
+            }
+        });
+        // No se amontona con el aviso de cookies: espera a que lo cierren
+        const banner = document.getElementById('cookieBanner');
+        if (banner && !banner.hidden) {
+            banner.querySelector('[data-cookie-accept]')?.addEventListener('click', () => setTimeout(show, 400));
+            return;
+        }
+        setTimeout(show, 1200);
+    }
+
     function init() {
         initMobileNav();
         initNotifications();
         initViewToggles();
         initCookieBanner();
+        initReviewPrompt();
     }
 
     if (document.readyState === 'loading') {

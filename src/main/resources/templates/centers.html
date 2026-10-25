@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
         <link rel="stylesheet" th:href="@{/css/cliente.css}">
+        <link rel="stylesheet" th:href="@{/css/reviews.css}">
 </head>
 <body>
     <div th:replace="~{fragments/navbar :: brand(true)}"></div>
@@ -29,18 +30,22 @@
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
                     <span id="treatmentBadge" class="bell-badge" aria-hidden="true"></span>
                 </button>
-                <button type="button" class="btn btn-secondary filter-icon-btn offers-toggle" id="btnOffers" aria-pressed="false"
-                        title="Ver solo centros con ofertas">
-                    <i class="lucide-tag" aria-hidden="true"></i> Con ofertas
-                </button>
-                <button type="button" class="btn btn-secondary filter-icon-btn offers-toggle" id="btnOpenNow" aria-pressed="false"
-                        title="Ver solo centros abiertos ahora">
-                    <i class="lucide-clock" aria-hidden="true"></i> Abierto ahora
-                </button>
-                <button type="button" class="btn btn-secondary filter-icon-btn offers-toggle" id="btnTopRated" aria-pressed="false"
-                        title="Ver solo centros con 4 estrellas o más">
-                    <i class="lucide-star" aria-hidden="true"></i> 4 o más
-                </button>
+                <!-- Filtros rápidos: en escritorio van en esta fila; en móvil el script los mete en el panel de ajustes -->
+                <div class="quick-filters" id="quickFilters" role="group" aria-labelledby="quickFiltersLabel">
+                    <span class="advanced-search-label quick-filters-label" id="quickFiltersLabel">Mostrar solo</span>
+                    <button type="button" class="btn btn-secondary filter-icon-btn offers-toggle" id="btnOffers" aria-pressed="false"
+                            title="Ver solo centros con ofertas">
+                        <i class="lucide-tag" aria-hidden="true"></i> Con ofertas
+                    </button>
+                    <button type="button" class="btn btn-secondary filter-icon-btn offers-toggle" id="btnOpenNow" aria-pressed="false"
+                            title="Ver solo centros abiertos ahora">
+                        <i class="lucide-clock" aria-hidden="true"></i> Abierto ahora
+                    </button>
+                    <button type="button" class="btn btn-secondary filter-icon-btn offers-toggle" id="btnTopRated" aria-pressed="false"
+                            title="Ver solo centros con 4 estrellas o más">
+                        <i class="lucide-star" aria-hidden="true"></i> 4 o más
+                    </button>
+                </div>
                 <button type="button" class="btn btn-secondary filter-icon-btn" id="btnMapToggle" aria-label="Ver en mapa" aria-pressed="false">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"></polygon><line x1="9" y1="3" x2="9" y2="21"></line><line x1="15" y1="3" x2="15" y2="21"></line></svg>
                 </button>
@@ -50,7 +55,7 @@
             </div>
 
             <div id="advancedSearchPanel" class="advanced-search-panel">
-                <div class="advanced-search-fields">
+                <div class="advanced-search-fields" id="advancedSearchFields">
                     <div class="advanced-search-field">
                         <label class="form-label advanced-search-label" for="searchTreatment">Tipo de Tratamiento</label>
                         <select id="searchTreatment" class="form-control">
@@ -158,14 +163,20 @@
                     </p>`;
             }
 
-            /** Nota media de las reseñas verificadas («★ 4,7 · 23 reseñas»); nada si el centro aún no tiene. */
+            /** Estrellas de las reseñas verificadas («★★★★½ 4,7 · 23 reseñas»); sin reseñas, vacías y «Sin valoraciones». */
             function ratingBlock(center, className) {
-                if (!center.reviewCount) return '';
+                if (!center.reviewCount) {
+                    return `
+                    <p class="${className} center-rating--empty" aria-label="Sin valoraciones todavía">
+                        <span class="stars" aria-hidden="true" style="--stars: 0"><span class="stars-fill"></span></span>
+                        <span>Sin valoraciones</span>
+                    </p>`;
+                }
                 const average = center.rating.toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
                 const count = center.reviewCount === 1 ? '1 reseña' : `${center.reviewCount} reseñas`;
                 return `
                     <p class="${className}" aria-label="Nota media ${average} de 5, ${count}">
-                        <i class="lucide-star" aria-hidden="true"></i>
+                        <span class="stars" aria-hidden="true" style="--stars: ${Math.round(center.rating * 2) / 2}"><span class="stars-fill"></span></span>
                         <strong>${average}</strong> <span>· ${count}</span>
                     </p>`;
             }
@@ -227,28 +238,51 @@
                 clearTimeout(searchTimeout);
                 searchTimeout = setTimeout(resetAndFetch, 400);
             });
+            // Móvil: «Con ofertas», «Abierto ahora» y «4 o más» pasan al panel de ajustes para que la barra no se llene
+            const quickFilters = document.getElementById('quickFilters');
+            const advancedFields = document.getElementById('advancedSearchFields');
+            const mobileFilters = window.matchMedia('(max-width: 600px)');
+            function placeQuickFilters() {
+                if (mobileFilters.matches) advancedFields.prepend(quickFilters);
+                else btnMapToggle.before(quickFilters);
+                updateFilterBadge();
+            }
+
+            // El número del botón de ajustes cuenta los filtros puestos que hay dentro del panel
+            function updateFilterBadge() {
+                let count = searchTreatment.value !== '' ? 1 : 0;
+                if (mobileFilters.matches) count += [onlyOffers, onlyOpen, onlyTopRated].filter(Boolean).length;
+                treatmentBadge.textContent = count > 1 ? String(count) : '';
+                treatmentBadge.classList.toggle('is-visible', count > 0);
+            }
+
             btnOffers.addEventListener('click', () => {
                 onlyOffers = !onlyOffers;
                 btnOffers.classList.toggle('is-active', onlyOffers);
                 btnOffers.setAttribute('aria-pressed', String(onlyOffers));
+                updateFilterBadge();
                 resetAndFetch();
             });
             btnOpenNow.addEventListener('click', () => {
                 onlyOpen = !onlyOpen;
                 btnOpenNow.classList.toggle('is-active', onlyOpen);
                 btnOpenNow.setAttribute('aria-pressed', String(onlyOpen));
+                updateFilterBadge();
                 resetAndFetch();
             });
             btnTopRated.addEventListener('click', () => {
                 onlyTopRated = !onlyTopRated;
                 btnTopRated.classList.toggle('is-active', onlyTopRated);
                 btnTopRated.setAttribute('aria-pressed', String(onlyTopRated));
+                updateFilterBadge();
                 resetAndFetch();
             });
             searchTreatment.addEventListener('change', () => {
-                treatmentBadge.classList.toggle('is-visible', searchTreatment.value !== '');
+                updateFilterBadge();
                 resetAndFetch();
             });
+            mobileFilters.addEventListener('change', placeQuickFilters);
+            placeQuickFilters();
 
             function filterParams(extra) {
                 const params = new URLSearchParams(extra);

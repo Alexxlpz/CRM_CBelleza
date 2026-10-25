@@ -5,6 +5,7 @@ import com.alexxlpz.crm_cbelleza.services.ClientNotificationService;
 import com.alexxlpz.crm_cbelleza.services.NotificationDismissalService;
 import com.alexxlpz.crm_cbelleza.services.NotificationService;
 import com.alexxlpz.crm_cbelleza.services.NotificationService.NotificationItem;
+import com.alexxlpz.crm_cbelleza.services.ReviewService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.Profiles;
@@ -25,12 +26,14 @@ public class CurrentUserModelAdvice {
 
     private final NotificationService notificationService;
     private final ClientNotificationService clientNotificationService;
+    private final ReviewService reviewService;
     private final NotificationDismissalService dismissals;
     private final CenterAccess centerAccess;
     private final boolean devLoginEnabled;
 
     public CurrentUserModelAdvice(NotificationService notificationService,
                                   ClientNotificationService clientNotificationService,
+                                  ReviewService reviewService,
                                   NotificationDismissalService dismissals,
                                   CenterAccess centerAccess,
                                   Environment environment) {
@@ -38,6 +41,7 @@ public class CurrentUserModelAdvice {
         this.centerAccess = centerAccess;
         this.notificationService = notificationService;
         this.clientNotificationService = clientNotificationService;
+        this.reviewService = reviewService;
         this.devLoginEnabled = environment.acceptsProfiles(Profiles.of("dev"));
     }
 
@@ -70,6 +74,8 @@ public class CurrentUserModelAdvice {
             }
         } else if ("GET".equalsIgnoreCase(request.getMethod())) {
             model.addAttribute("clientNotifications", clientNotificationService.forClient(user.getId()));
+            // «¿Qué tal tu cita?»: una vez por cita completada, en la primera página que abra después
+            model.addAttribute("reviewPrompt", reviewService.toPrompt(user.getId()).orElse(null));
         }
     }
 

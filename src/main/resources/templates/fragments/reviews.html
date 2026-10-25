@@ -37,7 +37,7 @@
     </div>
 
     <!--/* Una reseña tal y como la ven todos: autor, estrellas, tratamiento, comentario y la respuesta del centro. */-->
-    <article th:fragment="review(review, centerName)" class="review-item">
+    <article th:fragment="review(review, centerName)" class="review-item" th:id="${'resena-' + review.id}">
         <header class="review-item-head">
             <span class="review-avatar" aria-hidden="true" th:text="${#strings.substring(review.authorName, 0, 1)}">S</span>
             <div class="review-item-who">
@@ -48,9 +48,11 @@
                 <p class="review-meta">
                     <span th:replace="~{fragments/reviews :: stars(${review.rating})}"></span>
                     <span class="visually-hidden" th:text="${review.rating + ' de 5 estrellas'}">5 de 5 estrellas</span>
-                    <span th:text="${review.appointment.treatment.name}">Manicura rusa</span>
-                    · <time th:datetime="${review.createdAt}" th:text="${#temporals.format(review.createdAt, 'd MMM yyyy')}">7 sept 2026</time>
+                    <time th:datetime="${review.createdAt}" th:title="${#temporals.format(review.createdAt, 'd MMM yyyy')}"
+                          th:text="${reviewAges != null and reviewAges[review.id] != null ? reviewAges[review.id] : #temporals.format(review.createdAt, 'd MMM yyyy')}">7 sept 2026</time>
                 </p>
+                <p class="review-treatment"
+                   th:text="${review.appointment.treatment.name + (review.appointment.worker != null ? ' con ' + #strings.arraySplit(review.appointment.worker.name, ' ')[0] : '')}">Manicura rusa con Carlos</p>
             </div>
         </header>
         <p class="review-comment" th:if="${review.comment != null}" th:text="${review.comment}">Genial.</p>
@@ -60,4 +62,31 @@
             <p class="review-reply-text" th:text="${review.reply}">¡Gracias, Sofía!</p>
         </div>
     </article>
+
+    <!--/* Tarjeta corta del carrusel de la ficha: el comentario se corta a cuatro líneas y «Leer entera» lleva a la lista. */-->
+    <li th:fragment="reviewCard(review, age, centerId)" class="review-card">
+        <header class="review-card-head">
+            <span class="review-avatar" aria-hidden="true" th:text="${#strings.substring(review.authorName, 0, 1)}">S</span>
+            <div class="review-item-who">
+                <strong class="review-card-author" th:text="${review.authorName}">Sofía M.</strong>
+                <p class="review-card-meta">
+                    <time th:datetime="${review.createdAt}" th:title="${#temporals.format(review.createdAt, 'd MMM yyyy')}" th:text="${age}">hace 3 días</time>
+                    · <span th:text="${review.appointment.treatment.name}">Manicura rusa</span>
+                </p>
+            </div>
+        </header>
+        <span th:replace="~{fragments/reviews :: stars(${review.rating})}"></span>
+        <span class="visually-hidden" th:text="${review.rating + ' de 5 estrellas'}">5 de 5 estrellas</span>
+        <p class="review-card-comment" th:if="${review.comment != null}" th:text="${review.comment}">Genial.</p>
+        <p class="review-card-comment review-card-comment--none" th:if="${review.comment == null}">Sin comentario</p>
+        <footer class="review-card-foot" th:if="${review.hasReply() or (review.comment != null and review.comment.length() > 160)}">
+            <span class="review-card-replied" th:if="${review.hasReply()}">
+                <i class="lucide-message-square-reply" aria-hidden="true"></i> El centro ha respondido
+            </span>
+            <a th:with="reviewsUrl=@{/client/centers/{id}/opiniones(id=${centerId})}"
+               th:href="${reviewsUrl + '#resena-' + review.id}"
+               th:text="${review.comment != null and review.comment.length() > 160 ? 'Leer entera' : 'Ver respuesta'}"
+               th:attr="aria-label=${'Leer la opinión de ' + review.authorName}">Leer entera</a>
+        </footer>
+    </li>
 </div>

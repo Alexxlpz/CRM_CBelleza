@@ -2,19 +2,26 @@ package com.alexxlpz.crm_cbelleza.services;
 
 import com.alexxlpz.crm_cbelleza.booking.CenterClock;
 import com.alexxlpz.crm_cbelleza.dto.CenterRating;
+import com.alexxlpz.crm_cbelleza.dto.ReviewFilter;
 import com.alexxlpz.crm_cbelleza.entities.Appointment;
 import com.alexxlpz.crm_cbelleza.entities.AppointmentStatus;
 import com.alexxlpz.crm_cbelleza.entities.Review;
+import com.alexxlpz.crm_cbelleza.entities.User;
 import com.alexxlpz.crm_cbelleza.exceptions.BusinessRuleException;
 import com.alexxlpz.crm_cbelleza.exceptions.ResourceNotFoundException;
 import com.alexxlpz.crm_cbelleza.forms.FormText;
 import com.alexxlpz.crm_cbelleza.repositories.AppointmentRepository;
 import com.alexxlpz.crm_cbelleza.repositories.ReviewRepository;
+import com.alexxlpz.crm_cbelleza.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Period;
+import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -34,13 +41,18 @@ public class ReviewService {
     /** Días después de la cita en los que todavía se puede valorar. */
     public static final int DAYS_TO_REVIEW = 90;
 
+    /** Días después de la cita en los que, al entrar, se le propone valorarla (como el recordatorio de la campana). */
+    public static final int DAYS_TO_PROMPT = 7;
+
     private final ReviewRepository reviews;
     private final AppointmentRepository appointments;
+    private final UserRepository users;
     private final Clock clock;
 
-    public ReviewService(ReviewRepository reviews, AppointmentRepository appointments, Clock clock) {
+    public ReviewService(ReviewRepository reviews, AppointmentRepository appointments, UserRepository users, Clock clock) {
         this.reviews = reviews;
         this.appointments = appointments;
+        this.users = users;
         this.clock = clock;
     }
 
@@ -73,6 +85,41 @@ public class ReviewService {
             }
         }
         return reviewable;
+    }
+
+    /**
+     * La cita que se propone valorar al cliente con el aviso que sale al entrar: la última completada de los
+     * últimos {@value #DAYS_TO_PROMPT} días que aún puede valorar y de la que todavía no se le ha avisado.
+     */
+    public Optional<Appointment> toPrompt(Long clientId) {
+        if (users.findById(clientId).map(User::isReviewPromptsOff).orElse(true)) {
+            return Optional.empty();
+        }
+        Set<Long> reviewed = ratingsOfClient(clientId).keySet();
+        return appointments.findByClientIdOrderByDateTimeDesc(clientId).stream()
+                .filter(appointment -> appointment.getStatus() == AppointmentStatus.COMPLETED
+                        && appointment.getReviewPromptedAt() == null
+                        && !reviewed.contains(appointment.getId()))
+                .filter(appointment -> {
+                    LocalDateTime now = CenterClock.now(clock, appointment.getCenter());
+                    return appointment.getDateTime().isBefore(now)
+                            && appointment.getDateTime().isAfter(now.minusDays(DAYS_TO_PROMPT));
+                })
+                .findFirst();
+    }
+
+    /** El aviso para valorar ya se ha enseñado: no vuelve a salir para esta cita (la campana lo sigue recordando). */
+    @Transactional
+    public void markPrompted(Long clientId, Long appointmentId) {
+        appointments.findByIdAndClientId(appointmentId, clientId)
+                .filter(appointment -> appointment.getReviewPromptedAt() == null)
+                .ifPresent(appointment -> appointment.setReviewPromptedAt(LocalDateTime.now(clock)));
+    }
+
+    /** «No mostrar más»: el cliente no quiere que se le vuelva a proponer valorar ninguna cita. */
+    @Transactional
+    public void stopPrompts(Long clientId) {
+        users.findById(clientId).ifPresent(user -> user.setReviewPromptsOff(true));
     }
 
     /** El cliente valora su cita completada. */
@@ -109,6 +156,57 @@ public class ReviewService {
 
     public List<Review> forCenter(Long centerId) {
         return reviews.findByCenterIdOrderByCreatedAtDesc(centerId);
+    }
+
+    /** Las reseñas del centro ordenadas y filtradas como pide la pantalla «Todas las opiniones». */
+    public List<Review> forCenter(Long centerId, ReviewFilter filter) {
+        Comparator<Review> newest = Comparator.comparing(Review::getCreatedAt).reversed();
+        Comparator<Review> order = switch (filter.order()) {
+            case RECENT -> newest;
+            case BEST -> Comparator.comparing(Review::getRating).reversed().thenComparing(newest);
+            case WORST -> Comparator.comparing(Review::getRating).thenComparing(newest);
+        };
+        return forCenter(centerId).stream()
+                .filter(review -> filter.stars() == null || filter.stars().equals(review.getRating()))
+                .filter(review -> !filter.withComment() || review.getComment() != null)
+                .filter(review -> filter.treatmentId() == null
+                        || filter.treatmentId().equals(review.getAppointment().getTreatment().getId()))
+                .sorted(order)
+                .toList();
+    }
+
+    /** Hace cuánto se escribió cada reseña («hace 3 días»), por id de reseña. */
+    public Map<Long, String> ages(List<Review> list) {
+        LocalDate today = LocalDate.now(clock);
+        Map<Long, String> byReview = new HashMap<>();
+        for (Review review : list) {
+            byReview.put(review.getId(), age(review.getCreatedAt().toLocalDate(), today));
+        }
+        return byReview;
+    }
+
+    /** «hoy», «ayer», «hace 3 días», «hace 2 semanas», «hace 1 mes», «hace 2 años». */
+    public static String age(LocalDate day, LocalDate today) {
+        long days = ChronoUnit.DAYS.between(day, today);
+        if (days <= 0) {
+            return "hoy";
+        }
+        if (days == 1) {
+            return "ayer";
+        }
+        if (days < 7) {
+            return "hace " + days + " días";
+        }
+        if (days < 30) {
+            long weeks = days / 7;
+            return weeks == 1 ? "hace 1 semana" : "hace " + weeks + " semanas";
+        }
+        Period period = Period.between(day, today);
+        if (period.getYears() == 0) {
+            long months = Math.max(1, period.getMonths());
+            return months == 1 ? "hace 1 mes" : "hace " + months + " meses";
+        }
+        return period.getYears() == 1 ? "hace 1 año" : "hace " + period.getYears() + " años";
     }
 
     public CenterRating rating(Long centerId) {

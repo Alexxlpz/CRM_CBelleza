@@ -476,16 +476,31 @@
     gap: 6px;
 }
 
-/* Móvil: el buscador conserva su ancho y «Con ofertas» y «Abierto ahora» bajan a su propia línea */
-@media (max-width: 600px) {
-    .filter-search-row {
-        flex-wrap: wrap;
-    }
+/* Escritorio: los filtros rápidos van sueltos en la fila del buscador */
+.quick-filters {
+    display: contents;
+}
 
-    .filter-icon-btn.offers-toggle {
-        order: 1;
-        height: 36px;
-    }
+.quick-filters-label {
+    display: none;
+}
+
+/* Móvil: centers.html los mete al principio del panel de ajustes, en su propia línea */
+.advanced-search-fields > .quick-filters {
+    display: flex;
+    flex-basis: 100%;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.advanced-search-fields > .quick-filters .quick-filters-label {
+    display: block;
+    flex-basis: 100%;
+    margin: 0;
+}
+
+.advanced-search-fields > .quick-filters .offers-toggle {
+    height: 38px;
 }
 
 .filter-icon-btn.is-active {
@@ -847,17 +862,15 @@
 /* Nota media de las reseñas, en la tarjeta del buscador y en el globo del mapa */
 .center-rating {
     display: flex;
-    align-items: baseline;
+    align-items: center;
     gap: 4px;
     margin: 0;
     font-size: 13px;
     color: var(--text-muted);
 }
 
-.center-rating i {
-    position: relative;
-    top: 1px;
-    color: var(--star);
+.center-rating .stars {
+    font-size: 14px;
 }
 
 .center-rating strong {

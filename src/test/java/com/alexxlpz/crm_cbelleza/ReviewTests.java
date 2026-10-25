@@ -1,6 +1,7 @@
 package com.alexxlpz.crm_cbelleza;
 
 import com.alexxlpz.crm_cbelleza.dto.CenterRating;
+import com.alexxlpz.crm_cbelleza.dto.ReviewFilter;
 import com.alexxlpz.crm_cbelleza.entities.Appointment;
 import com.alexxlpz.crm_cbelleza.entities.AppointmentStatus;
 import com.alexxlpz.crm_cbelleza.entities.Center;
@@ -12,6 +13,7 @@ import com.alexxlpz.crm_cbelleza.repositories.CenterRepository;
 import com.alexxlpz.crm_cbelleza.repositories.ReviewRepository;
 import com.alexxlpz.crm_cbelleza.repositories.TreatmentRepository;
 import com.alexxlpz.crm_cbelleza.repositories.UserRepository;
+import com.alexxlpz.crm_cbelleza.services.ReviewService;
 import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,11 +23,13 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -69,6 +73,10 @@ class ReviewTests {
     }
 
     private Appointment appointment(AppointmentStatus status, LocalDateTime at) {
+        return appointment(status, at, treatment);
+    }
+
+    private Appointment appointment(AppointmentStatus status, LocalDateTime at, Treatment treatment) {
         return appointments.saveAndFlush(Appointment.builder()
                 .dateTime(at).treatment(treatment).center(center).client(sofia)
                 .status(status).price(treatment.getPrice()).createdAt(at.minusDays(5))
@@ -110,7 +118,7 @@ class ReviewTests {
         mvc.perform(get("/client/centers/" + center.getId()).with(TestUsers.as(users, TestUsers.CLIENT)))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Muy buen trato.")))
-                .andExpect(content().string(containsString("Cita verificada")))
+                .andExpect(content().string(containsString("Solo de citas reales")))
                 .andExpect(content().string(containsString("4,0")))
                 .andExpect(content().string(containsString("1 opinión verificada")));
 
@@ -178,7 +186,11 @@ class ReviewTests {
                 .andExpect(flash().attribute("successMessage", containsString("Respuesta publicada")));
         assertEquals("¡Gracias, Sofía!", reviews.findById(saved.getId()).orElseThrow().getReply());
 
+        // En el carrusel de la ficha solo se avisa; la respuesta entera, en «Ver las opiniones»
         mvc.perform(get("/client/centers/" + center.getId()).with(TestUsers.as(users, TestUsers.CLIENT)))
+                .andExpect(content().string(containsString("El centro ha respondido")));
+        mvc.perform(get("/client/centers/" + center.getId() + "/opiniones").with(TestUsers.as(users, TestUsers.CLIENT)))
+                .andExpect(content().string(containsString("Cita verificada")))
                 .andExpect(content().string(containsString("¡Gracias, Sofía!")));
         mvc.perform(get("/client/appointments").with(TestUsers.as(users, TestUsers.CLIENT)))
                 .andExpect(content().string(containsString(center.getName() + " ha respondido a tu valoración")));
@@ -236,6 +248,139 @@ class ReviewTests {
                 .andReturn().getResponse().getContentAsString(), "$");
         assertEquals(1, top.size());
         assertEquals(center.getId(), ((Number) top.getFirst().get("id")).longValue());
+    }
+
+    @Test
+    void theCenterPageShowsTheLatestReviewsAndLinksToAllOfThem() throws Exception {
+        for (int i = 1; i <= 7; i++) {
+            review(appointment(AppointmentStatus.COMPLETED, LocalDateTime.now().minusDays(i)), 5, "Opinión número " + i + ".");
+        }
+
+        // Carrusel con las seis más recientes; la séptima, solo en «Ver las 7 opiniones»
+        String page = mvc.perform(get("/client/centers/" + center.getId()).with(TestUsers.as(users, TestUsers.CLIENT)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Solo de citas reales")))
+                .andExpect(content().string(containsString("Ver las 7 opiniones")))
+                .andExpect(content().string(containsString("href=\"/client/centers/" + center.getId() + "/opiniones\"")))
+                .andReturn().getResponse().getContentAsString();
+        assertEquals(6, page.split("class=\"review-card\"", -1).length - 1);
+
+        mvc.perform(get("/client/centers/" + center.getId() + "/opiniones").with(TestUsers.as(users, TestUsers.CLIENT)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("7 opiniones")))
+                .andExpect(content().string(containsString("Opinión número 7.")))
+                .andExpect(content().string(matchesPattern("(?s).*<time[^>]*>hoy</time>.*")));
+    }
+
+    @Test
+    void allReviewsCanBeSortedAndFiltered() throws Exception {
+        Treatment other = treatments.findByCenterId(center.getId()).get(1);
+        review(appointment(AppointmentStatus.COMPLETED, LocalDateTime.now().minusDays(1)), 5, "Cinco estrellas.");
+        review(appointment(AppointmentStatus.COMPLETED, LocalDateTime.now().minusDays(2)), 2, "Dos estrellas.");
+        review(appointment(AppointmentStatus.COMPLETED, LocalDateTime.now().minusDays(3), other), 4, "");
+        String url = "/client/centers/" + center.getId() + "/opiniones";
+
+        mvc.perform(get(url).param("estrellas", "5").with(TestUsers.as(users, TestUsers.CLIENT)))
+                .andExpect(content().string(containsString("Mostrando 1 de 3")))
+                .andExpect(content().string(containsString("Cinco estrellas.")))
+                .andExpect(content().string(not(containsString("Dos estrellas."))));
+        mvc.perform(get(url).param("comentario", "true").with(TestUsers.as(users, TestUsers.CLIENT)))
+                .andExpect(content().string(containsString("Mostrando 2 de 3")));
+        mvc.perform(get(url).param("tratamiento", other.getId().toString()).with(TestUsers.as(users, TestUsers.CLIENT)))
+                .andExpect(content().string(containsString("Mostrando 1 de 3")));
+        mvc.perform(get(url).param("estrellas", "1").with(TestUsers.as(users, TestUsers.CLIENT)))
+                .andExpect(content().string(containsString("Ninguna opinión cumple estos filtros.")));
+
+        // Peor valoradas primero
+        String worst = mvc.perform(get(url).param("orden", "peores").with(TestUsers.as(users, TestUsers.CLIENT)))
+                .andExpect(content().string(containsString("3 opiniones verificadas")))
+                .andReturn().getResponse().getContentAsString();
+        assertTrue(worst.indexOf("Dos estrellas.") < worst.indexOf("Cinco estrellas."));
+
+        // Hay que entrar para verla, como la ficha
+        mvc.perform(get(url)).andExpect(status().is3xxRedirection());
+    }
+
+    @Test
+    void afterACompletedAppointmentTheClientIsAskedOnceToReviewIt() throws Exception {
+        appointments.findByClientIdOrderByDateTimeDesc(sofia.getId()).forEach(app -> app.setReviewPromptedAt(LocalDateTime.now()));
+        Appointment old = appointment(AppointmentStatus.COMPLETED, LocalDateTime.now().minusDays(ReviewService.DAYS_TO_PROMPT + 1));
+        Appointment done = appointment(AppointmentStatus.COMPLETED, LocalDateTime.now().minusDays(1));
+
+        mvc.perform(get("/centers").with(TestUsers.as(users, TestUsers.CLIENT)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("id=\"reviewPrompt\"")))
+                .andExpect(content().string(containsString(("¿Qué tal tu " + treatment.getName() + "?").replace("&", "&amp;"))))
+                .andExpect(content().string(containsString(("Fuiste ayer a " + center.getName()).replace("&", "&amp;"))))
+                .andExpect(content().string(containsString("/client/appointments?valorar=" + done.getId() + "&amp;estrellas=5")));
+
+        // Enseñado una vez, no vuelve a salir; la campana lo sigue recordando
+        mvc.perform(post("/client/appointments/" + done.getId() + "/review-prompt/seen")
+                        .with(TestUsers.as(users, TestUsers.CLIENT)).with(csrf()))
+                .andExpect(status().isOk());
+        assertNotNull(appointments.findById(done.getId()).orElseThrow().getReviewPromptedAt());
+        assertNull(appointments.findById(old.getId()).orElseThrow().getReviewPromptedAt());
+        mvc.perform(get("/centers").with(TestUsers.as(users, TestUsers.CLIENT)))
+                .andExpect(content().string(not(containsString("id=\"reviewPrompt\""))))
+                .andExpect(content().string(containsString("Valóralo desde tu historial.")));
+    }
+
+    @Test
+    void noMostrarMasStopsThePromptForEveryAppointment() throws Exception {
+        appointments.findByClientIdOrderByDateTimeDesc(sofia.getId()).forEach(app -> app.setReviewPromptedAt(LocalDateTime.now()));
+        appointment(AppointmentStatus.COMPLETED, LocalDateTime.now().minusDays(2));
+        mvc.perform(get("/centers").with(TestUsers.as(users, TestUsers.CLIENT)))
+                .andExpect(content().string(containsString("No mostrar más")));
+
+        mvc.perform(post("/client/review-prompts/off").with(TestUsers.as(users, TestUsers.CLIENT)).with(csrf()))
+                .andExpect(status().isOk());
+        assertTrue(users.findById(sofia.getId()).orElseThrow().isReviewPromptsOff());
+
+        // Ni para esa cita ni para las siguientes; la campana sigue recordándolo
+        appointment(AppointmentStatus.COMPLETED, LocalDateTime.now().minusHours(3));
+        mvc.perform(get("/centers").with(TestUsers.as(users, TestUsers.CLIENT)))
+                .andExpect(content().string(not(containsString("id=\"reviewPrompt\""))))
+                .andExpect(content().string(containsString("Valóralo desde tu historial.")));
+    }
+
+    @Test
+    void aReviewedAppointmentOrSomeoneElsesIsNotPrompted() throws Exception {
+        appointments.findByClientIdOrderByDateTimeDesc(sofia.getId()).forEach(app -> app.setReviewPromptedAt(LocalDateTime.now()));
+        Appointment done = appointment(AppointmentStatus.COMPLETED, LocalDateTime.now().minusDays(2));
+        review(done, 5, "");
+
+        mvc.perform(get("/centers").with(TestUsers.as(users, TestUsers.CLIENT)))
+                .andExpect(content().string(not(containsString("id=\"reviewPrompt\""))));
+
+        // Otro cliente no puede marcar como visto el aviso de Sofía
+        Appointment pending = appointment(AppointmentStatus.COMPLETED, LocalDateTime.now().minusDays(1));
+        User other = users.findAll().stream()
+                .filter(u -> u.getRole() == com.alexxlpz.crm_cbelleza.entities.Role.CLIENT && !u.getId().equals(sofia.getId()))
+                .findFirst().orElseThrow();
+        mvc.perform(post("/client/appointments/" + pending.getId() + "/review-prompt/seen")
+                .with(TestUsers.as(users, other.getName())).with(csrf()));
+        assertNull(appointments.findById(pending.getId()).orElseThrow().getReviewPromptedAt());
+    }
+
+    @Test
+    void reviewFilterAndAgeLabels() {
+        ReviewFilter odd = ReviewFilter.of("raro", 9, false, null);
+        assertEquals(ReviewFilter.Order.RECENT, odd.order());
+        assertNull(odd.stars());
+        assertFalse(odd.isFiltered());
+        assertEquals(ReviewFilter.Order.WORST, ReviewFilter.of("peores", 2, false, null).order());
+        assertTrue(ReviewFilter.of(null, 2, false, null).isFiltered());
+
+        LocalDate today = LocalDate.of(2026, 10, 25);
+        assertEquals("hoy", ReviewService.age(today, today));
+        assertEquals("ayer", ReviewService.age(today.minusDays(1), today));
+        assertEquals("hace 3 días", ReviewService.age(today.minusDays(3), today));
+        assertEquals("hace 1 semana", ReviewService.age(today.minusDays(8), today));
+        assertEquals("hace 3 semanas", ReviewService.age(today.minusDays(22), today));
+        assertEquals("hace 1 mes", ReviewService.age(today.minusDays(31), today));
+        assertEquals("hace 5 meses", ReviewService.age(today.minusMonths(5), today));
+        assertEquals("hace 1 año", ReviewService.age(today.minusMonths(13), today));
+        assertEquals("hace 2 años", ReviewService.age(today.minusYears(2), today));
     }
 
     @Test

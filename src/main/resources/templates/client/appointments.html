@@ -112,6 +112,22 @@
             Cuquora.openModal('reviewModal');
             document.getElementById('reviewRating5').focus();
         }));
+        // Desde «¿Qué tal tu cita?»: ?valorar=<cita>&estrellas=<n> abre el modal con esas estrellas ya marcadas
+        const toReview = new URLSearchParams(location.search);
+        const reviewButton = toReview.get('valorar')
+            && document.querySelector(`[data-review-open][data-id="${CSS.escape(toReview.get('valorar'))}"]`);
+        if (toReview.has('valorar')) history.replaceState(null, '', location.pathname);
+        // Cuando app.js (diferido) ya ha definido Cuquora.openModal
+        if (reviewButton) document.addEventListener('DOMContentLoaded', () => {
+            reviewButton.click();
+            const preset = document.getElementById('reviewRating' + Number(toReview.get('estrellas')));
+            if (preset) {
+                preset.checked = true;
+                const n = Number(preset.value);
+                reviewStarsLabel.textContent = `${starWords[n]} · ${n === 1 ? '1 estrella' : n + ' estrellas'}`;
+                document.getElementById('reviewComment').focus();
+            }
+        });
         reviewForm?.addEventListener('change', e => {
             if (e.target.name !== 'rating') return;
             const n = Number(e.target.value);

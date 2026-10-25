@@ -11,6 +11,11 @@
             <strong th:text="${rating.averageLabel()}">4,7</strong>
             <span th:text="${'· ' + rating.countLabel()}">· 23 reseñas</span>
         </a>
+        <a class="hero-rating hero-rating--empty" href="#resenas" th:if="${rating != null and !rating.hasReviews()}"
+           aria-label="Sin valoraciones todavía. Ver opiniones">
+            <span th:replace="~{fragments/reviews :: stars(0)}"></span>
+            <span>Sin valoraciones todavía</span>
+        </a>
         <div class="hero-meta-container">
             <div class="hero-meta-item">
                 <i class="lucide-map-pin" aria-hidden="true"></i>

@@ -2,6 +2,7 @@
     <!--/*
         Pie común: texto de la página, enlaces legales y aviso de cookies.
         El aviso sale oculto y app.js lo muestra hasta que el usuario pulsa «Entendido».
+        Al cliente, tras una cita completada, le sale una vez «¿Qué tal tu cita?» (reviewPrompt, de CurrentUserModelAdvice).
     */-->
     <th:block th:fragment="footer(text)">
         <footer>
@@ -31,6 +32,31 @@
                         <i class="lucide-check" aria-hidden="true"></i> Entendido
                     </button>
                 </div>
+            </div>
+        </section>
+
+        <!--/* No bloquea la página: tarjeta en una esquina; la «x» la cierra y «No mostrar más» la quita para siempre.
+               Cada estrella lleva al modal de valorar. */-->
+        <section class="review-prompt" id="reviewPrompt" th:if="${reviewPrompt != null}" hidden
+                 role="dialog" aria-labelledby="reviewPromptTitle" aria-describedby="reviewPromptText"
+                 th:attr="data-seen-url=@{/client/appointments/{id}/review-prompt/seen(id=${reviewPrompt.id})}">
+            <button type="button" class="review-prompt-close" data-review-prompt-close aria-label="Cerrar">
+                <i class="lucide-x" aria-hidden="true"></i>
+            </button>
+            <span class="review-prompt-icon" aria-hidden="true"><i class="lucide-star"></i></span>
+            <div class="review-prompt-body">
+                <h2 class="review-prompt-title" id="reviewPromptTitle"
+                    th:text="${'¿Qué tal tu ' + reviewPrompt.treatment.name + '?'}">¿Qué tal tu Manicura rusa?</h2>
+                <p class="review-prompt-text" id="reviewPromptText"
+                   th:text="${'Fuiste ' + T(com.alexxlpz.crm_cbelleza.services.ReviewService).age(reviewPrompt.dateTime.toLocalDate(), #temporals.createToday())
+                            + ' a ' + reviewPrompt.center.name + '. Tu opinión ayuda a otros clientes a elegir.'}">
+                    Fuiste ayer a Centro Histórico. Tu opinión ayuda a otros clientes a elegir.</p>
+                <div class="review-prompt-stars" role="group" aria-label="Valora de 1 a 5 estrellas">
+                    <a th:each="n : ${#numbers.sequence(1, 5)}"
+                       th:href="@{/client/appointments(valorar=${reviewPrompt.id}, estrellas=${n})}"
+                       th:attr="aria-label=${n == 1 ? '1 estrella' : n + ' estrellas'}, title=${n == 1 ? '1 estrella' : n + ' estrellas'}">★</a>
+                </div>
+                <button type="button" class="review-prompt-later" data-review-prompt-off="/client/review-prompts/off">No mostrar más</button>
             </div>
         </section>
     </th:block>

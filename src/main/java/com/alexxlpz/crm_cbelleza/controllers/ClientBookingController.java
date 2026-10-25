@@ -1,7 +1,9 @@
 package com.alexxlpz.crm_cbelleza.controllers;
 
 import com.alexxlpz.crm_cbelleza.entities.Appointment;
+import com.alexxlpz.crm_cbelleza.dto.ReviewFilter;
 import com.alexxlpz.crm_cbelleza.entities.AppointmentStatus;
+import com.alexxlpz.crm_cbelleza.entities.Review;
 import com.alexxlpz.crm_cbelleza.entities.Treatment;
 import com.alexxlpz.crm_cbelleza.exceptions.BusinessRuleException;
 import com.alexxlpz.crm_cbelleza.security.AppUserDetails;
@@ -25,6 +27,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -36,6 +40,9 @@ public class ClientBookingController {
 
     private static final java.time.format.DateTimeFormatter CHANGED_AT =
             java.time.format.DateTimeFormatter.ofPattern("EEEE d 'de' MMMM 'a las' HH:mm", java.util.Locale.forLanguageTag("es"));
+
+    /** Cuántas reseñas salen en el carrusel de la ficha; el resto, en «Ver las N opiniones». */
+    private static final int LATEST_REVIEWS = 6;
 
     private final CenterService centerService;
     private final TreatmentService treatmentService;
@@ -91,9 +98,39 @@ public class ClientBookingController {
         model.addAttribute("openingHoursLines", openingHours.forCenter(id).describe());
         model.addAttribute("rating", reviewService.rating(id));
         model.addAttribute("ratingDistribution", reviewService.distribution(id));
-        model.addAttribute("reviews", reviewService.forCenter(id));
+        List<Review> reviews = reviewService.forCenter(id);
+        model.addAttribute("reviewCount", reviews.size());
+        model.addAttribute("latestReviews", reviews.stream().limit(LATEST_REVIEWS).toList());
+        model.addAttribute("reviewAges", reviewService.ages(reviews.stream().limit(LATEST_REVIEWS).toList()));
         model.addAttribute("activePage", "centers");
         return "client/center_details";
+    }
+
+    /** «Ver las N opiniones»: todas las reseñas del centro, con orden y filtros por estrellas, comentario y tratamiento. */
+    @GetMapping("/client/centers/{id}/opiniones")
+    public String centerReviews(@PathVariable Long id,
+                                @RequestParam(name = "orden", required = false) String order,
+                                @RequestParam(name = "estrellas", required = false) Integer stars,
+                                @RequestParam(name = "comentario", defaultValue = "false") boolean withComment,
+                                @RequestParam(name = "tratamiento", required = false) Long treatmentId,
+                                Model model) {
+        ReviewFilter filter = ReviewFilter.of(order, stars, withComment, treatmentId);
+        List<Review> shown = reviewService.forCenter(id, filter);
+        // Solo los tratamientos que tienen alguna reseña, por orden alfabético
+        Map<Long, String> reviewedTreatments = new LinkedHashMap<>();
+        reviewService.forCenter(id).stream()
+                .map(review -> review.getAppointment().getTreatment())
+                .sorted(Comparator.comparing(Treatment::getName, String.CASE_INSENSITIVE_ORDER))
+                .forEach(treatment -> reviewedTreatments.putIfAbsent(treatment.getId(), treatment.getName()));
+        model.addAttribute("center", centerService.getPublishedCenter(id));
+        model.addAttribute("rating", reviewService.rating(id));
+        model.addAttribute("filter", filter);
+        model.addAttribute("orders", ReviewFilter.Order.values());
+        model.addAttribute("reviewedTreatments", reviewedTreatments);
+        model.addAttribute("reviews", shown);
+        model.addAttribute("reviewAges", reviewService.ages(shown));
+        model.addAttribute("activePage", "centers");
+        return "client/center_reviews";
     }
 
     @PostMapping("/client/booking")

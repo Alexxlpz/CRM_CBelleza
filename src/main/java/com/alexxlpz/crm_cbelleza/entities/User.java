@@ -45,6 +45,10 @@ public class User {
     @Column(name = "notifications_seen_at")
     private java.time.LocalDateTime notificationsSeenAt;
 
+    /** Ha pulsado «No mostrar más» en el aviso para valorar una cita: no se le vuelve a enseñar. */
+    @Column(name = "review_prompts_off", nullable = false)
+    private boolean reviewPromptsOff;
+
     /**
      * Tiene cuenta propia (puede iniciar sesión con contraseña o con Google).
      * Los clientes dados de alta a mano desde la cartera no tienen ninguna de las dos.

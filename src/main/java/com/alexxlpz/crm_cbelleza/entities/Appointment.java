@@ -97,6 +97,10 @@ public class Appointment {
     @Column(name = "reminder_sent_at")
     private LocalDateTime reminderSentAt;
 
+    /** Cuándo se enseñó al cliente el aviso para valorar la cita (sale una sola vez); nulo si aún no. */
+    @Column(name = "review_prompted_at")
+    private LocalDateTime reviewPromptedAt;
+
     /** Resumen del tratamiento realizado (interno del centro: el cliente no lo ve). */
     @Column(name = "treatment_summary", length = TREATMENT_SUMMARY_MAX_LENGTH)
     private String treatmentSummary;
