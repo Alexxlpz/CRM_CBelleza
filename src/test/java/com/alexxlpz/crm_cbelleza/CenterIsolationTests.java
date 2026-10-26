@@ -13,6 +13,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.LocalDateTime;
+import java.util.stream.Stream;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -141,7 +144,7 @@ class CenterIsolationTests {
     void manualClientNeverLinksAccountsOfOtherCenters() {
         var sofia = users.findByNameIgnoreCase(TestUsers.CLIENT).orElseThrow();
         // Un centro en el que Sofía no es clienta (ni ficha ni citas)
-        Long center2 = java.util.stream.Stream.of(TestUsers.WORKER_CENTER_2, "marco@cbelleza.com", "ana@cbelleza.com")
+        Long center2 = Stream.of(TestUsers.WORKER_CENTER_2, "marco@cbelleza.com", "ana@cbelleza.com")
                 .map(this::centerOf)
                 .filter(center -> appointments.findByCenterIdOrderByDateTimeDesc(center).stream()
                         .noneMatch(a -> a.getClient() != null && a.getClient().getId().equals(sofia.getId())))
@@ -182,7 +185,7 @@ class CenterIsolationTests {
     void workerCannotSeePhotoOfAnotherCenterStillUnderReview() throws Exception {
         var center = users.findByEmailIgnoreCase(TestUsers.WORKER_CENTER_1).orElseThrow().getCenter();
         center.setPublished(false);
-        center.setPhotoUpdatedAt(java.time.LocalDateTime.now());
+        center.setPhotoUpdatedAt(LocalDateTime.now());
         centers.save(center);
         centerPhotos.save(new com.alexxlpz.crm_cbelleza.entities.CenterPhoto(center.getId(), "image/jpeg", new byte[]{1, 2, 3}));
         try {

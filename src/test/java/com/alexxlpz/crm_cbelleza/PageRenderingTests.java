@@ -10,6 +10,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.LocalDateTime;
+
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -65,7 +67,7 @@ class PageRenderingTests {
     void clientAppointmentsShowUpcomingFirstSoonestFirst() {
         Long sofia = users.findByNameIgnoreCase(TestUsers.CLIENT).orElseThrow().getId();
         var list = appointmentService.getClientAppointments(sofia);
-        java.time.LocalDateTime now = java.time.LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now();
         var upcoming = list.stream().filter(a -> !a.getDateTime().isBefore(now)).toList();
         var past = list.stream().filter(a -> a.getDateTime().isBefore(now)).toList();
         org.junit.jupiter.api.Assertions.assertEquals(upcoming, list.subList(0, upcoming.size()), "primero las próximas");

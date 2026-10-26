@@ -66,7 +66,11 @@
     word-break: break-word;
 }
 
+/* Con oferta, el precio de carta va tachado encima */
 .treatment-item-price {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-end;
     font-family: 'Plus Jakarta Sans', sans-serif;
     font-size: 17px;
     font-weight: 800;
@@ -74,7 +78,6 @@
     white-space: nowrap;
     flex-shrink: 0;
     text-align: right;
-    display: inline-block;
 }
 
 .treatment-item-desc {
@@ -116,12 +119,6 @@
 }
 
 /* Oferta: precio de carta tachado y botón para ponerla o cambiarla */
-.treatment-item-price {
-    display: inline-flex;
-    flex-direction: column;
-    align-items: flex-end;
-}
-
 .treatment-item-old-price {
     color: var(--text-soft);
     font-size: 13px;

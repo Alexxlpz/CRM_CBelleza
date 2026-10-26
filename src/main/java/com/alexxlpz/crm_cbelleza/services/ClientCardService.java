@@ -26,9 +26,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -124,7 +126,7 @@ public class ClientCardService {
                     .filter(a -> a.getStatus() == AppointmentStatus.COMPLETED)
                     .findFirst()
                     .orElse(null);
-            result.add(summary(apps.get(0).getClient(), card, filled, (int) (visits > 0 ? visits : apps.size()),
+            result.add(summary(apps.getFirst().getClient(), card, filled, (int) (visits > 0 ? visits : apps.size()),
                     lastCompleted != null ? lastCompleted.getDateTime() : null));
         });
 
@@ -183,11 +185,11 @@ public class ClientCardService {
         List<User> clientsOfCenter = new ArrayList<>();
         clientCardRepository.findByCenterId(centerId).stream()
                 .map(ClientCard::getClient)
-                .filter(java.util.Objects::nonNull)
+                .filter(Objects::nonNull)
                 .forEach(clientsOfCenter::add);
         appointmentRepository.findByCenterIdOrderByDateTimeDesc(centerId).stream()
                 .map(Appointment::getClient)
-                .filter(java.util.Objects::nonNull)
+                .filter(Objects::nonNull)
                 .forEach(clientsOfCenter::add);
         return clientsOfCenter.stream()
                 .filter(c -> (!digits.isEmpty() && digits.equals(digits(c.getPhone())))
@@ -251,7 +253,7 @@ public class ClientCardService {
                 .build();
     }
 
-    private static java.util.function.Predicate<ClientSummaryDTO> matches(String query) {
+    private static Predicate<ClientSummaryDTO> matches(String query) {
         if (FormText.isBlank(query)) {
             return c -> true;
         }

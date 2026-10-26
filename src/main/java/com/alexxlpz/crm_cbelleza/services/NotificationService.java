@@ -14,10 +14,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -110,8 +113,8 @@ public class NotificationService {
      * aceptar o no una propuesta, anular una cita.
      */
     private List<NotificationItem> clientResponseAlerts(List<Appointment> appointments) {
-        java.time.LocalDateTime since = java.time.LocalDateTime.now(clock).minusHours(24);
-        java.time.format.DateTimeFormatter when = java.time.format.DateTimeFormatter.ofPattern("dd/MM 'a las' HH:mm");
+        LocalDateTime since = LocalDateTime.now(clock).minusHours(24);
+        DateTimeFormatter when = DateTimeFormatter.ofPattern("dd/MM 'a las' HH:mm");
         List<NotificationItem> alerts = new ArrayList<>();
         for (Appointment app : appointments) {
             if (app.getLastChange() == null || app.getLastChangeAt() == null || app.getLastChangeAt().isBefore(since)) {
@@ -139,14 +142,14 @@ public class NotificationService {
 
     /** Reseñas recibidas en las últimas 24 h. */
     private List<NotificationItem> reviewAlerts(Long centerId) {
-        return reviewRepository.findByCenterIdAndCreatedAtAfter(centerId, java.time.LocalDateTime.now(clock).minusHours(24)).stream()
+        return reviewRepository.findByCenterIdAndCreatedAtAfter(centerId, LocalDateTime.now(clock).minusHours(24)).stream()
                 .map(review -> new NotificationItem(review.getAuthorName() + " ha valorado su cita con " + review.getRating()
                         + (review.getRating() == 1 ? " estrella." : " estrellas."), "/worker/reviews"))
                 .toList();
     }
 
     /** Clientes atendidos (hasta hoy) cuya ficha sigue vacía. */
-    private java.util.Optional<NotificationItem> pendingCardsAlert(Long centerId, List<Appointment> appointments) {
+    private Optional<NotificationItem> pendingCardsAlert(Long centerId, List<Appointment> appointments) {
         LocalDate today = LocalDate.now(clock);
         Map<Long, String> cardsData = clientCardRepository.findByCenterId(centerId).stream()
                 .filter(card -> card.getClient() != null)
@@ -163,15 +166,15 @@ public class NotificationService {
             }
         }
         if (pendingClients.isEmpty()) {
-            return java.util.Optional.empty();
+            return Optional.empty();
         }
         if (pendingClients.size() == 1) {
             User client = pendingClients.values().iterator().next();
-            return java.util.Optional.of(new NotificationItem(
+            return Optional.of(new NotificationItem(
                     "Ficha pendiente: recuerda rellenar la ficha de " + client.getName() + " tras su cita.",
                     "/worker/clients/" + client.getId()));
         }
-        return java.util.Optional.of(new NotificationItem(
+        return Optional.of(new NotificationItem(
                 "Tienes " + pendingClients.size() + " fichas de clientes pendientes de rellenar tras sus citas.",
                 "/worker/clients"));
     }

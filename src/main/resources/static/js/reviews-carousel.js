@@ -4,23 +4,23 @@
  */
 (function () {
     document.querySelectorAll('[data-review-carousel]').forEach(function (root) {
-        var track = root.querySelector('.reviews-carousel');
-        var cards = track ? Array.prototype.slice.call(track.children) : [];
-        var dots = Array.prototype.slice.call(root.querySelectorAll('.reviews-carousel-dots > span'));
-        var prev = root.querySelector('[data-carousel-prev]');
-        var next = root.querySelector('[data-carousel-next]');
+        const track = root.querySelector('.reviews-carousel');
+        const cards = track ? Array.prototype.slice.call(track.children) : [];
+        const dots = Array.prototype.slice.call(root.querySelectorAll('.reviews-carousel-dots > span'));
+        const prev = root.querySelector('[data-carousel-prev]');
+        const next = root.querySelector('[data-carousel-next]');
         if (!cards.length) {
             return;
         }
 
         function step() {
-            var gap = parseFloat(getComputedStyle(track).columnGap) || 0;
+            const gap = parseFloat(getComputedStyle(track).columnGap) || 0;
             return cards[0].getBoundingClientRect().width + gap;
         }
 
         function update() {
-            var index = Math.round(track.scrollLeft / step());
-            var atEnd = track.scrollLeft + track.clientWidth >= track.scrollWidth - 2;
+            let index = Math.round(track.scrollLeft / step());
+            const atEnd = track.scrollLeft + track.clientWidth >= track.scrollWidth - 2;
             if (atEnd) {
                 index = cards.length - 1;
             }

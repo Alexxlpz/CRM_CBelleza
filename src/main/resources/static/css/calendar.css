@@ -427,6 +427,7 @@
 .agenda-card-actions {
     display: flex;
     justify-content: flex-end;
+    flex-wrap: wrap;
     gap: 10px;
     width: 100%;
     box-sizing: border-box;
@@ -1062,6 +1063,7 @@ button.calendar-day-cell {
         linear-gradient(to bottom, transparent calc(50% - 0.5px), rgba(var(--primary-rgb), 0.08) calc(50% - 0.5px), rgba(var(--primary-rgb), 0.08) calc(50% + 0.5px), transparent calc(50% + 0.5px));
     background-size: 100% var(--hour-height);
     overflow: hidden;
+    cursor: cell;
 }
 
 /* Día que el centro no abre: mismo rayado que un bloqueo, con las líneas de las horas encima */
@@ -1467,10 +1469,6 @@ button.calendar-day-cell {
     margin-bottom: 10px;
 }
 
-.agenda-card-actions {
-    flex-wrap: wrap;
-}
-
 .btn-agenda-action.neutral,
 .btn-agenda-action.propose {
     background: rgba(var(--primary-rgb), 0.1);
@@ -1491,10 +1489,6 @@ button.calendar-day-cell {
 }
 
 /* ---- Vista semanal: estados nuevos, bloqueos, horas propuestas y arrastre ---- */
-.week-day-col {
-    cursor: cell;
-}
-
 .status-proposed {
     background: rgba(var(--info-rgb), 0.14);
     border-left-color: var(--info-text);

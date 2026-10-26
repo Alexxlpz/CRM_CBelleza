@@ -29,6 +29,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.LocalDateTime;
 
@@ -265,7 +266,7 @@ class AnalyticsTests {
                 .andExpect(status().isOk())
                 .andExpect(header().string("Content-Type", containsString("text/csv")))
                 .andExpect(header().string("Content-Disposition", containsString("analisis-centro-historico-ultimos-3-meses.csv")))
-                .andReturn().getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8);
+                .andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);
         assertTrue(csv.startsWith("\uFEFFAnálisis de Centro Histórico;Últimos 3 meses"));
         assertTrue(csv.contains("Mes;Ingresos (€);Tratamientos (€);Productos (€);Visitas"));
         assertTrue(csv.contains("Profesional;Visitas;Clientes;Ingresos (€);Ticket medio (€);Ocupación (%);No vinieron;Nota media;Reseñas"));

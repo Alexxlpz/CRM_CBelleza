@@ -3,6 +3,8 @@ package com.alexxlpz.crm_cbelleza.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "users")
 @Getter
@@ -43,7 +45,7 @@ public class User {
 
     /** Última vez que abrió su campana de avisos: lo posterior cuenta como nuevo. */
     @Column(name = "notifications_seen_at")
-    private java.time.LocalDateTime notificationsSeenAt;
+    private LocalDateTime notificationsSeenAt;
 
     /** Ha pulsado «No mostrar más» en el aviso para valorar una cita: no se le vuelve a enseñar. */
     @Column(name = "review_prompts_off", nullable = false)

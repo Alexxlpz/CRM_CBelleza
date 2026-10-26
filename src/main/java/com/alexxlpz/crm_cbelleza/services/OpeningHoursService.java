@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -204,7 +205,7 @@ public class OpeningHoursService {
     }
 
     private static String dayLower(DayOfWeek day) {
-        return OpeningHours.dayName(day).toLowerCase(java.util.Locale.ROOT);
+        return OpeningHours.dayName(day).toLowerCase(Locale.ROOT);
     }
 
     /** Un día en el editor: abierto o no, el primer tramo y, si es jornada partida, el segundo. */

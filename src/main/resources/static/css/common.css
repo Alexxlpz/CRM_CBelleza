@@ -3173,16 +3173,13 @@ body.modal-open {
     font-family: inherit;
     font-size: 13px;
     font-weight: 700;
+    text-decoration: none;
     cursor: pointer;
     transition: var(--transition);
 }
 
 .view-toggle-btn:hover {
     color: var(--primary-text);
-}
-
-.view-toggle-btn {
-    text-decoration: none;
 }
 
 .view-toggle-btn[aria-pressed="true"],

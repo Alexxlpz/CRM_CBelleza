@@ -17,6 +17,7 @@ import com.alexxlpz.crm_cbelleza.repositories.UserRepository;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -71,7 +72,7 @@ final class DemoHistory {
         // Primer mes con Cuquora: enero del año anterior
         LocalDate start = LocalDate.of(today.getYear() - 1, 1, 8);
         LocalDate lastDay = today.toLocalDate().minusDays(1);
-        int days = (int) java.time.temporal.ChronoUnit.DAYS.between(start, lastDay);
+        int days = (int) ChronoUnit.DAYS.between(start, lastDay);
         List<Appointment> history = new ArrayList<>();
         List<ProductSale> productSales = new ArrayList<>();
 

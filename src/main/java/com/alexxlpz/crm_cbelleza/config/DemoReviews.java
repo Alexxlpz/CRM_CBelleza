@@ -7,6 +7,7 @@ import com.alexxlpz.crm_cbelleza.repositories.ReviewRepository;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -80,7 +81,7 @@ final class DemoReviews {
                     .createdAt(createdAt)
                     .build());
         }
-        created.sort(java.util.Comparator.comparing(Review::getCreatedAt));
+        created.sort(Comparator.comparing(Review::getCreatedAt));
         for (int i = 0; i < created.size() - 3; i++) {
             Review review = created.get(i);
             if (random.nextInt(10) < 8) {

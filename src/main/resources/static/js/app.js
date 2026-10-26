@@ -21,16 +21,16 @@
     const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
     if (csrfToken && csrfHeader && window.fetch) {
         const originalFetch = window.fetch.bind(window);
-        window.fetch = function (input, init = {}) {
-            const method = (init.method || (input instanceof Request ? input.method : 'GET')).toUpperCase();
+        window.fetch = function (input, options = {}) {
+            const method = (options.method || (input instanceof Request ? input.method : 'GET')).toUpperCase();
             const url = new URL(input instanceof Request ? input.url : input, window.location.href);
             if (!['GET', 'HEAD', 'OPTIONS'].includes(method) && url.origin === window.location.origin) {
-                const headers = new Headers(init.headers || (input instanceof Request ? input.headers : undefined));
+                const headers = new Headers(options.headers || (input instanceof Request ? input.headers : undefined));
                 headers.set(csrfHeader, csrfToken);
                 headers.set('X-Requested-With', 'XMLHttpRequest');
-                init = Object.assign({}, init, { headers });
+                options = Object.assign({}, options, { headers });
             }
-            return originalFetch(input, init);
+            return originalFetch(input, options);
         };
     }
 

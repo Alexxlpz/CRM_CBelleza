@@ -4,6 +4,9 @@ import com.alexxlpz.crm_cbelleza.booking.CenterTimeZones;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+
 @Entity
 @Table(name = "centers")
 @Getter
@@ -57,7 +60,7 @@ public class Center {
 
     /** Desde cuándo suma puntos: las citas anteriores no cuentan. */
     @Column(name = "loyalty_since")
-    private java.time.LocalDateTime loyaltySince;
+    private LocalDateTime loyaltySince;
 
     /** Las citas que piden los clientes quedan confirmadas al momento, sin que nadie del centro las apruebe. */
     @Column(name = "auto_accept_bookings", nullable = false)
@@ -90,16 +93,16 @@ public class Center {
     private String approvalTokenHash;
 
     @Column(name = "registered_at")
-    private java.time.LocalDateTime registeredAt;
+    private LocalDateTime registeredAt;
 
     /** Cuándo se subió la foto de presentación (nula = sin foto); versiona la URL de la imagen. */
     @Column(name = "photo_updated_at")
-    private java.time.LocalDateTime photoUpdatedAt;
+    private LocalDateTime photoUpdatedAt;
 
     /** Dirección de la foto de presentación, o nula si el centro no tiene. */
     public String getPhotoUrl() {
         return photoUpdatedAt == null ? null
-                : "/centers/" + id + "/photo?v=" + photoUpdatedAt.toEpochSecond(java.time.ZoneOffset.UTC);
+                : "/centers/" + id + "/photo?v=" + photoUpdatedAt.toEpochSecond(ZoneOffset.UTC);
     }
 
     /** Iniciales del nombre (como mucho dos) para el hueco de la foto cuando el centro no tiene. */

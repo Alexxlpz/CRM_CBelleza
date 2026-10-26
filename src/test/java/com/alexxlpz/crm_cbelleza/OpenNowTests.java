@@ -25,6 +25,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -53,9 +54,9 @@ class OpenNowTests {
     private static final LocalDateTime MONDAY = LocalDateTime.of(2025, 10, 20, 0, 0);
 
     /** Lunes a viernes 10:00-14:00 y 16:30-20:30, como Plaza Norte; fines de semana cerrado. */
-    private static final OpeningHours SPLIT = new OpeningHours(30, java.util.stream.Stream.of(
+    private static final OpeningHours SPLIT = new OpeningHours(30, Stream.of(
                     DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY, DayOfWeek.FRIDAY)
-            .flatMap(day -> java.util.stream.Stream.of(
+            .flatMap(day -> Stream.of(
                     new Period(day, LocalTime.of(10, 0), LocalTime.of(14, 0)),
                     new Period(day, LocalTime.of(16, 30), LocalTime.of(20, 30))))
             .toList());

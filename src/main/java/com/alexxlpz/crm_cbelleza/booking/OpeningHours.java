@@ -115,7 +115,7 @@ public final class OpeningHours {
     }
 
     /** true si el tramo [opens, closes) del día cabe entero dentro de alguno de los tramos de ese día. */
-    public boolean covers(DayOfWeek day, java.time.LocalTime opens, java.time.LocalTime closes) {
+    public boolean covers(DayOfWeek day, LocalTime opens, LocalTime closes) {
         return byDay.get(day).stream()
                 .anyMatch(period -> !opens.isBefore(period.opens()) && !closes.isAfter(period.closes()));
     }

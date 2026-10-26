@@ -992,6 +992,8 @@
     flex-direction: column;
     gap: 28px;
     min-width: 0;
+    /* En la columna estrecha de escritorio el total y «Anular» bajan a una segunda línea */
+    container-type: inline-size;
 }
 
 .sale-list {
@@ -1036,11 +1038,6 @@
     font-size: 14.5px;
     color: var(--text-main);
     white-space: nowrap;
-}
-
-/* En la columna estrecha de escritorio el total y «Anular» bajan a una segunda línea */
-.client-side-column {
-    container-type: inline-size;
 }
 
 @container (max-width: 480px) {

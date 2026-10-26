@@ -309,6 +309,10 @@
 }
 
 .treatment-card-price {
+    display: inline-flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 6px;
     font-weight: 700;
     color: var(--primary-text);
     font-size: 14px;
@@ -346,13 +350,6 @@
 
 .treatment-select-card .offer-badge {
     margin-right: 24px; /* el radio va en la esquina */
-}
-
-.treatment-card-price {
-    display: inline-flex;
-    align-items: baseline;
-    flex-wrap: wrap;
-    gap: 6px;
 }
 
 .treatment-card-old-price {

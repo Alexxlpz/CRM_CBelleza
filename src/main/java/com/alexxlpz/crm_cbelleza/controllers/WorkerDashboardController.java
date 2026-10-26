@@ -19,6 +19,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.nio.charset.StandardCharsets;
+
 /** Panel principal del trabajador y su pantalla de análisis. */
 @Controller
 public class WorkerDashboardController {
@@ -82,11 +84,11 @@ public class WorkerDashboardController {
                 : analyticsService.reportFor(worker.getCenterId(), AnalyticsService.normalizeMonths(months));
         String centerName = centerService.getCenterById(worker.getCenterId()).getName();
         return ResponseEntity.ok()
-                .contentType(new MediaType("text", "csv", java.nio.charset.StandardCharsets.UTF_8))
+                .contentType(new MediaType("text", "csv", StandardCharsets.UTF_8))
                 .header(HttpHeaders.CONTENT_DISPOSITION, ContentDisposition.attachment()
-                        .filename(AnalyticsCsv.fileName(centerName, report), java.nio.charset.StandardCharsets.UTF_8)
+                        .filename(AnalyticsCsv.fileName(centerName, report), StandardCharsets.UTF_8)
                         .build().toString())
-                .body(AnalyticsCsv.of(centerName, report).getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                .body(AnalyticsCsv.of(centerName, report).getBytes(StandardCharsets.UTF_8));
     }
 
     private static Integer parseYear(String year) {

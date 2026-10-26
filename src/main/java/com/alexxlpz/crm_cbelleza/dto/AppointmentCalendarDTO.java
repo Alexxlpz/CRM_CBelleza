@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -25,7 +27,7 @@ public class AppointmentCalendarDTO {
     /** Hora anterior si el centro la movió. */
     private String previousDateTime;
     /** Horas propuestas al cliente (solo en citas PROPOSED). */
-    private java.util.List<ProposalDTO> proposals;
+    private List<ProposalDTO> proposals;
     private String proposalExpiresAt;
     /** Resumen del tratamiento realizado y si es un aviso. */
     private String treatmentSummary;
@@ -33,7 +35,7 @@ public class AppointmentCalendarDTO {
     /** La cita ya ha empezado: se puede escribir su resumen. */
     private boolean summaryEditable;
     /** Avisos que el cliente tiene en otras citas del centro (reacciones, productos que no le sientan bien...). */
-    private java.util.List<ClientAlertDTO> clientAlerts;
+    private List<ClientAlertDTO> clientAlerts;
     /** Citas del centro a las que el cliente no se presentó. */
     private int clientNoShows;
     /** Solicitud en la que el cliente ha elegido profesional (sale en «La atiende»). */

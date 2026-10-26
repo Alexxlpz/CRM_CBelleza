@@ -72,8 +72,8 @@
             .filter(f => f.el);
 
         const errorOf = f => {
-            for (const check of f.checks) {
-                const message = check(f.el.value || '', f.el);
+            for (const rule of f.checks) {
+                const message = rule(f.el.value || '', f.el);
                 if (message) return message;
             }
             return '';

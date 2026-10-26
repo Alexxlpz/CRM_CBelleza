@@ -27,10 +27,12 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -39,8 +41,8 @@ import java.util.stream.Collectors;
 @Controller
 public class ClientBookingController {
 
-    private static final java.time.format.DateTimeFormatter CHANGED_AT =
-            java.time.format.DateTimeFormatter.ofPattern("EEEE d 'de' MMMM 'a las' HH:mm", java.util.Locale.forLanguageTag("es"));
+    private static final DateTimeFormatter CHANGED_AT =
+            DateTimeFormatter.ofPattern("EEEE d 'de' MMMM 'a las' HH:mm", Locale.forLanguageTag("es"));
 
     /** Cuántas reseñas salen en el carrusel de la ficha; el resto, en «Ver las N opiniones». */
     private static final int LATEST_REVIEWS = 6;

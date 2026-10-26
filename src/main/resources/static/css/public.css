@@ -687,12 +687,9 @@
     }
 
     .wizard-steps {
+        --notch: 18px;
         gap: 6px;
         margin-bottom: 36px;
-    }
-
-    .wizard-steps {
-        --notch: 18px;
     }
 
     .wizard-steps button {

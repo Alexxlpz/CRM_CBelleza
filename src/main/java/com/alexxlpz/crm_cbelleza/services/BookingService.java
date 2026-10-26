@@ -25,8 +25,10 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.Serial;
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Objects;
@@ -260,7 +262,7 @@ public class BookingService {
         if (current != null && appointment.getTreatment().isDoneBy(current.getId())) {
             try {
                 return freeCandidate(agenda, slot, appointment.getTreatment(), current.getId());
-            } catch (BusinessRuleException e) {
+            } catch (BusinessRuleException ignored) {
                 // Ya no está libre (o no está en el centro): cualquiera que haga el tratamiento
             }
         }
@@ -674,13 +676,16 @@ public class BookingService {
     }
 
     private static String label(LocalDateTime time) {
-        return time.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM HH:mm"));
+        return time.format(DateTimeFormatter.ofPattern("dd/MM HH:mm"));
     }
 
     static LocalDateTime parse(String value) {
+        if (value == null) {
+            throw new BusinessRuleException("Selecciona un día y una hora válidos.");
+        }
         try {
             return LocalDateTime.parse(value);
-        } catch (DateTimeParseException | NullPointerException e) {
+        } catch (DateTimeParseException e) {
             throw new BusinessRuleException("Selecciona un día y una hora válidos.");
         }
     }
@@ -702,6 +707,9 @@ public class BookingService {
 
     /** El hueco está ocupado (409 en las llamadas fetch de la agenda). */
     public static class SlotUnavailableException extends BusinessRuleException {
+        @Serial
+        private static final long serialVersionUID = 1L;
+
         public SlotUnavailableException(String message) {
             super(message);
         }
@@ -709,6 +717,9 @@ public class BookingService {
 
     /** La hora queda fuera del horario de reservas: la agenda pregunta si se quiere guardar igualmente. */
     public static class OutsideOpeningHoursException extends BusinessRuleException {
+        @Serial
+        private static final long serialVersionUID = 1L;
+
         public OutsideOpeningHoursException() {
             this("La cita queda fuera del horario de reservas del centro.");
         }

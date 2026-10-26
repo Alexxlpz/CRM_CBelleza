@@ -5,6 +5,7 @@ import com.alexxlpz.crm_cbelleza.services.AnalyticsService.Kpi;
 import com.alexxlpz.crm_cbelleza.services.AnalyticsService.MonthPoint;
 import com.alexxlpz.crm_cbelleza.services.AnalyticsService.TeamRow;
 
+import java.text.Normalizer;
 import java.util.Locale;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -66,7 +67,7 @@ public final class AnalyticsCsv {
     }
 
     static String slug(String text) {
-        String plain = java.text.Normalizer.normalize(text, java.text.Normalizer.Form.NFD).replaceAll("\\p{M}", "");
+        String plain = Normalizer.normalize(text, Normalizer.Form.NFD).replaceAll("\\p{M}", "");
         return plain.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9]+", "-").replaceAll("(^-|-$)", "");
     }
 

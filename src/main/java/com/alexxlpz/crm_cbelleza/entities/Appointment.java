@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "appointments")
@@ -121,7 +123,7 @@ public class Appointment {
     @OrderBy("dateTime ASC")
     @JsonIgnoreProperties({"appointment"})
     @Builder.Default
-    private java.util.List<AppointmentProposal> proposals = new java.util.ArrayList<>();
+    private List<AppointmentProposal> proposals = new ArrayList<>();
 
     @Transient
     private Boolean isNewClient;

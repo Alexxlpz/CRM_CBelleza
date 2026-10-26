@@ -7,6 +7,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -440,11 +441,11 @@ public class DatabaseSeeder implements CommandLineRunner {
         LocalDateTime tomorrow = today.plusDays(1);
         LocalDateTime dayAfter = today.plusDays(2);
         LocalDateTime day3 = today.plusDays(3);
-        while (day3.getDayOfWeek() == java.time.DayOfWeek.SATURDAY || day3.getDayOfWeek() == java.time.DayOfWeek.SUNDAY) {
+        while (day3.getDayOfWeek() == DayOfWeek.SATURDAY || day3.getDayOfWeek() == DayOfWeek.SUNDAY) {
             day3 = day3.plusDays(1);
         }
         LocalDateTime day5 = today.plusDays(5);
-        while (day5.getDayOfWeek() == java.time.DayOfWeek.SATURDAY || day5.getDayOfWeek() == java.time.DayOfWeek.SUNDAY) {
+        while (day5.getDayOfWeek() == DayOfWeek.SATURDAY || day5.getDayOfWeek() == DayOfWeek.SUNDAY) {
             day5 = day5.plusDays(1);
         }
 
@@ -553,8 +554,8 @@ public class DatabaseSeeder implements CommandLineRunner {
         return CenterOpeningPeriod.builder()
                 .center(center)
                 .dayOfWeek(day)
-                .opensAt(java.time.LocalTime.of(openHour, openMinute))
-                .closesAt(java.time.LocalTime.of(closeHour, closeMinute))
+                .opensAt(LocalTime.of(openHour, openMinute))
+                .closesAt(LocalTime.of(closeHour, closeMinute))
                 .build();
     }
 }
