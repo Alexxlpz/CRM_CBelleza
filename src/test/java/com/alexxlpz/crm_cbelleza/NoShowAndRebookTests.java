@@ -1,5 +1,6 @@
 package com.alexxlpz.crm_cbelleza;
 
+import com.alexxlpz.crm_cbelleza.services.CenterService;
 import com.alexxlpz.crm_cbelleza.entities.Appointment;
 import com.alexxlpz.crm_cbelleza.entities.AppointmentStatus;
 import com.alexxlpz.crm_cbelleza.entities.Center;
@@ -35,6 +36,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @Transactional
 class NoShowAndRebookTests {
+
+    @Autowired
+    private CenterService centerService;
 
     @Autowired
     private MockMvc mvc;
@@ -168,7 +172,7 @@ class NoShowAndRebookTests {
                 .andExpect(content().string(containsString("Próximas citas")))
                 .andExpect(content().string(containsString("Tu próxima cita")))
                 .andExpect(content().string(containsString("Historial")))
-                .andExpect(content().string(containsString("/client/centers/" + past.getCenter().getId() + "?tratamiento=" + treatmentId)))
+                .andExpect(content().string(containsString("/client/centers/" + centerService.shortSlug(past.getCenter()) + "?tratamiento=" + treatmentId)))
                 .andExpect(content().string(containsString("/client/appointments/" + upcoming.getId() + "/cancel")));
     }
 
@@ -176,7 +180,7 @@ class NoShowAndRebookTests {
     void rebookLinkOpensTheBookingWithTheTreatmentChosen() throws Exception {
         Center center = center1();
         Treatment treatment = treatments.findByCenterId(center.getId()).getFirst();
-        mvc.perform(get("/client/centers/" + center.getId()).param("tratamiento", String.valueOf(treatment.getId()))
+        mvc.perform(get("/client/centers/" + centerService.shortSlug(center)).param("tratamiento", String.valueOf(treatment.getId()))
                         .with(TestUsers.as(users, TestUsers.CLIENT)))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("data-rebook=\"true\"")))
@@ -185,7 +189,7 @@ class NoShowAndRebookTests {
         // Un tratamiento de otro centro no se elige
         Center other = users.findByEmailIgnoreCase(TestUsers.WORKER_CENTER_2).orElseThrow().getCenter();
         Long foreign = treatments.findByCenterId(other.getId()).getFirst().getId();
-        mvc.perform(get("/client/centers/" + center.getId()).param("tratamiento", String.valueOf(foreign))
+        mvc.perform(get("/client/centers/" + centerService.shortSlug(center)).param("tratamiento", String.valueOf(foreign))
                         .with(TestUsers.as(users, TestUsers.CLIENT)))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("data-rebook=\"false\"")))

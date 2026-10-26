@@ -283,6 +283,28 @@
                             <button type="submit" class="btn btn-secondary btn-sm">Guardar</button>
                         </form>
                     </div>
+
+                    <!-- Enlace corto (/c/nombre-del-centro) para la bio de Instagram, Google Maps o WhatsApp -->
+                    <div class="sync-setting sync-setting--stacked">
+                        <div class="sync-setting-text">
+                            <p class="sync-setting-title" id="shortLinkLabel">Enlace para reservar</p>
+                            <p class="sync-setting-help" th:if="${center.published}">
+                                Ponlo en la bio de Instagram, en vuestra ficha de Google Maps o en WhatsApp: abre directamente
+                                vuestro centro para pedir cita.
+                            </p>
+                            <p class="sync-setting-help" th:unless="${center.published}">
+                                Funcionará en cuanto se publique el centro.
+                            </p>
+                        </div>
+                        <div class="short-link">
+                            <input type="text" class="form-control" id="shortLink" readonly th:value="${shortLink}"
+                                   aria-labelledby="shortLinkLabel" value="https://cuquora.com/c/centro-historico">
+                            <button type="button" class="btn btn-secondary btn-sm" data-copy="shortLink">
+                                <i class="lucide-copy" aria-hidden="true"></i> <span>Copiar</span>
+                            </button>
+                        </div>
+                        <p class="sync-setting-help">Sale del nombre del centro: si lo cambiáis, cambia también el enlace.</p>
+                    </div>
                 </section>
 
                 <section class="settings-card" id="foto" th:if="${isOwner}">

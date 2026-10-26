@@ -7,11 +7,13 @@ import java.util.List;
 /**
  * Centro tal y como lo consume el buscador/mapa público. {@code openNow} y {@code hoursLabel} («Abierto · cierra
  * a las 20:00», «Cerrado · abre mañana a las 9:00») salen de su horario y sus cierres, en su zona horaria.
+ * {@code firstSlot}: «hoy a las 17:30», el primer hueco libre de las próximas dos semanas (nulo si no hay).
+ * {@code slug}: nombre del centro en la dirección de su ficha ({@code /client/centers/centro-historico}).
  */
 public record CenterSummaryDTO(Long id, String name, String address, String phone, String email,
                                Double distanceKm, Double latitude, Double longitude, String photoUrl,
                                List<Offer> offers, boolean openNow, String hoursLabel,
-                               Double rating, long reviewCount) {
+                               Double rating, long reviewCount, String firstSlot, String slug) {
 
     /** Tratamiento en oferta, para la tarjeta del buscador. */
     public record Offer(String treatment, Double price, Double offerPrice, int discountPercent) {
@@ -21,6 +23,11 @@ public record CenterSummaryDTO(Long id, String name, String address, String phon
                                       CenterRating rating) {
         return new CenterSummaryDTO(c.getId(), c.getName(), c.getAddress(), c.getPhone(), c.getEmail(),
                 distanceKm, c.getLatitude(), c.getLongitude(), c.getPhotoUrl(), offers, openNow, hoursLabel,
-                rating.hasReviews() ? Math.round(rating.average() * 10) / 10.0 : null, rating.count());
+                rating.hasReviews() ? Math.round(rating.average() * 10) / 10.0 : null, rating.count(), null, null);
+    }
+
+    public CenterSummaryDTO withFirstSlotAndSlug(String label, String slug) {
+        return new CenterSummaryDTO(id, name, address, phone, email, distanceKm, latitude, longitude, photoUrl, offers,
+                openNow, hoursLabel, rating, reviewCount, label, slug);
     }
 }

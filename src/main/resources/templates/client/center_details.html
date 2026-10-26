@@ -148,13 +148,13 @@
                     </div>
                     <ul class="reviews-carousel" aria-labelledby="reviewsTitle" tabindex="0">
                         <th:block th:each="review : ${latestReviews}">
-                            <li th:replace="~{fragments/reviews :: reviewCard(${review}, ${reviewAges[review.id]}, ${center.id})}"></li>
+                            <li th:replace="~{fragments/reviews :: reviewCard(${review}, ${reviewAges[review.id]}, ${centerSlug})}"></li>
                         </th:block>
                     </ul>
                     <div class="reviews-carousel-dots" aria-hidden="true" th:if="${latestReviews.size() > 1}">
                         <span th:each="review, stat : ${latestReviews}" th:classappend="${stat.first} ? 'is-active'"></span>
                     </div>
-                    <a class="btn btn-secondary reviews-all" th:href="@{/client/centers/{id}/opiniones(id=${center.id})}"
+                    <a class="btn btn-secondary reviews-all" th:href="@{/client/centers/{s}/opiniones(s=${centerSlug})}"
                        th:text="${reviewCount == 1 ? 'Ver la opinión' : 'Ver las ' + reviewCount + ' opiniones'}">Ver las 49 opiniones</a>
                 </div>
             </div>

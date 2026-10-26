@@ -11,6 +11,7 @@
  *     [data-view="grid|list"]. Añade .is-list-view al listado y recuerda la elección.
  *  8. Aviso de cookies (#cookieBanner, en fragments/footer): se muestra hasta que se pulsa «Entendido».
  *  9. «¿Qué tal tu cita?» (#reviewPrompt, en fragments/footer): sale una vez por cita, después del aviso de cookies.
+ * 10. Botones [data-copy="idDelCampo"]: copian el texto del campo y lo confirman en el propio botón.
  */
 (function () {
     'use strict';
@@ -402,7 +403,57 @@
         setTimeout(show, 1200);
     }
 
+    /* ---------- 10. Copiar al portapapeles ---------- */
+    function initCopyButtons() {
+        document.querySelectorAll('[data-copy]').forEach(button => button.addEventListener('click', async () => {
+            const field = document.getElementById(button.dataset.copy);
+            if (!field) return;
+            const label = button.querySelector('span');
+            try {
+                await navigator.clipboard.writeText(field.value);
+            } catch (e) {
+                // Sin permiso para el portapapeles: se deja el texto seleccionado para copiarlo a mano
+                field.select();
+                return;
+            }
+            if (label) {
+                label.textContent = 'Copiado';
+                setTimeout(() => { label.textContent = 'Copiar'; }, 2000);
+            }
+        }));
+    }
+
+    /* Botón «Compartir» de la ficha del centro: comparte el enlace corto (/c/nombre)
+       con el menú del sistema en móvil o lo copia al portapapeles en escritorio. */
+    function initShareButtons() {
+        document.querySelectorAll('[data-share-path]').forEach(button => button.addEventListener('click', async () => {
+            const url = new URL(button.dataset.sharePath, window.location.origin).href;
+            const status = button.parentElement.querySelector('.hero-share-status');
+            const say = text => {
+                if (!status) return;
+                status.textContent = text;
+                setTimeout(() => { status.textContent = ''; }, 4000);
+            };
+            if (navigator.share) {
+                try {
+                    await navigator.share({ title: button.dataset.shareTitle, url });
+                    return;
+                } catch (e) {
+                    if (e.name === 'AbortError') return; // la persona cerró el menú
+                }
+            }
+            try {
+                await navigator.clipboard.writeText(url);
+                say('Enlace copiado: ' + url);
+            } catch (e) {
+                say('Copia este enlace: ' + url);
+            }
+        }));
+    }
+
     function init() {
+        initCopyButtons();
+        initShareButtons();
         initMobileNav();
         initNotifications();
         initViewToggles();

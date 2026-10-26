@@ -109,7 +109,7 @@
                 <i class="lucide-star" aria-hidden="true"></i> Valorar
             </button>
             <a class="btn btn-secondary btn-sm" th:if="${app.center.published}"
-               th:href="@{/client/centers/{id}(id=${app.center.id}, tratamiento=${app.treatment.id})}"
+               th:href="@{/client/centers/{s}(s=${centerSlugs[app.center.id]}, tratamiento=${app.treatment.id})}"
                th:attr="aria-label=${'Volver a reservar ' + app.treatment.name + ' en ' + app.center.name}">
                 <i class="lucide-rotate-ccw" aria-hidden="true"></i> Volver a reservar
             </a>

@@ -3422,6 +3422,22 @@ body.modal-open {
 }
 
 /* Segundo ajuste de la misma tarjeta («Cambios de hora por el cliente» en Mi Centro) */
+/* Enlace corto del centro en «Mi Centro» > Reservas de clientes, con botón para copiarlo */
+.short-link {
+    display: flex;
+    gap: 8px;
+}
+
+.short-link .form-control {
+    flex: 1;
+    min-width: 0;
+    font-size: 14px;
+}
+
+.short-link .btn {
+    flex-shrink: 0;
+}
+
 .sync-setting--stacked {
     flex-direction: column;
     align-items: stretch;

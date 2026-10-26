@@ -13,7 +13,7 @@
     <!--/* «Ver las N opiniones» de la ficha: todas las reseñas del centro con orden y filtros (formulario GET). */-->
     <main class="main-container all-reviews-page">
         <header class="all-reviews-head">
-            <a class="all-reviews-back" th:with="centerUrl=@{/client/centers/{id}(id=${center.id})}"
+            <a class="all-reviews-back" th:with="centerUrl=@{/client/centers/{s}(s=${centerSlug})}"
                th:href="${centerUrl + '#resenas'}"
                th:attr="aria-label=${'Volver a ' + center.name}">
                 <i class="lucide-chevron-left" aria-hidden="true"></i>
@@ -28,7 +28,7 @@
             </div>
         </header>
 
-        <form class="all-reviews-filters" method="get" th:action="@{/client/centers/{id}/opiniones(id=${center.id})}"
+        <form class="all-reviews-filters" method="get" th:action="@{/client/centers/{s}/opiniones(s=${centerSlug})}"
               aria-label="Ordenar y filtrar opiniones" th:if="${rating.hasReviews()}" data-auto-submit>
             <label class="review-chip review-chip--select">
                 <span class="visually-hidden">Ordenar</span>
@@ -66,7 +66,7 @@
                 <span th:text="${filter.isFiltered()
                         ? 'Mostrando ' + reviews.size() + ' de ' + rating.count
                         : (rating.count == 1 ? '1 opinión verificada' : rating.count + ' opiniones verificadas')}">Mostrando 9 de 49</span>
-                <a th:if="${filter.isFiltered()}" th:href="@{/client/centers/{id}/opiniones(id=${center.id})}">Quitar filtros</a>
+                <a th:if="${filter.isFiltered()}" th:href="@{/client/centers/{s}/opiniones(s=${centerSlug})}">Quitar filtros</a>
             </p>
             <p class="reviews-empty" th:if="${!rating.hasReviews()}">
                 Este centro todavía no tiene opiniones.
@@ -79,7 +79,7 @@
             </th:block>
         </section>
 
-        <a class="btn btn-primary all-reviews-book" th:href="@{/client/centers/{id}(id=${center.id})}">
+        <a class="btn btn-primary all-reviews-book" th:href="@{/client/centers/{s}(s=${centerSlug})}">
             <i class="lucide-calendar-plus" aria-hidden="true"></i> Reservar en <span th:text="${center.name}">Centro Histórico</span>
         </a>
     </main>

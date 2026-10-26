@@ -135,6 +135,20 @@
     font-size: 14px;
 }
 
+.hero-share {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 24px;
+}
+
+.hero-share-status {
+    min-height: 1em;
+    margin: 8px 0 0;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
 .hero-meta-item {
     display: flex;
     align-items: flex-start;
@@ -614,6 +628,26 @@
 
 .map-popup-hours {
     font-size: 12px;
+}
+
+/* «Primer hueco: hoy a las 17:30» bajo el horario */
+.center-first-slot {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    margin: 0;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.center-first-slot i {
+    position: relative;
+    top: 1px;
+    color: var(--primary-text);
+}
+
+.center-first-slot strong {
+    color: var(--text-main);
 }
 
 /* Ofertas en la tarjeta del buscador y en el globo del mapa */

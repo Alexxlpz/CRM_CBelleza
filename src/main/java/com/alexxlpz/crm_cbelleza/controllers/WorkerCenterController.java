@@ -120,6 +120,7 @@ public class WorkerCenterController {
                     .toList());
         }
         model.addAttribute("worker", userService.getUser(worker.getId()));
+        model.addAttribute("shortLink", site.siteUrl() + "/c/" + centerService.shortSlug(center));
         model.addAttribute("treatmentsCount", treatmentService.countByCenter(centerId));
         model.addAttribute("workersCount", userService.countWorkersByCenter(centerId));
         model.addAttribute("timeZones", CenterTimeZones.OPTIONS);

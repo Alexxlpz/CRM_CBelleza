@@ -1,5 +1,6 @@
 package com.alexxlpz.crm_cbelleza;
 
+import com.alexxlpz.crm_cbelleza.services.CenterService;
 import com.alexxlpz.crm_cbelleza.entities.Appointment;
 import com.alexxlpz.crm_cbelleza.entities.AppointmentChange;
 import com.alexxlpz.crm_cbelleza.entities.AppointmentStatus;
@@ -45,6 +46,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class ProfessionalAndRescheduleTests {
 
     private static final String LUCIA = "lucia.romero@cbelleza.com";
+
+    @Autowired
+    private CenterService centerService;
 
     @Autowired
     private MockMvc mvc;
@@ -126,7 +130,7 @@ class ProfessionalAndRescheduleTests {
         mvc.perform(get("/worker/treatments").with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
                 .andExpect(content().string(containsString("Quién lo hace")))
                 .andExpect(content().string(containsString("Todo el equipo")));
-        mvc.perform(get("/client/centers/" + center.getId()).with(TestUsers.as(users, TestUsers.CLIENT)))
+        mvc.perform(get("/client/centers/" + centerService.shortSlug(center)).with(TestUsers.as(users, TestUsers.CLIENT)))
                 .andExpect(content().string(containsString("¿Con quién?")))
                 .andExpect(content().string(containsString("data-workers=\"" + lucia.getId() + "\"")));
 

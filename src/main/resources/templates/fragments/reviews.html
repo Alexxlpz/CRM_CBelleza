@@ -64,7 +64,7 @@
     </article>
 
     <!--/* Tarjeta corta del carrusel de la ficha: el comentario se corta a cuatro líneas y «Leer entera» lleva a la lista. */-->
-    <li th:fragment="reviewCard(review, age, centerId)" class="review-card">
+    <li th:fragment="reviewCard(review, age, centerSlug)" class="review-card">
         <header class="review-card-head">
             <span class="review-avatar" aria-hidden="true" th:text="${#strings.substring(review.authorName, 0, 1)}">S</span>
             <div class="review-item-who">
@@ -83,7 +83,7 @@
             <span class="review-card-replied" th:if="${review.hasReply()}">
                 <i class="lucide-message-square-reply" aria-hidden="true"></i> El centro ha respondido
             </span>
-            <a th:with="reviewsUrl=@{/client/centers/{id}/opiniones(id=${centerId})}"
+            <a th:with="reviewsUrl=@{/client/centers/{s}/opiniones(s=${centerSlug})}"
                th:href="${reviewsUrl + '#resena-' + review.id}"
                th:text="${review.comment != null and review.comment.length() > 160 ? 'Leer entera' : 'Ver respuesta'}"
                th:attr="aria-label=${'Leer la opinión de ' + review.authorName}">Leer entera</a>

@@ -119,13 +119,13 @@
 
             /* ---- Acceso a un centro ---- */
             /*
-             * Acceso a la ficha de un centro (/client/centers/{id}):
+             * Acceso a la ficha de un centro (/client/centers/{nombre}):
              *  - Trabajador: no puede consultar otros centros → aviso y no se navega.
              *  - Sin sesión: se navega igualmente; el servidor redirige al inicio de sesión
              *    y, tras entrar, devuelve al usuario al centro que eligió.
              *  - Cliente: navega directamente.
              */
-            const centerUrl = center => `/client/centers/${encodeURIComponent(center.id)}`;
+            const centerUrl = center => `/client/centers/${encodeURIComponent(center.slug)}`;
 
             async function showWorkerRestriction() {
                 const goToPanel = await Cuquora.confirm(
@@ -182,6 +182,16 @@
             }
 
             /** «Abierto · cierra a las 20:00» o «Cerrado · abre mañana a las 9:00», con el estado destacado. */
+            /** «Primer hueco: hoy a las 17:30» (el primero libre de las próximas dos semanas). */
+            function firstSlotBlock(center, className) {
+                if (!center.firstSlot) return '';
+                return `
+                    <p class="${className}">
+                        <i class="lucide-calendar-check" aria-hidden="true"></i>
+                        <span>Primer hueco: <strong>${esc(center.firstSlot)}</strong></span>
+                    </p>`;
+            }
+
             function hoursStatus(center, className) {
                 if (!center.hoursLabel) return '';
                 const [state, ...rest] = center.hoursLabel.split(' · ');
@@ -205,6 +215,7 @@
                     ${center.address ? `<span class="map-popup-address">${esc(center.address)}</span>` : ''}
                     ${distance}
                     ${hoursStatus(center, 'center-hours-status map-popup-hours')}
+                    ${firstSlotBlock(center, 'center-first-slot map-popup-hours')}
                     ${ratingBlock(center, 'center-rating map-popup-rating')}
                     ${offers}
                     <button type="button" class="btn btn-primary btn-sm map-popup-btn">
@@ -388,6 +399,7 @@
                         ${distance}
                     </div>
                     ${hoursStatus(center, 'center-hours-status')}
+                    ${firstSlotBlock(center, 'center-first-slot')}
                     ${ratingBlock(center, 'center-rating')}
                     ${offersBlock(center.offers)}
                     <div class="center-card-body">
@@ -396,7 +408,7 @@
                         ${meta('mail', 'Dirección email:', center.email)}
                     </div>
                     <div class="center-card-footer">
-                        <a href="/client/centers/${encodeURIComponent(center.id)}" class="btn btn-primary center-select-btn">
+                        <a href="/client/centers/${encodeURIComponent(center.slug)}" class="btn btn-primary center-select-btn">
                             <i class="lucide-calendar-plus" aria-hidden="true"></i> Ver Tratamientos y Reservar
                         </a>
                     </div>`;

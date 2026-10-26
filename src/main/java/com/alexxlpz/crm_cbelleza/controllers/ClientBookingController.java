@@ -3,6 +3,7 @@ package com.alexxlpz.crm_cbelleza.controllers;
 import com.alexxlpz.crm_cbelleza.entities.Appointment;
 import com.alexxlpz.crm_cbelleza.dto.ReviewFilter;
 import com.alexxlpz.crm_cbelleza.entities.AppointmentStatus;
+import com.alexxlpz.crm_cbelleza.entities.Center;
 import com.alexxlpz.crm_cbelleza.entities.Review;
 import com.alexxlpz.crm_cbelleza.entities.Treatment;
 import com.alexxlpz.crm_cbelleza.exceptions.BusinessRuleException;
@@ -77,12 +78,18 @@ public class ClientBookingController {
         return "redirect:/centers";
     }
 
-    /** Ficha del centro con la reserva. {@code tratamiento}: «Volver a reservar» lo deja ya elegido (si sigue en la carta). */
-    @GetMapping("/client/centers/{id}")
-    public String centerDetails(@PathVariable Long id,
+    /**
+     * Ficha del centro con la reserva, por su nombre en la dirección ({@code /client/centers/centro-historico}: nunca
+     * el id). {@code tratamiento}: «Volver a reservar» lo deja ya elegido (si sigue en la carta).
+     */
+    @GetMapping("/client/centers/{slug}")
+    public String centerDetails(@PathVariable String slug,
                                 @RequestParam(name = "tratamiento", required = false) Long treatmentId,
                                 Model model) {
-        model.addAttribute("center", centerService.getPublishedCenter(id));
+        Center center = centerService.getPublishedBySlug(slug);
+        Long id = center.getId();
+        model.addAttribute("center", center);
+        model.addAttribute("centerSlug", centerService.shortSlug(center));
         List<Treatment> treatments = treatmentService.getTreatmentsByCenter(id);
         LocalDate today = treatmentService.todayAt(id);
         model.addAttribute("treatments", treatments);
@@ -107,13 +114,15 @@ public class ClientBookingController {
     }
 
     /** «Ver las N opiniones»: todas las reseñas del centro, con orden y filtros por estrellas, comentario y tratamiento. */
-    @GetMapping("/client/centers/{id}/opiniones")
-    public String centerReviews(@PathVariable Long id,
+    @GetMapping("/client/centers/{slug}/opiniones")
+    public String centerReviews(@PathVariable String slug,
                                 @RequestParam(name = "orden", required = false) String order,
                                 @RequestParam(name = "estrellas", required = false) Integer stars,
                                 @RequestParam(name = "comentario", defaultValue = "false") boolean withComment,
                                 @RequestParam(name = "tratamiento", required = false) Long treatmentId,
                                 Model model) {
+        Center center = centerService.getPublishedBySlug(slug);
+        Long id = center.getId();
         ReviewFilter filter = ReviewFilter.of(order, stars, withComment, treatmentId);
         List<Review> shown = reviewService.forCenter(id, filter);
         // Solo los tratamientos que tienen alguna reseña, por orden alfabético
@@ -122,7 +131,8 @@ public class ClientBookingController {
                 .map(review -> review.getAppointment().getTreatment())
                 .sorted(Comparator.comparing(Treatment::getName, String.CASE_INSENSITIVE_ORDER))
                 .forEach(treatment -> reviewedTreatments.putIfAbsent(treatment.getId(), treatment.getName()));
-        model.addAttribute("center", centerService.getPublishedCenter(id));
+        model.addAttribute("center", center);
+        model.addAttribute("centerSlug", centerService.shortSlug(center));
         model.addAttribute("rating", reviewService.rating(id));
         model.addAttribute("filter", filter);
         model.addAttribute("orders", ReviewFilter.Order.values());
@@ -148,7 +158,7 @@ public class ClientBookingController {
             return "redirect:/client/appointments";
         } catch (BusinessRuleException e) {
             redirect.addFlashAttribute("bookingError", e.getMessage());
-            return "redirect:/client/centers/" + centerId;
+            return "redirect:/client/centers/" + centerService.shortSlug(centerService.getCenterById(centerId));
         }
     }
 
@@ -167,6 +177,7 @@ public class ClientBookingController {
         model.addAttribute("reviewRatings", ratings);
         model.addAttribute("reviewableIds", reviewService.reviewableAmong(appointments.history(), ratings.keySet()));
         model.addAttribute("loyaltyCards", loyaltyService.cardsOfClient(client.getId()));
+        model.addAttribute("centerSlugs", centerService.shortSlugs());
         model.addAttribute("activePage", "appointments");
         return "client/appointments";
     }

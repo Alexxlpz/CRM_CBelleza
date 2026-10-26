@@ -57,6 +57,8 @@ public class SecurityConfig {
             "/register-center/approve/*", "/register-center/approve/*/photo", "/invitation/*", "/invitation/*/renew",
             // Fotos de presentación de los centros (las de un centro sin publicar solo las sirve a su equipo)
             "/centers/*/photo",
+            // Enlace corto de cada centro para Instagram y Google Maps (CenterLinkController)
+            "/c/*",
             // Solo existen con el perfil "dev" (DevLoginController); en producción devuelven 404.
             "/login-selector", "/select-session"
     };

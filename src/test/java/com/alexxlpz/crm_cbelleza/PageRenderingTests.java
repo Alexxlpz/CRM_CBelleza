@@ -1,5 +1,6 @@
 package com.alexxlpz.crm_cbelleza;
 
+import com.alexxlpz.crm_cbelleza.services.CenterService;
 import com.alexxlpz.crm_cbelleza.repositories.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -22,6 +23,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 class PageRenderingTests {
+
+    @Autowired
+    private CenterService centerService;
 
     @Autowired
     private MockMvc mvc;
@@ -90,7 +94,7 @@ class PageRenderingTests {
     @Test
     void clientCanOpenCenterDetails() throws Exception {
         Long centerId = users.findByEmailIgnoreCase(TestUsers.WORKER_CENTER_1).orElseThrow().getCenter().getId();
-        mvc.perform(get("/client/centers/" + centerId).with(TestUsers.as(users, TestUsers.CLIENT)))
+        mvc.perform(get("/client/centers/" + centerService.shortSlug(centerService.getCenterById(centerId))).with(TestUsers.as(users, TestUsers.CLIENT)))
                 .andExpect(status().isOk());
     }
 

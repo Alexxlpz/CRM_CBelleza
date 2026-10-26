@@ -1,5 +1,6 @@
 package com.alexxlpz.crm_cbelleza;
 
+import com.alexxlpz.crm_cbelleza.services.CenterService;
 import com.alexxlpz.crm_cbelleza.dto.CenterRating;
 import com.alexxlpz.crm_cbelleza.dto.ReviewFilter;
 import com.alexxlpz.crm_cbelleza.entities.Appointment;
@@ -47,6 +48,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class ReviewTests {
 
     private static final String LUCIA = "lucia.romero@cbelleza.com";
+
+    @Autowired
+    private CenterService centerService;
 
     @Autowired
     private MockMvc mvc;
@@ -115,7 +119,7 @@ class ReviewTests {
                 .andExpect(content().string(not(containsString("data-id=\"" + done.getId() + "\""))))
                 .andExpect(content().string(containsString("Tu valoración")));
 
-        mvc.perform(get("/client/centers/" + center.getId()).with(TestUsers.as(users, TestUsers.CLIENT)))
+        mvc.perform(get("/client/centers/" + centerService.shortSlug(center)).with(TestUsers.as(users, TestUsers.CLIENT)))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Muy buen trato.")))
                 .andExpect(content().string(containsString("Solo de citas reales")))
@@ -187,9 +191,9 @@ class ReviewTests {
         assertEquals("¡Gracias, Sofía!", reviews.findById(saved.getId()).orElseThrow().getReply());
 
         // En el carrusel de la ficha solo se avisa; la respuesta entera, en «Ver las opiniones»
-        mvc.perform(get("/client/centers/" + center.getId()).with(TestUsers.as(users, TestUsers.CLIENT)))
+        mvc.perform(get("/client/centers/" + centerService.shortSlug(center)).with(TestUsers.as(users, TestUsers.CLIENT)))
                 .andExpect(content().string(containsString("El centro ha respondido")));
-        mvc.perform(get("/client/centers/" + center.getId() + "/opiniones").with(TestUsers.as(users, TestUsers.CLIENT)))
+        mvc.perform(get("/client/centers/" + centerService.shortSlug(center) + "/opiniones").with(TestUsers.as(users, TestUsers.CLIENT)))
                 .andExpect(content().string(containsString("Cita verificada")))
                 .andExpect(content().string(containsString("¡Gracias, Sofía!")));
         mvc.perform(get("/client/appointments").with(TestUsers.as(users, TestUsers.CLIENT)))
@@ -257,15 +261,15 @@ class ReviewTests {
         }
 
         // Carrusel con las seis más recientes; la séptima, solo en «Ver las 7 opiniones»
-        String page = mvc.perform(get("/client/centers/" + center.getId()).with(TestUsers.as(users, TestUsers.CLIENT)))
+        String page = mvc.perform(get("/client/centers/" + centerService.shortSlug(center)).with(TestUsers.as(users, TestUsers.CLIENT)))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Solo de citas reales")))
                 .andExpect(content().string(containsString("Ver las 7 opiniones")))
-                .andExpect(content().string(containsString("href=\"/client/centers/" + center.getId() + "/opiniones\"")))
+                .andExpect(content().string(containsString("href=\"/client/centers/" + centerService.shortSlug(center) + "/opiniones\"")))
                 .andReturn().getResponse().getContentAsString();
         assertEquals(6, page.split("class=\"review-card\"", -1).length - 1);
 
-        mvc.perform(get("/client/centers/" + center.getId() + "/opiniones").with(TestUsers.as(users, TestUsers.CLIENT)))
+        mvc.perform(get("/client/centers/" + centerService.shortSlug(center) + "/opiniones").with(TestUsers.as(users, TestUsers.CLIENT)))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("7 opiniones")))
                 .andExpect(content().string(containsString("Opinión número 7.")))
@@ -278,7 +282,7 @@ class ReviewTests {
         review(appointment(AppointmentStatus.COMPLETED, LocalDateTime.now().minusDays(1)), 5, "Cinco estrellas.");
         review(appointment(AppointmentStatus.COMPLETED, LocalDateTime.now().minusDays(2)), 2, "Dos estrellas.");
         review(appointment(AppointmentStatus.COMPLETED, LocalDateTime.now().minusDays(3), other), 4, "");
-        String url = "/client/centers/" + center.getId() + "/opiniones";
+        String url = "/client/centers/" + centerService.shortSlug(center) + "/opiniones";
 
         mvc.perform(get(url).param("estrellas", "5").with(TestUsers.as(users, TestUsers.CLIENT)))
                 .andExpect(content().string(containsString("Mostrando 1 de 3")))

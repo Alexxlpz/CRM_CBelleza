@@ -1,5 +1,6 @@
 package com.alexxlpz.crm_cbelleza;
 
+import com.alexxlpz.crm_cbelleza.services.CenterService;
 import com.alexxlpz.crm_cbelleza.entities.AgendaBlock;
 import com.alexxlpz.crm_cbelleza.entities.Center;
 import com.alexxlpz.crm_cbelleza.entities.User;
@@ -45,6 +46,9 @@ class CenterOwnershipTests {
     private static final String LUCIA = "lucia.romero@cbelleza.com";
 
     @Autowired
+    private CenterService centerService;
+
+    @Autowired
     private MockMvc mvc;
     @Autowired
     private UserRepository users;
@@ -85,7 +89,7 @@ class CenterOwnershipTests {
                 .andExpect(jsonPath("$.days['1'][1][0]").value(17 * 60))
                 .andExpect(jsonPath("$.openHour").value(10))
                 .andExpect(jsonPath("$.closeHour").value(21));
-        mvc.perform(get("/client/centers/" + center.getId()).with(TestUsers.as(users, TestUsers.CLIENT)))
+        mvc.perform(get("/client/centers/" + centerService.shortSlug(center)).with(TestUsers.as(users, TestUsers.CLIENT)))
                 .andExpect(content().string(containsString("Lunes: 10:00 - 14:00 y 17:00 - 21:00")));
 
         // A mediodía ya no se puede reservar

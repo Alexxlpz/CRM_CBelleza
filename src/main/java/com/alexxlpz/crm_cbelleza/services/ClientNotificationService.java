@@ -19,6 +19,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -39,10 +40,12 @@ public class ClientNotificationService {
     private final UserRepository users;
     private final ReviewRepository reviews;
     private final NotificationDismissalService dismissals;
+    private final CenterService centers;
     private final Clock clock;
 
     public ClientNotificationService(AppointmentRepository appointments, UserRepository users, ReviewRepository reviews,
-                                     NotificationDismissalService dismissals, Clock clock) {
+                                     NotificationDismissalService dismissals, CenterService centers, Clock clock) {
+        this.centers = centers;
         this.appointments = appointments;
         this.users = users;
         this.reviews = reviews;
@@ -92,12 +95,13 @@ public class ClientNotificationService {
             }
         }
 
+        Map<Long, String> slugs = centers.shortSlugs();
         for (Review review : reviews.findByClientIdAndRepliedAtAfter(clientId, now.minusDays(RECENT_DAYS))) {
             boolean unseen = seenAt == null || review.getRepliedAt().isAfter(seenAt);
             entries.add(new Entry(false, review.getRepliedAt(), new ClientNotification(
                     review.getCenter().getName() + " ha respondido a tu valoración de "
                             + review.getAppointment().getTreatment().getName() + ".",
-                    "/client/centers/" + review.getCenter().getId() + "#resenas", "lucide-message-square-reply", unseen)));
+                    "/client/centers/" + slugs.get(review.getCenter().getId()) + "#resenas", "lucide-message-square-reply", unseen)));
         }
 
         // Primero las citas de hoy y mañana, después los cambios del más reciente al más antiguo

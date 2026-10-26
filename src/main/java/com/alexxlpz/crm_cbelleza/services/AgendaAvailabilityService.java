@@ -22,6 +22,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /** Carga la agenda de un centro ({@link AgendaSnapshot}) y calcula los huecos llenos para el selector del cliente. */
 @Service
@@ -29,6 +30,9 @@ public class AgendaAvailabilityService {
 
     /** Días hacia delante que ve el selector de hora del cliente (booking-picker.js enseña 6 meses). */
     static final int BOOKING_HORIZON_DAYS = 215;
+
+    /** Días hacia delante en los que se busca el «Primer hueco» del buscador. */
+    static final int FIRST_SLOT_DAYS = 14;
 
     private final AppointmentRepository appointments;
     private final AgendaBlockRepository blocks;
@@ -126,6 +130,30 @@ public class AgendaAvailabilityService {
             }
         }
         return new Availability(hours, full, closedDates);
+    }
+
+    /**
+     * Primer hueco libre del centro de aquí a {@value #FIRST_SLOT_DAYS} días, del largo de un tramo del selector
+     * (con cabina y alguien del equipo libre): «Primer hueco: hoy a las 17:30» en el buscador. Vacío si no hay.
+     */
+    @Transactional(readOnly = true)
+    public Optional<LocalDateTime> firstFreeSlot(Center center, OpeningHours hours) {
+        LocalDateTime now = CenterClock.now(clock, center);
+        LocalDate today = now.toLocalDate();
+        LocalDate last = today.plusDays(FIRST_SLOT_DAYS);
+        AgendaSnapshot agenda = snapshot(center, today.atStartOfDay(), last.plusDays(1).atStartOfDay());
+        int slot = hours.slotMinutes();
+        for (LocalDate day = today; !day.isAfter(last); day = day.plusDays(1)) {
+            for (OpeningHours.Period period : hours.periods(day.getDayOfWeek())) {
+                LocalDateTime close = day.atTime(period.closes());
+                for (LocalDateTime start = day.atTime(period.opens()); start.isBefore(close); start = start.plusMinutes(slot)) {
+                    if (!start.isBefore(now) && agenda.fits(new AgendaSnapshot.Request(start, slot, null, null, true))) {
+                        return Optional.of(start);
+                    }
+                }
+            }
+        }
+        return Optional.empty();
     }
 
     public record Availability(OpeningHours hours, List<String> occupied, List<String> closedDates) {

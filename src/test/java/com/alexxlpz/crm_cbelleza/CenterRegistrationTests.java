@@ -1,5 +1,6 @@
 package com.alexxlpz.crm_cbelleza;
 
+import com.alexxlpz.crm_cbelleza.services.CenterService;
 import com.alexxlpz.crm_cbelleza.entities.Center;
 import com.alexxlpz.crm_cbelleza.entities.LoyaltyMode;
 import com.alexxlpz.crm_cbelleza.entities.Role;
@@ -45,6 +46,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @Transactional
 class CenterRegistrationTests {
+
+    @Autowired
+    private CenterService centerService;
 
     @Autowired
     private MockMvc mvc;
@@ -141,7 +145,7 @@ class CenterRegistrationTests {
 
         mvc.perform(get("/api/centers").param("size", "50"))
                 .andExpect(content().string(not(containsString("Estudio Alba"))));
-        mvc.perform(get("/client/centers/" + center.getId()).with(TestUsers.as(users, TestUsers.CLIENT)))
+        mvc.perform(get("/client/centers/" + centerService.shortSlug(center)).with(TestUsers.as(users, TestUsers.CLIENT)))
                 .andExpect(status().isNotFound());
         Long clientId = TestUsers.details(users, TestUsers.CLIENT).getId();
         assertThrows(ResourceNotFoundException.class, () -> bookingService.requestBooking(

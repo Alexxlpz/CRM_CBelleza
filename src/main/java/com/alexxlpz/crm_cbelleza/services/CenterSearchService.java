@@ -46,12 +46,17 @@ public class CenterSearchService {
     private final AgendaBlockRepository agendaBlocks;
     private final OpeningHoursService openingHours;
     private final ReviewService reviewService;
+    private final AgendaAvailabilityService availability;
+    private final CenterService centerService;
     private final Clock clock;
 
     public CenterSearchService(CenterRepository centerRepository, TreatmentRepository treatmentRepository,
                                AgendaBlockRepository agendaBlocks, OpeningHoursService openingHours,
-                               ReviewService reviewService, Clock clock) {
+                               ReviewService reviewService, AgendaAvailabilityService availability,
+                               CenterService centerService, Clock clock) {
+        this.centerService = centerService;
         this.reviewService = reviewService;
+        this.availability = availability;
         this.centerRepository = centerRepository;
         this.treatmentRepository = treatmentRepository;
         this.agendaBlocks = agendaBlocks;
@@ -100,7 +105,33 @@ public class CenterSearchService {
         if (from >= sorted.size()) {
             return List.of();
         }
-        return sorted.subList(from, Math.min(from + size, sorted.size()));
+        // El primer hueco necesita la agenda de cada centro: solo para los de esta página
+        Map<Long, Center> byId = centers.stream().collect(Collectors.toMap(Center::getId, center -> center));
+        Map<Long, String> slugs = centerService.shortSlugs();
+        return sorted.subList(from, Math.min(from + size, sorted.size())).stream()
+                .map(dto -> {
+                    Center center = byId.get(dto.id());
+                    return dto.withFirstSlotAndSlug(availability.firstFreeSlot(center, hoursByCenter.get(center.getId()))
+                            .map(slot -> firstSlotLabel(slot, CenterClock.now(clock, center)))
+                            .orElse(null), slugs.get(center.getId()));
+                })
+                .toList();
+    }
+
+    /** «hoy a las 17:30», «mañana a las 9:00», «el jueves a las 10:00», «el 5 de noviembre a las 10:00». */
+    public static String firstSlotLabel(LocalDateTime slot, LocalDateTime now) {
+        long days = slot.toLocalDate().toEpochDay() - now.toLocalDate().toEpochDay();
+        String when;
+        if (days == 0) {
+            when = "hoy";
+        } else if (days == 1) {
+            when = "mañana";
+        } else if (days < 7) {
+            when = "el " + slot.getDayOfWeek().getDisplayName(TextStyle.FULL, SPANISH);
+        } else {
+            when = "el " + slot.getDayOfMonth() + " de " + slot.getMonth().getDisplayName(TextStyle.FULL, SPANISH);
+        }
+        return when + " a las " + TIME.format(slot);
     }
 
     /**

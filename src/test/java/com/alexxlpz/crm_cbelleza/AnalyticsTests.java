@@ -224,7 +224,8 @@ class AnalyticsTests {
     void noShowsCountAsLostAndShowUpInTheTeamTable() {
         AnalyticsReport before = analytics.reportFor(center.getId(), 3);
         User absent = newClient("Pepa Faltona", "611800020");
-        visit(absent, now.minusMinutes(1), AppointmentStatus.NO_SHOW);
+        // Ayer a las 11:00: con «hoy» fallaba antes de las 11 (la cita aún no había pasado)
+        visit(absent, now.minusDays(1), AppointmentStatus.NO_SHOW);
         appointments.flush();
 
         AnalyticsReport after = analytics.reportFor(center.getId(), 3);

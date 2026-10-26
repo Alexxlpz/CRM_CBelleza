@@ -1,5 +1,6 @@
 package com.alexxlpz.crm_cbelleza;
 
+import com.alexxlpz.crm_cbelleza.services.CenterService;
 import com.alexxlpz.crm_cbelleza.entities.Appointment;
 import com.alexxlpz.crm_cbelleza.entities.Treatment;
 import com.alexxlpz.crm_cbelleza.entities.User;
@@ -39,6 +40,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @Transactional
 class TreatmentOfferTests {
+
+    @Autowired
+    private CenterService centerService;
 
     @Autowired
     private MockMvc mvc;
@@ -132,7 +136,7 @@ class TreatmentOfferTests {
     void clientSeesOffersWhenBooking() throws Exception {
         treatment.setOfferPrice(treatment.getPrice() - 6);
         treatment.setOfferEndsOn(null);
-        mvc.perform(get("/client/centers/" + centerId).with(TestUsers.as(users, TestUsers.CLIENT)))
+        mvc.perform(get("/client/centers/" + centerService.shortSlug(centerService.getCenterById(centerId))).with(TestUsers.as(users, TestUsers.CLIENT)))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("En oferta")))
                 .andExpect(content().string(containsString("treatment-card-old-price")));
