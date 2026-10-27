@@ -98,6 +98,9 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
     boolean existsByCenterIdAndClientIdAndStatusIn(Long centerId, Long clientId, Collection<AppointmentStatus> statuses);
 
+    long countByCenterIdAndClientIdAndStatusInAndDateTimeAfter(Long centerId, Long clientId,
+                                                               Collection<AppointmentStatus> statuses, LocalDateTime dateTime);
+
     @EntityGraph(attributePaths = {"treatment"})
     List<Appointment> findByStatusAndDateTimeBefore(AppointmentStatus status, LocalDateTime dateTime);
 }

@@ -2,6 +2,7 @@ package com.alexxlpz.crm_cbelleza;
 
 import com.alexxlpz.crm_cbelleza.entities.Appointment;
 import com.alexxlpz.crm_cbelleza.entities.AppointmentStatus;
+import com.alexxlpz.crm_cbelleza.entities.Role;
 import com.alexxlpz.crm_cbelleza.entities.Treatment;
 import com.alexxlpz.crm_cbelleza.entities.User;
 import com.alexxlpz.crm_cbelleza.exceptions.BusinessRuleException;
@@ -19,6 +20,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.TemporalAdjusters;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -36,14 +38,24 @@ class BookingServiceTests {
     @Autowired
     private AppointmentRepository appointments;
 
+    private User client;
+
     /** Un lunes lejano a la hora indicada, para no chocar con las citas de ejemplo. */
     private static LocalDateTime farMonday(int weeksAhead, int hour) {
         LocalDate monday = LocalDate.now().plusWeeks(weeksAhead).with(TemporalAdjusters.next(DayOfWeek.MONDAY));
         return LocalDateTime.of(monday, LocalTime.of(hour, 0));
     }
 
+    /**
+     * Un cliente nuevo para cada test: esta clase no deshace sus cambios y un mismo cliente acabaría con más
+     * solicitudes sin responder de las que admite un centro ({@link BookingService#MAX_PENDING_REQUESTS}).
+     */
     private User client() {
-        return users.findByNameIgnoreCase(TestUsers.CLIENT).orElseThrow();
+        if (client == null) {
+            client = users.save(User.builder().name("Cliente " + UUID.randomUUID())
+                    .email(UUID.randomUUID() + "@ejemplo.com").role(Role.CLIENT).build());
+        }
+        return client;
     }
 
     private Long centerOf(String email) {

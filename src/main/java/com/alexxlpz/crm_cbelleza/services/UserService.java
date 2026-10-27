@@ -151,13 +151,19 @@ public class UserService {
     public User updateProfile(Long userId, ProfileForm form) {
         passwordPolicy.validateOptional(form.newPassword(), form.confirmPassword());
         User user = getUser(userId);
+        boolean changesPassword = !FormText.isBlank(form.newPassword());
+        // Así, quien encuentre la sesión abierta en otro dispositivo no puede quedarse la cuenta
+        if (changesPassword && user.getPassword() != null && (form.currentPassword() == null
+                || !passwordEncoder.matches(form.currentPassword(), user.getPassword()))) {
+            throw new BusinessRuleException("La contraseña actual no es correcta.");
+        }
         if (!FormText.isBlank(form.name())) {
             user.setName(form.name().trim());
         }
         if (form.phone() != null) {
             user.setPhone(FormText.trimToNull(form.phone()));
         }
-        if (!FormText.isBlank(form.newPassword())) {
+        if (changesPassword) {
             user.setPassword(passwordEncoder.encode(form.newPassword()));
             // Al cambiar la contraseña se olvidan los dispositivos con «Recordar mi sesión»
             rememberMeTokens.removeUserTokens(AppUserDetails.usernameOf(user));

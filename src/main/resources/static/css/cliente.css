@@ -53,26 +53,6 @@
     font-weight: 700;
 }
 
-.center-card-body {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    font-size: 13px;
-    color: var(--text-muted);
-}
-
-.center-meta-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.center-meta-item i {
-    color: var(--primary-text);
-    font-size: 16px;
-    width: 18px;
-}
-
 .center-card-footer {
     margin-top: auto;
 }
@@ -86,19 +66,9 @@
     font-weight: 700;
 }
 
-.center-meta-item.align-start {
-    align-items: flex-start;
-}
-
 .center-meta-icon {
     margin-top: 3px;
     color: var(--primary-text);
-}
-
-.center-meta-title {
-    font-weight: 600;
-    display: block;
-    margin-bottom: 2px;
 }
 
 .center-select-btn {
@@ -534,10 +504,6 @@
     .centers-grid {
         grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
         gap: 20px;
-    }
-
-    .center-card-body span {
-        overflow-wrap: anywhere;
     }
 }
 

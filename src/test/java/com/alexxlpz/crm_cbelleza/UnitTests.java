@@ -71,10 +71,10 @@ class UnitTests {
     @Test
     void passwordPolicy() {
         PasswordPolicy policy = new PasswordPolicy();
-        assertDoesNotThrow(() -> policy.validateRequired("secreto", "secreto"));
+        assertDoesNotThrow(() -> policy.validateRequired("secreto1", "secreto1"));
         assertDoesNotThrow(() -> policy.validateOptional("", null), "vacía = no se cambia");
         assertThrows(BusinessRuleException.class, () -> policy.validateRequired("123", "123"));
-        assertThrows(BusinessRuleException.class, () -> policy.validateRequired("secreto", "otro"));
+        assertThrows(BusinessRuleException.class, () -> policy.validateRequired("secreto1", "otro"));
         assertThrows(BusinessRuleException.class, () -> policy.validateRequired(null, null));
     }
 

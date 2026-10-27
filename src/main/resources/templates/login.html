@@ -21,6 +21,10 @@
                     Credenciales no válidas.
                 </span>
             </div>
+            <div class="alert alert-error" role="alert" th:if="${param.blocked != null}">
+                <i class="lucide-lock" aria-hidden="true"></i>
+                <span>Demasiados intentos fallidos. Por seguridad, espera 15 minutos antes de volver a intentarlo.</span>
+            </div>
             <div class="alert alert-success" role="status" th:if="${successMessage != null or param.logout != null}">
                 <i class="lucide-check-circle-2" aria-hidden="true"></i>
                 <span th:text="${successMessage != null ? successMessage : 'Has cerrado sesión correctamente.'}">Has cerrado sesión correctamente.</span>

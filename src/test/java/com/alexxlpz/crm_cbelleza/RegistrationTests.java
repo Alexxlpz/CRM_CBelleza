@@ -1,5 +1,6 @@
 package com.alexxlpz.crm_cbelleza;
 
+import com.alexxlpz.crm_cbelleza.config.DatabaseSeeder;
 import com.alexxlpz.crm_cbelleza.entities.Role;
 import com.alexxlpz.crm_cbelleza.entities.User;
 import com.alexxlpz.crm_cbelleza.exceptions.BusinessRuleException;
@@ -135,7 +136,7 @@ class RegistrationTests {
         rememberMeTokens.createNewToken(new PersistentRememberMeToken(
                 TestUsers.WORKER_CENTER_1, "serie-1", "token-1", new Date()));
 
-        userService.updateProfile(worker.getId(), new ProfileForm(null, null, "nueva-clave", "nueva-clave"));
+        userService.updateProfile(worker.getId(), new ProfileForm(null, null, DatabaseSeeder.DEMO_PASSWORD, "nueva-clave", "nueva-clave"));
 
         assertNull(rememberMeTokens.getTokenForSeries("serie-1"));
     }

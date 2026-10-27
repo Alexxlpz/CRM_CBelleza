@@ -380,14 +380,6 @@
                 const distance = center.distanceKm !== null
                     ? `<span class="center-distance-badge">A ${center.distanceKm.toFixed(1)} km</span>`
                     : '<i class="lucide-map-pin center-meta-icon" aria-hidden="true"></i>';
-                const meta = (icon, label, value) => `
-                    <div class="center-meta-item align-start">
-                        <i class="lucide-${icon} center-meta-icon" aria-hidden="true"></i>
-                        <div>
-                            <span class="center-meta-title">${label}</span>
-                            <span>${esc(value || 'N/A')}</span>
-                        </div>
-                    </div>`;
                 // Sin foto, las iniciales ocupan el mismo hueco: todas las tarjetas miden lo mismo
                 const photo = center.photoUrl
                     ? `<img src="${esc(center.photoUrl)}" alt="" loading="lazy" decoding="async">`
@@ -402,11 +394,6 @@
                     ${firstSlotBlock(center, 'center-first-slot')}
                     ${ratingBlock(center, 'center-rating')}
                     ${offersBlock(center.offers)}
-                    <div class="center-card-body">
-                        ${meta('navigation', 'Dirección:', center.address)}
-                        ${meta('phone', 'Número de teléfono:', center.phone)}
-                        ${meta('mail', 'Dirección email:', center.email)}
-                    </div>
                     <div class="center-card-footer">
                         <a href="/client/centers/${encodeURIComponent(center.slug)}" class="btn btn-primary center-select-btn">
                             <i class="lucide-calendar-plus" aria-hidden="true"></i> Ver Tratamientos y Reservar

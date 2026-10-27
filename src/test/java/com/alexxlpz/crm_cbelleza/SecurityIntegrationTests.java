@@ -1,5 +1,6 @@
 package com.alexxlpz.crm_cbelleza;
 
+import com.alexxlpz.crm_cbelleza.config.DatabaseSeeder;
 import com.alexxlpz.crm_cbelleza.repositories.UserRepository;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
@@ -120,7 +121,7 @@ class SecurityIntegrationTests {
     void workerLoginRedirectsToDashboard() throws Exception {
         mvc.perform(post("/login").with(csrf())
                         .param("identifier", TestUsers.WORKER_CENTER_1)
-                        .param("password", "password123"))
+                        .param("password", DatabaseSeeder.DEMO_PASSWORD))
                 .andExpect(redirectedUrl("/worker/dashboard"));
     }
 
@@ -128,7 +129,7 @@ class SecurityIntegrationTests {
     void clientCanLogInWithUserName() throws Exception {
         mvc.perform(post("/login").with(csrf())
                         .param("identifier", TestUsers.CLIENT)
-                        .param("password", "password123"))
+                        .param("password", DatabaseSeeder.DEMO_PASSWORD))
                 .andExpect(redirectedUrl("/centers"));
     }
 
@@ -144,7 +145,7 @@ class SecurityIntegrationTests {
     void rememberMeCookieLogsBackInAfterSessionEnds() throws Exception {
         var login = mvc.perform(post("/login").with(csrf())
                         .param("identifier", TestUsers.WORKER_CENTER_1)
-                        .param("password", "password123")
+                        .param("password", DatabaseSeeder.DEMO_PASSWORD)
                         .param("rememberMe", "true"))
                 .andExpect(redirectedUrl("/worker/dashboard"))
                 .andReturn();

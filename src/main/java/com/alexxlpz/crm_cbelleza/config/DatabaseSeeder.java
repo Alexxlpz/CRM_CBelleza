@@ -16,13 +16,18 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Datos de demostración (centros, tratamientos y cuentas con la contraseña "password123").
+ * Datos de demostración (centros, tratamientos y cuentas con la contraseña {@link #DEMO_PASSWORD}).
  * Solo se cargan con crm.seed-demo-data=true: lo activan el perfil "dev" y los tests.
  * Nunca debe activarse en producción, porque la contraseña de las cuentas demo es pública.
  */
 @Component
 @ConditionalOnProperty(name = "crm.seed-demo-data", havingValue = "true")
 public class DatabaseSeeder implements CommandLineRunner {
+
+    /** Contraseña pública de todas las cuentas demo; cumple {@code PasswordPolicy} (8 caracteres, no es de las comunes). */
+    public static final String DEMO_PASSWORD = "Cuquora2026!";
+    /** La que tenían antes del 27 oct 2026 (6 caracteres mínimo): las BD demo que ya existían se pasan a la nueva. */
+    private static final String OLD_DEMO_PASSWORD = "password123";
 
     private final CenterRepository centerRepository;
     private final UserRepository userRepository;
@@ -73,7 +78,8 @@ public class DatabaseSeeder implements CommandLineRunner {
     @org.springframework.transaction.annotation.Transactional
     public void run(String... args) throws Exception {
         if (centerRepository.count() > 0) {
-            return; // Datos de demostración ya cargados
+            upgradeOldDemoPasswords(); // Datos de demostración ya cargados
+            return;
         }
 
         // 1. Seed Centers
@@ -119,8 +125,8 @@ public class DatabaseSeeder implements CommandLineRunner {
                 .build();
         centerRepository.saveAll(Arrays.asList(c1, c2, c3, c4));
 
-        // 2. Seed Users with Encrypted Passwords (default demo password: "password123")
-        String defaultHashedPassword = passwordEncoder.encode("password123");
+        // 2. Seed Users with Encrypted Passwords (default demo password: DEMO_PASSWORD)
+        String defaultHashedPassword = passwordEncoder.encode(DEMO_PASSWORD);
 
         // Workers
         User w1 = User.builder()
@@ -542,6 +548,16 @@ public class DatabaseSeeder implements CommandLineRunner {
                     .startsAt(LocalTime.of(14, 0)).endsAt(LocalTime.of(20, 0)).build());
             workerHoursRepository.saveAll(luciaHours);
         }
+    }
+
+    /** Las cuentas demo de una BD cargada antes del cambio entran con {@link #DEMO_PASSWORD}; las demás no se tocan. */
+    private void upgradeOldDemoPasswords() {
+        String hashed = passwordEncoder.encode(DEMO_PASSWORD);
+        List<User> upgraded = userRepository.findAll().stream()
+                .filter(user -> user.getPassword() != null && passwordEncoder.matches(OLD_DEMO_PASSWORD, user.getPassword()))
+                .toList();
+        upgraded.forEach(user -> user.setPassword(hashed));
+        userRepository.saveAll(upgraded);
     }
 
     private static void demoOffer(Treatment treatment, double offerPrice, LocalDate endsOn) {

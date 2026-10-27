@@ -48,12 +48,10 @@ Propuestas pendientes de decidir, de más a menos impacto (detalle en el informe
 
 ## Seguridad (informe del 9 oct 2026, sin corregir todavía)
 
-Los 🟠 hay que resolverlos antes de producción. Resueltos el 10 oct 2026: #1 (seeder solo con `crm.seed-demo-data`, activado en `dev` y tests) y #2 (secretos en `.env`, Postgres sin puerto publicado, contraseña nueva). El 11 oct 2026: #3 (el alta manual solo reutiliza clientes del propio centro; si el correo ya está en uso, el cliente se guarda sin él). La antigua `crm_pass` sigue en el historial de git: no reutilizarla en ningún sitio.
+Los 🟠 hay que resolverlos antes de producción. Resueltos el 10 oct 2026: #1 (seeder solo con `crm.seed-demo-data`, activado en `dev` y tests) y #2 (secretos en `.env`, Postgres sin puerto publicado, contraseña nueva). El 11 oct 2026: #3 (el alta manual solo reutiliza clientes del propio centro; si el correo ya está en uso, el cliente se guarda sin él). El 27 oct 2026: #4 (5 fallos por cuenta o 20 por IP cierran el login 15 minutos, `LoginAttemptService`; contraseñas de 8 caracteres como mínimo y sin las más usadas), #5 (para cambiar la contraseña se pide la actual) y #13 (máximo 3 solicitudes sin responder por cliente y centro). La antigua `crm_pass` sigue en el historial de git: no reutilizarla en ningún sitio.
 
 | # | Gravedad | Hallazgo | Dónde | Arreglo propuesto |
 |---|---|---|---|---|
-| 4 | 🟠 | Sin límite de intentos de login; contraseñas de 6 caracteres | `SecurityConfig`, `forms/PasswordPolicy.java` (`MIN_LENGTH = 6`) | Bloqueo temporal tras 5-10 fallos por cuenta e IP; mínimo 8-10 caracteres y rechazar contraseñas comunes |
-| 5 | 🟠 | Cambio de contraseña sin pedir la actual | `services/UserService.java`, `ClientProfileController`, `WorkerCenterController` | Campo `currentPassword` en `ProfileForm` y `passwordEncoder.matches` |
 | 6 | 🟠 | `/contact` y `/register-center` envían correos a cualquier dirección (spam/phishing); el alta de centro además crea un centro oculto y hasta 21 trabajadores e invitaciones por envío | `mail/InquiryMailService.java`, `mail/CenterOnboardingMailService.java`, `CenterRegistrationService` | Límite por IP, honeypot o captcha, acuse con texto fijo; borrar centros sin publicar tras un tiempo |
 | 7 | 🟠 | Sin HTTPS ni cookies `Secure` | `Dockerfile`, `docker-compose.yml`, `application.properties` | Cloudflare Full (strict) + propiedades de «Despliegue» en `CLAUDE.md` |
 | 8 | 🟡 | Login por nombre no único (falla si hay dos iguales) | `security/AppUserDetailsService.java`, `UserRepository.findByNameIgnoreCase` | Login solo por correo o usuario único separado del nombre |
@@ -61,7 +59,6 @@ Los 🟠 hay que resolverlos antes de producción. Resueltos el 10 oct 2026: #1 
 | 10 | 🟡 | Enumeración de cuentas en registro y alta manual | `UserService`, `ClientCardService` | Límite de intentos también en `/register`; mensaje neutro |
 | 11 | 🟠 | Una cuenta creada a mano por un centro (sin contraseña) se completa al registrarse con su correo **sin verificar que el correo es suyo**: quien conozca el correo de un cliente puede quedarse su cuenta y ver sus citas. Con Google sí se verifica. Los correos internos `@cbelleza.local` ya no se pueden registrar | `UserService.registerClient` | Cuando funcione el correo (Brevo): enviar un enlace de confirmación y poner la contraseña solo al pulsarlo |
 | 12 | 🟡 | Leaflet desde unpkg e iconos de marcador desde `raw.githubusercontent.com` sin SRI ni CSP | `templates/centers.html` | Servirlos desde `/static` o añadir `integrity`; CSP más adelante |
-| 13 | 🟡 | Solicitudes de cita ilimitadas | `services/BookingService.java` | Máximo de pendientes por cliente y centro (p. ej. 3) |
 | 14 | ⚪ | `page * size` desborda en `CenterSearchService`; sesiones abiertas no se cierran al cambiar la contraseña (los dispositivos recordados sí se olvidan); no se validan precios ni duraciones negativas | varios | Detalles menores |
 
 Revisado y correcto: sin inyección SQL, sin `th:utext`, escapado en JS, CSRF, IDOR entre centros, redirecciones, BCrypt y fijación de sesión. Dependencias sin comprobar contra CVE: añadir Dependabot o `mvn org.owasp:dependency-check-maven:check`.

@@ -51,7 +51,7 @@
                     <label for="passwordInput" class="form-label">Contraseña</label>
                     <div class="password-wrapper">
                         <input type="password" id="passwordInput" name="password" class="form-control"
-                               autocomplete="new-password" placeholder="Mínimo 6 caracteres" minlength="6">
+                               autocomplete="new-password" placeholder="Mínimo 8 caracteres" minlength="8">
                         <button type="button" class="password-toggle-btn" data-toggle-password="passwordInput"
                                 aria-label="Mostrar u ocultar contraseña" aria-pressed="false">
                             <i class="lucide-eye" aria-hidden="true"></i>
@@ -63,7 +63,7 @@
                     <label for="confirmPasswordInput" class="form-label">Confirmar contraseña</label>
                     <div class="password-wrapper">
                         <input type="password" id="confirmPasswordInput" name="confirmPassword" class="form-control"
-                               autocomplete="new-password" placeholder="Repite tu contraseña" minlength="6">
+                               autocomplete="new-password" placeholder="Repite tu contraseña" minlength="8">
                         <button type="button" class="password-toggle-btn" data-toggle-password="confirmPasswordInput"
                                 aria-label="Mostrar u ocultar contraseña" aria-pressed="false">
                             <i class="lucide-eye" aria-hidden="true"></i>
@@ -105,7 +105,7 @@
                 name: [V.required('Por favor, introduce tu nombre y apellidos.'), V.minLength(2, 'El nombre debe tener al menos 2 caracteres.')],
                 email: [V.required('Por favor, introduce tu correo electrónico.'), V.email()],
                 phone: [V.phone()],
-                password: [V.required('Por favor, introduce una contraseña.'), V.minLength(6, 'La contraseña debe tener al menos 6 caracteres.')],
+                password: [V.required('Por favor, introduce una contraseña.'), V.minLength(8, 'La contraseña debe tener al menos 8 caracteres.')],
                 confirmPassword: [V.required('Por favor, confirma tu contraseña.'), V.sameAs('password', 'Las contraseñas no coinciden. Por favor, revísalas.')]
             });
         });

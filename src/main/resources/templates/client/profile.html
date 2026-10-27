@@ -45,9 +45,14 @@
                         <p class="settings-section-text">Ahora entras con Google. Añade una contraseña si quieres iniciar sesión también con tu correo.</p>
                     </th:block>
                     <div class="settings-grid">
+                    <div class="span-full" th:if="${hasPassword}">
+                        <label for="currentPassword" class="form-label">Contraseña actual</label>
+                        <input type="password" id="currentPassword" name="currentPassword" class="form-control" autocomplete="current-password">
+                        <span class="form-hint">Solo hace falta si vas a cambiarla.</span>
+                    </div>
                     <div>
                         <label for="newPassword" class="form-label">Nueva Contraseña</label>
-                        <input type="password" id="newPassword" name="newPassword" class="form-control" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+                        <input type="password" id="newPassword" name="newPassword" class="form-control" placeholder="Mínimo 8 caracteres" autocomplete="new-password">
                     </div>
                     <div>
                         <label for="confirmPassword" class="form-label">Confirmar Nueva Contraseña</label>

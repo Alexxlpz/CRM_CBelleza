@@ -48,6 +48,8 @@ public class BookingService {
 
     /** Máximo de horas que se pueden proponer a la vez. */
     public static final int MAX_PROPOSALS = 3;
+    /** Solicitudes sin responder que un cliente puede tener a la vez en un centro (evita llenar la agenda de peticiones). */
+    public static final int MAX_PENDING_REQUESTS = 3;
 
     private final AppointmentRepository appointmentRepository;
     private final CenterRepository centerRepository;
@@ -126,6 +128,11 @@ public class BookingService {
         User client = userRepository.findById(clientId)
                 .orElseThrow(() -> new BusinessRuleException("Cliente no encontrado en el sistema."));
         boolean confirmed = center.isAutoAcceptBookings() && free != null;
+        if (!confirmed && appointmentRepository.countByCenterIdAndClientIdAndStatusInAndDateTimeAfter(centerId, clientId,
+                List.of(AppointmentStatus.PENDING, AppointmentStatus.PROPOSED), now) >= MAX_PENDING_REQUESTS) {
+            throw new BusinessRuleException("Ya tienes " + MAX_PENDING_REQUESTS + " solicitudes sin responder en este centro. "
+                    + "Espera a que te contesten o anula alguna desde «Mis citas».");
+        }
         User worker = confirmed || workerId != null ? free : null;
         AppointmentChange change = confirmed ? AppointmentChange.BOOKED : AppointmentChange.REQUESTED;
 

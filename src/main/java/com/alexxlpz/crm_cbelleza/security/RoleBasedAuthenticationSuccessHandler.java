@@ -20,11 +20,14 @@ public class RoleBasedAuthenticationSuccessHandler extends SavedRequestAwareAuth
 
     private final AuthenticationSessionService authSession;
     private final RememberMeServices rememberMeServices;
+    private final LoginAttemptService attempts;
 
     public RoleBasedAuthenticationSuccessHandler(AuthenticationSessionService authSession,
-                                                 RememberMeServices rememberMeServices) {
+                                                 RememberMeServices rememberMeServices,
+                                                 LoginAttemptService attempts) {
         this.authSession = authSession;
         this.rememberMeServices = rememberMeServices;
+        this.attempts = attempts;
     }
 
     @Override
@@ -51,6 +54,7 @@ public class RoleBasedAuthenticationSuccessHandler extends SavedRequestAwareAuth
                 rememberMeServices.loginSuccess(RememberMe.requested(request), response, authentication);
             }
         }
+        attempts.recordSuccess(request.getParameter("identifier"));
         if (request.getSession(false) != null) {
             request.getSession(false).removeAttribute(LoginFailureHandler.LAST_IDENTIFIER_ATTRIBUTE);
         }

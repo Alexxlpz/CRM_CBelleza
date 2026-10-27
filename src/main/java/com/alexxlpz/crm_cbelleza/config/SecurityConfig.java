@@ -6,7 +6,9 @@ import com.alexxlpz.crm_cbelleza.security.GoogleAuthorizationRequestResolver;
 import com.alexxlpz.crm_cbelleza.security.GoogleLoginFailureHandler;
 import com.alexxlpz.crm_cbelleza.security.GoogleOidcUserService;
 import com.alexxlpz.crm_cbelleza.security.JdbcRememberMeTokenRepository;
+import com.alexxlpz.crm_cbelleza.security.LoginAttemptService;
 import com.alexxlpz.crm_cbelleza.security.LoginFailureHandler;
+import com.alexxlpz.crm_cbelleza.security.LoginThrottleFilter;
 import com.alexxlpz.crm_cbelleza.security.RememberMe;
 import com.alexxlpz.crm_cbelleza.security.RoleAwareAccessDeniedHandler;
 import com.alexxlpz.crm_cbelleza.security.RoleBasedAuthenticationSuccessHandler;
@@ -25,6 +27,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
 import org.springframework.security.oauth2.client.web.HttpSessionOAuth2AuthorizedClientRepository;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenBasedRememberMeServices;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
@@ -39,7 +42,8 @@ import java.util.UUID;
 /**
  * Seguridad de la aplicación:
  * <ul>
- *     <li>Formulario de login propio en /login (correo o usuario + contraseña).</li>
+ *     <li>Formulario de login propio en /login (correo o usuario + contraseña), con freno a los intentos fallidos
+ *     ({@link LoginAttemptService}).</li>
  *     <li>Acceso con Google (OpenID Connect) si están configurados GOOGLE_CLIENT_ID y GOOGLE_CLIENT_SECRET.</li>
  *     <li>/client/** solo para clientes y /worker/** solo para trabajadores con centro asignado.</li>
  *     <li>Protección CSRF activa en todos los formularios y peticiones fetch.</li>
@@ -102,6 +106,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
                                                    RoleBasedAuthenticationSuccessHandler successHandler,
                                                    LoginFailureHandler failureHandler,
+                                                   LoginAttemptService loginAttempts,
                                                    RoleAwareAccessDeniedHandler accessDeniedHandler,
                                                    GoogleLoginSettings google,
                                                    GoogleOidcUserService googleUserService,
@@ -133,6 +138,7 @@ public class SecurityConfig {
                 .successHandler(successHandler)
                 .failureHandler(failureHandler)
                 .permitAll());
+        http.addFilterBefore(new LoginThrottleFilter(loginAttempts), UsernamePasswordAuthenticationFilter.class);
 
         // Sin credenciales de Google no se registra nada: /oauth2/** y /login/oauth2/** responden 404
         if (google.isEnabled()) {
