@@ -20,7 +20,7 @@ Se lee bajo demanda desde `CLAUDE.md` (variables de entorno, `.env`, Docker, Clo
 | `REMEMBER_ME_KEY` | Firma de «Recordar mi sesión». Vacía = aleatoria en cada arranque (los dispositivos recordados dejan de valer al reiniciar) |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | «Iniciar sesión con Google» (ID de cliente OAuth tipo «Aplicación web»). Vacías = sin botón de Google |
 | `GOOGLE_TOKEN_KEY` | Cifra los tokens de Google Calendar guardados. Vacía (o sin las dos anteriores) = interruptor de Google Calendar apagado con «Próximamente» (y sin bloque de Google Calendar en el perfil del cliente). URIs de redirección que hay que autorizar en Google Cloud: `/login/oauth2/code/google`, `/worker/google-calendar/callback` y `/client/google-calendar/callback` |
-| `SEED_DEMO_DATA` | `true` = carga los datos demo (por defecto `false`; el perfil `dev` los activa). En `dev`, `crm.seed-demo-history=true` añade además historial de visitas, ventas y ofertas (`DemoHistory`) |
+| `SEED_DEMO_DATA` | `true` = carga los datos demo con la contraseña pública `Cuquora2026!` (por defecto `false`; el perfil `dev` los activa). En `dev`, `crm.seed-demo-history=true` añade además historial de visitas, ventas y ofertas (`DemoHistory`) |
 | `SITE_URL` | Dirección pública (p. ej. `https://cuquora.com`) para las etiquetas Open Graph y la vuelta de Google Calendar. Vacía = la de la petición |
 | `LEGAL_OWNER_NAME`, `LEGAL_OWNER_NIF`, `LEGAL_OWNER_ADDRESS` | Titular de la web en Términos y Privacidad (LSSI). Vacías = solo «Cuquora» |
 | `TZ` | Zona horaria del servidor (Docker: `Europe/Madrid` por defecto). Las citas se guardan en hora local |
@@ -33,5 +33,5 @@ Se lee bajo demanda desde `CLAUDE.md` (variables de entorno, `.env`, Docker, Clo
 ## Despliegue previsto
 
 - **Cloudflare** delante de la app: proxy activado (nube naranja), SSL **Full (strict)**, HTTPS gratis. El mismo dominio servirá para el correo.
-- Detrás del proxy hace falta: `server.forward-headers-strategy=native`, `server.servlet.session.cookie.secure=true`, `server.servlet.session.cookie.same-site=lax`, HSTS y `REMEMBER_ME_KEY` fija.
-- Antes de producción hay que cerrar los puntos 🟠 de [`PENDIENTES.md`](PENDIENTES.md), en especial las cookies seguras y el límite de intentos de login.
+- Detrás del proxy hace falta: `server.forward-headers-strategy=native` (sin él, el freno de login por IP vería la IP de Cloudflare y cerraría a todos a la vez), `server.servlet.session.cookie.secure=true`, `server.servlet.session.cookie.same-site=lax`, HSTS y `REMEMBER_ME_KEY` fija.
+- Antes de producción hay que cerrar los puntos 🟠 de [`PENDIENTES.md`](PENDIENTES.md), en especial las cookies seguras y el límite de correos de contacto y alta (#6). El límite de intentos de login ya está (27 oct 2026).

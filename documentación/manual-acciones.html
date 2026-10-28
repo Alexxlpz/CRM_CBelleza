@@ -89,7 +89,7 @@
                         <div class="section-icon">🛡️</div>
                         <div>
                             <h2>Matriz de Permisos por Rol de Usuario</h2>
-                            <p style="margin: 0; font-size: 0.95rem;">Rutas reales de los controladores a 22 de octubre de 2026 y quién puede usarlas. 👑 = solo el dueño del centro (quien lo dio de alta); el resto del equipo lo ve en lectura</p>
+                            <p style="margin: 0; font-size: 0.95rem;">Rutas reales de los controladores a 28 de octubre de 2026 y quién puede usarlas. 👑 = solo el dueño del centro (quien lo dio de alta); el resto del equipo lo ve en lectura</p>
                         </div>
                     </div>
                 </div>
@@ -161,9 +161,17 @@
                                 <td>✅ Publicado o de su centro</td>
                             </tr>
                             <tr>
+                                <td><code>/c/{nombre}</code></td>
+                                <td><span class="http-get">GET</span></td>
+                                <td>Enlace corto del centro (Instagram, Google Maps): lleva a su ficha; sin sesión, pasa antes por el login</td>
+                                <td>✅ Permitido</td>
+                                <td>✅ Permitido</td>
+                                <td>✅ Permitido</td>
+                            </tr>
+                            <tr>
                                 <td><code>/api/centers, /api/centers/{id}/availability</code></td>
                                 <td><span class="http-get">GET</span></td>
-                                <td>JSON: búsqueda de centros con distancia y huecos llenos de un centro</td>
+                                <td>JSON: búsqueda de centros con distancia, nota, «abierto ahora» y primer hueco; huecos libres de un centro (por profesional con <code>?treatmentId=&amp;workerId=</code>)</td>
                                 <td>✅ Permitido</td>
                                 <td>✅ Permitido</td>
                                 <td>✅ Permitido</td>
@@ -172,7 +180,7 @@
                             <tr>
                                 <td><code>/login</code></td>
                                 <td><span class="http-get">GET</span> <span class="http-post">POST</span></td>
-                                <td>Inicio de sesión con correo o nombre y contraseña</td>
+                                <td>Inicio de sesión con correo o nombre y contraseña; tras 5 fallos por cuenta o 20 por IP se cierra 15 min (<code>/login?blocked</code>)</td>
                                 <td>✅ Permitido</td>
                                 <td>(Redirige)</td>
                                 <td>(Redirige)</td>
@@ -219,9 +227,17 @@
                             </tr>
                             <!-- Cliente -->
                             <tr>
-                                <td><code>/client/centers/{id}</code></td>
+                                <td><code>/client/centers/{nombre}</code></td>
                                 <td><span class="http-get">GET</span></td>
-                                <td>Ficha del centro y tratamientos; <code>?tratamiento={id}</code> lo deja elegido (/client/centers redirige a /centers)</td>
+                                <td>Ficha del centro, tratamientos y opiniones; <code>?tratamiento={id}</code> lo deja elegido (/client/centers redirige a /centers). Por número de id da 404</td>
+                                <td>❌ Login</td>
+                                <td>✅ Permitido</td>
+                                <td>⚠️ Aviso</td>
+                            </tr>
+                            <tr>
+                                <td><code>/client/centers/{nombre}/opiniones</code></td>
+                                <td><span class="http-get">GET</span></td>
+                                <td>Todas las opiniones del centro con filtros <code>orden</code>, <code>estrellas</code>, <code>comentario</code> y <code>tratamiento</code></td>
                                 <td>❌ Login</td>
                                 <td>✅ Permitido</td>
                                 <td>⚠️ Aviso</td>
@@ -229,7 +245,7 @@
                             <tr>
                                 <td><code>/client/booking</code></td>
                                 <td><span class="http-post">POST</span></td>
-                                <td>Solicitud de cita (pendiente, o confirmada al momento si el centro acepta automáticamente)</td>
+                                <td>Solicitud de cita con el profesional elegido o «Cualquiera» (pendiente, o confirmada al momento si el centro acepta automáticamente). Máximo 3 sin responder por centro</td>
                                 <td>❌ Login</td>
                                 <td>✅ Permitido</td>
                                 <td>❌ Bloqueado</td>
@@ -238,6 +254,30 @@
                                 <td><code>/client/appointments</code></td>
                                 <td><span class="http-get">GET</span></td>
                                 <td>«Mis reservas»: próximas citas e historial con «Volver a reservar»</td>
+                                <td>❌ Login</td>
+                                <td>✅ Permitido</td>
+                                <td>❌ Bloqueado</td>
+                            </tr>
+                            <tr>
+                                <td><code>/client/appointments/{id}/cambiar</code></td>
+                                <td><span class="http-get">GET</span> <span class="http-post">POST</span></td>
+                                <td>Cambiar la hora (y el profesional) de una solicitud o cita confirmada, hasta las horas antes que permita el centro</td>
+                                <td>❌ Login</td>
+                                <td>✅ Las suyas</td>
+                                <td>❌ Bloqueado</td>
+                            </tr>
+                            <tr>
+                                <td><code>/client/appointments/{id}/review</code></td>
+                                <td><span class="http-post">POST</span></td>
+                                <td>Valorar una cita completada (1-5 estrellas y comentario; una por cita, 90 días)</td>
+                                <td>❌ Login</td>
+                                <td>✅ Las suyas</td>
+                                <td>❌ Bloqueado</td>
+                            </tr>
+                            <tr>
+                                <td><code>/client/appointments/{id}/review-prompt/seen, /client/review-prompts/off</code></td>
+                                <td><span class="http-post">POST</span></td>
+                                <td>Aviso «¿Qué tal tu cita?»: marcarlo como enseñado o «No mostrar más» (JSON)</td>
                                 <td>❌ Login</td>
                                 <td>✅ Permitido</td>
                                 <td>❌ Bloqueado</td>
@@ -275,9 +315,17 @@
                                 <td>❌ Bloqueado</td>
                             </tr>
                             <tr>
+                                <td><code>/client/notifications/dismiss, /worker/notifications/dismiss</code></td>
+                                <td><span class="http-post">POST</span></td>
+                                <td>Quitar avisos de la campana («x» o «Limpiar todas»; se guardan por usuario, JSON)</td>
+                                <td>❌ Login</td>
+                                <td>✅ El suyo</td>
+                                <td>✅ El suyo</td>
+                            </tr>
+                            <tr>
                                 <td><code>/client/profile</code></td>
                                 <td><span class="http-get">GET</span> <span class="http-post">POST</span></td>
-                                <td>Datos personales y contraseña</td>
+                                <td>Datos personales y contraseña (para cambiarla se pide la actual)</td>
                                 <td>❌ Login</td>
                                 <td>✅ Permitido</td>
                                 <td>❌ Bloqueado</td>
@@ -302,10 +350,26 @@
                             <tr>
                                 <td><code>/worker/analytics?meses=3|6|12</code> · <code>?anio=2025</code></td>
                                 <td><span class="http-get">GET</span></td>
-                                <td>Análisis del centro: ingresos, visitas, clientes nuevos, fieles y a recuperar; por año, frente al año anterior</td>
+                                <td>Análisis del centro: 8 cifras (con ocupación de la agenda y clientes atendidos), fieles y a recuperar, rendimiento por profesional; por año, frente al año anterior</td>
                                 <td>❌ Login</td>
                                 <td>❌ Bloqueado</td>
                                 <td>👑 Solo el dueño</td>
+                            </tr>
+                            <tr>
+                                <td><code>/worker/analytics/export</code></td>
+                                <td><span class="http-get">GET</span></td>
+                                <td>Descargar el análisis del periodo en CSV</td>
+                                <td>❌ Login</td>
+                                <td>❌ Bloqueado</td>
+                                <td>👑 Solo el dueño</td>
+                            </tr>
+                            <tr>
+                                <td><code>/worker/reviews, /worker/reviews/{id}/reply</code></td>
+                                <td><span class="http-get">GET</span> <span class="http-post">POST</span></td>
+                                <td>Reseñas del centro (filtro «Sin responder»); responder o quitar la respuesta</td>
+                                <td>❌ Login</td>
+                                <td>❌ Bloqueado</td>
+                                <td>✅ Ver · 👑 responder, solo el dueño</td>
                             </tr>
                             <tr>
                                 <td><code>/worker/calendar</code></td>
@@ -420,6 +484,14 @@
                                 <td>👑 Solo el dueño</td>
                             </tr>
                             <tr>
+                                <td><code>/worker/treatments/{id}/workers</code></td>
+                                <td><span class="http-post">POST</span></td>
+                                <td>Quién hace cada tratamiento (ninguno = todo el equipo)</td>
+                                <td>❌ Login</td>
+                                <td>❌ Bloqueado</td>
+                                <td>👑 Solo el dueño</td>
+                            </tr>
+                            <tr>
                                 <td><code>/worker/clients, /worker/clients/search</code></td>
                                 <td><span class="http-get">GET</span></td>
                                 <td>Cartera de clientes y buscador (JSON, para «Nueva cita»)</td>
@@ -484,9 +556,9 @@
                                 <td>✅ Su perfil · 👑 datos del centro, solo el dueño</td>
                             </tr>
                             <tr>
-                                <td><code>/worker/center/loyalty, /photo, /photo/delete, /hours, /bookings</code></td>
+                                <td><code>/worker/center/loyalty, /photo, /photo/delete, /hours, /bookings, /reschedule</code></td>
                                 <td><span class="http-post">POST</span></td>
-                                <td>Configurar la tarjeta de puntos; subir o quitar la foto del centro; horario de apertura; aceptar automáticamente las citas de los clientes</td>
+                                <td>Configurar la tarjeta de puntos; subir o quitar la foto del centro; horario de apertura; aceptar automáticamente las citas de los clientes; hasta cuántas horas antes puede el cliente cambiar la hora</td>
                                 <td>❌ Login</td>
                                 <td>❌ Bloqueado</td>
                                 <td>👑 Solo el dueño</td>
@@ -495,6 +567,14 @@
                                 <td><code>/worker/center/team, /team/{id}/resend, /team/{id}/remove</code></td>
                                 <td><span class="http-post">POST</span></td>
                                 <td>Equipo: invitar a alguien, reenviar la invitación o sacarlo del centro</td>
+                                <td>❌ Login</td>
+                                <td>❌ Bloqueado</td>
+                                <td>👑 Solo el dueño</td>
+                            </tr>
+                            <tr>
+                                <td><code>/worker/center/team/{id}/horario</code></td>
+                                <td><span class="http-get">GET</span> <span class="http-post">POST</span></td>
+                                <td>Horario de un profesional (tramos por día dentro del horario del centro)</td>
                                 <td>❌ Login</td>
                                 <td>❌ Bloqueado</td>
                                 <td>👑 Solo el dueño</td>
@@ -543,7 +623,8 @@
                         <li><strong>Parámetros:</strong> <code>identifier</code> (correo o nombre), <code>password</code> y <code>rememberMe</code> (opcional) más el token CSRF.</li>
                         <li><strong>Comprobación:</strong> <code>AppUserDetailsService</code> busca por correo y, si no, por nombre; la contraseña se compara con BCrypt.</li>
                         <li><strong>Éxito:</strong> <code>RoleBasedAuthenticationSuccessHandler</code> manda al cliente a centros (o a la página que intentaba abrir) y al trabajador a <code>/worker/dashboard</code>.</li>
-                        <li><strong>Error:</strong> <code>LoginFailureHandler</code> vuelve a <code>/login</code> con el aviso y el identificador escrito.</li>
+                        <li><strong>Error:</strong> <code>LoginFailureHandler</code> vuelve a <code>/login</code> con el aviso y el identificador escrito, y apunta el fallo en <code>LoginAttemptService</code>.</li>
+                        <li><strong>Freno a los intentos:</strong> 5 fallos seguidos con una cuenta (exista o no) o 20 desde una IP cierran el login 15 minutos. Mientras dura, <code>LoginThrottleFilter</code> corta el envío sin comprobar la contraseña y vuelve a <code>/login?blocked</code> («Demasiados intentos fallidos…»). Se guarda en memoria: reiniciar la aplicación lo borra.</li>
                         <li><strong>«Recordar mi sesión»:</strong> 14 días con tokens en <code>persistent_logins</code>, firmados con <code>REMEMBER_ME_KEY</code>; se borran al cerrar sesión y al cambiar la contraseña.</li>
                     </ul>
                 </div>
@@ -569,7 +650,7 @@
                         <strong>/register</strong>
                         <span class="card-badge badge-guest">Público</span>
                     </div>
-                    <p>Crea una cuenta de cliente (nombre, correo, teléfono, contraseña y confirmación; mínimo 6 caracteres). Si el correo es de un cliente dado de alta a mano, completa esa cuenta. Si es de una cuenta solo de Google, avisa de que ya existe y propone «Continuar con Google». No se aceptan correos internos <code>@cbelleza.local</code>.</p>
+                    <p>Crea una cuenta de cliente (nombre, correo, teléfono, contraseña y confirmación; mínimo 8 caracteres y no puede ser de las más usadas, <code>PasswordPolicy</code>). Si el correo es de un cliente dado de alta a mano, completa esa cuenta. Si es de una cuenta solo de Google, avisa de que ya existe y propone «Continuar con Google». No se aceptan correos internos <code>@cbelleza.local</code>.</p>
                 </div>
 
                 <div class="card-feature" style="margin-bottom: 1.5rem;">
@@ -609,16 +690,16 @@
                         <strong>/centers</strong>
                         <span class="card-badge badge-guest">Público</span>
                     </div>
-                    <p>Buscador de centros con tarjetas y mapa (Leaflet + OpenStreetMap). Los datos llegan de <code>/api/centers</code>. Al tocar un marcador se abre un globo con «Ver tratamientos»; sin sesión, ese botón lleva al login y luego de vuelta al centro. La ruta antigua <code>/client/centers</code> redirige aquí.</p>
+                    <p>Buscador de centros con tarjetas y mapa (Leaflet + OpenStreetMap). Los datos llegan de <code>/api/centers</code>: nota y número de opiniones, si está abierto ahora y el primer hueco libre de los próximos 14 días (<code>AgendaAvailabilityService.firstFreeSlot</code>, solo para los centros de la página). Filtros rápidos «Con ofertas», «Abierto ahora» y «4 o más» (<code>topRated=true</code>); en móvil van dentro del panel de ajustes. Las tarjetas no enseñan dirección ni contacto (están en la ficha). Al tocar un marcador se abre un globo con «Ver tratamientos»; sin sesión, ese botón lleva al login y luego de vuelta al centro. La ruta antigua <code>/client/centers</code> redirige aquí.</p>
                 </div>
 
                 <div class="card-feature" style="margin-bottom: 1.5rem;">
                     <div class="card-feature-header">
                         <span class="http-get">GET</span>
-                        <strong>/client/centers/{id}</strong>
+                        <strong>/client/centers/{nombre}</strong>
                         <span class="card-badge badge-client">CLIENT</span>
                     </div>
-                    <p>Ficha del centro: foto, datos, horario de reservas, tratamientos con duración y precio, y profesionales. El calendario de la reserva (<code>fragments/datetime-picker.html</code> + <code>booking-picker.js</code>) marca cada día como con horas libres, completo o cerrado y enseña las horas libres del día elegido. Un centro sin publicar responde 404. Un trabajador que intenta ver un centro como cliente recibe un aviso con enlace a su panel.</p>
+                    <p>Ficha del centro, con el nombre en la dirección (<code>CenterService.shortSlugs</code>: si dos centros se llaman igual, el más nuevo lleva -2, -3…; por número de id responde 404). Foto, nota en estrellas, botón «Compartir» (enlace corto <code>/c/{nombre}</code>), datos, horario de reservas, tratamientos con duración y precio, el paso «¿Con quién?» y las opiniones (resumen y carrusel con las 6 últimas; «Ver las N opiniones» abre <code>/client/centers/{nombre}/opiniones</code> con filtros). El calendario de la reserva (<code>fragments/datetime-picker.html</code> + <code>booking-picker.js</code>) marca cada día como con horas libres, completo o cerrado y enseña las horas libres del día elegido. Un centro sin publicar responde 404. Un trabajador que intenta ver un centro como cliente recibe un aviso con enlace a su panel.</p>
                 </div>
 
                 <div class="card-feature" style="margin-bottom: 1.5rem;">
@@ -629,12 +710,13 @@
                     </div>
                     <p>Solicita una cita llamando a <code>BookingService.requestBooking</code>:</p>
                     <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.9rem; margin-bottom: 0.8rem;">
-                        <li><strong>Parámetros:</strong> <code>centerId</code>, <code>treatmentId</code> y <code>dateTime</code> (ISO-8601).</li>
+                        <li><strong>Parámetros:</strong> <code>centerId</code>, <code>treatmentId</code>, <code>workerId</code> (opcional; vacío = «Cualquiera») y <code>dateTime</code> (ISO-8601).</li>
                         <li><strong>Validaciones</strong> (con bloqueo por centro):
                             <ol style="margin-left: 1.25rem; margin-top: 0.4rem;">
                                 <li>No es una hora pasada, según la hora local del centro (<code>CenterClock</code>).</li>
                                 <li>Cabe completa en el horario de apertura del centro (<code>OpeningHoursService.forCenter</code>, configurable por día en «Mi Centro»; huecos de 30 min).</li>
-                                <li>Cabe en la agenda (<code>AgendaSnapshot</code>): centro no cerrado, no más citas a la vez que cabinas y al menos un profesional libre.</li>
+                                <li>Cabe en la agenda (<code>AgendaSnapshot</code>): centro no cerrado, no más citas a la vez que cabinas y al menos un profesional libre que haga ese tratamiento y trabaje a esa hora (o el elegido).</li>
+                                <li>Si no va a quedar confirmada al momento, el cliente no tiene ya 3 solicitudes sin responder en ese centro (<code>MAX_PENDING_REQUESTS</code>).</li>
                             </ol>
                         </li>
                         <li><strong>Éxito:</strong> cita <code>PENDING</code> (o <code>CONFIRMED</code> si el centro tiene activadas las reservas automáticas), correo al cliente y redirección a <code>/client/appointments</code>.</li>
@@ -653,8 +735,10 @@
                         <li><code>POST /client/appointments/{id}/accept-proposal</code> (<code>proposalId</code>): elige una hora propuesta y la cita queda confirmada.</li>
                         <li><code>POST /client/appointments/{id}/decline-proposal</code>: ninguna hora le viene bien; se avisa al centro.</li>
                         <li><code>POST /client/appointments/{id}/cancel</code>: anula la cita y se avisa al centro.</li>
+                        <li><code>GET|POST /client/appointments/{id}/cambiar</code> (<code>workerId</code>, <code>dateTime</code>): cambia la hora y el profesional de una solicitud o cita confirmada (<code>BookingService.rescheduleByClient</code>) si el centro lo permite y faltan al menos <code>client_reschedule_hours</code> horas. Una confirmada sigue confirmada; el centro recibe campana y correo.</li>
+                        <li><code>POST /client/appointments/{id}/review</code> (<code>rating</code> 1-5, <code>comment</code>): valora una cita completada de los últimos 90 días, una vez por cita. <code>?valorar={id}&amp;estrellas={n}</code> abre el modal ya marcado.</li>
                     </ul>
-                    <p style="font-size: 0.9rem;">Las tres buscan la cita con <code>findByIdAndClientId</code>: la cita de otro cliente responde 404.</p>
+                    <p style="font-size: 0.9rem;">Todas buscan la cita con <code>findByIdAndClientId</code>: la cita de otro cliente responde 404.</p>
                 </div>
 
                 <div class="card-feature">
@@ -663,7 +747,8 @@
                         <strong>/client/notifications/seen</strong>
                         <span class="card-badge badge-client">CLIENT · JSON</span>
                     </div>
-                    <p>La campana del cliente (<code>ClientNotificationService</code>) muestra sus citas de hoy y mañana y los cambios hechos por el centro en los últimos 7 días. Al abrirla, este endpoint guarda la hora en <code>notifications_seen_at</code>.</p>
+                    <p>La campana del cliente (<code>ClientNotificationService</code>) muestra sus citas de hoy y mañana y los cambios hechos por el centro en los últimos 7 días. Al abrirla, este endpoint guarda la hora en <code>notifications_seen_at</code>. Cada aviso se quita con <code>POST /client/notifications/dismiss</code> (<code>key</code> repetido; «Limpiar todas» manda todas): se guarda su huella en <code>notification_dismissals</code> y vuelve a salir si el texto cambia.</p>
+                    <p style="font-size: 0.9rem;">Aviso «¿Qué tal tu cita?»: tras una cita completada en los últimos 7 días sin reseña sale una vez; <code>POST /client/appointments/{id}/review-prompt/seen</code> lo marca al enseñarlo y <code>POST /client/review-prompts/off</code> («No mostrar más») lo apaga para todas.</p>
                 </div>
             </section>
 
@@ -674,7 +759,7 @@
                         <div class="section-icon">🩺</div>
                         <div>
                             <h2>Módulo 3: Operaciones de Especialista y Cabina</h2>
-                            <p style="margin: 0; font-size: 0.95rem;">Controladores: <code>WorkerCalendarController</code>, <code>WorkerAppointmentApiController</code>, <code>InventoryController</code>, <code>TreatmentController</code>, <code>ClientCardController</code>, <code>WorkerCenterController</code>, <code>GoogleCalendarController</code></p>
+                            <p style="margin: 0; font-size: 0.95rem;">Controladores: <code>WorkerCalendarController</code>, <code>WorkerAppointmentApiController</code>, <code>InventoryController</code>, <code>TreatmentController</code>, <code>ClientCardController</code>, <code>WorkerCenterController</code>, <code>WorkerReviewController</code>, <code>WorkerDashboardController</code>, <code>GoogleCalendarController</code></p>
                         </div>
                     </div>
                 </div>
@@ -693,7 +778,25 @@
                         <strong>/worker/dashboard</strong>
                         <span class="card-badge badge-worker">WORKER</span>
                     </div>
-                    <p>Métricas del centro: citas de hoy, citas de mañana, solicitudes pendientes y productos con stock bajo (≤ 3 unidades).</p>
+                    <p>Métricas del centro: citas de hoy, citas de mañana, solicitudes pendientes y productos con stock bajo (≤ 3 unidades). Cinco accesos directos: agenda, inventario, tratamientos, clientes y reseñas (con la nota media).</p>
+                </div>
+
+                <div class="card-feature" style="margin-bottom: 1.5rem;">
+                    <div class="card-feature-header">
+                        <span class="http-get">GET</span>
+                        <strong>/worker/analytics · /worker/analytics/export</strong>
+                        <span class="card-badge badge-worker">WORKER · 👑 dueño</span>
+                    </div>
+                    <p><code>AnalyticsService</code> calcula en memoria 8 cifras (ingresos, visitas, clientes nuevos, ticket medio, visitas de clientes que repiten, anuladas/rechazadas/no vino, <strong>ocupación de la agenda</strong> y <strong>clientes atendidos</strong>), gráficos por mes o por año y la tabla «Rendimiento por profesional» (visitas, clientes, ingresos, ticket medio, ocupación, no presentados y nota). La ocupación compara las horas con cita con las horas abiertas, con el horario actual del centro y de cada profesional, las cabinas y los bloqueos. <code>/export</code> descarga lo mismo en CSV (<code>AnalyticsCsv</code>).</p>
+                </div>
+
+                <div class="card-feature" style="margin-bottom: 1.5rem;">
+                    <div class="card-feature-header">
+                        <span class="http-get">GET</span> <span class="http-post">POST</span>
+                        <strong>/worker/reviews · /worker/reviews/{id}/reply</strong>
+                        <span class="card-badge badge-worker">WORKER · 👑 responder</span>
+                    </div>
+                    <p>Opiniones del centro (<code>ReviewService</code>), todas o solo las sin responder (<code>?filtro=sin-responder</code>). Las ve todo el equipo; el dueño responde con <code>reply</code> (hasta 1000 caracteres, pública en la ficha del centro). Una respuesta vacía la quita.</p>
                 </div>
 
                 <div class="card-feature" style="margin-bottom: 1.5rem;">
@@ -720,17 +823,18 @@
                             </thead>
                             <tbody>
                                 <tr><td><code>/worker/appointments</code></td><td>Crea una cita confirmada. Cliente de la cartera (<code>clientId</code>) o nuevo (<code>newClientName</code>, <code>newClientPhone</code>, <code>newClientEmail</code>), <code>treatmentId</code>, <code>dateTime</code>, <code>workerId</code> (vacío = quien la crea), <code>message</code> y <code>allowOutsideHours</code>.</td></tr>
-                                <tr><td><code>/{id}/approve</code></td><td>Acepta una solicitud pendiente asignando un profesional; puede llevar un mensaje.</td></tr>
+                                <tr><td><code>/{id}/approve</code></td><td>Acepta una solicitud pendiente asignando un profesional (llega propuesto el que eligió el cliente); puede llevar un mensaje.</td></tr>
                                 <tr><td><code>/{id}/reject</code></td><td>Rechaza una solicitud con un mensaje para el cliente.</td></tr>
                                 <tr><td><code>/{id}/propose</code></td><td>Propone de 1 a 3 horas futuras. La cita pasa a <code>PROPOSED</code>; caduca a las 48 h o 2 h antes de la primera hora.</td></tr>
                                 <tr><td><code>/{id}/withdraw-proposal</code></td><td>Retira la propuesta y la cita vuelve a pendiente.</td></tr>
                                 <tr><td><code>/{id}/reschedule</code></td><td>Cambia la hora (y el profesional) de una cita confirmada que no ha empezado. Sigue confirmada y se guarda la hora anterior.</td></tr>
                                 <tr><td><code>/{id}/cancel</code></td><td>Anula una cita confirmada que no ha empezado.</td></tr>
+                                <tr><td><code>/{id}/no-show</code></td><td>Marca «No se presentó» en una cita confirmada que ya ha empezado (<code>undo=true</code> lo deshace).</td></tr>
                                 <tr><td><code>/worker/agenda-blocks</code></td><td>Bloquea un horario de un profesional (<code>workerId</code>) o de todo el centro (<code>wholeCenter</code>) entre <code>startsAt</code> y <code>endsAt</code>, con motivo opcional. <code>/{id}/delete</code> lo quita.</td></tr>
                             </tbody>
                         </table>
                     </div>
-                    <p style="font-size: 0.9rem;">Fuera del horario de reservas el servidor responde <strong>409</strong> con <code>code: OUTSIDE_HOURS</code> y la pantalla pregunta si guardar igualmente (se reenvía con <code>allowOutsideHours=true</code>). Los solapes nunca se permiten.</p>
+                    <p style="font-size: 0.9rem;">Fuera del horario de reservas del centro o del horario de ese profesional el servidor responde <strong>409</strong> con <code>code: OUTSIDE_HOURS</code> y la pantalla pregunta si guardar igualmente (se reenvía con <code>allowOutsideHours=true</code>). Los solapes nunca se permiten.</p>
                 </div>
 
                 <div class="card-feature" style="margin-bottom: 1.5rem;">
@@ -779,8 +883,12 @@
                         <span class="card-badge badge-worker">WORKER</span>
                     </div>
                     <p>
-                        Alta de tratamiento en el centro: <code>name</code>, <code>description</code>, <code>price</code>, <code>duration</code> (minutos) y <code>type</code> (<code>TreatmentType</code>).
+                        Alta de tratamiento en el centro: <code>name</code>, <code>description</code>, <code>price</code>, <code>duration</code> (minutos), <code>type</code> (<code>TreatmentType</code>) y, si el equipo tiene más de una persona, <code>workerIds</code> («¿Quién lo hace?»).
                     </p>
+                    <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.9rem;">
+                        <li><code>POST /worker/treatments/{id}/workers</code> (<code>workerIds</code> repetido): quién hace el tratamiento, guardado en <code>treatment_workers</code>. Sin nadie marcado lo hace todo el equipo. Lo usan el paso «¿Con quién?» del cliente, los huecos libres y la asignación automática.</li>
+                        <li><code>POST /worker/treatments/{id}/offer</code> · <code>/offer/delete</code>: poner o quitar una oferta.</li>
+                    </ul>
                 </div>
 
                 <div class="card-feature" style="margin-bottom: 1.5rem;">
@@ -803,9 +911,11 @@
                         <strong>/worker/center</strong>
                         <span class="card-badge badge-worker">WORKER</span>
                     </div>
-                    <p>«Mi Centro»: datos del centro y ubicación con pin, zona horaria (entre las de <code>CenterTimeZones.OPTIONS</code>), cabinas (1-50), datos personales y contraseña del trabajador.</p>
+                    <p>«Mi Centro»: datos del centro y ubicación con pin, zona horaria (entre las de <code>CenterTimeZones.OPTIONS</code>), cabinas (1-50), datos personales y contraseña del trabajador (para cambiarla hay que escribir la actual).</p>
                     <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.9rem;">
                         <li><code>POST /worker/center/photo</code> · <code>/photo/delete</code> (<code>CenterPhotoService</code>): JPG o PNG hasta 8 MB y al menos 400×250 px. Se endereza con la orientación EXIF y se guarda en la base de datos como JPEG de 1200 px como mucho. Sale en el buscador, en la ficha del centro y detrás del saludo del panel; sin foto, las iniciales del centro.</li>
+                        <li><code>POST /worker/center/bookings</code> (aceptar automáticamente) y <code>/reschedule</code> (<code>hours</code>: 0, 2, 12, 24 o 48; hasta cuántas horas antes puede el cliente cambiar la hora; 0 = no puede). En el mismo bloque, el enlace corto <code>/c/{nombre}</code> con «Copiar».</li>
+                        <li><code>GET|POST /worker/center/team/{id}/horario</code> (<code>WorkerHoursService</code>): tramos de cada día en los que trabaja esa persona (dos el mismo día = jornada partida), siempre dentro del horario del centro. Sin tramos, trabaja siempre que el centro abre.</li>
                         <li><code>POST /worker/center/loyalty</code> (<code>LoyaltyService.updateSettings</code>): modo (desactivada, <code>PER_EURO</code> o <code>PER_ITEM</code>), puntos que se ganan (1-1000), puntos para la recompensa (1-100.000) y su texto (hasta 200 caracteres). Los tratamientos suman cuando la cita está completada y solo desde que se activó la tarjeta.</li>
                     </ul>
                 </div>
@@ -839,7 +949,7 @@
                         <span class="card-badge badge-guest">JSON REST</span>
                     </div>
                     <p>
-                        Lo usa el selector de hora del cliente. Devuelve el horario de reservas, los días cerrados del centro (bloqueos de todo el centro) y los huecos llenos: los que no tienen cabina libre o ningún profesional disponible, contando citas, bloqueos y horas propuestas.
+                        Lo usa el selector de hora del cliente. Devuelve el horario de reservas (con los tramos de cada día en minutos, <code>days</code>), los días cerrados del centro (bloqueos de todo el centro) y los huecos llenos: los que no tienen cabina libre o ningún profesional disponible, contando citas, bloqueos, horas propuestas y el horario de cada profesional. Parámetros opcionales: <code>treatmentId</code> y <code>workerId</code> (solo cuenta ese profesional, o quien haga el tratamiento) y <code>changing</code> (la cita que el cliente está cambiando de hora no ocupa su propio hueco).
                     </p>
                     <pre><code>// Respuesta JSON de ejemplo:
 {
@@ -847,6 +957,7 @@
   "workingDays": [1, 2, 3, 4, 5],
   "openHour": 9,
   "closeHour": 20,
+  "days": { "1": [[540, 840], [960, 1200]], "2": [[540, 1200]] },
   "closedDates": ["2026-10-20"],
   "occupied": [
     "2026-10-14T10:00:00",
@@ -863,7 +974,7 @@
                         <span class="card-badge badge-guest">JSON REST</span>
                     </div>
                     <p>
-                        Búsqueda de centros para la página <code>/centers</code>. Si se pasan <code>lat</code> y <code>lon</code>, calcula la distancia en kilómetros a cada centro con la <strong>fórmula de Haversine</strong> (<code>GeoDistance</code>).
+                        Búsqueda de centros para la página <code>/centers</code>. Si se pasan <code>lat</code> y <code>lon</code>, calcula la distancia en kilómetros a cada centro con la <strong>fórmula de Haversine</strong> (<code>GeoDistance</code>). Filtros <code>withOffers</code>, <code>openNow</code> y <code>topRated</code> (4 estrellas o más). Cada centro trae su nombre en la dirección (<code>slug</code>), la nota (<code>rating</code>, <code>reviewCount</code>), si está abierto y el primer hueco libre de los próximos 14 días (<code>firstSlot</code>, solo para la página devuelta). Las tarjetas ya no pintan dirección, correo ni teléfono, aunque la respuesta los sigue trayendo.
                     </p>
                 </div>
             </section>
@@ -970,6 +1081,36 @@
                                 <td><strong>Bloqueo con citas</strong></td>
                                 <td>No se puede bloquear un periodo con citas confirmadas, ni uno pasado o de más de un año.</td>
                                 <td>«Hay N citas confirmadas…»</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Demasiadas solicitudes</strong></td>
+                                <td>Un cliente puede tener como mucho 3 solicitudes sin responder (pendientes o con propuesta) en un mismo centro.</td>
+                                <td>«Ya tienes 3 solicitudes sin responder en este centro. Espera a que te contesten o anula alguna desde «Mis citas».»</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Cliente cambia la hora</strong></td>
+                                <td>Solo solicitudes o citas confirmadas futuras, si el centro lo permite y faltan al menos las horas que pide.</td>
+                                <td>«&lt;Centro&gt; no deja cambiar la hora desde la web…» / «Solo se puede cambiar hasta N h antes de la cita…»</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Fuera del horario del profesional</strong></td>
+                                <td>Sus tramos deben estar dentro del horario del centro; en la agenda se puede saltar confirmándolo.</td>
+                                <td>«El &lt;día&gt; &lt;nombre&gt; no puede trabajar de …» / 409 <code>OUTSIDE_HOURS</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Valoración no permitida</strong></td>
+                                <td>Solo citas completadas, una vez por cita y en los 90 días siguientes; de 1 a 5 estrellas.</td>
+                                <td>«Solo se pueden valorar las citas completadas.» / «Ya has valorado esta cita.» / «Ha pasado el plazo…» / «Elige de 1 a 5 estrellas.»</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Contraseña débil o sin la actual</strong></td>
+                                <td>8 caracteres como mínimo, ninguna de las más usadas; para cambiarla se pide la actual.</td>
+                                <td>«La contraseña debe tener al menos 8 caracteres.» / «Esa contraseña es de las más usadas…» / «La contraseña actual no es correcta.»</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Demasiados intentos de login</strong></td>
+                                <td>5 fallos por cuenta o 20 por IP cierran el login 15 minutos.</td>
+                                <td>«Demasiados intentos fallidos. Por seguridad, espera 15 minutos…»</td>
                             </tr>
                             <tr>
                                 <td><strong>Recurso de otro centro o cliente</strong></td>

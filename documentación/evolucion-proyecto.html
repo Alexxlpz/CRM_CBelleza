@@ -83,7 +83,7 @@
                     </div>
                     <div class="hero-meta-item">
                         <span>Commits Registrados:</span>
-                        <strong>56 commits (hasta el 22 oct 2026)</strong>
+                        <strong>63 commits (hasta el 27 oct 2026)</strong>
                     </div>
                     <div class="hero-meta-item">
                         <span>Metodología:</span>
@@ -939,7 +939,7 @@
                         <div class="timeline-dot"></div>
                         <div class="timeline-content">
                             <div class="timeline-header">
-                                <span class="commit-hash">5c8ad79</span>
+                                <span class="commit-hash">eec2c81</span>
                                 <span class="commit-date">📅 22 de Octubre, 2026</span>
                                 <span class="commit-author">👤 alejandro</span>
                             </div>
@@ -949,6 +949,122 @@
                                 <li>«Volver a reservar» abre el centro con el mismo tratamiento ya elegido (<code>?tratamiento=</code>).</li>
                                 <li>El trabajador marca «No se presentó» en una cita ya empezada (<code>V18__citas_no_presentado.sql</code>, estado <code>NO_SHOW</code>); se puede deshacer, quita los puntos de esa cita y la ficha del cliente y la agenda avisan de cuántas veces ha faltado.</li>
                                 <li>Tests: 225 en total, todos en verde.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Commit 46 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="commit-hash">4f6bc60</span>
+                                <span class="commit-date">📅 23 de Octubre, 2026</span>
+                                <span class="commit-author">👤 alejandro</span>
+                            </div>
+                            <h4>Elegir profesional y cambiar la hora desde «Mis reservas»</h4>
+                            <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.88rem;">
+                                <li>El dueño elige qué profesionales hacen cada tratamiento (<code>V19__profesionales_y_cambios_de_hora.sql</code>, tabla <code>treatment_workers</code>; sin nadie marcado, todo el equipo).</li>
+                                <li>La reserva tiene un paso «¿Con quién?»: «Cualquiera» o un profesional que haga el servicio, y los huecos libres siguen esa elección.</li>
+                                <li>El cliente cambia la hora (y el profesional) de una solicitud o cita confirmada desde «Mis reservas», hasta las horas antes que decida el dueño (<code>client_reschedule_hours</code>; 0 = tiene que llamar). La confirmada sigue confirmada y el centro recibe campana y correo.</li>
+                                <li>Arreglos de la reserva: pulsar un día sin servicio elegido marca en rojo los servicios con un aviso; en móvil, elegir servicio ya no se salta el paso del profesional.</li>
+                                <li>Tests: <code>ProfessionalAndRescheduleTests</code>.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Commit 47 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="commit-hash">0a85cdc</span>
+                                <span class="commit-date">📅 24 de Octubre, 2026</span>
+                                <span class="commit-author">👤 alejandro</span>
+                            </div>
+                            <h4>Reseñas verificadas, horario por profesional y análisis ampliado</h4>
+                            <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.88rem;">
+                                <li><strong>Reseñas verificadas</strong> (<code>V20__resenas.sql</code>): solo puede opinar el cliente de una cita completada, una vez por cita y en los 90 días siguientes. La nota sale en el buscador y en la ficha del centro, y el dueño responde desde la nueva pantalla «Reseñas».</li>
+                                <li><strong>Horario de cada profesional</strong> (<code>V21__horario_profesionales.sql</code>) desde «Mi Centro» &gt; Equipo, siempre dentro del horario del centro. Reservas, huecos libres y agenda lo respetan; en la agenda se puede saltar confirmándolo.</li>
+                                <li><strong>Análisis:</strong> nuevas cifras «Ocupación de la agenda» y «Clientes atendidos», tabla «Rendimiento por profesional» y exportación a CSV.</li>
+                                <li><strong>Campanas:</strong> cada aviso se quita con su «x» o todos con «Limpiar todas», guardado por usuario (<code>V22__avisos_descartados.sql</code>).</li>
+                                <li>Tests: <code>ReviewTests</code>, <code>WorkerHoursTests</code>, <code>AnalyticsOccupancyTest</code> y <code>NotificationDismissTests</code>.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Commit 48 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="commit-hash">1a0f342</span>
+                                <span class="commit-date">📅 25 de Octubre, 2026</span>
+                                <span class="commit-author">👤 alejandro</span>
+                            </div>
+                            <h4>Opiniones en la ficha y aviso «¿Qué tal tu cita?»</h4>
+                            <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.88rem;">
+                                <li>Todos los centros enseñan estrellas; sin reseñas, vacías y «Sin valoraciones». Nuevo filtro «4 o más» en el buscador.</li>
+                                <li>La ficha del centro resume la nota y muestra un carrusel con las seis últimas opiniones; «Ver las N opiniones» abre una página con todas y filtros por orden, estrellas, comentario y tratamiento.</li>
+                                <li>Tras una cita completada sale una sola vez la tarjeta «¿Qué tal tu cita?» (<code>V23__aviso_valorar.sql</code>); cada estrella abre la valoración ya marcada y «No mostrar más» la apaga para siempre (<code>V24__no_mostrar_aviso_valorar.sql</code>).</li>
+                                <li>En móvil, los filtros rápidos del buscador pasan al panel de ajustes, que dice cuántos hay puestos.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Commit 49 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="commit-hash">9ccf192</span>
+                                <span class="commit-date">📅 26 de Octubre, 2026</span>
+                                <span class="commit-author">👤 alejandro</span>
+                            </div>
+                            <h4>Primer hueco, enlace corto y ficha por nombre</h4>
+                            <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.88rem;">
+                                <li>Cada centro del buscador enseña su primer hueco libre de los próximos 14 días («Primer hueco: hoy a las 17:30»).</li>
+                                <li>Enlace corto por centro (<code>/c/centro-historico</code>) para Instagram o Google Maps, que se copia desde «Mi Centro»; si dos centros se llaman igual, el segundo lleva -2.</li>
+                                <li>La ficha y las opiniones se abren por el nombre (<code>/client/centers/centro-historico</code>) y ningún enlace de cliente lleva ya el id; por id responde 404.</li>
+                                <li>Botón «Compartir» en la ficha: el menú de compartir del móvil o copiar el enlace en el ordenador.</li>
+                                <li>Arreglado <code>AnalyticsTests</code>, que fallaba si se lanzaba antes de las 11:00. Tests: <code>FirstSlotAndShortLinkTests</code>.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Commit 50 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="commit-hash">90f9c3d</span>
+                                <span class="commit-date">📅 26 de Octubre, 2026</span>
+                                <span class="commit-author">👤 alejandro</span>
+                            </div>
+                            <h4>Limpieza de código</h4>
+                            <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.88rem;">
+                                <li><code>serialVersionUID</code> en las excepciones, nombres completos de <code>java.*</code> pasados a imports y selectores CSS duplicados unidos (sin cambios visibles: capturas antes y después idénticas).</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Commit 51 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="commit-hash">0248b12</span>
+                                <span class="commit-date">📅 27 de Octubre, 2026</span>
+                                <span class="commit-author">👤 alejandro</span>
+                            </div>
+                            <h4>Seguridad antes de publicar</h4>
+                            <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.88rem;">
+                                <li>Tras 5 intentos fallidos con una cuenta, o 20 desde una IP, el login se cierra 15 minutos (<code>LoginAttemptService</code>).</li>
+                                <li>Contraseñas de 8 caracteres como mínimo y fuera las más usadas; para cambiarla (perfil del cliente y «Mi Centro») se pide la actual.</li>
+                                <li>Un cliente puede tener como mucho 3 solicitudes sin responder por centro.</li>
+                                <li>Nueva contraseña de las cuentas demo, <code>Cuquora2026!</code>; las bases de datos demo con la antigua se actualizan al arrancar.</li>
+                                <li>Las tarjetas del listado de centros ya no enseñan dirección, correo ni teléfono (siguen en la ficha).</li>
+                                <li>Tests: <code>SecurityHardeningTests</code>; 291 en total, todos en verde.</li>
                             </ul>
                         </div>
                     </div>
@@ -1038,6 +1154,20 @@
                             El alta crea a todo el equipo sin contraseña: cada uno la pone desde su invitación. En la base de datos solo se guarda la huella SHA-256 de los enlaces de invitación y de aprobación (<code>SecureTokens</code>), y el centro no es visible hasta que administración lo publica.
                         </p>
                     </div>
+
+                    <div class="card-feature">
+                        <h4>11. Quitar Avisos que No Están en la Base de Datos</h4>
+                        <p>
+                            Los avisos de la campana se calculan al vuelo a partir de las citas y el stock, así que no hay una fila que borrar. Al quitar uno se guarda su huella (texto y enlace) por usuario: si el aviso cambia («Mañana» pasa a «Hoy», otra cantidad), es otro y vuelve a salir, y las huellas de avisos que ya no existen se borran solas.
+                        </p>
+                    </div>
+
+                    <div class="card-feature">
+                        <h4>12. Opiniones que No se Pueden Inventar</h4>
+                        <p>
+                            Una reseña solo la puede dejar el cliente de una cita completada, una vez por cita y en los 90 días siguientes, y la respuesta solo la escribe el dueño del centro. Así la nota del buscador sale de visitas reales y no de cuentas creadas para opinar.
+                        </p>
+                    </div>
                 </div>
             </section>
 
@@ -1074,7 +1204,7 @@
                         <div class="step-num">3</div>
                         <div class="step-body">
                             <h4>Análisis: siguiente fase</h4>
-                            <p>Ya hay análisis de ingresos, visitas y clientes, también año contra año. Falta la ocupación de la agenda (horas reservadas frente a horas abiertas) y las comisiones por profesional.</p>
+                            <p>Ya hay análisis de ingresos, visitas y clientes, también año contra año, con la ocupación de la agenda, el rendimiento por profesional y la exportación a CSV. Faltan las comisiones por profesional y comparar dos años cualesquiera.</p>
                         </div>
                     </div>
 
@@ -1082,7 +1212,7 @@
                         <div class="step-num">4</div>
                         <div class="step-body">
                             <h4>Agenda: Siguiente Fase</h4>
-                            <p>Que el cliente pueda pedir cita con varias franjas que le vienen bien y el trabajador elija, horario propio por centro y qué profesionales hacen cada tratamiento.</p>
+                            <p>El horario por centro y por profesional y quién hace cada tratamiento ya están. Falta que el cliente pueda pedir cita con varias franjas que le vienen bien y el trabajador elija, una lista de espera para cuando se libere un hueco y varios tratamientos en una misma cita.</p>
                         </div>
                     </div>
 
@@ -1090,7 +1220,7 @@
                         <div class="step-num">5</div>
                         <div class="step-body">
                             <h4>Puesta en Producción</h4>
-                            <p>Dominio propio detrás de Cloudflare (HTTPS y cookies seguras), remitente verificado en Brevo, credenciales y verificación de Google, límite de intentos de login y el resto de puntos 🟠 de <code>PENDIENTES.md</code>.</p>
+                            <p>Dominio propio detrás de Cloudflare (HTTPS y cookies seguras), remitente verificado en Brevo, credenciales y verificación de Google, límite de envíos en contacto y alta de centros y el resto de puntos 🟠 de <code>PENDIENTES.md</code>. El límite de intentos de login ya está desde el 27 de octubre.</p>
                         </div>
                     </div>
                 </div>

@@ -179,17 +179,17 @@
                             </tr>
                             <tr>
                                 <td><strong>Seguridad</strong></td>
-                                <td><code>SecurityConfig</code>, <code>AppUserDetailsService</code>, <code>GoogleOidcUserService</code>, <code>JdbcRememberMeTokenRepository</code></td>
-                                <td>Login por formulario o con Google, «Recordar mi sesión» 14 días, CSRF, rutas por rol (<code>/client/**</code>, <code>/worker/**</code>) y 404 propia también sin sesión.</td>
+                                <td><code>SecurityConfig</code>, <code>AppUserDetailsService</code>, <code>GoogleOidcUserService</code>, <code>JdbcRememberMeTokenRepository</code>, <code>LoginAttemptService</code>, <code>PasswordPolicy</code></td>
+                                <td>Login por formulario o con Google, «Recordar mi sesión» 14 días, CSRF, rutas por rol (<code>/client/**</code>, <code>/worker/**</code>) y 404 propia también sin sesión. Login cerrado 15 min tras 5 fallos por cuenta o 20 por IP; contraseñas de 8 caracteres como mínimo y sin las más usadas.</td>
                             </tr>
                             <tr>
                                 <td><strong>Controladores Web & API</strong></td>
-                                <td>Un controlador por área: <code>ClientBookingController</code>, <code>WorkerCalendarController</code>, <code>WorkerAppointmentApiController</code>, <code>InventoryController</code>, <code>ClientCardController</code>, <code>CenterApiController</code>…</td>
+                                <td>Un controlador por área: <code>ClientBookingController</code>, <code>WorkerCalendarController</code>, <code>WorkerAppointmentApiController</code>, <code>InventoryController</code>, <code>ClientCardController</code>, <code>CenterApiController</code>, <code>WorkerReviewController</code>, <code>CenterLinkController</code> (enlace corto <code>/c/{nombre}</code>)…</td>
                                 <td>Controladores finos: reciben el formulario (<code>record</code>), llaman al servicio y eligen la vista. Los endpoints JSON (<code>@ApiEndpoint</code>) devuelven los errores también en JSON.</td>
                             </tr>
                             <tr>
                                 <td><strong>Lógica de Negocio (Servicios)</strong></td>
-                                <td><code>BookingService</code>, <code>AgendaAvailabilityService</code>, <code>AgendaBlockService</code>, <code>ClientCardService</code>, <code>InventoryService</code>, <code>ProductSaleService</code>, <code>LoyaltyService</code>, <code>TreatmentSummaryService</code>, <code>CenterRegistrationService</code>, <code>InvitationService</code>, <code>CenterPhotoService</code>, <code>UserService</code>, <code>ClientNotificationService</code></td>
+                                <td><code>BookingService</code>, <code>AgendaAvailabilityService</code>, <code>AgendaBlockService</code>, <code>ClientCardService</code>, <code>InventoryService</code>, <code>ProductSaleService</code>, <code>LoyaltyService</code>, <code>TreatmentSummaryService</code>, <code>CenterRegistrationService</code>, <code>InvitationService</code>, <code>CenterPhotoService</code>, <code>UserService</code>, <code>ClientNotificationService</code>, <code>ReviewService</code>, <code>WorkerHoursService</code>, <code>NotificationDismissalService</code>, <code>AnalyticsService</code></td>
                                 <td>Toda la validación vive aquí y lanza <code>BusinessRuleException</code> (mensaje en español) o <code>ResourceNotFoundException</code> (404). <code>BookingService</code> concentra todos los cambios de cita con bloqueo por centro.</td>
                             </tr>
                             <tr>
@@ -205,7 +205,7 @@
                             <tr>
                                 <td><strong>Persistencia & Datos</strong></td>
                                 <td><code>PostgreSQL 16</code> (Docker) o <code>H2</code> en memoria (desarrollo y tests)</td>
-                                <td>Esquema creado por <strong>Flyway</strong> (<code>db/migration/V1</code> a <code>V18</code>) con <code>ddl-auto=validate</code>; datos demo solo con <code>crm.seed-demo-data=true</code>.</td>
+                                <td>Esquema creado por <strong>Flyway</strong> (<code>db/migration/V1</code> a <code>V24</code>) con <code>ddl-auto=validate</code>; datos demo solo con <code>crm.seed-demo-data=true</code>.</td>
                             </tr>
                         </tbody>
                     </table>
@@ -318,6 +318,12 @@
                                 <td>Modal «Vender producto» con el stock actual y el que quedará.</td>
                                 <td><code>worker/client_detail.html</code>, <code>worker/inventory.html</code></td>
                                 <td><strong>Nuevo (16 oct):</strong> sale de <code>clients.css</code> para que el inventario lo reutilice.</td>
+                            </tr>
+                            <tr>
+                                <td><code>reviews.css</code></td>
+                                <td>Estrellas, resumen y carrusel de opiniones, listado con filtros, modal «Valorar» y respuestas del centro.</td>
+                                <td><code>centers.html</code>, <code>client/center_details.html</code>, <code>client/center_reviews.html</code>, <code>client/appointments.html</code>, <code>worker/reviews.html</code></td>
+                                <td><strong>Nuevo (24 oct):</strong> lo comparten cliente y trabajador para que las estrellas se vean igual en todas partes.</td>
                             </tr>
                             <tr>
                                 <td><code>cliente.css</code> / <code>citas.css</code></td>
@@ -440,15 +446,15 @@
                 <div class="grid-2">
                     <div class="card-feature">
                         <h4>🏢 Center (Centros de Belleza)</h4>
-                        <p>Representa una sede física. Contiene nombre, dirección física, teléfono, email de contacto, coordenadas (latitud y longitud) para el mapa y la distancia, <strong>zona horaria</strong> (<code>time_zone</code>), número de <strong>cabinas</strong> (citas a la vez, de 1 a 50), CIF/NIF, si está <strong>publicado</strong> (los dados de alta nacen ocultos hasta que administración los revisa), la configuración de la tarjeta de puntos (<code>loyalty_*</code>) y la fecha de su foto (<code>photo_updated_at</code>; la imagen va en <code>center_photos</code>).</p>
+                        <p>Representa una sede física. Contiene nombre, dirección física, teléfono, email de contacto, coordenadas (latitud y longitud) para el mapa y la distancia, <strong>zona horaria</strong> (<code>time_zone</code>), número de <strong>cabinas</strong> (citas a la vez, de 1 a 50), CIF/NIF, si está <strong>publicado</strong> (los dados de alta nacen ocultos hasta que administración los revisa), la configuración de la tarjeta de puntos (<code>loyalty_*</code>) y la fecha de su foto (<code>photo_updated_at</code>; la imagen va en <code>center_photos</code>), su dueño (<code>owner_id</code>), si acepta las citas al momento (<code>auto_accept_bookings</code>) y hasta cuántas horas antes puede el cliente cambiar la hora (<code>client_reschedule_hours</code>). En las direcciones de cliente se usa su nombre (<code>/client/centers/centro-historico</code>), nunca el id.</p>
                     </div>
                     <div class="card-feature">
                         <h4>👤 User & Role (Usuarios y Roles)</h4>
-                        <p>Entidad de usuarios del sistema. Posee nombre, email único, teléfono, contraseña cifrada en BCrypt (nula en clientes dados de alta a mano y en cuentas solo de Google), <code>google_id</code> si ha entrado con Google y un <code>Role</code> (<code>CLIENT</code> o <code>WORKER</code>). Los trabajadores se vinculan a un <code>Center</code>.</p>
+                        <p>Entidad de usuarios del sistema. Posee nombre, email único, teléfono, contraseña cifrada en BCrypt (nula en clientes dados de alta a mano y en cuentas solo de Google), <code>google_id</code> si ha entrado con Google y un <code>Role</code> (<code>CLIENT</code> o <code>WORKER</code>). Los trabajadores se vinculan a un <code>Center</code>. <code>review_prompts_off</code> guarda si el cliente pulsó «No mostrar más» en el aviso de valorar.</p>
                     </div>
                     <div class="card-feature">
                         <h4>💆 Treatment (Catálogo de Servicios)</h4>
-                        <p>Tratamientos ofrecidos por cada centro. Incluye nombre, descripción, tarifa (€), duración estimada en minutos (30, 45, 60, 90) y tipología (<code>FACIAL</code>, <code>MASAJES</code>, <code>MANICURA_PEDICURA</code>, <code>CORPORAL</code>, etc.).</p>
+                        <p>Tratamientos ofrecidos por cada centro. Incluye nombre, descripción, tarifa (€), duración estimada en minutos (30, 45, 60, 90) y tipología (<code>FACIAL</code>, <code>MASAJES</code>, <code>MANICURA_PEDICURA</code>, <code>CORPORAL</code>, etc.), oferta opcional y quién lo hace (<code>treatment_workers</code>; sin filas, todo el equipo).</p>
                     </div>
                     <div class="card-feature">
                         <h4>📦 Product & Inventory (Insumos y Stock)</h4>
@@ -460,7 +466,7 @@
                     </div>
                     <div class="card-feature">
                         <h4>📅 Appointment (Citas y Reservas)</h4>
-                        <p>Registra el turno acordado. Vincula un <code>dateTime</code> (fecha y hora exacta), un <code>treatment</code>, un <code>center</code> y obligatoriamente un <code>client</code> registrado (cuenta de usuario activa), el <code>worker</code> asignado, su estado (<code>PENDING</code>, <code>PROPOSED</code>, <code>CONFIRMED</code>, <code>REJECTED</code>, <code>CANCELLED</code>, <code>COMPLETED</code>), el <code>workerMessage</code>, el último cambio y quién lo hizo (<code>last_change</code>), la hora anterior si el centro la movió, los eventos de Google Calendar del trabajador y del cliente y el <strong>resumen del tratamiento</strong> (<code>treatment_summary</code>, con <code>treatment_alert</code> si es un aviso para próximas citas; solo lo ve el centro). <em>El flujo de clientes invitados se suprimió para garantizar la trazabilidad de las fichas.</em></p>
+                        <p>Registra el turno acordado. Vincula un <code>dateTime</code> (fecha y hora exacta), un <code>treatment</code>, un <code>center</code> y obligatoriamente un <code>client</code> registrado (cuenta de usuario activa), el <code>worker</code> asignado, su estado (<code>PENDING</code>, <code>PROPOSED</code>, <code>CONFIRMED</code>, <code>REJECTED</code>, <code>CANCELLED</code>, <code>COMPLETED</code>, <code>NO_SHOW</code>), el precio cobrado (<code>price</code>), cuándo se le propuso valorarla (<code>review_prompted_at</code>), el <code>workerMessage</code>, el último cambio y quién lo hizo (<code>last_change</code>), la hora anterior si el centro la movió, los eventos de Google Calendar del trabajador y del cliente y el <strong>resumen del tratamiento</strong> (<code>treatment_summary</code>, con <code>treatment_alert</code> si es un aviso para próximas citas; solo lo ve el centro). <em>El flujo de clientes invitados se suprimió para garantizar la trazabilidad de las fichas.</em></p>
                     </div>
                     <div class="card-feature">
                         <h4>🕒 AppointmentProposal & AgendaBlock</h4>
@@ -477,6 +483,18 @@
                     <div class="card-feature">
                         <h4>✉️ AccountInvitation & CenterPhoto</h4>
                         <p><code>AccountInvitation</code>: invitación de un solo uso (7 días) para que un trabajador de un centro nuevo ponga su contraseña; solo se guarda la huella SHA-256 del enlace. <code>CenterPhoto</code>: la foto del centro como JPEG de 1200 px como mucho, guardada en la base de datos.</p>
+                    </div>
+                    <div class="card-feature">
+                        <h4>⭐ Review (Reseñas verificadas)</h4>
+                        <p>Una por cita completada (<code>appointment_id</code> único), de 1 a 5 estrellas con comentario opcional, y la respuesta pública del dueño (<code>reply</code>, <code>replied_at</code>). Guarda también <code>center_id</code> para sacar la nota de cada centro sin pasar por las citas.</p>
+                    </div>
+                    <div class="card-feature">
+                        <h4>🕘 OpeningHours & WorkerHoursPeriod</h4>
+                        <p><code>center_opening_hours</code>: horario de cada centro por día de la semana (uno o dos tramos). <code>worker_hours</code>: los tramos en los que trabaja cada profesional, siempre dentro del horario del centro; sin tramos, trabaja siempre que el centro abre.</p>
+                    </div>
+                    <div class="card-feature">
+                        <h4>🔕 NotificationDismissal</h4>
+                        <p>Avisos de la campana que cada usuario ha quitado. Como los avisos se calculan al vuelo, solo se guarda una huella del texto y el enlace: si el aviso cambia, vuelve a salir.</p>
                     </div>
                 </div>
             </section>
@@ -549,7 +567,7 @@ mvnw.cmd spring-boot:run -Dspring-boot.run.profiles=dev
 # Linux (Maven del sistema)
 mvn spring-boot:run -Dspring-boot.run.profiles=dev
 
-# Tests (167)
+# Tests (291)
 mvn test</code></pre>
                 <p>
                     Con el perfil <code>dev</code> la aplicación usa H2 en memoria, carga los datos demo con <code>DatabaseSeeder</code> y activa <code>/login-selector</code> y la consola H2. Sin SMTP configurado, los correos se escriben en la consola. «Iniciar sesión con Google» y Google Calendar solo aparecen si están las variables <code>GOOGLE_CLIENT_ID</code>, <code>GOOGLE_CLIENT_SECRET</code> y <code>GOOGLE_TOKEN_KEY</code>.
@@ -572,7 +590,7 @@ mvn test</code></pre>
                     <div class="callout-icon">🔐</div>
                     <div class="callout-content">
                         <strong>Solo en desarrollo:</strong>
-                        <p>Estas cuentas solo existen al arrancar la aplicación con el perfil <code>dev</code> (o con <code>SEED_DEMO_DATA=true</code> en una instalación de pruebas). Todas usan la contraseña <code>password123</code>, que es pública: en un servidor real no se crean y nunca deben activarse.</p>
+                        <p>Estas cuentas solo existen al arrancar la aplicación con el perfil <code>dev</code> (o con <code>SEED_DEMO_DATA=true</code> en una instalación de pruebas). Todas usan la contraseña <code>Cuquora2026!</code>, que es pública (una base de datos demo creada con la antigua <code>password123</code> se actualiza sola al arrancar): en un servidor real no se crean y nunca deben activarse.</p>
                     </div>
                 </div>
 
@@ -593,49 +611,49 @@ mvn test</code></pre>
                                 <td><code>carlos@cbelleza.com</code></td>
                                 <td><span class="card-badge badge-worker">WORKER</span></td>
                                 <td>Centro Histórico (Madrid)</td>
-                                <td><code>password123</code></td>
+                                <td><code>Cuquora2026!</code></td>
                             </tr>
                             <tr>
                                 <td><strong>Lucía Romero</strong></td>
                                 <td><code>lucia.romero@cbelleza.com</code></td>
                                 <td><span class="card-badge badge-worker">WORKER</span></td>
                                 <td>Centro Histórico (Madrid)</td>
-                                <td><code>password123</code></td>
+                                <td><code>Cuquora2026!</code></td>
                             </tr>
                             <tr>
                                 <td><strong>Elena Rostova</strong></td>
                                 <td><code>elena@cbelleza.com</code></td>
                                 <td><span class="card-badge badge-worker">WORKER</span></td>
                                 <td>Plaza Norte (Madrid)</td>
-                                <td><code>password123</code></td>
+                                <td><code>Cuquora2026!</code></td>
                             </tr>
                             <tr>
                                 <td><strong>Marco Bellini</strong></td>
                                 <td><code>marco@cbelleza.com</code></td>
                                 <td><span class="card-badge badge-worker">WORKER</span></td>
                                 <td>Sarrià (Barcelona)</td>
-                                <td><code>password123</code></td>
+                                <td><code>Cuquora2026!</code></td>
                             </tr>
                             <tr>
                                 <td><strong>Ana Valdés</strong></td>
                                 <td><code>ana@cbelleza.com</code></td>
                                 <td><span class="card-badge badge-worker">WORKER</span></td>
                                 <td>Las Condes (Santiago)</td>
-                                <td><code>password123</code></td>
+                                <td><code>Cuquora2026!</code></td>
                             </tr>
                             <tr>
                                 <td><strong>Sofía Martínez</strong></td>
                                 <td><code>sofia@gmail.com</code></td>
                                 <td><span class="card-badge badge-client">CLIENT</span></td>
                                 <td>N/A (Cliente Registrada)</td>
-                                <td><code>password123</code></td>
+                                <td><code>Cuquora2026!</code></td>
                             </tr>
                             <tr>
                                 <td><strong>Lucía Gómez</strong></td>
                                 <td><code>lucia@gmail.com</code></td>
                                 <td><span class="card-badge badge-client">CLIENT</span></td>
                                 <td>N/A (Cliente Registrada)</td>
-                                <td><code>password123</code></td>
+                                <td><code>Cuquora2026!</code></td>
                             </tr>
                         </tbody>
                     </table>
@@ -645,7 +663,7 @@ mvn test</code></pre>
                     <div class="callout-icon">⚡</div>
                     <div class="callout-content">
                         <strong>Selector Rápido de Sesión (/login-selector):</strong>
-                        <p>Para agilizar presentaciones y auditorías de código, el sistema incorpora la ruta <code>/login-selector</code>, que permite entrar como cualquier usuario sin contraseña. Solo existe con el perfil <code>dev</code>.</p>
+                        <p>Para agilizar presentaciones y auditorías de código, el sistema incorpora la ruta <code>/login-selector</code>, que permite entrar como cualquier usuario sin contraseña (también los 16 clientes del historial demo, que no tienen contraseña). Solo existe con el perfil <code>dev</code>. Ojo: 5 contraseñas mal seguidas cierran esa cuenta 15 minutos; reiniciar la aplicación lo borra.</p>
                     </div>
                 </div>
             </section>

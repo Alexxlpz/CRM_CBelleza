@@ -26,7 +26,7 @@ async function login(user) {
     const res = await fetch(base + '/login', {
         method: 'POST', redirect: 'manual',
         headers: { cookie, 'content-type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({ identifier: user, password: args.password || 'password123', _csrf: csrf })
+        body: new URLSearchParams({ identifier: user, password: args.password || 'Cuquora2026!', _csrf: csrf })
     });
     const session = res.headers.getSetCookie().find(c => c.startsWith('JSESSIONID='));
     if (!session || /login/.test(String(res.headers.get('location')))) throw new Error('No se pudo iniciar sesión como ' + user);
