@@ -11,9 +11,13 @@
     <!-- Main Container -->
     <main class="main-container card-template-page">
 
-        <div class="page-header">
-            <h1>Configuración de Plantilla de Ficha</h1>
-            <p>Define las variables y preguntas personalizadas que tu centro guardará en la ficha de cada cliente</p>
+        <div class="page-header page-header--panel">
+            <span th:replace="~{worker/fragments/page-header :: icon('clipboard-list')}"></span>
+            <div class="page-header-text">
+                <nav th:replace="~{worker/fragments/page-header :: subcrumb('Clientes', '/worker/clients', 'Plantilla de ficha')}"></nav>
+                <h1>Configuración de Plantilla de Ficha</h1>
+                <p>Define las variables y preguntas personalizadas que tu centro guardará en la ficha de cada cliente</p>
+            </div>
         </div>
 
         <div th:if="${errorMessage != null}" class="alert alert-error" role="alert">

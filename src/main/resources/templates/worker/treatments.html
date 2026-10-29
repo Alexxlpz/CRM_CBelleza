@@ -11,15 +11,19 @@
     <div th:replace="~{fragments/navbar :: worker('/worker/dashboard', 'Volver al panel principal', ${notifications})}"></div>
 
     <main class="main-container main-container--wide">
-        <div class="page-header treatments-header">
-            <div>
+        <div class="page-header page-header--panel treatments-header">
+            <span th:replace="~{worker/fragments/page-header :: icon('sparkles')}"></span>
+            <div class="page-header-text">
+                <nav th:replace="~{worker/fragments/page-header :: crumb('Tratamientos')}"></nav>
                 <h1>Carta de Tratamientos</h1>
                 <p th:text="'Servicios de estética activos en ' + ${sessionCenterName}">Servicios de estética activos en tu centro</p>
             </div>
-            <button type="button" class="btn btn-primary btn-add-treatment" data-sheet-open="addTreatmentSheet" th:if="${isCenterOwner}">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                <span class="btn-add-label">Añadir Tratamiento</span>
-            </button>
+            <div class="page-header-actions" th:if="${isCenterOwner}">
+                <button type="button" class="btn btn-primary btn-add-treatment" data-sheet-open="addTreatmentSheet">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    <span class="btn-add-label">Añadir Tratamiento</span>
+                </button>
+            </div>
         </div>
 
         <div th:replace="~{fragments/alerts :: flash}"></div>

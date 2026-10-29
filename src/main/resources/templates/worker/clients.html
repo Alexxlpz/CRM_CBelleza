@@ -10,23 +10,14 @@
     <!-- Main Container -->
     <main class="main-container main-container--wide">
 
-        <div class="page-header">
-            <h1>Cartera de Clientes</h1>
-            <p>Consulta las fichas técnicas personalizadas y el historial de citas de los clientes de este centro</p>
-        </div>
-
-        <div th:replace="~{fragments/alerts :: flash}"></div>
-
-        <!-- Toolbar: Search + Action Buttons -->
-        <div class="clients-toolbar">
-            <form th:action="@{/worker/clients}" method="get" class="clients-search-box" role="search">
-                <i class="lucide-search clients-search-icon" aria-hidden="true"></i>
-                <label for="clientSearch" class="visually-hidden">Buscar clientes</label>
-                <input type="search" id="clientSearch" name="search" class="clients-search-input"
-                       placeholder="Buscar por nombre, teléfono o email..."
-                       th:value="${searchQuery}" autocomplete="off">
-            </form>
-            <div class="clients-action-group">
+        <div class="page-header page-header--panel">
+            <span th:replace="~{worker/fragments/page-header :: icon('users')}"></span>
+            <div class="page-header-text">
+                <nav th:replace="~{worker/fragments/page-header :: crumb('Clientes')}"></nav>
+                <h1>Cartera de Clientes</h1>
+                <p>Consulta las fichas técnicas personalizadas y el historial de citas de los clientes de este centro</p>
+            </div>
+            <div class="page-header-actions clients-action-group">
                 <button type="button" class="btn-create-client" data-modal-open="createClientModal">
                     <i class="lucide-user-plus" aria-hidden="true"></i>
                     <span>Nuevo Cliente</span>
@@ -36,6 +27,19 @@
                     <span>Plantilla de Ficha</span>
                 </a>
             </div>
+        </div>
+
+        <div th:replace="~{fragments/alerts :: flash}"></div>
+
+        <!-- Buscador -->
+        <div class="clients-toolbar">
+            <form th:action="@{/worker/clients}" method="get" class="clients-search-box" role="search">
+                <i class="lucide-search clients-search-icon" aria-hidden="true"></i>
+                <label for="clientSearch" class="visually-hidden">Buscar clientes</label>
+                <input type="search" id="clientSearch" name="search" class="clients-search-input"
+                       placeholder="Buscar por nombre, teléfono o email..."
+                       th:value="${searchQuery}" autocomplete="off">
+            </form>
         </div>
 
         <!-- Resumen -->

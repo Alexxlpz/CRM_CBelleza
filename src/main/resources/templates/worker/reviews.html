@@ -8,9 +8,13 @@
     <div th:replace="~{fragments/navbar :: worker('/worker/dashboard', 'Volver al panel principal', ${notifications})}"></div>
 
     <main class="main-container main-container--wide worker-reviews-page">
-        <div class="page-header">
-            <h1>Reseñas</h1>
-            <p th:text="'Lo que opinan los clientes de ' + ${sessionCenterName} + ' tras sus citas. Se ven en la ficha pública del centro.'">Lo que opinan los clientes</p>
+        <div class="page-header page-header--panel">
+            <span th:replace="~{worker/fragments/page-header :: icon('star')}"></span>
+            <div class="page-header-text">
+                <nav th:replace="~{worker/fragments/page-header :: crumb('Reseñas')}"></nav>
+                <h1>Reseñas</h1>
+                <p th:text="'Lo que opinan los clientes de ' + ${sessionCenterName} + ' tras sus citas. Se ven en la ficha pública del centro.'">Lo que opinan los clientes</p>
+            </div>
         </div>
 
         <div th:replace="~{fragments/alerts :: flash}"></div>

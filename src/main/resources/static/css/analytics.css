@@ -7,13 +7,26 @@
 .analytics-section-head {
     display: flex;
     flex-wrap: wrap;
-    align-items: baseline;
+    align-items: center;
     gap: 4px 14px;
     margin-bottom: 14px;
 }
 
+/* Barrita bronce delante, a juego con la línea de la cabecera */
 .analytics-section-head h2 {
-    font-size: 22px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 20px;
+}
+
+.analytics-section-head h2::before {
+    content: "";
+    flex: none;
+    width: 4px;
+    height: 20px;
+    border-radius: 4px;
+    background: var(--brand-gradient);
 }
 
 .analytics-section-head p {
@@ -106,15 +119,8 @@
     color: var(--primary-text);
 }
 
-/* ---- Periodo ---- */
-.analytics-toolbar {
-    flex-wrap: wrap;
-}
-
+/* ---- Periodo (en la cabecera) ---- */
 .analytics-controls {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
     gap: 10px 14px;
 }
 
@@ -160,21 +166,6 @@
 
 .year-nav-btn.is-disabled:hover {
     background: none;
-}
-
-.analytics-period-summary {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 4px 12px;
-    min-width: 0;
-    font-size: 14px;
-    color: var(--text-muted);
-}
-
-.analytics-period-summary strong {
-    font-size: 18px;
-    color: var(--text-main);
 }
 
 /* ---- Paneles ---- */

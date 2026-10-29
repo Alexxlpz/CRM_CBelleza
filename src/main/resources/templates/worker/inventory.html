@@ -11,12 +11,14 @@
     <div th:replace="~{fragments/navbar :: worker('/worker/dashboard', 'Volver al panel principal', ${notifications})}"></div>
 
     <main class="main-container main-container--wide">
-        <div class="page-header inventory-page-header">
-            <div>
+        <div class="page-header page-header--panel inventory-page-header">
+            <span th:replace="~{worker/fragments/page-header :: icon('package')}"></span>
+            <div class="page-header-text">
+                <nav th:replace="~{worker/fragments/page-header :: crumb('Inventario')}"></nav>
                 <h1>Gestión de Inventario</h1>
                 <p th:text="${#lists.size(inventoryItems)} + ' productos registrados en el stock del salón'">0 productos registrados</p>
             </div>
-            <div class="inventory-header-actions">
+            <div class="page-header-actions inventory-header-actions">
                 <button type="button" class="btn btn-secondary" data-modal-open="productSaleModal" th:disabled="${inventoryItems.isEmpty()}">
                     <i class="lucide-shopping-bag" aria-hidden="true"></i> Vender producto
                 </button>

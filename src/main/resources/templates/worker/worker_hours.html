@@ -8,8 +8,10 @@
     <div th:replace="~{fragments/navbar :: worker('/worker/center#equipo', 'Volver al equipo', ${notifications})}"></div>
 
     <main class="main-container settings-page">
-        <header class="settings-header">
-            <div>
+        <header class="page-header page-header--panel">
+            <span th:replace="~{worker/fragments/page-header :: icon('clock')}"></span>
+            <div class="page-header-text">
+                <nav th:replace="~{worker/fragments/page-header :: subcrumb('Mi Centro', '/worker/center', 'Horario')}"></nav>
                 <h1 th:text="'Horario de ' + ${member.name}">Horario de Lucía Romero</h1>
                 <p>Los días y horas en los que trabaja. Los clientes solo podrán pedirle cita dentro de ellos y la agenda no le dará citas fuera.</p>
             </div>

@@ -9,30 +9,15 @@
 
     <main class="main-container main-container--wide analytics-page">
 
-        <div class="page-header">
-            <h1>Análisis del centro</h1>
-            <p th:text="'Cómo va ' + ${sessionCenterName} + ': ingresos, visitas y clientes, mes a mes.'">Cómo va el centro</p>
-        </div>
-
-        <div class="analytics-empty" th:unless="${report.hasData}">
-            <i class="lucide-bar-chart-3" aria-hidden="true"></i>
-            <div>
-                <h2>Todavía no hay cifras</h2>
-                <p>Las cifras salen de las citas completadas y de los productos vendidos. En cuanto el centro tenga sus primeras visitas, aquí verás cómo evoluciona cada mes.</p>
+        <div class="page-header page-header--panel">
+            <span th:replace="~{worker/fragments/page-header :: icon('bar-chart-3')}"></span>
+            <div class="page-header-text">
+                <nav th:replace="~{worker/fragments/page-header :: crumb('Análisis')}"></nav>
+                <h1>Análisis del centro</h1>
+                <p th:text="'Cómo va ' + ${sessionCenterName} + ': ingresos, visitas y clientes, mes a mes.'">Cómo va el centro</p>
             </div>
-        </div>
-
-        <th:block th:if="${report.hasData}">
-
-        <!-- Periodo: últimos meses o un año entero frente al anterior -->
-        <div class="list-toolbar analytics-toolbar">
-            <p class="analytics-period-summary">
-                <strong th:text="${report.periodLabel}">Últimos 12 meses</strong>
-                <span th:text="${report.periodVisits} + ' visitas · ' + ${report.periodClients} + ' clientes · '
-                        + ${#numbers.formatDecimal(report.periodRevenue, 1, 'POINT', 0, 'COMMA')} + ' € · ticket medio '
-                        + ${#numbers.formatDecimal(report.periodAverageTicket(), 1, 'POINT', 2, 'COMMA')} + ' €'">320 visitas</span>
-            </p>
-            <div class="analytics-controls">
+            <!-- Periodo: últimos meses o un año entero frente al anterior -->
+            <div class="page-header-actions analytics-controls" th:if="${report.hasData}">
                 <nav class="year-nav" th:if="${report.yearView}" aria-label="Año">
                     <a class="year-nav-btn" th:if="${report.previousYear != null}"
                        th:href="@{/worker/analytics(anio=${report.previousYear})}"
@@ -70,7 +55,23 @@
                        th:attr="aria-current=${report.yearView} ? 'page'">Por año</a>
                 </nav>
             </div>
+            <p class="page-header-meta" th:if="${report.hasData}">
+                <strong th:text="${report.periodLabel}">Últimos 12 meses</strong>
+                <span th:text="${report.periodVisits} + ' visitas · ' + ${report.periodClients} + ' clientes · '
+                        + ${#numbers.formatDecimal(report.periodRevenue, 1, 'POINT', 0, 'COMMA')} + ' € · ticket medio '
+                        + ${#numbers.formatDecimal(report.periodAverageTicket(), 1, 'POINT', 2, 'COMMA')} + ' €'">320 visitas</span>
+            </p>
         </div>
+
+        <div class="analytics-empty" th:unless="${report.hasData}">
+            <i class="lucide-bar-chart-3" aria-hidden="true"></i>
+            <div>
+                <h2>Todavía no hay cifras</h2>
+                <p>Las cifras salen de las citas completadas y de los productos vendidos. En cuanto el centro tenga sus primeras visitas, aquí verás cómo evoluciona cada mes.</p>
+            </div>
+        </div>
+
+        <th:block th:if="${report.hasData}">
 
         <!-- Cifras del periodo frente al tramo comparable -->
         <section class="analytics-section" aria-labelledby="kpiTitle">

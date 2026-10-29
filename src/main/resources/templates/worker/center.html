@@ -13,8 +13,10 @@
     <div th:replace="~{fragments/navbar :: worker('/worker/dashboard', 'Volver al panel', ${notifications})}"></div>
 
     <main class="main-container settings-page settings-page--split">
-        <header class="settings-header">
-            <div>
+        <header class="page-header page-header--panel">
+            <span th:replace="~{worker/fragments/page-header :: icon('store')}"></span>
+            <div class="page-header-text">
+                <nav th:replace="~{worker/fragments/page-header :: crumb('Mi Centro')}"></nav>
                 <h1 th:text="${center.name}">Mi Centro</h1>
                 <p th:text="${isOwner} ? 'Actualiza los datos públicos de tu salón y la configuración de tu cuenta' : 'Los datos de tu centro y la configuración de tu cuenta'">Actualiza los datos públicos de tu salón y la configuración de tu cuenta</p>
             </div>

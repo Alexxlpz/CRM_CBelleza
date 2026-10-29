@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<body>
+    <!-- Cabecera de las pantallas del panel: icono de la pantalla y miga de pan sobre el título -->
+    <span th:fragment="icon(name)" class="page-header-icon" aria-hidden="true"><i th:class="'lucide-' + ${name}"></i></span>
+
+    <nav th:fragment="crumb(label)" class="page-header-crumb" aria-label="Estás en">
+        <a th:href="@{/worker/dashboard}">Mi Panel</a>
+        <i class="lucide-chevron-right" aria-hidden="true"></i>
+        <span aria-current="page" th:text="${label}">Pantalla</span>
+    </nav>
+
+    <nav th:fragment="subcrumb(parentLabel, parentUrl, label)" class="page-header-crumb" aria-label="Estás en">
+        <a th:href="@{/worker/dashboard}">Mi Panel</a>
+        <i class="lucide-chevron-right" aria-hidden="true"></i>
+        <a th:href="@{${parentUrl}}" th:text="${parentLabel}">Sección</a>
+        <i class="lucide-chevron-right" aria-hidden="true"></i>
+        <span aria-current="page" th:text="${label}">Pantalla</span>
+    </nav>
+</body>
+</html>

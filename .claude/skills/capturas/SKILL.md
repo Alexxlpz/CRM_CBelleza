@@ -39,7 +39,9 @@ node $S --user carlos@cbelleza.com --path "/worker/calendar?date=2026-10-12&view
   --run "document.querySelector('[data-action=summary]')?.click()"
 ```
 
-- Usuarios demo (contraseña `password123`): trabajadores `carlos@cbelleza.com`, `elena@cbelleza.com`; cliente `sofia@gmail.com`. Sin `--user`, páginas públicas.
+- Usuarios demo (contraseña `Cuquora2026!`, la que usa el script por defecto): trabajadores `carlos@cbelleza.com`, `elena@cbelleza.com`; cliente `sofia@gmail.com`. Sin `--user`, páginas públicas. Ojo: 5 logins fallidos con una cuenta (o 20 desde la IP) la cierran 15 min; reiniciar la app lo borra.
+- Con cliente: el aviso de cookies vuelve a salir tras el login y puede salir la tarjeta «¿Qué tal tu cita?»; pulsa «Entendido» (y cierra la tarjeta si estorba) con `--run` antes de capturar.
+- En el buscador (`/centers`) usa `--wait 9000`: espera a la geolocalización.
 - **En Windows (Git Bash)** exporta antes `MSYS_NO_PATHCONV=1`: si no, `--path /worker/...` se convierte en una ruta de Git y la captura sale en blanco (el script avisa con «Navegación fallida»). El script busca Brave o Chrome también en `C:/Program Files`.
 - Ids útiles con datos demo: Sofía Martínez es el cliente 6 del centro de Carlos.
 - Mira las capturas con la herramienta de leer imágenes. Empieza por 1440 y 390; abre las demás solo si el cambio afecta al diseño en esos anchos (960-1100 es donde más se rompe).
