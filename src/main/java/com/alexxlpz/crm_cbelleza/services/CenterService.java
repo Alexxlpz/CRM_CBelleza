@@ -91,6 +91,17 @@ public class CenterService {
         return slugs;
     }
 
+    /** Nombre en la dirección de los centros publicados, por orden de alta (para el sitemap). */
+    @Transactional(readOnly = true)
+    public List<String> publishedSlugs() {
+        Map<Long, String> slugs = shortSlugs();
+        return centerRepository.findAll().stream()
+                .filter(Center::isPublished)
+                .sorted(Comparator.comparing(Center::getId))
+                .map(center -> slugs.get(center.getId()))
+                .toList();
+    }
+
     /** «Peluquería Ana & Co.» → «peluqueria-ana-co»: minúsculas, sin tildes y con guiones. */
     public static String slugOf(String name) {
         if (name == null) {

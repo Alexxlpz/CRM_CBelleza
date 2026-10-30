@@ -168,7 +168,7 @@
                    th:text="${'Quién trabaja en el centro. ' + ownerName + ' invita a gente nueva y quita a quien se va.'}">Quién trabaja en el centro.</p>
                 <ul class="team-list">
                     <li class="team-member" th:each="member : ${teamMembers}">
-                        <span class="team-avatar" aria-hidden="true" th:text="${#strings.toUpperCase(#strings.substring(member.name(), 0, 1))}">C</span>
+                        <span th:replace="~{fragments/avatar :: avatar(${member.photoUrl()}, ${#strings.toUpperCase(#strings.substring(member.name(), 0, 1))}, 'team-avatar')}"></span>
                         <div class="team-member-info">
                             <p class="team-member-name">
                                 <span th:text="${member.name()}">Carlos Mendoza</span>
@@ -228,6 +228,33 @@
             </div>
 
             <div class="settings-side">
+                <section class="settings-card" id="mi-foto">
+                    <h2 class="settings-section-title"><i class="lucide-circle-user-round" aria-hidden="true"></i> Mi foto de perfil</h2>
+                    <p class="form-help settings-intro">Tus clientes la ven al elegir con quién reservar y tu equipo, en «Equipo». Si no subes ninguna, sale tu inicial.</p>
+                    <div class="alert alert-success" role="status" th:if="${myPhotoMessage != null}">
+                        <i class="lucide-check-circle-2" aria-hidden="true"></i>
+                        <span th:text="${myPhotoMessage}">Foto guardada.</span>
+                    </div>
+                    <div class="alert alert-error" role="alert" th:if="${myPhotoError != null}">
+                        <i class="lucide-alert-circle" aria-hidden="true"></i>
+                        <span th:text="${myPhotoError}">Sube la foto en JPG o PNG.</span>
+                    </div>
+                    <form th:action="@{/worker/center/my-photo}" method="post" enctype="multipart/form-data" id="myPhotoForm">
+                        <div th:replace="~{fragments/photo-picker :: avatarPicker('myPhoto', ${worker.photoUrl}, ${worker.initial}, ${maxPhotoMb})}"></div>
+                    </form>
+                    <form th:if="${worker.photoUrl != null}" th:action="@{/worker/center/my-photo/delete}" method="post" id="removeMyPhotoForm"
+                          data-confirm="Tus clientes verán tu inicial hasta que subas otra." data-confirm-title="¿Quitar tu foto?"
+                          data-confirm-button="Quitar foto"></form>
+                    <div class="settings-actions settings-actions--stack">
+                        <button type="submit" form="removeMyPhotoForm" class="btn btn-secondary" th:if="${worker.photoUrl != null}">
+                            <i class="lucide-trash-2" aria-hidden="true"></i> Quitar foto
+                        </button>
+                        <button type="submit" form="myPhotoForm" class="btn btn-primary">
+                            <i class="lucide-upload" aria-hidden="true"></i> Guardar foto
+                        </button>
+                    </div>
+                </section>
+
                 <section class="settings-card" id="reservas">
                     <h2 class="settings-section-title"><i class="lucide-calendar-plus" aria-hidden="true"></i> Reservas de clientes</h2>
                     <div class="alert alert-success" role="status" th:if="${bookingsMessage != null}">

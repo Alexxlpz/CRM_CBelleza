@@ -1,10 +1,14 @@
 package com.alexxlpz.crm_cbelleza.controllers;
 
+import com.alexxlpz.crm_cbelleza.booking.OpeningHours;
+import com.alexxlpz.crm_cbelleza.config.SiteModelAdvice;
+import com.alexxlpz.crm_cbelleza.dto.CenterRating;
 import com.alexxlpz.crm_cbelleza.dto.ReviewFilter;
 import com.alexxlpz.crm_cbelleza.entities.Center;
 import com.alexxlpz.crm_cbelleza.entities.Review;
 import com.alexxlpz.crm_cbelleza.entities.Treatment;
 import com.alexxlpz.crm_cbelleza.services.CenterService;
+import com.alexxlpz.crm_cbelleza.services.CenterStructuredData;
 import com.alexxlpz.crm_cbelleza.services.OpeningHoursService;
 import com.alexxlpz.crm_cbelleza.services.ReviewService;
 import com.alexxlpz.crm_cbelleza.services.TreatmentService;
@@ -32,16 +36,24 @@ class CenterPageModel {
     private final TreatmentService treatmentService;
     private final OpeningHoursService openingHours;
     private final ReviewService reviewService;
+    private final CenterStructuredData structuredData;
+    private final SiteModelAdvice site;
 
     CenterPageModel(CenterService centerService, TreatmentService treatmentService,
-                    OpeningHoursService openingHours, ReviewService reviewService) {
+                    OpeningHoursService openingHours, ReviewService reviewService,
+                    CenterStructuredData structuredData, SiteModelAdvice site) {
         this.centerService = centerService;
         this.treatmentService = treatmentService;
         this.openingHours = openingHours;
         this.reviewService = reviewService;
+        this.structuredData = structuredData;
+        this.site = site;
     }
 
-    /** Datos, carta, horario y las últimas opiniones. Devuelve la carta para que la ficha del cliente la reutilice. */
+    /**
+     * Datos, carta, horario y las últimas opiniones. Devuelve la carta para que la ficha del cliente la reutilice.
+     * La pública lleva además su dirección canónica y los datos estructurados para Google ({@link CenterStructuredData}).
+     */
     List<Treatment> addCenter(Model model, Center center, boolean publicPage) {
         Long id = center.getId();
         List<Treatment> treatments = treatmentService.getTreatmentsByCenter(id);
@@ -50,14 +62,26 @@ class CenterPageModel {
         model.addAttribute("treatments", treatments);
         model.addAttribute("today", today);
         model.addAttribute("offerCount", treatments.stream().filter(t -> t.hasActiveOffer(today)).count());
-        model.addAttribute("openingHoursLines", openingHours.forCenter(id).describe());
-        model.addAttribute("rating", reviewService.rating(id));
+        OpeningHours hours = openingHours.forCenter(id);
+        CenterRating rating = reviewService.rating(id);
+        model.addAttribute("openingHoursLines", hours.describe());
+        model.addAttribute("rating", rating);
         model.addAttribute("ratingDistribution", reviewService.distribution(id));
         List<Review> reviews = reviewService.forCenter(id);
         List<Review> latest = reviews.stream().limit(LATEST_REVIEWS).toList();
         model.addAttribute("reviewCount", reviews.size());
         model.addAttribute("latestReviews", latest);
         model.addAttribute("reviewAges", reviewService.ages(latest));
+        if (publicPage) {
+            String siteUrl = site.siteUrl();
+            String pageUrl = siteUrl + "/c/" + centerService.shortSlug(center);
+            model.addAttribute("canonicalUrl", pageUrl);
+            if (center.getPhotoUrl() != null) {
+                model.addAttribute("pageImage", siteUrl + center.getPhotoUrl());
+            }
+            model.addAttribute("structuredData",
+                    structuredData.jsonLd(center, pageUrl, siteUrl, treatments, today, hours, rating, latest));
+        }
         return treatments;
     }
 

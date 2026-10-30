@@ -8,6 +8,8 @@
     <th:block th:replace="~{fragments/head :: meta(${center.name + ' · Cuquora'})}"></th:block>
     <link rel="stylesheet" th:href="@{/css/cliente.css}">
     <link rel="stylesheet" th:href="@{/css/reviews.css}">
+    <!--/* Para Google: salón de belleza con dirección, horario, precios y nota media (CenterStructuredData) */-->
+    <script type="application/ld+json" th:utext="${structuredData}"></script>
 </head>
 
 <body>

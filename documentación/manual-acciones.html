@@ -161,6 +161,22 @@
                                 <td>✅ Publicado o de su centro</td>
                             </tr>
                             <tr>
+                                <td><code>/team/{id}/photo</code></td>
+                                <td><span class="http-get">GET</span></td>
+                                <td>Foto de perfil de un profesional (JPEG de 400×400, caché de un año con <code>?v=</code>). Solo existe para trabajadores</td>
+                                <td>✅ Permitido</td>
+                                <td>✅ Permitido</td>
+                                <td>✅ Permitido</td>
+                            </tr>
+                            <tr>
+                                <td><code>/sitemap.xml</code> · <code>/robots.txt</code></td>
+                                <td><span class="http-get">GET</span></td>
+                                <td>Para los buscadores: páginas públicas y la ficha <code>/c/{nombre}</code> de cada centro publicado; el robots.txt indica dónde está el sitemap (con <code>SITE_URL</code>)</td>
+                                <td>✅ Permitido</td>
+                                <td>✅ Permitido</td>
+                                <td>✅ Permitido</td>
+                            </tr>
+                            <tr>
                                 <td><code>/c/{nombre}</code></td>
                                 <td><span class="http-get">GET</span></td>
                                 <td>Ficha pública del centro (enlace corto para Instagram o Google Maps): tratamientos, horario y opiniones sin iniciar sesión. «Reservar» lleva a <code>/client/centers/{nombre}</code>, que pide entrar y vuelve con el tratamiento elegido. Con mayúsculas redirige a minúsculas</td>
@@ -922,6 +938,7 @@
                     <p>«Mi Centro»: datos del centro y ubicación con pin, zona horaria (entre las de <code>CenterTimeZones.OPTIONS</code>), cabinas (1-50), datos personales y contraseña del trabajador (para cambiarla hay que escribir la actual).</p>
                     <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.9rem;">
                         <li><code>POST /worker/center/photo</code> · <code>/photo/delete</code> (<code>CenterPhotoService</code>): JPG o PNG hasta 8 MB y al menos 400×250 px. Se endereza con la orientación EXIF y se guarda en la base de datos como JPEG de 1200 px como mucho. Sale en el buscador, en la ficha del centro y detrás del saludo del panel; sin foto, las iniciales del centro.</li>
+                        <li><code>POST /worker/center/my-photo</code> · <code>/my-photo/delete</code> (<code>WorkerPhotoService</code>): foto de perfil de cada trabajador (no hace falta ser el dueño). JPG o PNG hasta 8 MB y al menos 160×160 px; se recorta en cuadrado y se guarda como JPEG de 400 px. Sale al reservar («¿Con quién?») y en el Equipo; sin foto, la inicial.</li>
                         <li><code>POST /worker/center/bookings</code> (aceptar automáticamente) y <code>/reschedule</code> (<code>hours</code>: 0, 2, 12, 24 o 48; hasta cuántas horas antes puede el cliente cambiar la hora; 0 = no puede). En el mismo bloque, el enlace corto <code>/c/{nombre}</code> con «Copiar».</li>
                         <li><code>GET|POST /worker/center/team/{id}/horario</code> (<code>WorkerHoursService</code>): tramos de cada día en los que trabaja esa persona (dos el mismo día = jornada partida), siempre dentro del horario del centro. Sin tramos, trabaja siempre que el centro abre.</li>
                         <li><code>POST /worker/center/loyalty</code> (<code>LoyaltyService.updateSettings</code>): modo (desactivada, <code>PER_EURO</code> o <code>PER_ITEM</code>), puntos que se ganan (1-1000), puntos para la recompensa (1-100.000) y su texto (hasta 200 caracteres). Los tratamientos suman cuando la cita está completada y solo desde que se activó la tarjeta.</li>

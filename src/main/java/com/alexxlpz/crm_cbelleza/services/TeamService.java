@@ -75,7 +75,7 @@ public class TeamService {
                 .collect(Collectors.toMap(i -> i.getUser().getId(), Function.identity(), (a, b) -> a));
         LocalDateTime now = LocalDateTime.now(clock);
         return workers.stream()
-                .map(w -> new Member(w.getId(), w.getName(), w.getEmail(), w.getId().equals(ownerId),
+                .map(w -> new Member(w.getId(), w.getName(), w.getEmail(), w.getPhotoUrl(), w.getId().equals(ownerId),
                         statusOf(w, latest.get(w.getId()), now)))
                 .sorted(Comparator.comparing(Member::owner).reversed()
                         .thenComparing(m -> m.name().toLowerCase(Locale.ROOT)))
@@ -208,7 +208,7 @@ public class TeamService {
         }
     }
 
-    public record Member(Long id, String name, String email, boolean owner, Status status) {
+    public record Member(Long id, String name, String email, String photoUrl, boolean owner, Status status) {
         public boolean pending() {
             return status != Status.ACTIVE;
         }

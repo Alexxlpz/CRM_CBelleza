@@ -60,7 +60,7 @@ public class SecurityConfig {
             // Enlaces de los correos del alta de centros: el secreto va en la propia ruta
             "/register-center/approve/*", "/register-center/approve/*/photo", "/invitation/*", "/invitation/*/renew",
             // Fotos de presentación de los centros (las de un centro sin publicar solo las sirve a su equipo)
-            "/centers/*/photo",
+            "/centers/*/photo", "/team/*/photo",
             // Ficha pública de cada centro y sus opiniones, el enlace para Instagram y Google Maps (CenterLinkController)
             "/c/*", "/c/*/opiniones",
             // Solo existen con el perfil "dev" (DevLoginController); en producción devuelven 404.
@@ -68,7 +68,7 @@ public class SecurityConfig {
     };
 
     private static final String[] STATIC_RESOURCES = {
-            "/css/**", "/js/**", "/images/**", "/icons/**", "/favicon.ico", "/robots.txt"
+            "/css/**", "/js/**", "/images/**", "/icons/**", "/favicon.ico", "/robots.txt", "/sitemap.xml"
     };
 
     /** Firma los datos de «Recordar mi sesión»; sin REMEMBER_ME_KEY es aleatoria y los dispositivos recordados caducan al reiniciar. */

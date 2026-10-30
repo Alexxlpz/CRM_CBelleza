@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 @Entity
 @Table(name = "users")
@@ -51,11 +52,26 @@ public class User {
     @Column(name = "review_prompts_off", nullable = false)
     private boolean reviewPromptsOff;
 
+    /** Cuándo subió su foto de perfil un profesional (nula = sin foto); versiona la URL de la imagen. */
+    @Column(name = "photo_updated_at")
+    private LocalDateTime photoUpdatedAt;
+
     /**
      * Tiene cuenta propia (puede iniciar sesión con contraseña o con Google).
      * Los clientes dados de alta a mano desde la cartera no tienen ninguna de las dos.
      */
     public boolean hasAccount() {
         return password != null || googleId != null;
+    }
+
+    /** Dirección de la foto de perfil, o nula si no tiene. */
+    public String getPhotoUrl() {
+        return photoUpdatedAt == null ? null
+                : "/team/" + id + "/photo?v=" + photoUpdatedAt.toEpochSecond(ZoneOffset.UTC);
+    }
+
+    /** Inicial del nombre para el hueco de la foto cuando no tiene. */
+    public String getInitial() {
+        return name == null || name.isBlank() ? "?" : name.strip().substring(0, 1).toUpperCase();
     }
 }

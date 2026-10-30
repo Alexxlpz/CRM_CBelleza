@@ -1,10 +1,12 @@
 package com.alexxlpz.crm_cbelleza.controllers;
 
 import com.alexxlpz.crm_cbelleza.entities.CenterPhoto;
+import com.alexxlpz.crm_cbelleza.entities.UserPhoto;
 import com.alexxlpz.crm_cbelleza.exceptions.ResourceNotFoundException;
 import com.alexxlpz.crm_cbelleza.security.AppUserDetails;
 import com.alexxlpz.crm_cbelleza.services.CenterPhotoService;
 import com.alexxlpz.crm_cbelleza.services.CenterRegistrationService;
+import com.alexxlpz.crm_cbelleza.services.WorkerPhotoService;
 import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -15,16 +17,19 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import java.time.Duration;
 
-/** Fotos de presentación de los centros: buscador, ficha del centro, «Mi Centro» y revisión del alta. */
+/** Fotos de los centros (buscador, ficha, «Mi Centro», revisión del alta) y de perfil de sus profesionales. */
 @Controller
 public class CenterPhotoController {
 
     private final CenterPhotoService photoService;
     private final CenterRegistrationService registrationService;
+    private final WorkerPhotoService workerPhotos;
 
-    public CenterPhotoController(CenterPhotoService photoService, CenterRegistrationService registrationService) {
+    public CenterPhotoController(CenterPhotoService photoService, CenterRegistrationService registrationService,
+                                 WorkerPhotoService workerPhotos) {
         this.photoService = photoService;
         this.registrationService = registrationService;
+        this.workerPhotos = workerPhotos;
     }
 
     /** La URL lleva la versión (?v=), así que el navegador puede guardarla un año sin volver a pedirla. */
@@ -47,11 +52,22 @@ public class CenterPhotoController {
         return image(photo, CacheControl.noStore());
     }
 
+    /** Foto de perfil de un profesional («¿Con quién?» al reservar, equipo); versionada con ?v= como la del centro. */
+    @GetMapping("/team/{id}/photo")
+    public ResponseEntity<byte[]> workerPhoto(@PathVariable Long id) {
+        UserPhoto photo = workerPhotos.photoOf(id);
+        return image(photo.getContentType(), photo.getData(), CacheControl.maxAge(Duration.ofDays(365)).cachePublic().immutable());
+    }
+
     private static ResponseEntity<byte[]> image(CenterPhoto photo, CacheControl cache) {
+        return image(photo.getContentType(), photo.getData(), cache);
+    }
+
+    private static ResponseEntity<byte[]> image(String contentType, byte[] data, CacheControl cache) {
         return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(photo.getContentType()))
+                .contentType(MediaType.parseMediaType(contentType))
                 .cacheControl(cache)
                 .header("X-Content-Type-Options", "nosniff")
-                .body(photo.getData());
+                .body(data);
     }
 }

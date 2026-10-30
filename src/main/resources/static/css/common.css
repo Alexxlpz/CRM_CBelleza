@@ -3642,3 +3642,44 @@ body.modal-open {
 .worker-hours-editor {
     margin-bottom: 16px;
 }
+
+/* Foto de perfil de un profesional dentro de su círculo (fragments/avatar.html); sin foto, la inicial */
+.booking-worker-avatar,
+.team-avatar {
+    overflow: hidden;
+}
+
+.avatar-photo {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatar-photo[hidden] {
+    display: none;
+}
+
+/* «Mi Centro» > Mi foto de perfil: el círculo a la izquierda y el campo de archivo al lado */
+.photo-picker--avatar {
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+}
+
+.photo-picker-avatar {
+    width: 96px;
+    height: 96px;
+    font-size: 36px;
+}
+
+@media (max-width: 640px) {
+    .photo-picker--avatar {
+        grid-template-columns: auto minmax(0, 1fr);
+    }
+
+    .photo-picker-avatar {
+        width: 72px;
+        height: 72px;
+        font-size: 28px;
+    }
+}

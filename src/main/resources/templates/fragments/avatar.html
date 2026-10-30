@@ -1,0 +1,9 @@
+<!--/*
+    Círculo con la foto de perfil de un profesional o, si no tiene, su inicial (WorkerPhotoService).
+    cssClass da el tamaño y el color: booking-worker-avatar al reservar, team-avatar en el equipo.
+*/-->
+<div xmlns:th="http://www.thymeleaf.org">
+    <span th:fragment="avatar(photoUrl, initial, cssClass)" th:class="${cssClass}" aria-hidden="true"><img
+            th:if="${photoUrl != null}" th:src="@{${photoUrl}}" alt="" class="avatar-photo"><th:block
+            th:unless="${photoUrl != null}" th:text="${initial}">L</th:block></span>
+</div>

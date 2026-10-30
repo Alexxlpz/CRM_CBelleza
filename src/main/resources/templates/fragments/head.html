@@ -14,6 +14,9 @@
            pageDescription la pone el controlador de cada página (opcional) y siteUrl SiteModelAdvice */-->
     <!--/*@thymesVar id="pageDescription" type="java.lang.String"*/-->
     <!--/*@thymesVar id="siteUrl" type="java.lang.String"*/-->
+    <!--/* canonicalUrl (dirección única de la página para Google) y pageImage (foto para compartir) son opcionales */-->
+    <!--/*@thymesVar id="canonicalUrl" type="java.lang.String"*/-->
+    <!--/*@thymesVar id="pageImage" type="java.lang.String"*/-->
     <!--/*@thymesVar id="_csrf" type="org.springframework.security.web.csrf.CsrfToken"*/-->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -30,12 +33,16 @@
         <meta property="og:locale" content="es_ES">
         <meta property="og:title" content="Cuquora" th:content="${title}">
         <meta property="og:description" content="Cuquora" th:content="${description}">
+        <link rel="canonical" href="/" th:if="${canonicalUrl != null}" th:href="${canonicalUrl}">
+        <meta property="og:url" content="/" th:if="${canonicalUrl != null}" th:content="${canonicalUrl}">
         <meta property="og:image" content="/images/og-image.jpg"
-              th:content="${(siteUrl ?: '') + '/images/og-image.jpg'}">
+              th:content="${pageImage ?: (siteUrl ?: '') + '/images/og-image.jpg'}">
         <meta property="og:image:type" content="image/jpeg">
-        <meta property="og:image:width" content="1200">
-        <meta property="og:image:height" content="630">
-        <meta property="og:image:alt" content="Cuquora, software de gestión para centros de belleza">
+        <th:block th:if="${pageImage == null}">
+            <meta property="og:image:width" content="1200">
+            <meta property="og:image:height" content="630">
+            <meta property="og:image:alt" content="Cuquora, software de gestión para centros de belleza">
+        </th:block>
         <meta name="twitter:card" content="summary_large_image">
     </th:block>
     <!-- Token CSRF para las peticiones fetch (lo usa /js/app.js) -->

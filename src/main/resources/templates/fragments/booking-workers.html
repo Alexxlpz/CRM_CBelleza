@@ -14,8 +14,7 @@
             </label>
             <label class="booking-worker-option" th:each="w : ${workers}" th:attr="data-worker-id=${w.id}">
                 <input type="radio" name="workerId" th:value="${w.id}" th:checked="${w.id == selectedWorkerId}">
-                <span class="booking-worker-avatar" aria-hidden="true"
-                      th:text="${#strings.toUpperCase(#strings.substring(w.name, 0, 1))}">L</span>
+                <span th:replace="~{fragments/avatar :: avatar(${w.photoUrl}, ${w.initial}, 'booking-worker-avatar')}"></span>
                 <span class="booking-worker-name" th:text="${w.name}">Lucía Romero</span>
             </label>
         </div>

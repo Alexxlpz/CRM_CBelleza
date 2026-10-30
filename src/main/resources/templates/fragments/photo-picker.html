@@ -2,6 +2,7 @@
     Foto de presentación del centro (alta de centro y «Mi Centro»): vista previa con el mismo recorte que la
     tarjeta del buscador y campo de archivo. photo-picker.js enseña la foto elegida y avisa si no vale.
     El servidor la vuelve a comprobar y la redimensiona (CenterPhotoService).
+    avatarPicker: lo mismo para la foto de perfil de un profesional, en un círculo (WorkerPhotoService).
 */-->
 <div xmlns:th="http://www.thymeleaf.org">
     <div th:fragment="picker(inputId, photoUrl, initials, maxMb)" class="photo-picker" data-photo-picker
@@ -16,6 +17,23 @@
                    th:attr="aria-describedby=${inputId + 'Help'}">
             <p class="form-help" th:id="${inputId + 'Help'}"
                th:text="${'JPG o PNG de hasta ' + maxMb + ' MB. Mejor apaisada: la fachada, la recepción o una cabina. En el buscador sale recortada como en la vista previa.'}">
+                JPG o PNG de hasta 8 MB.</p>
+            <p class="photo-picker-name" data-photo-name hidden></p>
+            <p class="field-error-msg" role="alert" data-photo-error hidden></p>
+        </div>
+    </div>
+
+    <div th:fragment="avatarPicker(inputId, photoUrl, initial, maxMb)" class="photo-picker photo-picker--avatar" data-photo-picker
+         th:attr="data-max-mb=${maxMb}">
+        <div class="team-avatar photo-picker-avatar">
+            <img th:src="${photoUrl}" alt="Tu foto de perfil" class="avatar-photo" th:hidden="${photoUrl == null}" data-photo-img>
+            <span aria-hidden="true" th:text="${initial}" th:hidden="${photoUrl != null}" data-photo-initials>C</span>
+        </div>
+        <div class="photo-picker-controls">
+            <input type="file" th:id="${inputId}" name="photo" accept="image/jpeg,image/png"
+                   th:attr="aria-describedby=${inputId + 'Help'}">
+            <p class="form-help" th:id="${inputId + 'Help'}"
+               th:text="${'JPG o PNG de hasta ' + maxMb + ' MB. Mejor una de la cara, de frente y con buena luz: sale recortada en un círculo.'}">
                 JPG o PNG de hasta 8 MB.</p>
             <p class="photo-picker-name" data-photo-name hidden></p>
             <p class="field-error-msg" role="alert" data-photo-error hidden></p>

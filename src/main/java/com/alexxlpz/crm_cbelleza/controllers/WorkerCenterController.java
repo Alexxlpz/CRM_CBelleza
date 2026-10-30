@@ -22,6 +22,7 @@ import com.alexxlpz.crm_cbelleza.googlecalendar.GoogleCalendarService;
 import com.alexxlpz.crm_cbelleza.security.AppUserDetails;
 import com.alexxlpz.crm_cbelleza.security.AuthenticationSessionService;
 import com.alexxlpz.crm_cbelleza.services.CenterPhotoService;
+import com.alexxlpz.crm_cbelleza.services.WorkerPhotoService;
 import com.alexxlpz.crm_cbelleza.services.CenterService;
 import com.alexxlpz.crm_cbelleza.services.TreatmentService;
 import com.alexxlpz.crm_cbelleza.services.UserService;
@@ -58,6 +59,7 @@ public class WorkerCenterController {
     private final GoogleCalendarService googleCalendar;
     private final LoyaltyService loyaltyService;
     private final CenterPhotoService photoService;
+    private final WorkerPhotoService workerPhotos;
     private final OpeningHoursService openingHours;
     private final CenterAccess access;
     private final TeamService team;
@@ -72,6 +74,7 @@ public class WorkerCenterController {
                                   GoogleCalendarService googleCalendar,
                                   LoyaltyService loyaltyService,
                                   CenterPhotoService photoService,
+                                  WorkerPhotoService workerPhotos,
                                   OpeningHoursService openingHours,
                                   CenterAccess access,
                                   TeamService team,
@@ -86,6 +89,7 @@ public class WorkerCenterController {
         this.access = access;
         this.loyaltyService = loyaltyService;
         this.photoService = photoService;
+        this.workerPhotos = workerPhotos;
         this.centerService = centerService;
         this.userService = userService;
         this.treatmentService = treatmentService;
@@ -360,5 +364,26 @@ public class WorkerCenterController {
         photoService.remove(worker.getCenterId());
         redirect.addFlashAttribute("photoMessage", "Foto quitada.");
         return "redirect:/worker/center#foto";
+    }
+
+    /** Foto de perfil: cada profesional la suya (no hace falta ser el dueño). */
+    @PostMapping("/worker/center/my-photo")
+    public String updateMyPhoto(@AuthenticationPrincipal AppUserDetails worker,
+                                @RequestParam(required = false) MultipartFile photo,
+                                RedirectAttributes redirect) {
+        try {
+            workerPhotos.save(worker.getId(), photo);
+            redirect.addFlashAttribute("myPhotoMessage", "Foto guardada: ya la ven tus clientes al reservar.");
+        } catch (BusinessRuleException e) {
+            redirect.addFlashAttribute("myPhotoError", e.getMessage());
+        }
+        return "redirect:/worker/center#mi-foto";
+    }
+
+    @PostMapping("/worker/center/my-photo/delete")
+    public String removeMyPhoto(@AuthenticationPrincipal AppUserDetails worker, RedirectAttributes redirect) {
+        workerPhotos.remove(worker.getId());
+        redirect.addFlashAttribute("myPhotoMessage", "Foto quitada.");
+        return "redirect:/worker/center#mi-foto";
     }
 }
