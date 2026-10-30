@@ -49,11 +49,13 @@ public class CenterRegistrationService {
     private final LoyaltyService loyalty;
     private final CenterPhotoService photos;
     private final OpeningHoursService openingHours;
+    private final CenterService centerService;
     private final Clock clock;
 
     public CenterRegistrationService(CenterRepository centers, UserRepository users, InvitationService invitations,
                                      LoyaltyService loyalty, CenterPhotoService photos, OpeningHoursService openingHours,
-                                     Clock clock) {
+                                     CenterService centerService, Clock clock) {
+        this.centerService = centerService;
         this.centers = centers;
         this.users = users;
         this.invitations = invitations;
@@ -132,6 +134,8 @@ public class CenterRegistrationService {
                 .approvalTokenHash(SecureTokens.hash(approvalToken))
                 .registeredAt(now)
                 .build());
+        // El enlace corto se fija ya: si se calculase al vuelo, otro centro podría quitárselo (CenterService.shortSlug)
+        centerService.assignSlug(center);
 
         if (form.mode() != null && !LoyaltyMode.OFF.name().equals(form.mode())) {
             loyalty.updateSettings(center.getId(), form.loyalty());

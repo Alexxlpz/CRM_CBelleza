@@ -17,6 +17,9 @@
                     Te han dado de alta en <strong th:text="${invitation.centerName()}">Centro</strong>.
                     Entrarás con <strong th:text="${invitation.email()}">correo</strong>.
                 </p>
+                <p th:if="${invitation.centerName() == null}">
+                    Activa tu cuenta: entrarás con <strong th:text="${invitation.email()}">correo</strong> y verás tus citas.
+                </p>
             </div>
 
             <div class="alert alert-error" role="alert" th:if="${errorMessage != null}">

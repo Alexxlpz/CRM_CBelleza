@@ -12,7 +12,7 @@
     </p>
     <div style="background:#fdfcfb; border:1px solid #eee8e2; border-radius:12px; padding:18px; margin-bottom:20px; font-size:14px; line-height:1.6;">
         <p style="margin:0 0 6px;" th:if="${teamSize > 0}">
-            También hemos enviado una invitación a <span th:text="${teamSize == 1 ? 'la otra persona' : 'las ' + teamSize + ' personas'}">tu equipo</span> de tu equipo.
+            <span th:text="${teamSize == 1 ? 'La otra persona' : 'Las ' + teamSize + ' personas'}">Tu equipo</span> de tu equipo recibirá su invitación cuando publiquemos el centro.
         </p>
         <p style="margin:0;">El centro aparecerá en el buscador y en el mapa cuando lo revisemos, como mucho en una semana. Te avisaremos por correo.</p>
     </div>

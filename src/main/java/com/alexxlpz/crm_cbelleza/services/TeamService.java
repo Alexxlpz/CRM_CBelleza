@@ -127,6 +127,23 @@ public class TeamService {
     }
 
     /**
+     * Invitaciones del equipo que esperaban a que administración publicase el centro: un centro sin publicar no envía
+     * correos a nadie salvo a su responsable (el alta es pública y serviría para mandar correos a cualquier dirección).
+     * Cada uno recibe un enlace nuevo; los anteriores, que nunca se enviaron, dejan de valer.
+     */
+    public List<Invitee> invitationsOnPublish(Long centerId) {
+        Center center = centers.findById(centerId)
+                .orElseThrow(() -> new ResourceNotFoundException("Centro no encontrado."));
+        return users.findByCenterIdAndRole(centerId, Role.WORKER).stream()
+                .filter(worker -> !worker.hasAccount() && !center.isOwnedBy(worker.getId()))
+                .map(worker -> {
+                    expireInvitations(worker.getId());
+                    return new Invitee(worker.getName(), worker.getEmail(), center.getName(), invitations.invite(worker));
+                })
+                .toList();
+    }
+
+    /**
      * Saca a alguien del equipo. No puede ser el dueño (antes tiene que ceder el centro) ni tener citas por
      * delante: se reasignan o se anulan primero en la agenda. Sus bloqueos de agenda pendientes se quitan.
      */

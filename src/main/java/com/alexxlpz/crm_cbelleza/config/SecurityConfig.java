@@ -31,6 +31,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.authentication.rememberme.PersistentTokenBasedRememberMeServices;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.servlet.HandlerMapping;
@@ -68,7 +69,7 @@ public class SecurityConfig {
     };
 
     private static final String[] STATIC_RESOURCES = {
-            "/css/**", "/js/**", "/images/**", "/icons/**", "/favicon.ico", "/robots.txt", "/sitemap.xml"
+            "/css/**", "/js/**", "/images/**", "/icons/**", "/fonts/**", "/vendor/**", "/favicon.ico", "/robots.txt", "/sitemap.xml"
     };
 
     /** Firma los datos de «Recordar mi sesión»; sin REMEMBER_ME_KEY es aleatoria y los dispositivos recordados caducan al reiniciar. */
@@ -173,12 +174,42 @@ public class SecurityConfig {
         requestCache.setMatchingRequestParameterName(null);
         http.requestCache(cache -> cache.requestCache(requestCache));
 
+        // Cabeceras de seguridad. Spring ya pone nosniff, X-Frame-Options y, cuando la petición llega por HTTPS, HSTS.
+        http.headers(headers -> headers
+                .contentSecurityPolicy(csp -> csp.policyDirectives(contentSecurityPolicy(h2ConsoleEnabled)))
+                .referrerPolicy(referrer -> referrer.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
+                .permissionsPolicyHeader(permissions -> permissions.policy(PERMISSIONS_POLICY)));
+
         if (h2ConsoleEnabled) {
             http.csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**"));
             http.headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin));
         }
 
         return http.build();
+    }
+
+    /** El buscador usa la ubicación para ordenar por distancia; cámara, micrófono y pagos no se usan nunca. */
+    static final String PERMISSIONS_POLICY = "geolocation=(self), camera=(), microphone=(), payment=(), usb=()";
+
+    /**
+     * Qué puede cargar una página: todo desde la propia web salvo las teselas y la búsqueda de direcciones de
+     * OpenStreetMap. Los {@code <script>} en línea de las plantillas obligan a 'unsafe-inline'; aun así, un script de
+     * otro dominio, un {@code <object>}, un {@code <base>} o enmarcar la web en otra quedan bloqueados.
+     * {@code form-action} admite Google porque «Conectar Google Calendar» es un formulario que redirige allí.
+     */
+    static String contentSecurityPolicy(boolean h2ConsoleEnabled) {
+        return String.join("; ",
+                "default-src 'self'",
+                "script-src 'self' 'unsafe-inline'",
+                "style-src 'self' 'unsafe-inline'",
+                "img-src 'self' data: blob: https://tile.openstreetmap.org",
+                "font-src 'self'",
+                "connect-src 'self' https://nominatim.openstreetmap.org",
+                "object-src 'none'",
+                "base-uri 'self'",
+                "form-action 'self' https://accounts.google.com",
+                // La consola H2 (solo con el perfil dev) se pinta en marcos de la propia web
+                "frame-ancestors " + (h2ConsoleEnabled ? "'self'" : "'none'"));
     }
 
     /**

@@ -69,10 +69,8 @@ public class CenterOnboardingMailService {
                         "teamSize", team.size() - 1,
                         "invitationUrl", invitationUrl(siteUrl, owner.invitationToken()),
                         "validityDays", InvitationService.VALIDITY_DAYS))));
-
-        for (Invitee member : team.subList(1, team.size())) {
-            sendInvitation(member.name(), member.email(), registration.centerName(), member.invitationToken(), siteUrl);
-        }
+        // El resto del equipo recibe su invitación al publicar el centro (CenterRegistrationController.approve): el alta
+        // es pública y, si no, serviría para mandar correos de Cuquora con el texto que se quiera a cualquier dirección.
     }
 
     /** Invitación de un trabajador (también la que se pide de nuevo cuando caduca). */
@@ -90,7 +88,26 @@ public class CenterOnboardingMailService {
                         "loginUrl", siteUrl + "/login"))));
     }
 
+    /**
+     * Enlace para que un cliente que un centro dio de alta a mano active su cuenta. Se manda cuando alguien se registra
+     * con ese correo: solo quien lo lee puede poner la contraseña (y quedarse con sus citas).
+     */
+    @Async
+    public void sendAccountActivation(String name, String email, String token, String siteUrl) {
+        sendSafely(new EmailMessage(email, null, null,
+                "Activa tu cuenta de Cuquora",
+                render("email/account-activation", Map.of(
+                        "name", name,
+                        "invitationUrl", invitationUrl(siteUrl, token),
+                        "validityDays", InvitationService.VALIDITY_DAYS))));
+    }
+
     private void sendInvitation(String name, String email, String centerName, String token, String siteUrl) {
+        if (centerName == null) {
+            // Clientes sin centro: el enlace nuevo de una activación de cuenta
+            sendAccountActivation(name, email, token, siteUrl);
+            return;
+        }
         sendSafely(new EmailMessage(email, null, null,
                 "Te han dado de alta en " + centerName + " - Cuquora",
                 render("email/worker-invitation", Map.of(

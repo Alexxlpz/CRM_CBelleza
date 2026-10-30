@@ -1858,6 +1858,15 @@ body:has(.cookie-banner:not([hidden])) {
     color: var(--text-soft);
 }
 
+/* Campo trampa para bots de los formularios públicos: fuera de la pantalla y fuera del lector de pantalla */
+.form-trap {
+    position: absolute !important;
+    left: -10000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}
+
 .spin {
     display: inline-block;
     animation: spin 0.8s linear infinite;

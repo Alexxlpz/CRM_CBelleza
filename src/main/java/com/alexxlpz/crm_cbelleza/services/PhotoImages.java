@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Set;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Preparar una foto subida (del centro o de un profesional): se lee como imagen (no se fía del nombre ni del tipo
@@ -31,8 +33,16 @@ final class PhotoImages {
 
     /** Tamaño máximo del fichero subido (también en spring.servlet.multipart.max-file-size). */
     static final int MAX_UPLOAD_MB = 8;
-    /** Evita que una imagen pequeña en bytes pero enorme en píxeles agote la memoria al descomprimirla. */
-    private static final long MAX_PIXELS = 50_000_000L;
+    /**
+     * Evita que una imagen pequeña en bytes pero enorme en píxeles agote la memoria al descomprimirla: un PNG de un
+     * color de 7.000 × 7.000 px pesa 139 KB y ocupa 186 MB al leerlo. 16 megapíxeles (unos 64 MB) sobran para una foto
+     * de móvil, que de todas formas se reduce a 1.200 px.
+     */
+    static final long MAX_PIXELS = 16_000_000L;
+    /** Fotos que se preparan a la vez; el resto espera un poco y, si no hay hueco, se le pide que lo intente de nuevo. */
+    static final int MAX_CONCURRENT = 2;
+    private static final Semaphore SLOTS = new Semaphore(MAX_CONCURRENT);
+    private static final long WAIT_SECONDS = 10;
     private static final Set<String> FORMATS = Set.of("jpeg", "png");
     private static final float JPEG_QUALITY = 0.85f;
 
@@ -56,10 +66,23 @@ final class PhotoImages {
      * se queda antes con el cuadrado del centro (fotos de perfil, que salen en un círculo).
      */
     static byte[] fit(byte[] original, int maxSide, int minWidth, int minHeight, boolean square) {
+        boolean acquired = false;
         try {
+            // Muchas fotos a la vez agotarían la memoria aunque cada una sea pequeña (el alta de centros es pública)
+            acquired = SLOTS.tryAcquire(WAIT_SECONDS, TimeUnit.SECONDS);
+            if (!acquired) {
+                throw new BusinessRuleException("Ahora mismo hay mucha gente subiendo fotos. Inténtalo de nuevo en un momento.");
+            }
             return fitImage(original, maxSide, minWidth, minHeight, square);
         } catch (IOException e) {
             throw new BusinessRuleException("No se ha podido leer la foto. Prueba con otra en JPG o PNG.");
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new BusinessRuleException("No se ha podido preparar la foto. Inténtalo de nuevo.");
+        } finally {
+            if (acquired) {
+                SLOTS.release();
+            }
         }
     }
 
@@ -107,7 +130,8 @@ final class PhotoImages {
                 }
                 reader.setInput(input, true, true);
                 if ((long) reader.getWidth(0) * reader.getHeight(0) > MAX_PIXELS) {
-                    throw new BusinessRuleException("La foto tiene demasiados píxeles. Usa una de menos de 50 megapíxeles.");
+                    throw new BusinessRuleException("La foto tiene demasiados píxeles. Usa una de menos de "
+                            + MAX_PIXELS / 1_000_000 + " megapíxeles.");
                 }
                 return reader.read(0);
             } finally {

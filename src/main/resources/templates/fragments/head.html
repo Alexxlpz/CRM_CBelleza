@@ -52,10 +52,9 @@
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="icon" type="image/png" href="/images/icon.png">
     <link rel="apple-touch-icon" href="/images/icon.png">
-    <!-- Tipografía (Plus Jakarta Sans) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400..800&display=swap">
+    <!-- Tipografía (Plus Jakarta Sans, servida por la propia web: sin Google Fonts) -->
+    <link rel="preload" href="/fonts/plus-jakarta-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" th:href="@{/css/fonts.css}">
     <!-- Iconos Lucide (fuente servida por la aplicación; clases lucide-<nombre>) -->
     <link rel="stylesheet" th:href="@{/css/lucide-icons.css}">
     <!-- Estilos base (tokens, componentes y layout comunes) -->

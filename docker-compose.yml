@@ -7,8 +7,11 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: crm_cbelleza_app
+    # Solo en el propio servidor (127.0.0.1): a internet se sale por Cloudflare (cloudflared o un proxy en esta máquina).
+    # Abierto a todas las interfaces, cualquiera podría saltarse Cloudflare, ir por http:// e inventarse su IP.
+    # Para probar desde otro equipo de casa: APP_BIND=0.0.0.0 en el .env (y nunca con FORWARD_HEADERS_STRATEGY=native).
     ports:
-      - "8080:8080"
+      - "${APP_BIND:-127.0.0.1}:8080:8080"
     environment:
       DB_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:?Falta POSTGRES_DB en .env}
       DB_DRIVER_CLASS_NAME: org.postgresql.Driver
@@ -24,7 +27,12 @@ services:
       CRM_FROM_EMAIL: ${CRM_FROM_EMAIL:-cuquora@hotmail.com}
       # Clave fija para que «Recordar mi sesión» siga funcionando tras reiniciar el contenedor
       REMEMBER_ME_KEY: ${REMEMBER_ME_KEY:?Falta REMEMBER_ME_KEY en .env}
-      SITE_URL: ${SITE_URL:-}
+      # Obligatoria: con ella se escriben los enlaces de los correos (invitaciones, publicar un centro). Vacía, la app
+      # los tomaría de la cabecera Host de la petición, que la elige quien la envía.
+      SITE_URL: ${SITE_URL:?Falta SITE_URL en .env (p. ej. https://cuquora.com o http://localhost:8080)}
+      # Con HTTPS delante (Cloudflare): true en las dos. En local por http:// se quedan en false / none.
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      FORWARD_HEADERS_STRATEGY: ${FORWARD_HEADERS_STRATEGY:-none}
       # Zona horaria del servidor (hora de las citas, «ahora» al reservar y al completar citas)
       TZ: ${TZ:-Europe/Madrid}
       # Titular de la web en Términos y Privacidad (LSSI)

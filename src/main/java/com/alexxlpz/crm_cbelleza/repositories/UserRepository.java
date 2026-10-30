@@ -30,6 +30,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @EntityGraph(attributePaths = {"center"})
     Optional<User> findByNameIgnoreCase(String name);
 
+    /** Como los nombres se repiten, basta con saber si hay uno o más de uno. */
+    @EntityGraph(attributePaths = {"center"})
+    List<User> findTop2ByNameIgnoreCase(String name);
+
     Optional<User> findByPhone(String phone);
 
     @EntityGraph(attributePaths = {"center"})

@@ -16,7 +16,8 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 
 /**
- * Invitaciones para que los trabajadores dados de alta con su centro pongan su contraseña.
+ * Invitaciones para que los trabajadores dados de alta con su centro pongan su contraseña (y para que un cliente
+ * que un centro dio de alta a mano active su cuenta desde su correo).
  * Cada enlace sirve una vez y caduca a los {@link #VALIDITY_DAYS} días; si caduca, la propia página
  * envía uno nuevo al correo del trabajador (nunca a otro).
  */
@@ -63,7 +64,18 @@ public class InvitationService {
                 user.getCenter() != null ? user.getCenter().getName() : null, stateOf(invitation));
     }
 
-    /** Pone la contraseña del trabajador y gasta el enlace. */
+    /** Caduca los enlaces que aún valían y crea otro (el último correo es el único que sirve). */
+    public String reinvite(User user) {
+        LocalDateTime now = LocalDateTime.now(clock);
+        invitations.findByUserIdAndUsedAtIsNull(user.getId()).forEach(invitation -> {
+            if (invitation.getExpiresAt().isAfter(now)) {
+                invitation.setExpiresAt(now);
+            }
+        });
+        return invite(user);
+    }
+
+    /** Pone la contraseña (trabajador o cliente que activa su cuenta) y gasta el enlace: el correo queda verificado. */
     public User accept(String token, String password, String confirmation) {
         AccountInvitation invitation = find(token);
         switch (stateOf(invitation)) {
@@ -74,6 +86,7 @@ public class InvitationService {
         passwordPolicy.validateRequired(password, confirmation);
         User user = invitation.getUser();
         user.setPassword(passwordEncoder.encode(password));
+        user.setEmailVerified(true);
         invitation.setUsedAt(LocalDateTime.now(clock));
         return users.save(user);
     }

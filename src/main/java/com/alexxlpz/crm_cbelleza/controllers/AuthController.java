@@ -1,12 +1,15 @@
 package com.alexxlpz.crm_cbelleza.controllers;
 
 import com.alexxlpz.crm_cbelleza.config.GoogleLoginSettings;
+import com.alexxlpz.crm_cbelleza.config.SiteModelAdvice;
 import com.alexxlpz.crm_cbelleza.entities.User;
 import com.alexxlpz.crm_cbelleza.exceptions.BusinessRuleException;
 import com.alexxlpz.crm_cbelleza.forms.RegistrationForm;
+import com.alexxlpz.crm_cbelleza.mail.CenterOnboardingMailService;
 import com.alexxlpz.crm_cbelleza.security.AppUserDetails;
 import com.alexxlpz.crm_cbelleza.security.AuthenticationSessionService;
 import com.alexxlpz.crm_cbelleza.security.LoginFailureHandler;
+import com.alexxlpz.crm_cbelleza.security.PublicFormLimiter;
 import com.alexxlpz.crm_cbelleza.security.RoleHomes;
 import com.alexxlpz.crm_cbelleza.services.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,11 +33,18 @@ public class AuthController {
     private final UserService userService;
     private final AuthenticationSessionService authSession;
     private final GoogleLoginSettings google;
+    private final PublicFormLimiter limiter;
+    private final CenterOnboardingMailService mailService;
+    private final SiteModelAdvice site;
 
-    public AuthController(UserService userService, AuthenticationSessionService authSession, GoogleLoginSettings google) {
+    public AuthController(UserService userService, AuthenticationSessionService authSession, GoogleLoginSettings google,
+                          PublicFormLimiter limiter, CenterOnboardingMailService mailService, SiteModelAdvice site) {
         this.userService = userService;
         this.authSession = authSession;
         this.google = google;
+        this.limiter = limiter;
+        this.mailService = mailService;
+        this.site = site;
     }
 
     /** Botón «Continuar con Google» en el login y el registro (solo si hay credenciales de Google). */
@@ -71,7 +81,17 @@ public class AuthController {
                            HttpServletResponse response,
                            RedirectAttributes redirect) {
         try {
-            User client = userService.registerClient(form);
+            limiter.check(PublicFormLimiter.Form.REGISTRATION, request.getRemoteAddr());
+            UserService.Registration registration = userService.registerClient(form);
+            User client = registration.user();
+            if (registration.needsActivation()) {
+                // El correo ya era de un cliente de algún centro: se activa desde el enlace que le llega
+                mailService.sendAccountActivation(client.getName(), client.getEmail(), registration.activationToken(),
+                        site.siteUrl());
+                redirect.addFlashAttribute("successMessage", "Te hemos enviado un correo a " + client.getEmail()
+                        + " para activar tu cuenta. Abre el enlace y pon ahí tu contraseña.");
+                return "redirect:/login";
+            }
             authSession.login(client, request, response);
             return "redirect:" + RoleHomes.CLIENT_HOME;
         } catch (BusinessRuleException e) {

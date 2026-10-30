@@ -27,4 +27,6 @@ ENV TZ=Europe/Madrid
 
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "/app/app.jar"]
+# Memoria de la JVM: el 75 % de la que tenga el contenedor (por defecto Java solo usa un 25 %).
+# Si se acaba, la app se reinicia (restart: unless-stopped) en vez de quedarse colgada.
+ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75", "-XX:+ExitOnOutOfMemoryError", "-Djava.security.egd=file:/dev/./urandom", "-jar", "/app/app.jar"]

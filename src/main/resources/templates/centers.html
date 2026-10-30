@@ -3,8 +3,9 @@
 <head>
     <th:block th:replace="~{fragments/head :: meta('Nuestros Centros de Belleza - Cuquora CRM')}"></th:block>
     <!-- Leaflet CSS & JS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Leaflet 1.9.4 servido por la propia web (static/vendor/leaflet): un CDN comprometido no puede meter código aquí -->
+    <link rel="stylesheet" th:href="@{/vendor/leaflet/leaflet.css}">
+    <script th:src="@{/vendor/leaflet/leaflet.js}"></script>
         <link rel="stylesheet" th:href="@{/css/cliente.css}">
         <link rel="stylesheet" th:href="@{/css/reviews.css}">
 </head>
@@ -307,8 +308,9 @@
 
             /* ---- Mapa ---- */
             const markerIcon = color => L.icon({
-                iconUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-${color}.png`,
-                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                iconUrl: `/vendor/leaflet/markers/marker-icon-${color}.png`,
+                iconRetinaUrl: `/vendor/leaflet/markers/marker-icon-2x-${color}.png`,
+                shadowUrl: '/vendor/leaflet/images/marker-shadow.png',
                 iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34]
             });
 

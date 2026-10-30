@@ -50,6 +50,12 @@ public class BookingService {
     public static final int MAX_PROPOSALS = 3;
     /** Solicitudes sin responder que un cliente puede tener a la vez en un centro (evita llenar la agenda de peticiones). */
     public static final int MAX_PENDING_REQUESTS = 3;
+    /**
+     * Citas por venir (pendientes, propuestas o confirmadas) que un cliente puede tener a la vez en un centro. Con
+     * «aceptar automáticamente» las citas nacen confirmadas y no cuentan como solicitudes: sin este tope una cuenta
+     * podría llenar la agenda entera del centro.
+     */
+    public static final int MAX_UPCOMING_BOOKINGS = 10;
 
     private final AppointmentRepository appointmentRepository;
     private final CenterRepository centerRepository;
@@ -128,6 +134,12 @@ public class BookingService {
         User client = userRepository.findById(clientId)
                 .orElseThrow(() -> new BusinessRuleException("Cliente no encontrado en el sistema."));
         boolean confirmed = center.isAutoAcceptBookings() && free != null;
+        if (appointmentRepository.countByCenterIdAndClientIdAndStatusInAndDateTimeAfter(centerId, clientId,
+                List.of(AppointmentStatus.PENDING, AppointmentStatus.PROPOSED, AppointmentStatus.CONFIRMED), now)
+                >= MAX_UPCOMING_BOOKINGS) {
+            throw new BusinessRuleException("Ya tienes " + MAX_UPCOMING_BOOKINGS + " citas por venir en este centro. "
+                    + "Si necesitas más, llama al centro o anula alguna desde «Mis citas».");
+        }
         if (!confirmed && appointmentRepository.countByCenterIdAndClientIdAndStatusInAndDateTimeAfter(centerId, clientId,
                 List.of(AppointmentStatus.PENDING, AppointmentStatus.PROPOSED), now) >= MAX_PENDING_REQUESTS) {
             throw new BusinessRuleException("Ya tienes " + MAX_PENDING_REQUESTS + " solicitudes sin responder en este centro. "

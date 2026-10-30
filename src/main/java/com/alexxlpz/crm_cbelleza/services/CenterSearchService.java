@@ -101,10 +101,12 @@ public class CenterSearchService {
                 .toList();
 
         int size = criteria.sizeOrDefault();
-        int from = criteria.pageOrDefault() * size;
-        if (from >= sorted.size()) {
+        // En long: una página enorme (?page=999999999) no debe dar la vuelta a negativo
+        long offset = (long) criteria.pageOrDefault() * size;
+        if (offset >= sorted.size()) {
             return List.of();
         }
+        int from = (int) offset;
         // El primer hueco necesita la agenda de cada centro: solo para los de esta página
         Map<Long, Center> byId = centers.stream().collect(Collectors.toMap(Center::getId, center -> center));
         Map<Long, String> slugs = centerService.shortSlugs();

@@ -62,11 +62,15 @@ public class WorkerPhotoService {
         worker.setPhotoUpdatedAt(null);
     }
 
-    /** Foto de un profesional: es pública (sale al reservar). Los clientes no tienen foto. */
+    /**
+     * Foto de un profesional: es pública (sale al reservar) cuando su centro ya está publicado; antes solo la ve su
+     * equipo, para que el alta pública no sirva para colgar imágenes en Cuquora. Los clientes no tienen foto.
+     */
     @Transactional(readOnly = true)
-    public UserPhoto photoOf(Long workerId) {
-        return users.findById(workerId)
-                .filter(u -> u.getRole() == Role.WORKER)
+    public UserPhoto photoOf(Long workerId, Long viewerCenterId) {
+        return users.findWithCenterById(workerId)
+                .filter(u -> u.getRole() == Role.WORKER && u.getCenter() != null)
+                .filter(u -> u.getCenter().isPublished() || u.getCenter().getId().equals(viewerCenterId))
                 .flatMap(u -> photos.findById(u.getId()))
                 .orElseThrow(() -> new ResourceNotFoundException("La foto no existe."));
     }

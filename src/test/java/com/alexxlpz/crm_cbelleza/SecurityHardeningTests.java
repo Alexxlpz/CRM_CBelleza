@@ -93,16 +93,31 @@ class SecurityHardeningTests {
     }
 
     @Test
-    void fiveFailedLoginsLockTheAccountEvenWithTheRightPassword() throws Exception {
+    void fiveFailedLoginsLockTheAccountFromThatIpEvenWithTheRightPassword() throws Exception {
         for (int i = 0; i < LoginAttemptService.MAX_ACCOUNT_FAILURES; i++) {
             login(ELENA, "no-es-esta-" + i, "10.0.0.1", "/login?error");
         }
         login(ELENA, DatabaseSeeder.DEMO_PASSWORD, "10.0.0.1", "/login?blocked");
-        // Cambiar de IP no sirve: el cierre es de la cuenta
-        login(ELENA, DatabaseSeeder.DEMO_PASSWORD, "10.0.0.2", "/login?blocked");
         mvc.perform(get("/login").param("blocked", "")).andExpect(content().string(containsString("Demasiados intentos fallidos")));
         // Las demás cuentas siguen entrando
         login(TestUsers.WORKER_CENTER_1, DatabaseSeeder.DEMO_PASSWORD, "10.0.0.3", "/worker/dashboard");
+    }
+
+    /** Quien falla adrede con la cuenta de otro no la deja sin entrar: el dueño entra desde su propia conexión. */
+    @Test
+    void someoneElseFailingDoesNotLockTheOwnerOut() {
+        LoginAttemptService attempts = new LoginAttemptService(Clock.fixed(Instant.parse("2026-10-30T10:00:00Z"), ZoneId.of("UTC")));
+        for (int i = 0; i < LoginAttemptService.MAX_ACCOUNT_FAILURES; i++) {
+            attempts.recordFailure("ana@ejemplo.com", "10.0.4.1");
+        }
+        assertTrue(attempts.isBlocked("ana@ejemplo.com", "10.0.4.1"));
+        assertFalse(attempts.isBlocked("ana@ejemplo.com", "10.0.4.2"), "desde otra IP la dueña sigue entrando");
+
+        // Probando desde muchas IPs la cuenta acaba cerrada para todas
+        for (int i = LoginAttemptService.MAX_ACCOUNT_FAILURES; i < LoginAttemptService.MAX_ACCOUNT_FAILURES_ALL_IPS; i++) {
+            attempts.recordFailure("ana@ejemplo.com", "10.0.5." + i);
+        }
+        assertTrue(attempts.isBlocked("ana@ejemplo.com", "10.0.4.2"));
     }
 
     @Test
@@ -139,11 +154,11 @@ class SecurityHardeningTests {
         for (int i = 0; i < LoginAttemptService.MAX_ACCOUNT_FAILURES; i++) {
             attempts.recordFailure("ana@ejemplo.com", "10.0.3.1");
         }
-        assertTrue(attempts.isBlocked("ana@ejemplo.com", "10.0.3.2"));
+        assertTrue(attempts.isBlocked("ana@ejemplo.com", "10.0.3.1"));
         clock.advance(LoginAttemptService.LOCK.minusSeconds(1));
-        assertTrue(attempts.isBlocked("ana@ejemplo.com", "10.0.3.2"));
+        assertTrue(attempts.isBlocked("ana@ejemplo.com", "10.0.3.1"));
         clock.advance(Duration.ofSeconds(1));
-        assertFalse(attempts.isBlocked("ana@ejemplo.com", "10.0.3.2"));
+        assertFalse(attempts.isBlocked("ana@ejemplo.com", "10.0.3.1"));
     }
 
     @Test

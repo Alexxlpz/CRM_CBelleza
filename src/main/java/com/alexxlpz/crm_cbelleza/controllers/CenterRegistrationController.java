@@ -9,13 +9,16 @@ import com.alexxlpz.crm_cbelleza.exceptions.BusinessRuleException;
 import com.alexxlpz.crm_cbelleza.forms.CenterRegistrationForm;
 import com.alexxlpz.crm_cbelleza.forms.PasswordPolicy;
 import com.alexxlpz.crm_cbelleza.mail.CenterOnboardingMailService;
+import com.alexxlpz.crm_cbelleza.security.PublicFormLimiter;
 import com.alexxlpz.crm_cbelleza.services.CenterPhotoService;
 import com.alexxlpz.crm_cbelleza.services.CenterRegistrationService;
 import com.alexxlpz.crm_cbelleza.services.CenterRegistrationService.Registration;
 import com.alexxlpz.crm_cbelleza.services.InvitationService;
 import com.alexxlpz.crm_cbelleza.services.InvitationService.Renewal;
 import com.alexxlpz.crm_cbelleza.services.OpeningHoursService;
+import com.alexxlpz.crm_cbelleza.services.TeamService;
 import com.alexxlpz.crm_cbelleza.services.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -47,6 +50,8 @@ public class CenterRegistrationController {
     private final GoogleLoginSettings google;
     private final UserService userService;
     private final OpeningHoursService openingHours;
+    private final TeamService team;
+    private final PublicFormLimiter limiter;
 
     public CenterRegistrationController(CenterRegistrationService registrationService,
                                         InvitationService invitationService,
@@ -54,8 +59,12 @@ public class CenterRegistrationController {
                                         SiteModelAdvice site,
                                         GoogleLoginSettings google,
                                         UserService userService,
-                                        OpeningHoursService openingHours) {
+                                        OpeningHoursService openingHours,
+                                        TeamService team,
+                                        PublicFormLimiter limiter) {
         this.openingHours = openingHours;
+        this.team = team;
+        this.limiter = limiter;
         this.registrationService = registrationService;
         this.invitationService = invitationService;
         this.mailService = mailService;
@@ -76,9 +85,20 @@ public class CenterRegistrationController {
     @PostMapping({"/register-center", "/alta-centro"})
     public String submitRegistration(@ModelAttribute CenterRegistrationForm form,
                                      @RequestParam(required = false) MultipartFile photo,
+                                     @RequestParam(name = ContactController.HONEYPOT, required = false) String honeypot,
+                                     HttpServletRequest request,
                                      Model model, RedirectAttributes redirect) {
+        if (honeypot != null && !honeypot.isBlank()) {
+            // Un bot: se le contesta como si nada, sin crear el centro ni enviar correos
+            redirect.addFlashAttribute("registered", true);
+            redirect.addFlashAttribute("registeredCenter", form.centerName());
+            redirect.addFlashAttribute("registeredEmail", form.email());
+            redirect.addFlashAttribute("registeredTeam", 0);
+            return "redirect:/register-center";
+        }
         Registration registration;
         try {
+            limiter.check(PublicFormLimiter.Form.CENTER_REGISTRATION, request.getRemoteAddr());
             registration = registrationService.register(form, photo);
         } catch (BusinessRuleException e) {
             // Se vuelve a pintar el formulario con lo escrito: es largo y no se debe perder nada
@@ -107,6 +127,9 @@ public class CenterRegistrationController {
     public String approve(@PathVariable String token, Model model) {
         Center center = registrationService.publish(token);
         mailService.sendPublished(center.getName(), center.getEmail(), site.siteUrl());
+        // Hasta ahora solo el responsable había recibido su enlace (ver TeamService.invitationsOnPublish)
+        team.invitationsOnPublish(center.getId()).forEach(invitee -> mailService.sendInvitationAsync(
+                invitee.name(), invitee.email(), invitee.centerName(), invitee.token(), site.siteUrl()));
         model.addAttribute("justPublished", true);
         return approvalView(center, model);
     }

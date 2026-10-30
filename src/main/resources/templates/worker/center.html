@@ -3,8 +3,9 @@
 <head>
     <th:block th:replace="~{fragments/head :: meta('Mi Centro - Cuquora CRM')}"></th:block>
     <script th:src="@{/js/loyalty-settings.js}" defer></script>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
+    <!-- Leaflet 1.9.4 servido por la propia web (static/vendor/leaflet): un CDN comprometido no puede meter código aquí -->
+    <link rel="stylesheet" th:href="@{/vendor/leaflet/leaflet.css}">
+    <script th:src="@{/vendor/leaflet/leaflet.js}" defer></script>
     <script th:src="@{/js/location-picker.js}" defer></script>
     <script th:src="@{/js/photo-picker.js}" defer></script>
     <script th:src="@{/js/opening-hours.js}" defer></script>
@@ -190,7 +191,7 @@
                                th:attr="aria-label=${'Horario de ' + member.name()}">
                                 <i class="lucide-calendar-clock" aria-hidden="true"></i> Horario
                             </a>
-                            <form th:if="${member.pending() and !member.owner()}" th:action="@{/worker/center/team/{id}/resend(id=${member.id()})}" method="post">
+                            <form th:if="${member.pending() and !member.owner() and center.published}" th:action="@{/worker/center/team/{id}/resend(id=${member.id()})}" method="post">
                                 <button type="submit" class="btn btn-secondary btn-sm">
                                     <i class="lucide-send" aria-hidden="true"></i> Reenviar invitación
                                 </button>
@@ -324,7 +325,7 @@
                             <p class="sync-setting-title" id="shortLinkLabel">Enlace para reservar</p>
                             <p class="sync-setting-help" th:if="${center.published}">
                                 Ponlo en la bio de Instagram, en vuestra ficha de Google Maps o en WhatsApp: abre directamente
-                                vuestro centro para pedir cita.
+                                vuestro centro para pedir cita. No cambia aunque cambiéis el nombre del centro.
                             </p>
                             <p class="sync-setting-help" th:unless="${center.published}">
                                 Funcionará en cuanto se publique el centro.

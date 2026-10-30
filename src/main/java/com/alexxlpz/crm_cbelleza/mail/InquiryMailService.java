@@ -43,8 +43,9 @@ public class InquiryMailService {
         sendSafely(new EmailMessage(adminEmail, form.email(), form.name(),
                 "[Cuquora Contacto] " + form.subject() + " - " + form.name(),
                 render("email/contact-admin", vars)));
+        // Asunto fijo: el remitente lo escribe cualquiera y el acuse no debe llevar su texto (ver contact-ack.html)
         sendSafely(new EmailMessage(form.email(), null, null,
-                "Hemos recibido tu consulta: " + form.subject() + " - Cuquora",
+                "Hemos recibido tu consulta - Cuquora",
                 render("email/contact-ack", vars)));
     }
 

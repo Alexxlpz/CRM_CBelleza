@@ -4,8 +4,9 @@
     <th:block th:replace="~{fragments/head :: meta('Alta de centro - Cuquora CRM')}"></th:block>
     <link rel="stylesheet" th:href="@{/css/home.css}">
     <link rel="stylesheet" th:href="@{/css/public.css}">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
+    <!-- Leaflet 1.9.4 servido por la propia web (static/vendor/leaflet): un CDN comprometido no puede meter código aquí -->
+    <link rel="stylesheet" th:href="@{/vendor/leaflet/leaflet.css}">
+    <script th:src="@{/vendor/leaflet/leaflet.js}" defer></script>
     <script th:src="@{/js/form-validation.js}" defer></script>
     <script th:src="@{/js/location-picker.js}" defer></script>
     <script th:src="@{/js/photo-picker.js}" defer></script>
@@ -27,10 +28,11 @@
         <section class="form-card form-card--wide registration-done" th:if="${registered != null}" aria-labelledby="registrationDoneTitle">
             <h2 id="registrationDoneTitle"><i class="lucide-mail-check" aria-hidden="true"></i> Centro registrado: revisa tu correo</h2>
             <p>
-                Hemos enviado a <strong th:text="${registeredEmail}">info@tucentro.com</strong> el enlace para crear tu contraseña
-                <th:block th:if="${registeredTeam > 0}">y una invitación a
-                    <span th:text="${registeredTeam == 1 ? 'la otra persona de tu equipo' : 'cada una de las ' + registeredTeam + ' personas de tu equipo'}">tu equipo</span></th:block>.
+                Hemos enviado a <strong th:text="${registeredEmail}">info@tucentro.com</strong> el enlace para crear tu contraseña.
                 El enlace vale <th:block th:text="${invitationDays}">7</th:block> días.
+                <th:block th:if="${registeredTeam > 0}">
+                    <span th:text="${registeredTeam == 1 ? 'La otra persona de tu equipo recibirá su invitación' : 'Las ' + registeredTeam + ' personas de tu equipo recibirán su invitación'}">Tu equipo recibirá su invitación</span>
+                    cuando publiquemos el centro.</th:block>
             </p>
             <p>
                 <strong th:text="${registeredCenter}">Tu centro</strong> no saldrá en el buscador hasta que lo revisemos (como mucho, una semana).
@@ -59,6 +61,11 @@
 
             <form th:action="@{/register-center}" method="post" id="registerCenterForm" novalidate enctype="multipart/form-data"
                   th:attr="data-max-workers=${maxExtraWorkers}">
+                <!-- Trampa para bots: oculto a las personas; si llega relleno, el envío se descarta -->
+                <div class="form-trap" aria-hidden="true">
+                    <label for="website">No rellenes este campo</label>
+                    <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+                </div>
 
                 <fieldset class="registration-section">
                     <legend><i class="lucide-store" aria-hidden="true"></i> El centro</legend>

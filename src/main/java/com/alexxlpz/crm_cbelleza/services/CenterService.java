@@ -41,13 +41,14 @@ public class CenterService {
     }
 
     /**
-     * Enlace corto del centro para Instagram, Google Maps o WhatsApp: {@code /c/centro-historico}. Sale solo del nombre
-     * (nunca del id): si centros dados de alta antes se llaman igual, se le añade un orden ({@code /c/centro-historico-2}).
-     * Si el centro cambia de nombre, cambia el enlace.
+     * Enlace corto del centro para Instagram, Google Maps o WhatsApp: {@code /c/centro-historico}. Sale del nombre
+     * (nunca del id) y se guarda en {@code centers.slug} en cuanto existe el centro: después no cambia aunque se renombre
+     * el centro o se dé de alta otro con el mismo nombre, que recibe {@code /c/centro-historico-2}. Si se recalculase en
+     * cada visita, renombrar un centro antiguo le quitaría el enlace a otro (S-03 del reporte de seguridad).
      */
     @Transactional(readOnly = true)
     public String shortSlug(Center center) {
-        return shortSlugs().get(center.getId());
+        return center.getSlug() != null ? center.getSlug() : shortSlugs().get(center.getId());
     }
 
     /** Centro publicado por su nombre en la dirección (el de {@link #shortSlug}); 404 si no hay ninguno. */
@@ -60,35 +61,79 @@ public class CenterService {
     /** El centro publicado de un enlace corto; vacío si no hay ninguno o aún no se ha publicado. */
     @Transactional(readOnly = true)
     public Optional<Center> findPublishedBySlug(String slug) {
+        if (slug == null || slug.isBlank()) {
+            return Optional.empty();
+        }
+        String clean = slug.toLowerCase(Locale.ROOT);
+        Optional<Center> stored = centerRepository.findBySlug(clean);
+        if (stored.isPresent()) {
+            return stored.filter(Center::isPublished);
+        }
+        // Centros que aún no tienen el enlace guardado (se guarda al arrancar la app, ver assignMissingSlugs)
         Map<Long, String> slugs = shortSlugs();
         return centerRepository.findAll().stream()
-                .filter(center -> center.isPublished() && slugs.get(center.getId()).equalsIgnoreCase(slug))
+                .filter(center -> center.getSlug() == null && center.isPublished() && clean.equals(slugs.get(center.getId())))
                 .findFirst();
     }
 
     /**
-     * Nombre en la dirección de cada centro, por id ({@code /c/centro-historico}, {@code /client/centers/centro-historico}):
-     * el más antiguo se queda el nombre limpio y los siguientes, -2, -3... Las direcciones nunca llevan el id.
+     * Enlace corto de cada centro, por id: el guardado o, si aún no tiene, el que le tocaría (el nombre limpio o con
+     * -2, -3... si ya está cogido, por orden de alta).
      */
     @Transactional(readOnly = true)
     public Map<Long, String> shortSlugs() {
+        List<Center> all = centerRepository.findAll();
         Map<Long, String> slugs = new HashMap<>();
         Set<String> taken = new HashSet<>();
-        centerRepository.findAll().stream()
+        all.stream().filter(c -> c.getSlug() != null).forEach(c -> {
+            slugs.put(c.getId(), c.getSlug());
+            taken.add(c.getSlug());
+        });
+        all.stream()
+                .filter(c -> c.getSlug() == null)
                 .sorted(Comparator.comparing(Center::getId))
                 .forEach(center -> {
-                    String base = slugOf(center.getName());
-                    if (base.isEmpty()) {
-                        base = "centro";
-                    }
-                    String slug = base;
-                    for (int n = 2; taken.contains(slug); n++) {
-                        slug = base + "-" + n;
-                    }
+                    String slug = freeSlug(center.getName(), taken);
                     taken.add(slug);
                     slugs.put(center.getId(), slug);
                 });
         return slugs;
+    }
+
+    /** Guarda el enlace de un centro nuevo: su nombre o, si ya lo tiene otro (aunque sea sin publicar), con -2, -3... */
+    public Center assignSlug(Center center) {
+        if (center.getSlug() == null) {
+            Map<Long, String> slugs = shortSlugs();
+            slugs.remove(center.getId());
+            Set<String> taken = new HashSet<>(slugs.values());
+            center.setSlug(freeSlug(center.getName(), taken));
+            centerRepository.save(center);
+        }
+        return center;
+    }
+
+    /** Guarda el enlace de los centros que no lo tienen (los anteriores a V26 y los datos de demostración). */
+    public int assignMissingSlugs() {
+        Map<Long, String> slugs = shortSlugs();
+        List<Center> missing = centerRepository.findAll().stream().filter(c -> c.getSlug() == null).toList();
+        missing.forEach(center -> center.setSlug(slugs.get(center.getId())));
+        centerRepository.saveAll(missing);
+        return missing.size();
+    }
+
+    private static String freeSlug(String name, Set<String> taken) {
+        String base = slugOf(name);
+        if (base.isEmpty()) {
+            base = "centro";
+        }
+        if (base.length() > 100) {
+            base = base.substring(0, 100).replaceAll("-+$", "");
+        }
+        String slug = base;
+        for (int n = 2; taken.contains(slug); n++) {
+            slug = base + "-" + n;
+        }
+        return slug;
     }
 
     /** Nombre en la dirección de los centros publicados, por orden de alta (para el sitemap). */

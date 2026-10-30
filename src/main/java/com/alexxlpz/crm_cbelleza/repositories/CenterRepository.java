@@ -23,6 +23,9 @@ public interface CenterRepository extends JpaRepository<Center, Long> {
 
     Optional<Center> findByApprovalTokenHash(String approvalTokenHash);
 
+    /** Centro de un enlace corto guardado ({@code /c/<slug>}, en minúsculas). */
+    Optional<Center> findBySlug(String slug);
+
     /** Dueño del centro (nulo si no tiene) sin cargar el centro entero: se consulta en cada petición del panel. */
     @Query("SELECT c.ownerId FROM Center c WHERE c.id = :id")
     Optional<Long> findOwnerId(@Param("id") Long id);

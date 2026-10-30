@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{email/layout :: layout('Hola, ' + ${name}, 'Activa tu cuenta de Cuquora', ~{::content})}">
+<body>
+<th:block th:fragment="content">
+    <p style="font-size:15px; color:#5c5550; line-height:1.6; margin:0 0 16px;">
+        Alguien ha pedido crear una cuenta en Cuquora con este correo. Ya tenías citas en algún centro que trabaja con Cuquora,
+        así que la cuenta conserva tu historial. Pon tu contraseña para entrar.
+    </p>
+    <p style="margin:0 0 20px;">
+        <a th:href="${invitationUrl}" style="display:inline-block; padding:12px 22px; background:#8a6a45; color:#ffffff; text-decoration:none; border-radius:10px; font-weight:700; font-size:14px;">Activar mi cuenta</a>
+    </p>
+    <p style="font-size:13px; color:#857b74; margin:0;">
+        El enlace vale <span th:text="${validityDays}">7</span> días. Si no has sido tú, ignora este correo: nadie puede entrar en tu cuenta sin él.
+    </p>
+</th:block>
+</body>
+</html>

@@ -54,9 +54,12 @@ public class CenterPhotoController {
 
     /** Foto de perfil de un profesional («¿Con quién?» al reservar, equipo); versionada con ?v= como la del centro. */
     @GetMapping("/team/{id}/photo")
-    public ResponseEntity<byte[]> workerPhoto(@PathVariable Long id) {
-        UserPhoto photo = workerPhotos.photoOf(id);
-        return image(photo.getContentType(), photo.getData(), CacheControl.maxAge(Duration.ofDays(365)).cachePublic().immutable());
+    public ResponseEntity<byte[]> workerPhoto(@PathVariable Long id, @AuthenticationPrincipal AppUserDetails viewer) {
+        Long viewerCenterId = viewer == null ? null : viewer.getCenterId();
+        UserPhoto photo = workerPhotos.photoOf(id, viewerCenterId);
+        // Sin centro propio solo se ven las de centros publicados; el equipo puede ver la suya antes de publicar
+        CacheControl cache = CacheControl.maxAge(Duration.ofDays(365));
+        return image(photo.getContentType(), photo.getData(), viewerCenterId == null ? cache.cachePublic().immutable() : cache.cachePrivate());
     }
 
     private static ResponseEntity<byte[]> image(CenterPhoto photo, CacheControl cache) {

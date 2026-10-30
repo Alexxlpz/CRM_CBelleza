@@ -14,6 +14,7 @@ import org.thymeleaf.ITemplateEngine;
 import org.thymeleaf.context.Context;
 
 import java.time.Clock;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -45,12 +46,15 @@ public class AppointmentMailService {
     private final ITemplateEngine templateEngine;
     private final Clock clock;
     private final String siteUrl;
+    private final DailyQuota dailyQuota;
 
     public AppointmentMailService(AppointmentRepository appointments,
                                   EmailGateway gateway,
                                   ITemplateEngine templateEngine,
                                   Clock clock,
-                                  @Value("${crm.site-url:}") String siteUrl) {
+                                  @Value("${crm.site-url:}") String siteUrl,
+                                  @Value("${crm.mail.max-client-emails-per-center-per-day:150}") int maxPerCenterPerDay) {
+        this.dailyQuota = new DailyQuota(maxPerCenterPerDay);
         this.appointments = appointments;
         this.gateway = gateway;
         this.templateEngine = templateEngine;
@@ -144,6 +148,17 @@ public class AppointmentMailService {
         if (client == null || !hasRealEmail(client.getEmail())) {
             return;
         }
+        // Un centro sin publicar no escribe a clientes: lo puede dar de alta cualquiera y elegir el nombre del centro,
+        // del tratamiento y el mensaje, así que serviría para mandar correos de Cuquora a cualquier dirección.
+        if (!app.getCenter().isPublished()) {
+            log.info("Correo de cita no enviado a {}: el centro {} aún no está publicado", client.getEmail(), app.getCenter().getId());
+            return;
+        }
+        if (!dailyQuota.tryUse(app.getCenter().getId(), LocalDate.now(clock))) {
+            log.warn("Correo de cita no enviado a {}: el centro {} ha llegado a {} correos a clientes hoy",
+                    client.getEmail(), app.getCenter().getId(), dailyQuota.max());
+            return;
+        }
         send(client.getEmail(), subject, heading, "Hola, " + client.getName(), intro, app, "/client/appointments", "Ver mis citas");
     }
 
@@ -213,5 +228,36 @@ public class AppointmentMailService {
 
     private static boolean hasRealEmail(String email) {
         return email != null && !email.isBlank() && !email.toLowerCase(Locale.ROOT).endsWith(User.PLACEHOLDER_EMAIL_DOMAIN);
+    }
+
+    /**
+     * Tope de correos a clientes por centro y día (recordatorios incluidos). El plan gratis de Brevo da 300 al día para
+     * toda la web: un centro que se pase (por un error o a propósito) no puede dejar sin avisos a los demás.
+     */
+    static final class DailyQuota {
+        private final int max;
+        private final Map<Long, int[]> used = new HashMap<>();
+        private LocalDate day;
+
+        DailyQuota(int max) {
+            this.max = max;
+        }
+
+        int max() {
+            return max;
+        }
+
+        synchronized boolean tryUse(Long centerId, LocalDate today) {
+            if (!today.equals(day)) {
+                used.clear();
+                day = today;
+            }
+            int[] count = used.computeIfAbsent(centerId, id -> new int[1]);
+            if (count[0] >= max) {
+                return false;
+            }
+            count[0]++;
+            return true;
+        }
     }
 }

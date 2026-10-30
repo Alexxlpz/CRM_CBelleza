@@ -57,6 +57,14 @@ public class User {
     private LocalDateTime photoUpdatedAt;
 
     /**
+     * Si se ha comprobado que el correo es de esta persona (enlace de un correo de Cuquora o Google). El registro público
+     * crea la cuenta sin comprobar: hasta entonces su contraseña no basta para quedarse con una cuenta que entre con Google.
+     */
+    @Column(name = "email_verified", nullable = false)
+    @Builder.Default
+    private boolean emailVerified = true;
+
+    /**
      * Tiene cuenta propia (puede iniciar sesión con contraseña o con Google).
      * Los clientes dados de alta a mano desde la cartera no tienen ninguna de las dos.
      */

@@ -25,4 +25,8 @@ public class Product {
     
     @Column(nullable = false)
     private Double price;
+
+    /** Centro que lo creó (solo lo ve ese centro); nulo = producto del catálogo general. */
+    @Column(name = "center_id")
+    private Long centerId;
 }

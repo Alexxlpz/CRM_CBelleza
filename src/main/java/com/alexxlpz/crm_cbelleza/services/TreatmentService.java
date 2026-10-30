@@ -66,6 +66,9 @@ public class TreatmentService {
         if (FormText.isBlank(form.name()) || form.price() == null || form.duration() == null || form.duration() <= 0) {
             throw new BusinessRuleException("Completa nombre, precio y duración del tratamiento.");
         }
+        if (form.price() < 0 || form.price().isNaN() || form.price().isInfinite()) {
+            throw new BusinessRuleException("El precio no puede ser negativo.");
+        }
         Center center = centerRepository.findById(centerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Centro no encontrado."));
         treatmentRepository.save(Treatment.builder()

@@ -41,13 +41,14 @@ public class InventoryService {
         return inventoryRepository.findByCenterId(centerId);
     }
 
-    /** Productos del catálogo general que el centro todavía no tiene en su inventario. */
+    /** Productos del catálogo general y los creados por el centro que todavía no tiene en su inventario. */
     @Transactional(readOnly = true)
     public List<Product> getAvailableCatalogProducts(Long centerId) {
         Set<Long> inInventory = inventoryRepository.findByCenterId(centerId).stream()
                 .map(item -> item.getProduct().getId())
                 .collect(Collectors.toSet());
         return productRepository.findAll().stream()
+                .filter(product -> visibleTo(product, centerId))
                 .filter(product -> !inInventory.contains(product.getId()))
                 .toList();
     }
@@ -75,6 +76,7 @@ public class InventoryService {
 
     private void addExistingProduct(Long centerId, Long productId, int stock) {
         Product product = productRepository.findById(productId)
+                .filter(p -> visibleTo(p, centerId))
                 .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado."));
         Inventory item = inventoryRepository.findByCenterIdAndProductId(centerId, productId)
                 .map(existing -> {
@@ -90,17 +92,27 @@ public class InventoryService {
     }
 
     private void addNewProduct(Long centerId, InventoryItemForm form) {
+        if (form.price() != null && (form.price() < 0 || form.price().isNaN() || form.price().isInfinite())) {
+            throw new BusinessRuleException("El precio no puede ser negativo.");
+        }
         Product product = productRepository.save(Product.builder()
                 .name(form.name().trim())
                 .description(form.description())
                 .category(form.category())
                 .price(form.price())
+                // Solo para este centro: si fuese al catálogo general, el resto vería los productos y precios que crea
+                .centerId(centerId)
                 .build());
         inventoryRepository.save(Inventory.builder()
                 .center(center(centerId))
                 .product(product)
                 .stock(form.stockOrZero())
                 .build());
+    }
+
+    /** Un producto del catálogo general (sin centro) o creado por este centro. */
+    private static boolean visibleTo(Product product, Long centerId) {
+        return product.getCenterId() == null || product.getCenterId().equals(centerId);
     }
 
     private Inventory findInCenter(Long centerId, Long inventoryId) {

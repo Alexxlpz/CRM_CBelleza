@@ -27,13 +27,25 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final PasswordPolicy passwordPolicy;
     private final PersistentTokenRepository rememberMeTokens;
+    private final InvitationService invitations;
 
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, PasswordPolicy passwordPolicy,
-                       PersistentTokenRepository rememberMeTokens) {
+                       PersistentTokenRepository rememberMeTokens, InvitationService invitations) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.passwordPolicy = passwordPolicy;
         this.rememberMeTokens = rememberMeTokens;
+        this.invitations = invitations;
+    }
+
+    /**
+     * Resultado del registro: o la cuenta nueva (ya se puede entrar) o, si el correo era de un cliente que un centro
+     * dio de alta a mano, el enlace para que el dueño del correo ponga la contraseña desde su bandeja.
+     */
+    public record Registration(User user, String activationToken) {
+        public boolean needsActivation() {
+            return activationToken != null;
+        }
     }
 
     @Transactional(readOnly = true)
@@ -54,12 +66,13 @@ public class UserService {
 
     /**
      * Alta pública de un cliente. Si un centro ya lo había dado de alta a mano con ese correo (cuenta sin
-     * contraseña ni Google), el registro completa esa cuenta en vez de rechazarse: conserva sus citas y fichas,
-     * y los datos que escribe el cliente sustituyen a los que puso el centro. Una cuenta de Google ya tiene
+     * contraseña ni Google), no se rechaza ni se pone la contraseña al momento: se manda un enlace a ese correo para
+     * que la ponga quien lo lea, porque si no cualquiera que conociera el correo se quedaría con las citas y fichas
+     * de esa persona. Las cuentas nuevas quedan con el correo sin verificar. Una cuenta de Google ya tiene
      * dueño aunque no tenga contraseña: no se puede registrar encima (la contraseña se añade desde el perfil).
      * Lanza {@link BusinessRuleException} con un mensaje para el usuario si algo falla.
      */
-    public User registerClient(RegistrationForm form) {
+    public Registration registerClient(RegistrationForm form) {
         if (FormText.isBlank(form.name()) || FormText.isBlank(form.email())) {
             throw new BusinessRuleException("Por favor, completa todos los campos requeridos.");
         }
@@ -71,7 +84,9 @@ public class UserService {
         }
         var existing = userRepository.findByEmailIgnoreCase(email);
         if (existing.isEmpty()) {
-            return createUser(form.name().trim(), email, FormText.trimToNull(form.phone()), form.password(), Role.CLIENT, null);
+            User created = createUser(form.name().trim(), email, FormText.trimToNull(form.phone()), form.password(), Role.CLIENT, null);
+            created.setEmailVerified(false);
+            return new Registration(userRepository.save(created), null);
         }
         User user = existing.get();
         if (user.getPassword() == null && user.getGoogleId() != null) {
@@ -82,15 +97,8 @@ public class UserService {
         if (user.hasAccount() || user.getRole() != Role.CLIENT) {
             throw new BusinessRuleException("Ya existe una cuenta con este correo electrónico. Por favor, inicia sesión.");
         }
-        // Prevalece lo que escribe el cliente; el teléfono del centro solo se mantiene si no pone ninguno
-        user.setName(form.name().trim());
-        user.setEmail(email);
-        String phone = FormText.trimToNull(form.phone());
-        if (phone != null) {
-            user.setPhone(phone);
-        }
-        user.setPassword(passwordEncoder.encode(form.password()));
-        return userRepository.save(user);
+        // Los datos que puso el centro no se tocan hasta que el dueño del correo entre; luego puede cambiarlos en su perfil
+        return new Registration(user, invitations.reinvite(user));
     }
 
     /**
@@ -120,7 +128,14 @@ public class UserService {
             if (user.getGoogleId() != null) {
                 throw new BusinessRuleException("Este correo ya está vinculado a otra cuenta de Google.");
             }
+            if (user.getPassword() != null && !user.isEmailVerified()) {
+                // Alguien se registró con este correo sin demostrar que era suyo: la contraseña que puso no vale,
+                // así no puede seguir entrando en la cuenta que ahora es de quien tiene el correo de verdad
+                user.setPassword(null);
+                rememberMeTokens.removeUserTokens(AppUserDetails.usernameOf(user));
+            }
             user.setGoogleId(googleId);
+            user.setEmailVerified(true);
             return userRepository.save(user);
         }
         int at = cleanEmail.indexOf('@');

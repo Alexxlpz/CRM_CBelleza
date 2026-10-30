@@ -52,6 +52,11 @@
                 </div>
 
                 <form th:action="@{/contact}" method="post" id="contactForm" novalidate>
+                    <!-- Trampa para bots: oculto a las personas; si llega relleno, el envío se descarta -->
+                    <div class="form-trap" aria-hidden="true">
+                        <label for="website">No rellenes este campo</label>
+                        <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+                    </div>
                     <div class="form-field">
                         <label for="name">Nombre y apellidos *</label>
                         <input type="text" id="name" name="name" placeholder="Tu nombre" required>

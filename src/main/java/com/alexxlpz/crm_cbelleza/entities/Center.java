@@ -92,6 +92,10 @@ public class Center {
     @Column(name = "approval_token_hash", unique = true, length = 64)
     private String approvalTokenHash;
 
+    /** Enlace corto ({@code /c/<slug>}): se fija una vez y no cambia al renombrar el centro (ver CenterService.shortSlugs). */
+    @Column(unique = true, length = 120)
+    private String slug;
+
     @Column(name = "registered_at")
     private LocalDateTime registeredAt;
 

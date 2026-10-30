@@ -245,7 +245,11 @@ public class WorkerCenterController {
         // Los avisos van dentro de la tarjeta del equipo (#equipo)
         try {
             Invitee invitee = team.invite(worker.getCenterId(), worker.getId(), name, email);
-            if (invitee.token() != null) {
+            if (invitee.token() != null && !published(worker)) {
+                // Un centro sin publicar no envía correos: la invitación sale al publicarlo (TeamService.invitationsOnPublish)
+                redirect.addFlashAttribute("teamMessage", invitee.name() + " ya está en tu equipo. Le enviaremos la invitación a "
+                        + invitee.email() + " en cuanto publiquemos tu centro.");
+            } else if (invitee.token() != null) {
                 onboardingMail.sendInvitationAsync(invitee.name(), invitee.email(), invitee.centerName(), invitee.token(), site.siteUrl());
                 redirect.addFlashAttribute("teamMessage", "Invitación enviada a " + invitee.email()
                         + ". " + invitee.name() + " entrará en cuanto cree su contraseña.");
@@ -267,6 +271,9 @@ public class WorkerCenterController {
                                    @PathVariable Long workerId,
                                    RedirectAttributes redirect) {
         try {
+            if (!published(worker)) {
+                throw new BusinessRuleException("La invitación saldrá sola en cuanto publiquemos tu centro.");
+            }
             Invitee invitee = team.resend(worker.getCenterId(), worker.getId(), workerId);
             onboardingMail.sendInvitationAsync(invitee.name(), invitee.email(), invitee.centerName(), invitee.token(), site.siteUrl());
             redirect.addFlashAttribute("teamMessage", "Invitación enviada de nuevo a " + invitee.email() + ". El enlace anterior ya no vale.");
@@ -364,6 +371,10 @@ public class WorkerCenterController {
         photoService.remove(worker.getCenterId());
         redirect.addFlashAttribute("photoMessage", "Foto quitada.");
         return "redirect:/worker/center#foto";
+    }
+
+    private boolean published(AppUserDetails worker) {
+        return centerService.getCenterById(worker.getCenterId()).isPublished();
     }
 
     /** Foto de perfil: cada profesional la suya (no hace falta ser el dueño). */
