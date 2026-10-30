@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<!--/* Ficha pública del centro (/c/nombre, CenterLinkController): lo que ofrece y sus opiniones, sin iniciar sesión.
+       Reservar lleva a la ficha del cliente (bookUrl), que pide entrar y después vuelve; cada tratamiento llega ya
+       elegido (?tratamiento=). Un trabajador no puede reservar: ve la carta sin enlaces y un aviso. */-->
+<head>
+    <th:block th:replace="~{fragments/head :: meta(${center.name + ' · Cuquora'})}"></th:block>
+    <link rel="stylesheet" th:href="@{/css/cliente.css}">
+    <link rel="stylesheet" th:href="@{/css/reviews.css}">
+</head>
+
+<body>
+    <div th:replace="~{fragments/navbar :: brand(true)}"></div>
+
+    <main class="main-container booking-page center-public-page"
+          th:with="canBook=${sessionRole != 'WORKER'}, bookLabel=${center.autoAcceptBookings ? 'Reservar cita' : 'Solicitar cita'}">
+        <div th:replace="~{client/fragments/center-hero :: hero(${center})}"></div>
+
+        <section class="glass-panel booking-section" aria-labelledby="treatmentsTitle">
+            <div class="center-public-head">
+                <h2 class="booking-section-title" id="treatmentsTitle">
+                    <i class="lucide-sparkles" aria-hidden="true"></i>
+                    Tratamientos
+                </h2>
+                <a class="btn btn-primary center-public-book" th:if="${canBook and not #lists.isEmpty(treatments)}"
+                   th:href="@{${bookUrl}}">
+                    <i class="lucide-calendar-plus" aria-hidden="true"></i> <span th:text="${bookLabel}">Reservar cita</span>
+                </a>
+            </div>
+
+            <div class="treatment-select-grid" th:if="${not #lists.isEmpty(treatments)}">
+                <th:block th:each="t : ${treatments}" th:with="onOffer=${t.hasActiveOffer(today)}">
+                    <a class="treatment-select-card treatment-public-card" th:if="${canBook}"
+                       th:href="@{${bookUrl}(tratamiento=${t.id})}"
+                       th:attr="aria-label=${bookLabel + ': ' + t.name}">
+                        <th:block th:replace="~{client/fragments/treatment-card :: treatmentBody(${t}, ${onOffer})}"></th:block>
+                        <span class="treatment-public-cta">
+                            <span th:text="${bookLabel}">Reservar cita</span> <i class="lucide-chevron-right" aria-hidden="true"></i>
+                        </span>
+                    </a>
+                    <div class="treatment-select-card treatment-public-card" th:unless="${canBook}">
+                        <th:block th:replace="~{client/fragments/treatment-card :: treatmentBody(${t}, ${onOffer})}"></th:block>
+                    </div>
+                </th:block>
+            </div>
+            <div th:if="${#lists.isEmpty(treatments)}" class="no-appointments-box">
+                <i class="lucide-sparkles" aria-hidden="true"></i>
+                <p>Este centro no tiene tratamientos publicados en este momento.</p>
+            </div>
+
+            <p class="center-public-note" th:if="${sessionRole == null and not #lists.isEmpty(treatments)}">
+                <i class="lucide-user-round" aria-hidden="true"></i>
+                <span>Para reservar te pediremos que inicies sesión o crees una cuenta. Después vuelves aquí con el tratamiento elegido.</span>
+            </p>
+            <p class="center-public-note" th:unless="${canBook}">
+                <i class="lucide-info" aria-hidden="true"></i>
+                <span>Has entrado como trabajador. Para reservar, entra con una cuenta de cliente.</span>
+            </p>
+        </section>
+
+        <!-- Opiniones: solo de clientes con una cita completada en el centro -->
+        <section th:replace="~{fragments/reviews :: centerReviews}"></section>
+    </main>
+
+    <script th:src="@{/js/reviews-carousel.js}" defer></script>
+
+    <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Software de gestión para centros de estética, salones y spas.')}"></div>
+
+</body>
+
+</html>

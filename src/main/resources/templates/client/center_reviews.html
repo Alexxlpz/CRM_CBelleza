@@ -10,11 +10,12 @@
 <body>
     <div th:replace="~{fragments/navbar :: brand(true)}"></div>
 
-    <!--/* «Ver las N opiniones» de la ficha: todas las reseñas del centro con orden y filtros (formulario GET). */-->
+    <!--/* «Ver las N opiniones» de la ficha (pública en /c/nombre/opiniones o del cliente): todas las reseñas del centro
+         con orden y filtros (formulario GET). centerUrl, reviewsUrl y bookUrl los pone CenterPageModel. */-->
     <main class="main-container all-reviews-page">
         <header class="all-reviews-head">
-            <a class="all-reviews-back" th:with="centerUrl=@{/client/centers/{s}(s=${centerSlug})}"
-               th:href="${centerUrl + '#resenas'}"
+            <a class="all-reviews-back" th:with="backUrl=@{${centerUrl}}"
+               th:href="${backUrl + '#resenas'}"
                th:attr="aria-label=${'Volver a ' + center.name}">
                 <i class="lucide-chevron-left" aria-hidden="true"></i>
             </a>
@@ -28,7 +29,7 @@
             </div>
         </header>
 
-        <form class="all-reviews-filters" method="get" th:action="@{/client/centers/{s}/opiniones(s=${centerSlug})}"
+        <form class="all-reviews-filters" method="get" th:action="@{${reviewsUrl}}"
               aria-label="Ordenar y filtrar opiniones" th:if="${rating.hasReviews()}" data-auto-submit>
             <label class="review-chip review-chip--select">
                 <span class="visually-hidden">Ordenar</span>
@@ -66,7 +67,7 @@
                 <span th:text="${filter.isFiltered()
                         ? 'Mostrando ' + reviews.size() + ' de ' + rating.count
                         : (rating.count == 1 ? '1 opinión verificada' : rating.count + ' opiniones verificadas')}">Mostrando 9 de 49</span>
-                <a th:if="${filter.isFiltered()}" th:href="@{/client/centers/{s}/opiniones(s=${centerSlug})}">Quitar filtros</a>
+                <a th:if="${filter.isFiltered()}" th:href="@{${reviewsUrl}}">Quitar filtros</a>
             </p>
             <p class="reviews-empty" th:if="${!rating.hasReviews()}">
                 Este centro todavía no tiene opiniones.
@@ -79,7 +80,8 @@
             </th:block>
         </section>
 
-        <a class="btn btn-primary all-reviews-book" th:href="@{/client/centers/{s}(s=${centerSlug})}">
+        <!--/* Desde la ficha pública también lleva a la reserva, que pide iniciar sesión */-->
+        <a class="btn btn-primary all-reviews-book" th:href="@{${bookUrl}}" th:unless="${sessionRole == 'WORKER'}">
             <i class="lucide-calendar-plus" aria-hidden="true"></i> Reservar en <span th:text="${center.name}">Centro Histórico</span>
         </a>
     </main>

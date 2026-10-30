@@ -105,16 +105,49 @@ class FirstSlotAndShortLinkTests {
         String slug = centerService.shortSlug(center);
         assertEquals(CenterService.slugOf(center.getName()), slug);
 
-        // Sin sesión también funciona: lleva a la ficha (y la ficha pide entrar)
+        // Sin sesión se ve la ficha pública: carta, opiniones y cada tratamiento enlaza a la reserva
         mvc.perform(get("/c/" + slug))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString(center.getName())))
+                .andExpect(content().string(containsString("Opiniones de clientes")))
+                .andExpect(content().string(containsString("Para reservar te pediremos que inicies sesión")))
+                .andExpect(content().string(containsString("href=\"/client/centers/" + slug + "?tratamiento=")));
+        mvc.perform(get("/c/" + slug.toUpperCase()))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/client/centers/" + centerService.shortSlug(center)));
+                .andExpect(redirectedUrl("/c/" + slug));
         mvc.perform(get("/c/no-existe")).andExpect(status().isNotFound());
 
         // Un centro aún sin publicar no se abre
         center.setPublished(false);
         centers.saveAndFlush(center);
         mvc.perform(get("/c/" + slug)).andExpect(status().isNotFound());
+    }
+
+    @Test
+    void theShortLinkShowsAllTheReviewsWithoutLoggingIn() throws Exception {
+        String slug = centerService.shortSlug(center());
+        mvc.perform(get("/c/" + slug + "/opiniones").param("orden", "peores"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("href=\"/c/" + slug + "#resenas\"")))
+                .andExpect(content().string(containsString("href=\"/client/centers/" + slug + "\"")));
+        mvc.perform(get("/c/no-existe/opiniones")).andExpect(status().isNotFound());
+    }
+
+    @Test
+    void bookingFromThePublicPageAsksToLogIn() throws Exception {
+        String slug = centerService.shortSlug(center());
+        mvc.perform(get("/client/centers/" + slug).param("tratamiento", "1"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login"));
+    }
+
+    @Test
+    void aWorkerSeesThePublicPageWithoutBookingLinks() throws Exception {
+        String slug = centerService.shortSlug(center());
+        mvc.perform(get("/c/" + slug).with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Has entrado como trabajador")))
+                .andExpect(content().string(org.hamcrest.Matchers.not(containsString("/client/centers/" + slug))));
     }
 
     @Test

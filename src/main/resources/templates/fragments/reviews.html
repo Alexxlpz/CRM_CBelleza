@@ -64,7 +64,7 @@
     </article>
 
     <!--/* Tarjeta corta del carrusel de la ficha: el comentario se corta a cuatro líneas y «Leer entera» lleva a la lista. */-->
-    <li th:fragment="reviewCard(review, age, centerSlug)" class="review-card">
+    <li th:fragment="reviewCard(review, age, reviewsUrl)" class="review-card">
         <header class="review-card-head">
             <span class="review-avatar" aria-hidden="true" th:text="${#strings.substring(review.authorName, 0, 1)}">S</span>
             <div class="review-item-who">
@@ -83,10 +83,67 @@
             <span class="review-card-replied" th:if="${review.hasReply()}">
                 <i class="lucide-message-square-reply" aria-hidden="true"></i> El centro ha respondido
             </span>
-            <a th:with="reviewsUrl=@{/client/centers/{s}/opiniones(s=${centerSlug})}"
-               th:href="${reviewsUrl + '#resena-' + review.id}"
+            <a th:with="allReviewsUrl=@{${reviewsUrl}}"
+               th:href="${allReviewsUrl + '#resena-' + review.id}"
                th:text="${review.comment != null and review.comment.length() > 160 ? 'Leer entera' : 'Ver respuesta'}"
                th:attr="aria-label=${'Leer la opinión de ' + review.authorName}">Leer entera</a>
         </footer>
     </li>
+
+    <!--/* Opiniones de la ficha del centro (pública y del cliente): resumen, barras y carrusel con las últimas.
+         Usa del modelo rating, ratingDistribution, latestReviews, reviewAges, reviewCount y reviewsUrl (CenterPageModel). */-->
+    <section th:fragment="centerReviews" class="glass-panel reviews-section" id="resenas" aria-labelledby="reviewsTitle">
+        <div class="reviews-head">
+            <h2 class="booking-section-title" id="reviewsTitle">
+                <i class="lucide-star" aria-hidden="true"></i>
+                Opiniones de clientes
+            </h2>
+            <span class="reviews-trust" th:if="${rating.hasReviews()}">
+                <i class="lucide-badge-check" aria-hidden="true"></i> Solo de citas reales
+            </span>
+        </div>
+        <p class="reviews-empty" th:unless="${rating.hasReviews()}">
+            Este centro todavía no tiene opiniones. Podrás valorarlo desde «Mis citas» cuando hayas tenido tu cita.
+        </p>
+        <div class="reviews-layout" th:if="${rating.hasReviews()}">
+            <div class="reviews-summary">
+                <div class="reviews-summary-score">
+                    <p class="reviews-average"><strong th:text="${rating.averageLabel()}">4,7</strong> <span>de 5</span></p>
+                    <span th:replace="~{fragments/reviews :: stars(${rating.roundedToHalf()})}"></span>
+                    <p class="reviews-count" th:text="${rating.count == 1 ? '1 opinión verificada' : rating.count + ' opiniones verificadas'}">23 opiniones verificadas</p>
+                </div>
+                <ul class="reviews-bars" aria-label="Opiniones por número de estrellas">
+                    <li th:each="entry : ${ratingDistribution}">
+                        <span class="reviews-bar-label" th:text="${entry.key + ' ★'}">5 ★</span>
+                        <span class="reviews-bar" aria-hidden="true"><span th:style="'width: ' + ${entry.value * 100 / rating.count} + '%'"></span></span>
+                        <span class="reviews-bar-count" th:text="${entry.value}">12</span>
+                        <span class="visually-hidden" th:text="${entry.key == 1 ? 'con 1 estrella' : 'con ' + entry.key + ' estrellas'}">con 5 estrellas</span>
+                    </li>
+                </ul>
+            </div>
+            <div class="reviews-latest" data-review-carousel>
+                <div class="reviews-latest-head">
+                    <h3 class="reviews-latest-title">Las más recientes</h3>
+                    <div class="reviews-carousel-nav" th:if="${latestReviews.size() > 1}">
+                        <button type="button" class="reviews-carousel-btn" data-carousel-prev aria-label="Opiniones anteriores">
+                            <i class="lucide-chevron-left" aria-hidden="true"></i>
+                        </button>
+                        <button type="button" class="reviews-carousel-btn" data-carousel-next aria-label="Opiniones siguientes">
+                            <i class="lucide-chevron-right" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
+                <ul class="reviews-carousel" aria-labelledby="reviewsTitle" tabindex="0">
+                    <th:block th:each="review : ${latestReviews}">
+                        <li th:replace="~{fragments/reviews :: reviewCard(${review}, ${reviewAges[review.id]}, ${reviewsUrl})}"></li>
+                    </th:block>
+                </ul>
+                <div class="reviews-carousel-dots" aria-hidden="true" th:if="${latestReviews.size() > 1}">
+                    <span th:each="review, stat : ${latestReviews}" th:classappend="${stat.first} ? 'is-active'"></span>
+                </div>
+                <a class="btn btn-secondary reviews-all" th:href="@{${reviewsUrl}}"
+                   th:text="${reviewCount == 1 ? 'Ver la opinión' : 'Ver las ' + reviewCount + ' opiniones'}">Ver las 49 opiniones</a>
+            </div>
+        </div>
+    </section>
 </div>

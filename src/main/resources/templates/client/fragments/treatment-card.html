@@ -1,0 +1,20 @@
+<!--/* Tarjeta de un tratamiento en la ficha pública del centro (center_public.html). */-->
+<div xmlns:th="http://www.thymeleaf.org">
+<!--/* Contenido de una tarjeta de la carta (nombre, oferta, descripción, precio y duración) */-->
+<th:block th:fragment="treatmentBody(t, onOffer)">
+    <span class="offer-badge" th:if="${onOffer}">
+        <i class="lucide-tag" aria-hidden="true"></i>
+        <span th:text="'-' + ${t.offerDiscountPercent()} + ' %' + (${t.offerEndsOn != null} ? ' · ' + ${t.offerEndsLabel()} : '')">-20 % · hasta el 30 oct</span>
+    </span>
+    <span class="treatment-card-title" th:text="${t.name}">Manicura</span>
+    <span class="treatment-card-desc" th:text="${t.description}">Descripción del servicio</span>
+    <span class="treatment-card-meta">
+        <span class="treatment-card-price">
+            <span th:text="${#numbers.formatDecimal(t.priceOn(today), 1, 'POINT', 2, 'COMMA')} + ' €'">32,00 €</span>
+            <s class="treatment-card-old-price" th:if="${onOffer}"
+               th:text="${#numbers.formatDecimal(t.price, 1, 'POINT', 2, 'COMMA')} + ' €'">40,00 €</s>
+        </span>
+        <span class="treatment-card-duration" th:text="${t.duration} + ' min'">30 min</span>
+    </span>
+</th:block>
+</div>

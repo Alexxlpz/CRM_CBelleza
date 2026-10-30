@@ -163,7 +163,15 @@
                             <tr>
                                 <td><code>/c/{nombre}</code></td>
                                 <td><span class="http-get">GET</span></td>
-                                <td>Enlace corto del centro (Instagram, Google Maps): lleva a su ficha; sin sesión, pasa antes por el login</td>
+                                <td>Ficha pública del centro (enlace corto para Instagram o Google Maps): tratamientos, horario y opiniones sin iniciar sesión. «Reservar» lleva a <code>/client/centers/{nombre}</code>, que pide entrar y vuelve con el tratamiento elegido. Con mayúsculas redirige a minúsculas</td>
+                                <td>✅ Permitido</td>
+                                <td>✅ Permitido</td>
+                                <td>⚠️ Sin enlaces para reservar</td>
+                            </tr>
+                            <tr>
+                                <td><code>/c/{nombre}/opiniones</code></td>
+                                <td><span class="http-get">GET</span></td>
+                                <td>Todas las opiniones del centro sin iniciar sesión, con los mismos filtros que <code>/client/centers/{nombre}/opiniones</code></td>
                                 <td>✅ Permitido</td>
                                 <td>✅ Permitido</td>
                                 <td>✅ Permitido</td>

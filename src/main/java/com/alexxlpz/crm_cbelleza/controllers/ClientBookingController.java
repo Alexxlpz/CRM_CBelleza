@@ -1,10 +1,8 @@
 package com.alexxlpz.crm_cbelleza.controllers;
 
 import com.alexxlpz.crm_cbelleza.entities.Appointment;
-import com.alexxlpz.crm_cbelleza.dto.ReviewFilter;
 import com.alexxlpz.crm_cbelleza.entities.AppointmentStatus;
 import com.alexxlpz.crm_cbelleza.entities.Center;
-import com.alexxlpz.crm_cbelleza.entities.Review;
 import com.alexxlpz.crm_cbelleza.entities.Treatment;
 import com.alexxlpz.crm_cbelleza.exceptions.BusinessRuleException;
 import com.alexxlpz.crm_cbelleza.security.AppUserDetails;
@@ -14,7 +12,6 @@ import com.alexxlpz.crm_cbelleza.services.CenterService;
 import com.alexxlpz.crm_cbelleza.services.LoyaltyService;
 import com.alexxlpz.crm_cbelleza.services.OpeningHoursService;
 import com.alexxlpz.crm_cbelleza.services.ReviewService;
-import com.alexxlpz.crm_cbelleza.services.TreatmentService;
 import com.alexxlpz.crm_cbelleza.services.UserService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -25,12 +22,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -44,30 +38,27 @@ public class ClientBookingController {
     private static final DateTimeFormatter CHANGED_AT =
             DateTimeFormatter.ofPattern("EEEE d 'de' MMMM 'a las' HH:mm", Locale.forLanguageTag("es"));
 
-    /** Cuántas reseñas salen en el carrusel de la ficha; el resto, en «Ver las N opiniones». */
-    private static final int LATEST_REVIEWS = 6;
-
     private final CenterService centerService;
-    private final TreatmentService treatmentService;
     private final UserService userService;
     private final AppointmentService appointmentService;
     private final BookingService bookingService;
     private final OpeningHoursService openingHours;
     private final LoyaltyService loyaltyService;
     private final ReviewService reviewService;
+    private final CenterPageModel centerPage;
 
     public ClientBookingController(CenterService centerService,
-                                   TreatmentService treatmentService,
                                    UserService userService,
                                    AppointmentService appointmentService,
                                    BookingService bookingService,
                                    OpeningHoursService openingHours,
                                    LoyaltyService loyaltyService,
-                                   ReviewService reviewService) {
+                                   ReviewService reviewService,
+                                   CenterPageModel centerPage) {
+        this.centerPage = centerPage;
         this.reviewService = reviewService;
         this.loyaltyService = loyaltyService;
         this.centerService = centerService;
-        this.treatmentService = treatmentService;
         this.userService = userService;
         this.appointmentService = appointmentService;
         this.bookingService = bookingService;
@@ -89,29 +80,14 @@ public class ClientBookingController {
                                 @RequestParam(name = "tratamiento", required = false) Long treatmentId,
                                 Model model) {
         Center center = centerService.getPublishedBySlug(slug);
-        Long id = center.getId();
-        model.addAttribute("center", center);
-        model.addAttribute("centerSlug", centerService.shortSlug(center));
-        List<Treatment> treatments = treatmentService.getTreatmentsByCenter(id);
-        LocalDate today = treatmentService.todayAt(id);
-        model.addAttribute("treatments", treatments);
+        List<Treatment> treatments = centerPage.addCenter(model, center, false);
         model.addAttribute("selectedTreatmentId", treatments.stream()
                 .map(Treatment::getId)
                 .filter(candidate -> candidate.equals(treatmentId))
                 .findFirst()
                 .orElse(null));
-        model.addAttribute("today", today);
-        model.addAttribute("offerCount", treatments.stream().filter(t -> t.hasActiveOffer(today)).count());
-        model.addAttribute("workers", userService.getWorkersByCenter(id));
+        model.addAttribute("workers", userService.getWorkersByCenter(center.getId()));
         model.addAttribute("selectedWorkerId", null);
-        model.addAttribute("openingHoursLines", openingHours.forCenter(id).describe());
-        model.addAttribute("rating", reviewService.rating(id));
-        model.addAttribute("ratingDistribution", reviewService.distribution(id));
-        List<Review> reviews = reviewService.forCenter(id);
-        model.addAttribute("reviewCount", reviews.size());
-        model.addAttribute("latestReviews", reviews.stream().limit(LATEST_REVIEWS).toList());
-        model.addAttribute("reviewAges", reviewService.ages(reviews.stream().limit(LATEST_REVIEWS).toList()));
-        model.addAttribute("activePage", "centers");
         return "client/center_details";
     }
 
@@ -123,25 +99,7 @@ public class ClientBookingController {
                                 @RequestParam(name = "comentario", defaultValue = "false") boolean withComment,
                                 @RequestParam(name = "tratamiento", required = false) Long treatmentId,
                                 Model model) {
-        Center center = centerService.getPublishedBySlug(slug);
-        Long id = center.getId();
-        ReviewFilter filter = ReviewFilter.of(order, stars, withComment, treatmentId);
-        List<Review> shown = reviewService.forCenter(id, filter);
-        // Solo los tratamientos que tienen alguna reseña, por orden alfabético
-        Map<Long, String> reviewedTreatments = new LinkedHashMap<>();
-        reviewService.forCenter(id).stream()
-                .map(review -> review.getAppointment().getTreatment())
-                .sorted(Comparator.comparing(Treatment::getName, String.CASE_INSENSITIVE_ORDER))
-                .forEach(treatment -> reviewedTreatments.putIfAbsent(treatment.getId(), treatment.getName()));
-        model.addAttribute("center", center);
-        model.addAttribute("centerSlug", centerService.shortSlug(center));
-        model.addAttribute("rating", reviewService.rating(id));
-        model.addAttribute("filter", filter);
-        model.addAttribute("orders", ReviewFilter.Order.values());
-        model.addAttribute("reviewedTreatments", reviewedTreatments);
-        model.addAttribute("reviews", shown);
-        model.addAttribute("reviewAges", reviewService.ages(shown));
-        model.addAttribute("activePage", "centers");
+        centerPage.addReviews(model, centerService.getPublishedBySlug(slug), false, order, stars, withComment, treatmentId);
         return "client/center_reviews";
     }
 
