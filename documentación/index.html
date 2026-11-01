@@ -180,7 +180,7 @@
                             <tr>
                                 <td><strong>Seguridad</strong></td>
                                 <td><code>SecurityConfig</code>, <code>AppUserDetailsService</code>, <code>GoogleOidcUserService</code>, <code>JdbcRememberMeTokenRepository</code>, <code>LoginAttemptService</code>, <code>PasswordPolicy</code></td>
-                                <td>Login por formulario o con Google, «Recordar mi sesión» 14 días, CSRF, rutas por rol (<code>/client/**</code>, <code>/worker/**</code>) y 404 propia también sin sesión. Login cerrado 15 min tras 5 fallos por cuenta o 20 por IP; contraseñas de 8 caracteres como mínimo y sin las más usadas.</td>
+                                <td>Login por formulario o con Google, «Recordar mi sesión» 14 días, CSRF, rutas por rol (<code>/client/**</code>, <code>/worker/**</code>) y 404 propia también sin sesión. Login cerrado 15 min tras 5 fallos por cuenta y conexión, 20 por conexión o 50 por cuenta; contraseñas de 8 caracteres como mínimo y sin las más usadas. Límite de envíos por conexión en contacto, alta de centro y registro, y Content-Security-Policy.</td>
                             </tr>
                             <tr>
                                 <td><strong>Controladores Web & API</strong></td>
@@ -189,7 +189,7 @@
                             </tr>
                             <tr>
                                 <td><strong>Lógica de Negocio (Servicios)</strong></td>
-                                <td><code>BookingService</code>, <code>AgendaAvailabilityService</code>, <code>AgendaBlockService</code>, <code>ClientCardService</code>, <code>InventoryService</code>, <code>ProductSaleService</code>, <code>LoyaltyService</code>, <code>TreatmentSummaryService</code>, <code>CenterRegistrationService</code>, <code>InvitationService</code>, <code>CenterPhotoService</code>, <code>UserService</code>, <code>ClientNotificationService</code>, <code>ReviewService</code>, <code>WorkerHoursService</code>, <code>NotificationDismissalService</code>, <code>AnalyticsService</code></td>
+                                <td><code>BookingService</code>, <code>AgendaAvailabilityService</code>, <code>AgendaBlockService</code>, <code>ClientCardService</code>, <code>InventoryService</code>, <code>ProductSaleService</code>, <code>LoyaltyService</code>, <code>TreatmentSummaryService</code>, <code>CenterRegistrationService</code>, <code>InvitationService</code>, <code>CenterPhotoService</code>, <code>UserService</code>, <code>ClientNotificationService</code>, <code>ReviewService</code>, <code>WorkerHoursService</code>, <code>NotificationDismissalService</code>, <code>AnalyticsService</code>, <code>WorkerPhotoService</code>, <code>CenterStructuredData</code></td>
                                 <td>Toda la validación vive aquí y lanza <code>BusinessRuleException</code> (mensaje en español) o <code>ResourceNotFoundException</code> (404). <code>BookingService</code> concentra todos los cambios de cita con bloqueo por centro.</td>
                             </tr>
                             <tr>
@@ -205,7 +205,7 @@
                             <tr>
                                 <td><strong>Persistencia & Datos</strong></td>
                                 <td><code>PostgreSQL 16</code> (Docker) o <code>H2</code> en memoria (desarrollo y tests)</td>
-                                <td>Esquema creado por <strong>Flyway</strong> (<code>db/migration/V1</code> a <code>V24</code>) con <code>ddl-auto=validate</code>; datos demo solo con <code>crm.seed-demo-data=true</code>.</td>
+                                <td>Esquema creado por <strong>Flyway</strong> (<code>db/migration/V1</code> a <code>V26</code>) con <code>ddl-auto=validate</code>; datos demo solo con <code>crm.seed-demo-data=true</code>.</td>
                             </tr>
                         </tbody>
                     </table>
@@ -446,11 +446,11 @@
                 <div class="grid-2">
                     <div class="card-feature">
                         <h4>🏢 Center (Centros de Belleza)</h4>
-                        <p>Representa una sede física. Contiene nombre, dirección física, teléfono, email de contacto, coordenadas (latitud y longitud) para el mapa y la distancia, <strong>zona horaria</strong> (<code>time_zone</code>), número de <strong>cabinas</strong> (citas a la vez, de 1 a 50), CIF/NIF, si está <strong>publicado</strong> (los dados de alta nacen ocultos hasta que administración los revisa), la configuración de la tarjeta de puntos (<code>loyalty_*</code>) y la fecha de su foto (<code>photo_updated_at</code>; la imagen va en <code>center_photos</code>), su dueño (<code>owner_id</code>), si acepta las citas al momento (<code>auto_accept_bookings</code>) y hasta cuántas horas antes puede el cliente cambiar la hora (<code>client_reschedule_hours</code>). En las direcciones de cliente se usa su nombre (<code>/client/centers/centro-historico</code>), nunca el id.</p>
+                        <p>Representa una sede física. Contiene nombre, dirección física, teléfono, email de contacto, coordenadas (latitud y longitud) para el mapa y la distancia, <strong>zona horaria</strong> (<code>time_zone</code>), número de <strong>cabinas</strong> (citas a la vez, de 1 a 50), CIF/NIF, si está <strong>publicado</strong> (los dados de alta nacen ocultos hasta que administración los revisa), la configuración de la tarjeta de puntos (<code>loyalty_*</code>) y la fecha de su foto (<code>photo_updated_at</code>; la imagen va en <code>center_photos</code>), su dueño (<code>owner_id</code>), si acepta las citas al momento (<code>auto_accept_bookings</code>) y hasta cuántas horas antes puede el cliente cambiar la hora (<code>client_reschedule_hours</code>). En las direcciones de cliente se usa su nombre (<code>/client/centers/centro-historico</code>), nunca el id; ese nombre se guarda en <code>slug</code> y es también su ficha pública (<code>/c/centro-historico</code>), que no cambia aunque se renombre el centro.</p>
                     </div>
                     <div class="card-feature">
                         <h4>👤 User & Role (Usuarios y Roles)</h4>
-                        <p>Entidad de usuarios del sistema. Posee nombre, email único, teléfono, contraseña cifrada en BCrypt (nula en clientes dados de alta a mano y en cuentas solo de Google), <code>google_id</code> si ha entrado con Google y un <code>Role</code> (<code>CLIENT</code> o <code>WORKER</code>). Los trabajadores se vinculan a un <code>Center</code>. <code>review_prompts_off</code> guarda si el cliente pulsó «No mostrar más» en el aviso de valorar.</p>
+                        <p>Entidad de usuarios del sistema. Posee nombre, email único, teléfono, contraseña cifrada en BCrypt (nula en clientes dados de alta a mano y en cuentas solo de Google), <code>google_id</code> si ha entrado con Google y un <code>Role</code> (<code>CLIENT</code> o <code>WORKER</code>). Los trabajadores se vinculan a un <code>Center</code>. <code>review_prompts_off</code> guarda si el cliente pulsó «No mostrar más» en el aviso de valorar. <code>email_verified</code> dice si el correo está comprobado (las cuentas nuevas del registro nacen sin comprobar) y <code>photo_updated_at</code> si el profesional tiene foto de perfil (la imagen va en <code>user_photos</code>).</p>
                     </div>
                     <div class="card-feature">
                         <h4>💆 Treatment (Catálogo de Servicios)</h4>
@@ -458,7 +458,7 @@
                     </div>
                     <div class="card-feature">
                         <h4>📦 Product & Inventory (Insumos y Stock)</h4>
-                        <p><code>Product</code> es el catálogo maestro (nombre, descripción, categoría, PVP). <code>Inventory</code> gestiona las existencias en cada sede con restricción de unicidad <code>(center_id, product_id)</code>.</p>
+                        <p><code>Product</code> es el catálogo (nombre, descripción, categoría, PVP): los productos generales no tienen centro y los que crea un centro (<code>center_id</code>) solo los ve ese centro. <code>Inventory</code> gestiona las existencias en cada sede con restricción de unicidad <code>(center_id, product_id)</code>.</p>
                     </div>
                     <div class="card-feature">
                         <h4>📋 ClientCard & Template (Fichas Técnicas Dinámicas)</h4>
@@ -482,7 +482,7 @@
                     </div>
                     <div class="card-feature">
                         <h4>✉️ AccountInvitation & CenterPhoto</h4>
-                        <p><code>AccountInvitation</code>: invitación de un solo uso (7 días) para que un trabajador de un centro nuevo ponga su contraseña; solo se guarda la huella SHA-256 del enlace. <code>CenterPhoto</code>: la foto del centro como JPEG de 1200 px como mucho, guardada en la base de datos.</p>
+                        <p><code>AccountInvitation</code>: invitación de un solo uso (7 días) para que un trabajador de un centro nuevo ponga su contraseña; solo se guarda la huella SHA-256 del enlace. <code>CenterPhoto</code>: la foto del centro como JPEG de 1200 px como mucho, guardada en la base de datos. <code>UserPhoto</code>: la foto de perfil de cada profesional, recortada en cuadrado (JPEG de 400 px).</p>
                     </div>
                     <div class="card-feature">
                         <h4>⭐ Review (Reseñas verificadas)</h4>
@@ -552,13 +552,13 @@
                 </div>
 
                 <h3>Opción A: Ejecución con Docker Compose (PostgreSQL 16)</h3>
-                <p>Primero copia <code>.env.example</code> a <code>.env</code> y rellena los secretos: <code>docker compose</code> no arranca si falta <code>POSTGRES_DB</code>, <code>POSTGRES_USER</code>, <code>POSTGRES_PASSWORD</code> o <code>REMEMBER_ME_KEY</code>. El esquema lo crea Flyway al arrancar.</p>
+                <p>Primero copia <code>.env.example</code> a <code>.env</code> y rellena los secretos: <code>docker compose</code> no arranca si falta <code>POSTGRES_DB</code>, <code>POSTGRES_USER</code>, <code>POSTGRES_PASSWORD</code>, <code>REMEMBER_ME_KEY</code> o <code>SITE_URL</code> (en local, <code>http://localhost:8080</code>). El esquema lo crea Flyway al arrancar.</p>
                 <pre><code># Desde la raíz del proyecto
 cp .env.example .env      # y rellenar los valores
 
 docker compose up --build -d
 docker compose logs -f app</code></pre>
-                <p>La aplicación estará accesible en: <code>http://localhost:8080</code>. PostgreSQL no publica puerto: solo lo ve la app dentro de la red de Docker.</p>
+                <p>La aplicación estará accesible en: <code>http://localhost:8080</code>. PostgreSQL no publica puerto: solo lo ve la app dentro de la red de Docker. La app solo escucha en <code>127.0.0.1</code>; para abrirla a otros equipos de casa, <code>APP_BIND=0.0.0.0</code> en el <code>.env</code>.</p>
 
                 <h3 style="margin-top: 2rem;">Opción B: Ejecución Local con Maven y Java 21 (perfil dev)</h3>
                 <pre><code># Windows (wrapper local)
@@ -567,7 +567,7 @@ mvnw.cmd spring-boot:run -Dspring-boot.run.profiles=dev
 # Linux (Maven del sistema)
 mvn spring-boot:run -Dspring-boot.run.profiles=dev
 
-# Tests (291)
+# Tests (319)
 mvn test</code></pre>
                 <p>
                     Con el perfil <code>dev</code> la aplicación usa H2 en memoria, carga los datos demo con <code>DatabaseSeeder</code> y activa <code>/login-selector</code> y la consola H2. Sin SMTP configurado, los correos se escriben en la consola. «Iniciar sesión con Google» y Google Calendar solo aparecen si están las variables <code>GOOGLE_CLIENT_ID</code>, <code>GOOGLE_CLIENT_SECRET</code> y <code>GOOGLE_TOKEN_KEY</code>.

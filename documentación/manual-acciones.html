@@ -204,7 +204,7 @@
                             <tr>
                                 <td><code>/login</code></td>
                                 <td><span class="http-get">GET</span> <span class="http-post">POST</span></td>
-                                <td>Inicio de sesión con correo o nombre y contraseña; tras 5 fallos por cuenta o 20 por IP se cierra 15 min (<code>/login?blocked</code>)</td>
+                                <td>Inicio de sesión con correo o nombre y contraseña; tras 5 fallos por cuenta e IP, 20 por IP o 50 por cuenta se cierra 15 min (<code>/login?blocked</code>)</td>
                                 <td>✅ Permitido</td>
                                 <td>(Redirige)</td>
                                 <td>(Redirige)</td>
@@ -645,10 +645,10 @@
                     <p>Login por formulario gestionado por Spring Security.</p>
                     <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.9rem; margin-bottom: 0.8rem;">
                         <li><strong>Parámetros:</strong> <code>identifier</code> (correo o nombre), <code>password</code> y <code>rememberMe</code> (opcional) más el token CSRF.</li>
-                        <li><strong>Comprobación:</strong> <code>AppUserDetailsService</code> busca por correo y, si no, por nombre; la contraseña se compara con BCrypt.</li>
+                        <li><strong>Comprobación:</strong> <code>AppUserDetailsService</code> busca por correo y, si no, por nombre (solo si ese nombre lo tiene una única cuenta); la contraseña se compara con BCrypt.</li>
                         <li><strong>Éxito:</strong> <code>RoleBasedAuthenticationSuccessHandler</code> manda al cliente a centros (o a la página que intentaba abrir) y al trabajador a <code>/worker/dashboard</code>.</li>
                         <li><strong>Error:</strong> <code>LoginFailureHandler</code> vuelve a <code>/login</code> con el aviso y el identificador escrito, y apunta el fallo en <code>LoginAttemptService</code>.</li>
-                        <li><strong>Freno a los intentos:</strong> 5 fallos seguidos con una cuenta (exista o no) o 20 desde una IP cierran el login 15 minutos. Mientras dura, <code>LoginThrottleFilter</code> corta el envío sin comprobar la contraseña y vuelve a <code>/login?blocked</code> («Demasiados intentos fallidos…»). Se guarda en memoria: reiniciar la aplicación lo borra.</li>
+                        <li><strong>Freno a los intentos:</strong> 5 fallos seguidos con una cuenta (exista o no) desde una misma IP la cierran para esa IP; 20 desde una IP cierran la IP entera y 50 con una cuenta desde cualquier IP, la cuenta. Dura 15 minutos y así nadie puede dejar sin entrar a otra persona a propósito. Mientras dura, <code>LoginThrottleFilter</code> corta el envío sin comprobar la contraseña y vuelve a <code>/login?blocked</code> («Demasiados intentos fallidos…»). Se guarda en memoria: reiniciar la aplicación lo borra.</li>
                         <li><strong>«Recordar mi sesión»:</strong> 14 días con tokens en <code>persistent_logins</code>, firmados con <code>REMEMBER_ME_KEY</code>; se borran al cerrar sesión y al cambiar la contraseña.</li>
                     </ul>
                 </div>
@@ -662,7 +662,7 @@
                     <p>«Iniciar sesión con Google» (OpenID Connect). Solo aparece si hay <code>GOOGLE_CLIENT_ID</code> y <code>GOOGLE_CLIENT_SECRET</code>. Google vuelve a <code>/login/oauth2/code/google</code> y <code>UserService.signInWithGoogle</code>:</p>
                     <ol class="text-secondary" style="margin-left: 1.5rem; font-size: 0.9rem;">
                         <li>Busca al usuario por su <code>google_id</code>.</li>
-                        <li>Si no, exige correo verificado y vincula la cuenta con ese correo (también trabajadores y clientes dados de alta a mano).</li>
+                        <li>Si no, exige correo verificado y vincula la cuenta con ese correo (también trabajadores y clientes dados de alta a mano), que queda como comprobado. Si esa cuenta tenía una contraseña puesta sin comprobar el correo, se borra.</li>
                         <li>Si no existe, crea un cliente sin contraseña.</li>
                     </ol>
                     <p style="font-size: 0.9rem;">Los errores vuelven a <code>/login</code> con un aviso (<code>GoogleLoginFailureHandler</code>).</p>
@@ -674,7 +674,7 @@
                         <strong>/register</strong>
                         <span class="card-badge badge-guest">Público</span>
                     </div>
-                    <p>Crea una cuenta de cliente (nombre, correo, teléfono, contraseña y confirmación; mínimo 8 caracteres y no puede ser de las más usadas, <code>PasswordPolicy</code>). Si el correo es de un cliente dado de alta a mano, completa esa cuenta. Si es de una cuenta solo de Google, avisa de que ya existe y propone «Continuar con Google». No se aceptan correos internos <code>@cbelleza.local</code>.</p>
+                    <p>Crea una cuenta de cliente (nombre, correo, teléfono, contraseña y confirmación; mínimo 8 caracteres y no puede ser de las más usadas, <code>PasswordPolicy</code>). La cuenta nueva entra al momento, con el correo sin comprobar. Si el correo es de un cliente dado de alta a mano, no pone la contraseña: manda a ese correo un enlace de activación para ponerla desde ahí. Como mucho 10 registros por conexión y hora. Si es de una cuenta solo de Google, avisa de que ya existe y propone «Continuar con Google». No se aceptan correos internos <code>@cbelleza.local</code>.</p>
                 </div>
 
                 <div class="card-feature" style="margin-bottom: 1.5rem;">
@@ -880,8 +880,8 @@
                     </div>
                     <p>Dos modalidades:</p>
                     <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.9rem;">
-                        <li><strong><code>mode="existing"</code>:</strong> añade al centro un producto del catálogo global con su stock inicial; si ya lo tenía, suma las unidades.</li>
-                        <li><strong><code>mode="new"</code>:</strong> crea un producto en el catálogo y su stock en el centro.</li>
+                        <li><strong><code>mode="existing"</code>:</strong> añade al centro un producto del catálogo general (o uno que creó ese centro) con su stock inicial; si ya lo tenía, suma las unidades.</li>
+                        <li><strong><code>mode="new"</code>:</strong> crea un producto que solo ve ese centro (<code>products.center_id</code>) y su stock.</li>
                     </ul>
                 </div>
 
@@ -1024,9 +1024,10 @@
                     </div>
                     <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.9rem; margin-bottom: 0.8rem;">
                         <li><strong>Alta de centro</strong> (<code>CenterRegistrationController</code>, asistente de 6 pasos con vista previa a la derecha desde 1100 px; por debajo, «Ver vista previa» la añade como paso final de confirmación antes de enviar): datos del centro, foto opcional y CIF/NIF, dirección con pin en el mapa, zona horaria, horario de apertura por día, cabinas, responsable (queda como dueño del centro) y hasta 20 trabajadores más (nombre y correo), tarjeta de puntos opcional, especialidades y notas. Crea el centro <strong>oculto</strong> y a todo el equipo como trabajadores sin contraseña.</li>
-                        <li><strong>Invitaciones</strong> (<code>/invitation/{token}</code>): cada trabajador recibe un enlace de un solo uso (7 días) para crear su contraseña; si caduca, pide otro desde la misma página. También puede entrar con Google.</li>
+                        <li><strong>Invitaciones</strong> (<code>/invitation/{token}</code>): el responsable recibe su enlace al momento y el resto del equipo cuando se publica el centro; es de un solo uso (7 días) y sirve para crear la contraseña; si caduca, pide otro desde la misma página. También puede entrar con Google.</li>
                         <li><strong>Publicación</strong> (<code>/register-center/approve/{token}</code>): el administrador (<code>CRM_ADMIN_EMAIL</code>) recibe el enlace, revisa los datos y pulsa «Publicar centro»; entonces sale en el buscador y el mapa y admite reservas, y el centro recibe un aviso.</li>
-                        <li><strong>Contacto:</strong> <code>name</code>, <code>email</code>, <code>phone</code>, <code>subject</code> y <code>message</code>, con acuse y aviso al administrador.</li>
+                        <li><strong>Contacto:</strong> <code>name</code>, <code>email</code>, <code>phone</code>, <code>subject</code> y <code>message</code>, con acuse (asunto y texto fijos, no repite lo escrito) y aviso al administrador.</li>
+<li><strong>Freno a robots:</strong> contacto (5), alta de centro (5) y registro (10) envíos por conexión y hora (<code>PublicFormLimiter</code>), y un campo trampa oculto (<code>website</code>) en contacto y alta: si llega relleno, se descarta.</li>
                         <li><strong>Validación</strong> en el navegador (botón desactivado hasta que el formulario es válido) y en el servidor.</li>
                     </ul>
                 </div>
@@ -1039,8 +1040,8 @@
                     <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.9rem;">
                         <li>Plantillas Thymeleaf en <code>templates/email/</code> enviadas con <code>EmailGateway</code>: por SMTP (Brevo, <code>MAIL_HOST</code>…) o, si no hay SMTP configurado, escritas en la consola (<code>LoggingEmailGateway</code>). EmailJS se retiró el 6 de octubre.</li>
                         <li><strong>Alta de centros</strong> (<code>CenterOnboardingMailService</code>): acuse al centro, aviso a administración con el enlace de revisión, invitación a cada trabajador y aviso de centro publicado. Sin SMTP, la consola imprime los enlaces.</li>
-                        <li><strong>Correos de citas</strong> (<code>AppointmentMailService</code>): solicitud, confirmación, cambio de hora, propuesta, anulación y recordatorio 24 h antes (lo envía <code>AppointmentStatusScheduler</code>).</li>
-                        <li>Remitente: <code>CRM_FROM_EMAIL</code>. Con <code>SITE_URL</code> los correos llevan el botón «Ver mis citas».</li>
+                        <li><strong>Correos de citas</strong> (<code>AppointmentMailService</code>): solicitud, confirmación, cambio de hora, propuesta, anulación y recordatorio 24 h antes (lo envía <code>AppointmentStatusScheduler</code>). Un centro sin publicar no escribe a clientes y cada centro puede mandar como mucho 150 al día (<code>crm.mail.max-client-emails-per-center-per-day</code>).</li>
+                        <li>Remitente: <code>CRM_FROM_EMAIL</code>. Los enlaces de los correos se escriben con <code>SITE_URL</code> (obligatoria en Docker), nunca con la dirección de la petición.</li>
                     </ul>
                 </div>
             </section>
@@ -1113,6 +1114,16 @@
                                 <td>«Ya tienes 3 solicitudes sin responder en este centro. Espera a que te contesten o anula alguna desde «Mis citas».»</td>
                             </tr>
                             <tr>
+                                <td><strong>Demasiadas citas por venir</strong></td>
+                                <td>Un cliente puede tener como mucho 10 citas por venir en un mismo centro, también si el centro acepta las citas al momento.</td>
+                                <td>«Ya tienes 10 citas por venir en este centro…»</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Demasiados envíos desde una conexión</strong></td>
+                                <td>Contacto (5), alta de centro (5) y registro (10) por conexión y hora.</td>
+                                <td>«Has enviado varios mensajes seguidos…» / «Se han enviado varias altas de centro desde tu conexión…» / «Demasiados intentos de registro desde tu conexión…»</td>
+                            </tr>
+                            <tr>
                                 <td><strong>Cliente cambia la hora</strong></td>
                                 <td>Solo solicitudes o citas confirmadas futuras, si el centro lo permite y faltan al menos las horas que pide.</td>
                                 <td>«&lt;Centro&gt; no deja cambiar la hora desde la web…» / «Solo se puede cambiar hasta N h antes de la cita…»</td>
@@ -1134,7 +1145,7 @@
                             </tr>
                             <tr>
                                 <td><strong>Demasiados intentos de login</strong></td>
-                                <td>5 fallos por cuenta o 20 por IP cierran el login 15 minutos.</td>
+                                <td>5 fallos por cuenta e IP, 20 por IP o 50 por cuenta desde cualquier IP cierran el login 15 minutos.</td>
                                 <td>«Demasiados intentos fallidos. Por seguridad, espera 15 minutos…»</td>
                             </tr>
                             <tr>

@@ -83,7 +83,7 @@
                     </div>
                     <div class="hero-meta-item">
                         <span>Commits Registrados:</span>
-                        <strong>63 commits (hasta el 27 oct 2026)</strong>
+                        <strong>68 commits (hasta el 30 oct 2026)</strong>
                     </div>
                     <div class="hero-meta-item">
                         <span>Metodología:</span>
@@ -1069,6 +1069,103 @@
                         </div>
                     </div>
 
+                    <!-- Commit 52 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="commit-hash">83abbd1</span>
+                                <span class="commit-date">📅 28 de Octubre, 2026</span>
+                                <span class="commit-author">👤 alejandro</span>
+                            </div>
+                            <h4>Documentación al día</h4>
+                            <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.88rem;">
+                                <li>Guía de roles, manual de acciones, modelo de datos y esta línea de tiempo actualizados hasta las reseñas, el horario por profesional y la seguridad del 27 de octubre.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Commit 53 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="commit-hash">2cefbb4</span>
+                                <span class="commit-date">📅 29 de Octubre, 2026</span>
+                                <span class="commit-author">👤 alejandro</span>
+                            </div>
+                            <h4>Cabecera común en las pantallas del panel</h4>
+                            <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.88rem;">
+                                <li>Cada pantalla del panel lleva arriba el icono de la pantalla, la miga de pan («Mi Panel › Inventario») y el título, con sus botones a la derecha (<code>worker/fragments/page-header</code>).</li>
+                                <li>En Análisis, el periodo, el año y «Exportar CSV» suben a la cabecera y el resumen del periodo queda justo debajo; los títulos de sección llevan una barra bronce.</li>
+                                <li>En Clientes, «Nuevo cliente» y «Plantilla de ficha» suben a la cabecera.</li>
+                                <li>Aplicada en Análisis, Agenda, Clientes, Plantilla de ficha, Inventario, Tratamientos, Reseñas, Mi Centro y el horario de cada profesional. En móvil el icono es más pequeño, la miga se oculta y los botones van debajo del título.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Commit 54 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="commit-hash">8a37978</span>
+                                <span class="commit-date">📅 30 de Octubre, 2026</span>
+                                <span class="commit-author">👤 alejandro</span>
+                            </div>
+                            <h4>Ficha pública del centro sin iniciar sesión</h4>
+                            <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.88rem;">
+                                <li>El enlace corto <code>/c/{nombre}</code> deja de llevar al login y enseña el escaparate del centro: cabecera, carta con precios y ofertas, horario y opiniones. <code>/c/{nombre}/opiniones</code> muestra todas, con los mismos filtros.</li>
+                                <li>«Reservar cita» y cada tratamiento llevan a la reserva; sin sesión se pide entrar y se vuelve con el tratamiento ya elegido.</li>
+                                <li>Un trabajador ve la ficha sin botones de reserva y con un aviso. Las direcciones con mayúsculas redirigen a la de minúsculas.</li>
+                                <li>Tests de la ficha pública, las opiniones públicas y la vuelta tras el login (294 en total). <code>CLAUDE.md</code>, <code>PENDIENTES.md</code> y <code>.claude/</code> pasan al <code>.gitignore</code>.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Commit 55 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="commit-hash">2a8deaf</span>
+                                <span class="commit-date">📅 30 de Octubre, 2026</span>
+                                <span class="commit-author">👤 alejandro</span>
+                            </div>
+                            <h4>Foto de los profesionales y datos para Google</h4>
+                            <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.88rem;">
+                                <li>Cada trabajador sube su foto desde «Mi Centro» › Mi foto de perfil (<code>V25__foto_profesionales.sql</code>): se recorta en cuadrado y sale al elegir «¿Con quién?» y en el equipo; sin foto, su inicial.</li>
+                                <li>La ficha pública lleva datos estructurados de schema.org (<code>BeautySalon</code>: dirección, horario, carta con precios y opiniones), enlace canónico y la foto del centro para las vistas previas.</li>
+                                <li>Nuevos <code>/sitemap.xml</code> (páginas públicas y la ficha de cada centro publicado) y <code>/robots.txt</code> con la línea del sitemap, con la dirección de <code>SITE_URL</code>.</li>
+                                <li>Tests: <code>WorkerPhotoTests</code> y <code>SearchEngineTests</code> (304 en total).</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Commit 56 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="commit-hash">fb5cf5e</span>
+                                <span class="commit-date">📅 30 de Octubre, 2026</span>
+                                <span class="commit-author">👤 alejandro</span>
+                            </div>
+                            <h4>Arreglos del reporte de seguridad (S-01 a S-16)</h4>
+                            <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.88rem;">
+                                <li>Contacto, alta de centro y registro admiten pocos envíos por conexión y hora y llevan un campo trampa contra robots; el acuse de contacto ya no repite lo que escribió el remitente.</li>
+                                <li>Un centro sin publicar no manda correos a clientes y su equipo recibe la invitación cuando se publica; tope diario de correos a clientes por centro.</li>
+                                <li>Las fotos de más de 16 megapíxeles se rechazan y se preparan como mucho dos a la vez, para que una imagen pequeña no tumbe la aplicación.</li>
+                                <li>El enlace corto se guarda (<code>V26__seguridad.sql</code>, columna <code>centers.slug</code>): renombrar un centro ya no lo cambia y nadie puede quitárselo a otro.</li>
+                                <li>Registrarse con el correo de un cliente dado de alta a mano manda un enlace de activación en lugar de poner la contraseña; las cuentas nuevas guardan si el correo está comprobado.</li>
+                                <li>El login se cierra por cuenta y conexión (5 fallos), por conexión (20) o por cuenta desde cualquier sitio (50): nadie puede dejar sin entrar a otra persona. Entrar por nombre solo vale si el nombre es único.</li>
+                                <li>Como mucho 10 citas por venir por cliente y centro. Los productos que crea un centro solo los ve ese centro.</li>
+                                <li>Leaflet y la tipografía se sirven desde la propia web, con Content-Security-Policy, <code>Referrer-Policy</code> y <code>Permissions-Policy</code>. Docker exige <code>SITE_URL</code> y publica el 8080 solo en <code>127.0.0.1</code>.</li>
+                                <li>Tests: <code>SecurityFixesTests</code> y <code>PhotoImagesLimitTest</code>; 319 en total, todos en verde.</li>
+                            </ul>
+                        </div>
+                    </div>
+
                 </div>
             </section>
 
@@ -1212,7 +1309,7 @@
                         <div class="step-num">4</div>
                         <div class="step-body">
                             <h4>Agenda: Siguiente Fase</h4>
-                            <p>El horario por centro y por profesional y quién hace cada tratamiento ya están. Falta que el cliente pueda pedir cita con varias franjas que le vienen bien y el trabajador elija, una lista de espera para cuando se libere un hueco y varios tratamientos en una misma cita.</p>
+                            <p>El horario por centro y por profesional y quién hace cada tratamiento ya están. Falta que el cliente pueda pedir cita con varias franjas que le vienen bien y el trabajador elija, una agenda del día por profesional y varios tratamientos en una misma cita.</p>
                         </div>
                     </div>
 
@@ -1220,7 +1317,7 @@
                         <div class="step-num">5</div>
                         <div class="step-body">
                             <h4>Puesta en Producción</h4>
-                            <p>Dominio propio detrás de Cloudflare (HTTPS y cookies seguras), remitente verificado en Brevo, credenciales y verificación de Google, límite de envíos en contacto y alta de centros y el resto de puntos 🟠 de <code>PENDIENTES.md</code>. El límite de intentos de login ya está desde el 27 de octubre.</p>
+                            <p>Dominio propio detrás de Cloudflare (HTTPS), remitente verificado en Brevo, credenciales y verificación de Google y alta en Search Console. El código ya está preparado desde el 30 de octubre: límites en los formularios públicos, cookies seguras con <code>COOKIE_SECURE</code>, <code>SITE_URL</code> obligatoria y el puerto solo en local. Lo que queda abierto está en <code>PENDIENTES.md</code>.</p>
                         </div>
                     </div>
                 </div>

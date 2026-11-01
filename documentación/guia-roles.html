@@ -374,7 +374,7 @@
                     </div>
                     <div class="card-feature">
                         <h4>🔐 Cifrado y Seguridad de Acceso</h4>
-                        <p>Spring Security con contraseñas cifradas con <strong>BCrypt</strong> (8 caracteres como mínimo y fuera las más usadas), protección CSRF y cierre de sesión por POST. Tras 5 intentos fallidos con una cuenta, o 20 desde una misma conexión, el login se cierra 15 minutos. Login con Google opcional y «Recordar mi sesión» con tokens que se borran al cerrar sesión o cambiar la contraseña. Los secretos del servidor van en el fichero <code>.env</code>, fuera del repositorio.</p>
+                        <p>Spring Security con contraseñas cifradas con <strong>BCrypt</strong> (8 caracteres como mínimo y fuera las más usadas), protección CSRF y cierre de sesión por POST. Tras 5 intentos fallidos con una cuenta desde una misma conexión, 20 desde una conexión o 50 con una cuenta desde cualquier sitio, el login se cierra 15 minutos (así nadie puede dejar fuera a otra persona). Contacto, alta de centro y registro admiten pocos envíos por conexión y hora. Login con Google opcional y «Recordar mi sesión» con tokens que se borran al cerrar sesión o cambiar la contraseña. Los secretos del servidor van en el fichero <code>.env</code>, fuera del repositorio.</p>
                     </div>
                     <div class="card-feature">
                         <h4>👥 Gestión de Especialistas</h4>
@@ -386,7 +386,7 @@
                     </div>
                     <div class="card-feature">
                         <h4>🆕 Alta de Centros Nuevos (/register-center)</h4>
-                        <p>Un centro se da de alta solo con un asistente de 6 pasos (centro y foto, ubicación en el mapa, horario de apertura, equipo, tarjeta de puntos y envío). Quien lo da de alta queda como dueño. En escritorio la vista previa del centro se rellena a la derecha mientras se escribe; en móvil y tablet sale al final como paso de confirmación («Ver vista previa» y luego «Sí, registrar»). Nace <strong>oculto</strong>: administración (<code>CRM_ADMIN_EMAIL</code>) recibe un correo con el enlace para revisarlo y publicarlo. Cada trabajador recibe una invitación de un solo uso (7 días) para poner su contraseña, o entra con Google.</p>
+                        <p>Un centro se da de alta solo con un asistente de 6 pasos (centro y foto, ubicación en el mapa, horario de apertura, equipo, tarjeta de puntos y envío). Quien lo da de alta queda como dueño. En escritorio la vista previa del centro se rellena a la derecha mientras se escribe; en móvil y tablet sale al final como paso de confirmación («Ver vista previa» y luego «Sí, registrar»). Nace <strong>oculto</strong>: administración (<code>CRM_ADMIN_EMAIL</code>) recibe un correo con el enlace para revisarlo y publicarlo. Quien lo da de alta recibe al momento su invitación para poner la contraseña; el resto del equipo, cuando el centro se publica. Cada invitación es de un solo uso (7 días); también se puede entrar con Google.</p>
                     </div>
                     <div class="card-feature">
                         <h4>🧪 Selector de Demostración (/login-selector)</h4>
