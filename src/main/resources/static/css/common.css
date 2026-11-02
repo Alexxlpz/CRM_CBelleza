@@ -3566,6 +3566,11 @@ body.modal-open {
     flex-shrink: 0;
 }
 
+/* «Cartel con QR para el mostrador», debajo del enlace corto en «Mi Centro» */
+.short-link-poster {
+    align-self: flex-start;
+}
+
 .sync-setting--stacked {
     flex-direction: column;
     align-items: stretch;

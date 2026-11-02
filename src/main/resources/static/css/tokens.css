@@ -109,6 +109,16 @@
     /* ---- Foco (anillo interior, nunca recortado por overflow) ---- */
     --focus-ring: inset 0 0 0 2px var(--primary-dark), inset 0 0 0 3px rgba(255, 255, 255, 0.5);
     --focus-ring-primary-dark: inset 0 0 0 2px var(--primary-dark), inset 0 0 0 3px rgba(255, 255, 255, 0.5);
+
+    /* ---- Cartel con QR (worker/center_poster): papel siempre claro, igual en modo oscuro y al imprimir ---- */
+    --poster-paper: #fffdf9;
+    --poster-paper-rgb: 255, 253, 249;  /* velo sobre la foto de fondo */
+    --poster-cream: #f6ede2;
+    --poster-cream-rgb: 246, 237, 226;
+    --poster-ink: #2b2825;
+    --poster-muted: #6b6159;
+    --poster-gold: #84653d;
+    --poster-line: #e6d8c6;
 }
 
 @media (prefers-color-scheme: dark) {

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{fragments/head :: meta('Cartel con QR - Cuquora CRM')}"></th:block>
+    <link rel="stylesheet" th:href="@{/css/poster.css}">
+    <script th:src="@{/js/poster.js}" defer></script>
+</head>
+<body class="poster-page">
+    <!--/*@thymesVar id="center" type="com.alexxlpz.crm_cbelleza.entities.Center"*/-->
+    <!--/*@thymesVar id="qrSvg" type="java.lang.String"*/-->
+    <div th:replace="~{fragments/navbar :: worker('/worker/center', 'Volver a Mi Centro', ${notifications})}"></div>
+
+    <main class="main-container poster-layout">
+        <header class="page-header page-header--panel poster-toolbar">
+            <span th:replace="~{worker/fragments/page-header :: icon('qr-code')}"></span>
+            <div class="page-header-text">
+                <nav th:replace="~{worker/fragments/page-header :: subcrumb('Mi Centro', '/worker/center', 'Cartel con QR')}"></nav>
+                <h1>Cartel con QR</h1>
+                <p>Ponlo en el mostrador, el espejo o el escaparate: quien lo escanee abre la ficha de tu centro y pide cita desde el móvil.</p>
+            </div>
+            <div class="page-header-actions">
+                <a class="btn btn-secondary btn-sm" th:href="@{/worker/center/qr.png}" download>
+                    <i class="lucide-image-down" aria-hidden="true"></i> <span>QR en PNG</span>
+                </a>
+                <a class="btn btn-secondary btn-sm" th:href="@{/worker/center/qr.svg}" download>
+                    <i class="lucide-download" aria-hidden="true"></i> <span>QR en SVG</span>
+                </a>
+                <button type="button" class="btn btn-primary btn-sm" data-print>
+                    <i class="lucide-printer" aria-hidden="true"></i> <span>Imprimir cartel</span>
+                </button>
+            </div>
+        </header>
+
+        <div class="alert alert-warning" role="status" th:unless="${center.published}">
+            <i class="lucide-hourglass" aria-hidden="true"></i>
+            <span>El QR funcionará en cuanto publiquemos tu centro. Puedes imprimirlo ya: no cambiará.</span>
+        </div>
+
+        <!-- El cartel: proporción A4, siempre en claro (también en modo oscuro) para que se vea igual que impreso -->
+        <article class="poster" aria-label="Vista previa del cartel">
+            <!-- Foto del centro de fondo, muy difuminada y fundida con el papel: da ambiente sin cargar el cartel -->
+            <div class="poster-backdrop" th:if="${center.photoUrl != null}" aria-hidden="true">
+                <img th:src="${center.photoUrl}" alt="" src="/images/beauty_salon_hero.webp">
+            </div>
+            <div class="poster-mark" th:classappend="${center.photoUrl != null} ? 'poster-mark--photo'">
+                <img th:if="${center.photoUrl != null}" th:src="${center.photoUrl}" alt="" src="/images/beauty_salon_hero.webp">
+                <span th:if="${center.photoUrl == null}" th:text="${center.initials}">CH</span>
+            </div>
+
+            <div class="poster-body">
+                <p class="poster-kicker">Pide tu cita online</p>
+                <h2 class="poster-title" th:text="${center.name}">Centro Histórico</h2>
+                <p class="poster-lead">Escanea el código con la cámara del móvil y elige día y hora en un minuto.</p>
+
+                <div class="poster-qr" th:utext="${qrSvg}">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><rect width="10" height="10" fill="#fff"/></svg>
+                </div>
+                <p class="poster-link" th:text="${shortLinkText}">cuquora.com/c/centro-historico</p>
+
+                <ol class="poster-steps">
+                    <li><i class="lucide-camera" aria-hidden="true"></i> <span>Abre la cámara</span></li>
+                    <li><i class="lucide-scan" aria-hidden="true"></i> <span>Apunta al código</span></li>
+                    <li><i class="lucide-calendar-check" aria-hidden="true"></i> <span>Elige día y hora</span></li>
+                </ol>
+            </div>
+
+            <footer class="poster-footer">
+                <div class="poster-footer-info">
+                    <p th:if="${center.address != null}"><i class="lucide-map-pin" aria-hidden="true"></i> <span th:text="${center.address}">Calle Mayor 1, Madrid</span></p>
+                    <p th:if="${!openingHoursLines.isEmpty()}"><i class="lucide-clock" aria-hidden="true"></i>
+                        <span class="poster-hours">
+                            <span th:each="line, it : ${openingHoursLines}" th:if="${it.index < 3}" th:text="${line}">Lunes a viernes: 09:00 - 20:00</span>
+                        </span></p>
+                </div>
+                <p class="poster-brand"><img th:src="@{/images/icon.svg}" alt="" src="/images/icon.svg"> <span>Reservas con Cuquora</span></p>
+            </footer>
+        </article>
+    </main>
+
+    <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Panel de gestión de centros.')}"></div>
+</body>
+</html>
