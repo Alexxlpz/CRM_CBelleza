@@ -1,6 +1,13 @@
 # Los datos sensibles (contraseñas, correo, claves) se leen del fichero .env de esta carpeta,
 # que NO se sube a git. Para crearlo: copia .env.example a .env y rellénalo.
 # Si falta una variable obligatoria, "docker compose up" se detiene con un mensaje.
+# Logs con tope: como mucho 5 ficheros de 10 MB por contenedor, para que nunca llenen el disco del servidor
+x-logs: &logs
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "5"
+
 services:
   app:
     build:
@@ -13,6 +20,9 @@ services:
     ports:
       - "${APP_BIND:-127.0.0.1}:8080:8080"
     environment:
+      # Perfil de producción (application-prod.properties): no arranca si falta algo imprescindible en el .env
+      # (ProductionChecks). Para probar en local por http://, pon SPRING_PROFILES_ACTIVE= (vacío) en el .env.
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE-prod}
       DB_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:?Falta POSTGRES_DB en .env}
       DB_DRIVER_CLASS_NAME: org.postgresql.Driver
       DB_USERNAME: ${POSTGRES_USER:?Falta POSTGRES_USER en .env}
@@ -30,9 +40,9 @@ services:
       # Obligatoria: con ella se escriben los enlaces de los correos (invitaciones, publicar un centro). Vacía, la app
       # los tomaría de la cabecera Host de la petición, que la elige quien la envía.
       SITE_URL: ${SITE_URL:?Falta SITE_URL en .env (p. ej. https://cuquora.com o http://localhost:8080)}
-      # Con HTTPS delante (Cloudflare): true en las dos. En local por http:// se quedan en false / none.
-      COOKIE_SECURE: ${COOKIE_SECURE:-false}
-      FORWARD_HEADERS_STRATEGY: ${FORWARD_HEADERS_STRATEGY:-none}
+      # Con HTTPS delante (Cloudflare) se quedan en true / native. Solo para probar en local por http://: false / none.
+      COOKIE_SECURE: ${COOKIE_SECURE:-true}
+      FORWARD_HEADERS_STRATEGY: ${FORWARD_HEADERS_STRATEGY:-native}
       # Zona horaria del servidor (hora de las citas, «ahora» al reservar y al completar citas)
       TZ: ${TZ:-Europe/Madrid}
       # Titular de la web en Términos y Privacidad (LSSI)
@@ -52,6 +62,14 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    # Docker reinicia la app si deja de responder (y «docker compose ps» dice si está sana)
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8080/robots.txt || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 90s
+    logging: *logs
     restart: unless-stopped
 
   db:
@@ -74,6 +92,7 @@ services:
       timeout: 5s
       retries: 5
       start_period: 5s
+    logging: *logs
     restart: unless-stopped
 
 volumes:

@@ -120,6 +120,8 @@ class SearchEngineTests {
                 .andExpect(content().contentTypeCompatibleWith("application/xml"))
                 .andExpect(content().string(containsString("<loc>http://localhost/c/" + centerService.shortSlug(center()) + "</loc>")))
                 .andExpect(content().string(containsString("<loc>http://localhost/centers</loc>")))
+                .andExpect(content().string(containsString("<loc>http://localhost/home</loc>")))
+                .andExpect(content().string(not(containsString("<loc>http://localhost/</loc>"))))
                 .andExpect(content().string(not(containsString(centerService.shortSlug(hidden)))));
     }
 

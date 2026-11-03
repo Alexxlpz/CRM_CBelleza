@@ -23,7 +23,7 @@ import java.util.List;
 public class SearchEngineController {
 
     /** Páginas públicas fijas que interesa que Google encuentre. */
-    static final List<String> PAGES = List.of("/", "/centers", "/register-center", "/contact");
+    static final List<String> PAGES = List.of("/home", "/centers", "/register-center", "/contact");
 
     private final CenterService centers;
     private final SiteModelAdvice site;

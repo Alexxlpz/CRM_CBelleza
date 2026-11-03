@@ -41,3 +41,6 @@ build/
 CLAUDE.md
 PENDIENTES.md
 .claude/
+
+### Copias de seguridad de la base de datos (docker/backup-db.sh) ###
+backups/
