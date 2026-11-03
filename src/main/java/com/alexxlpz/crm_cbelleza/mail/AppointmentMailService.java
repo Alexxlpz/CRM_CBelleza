@@ -4,7 +4,9 @@ import com.alexxlpz.crm_cbelleza.entities.Appointment;
 import com.alexxlpz.crm_cbelleza.entities.AppointmentChange;
 import com.alexxlpz.crm_cbelleza.entities.AppointmentStatus;
 import com.alexxlpz.crm_cbelleza.entities.User;
+import com.alexxlpz.crm_cbelleza.entities.Center;
 import com.alexxlpz.crm_cbelleza.repositories.AppointmentRepository;
+import com.alexxlpz.crm_cbelleza.repositories.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,7 +33,8 @@ import java.util.Map;
  *     automáticamente), aceptar o no una propuesta, anular.</li>
  *     <li>Recordatorio al cliente unas 24 h antes de la cita.</li>
  * </ul>
- * Los clientes sin correo real (alta a mano sin correo) no reciben nada.
+ * Los clientes sin correo real (alta a mano sin correo) no reciben nada. Los correos al cliente llevan como «Responder a»
+ * el correo del dueño del centro (o el del centro): si el cliente contesta, le llega al centro y no al buzón de Cuquora.
  */
 @Service
 public class AppointmentMailService {
@@ -42,6 +45,7 @@ public class AppointmentMailService {
     private static final DateTimeFormatter TIME = DateTimeFormatter.ofPattern("HH:mm");
 
     private final AppointmentRepository appointments;
+    private final UserRepository users;
     private final EmailGateway gateway;
     private final ITemplateEngine templateEngine;
     private final Clock clock;
@@ -49,6 +53,7 @@ public class AppointmentMailService {
     private final DailyQuota dailyQuota;
 
     public AppointmentMailService(AppointmentRepository appointments,
+                                  UserRepository users,
                                   EmailGateway gateway,
                                   ITemplateEngine templateEngine,
                                   Clock clock,
@@ -56,6 +61,7 @@ public class AppointmentMailService {
                                   @Value("${crm.mail.max-client-emails-per-center-per-day:150}") int maxPerCenterPerDay) {
         this.dailyQuota = new DailyQuota(maxPerCenterPerDay);
         this.appointments = appointments;
+        this.users = users;
         this.gateway = gateway;
         this.templateEngine = templateEngine;
         this.clock = clock;
@@ -159,7 +165,8 @@ public class AppointmentMailService {
                     client.getEmail(), app.getCenter().getId(), dailyQuota.max());
             return;
         }
-        send(client.getEmail(), subject, heading, "Hola, " + client.getName(), intro, app, "/client/appointments", "Ver mis citas");
+        send(client.getEmail(), replyToFor(app.getCenter()), app.getCenter().getName(),
+                subject, heading, "Hola, " + client.getName(), intro, app, "/client/appointments", "Ver mis citas");
     }
 
     private void toCenter(Appointment app, String subject, String heading, String intro) {
@@ -170,11 +177,22 @@ public class AppointmentMailService {
         if (!hasRealEmail(to)) {
             return;
         }
-        send(to, subject, heading, app.getCenter().getName(), intro, app,
+        send(to, null, null, subject, heading, app.getCenter().getName(), intro, app,
                 "/worker/calendar?date=" + app.getDateTime().toLocalDate(), "Abrir la agenda");
     }
 
-    private void send(String to, String subject, String heading, String subtitle, String intro,
+    /** A quién llega la respuesta del cliente: el dueño del centro y, si no tiene correo real, el correo del centro. */
+    private String replyToFor(Center center) {
+        if (center.getOwnerId() != null) {
+            String owner = users.findById(center.getOwnerId()).map(User::getEmail).orElse(null);
+            if (hasRealEmail(owner)) {
+                return owner;
+            }
+        }
+        return hasRealEmail(center.getEmail()) ? center.getEmail() : null;
+    }
+
+    private void send(String to, String replyTo, String replyToName, String subject, String heading, String subtitle, String intro,
                       Appointment app, String path, String buttonLabel) {
         Map<String, Object> vars = new HashMap<>();
         vars.put("heading", heading);
@@ -189,7 +207,7 @@ public class AppointmentMailService {
         vars.put("buttonLabel", buttonLabel);
         try {
             String html = templateEngine.process("email/appointment", new Context(ES, vars));
-            gateway.send(new EmailMessage(to, null, null, subject + " - Cuquora", html));
+            gateway.send(new EmailMessage(to, replyTo, replyTo == null ? null : replyToName, subject + " - Cuquora", html));
             log.info("Correo de cita enviado a {}: {}", to, subject);
         } catch (Exception e) {
             // Un correo que falla no debe afectar a la cita

@@ -114,3 +114,8 @@ services:
 
 volumes:
   postgres_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /volume1/docker-storage/cuquora/postgres

@@ -431,6 +431,23 @@ class AgendaTests {
         assertEquals(sofia.getEmail(), message.to());
         assertTrue(message.subject().startsWith("Cita confirmada"), message.subject());
         assertTrue(message.htmlBody().contains("Te esperamos"));
+        // Si el cliente contesta, la respuesta llega al dueño del centro y no al buzón de Cuquora
+        assertEquals(users.findById(center.getOwnerId()).orElseThrow().getEmail(), message.replyTo());
+        assertEquals(center.getName(), message.replyToName());
+    }
+
+    @Test
+    void emailsToTheCenterHaveNoReplyTo() {
+        org.mockito.Mockito.clearInvocations(emailGateway);
+        Appointment request = pendingRequest(monday(64, 10));
+        mail.notifyChange(request.getId(), AppointmentChange.REQUESTED);
+
+        ArgumentCaptor<EmailMessage> sent = ArgumentCaptor.forClass(EmailMessage.class);
+        verify(emailGateway, atLeastOnce()).send(sent.capture());
+        EmailMessage toCenter = sent.getAllValues().stream()
+                .filter(m -> m.subject().startsWith("Nueva solicitud"))
+                .findFirst().orElseThrow();
+        assertNull(toCenter.replyTo());
     }
 
     @Test
