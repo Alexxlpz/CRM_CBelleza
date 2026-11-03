@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<body>
+<!--/*
+  Teléfono con el prefijo del país aparte: lista de prefijos y el resto del número, que phone-input.js agrupa
+  mientras se escribe («+34» y «612 345 678»). Solo admite cifras y en el móvil abre el teclado numérico (inputmode). El servidor lo guarda junto: «+34 612 345 678» (PhoneNumbers).
+  Hace falta en el modelo: phoneCountries (PhoneNumbers.countriesWith) y callingCodes (PhoneNumbers.callingCodesText).
+  id:          id del campo del número (la lista lleva id + 'Country')
+  name:        nombre del campo del número; countryName, el de la lista
+  country:     prefijo elegido, sin «+»; number: el resto del número
+  inputClass:  clase extra de los dos controles (p. ej. 'form-control' en el panel)
+*/-->
+<div th:fragment="input(id, name, countryName, country, number, placeholder, inputClass, required, describedBy)"
+     class="phone-input" data-phone-input th:attr="data-calling-codes=${callingCodes}">
+    <select th:id="${id + 'Country'}" th:name="${countryName}" class="phone-input-country" th:classappend="${inputClass}"
+            aria-label="Prefijo del país" data-phone-country autocomplete="tel-country-code">
+        <!--/* Desplegada se lee «+34 (España)»; elegida, solo «+34» (phone-input.js cambia el texto al abrir y cerrar) */-->
+        <option th:each="c : ${phoneCountries}" th:value="${c.code()}" th:text="${c.label()}"
+                th:attr="data-short=${c.shortLabel()},data-long=${c.label()}"
+                th:selected="${c.code() == country}">+34 (España)</option>
+    </select>
+    <input type="tel" th:id="${id}" th:name="${name}" th:value="${number}" th:placeholder="${placeholder}"
+           class="phone-input-number" th:classappend="${inputClass}" inputmode="numeric" autocomplete="tel-national"
+           maxlength="24" th:required="${required}" th:attr="aria-describedby=${describedBy}" data-phone-number>
+</div>
+</body>
+</html>

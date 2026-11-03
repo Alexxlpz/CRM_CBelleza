@@ -12,7 +12,7 @@
             <td style="padding:8px 0;"><span th:text="${owner.name()}">Nombre</span> ·
                 <a th:href="'mailto:' + ${owner.email()}" th:text="${owner.email()}" style="color:#a87d4f; text-decoration:none; font-weight:600;">correo</a></td></tr>
         <tr><td style="padding:8px 0; color:#7a716a; font-weight:600;">Teléfono:</td>
-            <td style="padding:8px 0;" th:text="${form.phone()}">Teléfono</td></tr>
+            <td style="padding:8px 0;" th:text="${phone}">Teléfono</td></tr>
         <tr><td style="padding:8px 0; color:#7a716a; font-weight:600;">Dirección:</td>
             <td style="padding:8px 0;"><span th:text="${form.address()}">Dirección</span> ·
                 <a th:href="${mapUrl}" style="color:#a87d4f; text-decoration:none; font-weight:600;">ver el pin</a></td></tr>

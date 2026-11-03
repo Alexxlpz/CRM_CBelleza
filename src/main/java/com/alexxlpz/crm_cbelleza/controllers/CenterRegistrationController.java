@@ -7,6 +7,7 @@ import com.alexxlpz.crm_cbelleza.entities.Center;
 import com.alexxlpz.crm_cbelleza.entities.LoyaltyMode;
 import com.alexxlpz.crm_cbelleza.exceptions.BusinessRuleException;
 import com.alexxlpz.crm_cbelleza.forms.CenterRegistrationForm;
+import com.alexxlpz.crm_cbelleza.forms.PhoneNumbers;
 import com.alexxlpz.crm_cbelleza.forms.PasswordPolicy;
 import com.alexxlpz.crm_cbelleza.mail.CenterOnboardingMailService;
 import com.alexxlpz.crm_cbelleza.security.PublicFormLimiter;
@@ -74,9 +75,10 @@ public class CenterRegistrationController {
     }
 
     @GetMapping({"/register-center", "/alta-centro"})
-    public String registerCenter(Model model) {
+    public String registerCenter(Model model, HttpServletRequest request) {
         if (!model.containsAttribute("registered")) {
-            model.addAttribute("form", CenterRegistrationForm.empty());
+            // El prefijo del teléfono, el del país desde el que se conecta (o el del idioma del navegador)
+            model.addAttribute("form", CenterRegistrationForm.empty(PhoneNumbers.countryForRequest(request)));
             model.addAttribute("hourRows", openingHours.rows(openingHours.defaults()));
         }
         return registrationPage(model);
@@ -132,6 +134,13 @@ public class CenterRegistrationController {
                 invitee.name(), invitee.email(), invitee.centerName(), invitee.token(), site.siteUrl()));
         model.addAttribute("justPublished", true);
         return approvalView(center, model);
+    }
+
+    /** Rechaza el alta: el centro y las cuentas de su equipo se borran. */
+    @PostMapping("/register-center/approve/{token}/reject")
+    public String reject(@PathVariable String token, Model model) {
+        model.addAttribute("rejectedCenter", registrationService.reject(token));
+        return "center-approval";
     }
 
     @GetMapping("/invitation/{token}")
@@ -191,6 +200,9 @@ public class CenterRegistrationController {
         model.addAttribute("hourOptions", openingHours.timeOptions());
         model.addAttribute("maxPhotoMb", CenterPhotoService.MAX_UPLOAD_MB);
         model.addAttribute("invitationDays", InvitationService.VALIDITY_DAYS);
+        CenterRegistrationForm form = (CenterRegistrationForm) model.getAttribute("form");
+        model.addAttribute("phoneCountries", PhoneNumbers.countriesWith(form == null ? null : form.phoneCountryOrDefault()));
+        model.addAttribute("callingCodes", PhoneNumbers.callingCodesText());
         return "register-center";
     }
 }

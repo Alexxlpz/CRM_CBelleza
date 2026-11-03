@@ -7,6 +7,7 @@
     <link rel="stylesheet" th:href="@{/vendor/leaflet/leaflet.css}">
     <script th:src="@{/vendor/leaflet/leaflet.js}" defer></script>
     <script th:src="@{/js/location-picker.js}" defer></script>
+    <script th:src="@{/js/phone-input.js}" defer></script>
     <script th:src="@{/js/photo-picker.js}" defer></script>
     <script th:src="@{/js/opening-hours.js}" defer></script>
 </head>
@@ -59,8 +60,9 @@
                             <input type="text" id="centerAddress" name="centerAddress" class="form-control" th:value="${center.address}" placeholder="Calle, número, código postal y ciudad">
                         </div>
                         <div>
-                            <label for="centerPhone" class="form-label">Teléfono de Atención al Cliente</label>
-                            <input type="tel" id="centerPhone" name="centerPhone" class="form-control" th:value="${center.phone}" placeholder="Ej: 912 345 678">
+                            <!--/* th:for: el id lo pone el fragmento phone-input y IntelliJ no lo ve */--><label th:for="${'centerPhone'}" class="form-label">Teléfono de Atención al Cliente</label>
+                            <div th:replace="~{fragments/phone-input :: input('centerPhone', 'centerPhone', 'centerPhoneCountry', ${centerPhone.country()},
+                                    ${centerPhone.number()}, 'Ej: 912 345 678', 'form-control', false, null)}"></div>
                         </div>
                         <div>
                             <label for="centerEmail" class="form-label">Correo Comercial de Contacto</label>

@@ -6,6 +6,7 @@ import com.alexxlpz.crm_cbelleza.exceptions.BusinessRuleException;
 import com.alexxlpz.crm_cbelleza.exceptions.ResourceNotFoundException;
 import com.alexxlpz.crm_cbelleza.forms.CenterForm;
 import com.alexxlpz.crm_cbelleza.forms.FormText;
+import com.alexxlpz.crm_cbelleza.forms.PhoneNumbers;
 import com.alexxlpz.crm_cbelleza.repositories.CenterRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -193,7 +194,11 @@ public class CenterService {
             center.setName(form.name().trim());
         }
         if (form.address() != null) center.setAddress(form.address().trim());
-        if (form.phone() != null) center.setPhone(form.phone().trim());
+        if (form.phone() != null) {
+            // Vacío lo quita; si no, con su prefijo y en grupos, como en el alta («+34 612 345 678»)
+            center.setPhone(FormText.isBlank(form.phone()) ? null
+                    : PhoneNumbers.normalize(PhoneNumbers.countryForTimeZone(center.getTimeZone()), form.phone()));
+        }
         if (form.email() != null) center.setEmail(form.email().trim());
         if (form.latitude() != null) center.setLatitude(form.latitude());
         if (form.longitude() != null) center.setLongitude(form.longitude());

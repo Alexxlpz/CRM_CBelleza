@@ -13,6 +13,7 @@
 (function () {
     'use strict';
 
+    // Igual que CenterRegistrationService.EMAIL
     const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
     const validators = {
@@ -39,7 +40,8 @@
     const ERROR_ICON = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>';
 
     function container(el) {
-        return el.closest('.form-group, .form-item-field, .form-group-item, .terms-check-row') || el.parentNode;
+        return el.closest('.form-group, .form-item-field, .form-group-item, .terms-check-row')
+            || el.closest('.phone-input')?.parentNode || el.parentNode;
     }
 
     function clearError(el) {
@@ -164,4 +166,6 @@
     window.Cuquora = window.Cuquora || {};
     window.Cuquora.validators = validators;
     window.Cuquora.validateForm = validateForm;
+    // Para errores que no son de un solo campo (p. ej. las filas del equipo en el alta de centro)
+    window.Cuquora.fieldError = { show: showError, clear: clearError };
 })();

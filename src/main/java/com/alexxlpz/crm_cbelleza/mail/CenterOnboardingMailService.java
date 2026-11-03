@@ -2,6 +2,8 @@ package com.alexxlpz.crm_cbelleza.mail;
 
 import com.alexxlpz.crm_cbelleza.entities.LoyaltyMode;
 import com.alexxlpz.crm_cbelleza.forms.CenterRegistrationForm;
+import com.alexxlpz.crm_cbelleza.forms.PhoneNumbers;
+import com.alexxlpz.crm_cbelleza.forms.TaxIds;
 import com.alexxlpz.crm_cbelleza.services.CenterRegistrationService.Invitee;
 import com.alexxlpz.crm_cbelleza.services.CenterRegistrationService.Registration;
 import com.alexxlpz.crm_cbelleza.services.InvitationService;
@@ -48,7 +50,8 @@ public class CenterOnboardingMailService {
         List<Invitee> team = registration.invitees();
         Map<String, Object> admin = new HashMap<>();
         admin.put("form", form);
-        admin.put("taxId", form.cif().trim().toUpperCase(Locale.ROOT));
+        admin.put("taxId", TaxIds.compact(form.cif()));
+        admin.put("phone", PhoneNumbers.tryNormalize(form.phoneCountry(), form.phone()).orElse(form.phone()));
         admin.put("owner", owner);
         admin.put("team", team);
         admin.put("specialties", form.specialtiesOrEmpty().isEmpty() ? "No especificadas" : String.join(", ", form.specialtiesOrEmpty()));
@@ -58,7 +61,7 @@ public class CenterOnboardingMailService {
         admin.put("publishUrl", siteUrl + "/register-center/approve/" + registration.approvalToken());
         admin.put("timestamp", LocalDateTime.now().format(TIMESTAMP));
         sendSafely(new EmailMessage(adminEmail, owner.email(), owner.name(),
-                "[Cuquora Auditoría] Nuevo centro: " + registration.centerName() + " (" + admin.get("taxId") + ")",
+                "Nuevo centro para revisar: " + registration.centerName() + " (" + admin.get("taxId") + ")",
                 render("email/center-registration-admin", admin)));
 
         sendSafely(new EmailMessage(owner.email(), null, null,

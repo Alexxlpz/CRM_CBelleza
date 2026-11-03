@@ -4,6 +4,7 @@ import com.alexxlpz.crm_cbelleza.config.GoogleLoginSettings;
 import com.alexxlpz.crm_cbelleza.config.SiteModelAdvice;
 import com.alexxlpz.crm_cbelleza.entities.User;
 import com.alexxlpz.crm_cbelleza.exceptions.BusinessRuleException;
+import com.alexxlpz.crm_cbelleza.forms.PhoneNumbers;
 import com.alexxlpz.crm_cbelleza.forms.RegistrationForm;
 import com.alexxlpz.crm_cbelleza.mail.CenterOnboardingMailService;
 import com.alexxlpz.crm_cbelleza.security.AppUserDetails;
@@ -68,10 +69,17 @@ public class AuthController {
     }
 
     @GetMapping("/register")
-    public String registerPage(@AuthenticationPrincipal AppUserDetails user, Model model) {
+    public String registerPage(@AuthenticationPrincipal AppUserDetails user, Model model, HttpServletRequest request) {
         if (user != null) {
             return "redirect:" + RoleHomes.homeFor(user);
         }
+        // Teléfono con el prefijo aparte, como en el alta de centros (fragments/phone-input.html). Si no viene de un
+        // intento anterior, el del país desde el que se conecta (o el del idioma del navegador)
+        Object country = model.getAttribute("phoneCountry");
+        String phoneCountry = country == null ? PhoneNumbers.countryForRequest(request) : country.toString();
+        model.addAttribute("phoneCountry", phoneCountry);
+        model.addAttribute("phoneCountries", PhoneNumbers.countriesWith(phoneCountry));
+        model.addAttribute("callingCodes", PhoneNumbers.callingCodesText());
         return "register";
     }
 
@@ -99,6 +107,7 @@ public class AuthController {
             redirect.addFlashAttribute("name", form.name());
             redirect.addFlashAttribute("email", form.email());
             redirect.addFlashAttribute("phone", form.phone());
+            redirect.addFlashAttribute("phoneCountry", form.phoneCountryOrDefault());
             return "redirect:/register";
         }
     }

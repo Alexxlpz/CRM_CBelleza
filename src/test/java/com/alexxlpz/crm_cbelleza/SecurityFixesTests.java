@@ -195,7 +195,7 @@ class SecurityFixesTests {
     void teamInvitationsAreSentWhenTheCenterIsPublishedNotWhenItIsRegistered() throws Exception {
         mvc.perform(post("/register-center").with(csrf())
                         .param("centerName", "Estudio Alba")
-                        .param("cif", "B12345678")
+                        .param("cif", "B12345674")
                         .param("phone", "911 222 333")
                         .param("cabins", "1")
                         .param("hoursDay", "2")

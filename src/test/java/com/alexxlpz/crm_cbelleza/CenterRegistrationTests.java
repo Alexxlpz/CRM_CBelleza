@@ -78,7 +78,7 @@ class CenterRegistrationTests {
     private OpeningHoursService openingHours;
 
     private static CenterRegistrationForm form(String ownerEmail, List<String> workerNames, List<String> workerEmails) {
-        return new CenterRegistrationForm("Estudio Alba", "b-1234567.8", "+34 911 222 333", "Calle Mayor 12, 28013 Madrid",
+        return new CenterRegistrationForm("Estudio Alba", "b-1234567.4", "34", "+34 911 222 333", "Calle Mayor 12, 28013 Madrid",
                 40.4155, -3.7074, "Europe/Madrid", 2, TestHours.DAYS, TestHours.FROM, TestHours.TO, "Alba Ruiz", ownerEmail,
                 workerNames, workerEmails, "PER_ITEM", 10, 100, "Manicura gratis",
                 List.of("Manicura y uñas"), "Instagram: @estudioalba", true);
@@ -88,7 +88,7 @@ class CenterRegistrationTests {
     void registeringCreatesHiddenCenterWithTeamWithoutPasswordsAndLoyalty() throws Exception {
         mvc.perform(post("/register-center").with(csrf())
                         .param("centerName", "Estudio Alba")
-                        .param("cif", "B12345678")
+                        .param("cif", "B12345674")
                         .param("phone", "911 222 333")
                         .param("cabins", "2")
                         // Martes con jornada partida y sábado por la mañana
@@ -114,7 +114,7 @@ class CenterRegistrationTests {
         User nerea = users.findByEmailIgnoreCase("nerea@estudioalba.es").orElseThrow();
         Center center = centers.findById(owner.getCenter().getId()).orElseThrow();
         assertEquals("Estudio Alba", center.getName());
-        assertEquals("B12345678", center.getTaxId());
+        assertEquals("B12345674", center.getTaxId());
         assertEquals("Atlantic/Canary", center.getTimeZone());
         assertEquals(2, center.getCabins());
         assertEquals(40.4155, center.getLatitude());
@@ -153,7 +153,7 @@ class CenterRegistrationTests {
 
         // Administración lo publica desde el enlace del correo
         String approve = "/register-center/approve/" + registration.approvalToken();
-        mvc.perform(get(approve)).andExpect(status().isOk()).andExpect(content().string(containsString("B12345678")));
+        mvc.perform(get(approve)).andExpect(status().isOk()).andExpect(content().string(containsString("B12345674")));
         mvc.perform(post(approve).with(csrf())).andExpect(status().isOk());
         assertTrue(centers.findById(center.getId()).orElseThrow().isPublished());
         mvc.perform(get("/api/centers").param("size", "50"))
@@ -218,8 +218,8 @@ class CenterRegistrationTests {
         long centersBefore = centers.count();
         long usersBefore = users.count();
         mvc.perform(post("/register-center").with(csrf())
-                        .param("centerName", "Estudio Alba").param("cif", "B12345678").param("phone", "911222333")
-                        .param("cabins", "1").param("address", "Calle Mayor 12, Madrid")
+                        .param("centerName", "Estudio Alba").param("cif", "B12345674").param("phone", "911222333")
+                        .param("cabins", "1").param("address", "Calle Mayor 12, 28013 Madrid")
                         .param("hoursDay", "1").param("hoursFrom", "09:00").param("hoursTo", "20:00")
                         .param("latitude", "40.4").param("longitude", "-3.7")
                         .param("contactName", "Alba Ruiz").param("email", "alba@estudioalba.es")
@@ -228,34 +228,34 @@ class CenterRegistrationTests {
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Ya hay una cuenta de Cuquora con el correo " + TestUsers.WORKER_CENTER_1)))
                 // Lo escrito se conserva para corregirlo
-                .andExpect(content().string(containsString("Calle Mayor 12, Madrid")));
+                .andExpect(content().string(containsString("Calle Mayor 12, 28013 Madrid")));
         assertEquals(centersBefore, centers.count());
         assertEquals(usersBefore, users.count());
     }
 
     @Test
     void invalidRegistrationsExplainWhatToFix() {
-        assertRejected(new CenterRegistrationForm("Estudio Alba", "B12345678", "911222333", "Calle Mayor 12", null, null,
+        assertRejected(new CenterRegistrationForm("Estudio Alba", "B12345674", "34", "911222333", "Calle Mayor 12, 28013 Madrid", null, null,
                 null, 1, TestHours.DAYS, TestHours.FROM, TestHours.TO, "Alba", "alba@estudioalba.es", List.of(), List.of(), "OFF", null, null, null, null, null, true),
                 "Marca en el mapa");
         assertRejected(form("alba@estudioalba.es", List.of("Nerea"), List.of("ALBA@estudioalba.es")), "está repetido");
         assertRejected(form("alba@estudioalba.es", List.of("Nerea"), List.of("")), "falta el nombre o el correo");
-        assertRejected(new CenterRegistrationForm("Estudio Alba", "B12345678", "911222333", "Calle Mayor 12", 40.4, -3.7,
+        assertRejected(new CenterRegistrationForm("Estudio Alba", "B12345674", "34", "911222333", "Calle Mayor 12, 28013 Madrid", 40.4, -3.7,
                 null, 1, TestHours.DAYS, TestHours.FROM, TestHours.TO, "Alba", "alba@estudioalba.es", List.of(), List.of(), "OFF", null, null, null, null, null, null),
                 "acepta los términos");
-        assertRejected(new CenterRegistrationForm("Estudio Alba", "B12345678", "911222333", "Calle Mayor 12", 40.4, -3.7,
+        assertRejected(new CenterRegistrationForm("Estudio Alba", "B12345674", "34", "911222333", "Calle Mayor 12, 28013 Madrid", 40.4, -3.7,
                 null, 1, TestHours.DAYS, TestHours.FROM, TestHours.TO, "Alba", "alba@estudioalba.es", List.of(), List.of(), "PER_ITEM", 1, 10, " ", null, null, true),
                 "qué recompensa");
-        assertRejected(new CenterRegistrationForm("Estudio Alba", "B12345678", "911222333", "Calle Mayor 12", 40.4, -3.7,
+        assertRejected(new CenterRegistrationForm("Estudio Alba", "B12345674", "34", "911222333", "Calle Mayor 12, 28013 Madrid", 40.4, -3.7,
                 null, 1, List.of(), List.of(), List.of(), "Alba", "alba@estudioalba.es", List.of(), List.of(), "OFF", null, null, null, null, null, true),
                 "al menos un día");
-        assertRejected(new CenterRegistrationForm("Estudio Alba", "B12345678", "911222333", "Calle Mayor 12", 40.4, -3.7,
+        assertRejected(new CenterRegistrationForm("Estudio Alba", "B12345674", "34", "911222333", "Calle Mayor 12, 28013 Madrid", 40.4, -3.7,
                 null, 1, List.of(1), List.of("20:00"), List.of("09:00"), "Alba", "alba@estudioalba.es", List.of(), List.of(), "OFF", null, null, null, null, null, true),
                 "posterior a la de apertura");
-        assertRejected(new CenterRegistrationForm("Estudio Alba", "B12345678", "911222333", "Calle Mayor 12", 40.4, -3.7,
+        assertRejected(new CenterRegistrationForm("Estudio Alba", "B12345674", "34", "911222333", "Calle Mayor 12, 28013 Madrid", 40.4, -3.7,
                 null, 1, List.of(3, 3), List.of("09:00", "13:00"), List.of("14:00", "20:00"), "Alba", "alba@estudioalba.es", List.of(), List.of(), "OFF", null, null, null, null, null, true),
                 "se pisan");
-        assertRejected(new CenterRegistrationForm("Estudio Alba", "B12345678", "911222333", "Calle Mayor 12", 40.4, -3.7,
+        assertRejected(new CenterRegistrationForm("Estudio Alba", "B12345674", "34", "911222333", "Calle Mayor 12, 28013 Madrid", 40.4, -3.7,
                 null, 1, List.of(1), List.of("09:15"), List.of("14:00"), "Alba", "alba@estudioalba.es", List.of(), List.of(), "OFF", null, null, null, null, null, true),
                 "de 30 en 30 minutos");
         assertEquals(0, users.findByEmailIgnoreCase("alba@estudioalba.es").stream().count());

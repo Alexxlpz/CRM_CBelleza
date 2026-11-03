@@ -24,6 +24,7 @@ Al sacar una versión:
 ### Cambiado
 
 - Si un cliente contesta a un correo de su cita, la respuesta le llega al dueño del centro (antes iba al buzón de Cuquora).
+- Los correos llevan también una versión en texto plano, salen a nombre de «Cuquora» (antes «Cuquora CRM») y el aviso de centro nuevo al admin ya no lleva «[Cuquora Auditoría]» en el asunto, para que caigan menos en spam.
 - Documentación: diagrama de los correos que envía la app (Cuquora, Brevo y Cloudflare, y un apartado por cada tipo de correo).
 
 ## [0.9.0-beta] - 2026-11-03

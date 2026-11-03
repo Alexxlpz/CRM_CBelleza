@@ -8,6 +8,7 @@
     <link rel="stylesheet" th:href="@{/vendor/leaflet/leaflet.css}">
     <script th:src="@{/vendor/leaflet/leaflet.js}" defer></script>
     <script th:src="@{/js/form-validation.js}" defer></script>
+    <script th:src="@{/js/phone-input.js}" defer></script>
     <script th:src="@{/js/location-picker.js}" defer></script>
     <script th:src="@{/js/photo-picker.js}" defer></script>
     <script th:src="@{/js/loyalty-settings.js}" defer></script>
@@ -73,19 +74,22 @@
                         <div class="form-field">
                             <label for="centerName">Nombre comercial *</label>
                             <input type="text" id="centerName" name="centerName" th:value="${form.centerName()}"
-                                   placeholder="Ej: Salón Bellas Artes" maxlength="120" required>
+                                   placeholder="Ej: Salón Bellas Artes" minlength="2" maxlength="120" required>
                         </div>
                         <div class="form-field">
                             <label for="cif">CIF / NIF de la empresa o autónomo *</label>
-                            <input type="text" id="cif" name="cif" th:value="${form.cif()}" placeholder="Ej: B12345678 o 12345678Z"
-                                   maxlength="20" autocapitalize="characters" required>
+                            <input type="text" id="cif" name="cif" th:value="${form.cif()}" placeholder="Ej: B12345674 o 12345678Z"
+                                   maxlength="24" autocapitalize="characters" spellcheck="false" autocomplete="off" required
+                                   aria-describedby="cifHelp">
+                            <p class="form-help" id="cifHelp">Con su letra o dígito final. Da igual si lo escribes con puntos o guiones.</p>
                         </div>
                     </div>
                     <div class="form-grid-two">
                         <div class="form-field">
-                            <label for="phone">Teléfono del centro *</label>
-                            <input type="tel" id="phone" name="phone" th:value="${form.phone()}" placeholder="+34 912 345 678" required>
-                            <p class="form-help">Lo ven los clientes en la ficha del centro.</p>
+                            <!--/* th:for: el id lo pone el fragmento phone-input y IntelliJ no lo ve */--><label th:for="${'phone'}">Teléfono del centro *</label>
+                            <div th:replace="~{fragments/phone-input :: input('phone', 'phone', 'phoneCountry', ${form.phoneCountryOrDefault()},
+                                    ${form.phone()}, '612 345 678', '', true, 'phoneHelp')}"></div>
+                            <p class="form-help" id="phoneHelp">Elige el prefijo del país y escribe el resto. Lo ven los clientes en la ficha del centro.</p>
                         </div>
                         <div class="form-field">
                             <label for="cabins">Cabinas o puestos *</label>
@@ -119,7 +123,9 @@
                     <div class="form-field">
                         <label for="address">Dirección completa *</label>
                         <input type="text" id="address" name="address" th:value="${form.address()}"
-                               placeholder="Calle Mayor 12, 28013 Madrid" maxlength="255" autocomplete="street-address" required>
+                               placeholder="Calle Mayor 12, 28013 Madrid" maxlength="255" autocomplete="street-address" required
+                               aria-describedby="addressHelp">
+                        <p class="form-help" id="addressHelp">Calle y número, código postal y ciudad. Puedes añadir el piso o el local.</p>
                     </div>
                     <div class="form-field">
                         <span class="form-field-label">Ubicación en el mapa *</span>
@@ -153,12 +159,12 @@
                         <div class="form-field">
                             <label for="contactName">Tu nombre (dueño del centro) *</label>
                             <input type="text" id="contactName" name="contactName" th:value="${form.contactName()}"
-                                   placeholder="Nombre y apellidos" autocomplete="name" required>
+                                   placeholder="Nombre y apellidos" autocomplete="name" minlength="2" maxlength="100" required>
                         </div>
                         <div class="form-field">
                             <label for="email">Tu correo *</label>
                             <input type="email" id="email" name="email" th:value="${form.email()}"
-                                   placeholder="info@tucentro.com" autocomplete="email" required>
+                                   placeholder="info@tucentro.com" autocomplete="email" maxlength="254" spellcheck="false" required>
                             <p class="form-help">Con él entrarás a Cuquora y será el correo de contacto del centro.</p>
                         </div>
                     </div>
@@ -168,11 +174,11 @@
                         <li class="team-row" th:each="member, it : ${form.workerRowsForView()}">
                             <div class="form-field">
                                 <label th:for="${'workerName' + it.index}" class="visually-hidden">Nombre</label>
-                                <input type="text" th:id="${'workerName' + it.index}" name="workerNames" th:value="${member.name()}" placeholder="Nombre">
+                                <input type="text" th:id="${'workerName' + it.index}" name="workerNames" th:value="${member.name()}" placeholder="Nombre" maxlength="100">
                             </div>
                             <div class="form-field">
                                 <label th:for="${'workerEmail' + it.index}" class="visually-hidden">Correo</label>
-                                <input type="email" th:id="${'workerEmail' + it.index}" name="workerEmails" th:value="${member.email()}" placeholder="correo@ejemplo.com">
+                                <input type="email" th:id="${'workerEmail' + it.index}" name="workerEmails" th:value="${member.email()}" placeholder="correo@ejemplo.com" maxlength="254" spellcheck="false">
                             </div>
                             <button type="button" class="btn btn-secondary btn-sm team-row-remove" data-remove-worker aria-label="Quitar trabajador">
                                 <i class="lucide-x" aria-hidden="true"></i>
@@ -187,11 +193,11 @@
                         <li class="team-row">
                             <div class="form-field">
                                 <label class="visually-hidden">Nombre</label>
-                                <input type="text" name="workerNames" placeholder="Nombre">
+                                <input type="text" name="workerNames" placeholder="Nombre" maxlength="100">
                             </div>
                             <div class="form-field">
                                 <label class="visually-hidden">Correo</label>
-                                <input type="email" name="workerEmails" placeholder="correo@ejemplo.com">
+                                <input type="email" name="workerEmails" placeholder="correo@ejemplo.com" maxlength="254" spellcheck="false">
                             </div>
                             <button type="button" class="btn btn-secondary btn-sm team-row-remove" data-remove-worker aria-label="Quitar trabajador">
                                 <i class="lucide-x" aria-hidden="true"></i>

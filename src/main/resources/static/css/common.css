@@ -2045,6 +2045,34 @@ body.modal-open {
     color: var(--text-muted);
 }
 
+/* ---------- Teléfono con prefijo aparte (fragments/phone-input.html) ---------- */
+.phone-input {
+    display: flex;
+    gap: 8px;
+    align-items: stretch;
+    min-width: 0;
+}
+
+/* Anchos fijos: si no, el nombre de país más largo de la lista ensancharía la tarjeta en el móvil */
+.phone-input select.phone-input-country,
+.form-field .phone-input select.phone-input-country {
+    flex: 0 0 6rem;
+    width: 6rem;
+    min-width: 0;
+    padding-right: 8px;
+    text-overflow: ellipsis;
+    font-variant-numeric: tabular-nums;
+}
+
+.phone-input input.phone-input-number,
+.form-field .phone-input input.phone-input-number {
+    flex: 1 1 0;
+    width: 0;
+    min-width: 0;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+}
+
 /* ---------- Validación en vivo (form-validation.js) ---------- */
 .has-error,
 .form-control.has-error,

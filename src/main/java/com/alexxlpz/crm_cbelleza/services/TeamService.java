@@ -8,6 +8,7 @@ import com.alexxlpz.crm_cbelleza.entities.Role;
 import com.alexxlpz.crm_cbelleza.entities.User;
 import com.alexxlpz.crm_cbelleza.exceptions.BusinessRuleException;
 import com.alexxlpz.crm_cbelleza.exceptions.ResourceNotFoundException;
+import com.alexxlpz.crm_cbelleza.forms.Emails;
 import com.alexxlpz.crm_cbelleza.forms.FormText;
 import com.alexxlpz.crm_cbelleza.repositories.AccountInvitationRepository;
 import com.alexxlpz.crm_cbelleza.repositories.AgendaBlockRepository;
@@ -96,7 +97,7 @@ public class TeamService {
         if (cleanName.length() > 100) {
             throw new BusinessRuleException("El nombre es demasiado largo.");
         }
-        if (!CenterRegistrationService.EMAIL.matcher(cleanEmail).matches() || cleanEmail.endsWith(User.PLACEHOLDER_EMAIL_DOMAIN)) {
+        if (!Emails.isValid(cleanEmail) || cleanEmail.endsWith(User.PLACEHOLDER_EMAIL_DOMAIN)) {
             throw new BusinessRuleException("Revisa el correo «" + email.trim() + "»: no es válido.");
         }
         if (users.countByCenterIdAndRole(centerId, Role.WORKER) >= MAX_TEAM_SIZE) {

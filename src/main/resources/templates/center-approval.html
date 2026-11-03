@@ -15,7 +15,16 @@
             <span th:text="${center.name + ' ya aparece en el buscador y en el mapa. Hemos avisado al centro por correo.'}">Centro publicado.</span>
         </div>
 
-        <section class="form-card form-card--wide">
+        <!--/* Tras rechazar: el centro ya no existe */-->
+        <section class="form-card form-card--wide" th:if="${rejectedCenter != null}">
+            <div class="form-card-header">
+                <h1 class="approval-title"><i class="lucide-trash-2" aria-hidden="true"></i> Registro rechazado</h1>
+                <p><strong th:text="${rejectedCenter}">Centro</strong> y las cuentas de su equipo se han borrado.
+                    El enlace de este correo ya no sirve.</p>
+            </div>
+        </section>
+
+        <section class="form-card form-card--wide" th:if="${rejectedCenter == null}">
             <div class="form-card-header form-card-header--divided">
                 <h1 class="approval-title" th:text="${center.name}">Centro</h1>
                 <p th:if="${justPublished == null}">Pendiente de revisión. Comprueba el CIF o NIF y la ubicación antes de publicarlo.</p>
@@ -66,12 +75,20 @@
                 <dd th:if="${center.registeredAt != null}" th:text="${#temporals.format(center.registeredAt, 'dd/MM/yyyy HH:mm')}">14/10/2026</dd>
             </dl>
 
-            <form th:if="${justPublished == null}" th:action="@{/register-center/approve/{token}(token=${token})}" method="post"
-                  data-confirm="El centro aparecerá en el buscador y los clientes podrán pedir cita. ¿Publicarlo?">
+            <div class="approval-actions" th:if="${justPublished == null}">
+            <form th:action="@{/register-center/approve/{token}/reject(token=${token})}" method="post"
+                  th:attr="data-confirm=${'Se borrarán ' + center.name + ', las cuentas de su equipo y todo lo que hayan preparado. No se puede deshacer. ¿Rechazar el registro?'}">
+                <button type="submit" class="btn btn-danger btn-lg">
+                    <i class="lucide-x-circle" aria-hidden="true"></i> Rechazar registro
+                </button>
+            </form>
+            <form th:action="@{/register-center/approve/{token}(token=${token})}" method="post"
+                  data-confirm="El centro aparecerá en el buscador y los clientes podrán pedir cita. ¿Publicarlo?" data-confirm-tone="default">
                 <button type="submit" class="btn btn-primary btn-lg">
                     <i class="lucide-badge-check" aria-hidden="true"></i> Publicar centro
                 </button>
             </form>
+            </div>
         </section>
     </main>
 </body>

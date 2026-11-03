@@ -4,6 +4,7 @@
     <th:block th:replace="~{fragments/head :: meta('Crear Cuenta - Cuquora CRM')}"></th:block>
     <link rel="stylesheet" th:href="@{/css/auth.css}">
     <script th:src="@{/js/form-validation.js}" defer></script>
+    <script th:src="@{/js/phone-input.js}" defer></script>
 </head>
 <body class="auth-page">
     <div th:replace="~{fragments/navbar :: brand(true)}"></div>
@@ -32,19 +33,19 @@
                 <div class="form-group">
                     <label for="nameInput" class="form-label">Nombre y apellidos</label>
                     <input type="text" id="nameInput" name="name" class="form-control" autofocus
-                           autocomplete="name" placeholder="Ej. Laura Gómez" th:value="${name}">
+                           autocomplete="name" placeholder="Ej. Laura Gómez" maxlength="100" th:value="${name}">
                 </div>
 
                 <div class="form-group">
                     <label for="emailInput" class="form-label">Correo electrónico</label>
                     <input type="email" id="emailInput" name="email" class="form-control"
-                           autocomplete="email" placeholder="ejemplo@cbelleza.com" th:value="${email}">
+                           autocomplete="email" placeholder="ejemplo@cbelleza.com" maxlength="254" spellcheck="false" th:value="${email}">
                 </div>
 
                 <div class="form-group">
-                    <label for="phoneInput" class="form-label">Teléfono de contacto <span class="form-label-hint">(opcional)</span></label>
-                    <input type="tel" id="phoneInput" name="phone" class="form-control"
-                           autocomplete="tel" placeholder="+34 600 000 000" th:value="${phone}">
+                    <!--/* th:for: el id lo pone el fragmento phone-input y IntelliJ no lo ve */--><label th:for="${'phoneInput'}" class="form-label">Teléfono de contacto <span class="form-label-hint">(opcional)</span></label>
+                    <div th:replace="~{fragments/phone-input :: input('phoneInput', 'phone', 'phoneCountry', ${phoneCountry},
+                            ${phone}, '600 000 000', 'form-control', false, null)}"></div>
                 </div>
 
                 <div class="form-group">
@@ -104,7 +105,7 @@
             Cuquora.validateForm(document.getElementById('registerForm'), {
                 name: [V.required('Por favor, introduce tu nombre y apellidos.'), V.minLength(2, 'El nombre debe tener al menos 2 caracteres.')],
                 email: [V.required('Por favor, introduce tu correo electrónico.'), V.email()],
-                phone: [V.phone()],
+                phone: [V.phoneNumber()],
                 password: [V.required('Por favor, introduce una contraseña.'), V.minLength(8, 'La contraseña debe tener al menos 8 caracteres.')],
                 confirmPassword: [V.required('Por favor, confirma tu contraseña.'), V.sameAs('password', 'Las contraseñas no coinciden. Por favor, revísalas.')]
             });

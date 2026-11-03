@@ -11,6 +11,9 @@ import java.io.UnsupportedEncodingException;
 /** Envío real por SMTP (se activa cuando hay MAIL_HOST configurado). */
 public class SmtpEmailGateway implements EmailGateway {
 
+    /** Nombre que ve el destinatario junto al remitente ({@code CRM_FROM_EMAIL}). */
+    static final String SENDER_NAME = "Cuquora";
+
     private final JavaMailSender mailSender;
     private final String fromEmail;
 
@@ -24,13 +27,14 @@ public class SmtpEmailGateway implements EmailGateway {
         try {
             MimeMessage mime = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mime, true, "UTF-8");
-            helper.setFrom(fromEmail, "Cuquora CRM");
+            helper.setFrom(fromEmail, SENDER_NAME);
             helper.setTo(message.to());
             if (message.replyTo() != null) {
                 helper.setReplyTo(message.replyTo(), message.replyToName());
             }
             helper.setSubject(message.subject());
-            helper.setText(message.htmlBody(), true);
+            // Texto plano y HTML a la vez (multipart/alternative): los filtros de spam desconfían de los correos solo HTML
+            helper.setText(HtmlToText.convert(message.htmlBody()), message.htmlBody());
             mailSender.send(mime);
         } catch (MessagingException | UnsupportedEncodingException e) {
             throw new MailSendException("No se pudo preparar el correo para " + message.to(), e);

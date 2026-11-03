@@ -5,6 +5,7 @@ import com.alexxlpz.crm_cbelleza.entities.Role;
 import com.alexxlpz.crm_cbelleza.entities.User;
 import com.alexxlpz.crm_cbelleza.exceptions.BusinessRuleException;
 import com.alexxlpz.crm_cbelleza.exceptions.ResourceNotFoundException;
+import com.alexxlpz.crm_cbelleza.forms.Emails;
 import com.alexxlpz.crm_cbelleza.forms.FormText;
 import com.alexxlpz.crm_cbelleza.forms.PasswordPolicy;
 import com.alexxlpz.crm_cbelleza.forms.ProfileForm;
@@ -22,6 +23,9 @@ import java.util.List;
 @Service
 @Transactional
 public class UserService {
+
+    /** Nombre y apellidos de una cuenta (alta de clientes). */
+    static final int MAX_NAME = 100;
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -76,15 +80,23 @@ public class UserService {
         if (FormText.isBlank(form.name()) || FormText.isBlank(form.email())) {
             throw new BusinessRuleException("Por favor, completa todos los campos requeridos.");
         }
-        passwordPolicy.validateRequired(form.password(), form.confirmPassword());
+        String name = FormText.collapseSpaces(form.name());
+        if (name.length() < 2 || name.length() > MAX_NAME) {
+            throw new BusinessRuleException("El nombre tiene que tener entre 2 y " + MAX_NAME + " caracteres.");
+        }
         String email = form.normalizedEmail();
+        if (!Emails.isValid(email)) {
+            throw new BusinessRuleException("Revisa el correo: tiene que ser como usuario@gmail.com.");
+        }
+        String phone = form.normalizedPhone();
+        passwordPolicy.validateRequired(form.password(), form.confirmPassword());
         if (email.endsWith(User.PLACEHOLDER_EMAIL_DOMAIN)) {
             // Correos internos inventados a partir del teléfono: nadie puede registrarse (ni reclamar uno) con ellos
             throw new BusinessRuleException("Introduce un correo electrónico válido.");
         }
         var existing = userRepository.findByEmailIgnoreCase(email);
         if (existing.isEmpty()) {
-            User created = createUser(form.name().trim(), email, FormText.trimToNull(form.phone()), form.password(), Role.CLIENT, null);
+            User created = createUser(name, email, phone, form.password(), Role.CLIENT, null);
             created.setEmailVerified(false);
             return new Registration(userRepository.save(created), null);
         }

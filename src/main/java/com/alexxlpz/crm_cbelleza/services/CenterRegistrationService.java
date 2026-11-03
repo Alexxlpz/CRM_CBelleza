@@ -10,9 +10,12 @@ import com.alexxlpz.crm_cbelleza.exceptions.BusinessRuleException;
 import com.alexxlpz.crm_cbelleza.exceptions.ResourceNotFoundException;
 import com.alexxlpz.crm_cbelleza.forms.CenterRegistrationForm;
 import com.alexxlpz.crm_cbelleza.forms.CenterRegistrationForm.Member;
+import com.alexxlpz.crm_cbelleza.forms.Emails;
 import com.alexxlpz.crm_cbelleza.forms.FormText;
+import com.alexxlpz.crm_cbelleza.forms.TaxIds;
 import com.alexxlpz.crm_cbelleza.repositories.CenterRepository;
 import com.alexxlpz.crm_cbelleza.repositories.UserRepository;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -40,8 +43,13 @@ public class CenterRegistrationService {
     /** Trabajadores que se pueden añadir en el alta además del responsable. */
     public static final int MAX_EXTRA_WORKERS = 20;
 
-    static final Pattern EMAIL = Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
-    private static final Pattern TAX_ID = Pattern.compile("^[A-Z0-9]{5,20}$");
+    static final int MAX_CENTER_NAME = 120;
+    static final int MAX_PERSON_NAME = 100;
+    static final int MAX_ADDRESS = 255;
+    static final int MAX_NOTES = 2000;
+    private static final Set<String> SPANISH_TIME_ZONES = Set.of("Europe/Madrid", "Atlantic/Canary");
+    /** Un número de 5 cifras suelto: el código postal de una dirección española. */
+    private static final Pattern POSTCODE = Pattern.compile("(?<!\\d)(\\d{5})(?!\\d)");
 
     private final CenterRepository centers;
     private final UserRepository users;
@@ -51,10 +59,12 @@ public class CenterRegistrationService {
     private final OpeningHoursService openingHours;
     private final CenterService centerService;
     private final Clock clock;
+    private final JdbcTemplate jdbc;
 
     public CenterRegistrationService(CenterRepository centers, UserRepository users, InvitationService invitations,
                                      LoyaltyService loyalty, CenterPhotoService photos, OpeningHoursService openingHours,
-                                     CenterService centerService, Clock clock) {
+                                     CenterService centerService, Clock clock, JdbcTemplate jdbc) {
+        this.jdbc = jdbc;
         this.centerService = centerService;
         this.centers = centers;
         this.users = users;
@@ -75,34 +85,41 @@ public class CenterRegistrationService {
                 || FormText.isBlank(form.contactName()) || FormText.isBlank(form.email())) {
             throw new BusinessRuleException("Completa los datos del centro y del responsable.");
         }
-        String taxId = form.cif().replaceAll("[\\s.-]", "").toUpperCase(Locale.ROOT);
-        if (!TAX_ID.matcher(taxId).matches()) {
-            throw new BusinessRuleException("Revisa el CIF o NIF: solo letras y números, por ejemplo B12345678.");
-        }
-        if (form.phone().replaceAll("\\D", "").length() < 6) {
-            throw new BusinessRuleException("Introduce un teléfono válido (mínimo 6 dígitos).");
-        }
-        if (FormText.isBlank(form.address())) {
-            throw new BusinessRuleException("Escribe la dirección del centro: calle, número, código postal y ciudad.");
-        }
-        if (!validCoordinates(form.latitude(), form.longitude())) {
-            throw new BusinessRuleException("Marca en el mapa dónde está tu centro para que los clientes puedan encontrarlo.");
-        }
+        String centerName = FormText.collapseSpaces(form.centerName());
+        checkLength(centerName, 2, MAX_CENTER_NAME, "El nombre del centro");
+        // La zona horaria va antes que el CIF: dice si el centro está en España (CIF o NIF español con su letra)
         String timeZone = FormText.isBlank(form.timeZone()) ? CenterTimeZones.DEFAULT : form.timeZone();
         if (!CenterTimeZones.isValid(timeZone)) {
             throw new BusinessRuleException("Elige una zona horaria de la lista.");
+        }
+        boolean spain = SPANISH_TIME_ZONES.contains(timeZone);
+        String taxId = TaxIds.normalize(form.cif(), spain);
+        String phone = form.normalizedPhone();
+        String address = FormText.collapseSpaces(form.address());
+        if (address == null) {
+            throw new BusinessRuleException("Escribe la dirección del centro: calle, número, código postal y ciudad.");
+        }
+        checkLength(address, 5, MAX_ADDRESS, "La dirección");
+        if (spain) {
+            checkSpanishPostcode(address);
+        }
+        if (!validCoordinates(form.latitude(), form.longitude())) {
+            throw new BusinessRuleException("Marca en el mapa dónde está tu centro para que los clientes puedan encontrarlo.");
         }
         int cabins = form.cabins() == null ? 1 : form.cabins();
         if (cabins < 1 || cabins > CenterService.MAX_CABINS) {
             throw new BusinessRuleException("El número de cabinas tiene que estar entre 1 y " + CenterService.MAX_CABINS + ".");
         }
         OpeningHours hours = openingHours.parse(form.openingHours());
+        if (form.notes() != null && form.notes().length() > MAX_NOTES) {
+            throw new BusinessRuleException("La información para la revisión no puede pasar de " + MAX_NOTES + " caracteres.");
+        }
         if (!Boolean.TRUE.equals(form.terms())) {
             throw new BusinessRuleException("Confirma que el centro tiene actividad legal y acepta los términos para continuar.");
         }
 
         List<Member> team = new ArrayList<>();
-        team.add(new Member(form.contactName().trim(), form.email()));
+        team.add(new Member(form.contactName(), form.email()));
         List<Member> extra = form.extraWorkers();
         if (extra.size() > MAX_EXTRA_WORKERS) {
             throw new BusinessRuleException("Puedes dar de alta hasta " + MAX_EXTRA_WORKERS
@@ -121,10 +138,10 @@ public class CenterRegistrationService {
         LocalDateTime now = LocalDateTime.now(clock);
         String approvalToken = SecureTokens.newToken();
         Center center = centers.save(Center.builder()
-                .name(form.centerName().trim())
+                .name(centerName)
                 .taxId(taxId)
-                .address(form.address().trim())
-                .phone(form.phone().trim())
+                .address(address)
+                .phone(phone)
                 .email(cleanTeam.getFirst().email())
                 .latitude(form.latitude())
                 .longitude(form.longitude())
@@ -149,7 +166,7 @@ public class CenterRegistrationService {
             User worker = users.save(User.builder()
                     .name(member.name())
                     .email(member.email())
-                    .phone(i == 0 ? form.phone().trim() : null)
+                    .phone(i == 0 ? phone : null)
                     .role(Role.WORKER)
                     .center(center)
                     .build());
@@ -176,6 +193,52 @@ public class CenterRegistrationService {
         return centers.save(center);
     }
 
+    /**
+     * Rechaza un alta sin publicar: borra el centro, las cuentas de su equipo y todo lo que hayan preparado mientras
+     * tanto (tratamientos, inventario, agenda, fichas…). Los clientes con cuenta son de Cuquora, no del centro: se
+     * quedan; los que el equipo apuntó a mano (sin contraseña ni Google) se borran si no salen en ningún otro centro.
+     * El enlace deja de valer. Devuelve el nombre del centro, para el aviso.
+     */
+    public String reject(String approvalToken) {
+        Center center = findByApprovalToken(approvalToken);
+        Long id = center.getId();
+        String name = center.getName();
+        List<Long> team = jdbc.queryForList("SELECT id FROM users WHERE center_id = ?", Long.class, id);
+        List<Long> manualClients = jdbc.queryForList("""
+                SELECT u.id FROM users u WHERE u.role = 'CLIENT' AND u.password IS NULL AND u.google_id IS NULL
+                  AND (u.id IN (SELECT client_id FROM client_cards WHERE center_id = ?)
+                       OR u.id IN (SELECT client_id FROM appointments WHERE center_id = ?))""", Long.class, id, id);
+        // De lo que cuelga de lo demás hacia arriba; las tablas con ON DELETE CASCADE se vacían solas
+        // (horario, foto, reseñas, propuestas de cita, invitaciones, Google Calendar, horario y foto de cada uno…)
+        jdbc.update("DELETE FROM loyalty_movements WHERE center_id = ?", id);
+        jdbc.update("DELETE FROM product_sales WHERE center_id = ?", id);
+        jdbc.update("DELETE FROM reviews WHERE center_id = ?", id);
+        jdbc.update("DELETE FROM appointments WHERE center_id = ?", id);
+        jdbc.update("DELETE FROM agenda_blocks WHERE center_id = ?", id);
+        jdbc.update("DELETE FROM client_cards WHERE center_id = ?", id);
+        jdbc.update("DELETE FROM client_card_templates WHERE center_id = ?", id);
+        jdbc.update("DELETE FROM inventories WHERE center_id = ?", id);
+        jdbc.update("DELETE FROM treatments WHERE center_id = ?", id);
+        jdbc.update("DELETE FROM products WHERE center_id = ?", id);
+        jdbc.update("UPDATE centers SET owner_id = NULL WHERE id = ?", id);
+        for (Long userId : team) {
+            // Sesiones recordadas («Recordar mi sesión») del trabajador: van por correo, sin clave ajena
+            jdbc.update("DELETE FROM persistent_logins WHERE username = (SELECT email FROM users WHERE id = ?)", userId);
+        }
+        jdbc.update("DELETE FROM users WHERE center_id = ?", id);
+        jdbc.update("DELETE FROM centers WHERE id = ?", id);
+        for (Long clientId : manualClients) {
+            jdbc.update("""
+                    DELETE FROM users WHERE id = ?
+                      AND NOT EXISTS (SELECT 1 FROM client_cards WHERE client_id = ?)
+                      AND NOT EXISTS (SELECT 1 FROM appointments WHERE client_id = ?)
+                      AND NOT EXISTS (SELECT 1 FROM product_sales WHERE client_id = ?)
+                      AND NOT EXISTS (SELECT 1 FROM loyalty_movements WHERE client_id = ?)""",
+                    clientId, clientId, clientId, clientId, clientId);
+        }
+        return name;
+    }
+
     private Center findByApprovalToken(String token) {
         if (token == null || token.isBlank()) {
             throw new ResourceNotFoundException("El enlace no es válido o el centro ya está publicado.");
@@ -189,8 +252,10 @@ public class CenterRegistrationService {
         Set<String> seen = new HashSet<>();
         List<Member> clean = new ArrayList<>();
         for (Member member : team) {
+            String name = FormText.collapseSpaces(member.name());
+            checkLength(name, 2, MAX_PERSON_NAME, "El nombre de «" + name + "»");
             String email = member.email().trim().toLowerCase(Locale.ROOT);
-            if (!EMAIL.matcher(email).matches() || email.endsWith(User.PLACEHOLDER_EMAIL_DOMAIN)) {
+            if (!Emails.isValid(email) || email.endsWith(User.PLACEHOLDER_EMAIL_DOMAIN)) {
                 throw new BusinessRuleException("Revisa el correo «" + member.email().trim() + "»: no es válido.");
             }
             if (!seen.add(email)) {
@@ -200,9 +265,34 @@ public class CenterRegistrationService {
                 throw new BusinessRuleException("Ya hay una cuenta de Cuquora con el correo " + email
                         + ". Usa otro correo para esa persona o escríbenos desde Contacto.");
             }
-            clean.add(new Member(member.name().trim(), email));
+            clean.add(new Member(name, email));
         }
         return clean;
+    }
+
+    private static void checkLength(String text, int min, int max, String what) {
+        if (text.length() < min) {
+            throw new BusinessRuleException(what + " tiene que tener al menos " + min + " caracteres.");
+        }
+        if (text.length() > max) {
+            throw new BusinessRuleException(what + " no puede pasar de " + max + " caracteres.");
+        }
+    }
+
+    /** En España la dirección lleva su código postal: 5 cifras y las dos primeras, la provincia (01 a 52). */
+    static void checkSpanishPostcode(String address) {
+        var matcher = POSTCODE.matcher(address);
+        boolean found = false;
+        while (matcher.find()) {
+            int province = Integer.parseInt(matcher.group(1).substring(0, 2));
+            if (province >= 1 && province <= 52) {
+                return;
+            }
+            found = true;
+        }
+        throw new BusinessRuleException(found
+                ? "Revisa el código postal de la dirección: en España empieza por 01 a 52 (ej.: Calle Mayor 12, 28013 Madrid)."
+                : "Añade el código postal a la dirección (5 cifras, ej.: Calle Mayor 12, 28013 Madrid).");
     }
 
     private static boolean validCoordinates(Double latitude, Double longitude) {

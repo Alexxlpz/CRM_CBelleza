@@ -198,6 +198,6 @@ class RegistrationTests {
     }
 
     private static RegistrationForm form(String email) {
-        return new RegistrationForm("Alguien", email, null, "secreto1", "secreto1");
+        return new RegistrationForm("Alguien", email, null, null, "secreto1", "secreto1");
     }
 }

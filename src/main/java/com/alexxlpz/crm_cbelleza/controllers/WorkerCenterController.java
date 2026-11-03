@@ -17,6 +17,7 @@ import com.alexxlpz.crm_cbelleza.services.TeamService.Invitee;
 import com.alexxlpz.crm_cbelleza.services.LoyaltyService;
 import com.alexxlpz.crm_cbelleza.exceptions.BusinessRuleException;
 import com.alexxlpz.crm_cbelleza.exceptions.ResourceNotFoundException;
+import com.alexxlpz.crm_cbelleza.forms.PhoneNumbers;
 import com.alexxlpz.crm_cbelleza.forms.WorkerCenterForm;
 import com.alexxlpz.crm_cbelleza.googlecalendar.GoogleCalendarService;
 import com.alexxlpz.crm_cbelleza.security.AppUserDetails;
@@ -104,6 +105,11 @@ public class WorkerCenterController {
         OpeningHours hours = openingHours.forCenter(centerId);
         boolean owner = center.isOwnedBy(worker.getId());
         model.addAttribute("center", center);
+        // Teléfono del centro con el prefijo aparte; si no lo lleva, el del país de su zona horaria
+        PhoneNumbers.Parts centerPhone = PhoneNumbers.split(center.getPhone(), PhoneNumbers.countryForTimeZone(center.getTimeZone()));
+        model.addAttribute("centerPhone", centerPhone);
+        model.addAttribute("phoneCountries", PhoneNumbers.countriesWith(centerPhone.country()));
+        model.addAttribute("callingCodes", PhoneNumbers.callingCodesText());
         model.addAttribute("isOwner", owner);
         model.addAttribute("ownerName", access.ownerName(centerId));
         model.addAttribute("openingHoursLines", hours.describe());

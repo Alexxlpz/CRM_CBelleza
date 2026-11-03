@@ -9,14 +9,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const V = Cuquora.validators;
     const submitBtn = document.getElementById('submitCertBtn');
+    const timeZone = form.elements.timeZone;
+    // Igual que en el servidor: un centro en España necesita CIF, NIF o NIE español con su letra o dígito de control
+    const inSpain = () => !timeZone || ['Europe/Madrid', 'Atlantic/Canary'].includes(timeZone.value);
     const validator = Cuquora.validateForm(form, {
-        centerName: [V.required('Escribe el nombre comercial del centro.')],
-        cif: [V.required('Indica el CIF o NIF de la empresa o autónomo.')],
-        phone: [V.required('Escribe un teléfono de contacto del centro.'), V.phone()],
-        cabins: [V.required('Indica cuántas cabinas o puestos tenéis.')],
-        address: [V.required('Escribe la dirección del centro.')],
+        centerName: [V.required('Escribe el nombre comercial del centro.'),
+            V.minLength(2, 'El nombre del centro tiene que tener al menos 2 caracteres.')],
+        cif: [V.required('Indica el CIF o NIF de la empresa o autónomo.'), value => taxIdProblem(value, inSpain())],
+        phone: [V.required('Escribe un teléfono de contacto del centro.'), V.phoneNumber()],
+        cabins: [V.required('Indica cuántas cabinas o puestos tenéis.'), (value, el) => {
+            const n = Number(value);
+            return Number.isInteger(n) && n >= Number(el.min || 1) && n <= Number(el.max || 50) ? ''
+                : `Las cabinas o puestos tienen que ser un número entre ${el.min || 1} y ${el.max || 50}.`;
+        }],
+        address: [V.required('Escribe la dirección del centro.'), value => inSpain() ? postcodeProblem(value) : ''],
         latitude: [V.required('Marca en el mapa dónde está el centro.')],
-        contactName: [V.required('Escribe tu nombre.')],
+        contactName: [V.required('Escribe tu nombre.'), V.minLength(2, 'Tu nombre tiene que tener al menos 2 caracteres.')],
         email: [V.required('Escribe tu correo.'), V.email()],
         terms: [V.required('Confirma la actividad legal del centro y acepta los términos para continuar.')]
     }, {
@@ -26,6 +34,27 @@ document.addEventListener('DOMContentLoaded', () => {
             submitBtn.setAttribute('aria-busy', 'true');
             submitBtn.querySelector('span').textContent = 'Registrando el centro…';
         }
+    });
+
+    // El CIF/NIF no deja pasar de 9 letras y números en España (20 fuera); los puntos, guiones y espacios no cuentan
+    const cifInput = form.elements.cif;
+    const cifMax = () => inSpain() ? 9 : 20;
+    const cifLength = value => value.replace(/[\s.\-/]/g, '').length;
+    cifInput.addEventListener('beforeinput', e => {
+        if (!e.inputType.startsWith('insert') || e.inputType === 'insertFromPaste') return;
+        const next = cifInput.value.slice(0, cifInput.selectionStart) + (e.data || '') + cifInput.value.slice(cifInput.selectionEnd);
+        if (cifLength(next) > cifMax()) e.preventDefault();
+    });
+    cifInput.addEventListener('input', () => {
+        // Lo pegado se recorta
+        if (cifLength(cifInput.value) <= cifMax()) return;
+        let keep = cifMax();
+        cifInput.value = [...cifInput.value].filter(c => /[\s.\-/]/.test(c) || keep-- > 0).join('');
+    });
+
+    // Al cambiar de país (zona horaria) cambian las reglas del CIF y del código postal
+    timeZone?.addEventListener('change', () => {
+        ['cif', 'address'].forEach(name => form.elements[name].dispatchEvent(new Event('input', { bubbles: true })));
     });
 
     // ---- Más trabajadores ----
@@ -144,7 +173,42 @@ document.addEventListener('DOMContentLoaded', () => {
     // El horario lo comprueba su propio editor (opening-hours.js): días abiertos y tramos que no se pisan
     const hoursEditor = form.querySelector('[data-hours-editor]');
     const stepIsValid = index => validator.check(el => steps[index].contains(el))
-        && !(hoursEditor && steps[index].contains(hoursEditor) && window.OpeningHoursEditor.problem(hoursEditor));
+        && !(hoursEditor && steps[index].contains(hoursEditor) && window.OpeningHoursEditor.problem(hoursEditor))
+        && !(steps[index].contains(rows) && !teamIsValid());
+
+    /** Filas del equipo: nombre y correo juntos, correos bien escritos y sin repetir (también el tuyo). Marca los errores. */
+    function teamIsValid() {
+        const owner = form.elements.email.value.trim().toLowerCase();
+        const seen = new Set(owner ? [owner] : []);
+        let ok = true;
+        [...rows.querySelectorAll('.team-row')].forEach(row => {
+            const name = row.querySelector('input[name="workerNames"]');
+            const email = row.querySelector('input[name="workerEmails"]');
+            const address = email.value.trim().toLowerCase();
+            Cuquora.fieldError.clear(name);
+            Cuquora.fieldError.clear(email);
+            if (!name.value.trim() && !address) return;
+            let problem = null;
+            if (name.value.trim().length < 2) {
+                problem = [name, name.value.trim() ? 'El nombre tiene que tener al menos 2 caracteres.' : 'Falta el nombre (o quita la fila).'];
+            } else if (!address) {
+                problem = [email, 'Falta el correo (o quita la fila).'];
+            } else if (V.email()(address)) {
+                problem = [email, V.email()(address)];
+            } else if (seen.has(address)) {
+                problem = [email, 'Este correo está repetido: cada persona necesita el suyo.'];
+            }
+            seen.add(address);
+            if (problem) {
+                Cuquora.fieldError.show(...problem);
+                ok = false;
+            }
+        });
+        return ok;
+    }
+    rows.addEventListener('input', e => {
+        if (e.target.classList.contains('has-error')) Cuquora.fieldError.clear(e.target);
+    });
 
     function goTo(index) {
         // Hacia delante solo si los pasos que se dejan atrás están bien
@@ -198,7 +262,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function refreshPreview() {
-        ['centerName', 'address', 'phone', 'email', 'cabins'].forEach(name => setPreview(name, field(name).value.trim()));
+        ['centerName', 'address', 'email', 'cabins'].forEach(name => setPreview(name, field(name).value.trim()));
+        const phone = field('phone').value.trim();
+        setPreview('phone', phone && !phone.startsWith('+') ? `+${field('phoneCountry').value} ${phone}` : phone);
         const initials = Cuquora.initials(field('centerName').value);
         document.querySelectorAll('[data-initials]').forEach(el => { el.textContent = initials; });
         const specialties = [...form.querySelectorAll('input[name="specialties"]:checked')].map(c => c.value);
@@ -219,3 +285,50 @@ document.addEventListener('DOMContentLoaded', () => {
     preview.hidden = false;
     refreshPreview();
 });
+
+/** Mismas reglas que TaxIds.java: mensaje de error del CIF, NIF o NIE, o '' si vale. */
+function taxIdProblem(value, spanish) {
+    const id = value.replace(/[\s.\-/]/g, '').toUpperCase();
+    if (!id) return '';
+    if (!/^[A-Z0-9]{5,20}$/.test(id)) return 'Revisa el CIF o NIF: solo letras y números, por ejemplo B12345674.';
+    // Fuera de España cada país tiene el suyo (un RUT chileno como 76123456K parece un NIF y no lo es)
+    if (!spanish) return '';
+    const dni = digits => 'TRWAGMYFPDXBNJZSQVHLCKE'[Number(digits) % 23];
+    const last = id.slice(-1);
+    let valid = null;
+    if (/^\d{8}[A-Z]$/.test(id)) {
+        valid = dni(id.slice(0, 8)) === last;
+    } else if (/^[XYZ]\d{7}[A-Z]$/.test(id)) {
+        valid = dni('XYZ'.indexOf(id[0]) + id.slice(1, 8)) === last;
+    } else if (/^[KLM]\d{7}[A-Z]$/.test(id)) {
+        valid = dni(id.slice(1, 8)) === last;
+    } else if (/^[ABCDEFGHJNPQRSUVW]\d{7}[0-9A-J]$/.test(id)) {
+        let sum = 0;
+        [...id.slice(1, 8)].forEach((c, i) => {
+            const d = Number(c);
+            sum += i % 2 === 0 ? Math.floor(d * 2 / 10) + (d * 2) % 10 : d;
+        });
+        const control = (10 - sum % 10) % 10;
+        const digit = String(control);
+        const letter = 'JABCDEFGHI'[control];
+        if ('PQRSNW'.includes(id[0])) valid = last === letter;
+        else if ('ABEH'.includes(id[0])) valid = last === digit;
+        else valid = last === digit || last === letter;
+    }
+    if (valid === false) return `La letra o el último dígito del CIF o NIF ${id} no cuadra: revisa que esté bien copiado.`;
+    if (valid === null) {
+        return 'Revisa el CIF o NIF: un NIF son 8 números y una letra (12345678Z), un NIE empieza por X, Y o Z (X1234567L) '
+            + 'y un CIF es una letra y 8 caracteres (B12345674).';
+    }
+    return '';
+}
+
+/** Igual que CenterRegistrationService.checkSpanishPostcode: 5 cifras y provincia de 01 a 52. */
+function postcodeProblem(address) {
+    if (!address.trim()) return '';
+    const codes = [...address.matchAll(/(?<!\d)(\d{5})(?!\d)/g)].map(m => m[1]);
+    if (codes.some(code => Number(code.slice(0, 2)) >= 1 && Number(code.slice(0, 2)) <= 52)) return '';
+    return codes.length
+        ? 'Revisa el código postal de la dirección: en España empieza por 01 a 52 (ej.: Calle Mayor 12, 28013 Madrid).'
+        : 'Añade el código postal a la dirección (5 cifras, ej.: Calle Mayor 12, 28013 Madrid).';
+}

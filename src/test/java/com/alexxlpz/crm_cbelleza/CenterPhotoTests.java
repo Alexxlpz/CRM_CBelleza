@@ -183,7 +183,7 @@ class CenterPhotoTests {
 
     @Test
     void registrationSavesPhotoThatOnlyTheTeamAndTheReviewerSeeUntilPublished() throws Exception {
-        CenterRegistrationForm form = new CenterRegistrationForm("Estudio Lirio", "B87654321", "+34 911 444 555",
+        CenterRegistrationForm form = new CenterRegistrationForm("Estudio Lirio", "B87654323", "34", "+34 911 444 555",
                 "Calle Mayor 30, 28013 Madrid", 40.4155, -3.7074, "Europe/Madrid", 1, TestHours.DAYS, TestHours.FROM, TestHours.TO, "Lirio Gómez", "lirio@estudiolirio.es",
                 List.of(), List.of(), "OFF", 1, 100, null, List.of(), null, true);
         var registration = registrationService.register(form,
@@ -212,7 +212,7 @@ class CenterPhotoTests {
         mvc.perform(multipart("/register-center")
                         .file(new MockMultipartFile("photo", "sala.png", "image/png", image("png", 100, 100)))
                         .param("centerName", "Estudio Nube").param("cif", "B11223344").param("phone", "+34 911 000 111")
-                        .param("address", "Calle Luna 1, Madrid").param("latitude", "40.42").param("longitude", "-3.70")
+                        .param("address", "Calle Luna 1, 28001 Madrid").param("latitude", "40.42").param("longitude", "-3.70")
                         .param("timeZone", "Europe/Madrid").param("cabins", "1")
                         .param("hoursDay", "1").param("hoursFrom", "09:00").param("hoursTo", "20:00")
                         .param("contactName", "Nube Sanz").param("email", "nube@estudionube.es")
