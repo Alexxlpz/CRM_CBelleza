@@ -12,6 +12,8 @@
  *  8. Aviso de cookies (#cookieBanner, en fragments/footer): se muestra hasta que se pulsa «Entendido».
  *  9. «¿Qué tal tu cita?» (#reviewPrompt, en fragments/footer): sale una vez por cita, después del aviso de cookies.
  * 10. Botones [data-copy="idDelCampo"]: copian el texto del campo y lo confirman en el propio botón.
+ * 11. Color al estirar: <html> lleva .is-near-end en la mitad final de la página, para que el rebote
+ *     de abajo enseñe el color del pie y el de arriba el de la cabecera (common.css).
  */
 (function () {
     'use strict';
@@ -451,7 +453,29 @@
         }));
     }
 
+    /* ---------- 11. Color al estirar más allá del principio o del final ---------- */
+    function initOverscrollColor() {
+        const root = document.documentElement;
+        let pending = false;
+        const update = () => {
+            pending = false;
+            const max = root.scrollHeight - window.innerHeight;
+            root.classList.toggle('is-near-end', max > 0 && window.scrollY > max / 2);
+        };
+        const schedule = () => {
+            if (!pending) {
+                pending = true;
+                requestAnimationFrame(update);
+            }
+        };
+        window.addEventListener('scroll', schedule, { passive: true });
+        window.addEventListener('resize', schedule);
+        window.addEventListener('load', schedule);
+        update();
+    }
+
     function init() {
+        initOverscrollColor();
         initCopyButtons();
         initShareButtons();
         initMobileNav();

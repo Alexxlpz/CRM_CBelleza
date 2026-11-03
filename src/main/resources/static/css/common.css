@@ -35,6 +35,19 @@ html, body {
     outline: none;
 }
 
+/* Al estirar más allá del principio o del final (rebote de iPhone/iPad, Mac con trackpad) asoma el
+   fondo de <html>: lleva el color de la cabecera y, cerca del final, el del pie (clase la pone app.js).
+   El degradado sigue en <body>, que siempre cubre la pantalla. Solo en pantalla: no afecta al imprimir. */
+@media screen {
+    html {
+        background-color: var(--chrome-top);
+    }
+
+    html.is-near-end {
+        background-color: var(--chrome-bottom);
+    }
+}
+
 body {
     font-family: 'Plus Jakarta Sans', sans-serif;
     color: var(--text-main);
@@ -377,12 +390,18 @@ h1, h2, h3, h4, h5, h6 {
     transform: translateY(-6px) rotate(-45deg);
 }
 
+/* Menú móvil: el fondo y el panel sobresalen media pantalla por arriba y por abajo
+   (--nav-bleed). Así, al estirar la página en el iPhone (rebote) o cuando la barra de
+   Safari cambia de alto, sigue viéndose el menú en vez de franjas blancas. */
+:root {
+    --nav-bleed: 50vh;
+}
+
 /* Offcanvas Backdrop */
 .mobile-nav-backdrop {
     position: fixed;
-    inset: 0;
+    inset: calc(-1 * var(--nav-bleed)) 0;
     width: 100vw;
-    height: 100vh;
     background: rgba(22, 18, 14, 0.48);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
@@ -403,13 +422,18 @@ h1, h2, h3, h4, h5, h6 {
 /* Offcanvas Drawer Panel - Slides in Right to Left */
 .mobile-nav-drawer {
     position: fixed;
-    top: 0;
+    top: calc(-1 * var(--nav-bleed));
     right: 0;
-    bottom: 0;
+    bottom: calc(-1 * var(--nav-bleed));
     width: min(340px, 86vw);
-    height: 100vh;
-    height: 100dvh;
-    background: var(--surface);
+    /* El contenido queda dentro de la pantalla; el relleno es la parte que sobresale */
+    padding-block: var(--nav-bleed);
+    /* Lo que sobresale arriba y abajo lleva el tono de la cabecera y del pie */
+    background: linear-gradient(180deg,
+        var(--surface-muted) var(--nav-bleed),
+        var(--surface) var(--nav-bleed),
+        var(--surface) calc(100% - var(--nav-bleed)),
+        var(--surface-muted) calc(100% - var(--nav-bleed)));
     z-index: 9999;
     transform: translateX(100%);
     transition: transform 160ms var(--ease-in);
@@ -481,6 +505,7 @@ h1, h2, h3, h4, h5, h6 {
     flex: 1;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain; /* al llegar al final no arrastra la página de detrás */
     padding: 18px 16px;
     display: flex;
     flex-direction: column;
@@ -693,6 +718,10 @@ h1, h2, h3, h4, h5, h6 {
 body.mobile-nav-locked {
     overflow: hidden;
     touch-action: none;
+}
+
+html:has(body.mobile-nav-locked) {
+    overscroll-behavior: none; /* sin rebote de la página mientras el menú está abierto */
 }
 
 /* Responsive Breakpoints */

@@ -26,6 +26,11 @@
 
     /* ---- Superficies ---- */
     --bg-gradient: linear-gradient(135deg, #faf6f2 0%, #f3e6dd 100%);
+    /* Color de la zona que asoma al estirar más allá del principio o del final de la página
+       (rebote de iPhone/iPad) y de la barra del navegador (meta theme-color en fragments/head):
+       el tono ya pintado de la cabecera y del pie, en sólido. Si cambian --card-bg o el pie, revisar. */
+    --chrome-top: #fefdfc;
+    --chrome-bottom: #f8f0ea;
     --surface: #ffffff;
     --surface-rgb: 255, 255, 255;
     --surface-muted: #faf7f2;        /* campos de formulario, bloques secundarios */
@@ -136,6 +141,8 @@
         --danger-gradient: linear-gradient(135deg, #e07a72 0%, #c8605a 100%);
 
         --bg-gradient: linear-gradient(135deg, #1c1815 0%, #120e0c 100%);
+        --chrome-top: #211c17;
+        --chrome-bottom: #181411;
         --surface: #221d19;
         --surface-rgb: 34, 29, 25;
         --surface-muted: #2b2520;

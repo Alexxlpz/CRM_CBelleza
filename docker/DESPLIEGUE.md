@@ -1,13 +1,20 @@
 # Subir Cuquora a producción
 
-Lo que hay que hacer a mano (el código ya está preparado). El dominio de ejemplo es `cuquora.com`: cámbialo por el tuyo.
+Lo que hay que hacer a mano (el código ya está preparado). Dominio: `cuquora.com`.
 
-## 1. Dominio y Cloudflare
-1. Compra el dominio y apúntalo a Cloudflare (cambia los servidores DNS en el registrador por los que te da Cloudflare).
-2. En el servidor, instala `cloudflared` y crea un túnel hacia `http://127.0.0.1:8080` para `cuquora.com` (y `www`, con una regla que redirija `www` a `cuquora.com`).
-3. Cloudflare > SSL/TLS: modo **Full (strict)** y «Always Use HTTPS» activado.
+## 1. Cloudflare (dominio cuquora.com, ya comprado en Cloudflare)
+1. Cloudflare > Zero Trust > Networks > Tunnels > **Create a tunnel** > tipo **Cloudflared**, nombre `cuquora`.
+2. En «Install and run a connector» elige Docker y copia el token (lo que va detrás de `--token`). Va al `.env` del servidor
+   como `CLOUDFLARE_TUNNEL_TOKEN` (no lo compartas ni lo subas a git).
+3. «Public hostname»: subdominio vacío, dominio `cuquora.com`, servicio **HTTP**, URL **`app:8080`**.
+   Añade otro igual con subdominio `www`, o una regla de redirección de `www.cuquora.com` a `https://cuquora.com`.
+4. SSL/TLS: **Full (strict)**, y en «Edge Certificates» activa **Always Use HTTPS**.
+
+El servicio `cloudflared` del `docker-compose.yml` arranca solo con `COMPOSE_PROFILES=cloudflare` en el `.env`.
+No hace falta abrir puertos en el router ni en el servidor.
 
 ## 2. El fichero `.env` del servidor (copia `.env.example`)
+- `COMPOSE_PROFILES=cloudflare` y `CLOUDFLARE_TUNNEL_TOKEN=` el token del paso 1.
 - `SITE_URL=https://cuquora.com` (con https, sin barra final).
 - `REMEMBER_ME_KEY` y `GOOGLE_TOKEN_KEY`: `openssl rand -base64 48` cada una (nuevas, no las de tu equipo).
 - `POSTGRES_PASSWORD`: una contraseña larga nueva.
@@ -27,7 +34,8 @@ y en «Pantalla de consentimiento» el dominio autorizado y los enlaces a `/priv
 ```sh
 docker compose up -d --build
 docker compose logs -f app      # debe decir «Producción: configuración revisada» y «Started»
-docker compose ps               # app «healthy»
+docker compose ps               # app «healthy» y crm_cbelleza_tunnel en marcha
+docker compose logs cloudflared  # debe decir «Registered tunnel connection»
 ```
 Si algo falta en el `.env`, la app no arranca y el log dice qué variable corregir. Los avisos `Producción: …` no paran el arranque, pero conviene resolverlos.
 

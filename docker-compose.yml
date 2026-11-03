@@ -14,7 +14,7 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: crm_cbelleza_app
-    # Solo en el propio servidor (127.0.0.1): a internet se sale por Cloudflare (cloudflared o un proxy en esta máquina).
+    # Solo en el propio servidor (127.0.0.1): a internet se sale por Cloudflare (el servicio cloudflared de abajo).
     # Abierto a todas las interfaces, cualquiera podría saltarse Cloudflare, ir por http:// e inventarse su IP.
     # Para probar desde otro equipo de casa: APP_BIND=0.0.0.0 en el .env (y nunca con FORWARD_HEADERS_STRATEGY=native).
     ports:
@@ -92,6 +92,23 @@ services:
       timeout: 5s
       retries: 5
       start_period: 5s
+    logging: *logs
+    restart: unless-stopped
+
+  # Cloudflare Tunnel: publica la app en https://cuquora.com sin abrir ningún puerto del servidor ni del router.
+  # cloudflared sale hacia Cloudflare y le reenvía las visitas a http://app:8080 por la red interna de Docker.
+  # El túnel y su dominio se configuran en Cloudflare (Zero Trust > Networks > Tunnels); aquí solo va su token.
+  # Solo arranca con COMPOSE_PROFILES=cloudflare en el .env (en el servidor), así en local no hace falta token.
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: crm_cbelleza_tunnel
+    profiles: ["cloudflare"]
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:-}
+    depends_on:
+      app:
+        condition: service_healthy
     logging: *logs
     restart: unless-stopped
 

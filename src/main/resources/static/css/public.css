@@ -755,20 +755,78 @@
     }
 }
 
-/* En móvil los pasos caben en una fila: solo se lee el nombre del paso actual */
+/* En móvil los pasos caben en una fila: solo se lee el nombre del paso actual.
+   Las flechas son más altas, con la muesca más corta, y la cinta aprovecha parte del
+   relleno de la tarjeta: así las flechas encogidas tienen sitio para el icono entre la muesca y la punta */
 @media (max-width: 600px) {
+    .wizard-steps {
+        --notch: 11px;
+        gap: 3px;
+        margin-left: -10px;
+        margin-right: -10px;
+    }
+
+    .wizard-steps button {
+        height: 52px;
+        font-size: 14px;
+        gap: 6px;
+        padding: 0 calc(var(--notch) + 4px);
+    }
+
+    .wizard-step-icon {
+        font-size: 17px;
+    }
+
+    /* El paso actual mide lo que su nombre (sin cortarlo); el resto se reparte entre los demás */
     .wizard-steps li:has(.is-current) {
-        flex-grow: 3;
+        flex: 0 0 auto;
+    }
+
+    .wizard-steps button.is-current .wizard-step-text {
+        overflow: visible;
     }
 
     .wizard-steps button:not(.is-current) .wizard-step-text {
         display: none;
     }
 
-    /* Los pasos que solo llevan icono no caben con el relleno de la muesca: sin relleno,
-       el icono queda en el centro de la flecha (la muesca y la punta se compensan) */
+    /* Los pasos que solo llevan icono van sin relleno: el icono queda en el centro
+       de la flecha (la muesca y la punta se compensan) */
     .wizard-steps button:not(.is-current) {
         padding: 0;
+    }
+
+    /* El primero no tiene muesca: se centra en lo que queda a la izquierda de la punta */
+    .wizard-steps li:first-child button:not(.is-current) {
+        padding-right: calc(var(--notch) / 2);
+    }
+
+    /* Los iconos de las flechas encogidas van un poco hacia la punta, en el sentido de avance
+       (el último no tiene punta y se queda centrado) */
+    .wizard-steps li:not(:last-child) button:not(.is-current) .wizard-step-icon {
+        transform: translateX(3px);
+    }
+
+    /* En pantallas estrechas el paso actual se queda sin icono (ya se ve en el título del bloque)
+       para que el resto de flechas sigan teniendo sitio para el suyo */
+    @media (max-width: 380px) {
+        .wizard-steps button.is-current .wizard-step-icon {
+            display: none;
+        }
+    }
+
+    @media (max-width: 340px) {
+        .wizard-steps {
+            gap: 2px;
+        }
+
+        .wizard-steps button {
+            font-size: 13px;
+        }
+
+        .wizard-step-icon {
+            font-size: 15px;
+        }
     }
 
     /* El último no tiene punta: se centra en lo que queda a la derecha de la muesca */
