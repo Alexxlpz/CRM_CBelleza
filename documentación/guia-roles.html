@@ -11,6 +11,17 @@
 </head>
 <body>
 
+    <!-- Puntas de flecha que comparten todos los diagramas de esta página -->
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+        <defs>
+            <marker id="dga" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#8b857d"/></marker>
+            <marker id="dga-ok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#67b889"/></marker>
+            <marker id="dga-info" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#6fa9e8"/></marker>
+            <marker id="dga-bad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#e27171"/></marker>
+            <marker id="dga-wait" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#e0ad52"/></marker>
+        </defs>
+    </svg>
+
     <!-- Header / Navbar Principal -->
     <header class="doc-navbar">
         <a href="index.html" class="brand-wrapper">
@@ -39,13 +50,20 @@
         <!-- Sidebar Izquierdo -->
         <aside class="doc-sidebar">
             <div class="sidebar-group">
-                <div class="sidebar-title">Roles del Sistema</div>
+                <div class="sidebar-title">Empieza aquí</div>
                 <ul class="sidebar-nav">
-                    <li><a href="#introduccion-roles" class="active">Introducción a los Roles</a></li>
-                    <li><a href="#rol-cliente">1. Rol Cliente</a></li>
-                    <li><a href="#rol-trabajador">2. Rol Especialista / Trabajador</a></li>
-                    <li><a href="#rol-administrador">3. Rol Administrador / Gestor</a></li>
-                    <li><a href="#resumen-comparativo">Resumen Comparativo de Experiencia</a></li>
+                    <li><a href="#introduccion-roles" class="active">¿Quién eres?</a></li>
+                    <li><a href="#mapa">Cuquora en un dibujo</a></li>
+                    <li><a href="#vida-cita">La vida de una cita</a></li>
+                </ul>
+            </div>
+            <div class="sidebar-group">
+                <div class="sidebar-title">Roles</div>
+                <ul class="sidebar-nav">
+                    <li><a href="#rol-cliente">1. Cliente</a></li>
+                    <li><a href="#rol-trabajador">2. Trabajador del centro</a></li>
+                    <li><a href="#rol-administrador">3. Dueño y administración</a></li>
+                    <li><a href="#resumen-comparativo">Resumen de los tres</a></li>
                 </ul>
             </div>
 
@@ -63,21 +81,206 @@
 
             <!-- Hero Section -->
             <section class="doc-hero" id="introduccion-roles">
-                <span class="doc-tag">Manual Operativo Paso a Paso</span>
-                <h1>Guía de Uso del Sistema por Roles</h1>
+                <span class="doc-tag">Guía visual · versión 0.9.0-beta</span>
+                <h1>Cómo se usa Cuquora</h1>
                 <p>
-                    Cuquora CRM ha sido diseñado bajo una arquitectura centrada en la experiencia de usuario (UX), ofreciendo interfaces ergonómicas y especializadas según la responsabilidad del perfil: desde el cliente que reserva desde su smartphone hasta el especialista que atiende en cabina o el gestor que audita múltiples sedes.
+                    Cuquora une a dos personas: el <strong>cliente</strong>, que busca un centro de estética y pide cita desde el móvil, y el <strong>equipo del centro</strong>, que lleva la agenda, los clientes y el almacén. Cada uno ve solo lo suyo. Elige tu papel y sigue los dibujos y las capturas: no hace falta leer nada dos veces.
                 </p>
-                <div class="hero-meta-row">
-                    <div class="hero-meta-item">
-                        <span>Audiencia:</span>
-                        <strong>Clientes, Terapeutas, Recepción y Administradores</strong>
-                    </div>
-                    <div class="hero-meta-item">
-                        <span>Dispositivos:</span>
-                        <strong>100% Adaptativo (Móvil, Tablet y Escritorio)</strong>
+                <div class="who">
+                    <a href="#rol-cliente">
+                        <span class="who-icon">💆‍♀️</span>
+                        <strong>Soy cliente</strong>
+                        <span>Quiero encontrar un centro, pedir cita y ver mis reservas.</span>
+                        <em>5 pasos →</em>
+                    </a>
+                    <a href="#rol-trabajador">
+                        <span class="who-icon">🩺</span>
+                        <strong>Trabajo en un centro</strong>
+                        <span>Llevo la agenda, respondo solicitudes, atiendo clientes y vendo productos.</span>
+                        <em>Un día en el centro →</em>
+                    </a>
+                    <a href="#rol-administrador">
+                        <span class="who-icon">👑</span>
+                        <strong>Soy el dueño o administro Cuquora</strong>
+                        <span>Decido horario, carta, equipo y reglas, o reviso los centros nuevos.</span>
+                        <em>Qué cambia para el dueño →</em>
+                    </a>
+                </div>
+            </section>
+
+            <!-- MAPA GENERAL -->
+            <section class="doc-section" id="mapa">
+                <div class="section-header">
+                    <div class="section-header-title">
+                        <div class="section-icon">🗺️</div>
+                        <div>
+                            <h2>Cuquora en un dibujo</h2>
+                            <p style="margin: 0; font-size: 0.95rem;">Quién habla con quién cuando se pide una cita</p>
+                        </div>
                     </div>
                 </div>
+
+                <figure class="diagram">
+                    <div class="diagram-scroll">
+                        <svg class="dg" viewBox="0 0 1040 400" role="img" aria-label="El cliente pide cita a través de Cuquora, el centro responde y Cuquora avisa al cliente; administración publica los centros nuevos">
+                            <!-- Administración -->
+                            <rect x="410" y="10" width="200" height="64" rx="10" class="bx b-admin"/>
+                            <text x="510" y="38" text-anchor="middle" class="tt c-admin">Administración</text>
+                            <text x="510" y="57" text-anchor="middle" class="ts">de Cuquora</text>
+                            <line x1="510" y1="148" x2="510" y2="78" class="ar dash" marker-end="url(#dga)"/>
+                            <text x="524" y="112" class="lbs">revisa y publica</text>
+                            <text x="524" y="128" class="lbs">los centros nuevos</text>
+
+                            <!-- Cliente -->
+                            <rect x="20" y="150" width="200" height="120" rx="12" class="bx b-client"/>
+                            <text x="120" y="190" text-anchor="middle" class="tl c-client">Cliente</text>
+                            <text x="120" y="214" text-anchor="middle" class="ts">busca un centro,</text>
+                            <text x="120" y="232" text-anchor="middle" class="ts">pide cita y la valora</text>
+                            <text x="120" y="254" text-anchor="middle" class="tm">desde el móvil o el PC</text>
+
+                            <!-- Cuquora -->
+                            <rect x="410" y="150" width="200" height="120" rx="12" class="bx b-infra"/>
+                            <text x="510" y="190" text-anchor="middle" class="tl">Cuquora</text>
+                            <text x="510" y="214" text-anchor="middle" class="ts">cuquora.com</text>
+                            <text x="510" y="232" text-anchor="middle" class="ts">guarda la cita y avisa</text>
+                            <text x="510" y="254" text-anchor="middle" class="tm">correo + campana 🔔</text>
+
+                            <!-- Centro -->
+                            <rect x="800" y="40" width="225" height="340" rx="14" class="bx b-zone"/>
+                            <text x="912" y="64" text-anchor="middle" class="tz">EL CENTRO</text>
+                            <rect x="815" y="80" width="195" height="110" rx="10" class="bx b-owner"/>
+                            <text x="912" y="112" text-anchor="middle" class="tt c-owner">Dueño</text>
+                            <text x="912" y="134" text-anchor="middle" class="ts">horario, carta, equipo,</text>
+                            <text x="912" y="151" text-anchor="middle" class="ts">fotos, reglas, análisis</text>
+                            <text x="912" y="172" text-anchor="middle" class="tm">también hace lo del equipo</text>
+                            <rect x="815" y="230" width="195" height="135" rx="10" class="bx b-worker"/>
+                            <text x="912" y="262" text-anchor="middle" class="tt c-worker">Equipo</text>
+                            <text x="912" y="284" text-anchor="middle" class="ts">agenda y solicitudes,</text>
+                            <text x="912" y="301" text-anchor="middle" class="ts">fichas de clientes,</text>
+                            <text x="912" y="318" text-anchor="middle" class="ts">inventario y ventas</text>
+                            <text x="912" y="344" text-anchor="middle" class="tm">solo ve su centro</text>
+
+                            <!-- Ida y vuelta -->
+                            <line x1="220" y1="185" x2="404" y2="185" class="ar ok" marker-end="url(#dga-ok)"/>
+                            <text x="312" y="176" text-anchor="middle" class="lb">① Pide cita</text>
+                            <line x1="610" y1="185" x2="794" y2="185" class="ar" marker-end="url(#dga)"/>
+                            <text x="702" y="176" text-anchor="middle" class="lb">② Le llega la solicitud</text>
+                            <line x1="800" y1="240" x2="616" y2="240" class="ar info" marker-end="url(#dga-info)"/>
+                            <text x="708" y="260" text-anchor="middle" class="lb">③ Acepta, propone</text>
+                            <text x="708" y="276" text-anchor="middle" class="lb">otra hora o rechaza</text>
+                            <line x1="410" y1="240" x2="226" y2="240" class="ar info" marker-end="url(#dga-info)"/>
+                            <text x="318" y="260" text-anchor="middle" class="lb">④ Le avisa por</text>
+                            <text x="318" y="276" text-anchor="middle" class="lb">correo y campana</text>
+
+                            <text x="20" y="330" class="tm">Si el centro tiene «Aceptar automáticamente»,</text>
+                            <text x="20" y="347" class="tm">② y ③ pasan solos: la cita nace confirmada.</text>
+                        </svg>
+                    </div>
+                    <p class="swipe-hint">Desliza el dibujo hacia los lados para verlo entero →</p>
+                    <ul class="legend">
+                        <li><i class="lg-client"></i>Cliente</li>
+                        <li><i class="lg-owner"></i>Dueño del centro</li>
+                        <li><i class="lg-worker"></i>Resto del equipo</li>
+                        <li><i class="lg-admin"></i>Administración de Cuquora</li>
+                        <li><i class="lg-infra"></i>La aplicación</li>
+                    </ul>
+                </figure>
+
+                <div class="tldr">
+                    <div class="tldr-title">Tres ideas que lo explican todo</div>
+                    <ul>
+                        <li>Cada trabajador pertenece a <strong>un solo centro</strong> y nunca ve datos de otro.</li>
+                        <li>El <strong>dueño</strong> es quien dio de alta el centro: decide lo que se puede cambiar. El resto del equipo trabaja con la agenda y los clientes.</li>
+                        <li>Una cita pedida por el cliente es una <strong>solicitud</strong> hasta que el centro responde (o se confirma sola si el centro lo ha activado).</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- VIDA DE UNA CITA -->
+            <section class="doc-section" id="vida-cita">
+                <div class="section-header">
+                    <div class="section-header-title">
+                        <div class="section-icon">🔄</div>
+                        <div>
+                            <h2>La vida de una cita</h2>
+                            <p style="margin: 0; font-size: 0.95rem;">Todos los estados por los que pasa, y quién la mueve de uno a otro</p>
+                        </div>
+                    </div>
+                </div>
+
+                <figure class="diagram">
+                    <div class="diagram-scroll">
+                        <svg class="dg" viewBox="0 0 1100 470" role="img" aria-label="Estados de una cita: solicitud, propuesta, confirmada, rechazada, anulada, completada y no se presentó">
+                            <!-- Atajo: aceptar automáticamente -->
+                            <path d="M90,196 V34 H780 V190" class="ar ok dash" marker-end="url(#dga-ok)"/>
+                            <text x="435" y="26" text-anchor="middle" class="lbs">Si el centro acepta automáticamente, la cita nace confirmada</text>
+
+                            <!-- Nodos -->
+                            <rect x="20" y="196" width="140" height="64" rx="32" class="bx b-client"/>
+                            <text x="90" y="223" text-anchor="middle" class="tt c-client">El cliente</text>
+                            <text x="90" y="242" text-anchor="middle" class="ts">pide una cita</text>
+
+                            <rect x="220" y="196" width="170" height="64" rx="10" class="bx b-wait"/>
+                            <text x="305" y="223" text-anchor="middle" class="tt c-admin">Solicitud</text>
+                            <text x="305" y="242" text-anchor="middle" class="ts">espera respuesta</text>
+
+                            <rect x="470" y="60" width="170" height="64" rx="10" class="bx b-info"/>
+                            <text x="555" y="87" text-anchor="middle" class="tt c-worker">Propuesta</text>
+                            <text x="555" y="106" text-anchor="middle" class="ts">1 a 3 horas nuevas</text>
+
+                            <rect x="220" y="380" width="170" height="64" rx="10" class="bx b-bad"/>
+                            <text x="305" y="407" text-anchor="middle" class="tt c-bad">Rechazada</text>
+                            <text x="305" y="426" text-anchor="middle" class="ts">con un mensaje</text>
+
+                            <rect x="720" y="196" width="170" height="64" rx="10" class="bx b-ok"/>
+                            <text x="805" y="223" text-anchor="middle" class="tt c-client">Confirmada</text>
+                            <text x="805" y="242" text-anchor="middle" class="ts">con su profesional</text>
+
+                            <rect x="720" y="380" width="170" height="64" rx="10" class="bx b-off"/>
+                            <text x="805" y="407" text-anchor="middle" class="tt c-off">Anulada</text>
+                            <text x="805" y="426" text-anchor="middle" class="ts">por el cliente o el centro</text>
+
+                            <rect x="930" y="110" width="160" height="64" rx="10" class="bx b-ok"/>
+                            <text x="1010" y="137" text-anchor="middle" class="tt c-client">Completada</text>
+                            <text x="1010" y="156" text-anchor="middle" class="ts">sola, al terminar</text>
+
+                            <rect x="930" y="282" width="160" height="64" rx="10" class="bx b-off"/>
+                            <text x="1010" y="309" text-anchor="middle" class="tt c-off">No se presentó</text>
+                            <text x="1010" y="328" text-anchor="middle" class="ts">se puede deshacer</text>
+
+                            <!-- Flechas -->
+                            <line x1="160" y1="228" x2="216" y2="228" class="ar wait" marker-end="url(#dga-wait)"/>
+                            <line x1="390" y1="228" x2="716" y2="228" class="ar ok" marker-end="url(#dga-ok)"/>
+                            <text x="470" y="219" text-anchor="middle" class="lb">el centro acepta</text>
+                            <path d="M305,196 V92 H466" class="ar info" marker-end="url(#dga-info)"/>
+                            <text x="316" y="150" class="lb">el centro propone</text>
+                            <text x="316" y="166" class="lb">otra hora</text>
+                            <path d="M640,92 H845 V192" class="ar ok" marker-end="url(#dga-ok)"/>
+                            <text x="652" y="84" class="lb">el cliente elige una</text>
+                            <path d="M600,124 V412 H716" class="ar dash" marker-end="url(#dga)"/>
+                            <text x="612" y="320" class="lbs">ninguna le va bien</text>
+                            <text x="612" y="336" class="lbs">o caduca sin respuesta</text>
+                            <line x1="305" y1="260" x2="305" y2="376" class="ar bad" marker-end="url(#dga-bad)"/>
+                            <text x="316" y="322" class="lb">el centro rechaza</text>
+                            <line x1="805" y1="260" x2="805" y2="376" class="ar dash" marker-end="url(#dga)"/>
+                            <text x="816" y="322" class="lbs">se anula</text>
+                            <path d="M890,228 H910 V142 H926" class="ar ok" marker-end="url(#dga-ok)"/>
+                            <path d="M910,228 V314 H926" class="ar dash" marker-end="url(#dga)"/>
+                        </svg>
+                    </div>
+                    <p class="swipe-hint">Desliza el dibujo hacia los lados para verlo entero →</p>
+                    <figcaption><strong>Cómo leerlo:</strong> sigue las flechas de izquierda a derecha. Verde = la cita sigue adelante; azul = el centro propone otra hora; rojo = el centro la rechaza; gris discontinuo = se queda sin hacer. Una solicitud también se puede anular antes de que el centro responda.</figcaption>
+                </figure>
+
+                <div class="tldr-title">Cada estado en una frase</div>
+                <ul class="tasks">
+                    <li><span><span class="chip chip-wait">Solicitud</span></span><span>El cliente la ha pedido y el centro todavía no ha contestado. Un cliente puede tener como mucho 3 sin responder en el mismo centro.</span></li>
+                    <li><span><span class="chip chip-info">Propuesta</span></span><span>El centro ofrece de 1 a 3 horas distintas. Caduca a las 48 h, o 2 h antes de la primera hora propuesta.</span></li>
+                    <li><span><span class="chip chip-ok">Confirmada</span></span><span>Ya tiene día, hora y profesional. Un día antes sale un recordatorio por correo.</span></li>
+                    <li><span><span class="chip chip-ok">Completada</span></span><span>Cuquora la marca sola cuando termina. Suma puntos y el cliente puede valorarla durante 90 días.</span></li>
+                    <li><span><span class="chip chip-off">No se presentó</span></span><span>Lo marca el centro si el cliente no vino. No suma puntos y se puede deshacer («Sí vino»).</span></li>
+                    <li><span><span class="chip chip-bad">Rechazada</span> <span class="chip chip-off">Anulada</span></span><span>Ya no se hará. Cada cambio llega al otro por correo y a la campana.</span></li>
+                </ul>
             </section>
 
             <!-- ROL 1: CLIENTE -->
@@ -86,323 +289,469 @@
                     <div class="section-header-title">
                         <div class="section-icon">💆‍♀️</div>
                         <div>
-                            <h2>1. Rol: Cliente y Usuario Final</h2>
-                            <p style="margin: 0; font-size: 0.95rem;">Flujo completo de reserva y seguimiento de citas para clientes con cuenta registrada</p>
+                            <h2>1. Cliente</h2>
+                            <p style="margin: 0; font-size: 0.95rem;">De buscar un centro a tener la cita en el bolsillo</p>
                         </div>
                     </div>
                     <span class="card-badge badge-client">Perfil CLIENT</span>
                 </div>
 
-                <p>
-                    El cliente disfruta de una experiencia moderna, segura y fluida. Para garantizar la integridad de las fichas clínicas, preferencias estéticas y trazabilidad de turnos, el sistema <strong>requiere disponer de una cuenta de usuario</strong>: se crea en <code>/register</code> con contraseña (cifrada con BCrypt) o con el botón <strong>«Continuar con Google»</strong>. Si el centro ya le había dado de alta a mano con ese correo, al registrarse completa esa misma cuenta en lugar de crear otra. La contraseña necesita al menos 8 caracteres y no puede ser de las más usadas. Con «Recordar mi sesión» el dispositivo mantiene la sesión 14 días.
-                </p>
+                <div class="tldr">
+                    <div class="tldr-title">En 30 segundos</div>
+                    <ul>
+                        <li>Buscar centros y ver su ficha <strong>no necesita cuenta</strong>. Para reservar sí: se crea en un minuto con correo y contraseña o con Google.</li>
+                        <li>Reservar son tres elecciones: <strong>servicio → profesional → día y hora</strong>.</li>
+                        <li>Todo lo demás (cambiar la hora, anular, valorar, ver tus puntos) está en <strong>«Mis reservas»</strong>.</li>
+                    </ul>
+                </div>
 
-                <div class="step-list">
-                    <!-- Paso 1 -->
-                    <div class="step-card">
-                        <div class="step-num">1</div>
-                        <div class="step-body">
-                            <h4>Buscar un Centro (/centers)</h4>
-                            <p>
-                                La página de centros es pública: tarjetas con los centros y un mapa (OpenStreetMap). Se puede buscar por nombre (con filtros avanzados), quedarse solo con los centros <strong>«Abierto ahora»</strong>, <strong>«Con ofertas»</strong> o <strong>«4 o más»</strong> estrellas (en móvil estos filtros van dentro del panel de ajustes) y, si el navegador comparte la ubicación, cada centro muestra a cuántos kilómetros está. Cada tarjeta enseña la foto, la nota en estrellas (o «Sin valoraciones»), si el centro está abierto y cuándo cierra o vuelve a abrir, el <strong>primer hueco libre</strong> de las próximas dos semanas («Primer hueco: hoy a las 17:30») y cuántos tratamientos tiene en oferta. La dirección y el contacto se ven en la ficha del centro. Al tocar un marcador del mapa se abre un globo con nombre, dirección, distancia y <strong>«Ver tratamientos»</strong>; si no hay sesión, al pulsarlo se va al login y después se vuelve a ese centro.
-                            </p>
-                        </div>
+                <ol class="flow">
+                    <li><a href="#cliente-buscar"><strong>Buscar</strong><span>Centros cerca, abiertos o con ofertas</span></a></li>
+                    <li><a href="#cliente-ficha"><strong>Ver el centro</strong><span>Tratamientos, horario y opiniones</span></a></li>
+                    <li><a href="#cliente-reservar"><strong>Reservar</strong><span>Servicio, profesional, día y hora</span></a></li>
+                    <li><a href="#cliente-respuesta"><strong>Esperar respuesta</strong><span>Correo y campana; o confirmada al momento</span></a></li>
+                    <li><a href="#cliente-reservas"><strong>Mis reservas</strong><span>Cambiar, anular, valorar y puntos</span></a></li>
+                </ol>
+
+                <div class="walk" id="cliente-buscar">
+                    <div class="walk-text">
+                        <h3><span class="walk-n">1</span>Buscar un centro</h3>
+                        <p class="where">Menú «Centros» · <code>/centers</code> · sin iniciar sesión</p>
+                        <ul>
+                            <li>Cada tarjeta dice si el centro está <strong>abierto ahora</strong> y su <strong>primer hueco libre</strong> («Primer hueco: hoy a las 17:30»).</li>
+                            <li>Filtros de un toque: <strong>Abierto ahora</strong>, <strong>Con ofertas</strong> y <strong>4 o más ★</strong>. En el móvil van dentro del botón de ajustes.</li>
+                            <li>Si el navegador comparte la ubicación, cada centro enseña a cuántos <strong>km</strong> está. El botón del mapa los sitúa en OpenStreetMap.</li>
+                        </ul>
                     </div>
-
-                    <!-- Paso 2 -->
-                    <div class="step-card">
-                        <div class="step-num">2</div>
-                        <div class="step-body">
-                            <h4>Ver los Tratamientos del Centro (/client/centers/{nombre})</h4>
-                            <p>
-                                La dirección lleva el nombre del centro, nunca un número (por ejemplo <code>/client/centers/centro-historico</code>), y cada centro tiene además un enlace corto para Instagram o Google Maps (<code>/c/centro-historico</code>): su ficha pública, con los tratamientos, el horario y las opiniones, que se ve sin iniciar sesión; al pulsar «Reservar cita» o un tratamiento se pide entrar y se vuelve a la reserva con ese tratamiento elegido. El botón <strong>«Compartir»</strong> de la cabecera abre el menú de compartir del móvil o copia ese enlace. La ficha muestra su foto (o sus iniciales si no tiene), la nota en estrellas, su información, su horario de apertura (cada centro tiene el suyo, también sábados o jornada partida) y la lista de tratamientos:
-                            </p>
-                            <ul class="text-secondary" style="margin-left: 1.5rem; margin-bottom: 0.8rem;">
-                                <li><strong>Nombre y descripción</strong> del tratamiento.</li>
-                                <li><strong>Duración</strong> en minutos (decide cuántos huecos ocupa).</li>
-                                <li><strong>Precio</strong> en euros. Si está en oferta, sale la etiqueta con el descuento y hasta cuándo dura, y el precio de carta tachado; el filtro «En oferta» deja solo esos.</li>
-                                <li><strong>Categoría:</strong> manicura y pedicura, facial, corporal, masajes, peluquería, depilación u otro.</li>
-                            </ul>
-                            <p>Más abajo, las <strong>opiniones</strong>: la nota media, un carrusel con las seis últimas y «Ver las N opiniones», que abre todas con filtros (más recientes, mejor o peor valoradas, por estrellas, solo con comentario y por tratamiento). Solo opina quien ha tenido una cita completada en el centro, y el centro puede responder.</p>
-                        </div>
-                    </div>
-
-                    <!-- Paso 3 -->
-                    <div class="step-card">
-                        <div class="step-num">3</div>
-                        <div class="step-body">
-                            <h4>Elegir Día y Hora</h4>
-                            <p>
-                                Primero se elige el servicio (no hay ninguno marcado de antemano), después <strong>«¿Con quién?»</strong> («Cualquiera» o un profesional que haga ese servicio) y por último el día y la hora en el calendario de la reserva: los días del mes salen como <strong>con horas libres</strong>, <strong>completo</strong> o <strong>cerrado</strong>, y al lado aparecen las horas libres del día elegido. En móvil, al elegir el servicio la lista se pliega a ese servicio («Cambiar de servicio» la vuelve a abrir).
-                            </p>
-                            <ol class="text-secondary" style="margin-left: 1.5rem; margin-bottom: 0.8rem;">
-                                <li>El calendario consulta <code>/api/centers/{id}/availability</code>: el horario de ese centro (huecos de 30 min), días cerrados y horas llenas.</li>
-                                <li>Una hora está llena si no queda cabina libre o ningún profesional disponible (por otra cita, un bloqueo, una hora propuesta a otro cliente o porque está fuera de su horario). Si se eligió profesional, solo salen sus huecos.</li>
-                                <li>El cliente elige la hora y pulsa «Solicitar cita». La solicitud queda <span class="card-badge badge-admin">PENDIENTE</span> hasta que el centro responda, y el cliente recibe un correo. Si el centro <strong>acepta las citas automáticamente</strong>, el botón dice «Reservar cita» y la cita queda <span class="card-badge badge-client">CONFIRMADA</span> al momento con el profesional elegido o, con «Cualquiera», con uno libre. Un cliente puede tener como mucho 3 solicitudes sin responder en el mismo centro.</li>
-                            </ol>
-                        </div>
-                    </div>
-
-                    <!-- Paso 4 -->
-                    <div class="step-card">
-                        <div class="step-num">4</div>
-                        <div class="step-body">
-                            <h4>Respuesta del Centro</h4>
-                            <p>El centro puede:</p>
-                            <ul class="text-secondary" style="margin-left: 1.5rem;">
-                                <li><strong>Aceptar</strong> la cita: pasa a <span class="card-badge badge-client">CONFIRMADA</span>.</li>
-                                <li><strong>Rechazarla</strong>, con un mensaje para el cliente.</li>
-                                <li><strong>Proponer otras horas</strong> (de 1 a 3). El cliente elige una en «Mis reservas» o responde que ninguna le viene bien. La propuesta caduca a las 48 h o 2 h antes de la primera hora propuesta.</li>
-                                <li><strong>Cambiar la hora</strong> de una cita ya confirmada (el cliente ve «antes: …») o <strong>anularla</strong>.</li>
-                            </ul>
-                            <p>Cada cambio llega por correo y a la campana. Un día antes se envía un recordatorio.</p>
-                        </div>
-                    </div>
-
-                    <!-- Paso 5 -->
-                    <div class="step-card">
-                        <div class="step-num">5</div>
-                        <div class="step-body">
-                            <h4>«Mis reservas» y la Campana (/client/appointments)</h4>
-                            <ul class="text-secondary" style="margin-left: 1.5rem;">
-                                <li><strong>Próximas citas</strong> arriba (solicitudes, propuestas y confirmadas), con la más cercana destacada, y el <strong>historial</strong> plegado debajo en filas compactas.</li>
-                                <li><strong>Volver a reservar:</strong> en cada cita del historial, abre la reserva del centro con el mismo tratamiento ya elegido.</li>
-                                <li><strong>Elegir una hora propuesta</strong> o rechazar la propuesta.</li>
-                                <li><strong>Cambiar hora</strong> (y profesional) de una solicitud o cita confirmada, si el centro lo permite y faltan más horas de las que pide (por ejemplo 24 h). La confirmada sigue confirmada y el centro recibe un aviso; si ya no se puede, la tarjeta dice a qué teléfono llamar.</li>
-                                <li><strong>Anular</strong> una cita futura (se avisa al centro).</li>
-                                <li><strong>Valorar</strong> una cita completada de los últimos 90 días: de 1 a 5 estrellas y un comentario opcional. Tras una cita, al entrar sale una vez la tarjeta <strong>«¿Qué tal tu cita?»</strong>: al tocar una estrella se abre la valoración con esas estrellas marcadas; «No mostrar más» la apaga para siempre.</li>
-                                <li><strong>Mis puntos:</strong> arriba, la tarjeta de puntos de cada centro que la tiene activada y donde tiene citas o puntos: cuántos lleva y cuántos le faltan para la recompensa.</li>
-                                <li><strong>Campana:</strong> citas de hoy y mañana, cambios hechos por el centro en los últimos 7 días y citas por valorar. Al abrirla se marcan como vistos; cada aviso se quita con su «x» o todos con «Limpiar todas» (vuelve a salir si cambia).</li>
-                                <li><strong>Mi Perfil</strong> (<code>/client/profile</code>): datos personales, cambiar la contraseña (pide la actual) o añadir una si la cuenta es solo de Google, y el interruptor <strong>«Ver mis citas en Google Calendar»</strong> (solo si el servidor tiene las claves de Google).</li>
-                            </ul>
-                        </div>
+                    <div class="shot-pair">
+                        <figure class="shot"><div class="shot-frame browser"><a href="images/capturas/buscador.webp" target="_blank" title="Abrir la captura a tamaño completo"><img src="images/capturas/buscador.webp" alt="Buscador de centros en escritorio" loading="lazy"></a></div><figcaption>Escritorio</figcaption></figure>
+                        <figure class="shot"><div class="shot-frame phone"><a href="images/capturas/buscador-movil.webp" target="_blank" title="Abrir la captura a tamaño completo"><img src="images/capturas/buscador-movil.webp" alt="Buscador de centros en el móvil" loading="lazy"></a></div><figcaption>Móvil</figcaption></figure>
                     </div>
                 </div>
 
-                <div class="callout callout-info">
-                    <div class="callout-icon">💡</div>
-                    <div class="callout-content">
-                        <strong>Prevención de Solapamientos Garantizada:</strong>
-                        <p>Si un servicio dura 60 minutos, ocupa dos huecos seguidos de 30 minutos. El centro nunca tiene más citas a la vez que cabinas ni que profesionales libres, y un profesional no puede tener dos citas a la vez.</p>
+                <div class="walk" id="cliente-ficha">
+                    <div class="walk-text">
+                        <h3><span class="walk-n">2</span>Ver el centro</h3>
+                        <p class="where">Enlace corto <code>/c/centro-historico</code> · se ve sin cuenta</p>
+                        <ul>
+                            <li>Dirección, teléfono, correo y <strong>horario</strong> arriba; debajo la carta de <strong>tratamientos</strong> con precio y duración, y las <strong>opiniones</strong>.</li>
+                            <li>Un tratamiento en oferta lleva la etiqueta <span class="chip chip-bad">-20 %</span> y el precio de carta tachado.</li>
+                            <li>Solo opina quien ha tenido una cita completada en ese centro, y el centro puede responder.</li>
+                            <li>«Compartir» copia el enlace corto o abre el menú de compartir del móvil.</li>
+                            <li>Al pulsar <strong>«Solicitar cita»</strong> sin sesión, Cuquora pide entrar y vuelve a la reserva con el tratamiento ya elegido.</li>
+                        </ul>
                     </div>
+                    <div class="shot-pair">
+                        <figure class="shot"><div class="shot-frame browser"><a href="images/capturas/ficha-publica.webp" target="_blank" title="Abrir la captura a tamaño completo"><img src="images/capturas/ficha-publica.webp" alt="Ficha pública del centro" loading="lazy"></a></div><figcaption>Ficha pública del centro</figcaption></figure>
+                        <figure class="shot"><div class="shot-frame phone"><a href="images/capturas/ficha-publica-movil.webp" target="_blank" title="Abrir la captura a tamaño completo"><img src="images/capturas/ficha-publica-movil.webp" alt="Ficha pública del centro en el móvil" loading="lazy"></a></div><figcaption>Móvil</figcaption></figure>
+                    </div>
+                </div>
+
+                <div class="walk walk-wide" id="cliente-reservar">
+                    <div class="walk-text">
+                        <h3><span class="walk-n">3</span>Reservar: tres elecciones y un botón</h3>
+                        <p class="where">Ficha del centro con sesión · <code>/client/centers/{nombre}</code></p>
+                    </div>
+                    <figure class="shot">
+                        <div class="shot-frame browser"><div class="shot-img">
+                            <a href="images/capturas/reserva.webp" target="_blank" title="Abrir la captura a tamaño completo"><img src="images/capturas/reserva.webp" alt="Pantalla de reserva con servicio, profesional, calendario y horas libres" loading="lazy"></a>
+                            <span class="pin" style="left:1.6%;top:15.2%">1</span>
+                            <span class="pin" style="left:50.4%;top:15.2%">2</span>
+                            <span class="pin" style="left:52.4%;top:31%">3</span>
+                            <span class="pin" style="left:75.6%;top:31%">4</span>
+                            <span class="pin" style="left:52.4%;top:92.7%">5</span>
+                        </div></div>
+                    </figure>
+                    <div class="grid-2" style="margin-top: 1.25rem;">
+                        <ol class="pin-legend">
+                            <li><b>1</b><span><strong>Servicio.</strong> No hay ninguno marcado de antemano. «En oferta» deja solo los rebajados. En el móvil, al elegirlo la lista se pliega («Cambiar de servicio» la abre otra vez).</span></li>
+                            <li><b>2</b><span><strong>¿Con quién?</strong> «Cualquiera» o un profesional que haga ese servicio. Si eliges a alguien, solo salen sus huecos.</span></li>
+                            <li><b>3</b><span><strong>Día.</strong> Cada día del mes sale con horas libres, completo o cerrado (rayado).</span></li>
+                        </ol>
+                        <ol class="pin-legend">
+                            <li><b>4</b><span><strong>Hora.</strong> Huecos de 30 minutos, separados en mañana y tarde.</span></li>
+                            <li><b>5</b><span><strong>«Solicitar cita»</strong> la deja como solicitud. Si el centro acepta automáticamente, el botón dice <strong>«Reservar cita»</strong> y queda confirmada al momento.</span></li>
+                        </ol>
+                    </div>
+
+                    <div class="diagram-title" style="margin-top: 0.75rem;">¿Por qué una hora sale libre o llena?</div>
+                    <div class="equation">
+                        <span class="eq-term">El centro abre<small>su horario y sin cierres</small></span>
+                        <span class="eq-op">+</span>
+                        <span class="eq-term">Queda una cabina<small>citas a la vez ≤ cabinas</small></span>
+                        <span class="eq-op">+</span>
+                        <span class="eq-term">Un profesional libre<small>en su horario, sin cita ni bloqueo</small></span>
+                        <span class="eq-op">=</span>
+                        <span class="eq-term eq-result">Hora libre ✓</span>
+                    </div>
+                    <p>Un servicio de 60 minutos ocupa <strong>dos huecos seguidos</strong> de 30, así que tienen que estar libres los dos. Una hora que el centro ha propuesto a otro cliente también cuenta como ocupada mientras espera respuesta. Por eso nunca hay dos citas a la vez con el mismo profesional ni más citas que cabinas.</p>
+                </div>
+
+                <div class="walk" id="cliente-respuesta">
+                    <div class="walk-text">
+                        <h3><span class="walk-n">4</span>Esperar la respuesta del centro</h3>
+                        <p class="where">Llega por correo y a la campana 🔔</p>
+                        <ul>
+                            <li><span class="chip chip-ok">Acepta</span> la cita pasa a confirmada.</li>
+                            <li><span class="chip chip-info">Propone otra hora</span> eliges una de las que te ofrece (de 1 a 3) en «Mis reservas», o dices que ninguna te viene bien.</li>
+                            <li><span class="chip chip-bad">Rechaza</span> con un mensaje para ti.</li>
+                            <li>El centro también puede <strong>cambiar la hora</strong> de una cita confirmada (verás «antes: …») o anularla.</li>
+                        </ul>
+                        <p>La campana guarda las citas de hoy y mañana, los cambios del centro de los últimos 7 días y las citas por valorar. Cada aviso se quita con su «x».</p>
+                    </div>
+                    <figure class="shot"><div class="shot-frame browser"><a href="images/capturas/campana-cliente.webp" target="_blank" title="Abrir la captura a tamaño completo"><img src="images/capturas/campana-cliente.webp" alt="Campana de avisos del cliente abierta" loading="lazy"></a></div><figcaption>La campana del cliente abierta</figcaption></figure>
+                </div>
+
+                <div class="walk" id="cliente-reservas">
+                    <div class="walk-text">
+                        <h3><span class="walk-n">5</span>«Mis reservas»</h3>
+                        <p class="where">Botón «Mis Citas» · <code>/client/appointments</code></p>
+                        <p>Arriba, tus <strong>puntos</strong> en cada centro con tarjeta. Después las <strong>próximas citas</strong> (la más cercana destacada) y, plegado al final, el <strong>historial</strong>.</p>
+                    </div>
+                    <div class="shot-pair">
+                        <figure class="shot"><div class="shot-frame browser"><a href="images/capturas/mis-reservas.webp" target="_blank" title="Abrir la captura a tamaño completo"><img src="images/capturas/mis-reservas.webp" alt="Mis reservas en escritorio" loading="lazy"></a></div><figcaption>Escritorio</figcaption></figure>
+                        <figure class="shot"><div class="shot-frame phone"><a href="images/capturas/mis-reservas-movil.webp" target="_blank" title="Abrir la captura a tamaño completo"><img src="images/capturas/mis-reservas-movil.webp" alt="Mis reservas en el móvil" loading="lazy"></a></div><figcaption>Móvil</figcaption></figure>
+                    </div>
+                </div>
+
+                <ul class="tasks">
+                    <li><span>Cambiar la hora (o el profesional)</span><span>«Cambiar hora» en la cita. Solo si el centro lo permite y faltan más horas de las que pide (por ejemplo 24 h). Si ya no se puede, la tarjeta dice a qué teléfono llamar.</span></li>
+                    <li><span>Anular una cita</span><span>«Anular cita». El centro recibe un aviso.</span></li>
+                    <li><span>Elegir una hora propuesta</span><span>En la tarjeta de la propuesta, o «Ninguna me viene bien».</span></li>
+                    <li><span>Volver a reservar lo mismo</span><span>En el historial, «Volver a reservar» abre la reserva con ese tratamiento elegido.</span></li>
+                    <li><span>Valorar una cita</span><span>De 1 a 5 ★ y un comentario, durante 90 días. Tras una cita sale una vez «¿Qué tal tu cita?»; tocar una estrella abre la valoración.</span></li>
+                    <li><span>Ver mis puntos</span><span>Tarjeta «Mis puntos»: cuántos llevas y cuántos faltan para la recompensa.</span></li>
+                    <li><span>Mis datos y Google Calendar</span><span>«Mi Perfil»: datos, contraseña (pide la actual) e interruptor «Ver mis citas en Google Calendar».</span></li>
+                </ul>
+
+                <div class="diagram-title">Preguntas que suelen surgir</div>
+                <div class="faq">
+                    <details><summary>¿Necesito cuenta para mirar?</summary><div><p>No. El buscador, la ficha del centro y sus opiniones son públicos. Solo al reservar se pide entrar o registrarse (en <code>/register</code> o con «Continuar con Google»). Si el centro ya te había dado de alta con ese correo, al registrarte completas esa misma ficha en vez de crear otra.</p></div></details>
+                    <details><summary>¿Por qué no me deja pedir más citas?</summary><div><p>Puedes tener como mucho <strong>3 solicitudes sin responder</strong> en el mismo centro. En cuanto el centro conteste alguna, puedes pedir otra.</p></div></details>
+                    <details><summary>¿Por qué no aparece el botón «Cambiar hora»?</summary><div><p>El centro decide hasta cuántas horas antes puedes cambiarla tú (nunca, 2, 12, 24 o 48 h). Pasado ese plazo, la tarjeta te da el teléfono del centro.</p></div></details>
+                    <details><summary>¿Qué pasa si no contesto a una propuesta?</summary><div><p>Caduca a las 48 h, o 2 h antes de la primera hora propuesta si eso llega antes, y la cita queda anulada. Te llega un correo avisando.</p></div></details>
+                    <details><summary>¿Mi contraseña está segura?</summary><div><p>Se guarda cifrada (BCrypt), necesita al menos 8 caracteres y no puede ser de las más usadas. Tras varios intentos fallidos el acceso se cierra 15 minutos. Con «Recordar mi sesión» el dispositivo te mantiene dentro 14 días.</p></div></details>
                 </div>
             </section>
 
-            <!-- ROL 2: TRABAJADOR / ESPECIALISTA -->
+            <!-- ROL 2: TRABAJADOR -->
             <section class="doc-section" id="rol-trabajador">
                 <div class="section-header">
                     <div class="section-header-title">
                         <div class="section-icon">🩺</div>
                         <div>
-                            <h2>2. Rol: Especialista / Trabajador de Cabina</h2>
-                            <p style="margin: 0; font-size: 0.95rem;">Gestión diaria de agenda, confirmación de citas, control de inventario y catálogo</p>
+                            <h2>2. Trabajador del centro</h2>
+                            <p style="margin: 0; font-size: 0.95rem;">Agenda, solicitudes, clientes, almacén y carta de un solo centro</p>
                         </div>
                     </div>
                     <span class="card-badge badge-worker">Perfil WORKER</span>
                 </div>
 
-                <p>
-                    El especialista es el motor operativo del salón de belleza. Al iniciar sesión con sus credenciales (en el entorno de desarrollo, p. ej. la cuenta demo <code>carlos@cbelleza.com</code>), el sistema carga en sesión el centro asignado al trabajador (ej. <em>Centro Histórico</em>), adaptando toda la interfaz a esa sucursal física. Nunca puede ver datos de otro centro, y si intenta ver un centro como cliente le aparece un aviso con enlace a su panel. En escritorio, tratamientos, inventario y clientes ocupan todo el ancho, con una franja de resumen y el selector <strong>Tarjetas / Lista</strong>.
-                </p>
+                <div class="tldr">
+                    <div class="tldr-title">En 30 segundos</div>
+                    <ul>
+                        <li>Todo lo que ves es de <strong>tu centro</strong> (por ejemplo, con la cuenta demo <code>carlos@cbelleza.com</code>, Centro Histórico).</li>
+                        <li>El día empieza en el <strong>Panel</strong>: cuatro cifras te dicen si hay algo urgente.</li>
+                        <li>Las <strong>solicitudes</strong> se responden en la Agenda con tres botones: Aceptar, Otra hora o Rechazar.</li>
+                        <li>Lo que el dueño decide (horario, carta, inventario…) lo ves en lectura si no eres el dueño. Ver <a href="#dueno-vs-equipo">la diferencia</a>.</li>
+                    </ul>
+                </div>
 
-                <div class="grid-2">
-                    <!-- Dashboard -->
-                    <div class="card-feature">
-                        <div class="card-feature-header">
-                            <span class="card-badge badge-worker">Pantalla Principal</span>
-                        </div>
-                        <h4>1. Panel de Control (/worker/dashboard)</h4>
-                        <p>El saludo y los contadores van en el mismo cartel; si el centro tiene foto, se ve tenue detrás. El terapeuta inicia su jornada con 4 métricas en tiempo real:</p>
-                        <ul class="text-secondary" style="margin-left: 1.25rem; font-size: 0.88rem; margin-bottom: 0.8rem;">
-                            <li><strong>Citas de Hoy:</strong> Número de clientes citados en el día en curso.</li>
-                            <li><strong>Citas de Mañana:</strong> Previsión de carga de trabajo del día siguiente.</li>
-                            <li><strong>Pendientes de Aprobación:</strong> Solicitudes online que requieren validación.</li>
-                            <li><strong>Alertas de Stock Bajo:</strong> Insumos de cabina con 3 o menos unidades.</li>
-                        </ul>
-                        <p>Debajo, cinco accesos directos: agenda, inventario, tratamientos, clientes y <strong>Reseñas</strong> (<code>/worker/reviews</code>, con la nota media del centro). En Reseñas se ven todas las opiniones, con el filtro «Sin responder», y el dueño contesta cada una (la respuesta es pública; vaciarla la quita).</p>
-                        <p>Debajo de los accesos, un bloque con el mes en curso («Octubre hasta hoy») resume los ingresos, las visitas y los clientes nuevos del mes frente al mismo tramo del mes anterior, con el botón <strong>Ver análisis del centro</strong>.</p>
+                <ol class="flow">
+                    <li><a href="#trab-panel"><strong>Panel</strong><span>¿Qué hay hoy y qué es urgente?</span></a></li>
+                    <li><a href="#trab-agenda"><strong>Agenda</strong><span>Ver el día o la semana</span></a></li>
+                    <li><a href="#trab-solicitud"><strong>Responder</strong><span>Aceptar, otra hora o rechazar</span></a></li>
+                    <li><a href="#trab-cita"><strong>Atender</strong><span>Resumen, precio o «No se presentó»</span></a></li>
+                    <li><a href="#trab-clientes"><strong>Ficha y venta</strong><span>Historial, avisos, productos y puntos</span></a></li>
+                </ol>
+
+                <div class="walk walk-wide" id="trab-panel">
+                    <div class="walk-text">
+                        <h3><span class="walk-n">1</span>El Panel: el día de un vistazo</h3>
+                        <p class="where">«Mi Panel» · <code>/worker/dashboard</code></p>
                     </div>
-
-                    <!-- Análisis -->
-                    <div class="card-feature">
-                        <div class="card-feature-header">
-                            <span class="card-badge badge-worker">Análisis</span>
-                        </div>
-                        <h4>Análisis del centro (/worker/analytics)</h4>
-                        <p>Las cifras salen de las citas completadas y de los productos vendidos (cada cita cuenta por lo que se cobró: el precio de carta al reservar, o el que el trabajador haya puesto en «Añadir resumen y precio» si hubo descuento o suplemento). Arriba, el mes en curso hasta hoy comparado con los mismos días del mes anterior; debajo, gráficos y listas de los últimos 3, 6 o 12 meses:</p>
-                        <ul class="text-secondary" style="margin-left: 1.25rem; font-size: 0.88rem; margin-bottom: 0.8rem;">
-                            <li><strong>Cifras del mes (8):</strong> ingresos, visitas, clientes nuevos, ticket medio, visitas de clientes que repiten, citas anuladas, rechazadas o en las que el cliente no vino, <strong>ocupación de la agenda</strong> (horas con cita frente a horas abiertas, con el horario del centro y de cada profesional, cabinas y bloqueos) y <strong>clientes atendidos</strong>, y lo que queda reservado hasta fin de mes.</li>
-                            <li><strong>Ingresos y visitas por mes:</strong> barras con el detalle al pasar el ratón (tratamientos/productos, primera visita/repiten) y la misma información en tabla.</li>
-                            <li><strong>Clientes más fieles:</strong> los que más vienen, con lo que han gastado y su última visita; enlazan a su ficha.</li>
-                            <li><strong>Clientes a recuperar:</strong> han venido al menos dos veces, no tienen cita y llevan sin venir el doble de lo que solían tardar (dos meses como mínimo).</li>
-                            <li><strong>Tratamientos, productos, equipo y días de la semana</strong> con más visitas, y la hora con más citas.</li>
-                            <li><strong>Por año:</strong> el año hasta hoy frente al mismo tramo del anterior, con las barras de los dos años juntas y el bloque «Qué ha cambiado» (si los ingresos cambian por las visitas o por el ticket medio, qué clientes no han vuelto y qué tratamientos suben o bajan). Las flechas no pasan del primer año con Cuquora; ese primer mes lleva una bolita en los gráficos.</li>
-                            <li><strong>Rendimiento por profesional</strong> (visitas, clientes, ingresos, ticket medio, ocupación, no presentados y nota de cada uno) y <strong>«Exportar CSV»</strong> con los datos del periodo para abrirlos en Excel.</li>
-                        </ul>
-                    </div>
-
-                    <!-- Agenda / Calendario -->
-                    <div class="card-feature">
-                        <div class="card-feature-header">
-                            <span class="card-badge badge-worker">Agenda</span>
-                        </div>
-                        <h4>2. Agenda (/worker/calendar)</h4>
-                        <p>Dos vistas con el selector <strong>Mes / Semana</strong> (se recuerda la última elegida):</p>
-                        <ul class="text-secondary" style="margin-left: 1.25rem; font-size: 0.88rem; margin-bottom: 0.8rem;">
-                            <li><strong>Mes:</strong> calendario mensual y lista de citas del día elegido.</li>
-                            <li><strong>Semana:</strong> rejilla de lunes a domingo; cada cita es un bloque del alto de su duración, coloreado por estado. Las horas propuestas salen en azul discontinuo, los bloqueos rayados y una línea roja marca la hora actual. En móvil es una lista por días.</li>
-                            <li>Al pulsar una cita se abre su ficha: cliente, teléfono, tratamiento y acciones.</li>
-                            <li><strong>Pantalla completa</strong> (botón en la cabecera de la semana, en tablet y escritorio): la semana ocupa toda la pantalla con el horario entero sin scroll, sigue la semana actual y se actualiza sola cada minuto. Pensada para dejarla en una pantalla de recepción. Esc o el mismo botón salen.</li>
-                        </ul>
-                    </div>
-
-                    <!-- Gestión de Citas -->
-                    <div class="card-feature">
-                        <div class="card-feature-header">
-                            <span class="card-badge badge-worker">Organizar la agenda</span>
-                        </div>
-                        <h4>3. Gestionar Citas</h4>
-                        <ul class="text-secondary" style="margin-left: 1.25rem; font-size: 0.88rem; margin-bottom: 0.8rem;">
-                            <li><strong>Solicitud pendiente:</strong> llega ya con el profesional que eligió el cliente, si eligió alguno. Aceptar (eligiendo profesional), Rechazar con un mensaje u <strong>«Otra hora»</strong> (propone de 1 a 3 horas).</li>
-                            <li><strong>«Nueva cita»</strong> (botón de la barra o pulsar un hueco libre de la semana): cliente de la cartera o uno nuevo, tratamiento, día, hora y profesional. Nace confirmada.</li>
-                            <li><strong>Cita confirmada futura:</strong> «Cambiar hora» (y profesional) o «Anular». En escritorio también se puede arrastrar en la vista semana.</li>
-                            <li><strong>«No se presentó»:</strong> en una cita que ya ha empezado o terminado, si el cliente no vino. No suma puntos, sale tachada en la semana y se puede deshacer («Sí vino: deshacer»). La ficha del cliente muestra cuántas veces ha faltado y sus próximas citas lo avisan.</li>
-                            <li><strong>«Bloquear horario»:</strong> vacaciones o descansos de un profesional, o cierre del centro. No se puede bloquear un periodo con citas confirmadas.</li>
-                            <li>Fuera del horario del centro o del horario de ese profesional la app pregunta si guardar igualmente; los solapes nunca se permiten.</li>
-                        </ul>
-                    </div>
-
-                    <!-- Control de Stock -->
-                    <div class="card-feature">
-                        <div class="card-feature-header">
-                            <span class="card-badge badge-worker">Almacén de Cabina</span>
-                        </div>
-                        <h4>4. Inventario de Productos (/worker/inventory)</h4>
-                        <p>Supervisión y abastecimiento sin roturas:</p>
-                        <ul class="text-secondary" style="margin-left: 1.25rem; font-size: 0.88rem; margin-bottom: 0.8rem;">
-                            <li><strong>Semáforos de stock:</strong> Estado Óptimo (verde), Bajo Stock ≤ 3 uds (amarillo) y Agotado = 0 uds (rojo).</li>
-                            <li><strong>Ajustes en 1 clic:</strong> Botones <code>+</code> y <code>-</code> para registrar consumos de cabina en tiempo real.</li>
-                            <li><strong>Resumen y filtros:</strong> productos, unidades, bajo stock y agotados; filtros por categoría y vista Lista por defecto en escritorio.</li>
-                            <li><strong>Modal de Añadir Producto:</strong> Permite incorporar existencias de productos ya catalogados o crear un producto nuevo.</li>
-                            <li><strong>«Vender»:</strong> el mismo modal de venta que en la ficha del cliente, eligiendo aquí el cliente que se lo lleva.</li>
-                        </ul>
+                    <figure class="shot">
+                        <div class="shot-frame browser"><div class="shot-img">
+                            <a href="images/capturas/panel.webp" target="_blank" title="Abrir la captura a tamaño completo"><img src="images/capturas/panel.webp" alt="Panel del trabajador con cifras del día, accesos y resumen del mes" loading="lazy"></a>
+                            <span class="pin" style="left:4.4%;top:26.5%">1</span>
+                            <span class="pin" style="left:2.8%;top:43.5%">2</span>
+                            <span class="pin" style="left:2.8%;top:79%">3</span>
+                            <span class="pin" style="left:68.4%;top:3.6%">4</span>
+                        </div></div>
+                    </figure>
+                    <div class="grid-2" style="margin-top: 1.25rem;">
+                        <ol class="pin-legend">
+                            <li><b>1</b><span><strong>Cuatro cifras:</strong> citas de hoy, citas de mañana, solicitudes pendientes y productos con stock bajo (3 o menos).</span></li>
+                            <li><b>2</b><span><strong>Accesos:</strong> Agenda, Inventario, Tratamientos, Clientes y Reseñas. Cada uno avisa con una etiqueta si tiene algo pendiente.</span></li>
+                        </ol>
+                        <ol class="pin-legend">
+                            <li><b>3</b><span><strong>El mes hasta hoy:</strong> ingresos, visitas y clientes nuevos frente al mismo tramo del mes anterior. «Ver análisis del centro» abre el detalle.</span></li>
+                            <li><b>4</b><span><strong>Campana:</strong> productos agotados y solicitudes para hoy o mañana. Al pulsar un aviso se abre ese día o el inventario.</span></li>
+                        </ol>
                     </div>
                 </div>
 
-                <div class="step-card" style="margin-top: 1.5rem;">
-                    <div class="step-num">5</div>
-                    <div class="step-body">
-                        <h4>Gestión de la Carta de Tratamientos (/worker/treatments)</h4>
-                        <p>
-                            El trabajador puede auditar las tarifas y duraciones de los servicios que se ofrecen en su sede física. Si el centro incorpora una nueva técnica o aparatología, dispone del botón <strong>"Añadir Tratamiento"</strong> que abre un modal ergonómico idéntico al de inventario:
-                        </p>
-                        <ul class="text-secondary" style="margin-left: 1.5rem;">
-                            <li><strong>Nombre y Descripción:</strong> Procedimiento técnico y beneficios.</li>
-                            <li><strong>Precio (€) y Duración (minutos):</strong> Determina el tiempo exacto que reservará el algoritmo.</li>
-                            <li><strong>Tipología:</strong> Selector con las categorías autorizadas (<code>FACIAL</code>, <code>CORPORAL</code>, <code>DEPILACION</code>, <code>MANICURA_PEDICURA</code>, <code>MASAJES</code>, <code>PELUQUERIA</code>, <code>OTRO</code>).</li>
-                            <li><strong>«Quién lo hace»:</strong> el dueño elige qué profesionales hacen cada tratamiento (ninguno marcado = todo el equipo). Es lo que ve el cliente en «¿Con quién?» y lo que usa la agenda para asignar.</li>
-                            <li><strong>«Poner en oferta»:</strong> precio rebajado y, si se quiere, último día. Vale para las citas que se piden mientras dura; al terminar sale como «Oferta terminada» y se puede renovar. El filtro «En oferta» deja solo esos tratamientos.</li>
+                <div class="walk" id="trab-agenda">
+                    <div class="walk-text">
+                        <h3><span class="walk-n">2</span>La Agenda: mes o semana</h3>
+                        <p class="where">«Calendario de Agenda» · <code>/worker/calendar</code></p>
+                        <ul>
+                            <li><strong>Mes:</strong> calendario con puntos de colores; al pulsar un día salen sus citas a la derecha.</li>
+                            <li><strong>Semana:</strong> cada cita es un bloque del alto de su duración. Una línea roja marca la hora actual. En el móvil es una lista por días.</li>
+                            <li><strong>Pantalla completa</strong> (tablet y escritorio): la semana sin scroll, se actualiza sola cada minuto. Pensada para la pantalla de recepción.</li>
+                            <li>«Nueva cita» o pulsar un hueco libre crea una cita ya confirmada. En escritorio una cita se puede <strong>arrastrar</strong> a otra hora.</li>
                         </ul>
+                        <ul class="legend" style="margin-bottom: 1rem;">
+                            <li><i class="lg-owner"></i>Confirmada</li>
+                            <li><i class="lg-bad"></i>Solicitud pendiente</li>
+                            <li><i class="lg-worker" style="border-style: dashed;"></i>Hora propuesta</li>
+                            <li><i class="lg-off"></i>Cerrado o bloqueado (rayado)</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <figure class="shot" style="margin-bottom: 1rem;"><div class="shot-frame browser"><a href="images/capturas/agenda-semana.webp" target="_blank" title="Abrir la captura a tamaño completo"><img src="images/capturas/agenda-semana.webp" alt="Agenda en vista semana" loading="lazy"></a></div><figcaption>Vista semana</figcaption></figure>
+                        <div class="shot-pair">
+                            <figure class="shot"><div class="shot-frame browser"><a href="images/capturas/agenda-mes.webp" target="_blank" title="Abrir la captura a tamaño completo"><img src="images/capturas/agenda-mes.webp" alt="Agenda en vista mes" loading="lazy"></a></div><figcaption>Vista mes</figcaption></figure>
+                            <figure class="shot"><div class="shot-frame phone"><a href="images/capturas/agenda-movil.webp" target="_blank" title="Abrir la captura a tamaño completo"><img src="images/capturas/agenda-movil.webp" alt="Agenda en el móvil" loading="lazy"></a></div><figcaption>Móvil</figcaption></figure>
+                        </div>
                     </div>
                 </div>
 
-                <div class="step-card">
-                    <div class="step-num">6</div>
-                    <div class="step-body">
-                        <h4>Sistema de Notificaciones Proactivas (Campana Superior)</h4>
-                        <p>
-                            En la barra superior de navegación, el especialista dispone de una campana de alertas inteligentes alimentada por <code>NotificationService</code>. Si se detecta un insumo agotado o solicitudes de citas pendientes para hoy o mañana, se muestra un indicador visual. Al hacer clic en la alerta, la aplicación redirige de forma automática al día exacto del calendario o a la pantalla de inventario. Cada aviso se puede quitar con su «x» o todos con «Limpiar todas»; lo que quita una persona lo siguen viendo sus compañeros, y si el aviso cambia (otra cantidad, otro día) vuelve a salir.
-                        </p>
+                <div class="walk" id="trab-solicitud">
+                    <div class="walk-text">
+                        <h3><span class="walk-n">3</span>Responder una solicitud</h3>
+                        <p class="where">Agenda → el día con punto rojo → tarjeta «Solicitud»</p>
+                        <p>Llega con el profesional que eligió el cliente, si eligió alguno. Arriba se ven los <strong>avisos del cliente</strong> (por ejemplo, si ya faltó a alguna cita). Tres salidas:</p>
+                        <ul class="tasks">
+                            <li><span><span class="chip chip-ok">✓ Aceptar</span></span><span>Eliges quién la atiende en «La atiende». Pasa a confirmada y el cliente recibe el correo.</span></li>
+                            <li><span><span class="chip chip-info">Otra hora</span></span><span>Propones de 1 a 3 horas. El cliente elige; si no contesta, caduca.</span></li>
+                            <li><span><span class="chip chip-bad">✕ Rechazar</span></span><span>Con la «Nota opcional para el cliente» explicas el motivo.</span></li>
+                        </ul>
+                        <p>Para no tener que responder a mano, el dueño puede activar <strong>«Aceptar automáticamente»</strong> en Mi Centro.</p>
                     </div>
+                    <figure class="shot"><div class="shot-frame" style="max-width: 420px; margin: 0 auto;"><a href="images/capturas/solicitud.webp" target="_blank" title="Abrir la captura a tamaño completo"><img src="images/capturas/solicitud.webp" alt="Tarjeta de una solicitud pendiente con los botones Rechazar, Otra hora y Aceptar" loading="lazy"></a></div><figcaption>Una solicitud pendiente en la Agenda</figcaption></figure>
                 </div>
 
-                <div class="step-card">
-                    <div class="step-num">7</div>
-                    <div class="step-body">
-                        <h4>Cartera de Clientes y Fichas (/worker/clients)</h4>
-                        <p>
-                            Lista de clientes del centro con buscador y resumen (total, fichas al día, pendientes y citas). La etiqueta «Registrado» indica que el cliente tiene cuenta. Desde aquí se da de alta un cliente a mano (también desde «Nueva cita»), se rellena su ficha técnica y se configuran los campos de la ficha del centro. El alta manual solo reutiliza clientes que ya son del centro; nunca enlaza cuentas de otros centros. Cuando una cita ya ha empezado, el trabajador puede escribir el <strong>resumen del tratamiento</strong> (desde la agenda o el historial de la ficha): qué se hizo y cómo fue. Si lo marca como aviso (una alergia, un producto que no le sentó bien), aparece arriba en la ficha del cliente y en todas sus citas de la agenda. El cliente no lo ve.
-                        </p>
-                        <ul class="text-secondary" style="margin-left: 1.5rem;">
-                            <li><strong>Historial de citas</strong> con filtro por tratamiento y buscador en notas y resúmenes (sin distinguir mayúsculas ni tildes).</li>
-                            <li><strong>Vender producto:</strong> se elige un producto del inventario y la cantidad (de 1 a 99); antes de confirmar se ve el stock actual y el que quedará. Nunca se vende más de lo que hay. «Anular» devuelve las unidades al inventario y quita los puntos de esa venta.</li>
-                            <li><strong>Tarjeta de puntos:</strong> si el centro la tiene activada, la ficha muestra los puntos del cliente y, cuando llega a la meta, el botón para canjear la recompensa.</li>
-                        </ul>
+                <div class="walk walk-wide" id="trab-cita">
+                    <div class="walk-text">
+                        <h3><span class="walk-n">4</span>Qué se puede hacer con una cita</h3>
+                        <p class="where">Al pulsar una cita en la Agenda se abre su ficha: cliente, teléfono, tratamiento y botones</p>
                     </div>
+                    <ul class="tasks">
+                        <li><span>Moverla</span><span>«Cambiar hora» (y profesional), o arrastrarla en la vista semana. El cliente recibe «Tu cita ha cambiado».</span></li>
+                        <li><span>Anularla</span><span>«Anular», con un mensaje opcional para el cliente.</span></li>
+                        <li><span>El cliente no vino</span><span>«No se presentó», cuando la cita ya ha empezado. Sale tachada, no suma puntos y la ficha del cliente lo cuenta. Se deshace con «Sí vino».</span></li>
+                        <li><span>Apuntar cómo fue</span><span>«Añadir resumen y precio»: qué se hizo y lo que se cobró de verdad (descuento o suplemento). Si lo marcas como <strong>aviso</strong> (una alergia, por ejemplo), sale arriba en la ficha y en todas sus citas. El cliente no lo ve.</span></li>
+                        <li><span>Cerrar horas</span><span>«Bloquear horario»: vacaciones o descansos de un profesional, o cierre del centro. No se puede bloquear encima de citas confirmadas.</span></li>
+                        <li><span>Fuera de horario</span><span>Cuquora pregunta si guardar igualmente. Lo que nunca deja es solapar dos citas del mismo profesional.</span></li>
+                    </ul>
                 </div>
 
-                <div class="step-card">
-                    <div class="step-num">8</div>
-                    <div class="step-body">
-                        <h4>Mi Centro (/worker/center)</h4>
-                        <ul class="text-secondary" style="margin-left: 1.5rem;">
-                            <li>Datos del centro, ubicación con pin en el mapa, <strong>zona horaria</strong> (la usan las reservas y Google Calendar) y número de <strong>cabinas</strong> (citas a la vez, de 1 a 50).</li>
-                        <li><strong>Horario de apertura:</strong> uno o dos tramos por día de la semana (jornada partida), sábados y domingos incluidos. Es el que ven los clientes al reservar y el que pinta la agenda.</li>
-                        <li><strong>Equipo:</strong> quién trabaja en el centro y el estado de su cuenta. El dueño invita por correo, reenvía la invitación o saca a alguien del equipo (no si tiene citas por delante; conserva su historial). Con «Horario» pone los días y horas de cada profesional (siempre dentro del horario del centro); sin horario propio, trabaja siempre que el centro abre.</li>
-                        <li><strong>Reservas de clientes:</strong> «Aceptar automáticamente» hace que las citas pedidas en un hueco libre queden confirmadas al momento con el profesional elegido o, con «Cualquiera», con el libre que menos citas tiene ese día. También aquí: hasta cuántas horas antes puede el cliente cambiar la hora él mismo (nunca, 2, 12, 24 o 48 h) y el <strong>enlace corto</strong> del centro con el botón «Copiar».</li>
-                            <li><strong>Foto del centro</strong> (JPG o PNG, hasta 8 MB, mínimo 400×250 px): sale en el buscador, en la ficha del centro y detrás del saludo del panel. Se puede quitar.</li>
-                            <li><strong>Tarjeta de puntos:</strong> desactivada, puntos por euro gastado o por tratamiento/unidad de producto, puntos para la recompensa y qué recompensa es. Lo ya ganado no cambia al tocar la configuración.</li>
-                            <li>Datos personales y contraseña del trabajador (para cambiarla se pide la actual).</li>
-                        <li><strong>Dueño del centro:</strong> quien lo dio de alta. Solo él cambia los datos, el horario del centro y de cada profesional, la foto, la carta y quién hace cada tratamiento, la tarjeta de puntos, las reservas automáticas, la plantilla de ficha y el inventario, responde las reseñas y ve el análisis; puede ceder el centro a otra persona del equipo. El resto ve esos bloques en lectura y trabaja con la agenda, los clientes, las ventas y su cuenta.</li>
-                            <li>Interruptor <strong>«Guardar mis citas en Google Calendar»</strong>: el trabajador da permiso con la cuenta de Google que quiera y Cuquora crea un calendario «Cuquora» donde mantiene sus citas confirmadas. Si faltan las claves de Google en el servidor, sale apagado con «Próximamente».</li>
+                <div class="walk" id="trab-clientes">
+                    <div class="walk-text">
+                        <h3><span class="walk-n">5</span>Clientes y ventas</h3>
+                        <p class="where">«Cartera de Clientes» · <code>/worker/clients</code></p>
+                        <ul>
+                            <li>Buscador y resumen (total, fichas al día, pendientes, citas). «Registrado» = el cliente tiene cuenta.</li>
+                            <li>«Nuevo Cliente» da de alta a alguien a mano (también desde «Nueva cita»). Solo reutiliza clientes que ya son del centro.</li>
+                            <li>La <strong>ficha</strong> tiene el historial (con filtro y buscador sin tildes), la ficha técnica y los avisos.</li>
+                            <li><strong>Vender producto:</strong> eliges producto y cantidad (1 a 99) y ves el stock antes y después. Nunca se vende más de lo que hay; «Anular» devuelve las unidades.</li>
+                            <li><strong>Tarjeta de puntos:</strong> si el centro la tiene, la ficha enseña los puntos y el botón para canjear la recompensa.</li>
                         </ul>
                     </div>
+                    <figure class="shot"><div class="shot-frame browser"><a href="images/capturas/clientes.webp" target="_blank" title="Abrir la captura a tamaño completo"><img src="images/capturas/clientes.webp" alt="Cartera de clientes" loading="lazy"></a></div><figcaption>Cartera de clientes en vista lista</figcaption></figure>
                 </div>
+
+                <div class="diagram-title" style="margin-top: 1rem;">Las otras pantallas del centro</div>
+                <div class="shot-grid">
+                    <figure class="shot">
+                        <div class="shot-frame browser"><a href="images/capturas/inventario.webp" target="_blank" title="Abrir la captura a tamaño completo"><img src="images/capturas/inventario.webp" alt="Inventario de productos" loading="lazy"></a></div>
+                        <figcaption><strong>Inventario</strong> · <code>/worker/inventory</code><br>Semáforo de stock: <span class="chip chip-ok">Normal</span> <span class="chip chip-wait">Bajo ≤ 3</span> <span class="chip chip-bad">Agotado</span>. Botones − y + para consumos de cabina, «Añadir producto» y «Vender producto».</figcaption>
+                    </figure>
+                    <figure class="shot">
+                        <div class="shot-frame browser"><a href="images/capturas/tratamientos.webp" target="_blank" title="Abrir la captura a tamaño completo"><img src="images/capturas/tratamientos.webp" alt="Carta de tratamientos" loading="lazy"></a></div>
+                        <figcaption><strong>Tratamientos</strong> · <code>/worker/treatments</code><br>Nombre, precio, duración (decide los huecos que ocupa), categoría, «Quién lo hace» y «Poner en oferta» con fecha de fin.</figcaption>
+                    </figure>
+                    <figure class="shot">
+                        <div class="shot-frame browser"><a href="images/capturas/resenas.webp" target="_blank" title="Abrir la captura a tamaño completo"><img src="images/capturas/resenas.webp" alt="Reseñas del centro" loading="lazy"></a></div>
+                        <figcaption><strong>Reseñas</strong> · <code>/worker/reviews</code><br>Todas las opiniones con el filtro «Sin responder». El dueño responde cada una; la respuesta es pública.</figcaption>
+                    </figure>
+                    <figure class="shot">
+                        <div class="shot-frame browser"><a href="images/capturas/analisis.webp" target="_blank" title="Abrir la captura a tamaño completo"><img src="images/capturas/analisis.webp" alt="Análisis del centro" loading="lazy"></a></div>
+                        <figcaption><strong>Análisis</strong> · <code>/worker/analytics</code> (solo el dueño)<br>Ingresos, visitas, ocupación, clientes fieles y a recuperar, rendimiento por profesional y «Exportar CSV».</figcaption>
+                    </figure>
+                    <figure class="shot">
+                        <div class="shot-frame browser"><a href="images/capturas/campana-trabajador.webp" target="_blank" title="Abrir la captura a tamaño completo"><img src="images/capturas/campana-trabajador.webp" alt="Campana de avisos del trabajador" loading="lazy"></a></div>
+                        <figcaption><strong>Campana del equipo</strong><br>Agotados, stock bajo y solicitudes. Lo que quita una persona lo siguen viendo sus compañeros; si el aviso cambia, vuelve.</figcaption>
+                    </figure>
+                    <figure class="shot">
+                        <div class="shot-frame browser"><a href="images/capturas/mi-centro.webp" target="_blank" title="Abrir la captura a tamaño completo"><img src="images/capturas/mi-centro.webp" alt="Mi Centro" loading="lazy"></a></div>
+                        <figcaption><strong>Mi Centro</strong> · <code>/worker/center</code><br>Datos, mapa, horario, equipo, reservas automáticas, foto, cartel con QR, tarjeta de puntos y tu cuenta.</figcaption>
+                    </figure>
+                </div>
+
+                <details class="more">
+                    <summary>Todo lo que hay en «Mi Centro», bloque a bloque</summary>
+                    <div class="more-body">
+                        <ul class="tasks">
+                            <li><span>Datos del centro</span><span>Nombre, teléfono con su prefijo de país, ubicación con pin en el mapa, zona horaria y número de cabinas (citas a la vez, de 1 a 50).</span></li>
+                            <li><span>Horario de apertura</span><span>Uno o dos tramos por día (jornada partida), sábados y domingos incluidos. Es el que ven los clientes y el que pinta la agenda.</span></li>
+                            <li><span>Equipo</span><span>Invitar por correo, reenviar la invitación o sacar a alguien (no si tiene citas por delante; conserva su historial). «Horario» pone los días y horas de cada profesional dentro del horario del centro.</span></li>
+                            <li><span>Reservas de clientes</span><span>«Aceptar automáticamente» (con «Cualquiera» se asigna el profesional libre con menos citas ese día), plazo para que el cliente cambie la hora (nunca, 2, 12, 24 o 48 h) y enlace corto con «Copiar».</span></li>
+                            <li><span>Foto del centro</span><span>JPG o PNG, hasta 8 MB, mínimo 400×250 px. Sale en el buscador, en la ficha y detrás del saludo del panel.</span></li>
+                            <li><span>Mi foto de perfil</span><span>Cada trabajador sube la suya (no hace falta ser el dueño). Sale en «¿Con quién?» y en el equipo.</span></li>
+                            <li><span>Cartel con QR</span><span>Hoja A4 para el mostrador con la foto, el QR del enlace corto, tres pasos, la dirección y el horario. El QR se descarga en PNG y SVG.</span></li>
+                            <li><span>Tarjeta de puntos</span><span>Desactivada, puntos por euro o por tratamiento/producto, meta y recompensa. Lo ya ganado no cambia al tocarla.</span></li>
+                            <li><span>Google Calendar</span><span>«Guardar mis citas en Google Calendar» crea un calendario «Cuquora» con tus citas confirmadas. Sin claves de Google en el servidor sale apagado («Próximamente»).</span></li>
+                            <li><span>Mi cuenta</span><span>Datos personales y contraseña (pide la actual).</span></li>
+                        </ul>
+                    </div>
+                </details>
             </section>
 
-            <!-- ROL 3: ADMINISTRADOR / PROPIETARIO -->
+            <!-- ROL 3: DUEÑO Y ADMINISTRACIÓN -->
             <section class="doc-section" id="rol-administrador">
                 <div class="section-header">
                     <div class="section-header-title">
                         <div class="section-icon">👑</div>
                         <div>
-                            <h2>3. Rol: Administrador y Dirección del Negocio</h2>
-                            <p style="margin: 0; font-size: 0.95rem;">Gobernanza multisede, control de cuentas, seguridad y auditoría</p>
+                            <h2>3. Dueño del centro y administración</h2>
+                            <p style="margin: 0; font-size: 0.95rem;">Quién decide qué, y cómo nace un centro nuevo</p>
                         </div>
                     </div>
-                    <span class="card-badge badge-admin">Dirección / Propietario</span>
+                    <span class="card-badge badge-admin">Dueño · Admin</span>
                 </div>
 
-                <p>
-                    Los directores de centros o cadenas de estética supervisan el funcionamiento global del negocio. Aunque la aplicación delega la operativa cotidiana en los especialistas, el administrador dispone de los siguientes instrumentos de supervisión:
-                </p>
+                <div class="tldr">
+                    <div class="tldr-title">En 30 segundos</div>
+                    <ul>
+                        <li>El <strong>dueño</strong> es quien dio de alta el centro. Puede ceder el centro a otra persona del equipo.</li>
+                        <li><strong>Administración</strong> (el correo de <code>CRM_ADMIN_EMAIL</code>) no entra en los centros: solo revisa y publica los nuevos.</li>
+                        <li>Un centro nuevo <strong>nace oculto</strong> y sale en el buscador cuando administración lo publica.</li>
+                    </ul>
+                </div>
 
-                <div class="grid-2">
+                <h3 id="dueno-vs-equipo">Dueño frente al resto del equipo</h3>
+                <div class="compare">
+                    <div class="cmp-owner">
+                        <h4>👑 Solo el dueño</h4>
+                        <ul class="yes">
+                            <li>Datos, foto y horario del centro</li>
+                            <li>Horario de cada profesional</li>
+                            <li>Carta de tratamientos y quién hace cada uno</li>
+                            <li>Inventario (alta y ajustes de productos)</li>
+                            <li>Tarjeta de puntos y reservas automáticas</li>
+                            <li>Plantilla de la ficha del cliente</li>
+                            <li>Invitar o sacar a alguien del equipo</li>
+                            <li>Responder reseñas y ver el análisis</li>
+                            <li>Ceder el centro a otra persona</li>
+                        </ul>
+                    </div>
+                    <div class="cmp-team">
+                        <h4>🩺 Todo el equipo (dueño incluido)</h4>
+                        <ul class="yes">
+                            <li>Agenda: responder, crear, mover y anular citas</li>
+                            <li>Bloquear horario</li>
+                            <li>Clientes: alta, ficha, resúmenes y avisos</li>
+                            <li>Vender productos y canjear puntos</li>
+                            <li>Su foto de perfil, sus datos y su contraseña</li>
+                            <li>Google Calendar con sus citas</li>
+                            <li>Imprimir el cartel con QR</li>
+                        </ul>
+                        <p style="font-size: 0.85rem; margin: 0.8rem 0 0;">Lo del dueño lo ven <strong>en lectura</strong>: aparece, pero sin poder cambiarlo.</p>
+                    </div>
+                </div>
+
+                <h3 id="alta-centro">Cómo nace un centro nuevo</h3>
+                <figure class="diagram">
+                    <div class="diagram-scroll">
+                        <svg class="dg" viewBox="0 0 1100 250" role="img" aria-label="Alta de un centro: el dueño rellena el asistente, el centro queda oculto, administración lo revisa y lo publica o lo rechaza">
+                            <rect x="20" y="40" width="210" height="84" rx="10" class="bx b-owner"/>
+                            <text x="125" y="70" text-anchor="middle" class="tt c-owner">1 · El dueño rellena</text>
+                            <text x="125" y="91" text-anchor="middle" class="ts">el asistente de 6 pasos</text>
+                            <text x="125" y="109" text-anchor="middle" class="tm">en /register-center</text>
+
+                            <rect x="290" y="40" width="210" height="84" rx="10" class="bx b-off"/>
+                            <text x="395" y="70" text-anchor="middle" class="tt">2 · Centro oculto</text>
+                            <text x="395" y="91" text-anchor="middle" class="ts">el dueño ya puede entrar</text>
+                            <text x="395" y="109" text-anchor="middle" class="ts">y preparar carta e inventario</text>
+
+                            <rect x="560" y="40" width="210" height="84" rx="10" class="bx b-admin"/>
+                            <text x="665" y="70" text-anchor="middle" class="tt c-admin">3 · Administración</text>
+                            <text x="665" y="91" text-anchor="middle" class="ts">recibe un correo con el</text>
+                            <text x="665" y="109" text-anchor="middle" class="ts">enlace para revisarlo</text>
+
+                            <rect x="840" y="0" width="245" height="84" rx="10" class="bx b-ok"/>
+                            <text x="962" y="30" text-anchor="middle" class="tt c-client">«Publicar centro»</text>
+                            <text x="962" y="51" text-anchor="middle" class="ts">sale en el buscador y el resto</text>
+                            <text x="962" y="69" text-anchor="middle" class="ts">del equipo recibe su invitación</text>
+
+                            <rect x="840" y="140" width="245" height="84" rx="10" class="bx b-bad"/>
+                            <text x="962" y="170" text-anchor="middle" class="tt c-bad">«Rechazar registro»</text>
+                            <text x="962" y="191" text-anchor="middle" class="ts">borra el centro y las cuentas</text>
+                            <text x="962" y="209" text-anchor="middle" class="ts">de su equipo · no se deshace</text>
+
+                            <line x1="230" y1="82" x2="286" y2="82" class="ar" marker-end="url(#dga)"/>
+                            <line x1="500" y1="82" x2="556" y2="82" class="ar" marker-end="url(#dga)"/>
+                            <path d="M770,74 H805 V42 H836" class="ar ok" marker-end="url(#dga-ok)"/>
+                            <path d="M770,90 H805 V182 H836" class="ar bad" marker-end="url(#dga-bad)"/>
+
+                            <text x="20" y="168" class="tm">Al enviar el alta, el dueño recibe al momento su invitación para crear la contraseña.</text>
+                            <text x="20" y="188" class="tm">Cada invitación sirve una sola vez y caduca a los 7 días; también se puede entrar con Google.</text>
+                        </svg>
+                    </div>
+                    <p class="swipe-hint">Desliza el dibujo hacia los lados para verlo entero →</p>
+                </figure>
+
+                <div class="walk">
+                    <div class="walk-text">
+                        <h3>El asistente de alta</h3>
+                        <p class="where">«Registra tu Centro» · <code>/register-center</code></p>
+                        <ol>
+                            <li><strong>El centro</strong> y su foto</li>
+                            <li><strong>Ubicación</strong> en el mapa</li>
+                            <li><strong>Horario</strong> de apertura</li>
+                            <li><strong>Equipo</strong></li>
+                            <li><strong>Tarjeta de puntos</strong></li>
+                            <li><strong>Enviar</strong></li>
+                        </ol>
+                        <p>Se comprueban el <strong>CIF/NIF</strong> (con su letra o dígito de control), el <strong>teléfono</strong> con su prefijo y, en España, que la dirección lleve <strong>código postal</strong>. En escritorio la vista previa del centro se rellena a la derecha mientras escribes; en el móvil sale al final («Ver vista previa» y luego «Sí, registrar»).</p>
+                    </div>
+                    <div class="shot-pair">
+                        <figure class="shot"><div class="shot-frame browser"><a href="images/capturas/alta-centro.webp" target="_blank" title="Abrir la captura a tamaño completo"><img src="images/capturas/alta-centro.webp" alt="Asistente de alta de centro en escritorio" loading="lazy"></a></div><figcaption>Escritorio, con vista previa</figcaption></figure>
+                        <figure class="shot"><div class="shot-frame phone"><a href="images/capturas/alta-centro-movil.webp" target="_blank" title="Abrir la captura a tamaño completo"><img src="images/capturas/alta-centro-movil.webp" alt="Asistente de alta de centro en el móvil" loading="lazy"></a></div><figcaption>Móvil</figcaption></figure>
+                    </div>
+                </div>
+
+                <div class="grid-2" style="margin-top: 1rem;">
                     <div class="card-feature">
-                        <h4>🏢 Modelo Multisede</h4>
-                        <p>Supervisión de múltiples sedes físicas simultáneas (Madrid Centro, Plaza Norte, Barcelona Sarrià, Las Condes). Cada sede mantiene su contabilidad de turnos y almacén aislados pero bajo una misma marca y gobernanza.</p>
+                        <div class="card-feature-header"><span>🔐</span><strong>Seguridad, en corto</strong></div>
+                        <ul style="margin-left: 1.1rem; color: var(--text-secondary); font-size: 0.92rem;">
+                            <li>Contraseñas cifradas, mínimo 8 caracteres y fuera las más usadas.</li>
+                            <li>5 fallos con una cuenta desde la misma conexión, 20 desde una conexión o 50 con una cuenta desde cualquier sitio cierran el login 15 minutos.</li>
+                            <li>«Recordar mi sesión» se borra al cerrar sesión o cambiar la contraseña.</li>
+                            <li>Quien sale del equipo pierde el acceso al panel al momento.</li>
+                        </ul>
                     </div>
                     <div class="card-feature">
-                        <h4>🔐 Cifrado y Seguridad de Acceso</h4>
-                        <p>Spring Security con contraseñas cifradas con <strong>BCrypt</strong> (8 caracteres como mínimo y fuera las más usadas), protección CSRF y cierre de sesión por POST. Tras 5 intentos fallidos con una cuenta desde una misma conexión, 20 desde una conexión o 50 con una cuenta desde cualquier sitio, el login se cierra 15 minutos (así nadie puede dejar fuera a otra persona). Contacto, alta de centro y registro admiten pocos envíos por conexión y hora. Login con Google opcional y «Recordar mi sesión» con tokens que se borran al cerrar sesión o cambiar la contraseña. Los secretos del servidor van en el fichero <code>.env</code>, fuera del repositorio.</p>
-                    </div>
-                    <div class="card-feature">
-                        <h4>👥 Gestión de Especialistas</h4>
-                        <p>Cada trabajador pertenece a un centro (<code>center_id</code> en <code>users</code>) y solo gestiona las citas de ese centro. El dueño del centro (<code>centers.owner_id</code>) gestiona el equipo desde «Mi Centro»; quien sale del equipo pierde el acceso al panel al momento.</p>
-                    </div>
-                    <div class="card-feature">
-                        <h4>📜 Páginas Legales</h4>
-                        <p>Términos (<code>/terms</code>), Privacidad (<code>/privacy</code>) y Cookies (<code>/cookies</code>), enlazadas desde el pie de todas las páginas, con los datos del titular que exige la LSSI configurables por variables de entorno. Aviso de cookies informativo (solo hay cookies técnicas).</p>
-                    </div>
-                    <div class="card-feature">
-                        <h4>🆕 Alta de Centros Nuevos (/register-center)</h4>
-                        <p>Un centro se da de alta solo con un asistente de 6 pasos (centro y foto, ubicación en el mapa, horario de apertura, equipo, tarjeta de puntos y envío). Quien lo da de alta queda como dueño. En escritorio la vista previa del centro se rellena a la derecha mientras se escribe; en móvil y tablet sale al final como paso de confirmación («Ver vista previa» y luego «Sí, registrar»). Nace <strong>oculto</strong>: administración (<code>CRM_ADMIN_EMAIL</code>) recibe un correo con el enlace para revisarlo y publicarlo. Quien lo da de alta recibe al momento su invitación para poner la contraseña; el resto del equipo, cuando el centro se publica. Cada invitación es de un solo uso (7 días); también se puede entrar con Google.</p>
-                    </div>
-                    <div class="card-feature">
-                        <h4>🧪 Selector de Demostración (/login-selector)</h4>
-                        <p>Herramienta para demostraciones: permite entrar como cualquier cliente o trabajador sin contraseña. Solo existe con el perfil <code>dev</code>; en producción no está.</p>
+                        <div class="card-feature-header"><span>📜</span><strong>Páginas legales y demo</strong></div>
+                        <ul style="margin-left: 1.1rem; color: var(--text-secondary); font-size: 0.92rem;">
+                            <li>Términos, Privacidad y Cookies en el pie de todas las páginas, con los datos del titular que pide la LSSI (variables de entorno).</li>
+                            <li>Solo hay cookies técnicas, así que el aviso es informativo.</li>
+                            <li><strong>Selector de demostración</strong> (<code>/login-selector</code>): entra como cualquier cliente o trabajador sin contraseña. Solo existe con el perfil <code>dev</code>; en producción no está.</li>
+                        </ul>
                     </div>
                 </div>
             </section>
 
-            <!-- Resumen Comparativo de Experiencia -->
+            <!-- RESUMEN COMPARATIVO -->
             <section class="doc-section" id="resumen-comparativo">
                 <div class="section-header">
                     <div class="section-header-title">
                         <div class="section-icon">📊</div>
                         <div>
-                            <h2>Resumen Comparativo de Experiencia por Rol</h2>
-                            <p style="margin: 0; font-size: 0.95rem;">Matriz de responsabilidades y valor aportado a cada perfil de usuario</p>
+                            <h2>Resumen de los tres papeles</h2>
+                            <p style="margin: 0; font-size: 0.95rem;">Lo mismo de arriba, en una sola tabla</p>
                         </div>
                     </div>
                 </div>
@@ -411,46 +760,53 @@
                     <table class="doc-table">
                         <thead>
                             <tr>
-                                <th>Dimensión</th>
-                                <th>Cliente</th>
-                                <th>Especialista / Trabajador</th>
-                                <th>Director / Administrador</th>
+                                <th></th>
+                                <th>💆‍♀️ Cliente</th>
+                                <th>🩺 Trabajador</th>
+                                <th>👑 Dueño</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
-                                <td><strong>Objetivo Principal</strong></td>
-                                <td>Encontrar su centro preferido y reservar cita en 2 minutos.</td>
-                                <td>Atender en cabina, gestionar turnos y evitar desabastecimiento.</td>
-                                <td>Garantizar la rentabilidad, ocupación de cabinas y control multisede.</td>
+                                <td><strong>Quiere</strong></td>
+                                <td>Encontrar un centro y reservar en 2 minutos.</td>
+                                <td>Atender, llevar la agenda y no quedarse sin producto.</td>
+                                <td>Que el centro esté bien configurado y saber cómo va.</td>
                             </tr>
                             <tr>
-                                <td><strong>Punto de Entrada</strong></td>
-                                <td>Página de inicio pública y buscador de centros con mapa (<code>/centers</code>).</td>
-                                <td>Inicio de sesión seguro (<code>/login</code>) al Dashboard de cabina.</td>
-                                <td>Panel integral o selector de perfiles de demostración (<code>/login-selector</code>).</td>
+                                <td><strong>Entra por</strong></td>
+                                <td>Inicio o el buscador <code>/centers</code>; el enlace corto <code>/c/…</code></td>
+                                <td><code>/login</code> → Panel</td>
+                                <td><code>/login</code> → Panel y Mi Centro</td>
                             </tr>
                             <tr>
-                                <td><strong>Nivel de Autenticación</strong></td>
-                                <td>Obligatoria (registro con correo y contraseña, o con Google).</td>
-                                <td>Obligatoria (correo o nombre y contraseña, o Google con el mismo correo).</td>
-                                <td>Obligatoria con privilegios de gestión de centro.</td>
+                                <td><strong>Cuenta</strong></td>
+                                <td>Solo para reservar (correo o Google)</td>
+                                <td>Por invitación del dueño (o Google con el mismo correo)</td>
+                                <td>Al dar de alta el centro</td>
                             </tr>
                             <tr>
-                                <td><strong>Gestión de Citas</strong></td>
-                                <td>Pedir cita, elegir entre horas propuestas, anular y recibir avisos por correo y campana.</td>
-                                <td>Aceptar, rechazar, proponer otras horas, crear, mover y anular citas, y bloquear horario.</td>
-                                <td>Supervisión de métricas de puntualidad y ausencia de solapes.</td>
+                                <td><strong>Citas</strong></td>
+                                <td>Pedir, elegir propuesta, cambiar hora, anular, valorar</td>
+                                <td>Aceptar, proponer, rechazar, crear, mover, anular, bloquear</td>
+                                <td>Lo mismo + reservas automáticas y plazo de cambio</td>
                             </tr>
                             <tr>
-                                <td><strong>Gestión de Insumos</strong></td>
-                                <td>Sin acceso al stock; ve los puntos que lleva en cada centro.</td>
-                                <td>Ajuste directo de existencias, alta de productos y venta a clientes (con puntos si el centro tiene tarjeta).</td>
-                                <td>Auditoría de roturas de stock y optimización de compras.</td>
+                                <td><strong>Productos</strong></td>
+                                <td>—; ve sus puntos</td>
+                                <td>Vender y ver stock</td>
+                                <td>Alta y ajustes de inventario</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Cifras</strong></td>
+                                <td>—</td>
+                                <td>Resumen del mes en el Panel</td>
+                                <td>Análisis completo y CSV</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
+                <p style="font-size: 0.9rem;">¿Buscas la ruta exacta, el método HTTP o el mensaje de error de una acción? Están en el <a href="manual-acciones.html">Manual de Acciones</a>.</p>
             </section>
 
         </main>
@@ -464,7 +820,7 @@
             <li><a href="manual-acciones.html">Manual de Acciones</a></li>
             <li><a href="evolucion-proyecto.html">Evolución & Commits</a></li>
         </ul>
-        <p>© 2026 Cuquora CRM — Plataforma de Gestión para Centros de Estética y Bienestar.</p>
+        <p>© 2026 Cuquora — Plataforma de Gestión para Centros de Estética y Bienestar · Documentación de la versión 0.9.0-beta (4 de noviembre de 2026).</p>
     </footer>
 
 </body>

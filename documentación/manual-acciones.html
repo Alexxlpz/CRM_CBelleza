@@ -11,6 +11,18 @@
 </head>
 <body>
 
+    <!-- Puntas de flecha que comparten todos los diagramas de esta página -->
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+        <defs>
+            <marker id="dga" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#8b857d"/></marker>
+            <marker id="dga-ok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#67b889"/></marker>
+            <marker id="dga-info" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#6fa9e8"/></marker>
+            <marker id="dga-bad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#e27171"/></marker>
+            <marker id="dga-wait" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#e0ad52"/></marker>
+        </defs>
+    </svg>
+
+
     <!-- Header / Navbar Principal -->
     <header class="doc-navbar">
         <a href="index.html" class="brand-wrapper">
@@ -41,13 +53,17 @@
             <div class="sidebar-group">
                 <div class="sidebar-title">Contenido del Manual</div>
                 <ul class="sidebar-nav">
-                    <li><a href="#matriz-permisos" class="active">Matriz de Permisos Global</a></li>
-                    <li><a href="#modulo-auth">Módulo 1: Autenticación & Sesión</a></li>
-                    <li><a href="#modulo-cliente">Módulo 2: Cliente & Reservas</a></li>
-                    <li><a href="#modulo-worker">Módulo 3: Especialista & Cabina</a></li>
-                    <li><a href="#modulo-api">Módulo 4: APIs REST de Disponibilidad</a></li>
-                    <li><a href="#modulo-onboarding">Módulo 5: Contacto, Correos & Alta de Centros</a></li>
-                    <li><a href="#reglas-negocio">Reglas de Negocio & Validaciones</a></li>
+                    <li><a href="#matriz-permisos" class="active">Inicio y novedades</a></li>
+                    <li><a href="#mapa-web">El mapa de la web</a></li>
+                    <li><a href="#matriz">Quién puede hacer qué</a></li>
+                    <li><a href="#modulo-auth">1. Entrar y registrarse</a></li>
+                    <li><a href="#modulo-cliente">2. Clientes y reservas</a></li>
+                    <li><a href="#modulo-worker">3. Trabajadores y su centro</a></li>
+                    <li><a href="#modulo-api">4. API JSON de centros y huecos</a></li>
+                    <li><a href="#modulo-onboarding">5. Alta de centros y contacto</a></li>
+                    <li><a href="#formato-datos">Formato de los datos</a></li>
+                    <li><a href="#correos">Correos</a></li>
+                    <li><a href="#reglas-negocio">Reglas y mensajes de error</a></li>
                 </ul>
             </div>
 
@@ -65,40 +81,136 @@
 
             <!-- Hero Section -->
             <section class="doc-hero" id="matriz-permisos">
-                <span class="doc-tag">Especificación de Operaciones del Sistema</span>
-                <h1>Manual de Acciones y Matriz de Permisos</h1>
+                <span class="doc-tag">Versión 0.9.0-beta · 4 de noviembre de 2026</span>
+                <h1>Manual de Acciones y Permisos</h1>
                 <p>
-                    Este documento define con rigor técnico todas las acciones, rutas web y endpoints que componen <strong>Cuquora CRM</strong>. Detalla qué rol está facultado para invocar cada operación, los parámetros requeridos, las validaciones de negocio aplicadas y los códigos de respuesta o redirección producidos.
+                    Todo lo que se puede hacer en <strong>Cuquora</strong>: cada ruta de la web, quién puede usarla, qué datos pide, qué comprueba y qué responde. Empieza por <a href="#mapa-web">el mapa de la web</a>; cada módulo abre con un resumen de 30 segundos y debajo está el detalle de cada ruta. Si buscas cómo se usa la app, sin rutas, ve a la <a href="guia-roles.html">Guía por roles</a>.
                 </p>
                 <div class="hero-meta-row">
                     <div class="hero-meta-item">
-                        <span>Total de Operaciones:</span>
-                        <strong>36 rutas documentadas</strong>
+                        <span>Versión:</span>
+                        <strong>0.9.0-beta (último commit a740c87)</strong>
                     </div>
                     <div class="hero-meta-item">
-                        <span>Validación de Citas:</span>
-                        <strong>Cabinas, profesionales y bloqueos</strong>
+                        <span>En producción:</span>
+                        <strong>cuquora.com (NAS Synology + túnel de Cloudflare)</strong>
+                    </div>
+                    <div class="hero-meta-item">
+                        <span>Base de datos:</span>
+                        <strong>Migraciones V1 a V27</strong>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- MAPA DE LA WEB -->
+            <section class="doc-section" id="mapa-web">
+                <div class="section-header">
+                    <div class="section-header-title">
+                        <div class="section-icon">🗺️</div>
+                        <div>
+                            <h2>El mapa de la web</h2>
+                            <p style="margin: 0; font-size: 0.95rem;">Cuatro zonas; la puerta de cada una decide quién pasa</p>
+                        </div>
+                    </div>
+                </div>
+
+                <figure class="diagram">
+                    <div class="diagram-scroll">
+                        <svg class="dg" viewBox="0 0 1100 360" role="img" aria-label="Zonas de la web: páginas públicas, zona del cliente, zona del trabajador y API JSON, con la puerta del login">
+                            <rect x="20" y="20" width="250" height="320" rx="14" class="bx b-off"/>
+                            <text x="145" y="48" text-anchor="middle" class="tz">PÚBLICA · SIN SESIÓN</text>
+                            <text x="40" y="82" class="lb">/home · /features</text><text x="40" y="99" class="lbs">inicio y funcionalidades</text>
+                            <text x="40" y="128" class="lb">/centers</text><text x="40" y="145" class="lbs">buscador con mapa</text>
+                            <text x="40" y="174" class="lb">/c/{nombre}</text><text x="40" y="191" class="lbs">ficha pública y opiniones</text>
+                            <text x="40" y="220" class="lb">/register · /register-center</text><text x="40" y="237" class="lbs">crear cuenta o dar de alta un centro</text>
+                            <text x="40" y="266" class="lb">/contact · /terms · /privacy</text><text x="40" y="283" class="lbs">contacto y páginas legales</text>
+                            <text x="40" y="312" class="lb">/invitation/{token}</text><text x="40" y="329" class="lbs">crear la contraseña del equipo</text>
+
+                            <rect x="330" y="140" width="150" height="80" rx="40" class="bx b-admin"/>
+                            <text x="405" y="174" text-anchor="middle" class="tt c-admin">/login</text>
+                            <text x="405" y="194" text-anchor="middle" class="ts">correo o Google</text>
+                            <line x1="270" y1="180" x2="326" y2="180" class="ar" marker-end="url(#dga)"/>
+
+                            <rect x="560" y="20" width="250" height="150" rx="14" class="bx b-client"/>
+                            <text x="685" y="48" text-anchor="middle" class="tz">/client/** · CLIENTE</text>
+                            <text x="580" y="80" class="lb">/client/centers/{nombre}</text><text x="580" y="97" class="lbs">reservar</text>
+                            <text x="580" y="124" class="lb">/client/appointments</text><text x="580" y="141" class="lbs">mis reservas · /client/profile</text>
+
+                            <rect x="560" y="190" width="250" height="150" rx="14" class="bx b-worker"/>
+                            <text x="685" y="218" text-anchor="middle" class="tz">/worker/** · TRABAJADOR</text>
+                            <text x="580" y="248" class="lb">dashboard · calendar</text><text x="580" y="265" class="lbs">panel y agenda</text>
+                            <text x="580" y="292" class="lb">clients · inventory · treatments</text><text x="580" y="309" class="lbs">center · reviews · analytics 👑</text>
+
+                            <path d="M480,170 H520 V95 H556" class="ar ok" marker-end="url(#dga-ok)"/>
+                            <text x="488" y="88" class="lbs">ROLE_CLIENT</text>
+                            <path d="M480,190 H520 V265 H556" class="ar info" marker-end="url(#dga-info)"/>
+                            <text x="488" y="290" class="lbs">trabajador</text><text x="488" y="305" class="lbs">con centro</text>
+
+                            <rect x="870" y="20" width="210" height="320" rx="14" class="bx b-infra"/>
+                            <text x="975" y="48" text-anchor="middle" class="tz">JSON</text>
+                            <text x="890" y="82" class="lb">/api/centers</text><text x="890" y="99" class="lbs">búsqueda, distancia,</text><text x="890" y="114" class="lbs">abierto y primer hueco</text>
+                            <text x="890" y="146" class="lb">…/{id}/availability</text><text x="890" y="163" class="lbs">horas libres y llenas</text>
+                            <text x="890" y="195" class="lb">/worker/calendar/data</text><text x="890" y="212" class="lbs">citas de la agenda (JSON,</text><text x="890" y="227" class="lbs">solo el equipo)</text>
+                            <text x="890" y="250" class="tm">Lo llaman las páginas</text><text x="890" y="266" class="tm">con fetch; los errores</text><text x="890" y="282" class="tm">también salen en JSON</text>
+                        </svg>
+                    </div>
+                    <p class="swipe-hint">Desliza el dibujo hacia los lados para verlo entero →</p>
+                    <figcaption><strong>Reglas de la puerta:</strong> sin sesión, una ruta protegida lleva al login y después vuelve a donde ibas. Un cliente que abre <code>/worker/**</code> (o al revés) no pasa. Una URL que no existe muestra la página 404 propia. Todos los <code>POST</code> llevan token CSRF.</figcaption>
+                </figure>
+
+                <div class="diagram-title">Cómo leer las tarjetas de este manual</div>
+                <ul class="tasks">
+                    <li><span><span class="http-get">GET</span> <span class="http-post">POST</span></span><span>GET abre una página o pide datos; POST envía un formulario o hace un cambio.</span></li>
+                    <li><span><span class="card-badge badge-guest">Público</span> <span class="card-badge badge-client">Cliente</span> <span class="card-badge badge-worker">Trabajador</span></span><span>Quién puede usar esa ruta. 👑 = solo el dueño del centro; el resto del equipo lo ve sin poder cambiarlo.</span></li>
+                    <li><span>Parámetros · Comprobación · Éxito · Error</span><span>Lo que pide, lo que revisa antes de hacer nada, a dónde te lleva si va bien y qué mensaje sale si no.</span></li>
+                </ul>
+            </section>
+
+            <!-- Novedades -->
+            <section class="doc-section" id="novedades">
+                <div class="callout callout-info">
+                    <div class="callout-icon">🆕</div>
+                    <div class="callout-content">
+                        <strong>Novedades desde la documentación del 1 de noviembre</strong>
+                        <ul style="margin: 0.4rem 0 0 1.2rem; font-size: 0.92rem;">
+                            <li><strong>En producción:</strong> la web se publica en <code>cuquora.com</code> desde un NAS Synology, a través de un túnel de Cloudflare (sin abrir puertos). Los pasos están en <code>docker/DESPLIEGUE.md</code> y en el <a href="index.html#produccion">Portal General</a>.</li>
+                            <li><strong>Correo:</strong> sale por Brevo como «Cuquora &lt;citas@cuquora.com&gt;», con versión HTML y en texto plano. Lo que alguien escribe a <code>citas@cuquora.com</code> lo reenvía Cloudflare Email Routing. Si un cliente contesta a un correo de su cita, le llega al dueño del centro. <a href="#correos">Ver correos</a>.</li>
+                            <li><strong>Teléfono con prefijo aparte</strong> en el alta de centros, el registro de clientes y «Mi Centro»; se guarda como «+34 612 345 678». La migración V27 pone así los teléfonos de centros ya guardados. <a href="#formato-datos">Ver formato</a>.</li>
+                            <li><strong>Alta de centros más estricta:</strong> se comprueba la letra o el dígito de control del CIF/NIF/NIE y las direcciones españolas tienen que llevar código postal.</li>
+                            <li><strong>«Rechazar registro»</strong> en la página de revisión de un centro nuevo: borra el centro sin publicar y las cuentas de su equipo. <a href="#modulo-onboarding">Ver alta de centros</a>.</li>
+                            <li><strong>Cartel con QR para el mostrador</strong> desde «Mi Centro», con descarga del QR en PNG y SVG.</li>
+                        </ul>
                     </div>
                 </div>
             </section>
 
             <!-- Matriz de Permisos Global -->
-            <section class="doc-section">
+            <section class="doc-section" id="matriz">
                 <div class="section-header">
                     <div class="section-header-title">
                         <div class="section-icon">🛡️</div>
                         <div>
-                            <h2>Matriz de Permisos por Rol de Usuario</h2>
-                            <p style="margin: 0; font-size: 0.95rem;">Rutas reales de los controladores a 28 de octubre de 2026 y quién puede usarlas. 👑 = solo el dueño del centro (quien lo dio de alta); el resto del equipo lo ve en lectura</p>
+                            <h2>Quién puede hacer qué</h2>
+                            <p style="margin: 0; font-size: 0.95rem;">Rutas reales de los controladores en la versión 0.9.0-beta. 👑 = solo el dueño del centro (quien lo dio de alta); el resto del equipo lo ve sin poder cambiarlo</p>
                         </div>
                     </div>
+                </div>
+
+                <div class="tldr">
+                    <div class="tldr-title">En 30 segundos</div>
+                    <ul>
+                        <li>Tres papeles: <strong>sin sesión</strong>, <strong>cliente</strong> y <strong>trabajador</strong>; dentro del trabajador, el <strong>dueño</strong> 👑 puede además cambiar la configuración.</li>
+                        <li>Cada fila es una ruta: busca la tuya y mira las tres últimas columnas.</li>
+                        <li>La lista completa de rutas está plegada debajo; el <a href="#mapa-web">mapa de la web</a> la resume en un dibujo.</li>
+                    </ul>
                 </div>
 
                 <p>
                     Las rutas <code>/client/**</code> solo las usa <code>ROLE_CLIENT</code> y <code>/worker/**</code> solo los trabajadores con centro asignado. Sin sesión, una ruta protegida lleva al login; una URL que no existe muestra la página 404 propia. Todos los <code>POST</code> llevan token CSRF (en <code>fetch</code> lo añade <code>app.js</code>).
                 </p>
 
-                <div class="table-responsive">
+                <details class="more"><summary>Ver las 65 rutas una a una</summary><div class="more-body"><div class="table-responsive">
                     <table class="doc-table">
                         <thead>
                             <tr>
@@ -137,9 +249,9 @@
                                 <td>✅ Permitido</td>
                             </tr>
                             <tr>
-                                <td><code>/register-center/approve/{token}</code></td>
+                                <td><code>/register-center/approve/{token}, /{token}/reject</code></td>
                                 <td><span class="http-get">GET</span> <span class="http-post">POST</span></td>
-                                <td>Revisar y publicar un centro nuevo (enlace del correo de administración); <code>/photo</code> enseña su foto</td>
+                                <td>Revisar un centro nuevo (enlace del correo a administración) y «Publicar centro» o «Rechazar registro» (<code>/reject</code>); <code>/photo</code> enseña su foto</td>
                                 <td>✅ Con el enlace</td>
                                 <td>✅ Con el enlace</td>
                                 <td>✅ Con el enlace</td>
@@ -357,7 +469,7 @@
                             <tr>
                                 <td><code>/client/google-calendar/connect | disconnect, /callback</code></td>
                                 <td><span class="http-get">GET</span> <span class="http-post">POST</span></td>
-                                <td>Ver las citas del cliente en Google Calendar</td>
+                                <td>Copiar las citas del cliente a Google Calendar</td>
                                 <td>❌ Login</td>
                                 <td>✅ Permitido</td>
                                 <td>❌ Bloqueado</td>
@@ -588,6 +700,22 @@
                                 <td>👑 Solo el dueño</td>
                             </tr>
                             <tr>
+                                <td><code>/worker/center/my-photo, /my-photo/delete</code></td>
+                                <td><span class="http-post">POST</span></td>
+                                <td>Subir o quitar la foto de perfil propia</td>
+                                <td>❌ Login</td>
+                                <td>❌ Bloqueado</td>
+                                <td>✅ La suya</td>
+                            </tr>
+                            <tr>
+                                <td><code>/worker/center/cartel, /qr.png, /qr.svg</code></td>
+                                <td><span class="http-get">GET</span></td>
+                                <td>Cartel A4 con QR para el mostrador (se imprime desde el navegador) y descarga del QR del enlace corto</td>
+                                <td>❌ Login</td>
+                                <td>❌ Bloqueado</td>
+                                <td>✅ Permitido</td>
+                            </tr>
+                            <tr>
                                 <td><code>/worker/center/team, /team/{id}/resend, /team/{id}/remove</code></td>
                                 <td><span class="http-post">POST</span></td>
                                 <td>Equipo: invitar a alguien, reenviar la invitación o sacarlo del centro</td>
@@ -621,7 +749,7 @@
                             </tr>
                         </tbody>
                     </table>
-                </div>
+                </div></div></details>
             </section>
 
             <!-- MÓDULO 1: AUTENTICACIÓN -->
@@ -630,10 +758,19 @@
                     <div class="section-header-title">
                         <div class="section-icon">🔑</div>
                         <div>
-                            <h2>Módulo 1: Autenticación, Sesión y Accesos</h2>
+                            <h2>1. Entrar, registrarse y cerrar sesión</h2>
                             <p style="margin: 0; font-size: 0.95rem;">Spring Security: <code>SecurityConfig</code>, <code>AppUserDetailsService</code>, <code>GoogleOidcUserService</code>, <code>UserService</code></p>
                         </div>
                     </div>
+                </div>
+
+                <div class="tldr">
+                    <div class="tldr-title">En 30 segundos</div>
+                    <ul>
+                        <li>Se entra con <strong>correo (o nombre) y contraseña</strong>, o con Google si el correo coincide.</li>
+                        <li>Tras el login, el cliente va a los centros (o a la página que intentaba abrir) y el trabajador a su panel.</li>
+                        <li>5 fallos seguidos con una cuenta desde la misma conexión cierran el login 15 minutos.</li>
+                    </ul>
                 </div>
 
                 <div class="card-feature" style="margin-bottom: 1.5rem;">
@@ -674,7 +811,13 @@
                         <strong>/register</strong>
                         <span class="card-badge badge-guest">Público</span>
                     </div>
-                    <p>Crea una cuenta de cliente (nombre, correo, teléfono, contraseña y confirmación; mínimo 8 caracteres y no puede ser de las más usadas, <code>PasswordPolicy</code>). La cuenta nueva entra al momento, con el correo sin comprobar. Si el correo es de un cliente dado de alta a mano, no pone la contraseña: manda a ese correo un enlace de activación para ponerla desde ahí. Como mucho 10 registros por conexión y hora. Si es de una cuenta solo de Google, avisa de que ya existe y propone «Continuar con Google». No se aceptan correos internos <code>@cbelleza.local</code>.</p>
+                    <p>Crea una cuenta de cliente. La cuenta nueva entra al momento, con el correo sin comprobar.</p>
+                    <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.9rem;">
+                        <li><strong>Datos:</strong> nombre, correo, teléfono con prefijo de país (ver <a href="#formato-datos">Formato de los datos</a>), contraseña y confirmación.</li>
+                        <li><strong>Contraseña:</strong> 8 caracteres como mínimo y ninguna de las más usadas (<code>PasswordPolicy</code>).</li>
+                        <li><strong>Correo ya conocido:</strong> si es de un cliente dado de alta a mano, no pone la contraseña: manda a ese correo un enlace de activación. Si es de una cuenta solo de Google, avisa y propone «Continuar con Google». No se aceptan correos internos <code>@cbelleza.local</code>.</li>
+                        <li><strong>Límite:</strong> 10 registros por conexión y hora.</li>
+                    </ul>
                 </div>
 
                 <div class="card-feature" style="margin-bottom: 1.5rem;">
@@ -702,11 +845,85 @@
                     <div class="section-header-title">
                         <div class="section-icon">📅</div>
                         <div>
-                            <h2>Módulo 2: Portal de Clientes y Agendamiento</h2>
+                            <h2>2. Clientes y reservas</h2>
                             <p style="margin: 0; font-size: 0.95rem;">Controladores: <code>PublicPagesController</code>, <code>ClientBookingController</code>, <code>ClientNotificationController</code>, <code>ClientProfileController</code>, <code>GoogleCalendarController</code></p>
                         </div>
                     </div>
                 </div>
+
+                <div class="tldr">
+                    <div class="tldr-title">En 30 segundos</div>
+                    <ul>
+                        <li>Buscar y ver la ficha de un centro es público; reservar y «Mis reservas» piden ser cliente.</li>
+                        <li>Una reserva crea una <strong>solicitud</strong> o, si el centro acepta automáticamente, una cita <strong>confirmada</strong>.</li>
+                        <li>El dibujo de abajo es el ciclo completo de una cita; las tarjetas explican cada botón.</li>
+                    </ul>
+                </div>
+
+                <div class="diagram-title">La vida de una cita</div>
+                <figure class="diagram">
+                    <div class="diagram-scroll">
+                        <svg class="dg" viewBox="0 0 1100 470" role="img" aria-label="Estados de una cita: solicitud, propuesta, confirmada, rechazada, anulada, completada y no se presentó">
+                            <!-- Atajo: aceptar automáticamente -->
+                            <path d="M90,196 V34 H780 V190" class="ar ok dash" marker-end="url(#dga-ok)"/>
+                            <text x="435" y="26" text-anchor="middle" class="lbs">Si el centro acepta automáticamente, la cita nace confirmada</text>
+
+                            <!-- Nodos -->
+                            <rect x="20" y="196" width="140" height="64" rx="32" class="bx b-client"/>
+                            <text x="90" y="223" text-anchor="middle" class="tt c-client">El cliente</text>
+                            <text x="90" y="242" text-anchor="middle" class="ts">pide una cita</text>
+
+                            <rect x="220" y="196" width="170" height="64" rx="10" class="bx b-wait"/>
+                            <text x="305" y="223" text-anchor="middle" class="tt c-admin">Solicitud</text>
+                            <text x="305" y="242" text-anchor="middle" class="ts">espera respuesta</text>
+
+                            <rect x="470" y="60" width="170" height="64" rx="10" class="bx b-info"/>
+                            <text x="555" y="87" text-anchor="middle" class="tt c-worker">Propuesta</text>
+                            <text x="555" y="106" text-anchor="middle" class="ts">1 a 3 horas nuevas</text>
+
+                            <rect x="220" y="380" width="170" height="64" rx="10" class="bx b-bad"/>
+                            <text x="305" y="407" text-anchor="middle" class="tt c-bad">Rechazada</text>
+                            <text x="305" y="426" text-anchor="middle" class="ts">con un mensaje</text>
+
+                            <rect x="720" y="196" width="170" height="64" rx="10" class="bx b-ok"/>
+                            <text x="805" y="223" text-anchor="middle" class="tt c-client">Confirmada</text>
+                            <text x="805" y="242" text-anchor="middle" class="ts">con su profesional</text>
+
+                            <rect x="720" y="380" width="170" height="64" rx="10" class="bx b-off"/>
+                            <text x="805" y="407" text-anchor="middle" class="tt c-off">Anulada</text>
+                            <text x="805" y="426" text-anchor="middle" class="ts">por el cliente o el centro</text>
+
+                            <rect x="930" y="110" width="160" height="64" rx="10" class="bx b-ok"/>
+                            <text x="1010" y="137" text-anchor="middle" class="tt c-client">Completada</text>
+                            <text x="1010" y="156" text-anchor="middle" class="ts">sola, al terminar</text>
+
+                            <rect x="930" y="282" width="160" height="64" rx="10" class="bx b-off"/>
+                            <text x="1010" y="309" text-anchor="middle" class="tt c-off">No se presentó</text>
+                            <text x="1010" y="328" text-anchor="middle" class="ts">se puede deshacer</text>
+
+                            <!-- Flechas -->
+                            <line x1="160" y1="228" x2="216" y2="228" class="ar wait" marker-end="url(#dga-wait)"/>
+                            <line x1="390" y1="228" x2="716" y2="228" class="ar ok" marker-end="url(#dga-ok)"/>
+                            <text x="470" y="219" text-anchor="middle" class="lb">el centro acepta</text>
+                            <path d="M305,196 V92 H466" class="ar info" marker-end="url(#dga-info)"/>
+                            <text x="316" y="150" class="lb">el centro propone</text>
+                            <text x="316" y="166" class="lb">otra hora</text>
+                            <path d="M640,92 H845 V192" class="ar ok" marker-end="url(#dga-ok)"/>
+                            <text x="652" y="84" class="lb">el cliente elige una</text>
+                            <path d="M600,124 V412 H716" class="ar dash" marker-end="url(#dga)"/>
+                            <text x="612" y="320" class="lbs">ninguna le va bien</text>
+                            <text x="612" y="336" class="lbs">o caduca sin respuesta</text>
+                            <line x1="305" y1="260" x2="305" y2="376" class="ar bad" marker-end="url(#dga-bad)"/>
+                            <text x="316" y="322" class="lb">el centro rechaza</text>
+                            <line x1="805" y1="260" x2="805" y2="376" class="ar dash" marker-end="url(#dga)"/>
+                            <text x="816" y="322" class="lbs">se anula</text>
+                            <path d="M890,228 H910 V142 H926" class="ar ok" marker-end="url(#dga-ok)"/>
+                            <path d="M910,228 V314 H926" class="ar dash" marker-end="url(#dga)"/>
+                        </svg>
+                    </div>
+                    <p class="swipe-hint">Desliza el dibujo hacia los lados para verlo entero →</p>
+                    <figcaption><strong>Cómo leerlo:</strong> sigue las flechas de izquierda a derecha. Verde = la cita sigue adelante; azul = el centro propone otra hora; rojo = el centro la rechaza; gris discontinuo = se queda sin hacer. Una solicitud también se puede anular antes de que el centro responda.</figcaption>
+                </figure>
 
                 <div class="card-feature" style="margin-bottom: 1.5rem;">
                     <div class="card-feature-header">
@@ -714,7 +931,13 @@
                         <strong>/centers</strong>
                         <span class="card-badge badge-guest">Público</span>
                     </div>
-                    <p>Buscador de centros con tarjetas y mapa (Leaflet + OpenStreetMap). Los datos llegan de <code>/api/centers</code>: nota y número de opiniones, si está abierto ahora y el primer hueco libre de los próximos 14 días (<code>AgendaAvailabilityService.firstFreeSlot</code>, solo para los centros de la página). Filtros rápidos «Con ofertas», «Abierto ahora» y «4 o más» (<code>topRated=true</code>); en móvil van dentro del panel de ajustes. Las tarjetas no enseñan dirección ni contacto (están en la ficha). Al tocar un marcador se abre un globo con «Ver tratamientos»; sin sesión, ese botón lleva al login y luego de vuelta al centro. La ruta antigua <code>/client/centers</code> redirige aquí.</p>
+                    <p>Buscador de centros con tarjetas y mapa (Leaflet + OpenStreetMap).</p>
+                    <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.9rem;">
+                        <li><strong>Datos</strong> (de <code>/api/centers</code>): nota y número de opiniones, si está abierto ahora y el primer hueco libre de los próximos 14 días (<code>AgendaAvailabilityService.firstFreeSlot</code>, solo para los centros de la página).</li>
+                        <li><strong>Filtros rápidos:</strong> «Con ofertas», «Abierto ahora» y «4 o más» (<code>topRated=true</code>); en móvil van dentro del panel de ajustes.</li>
+                        <li><strong>Tarjetas:</strong> sin dirección ni contacto (están en la ficha). Al tocar un marcador se abre un globo con «Ver tratamientos»; sin sesión, ese botón pide entrar y vuelve al centro.</li>
+                        <li>La ruta antigua <code>/client/centers</code> redirige aquí.</li>
+                    </ul>
                 </div>
 
                 <div class="card-feature" style="margin-bottom: 1.5rem;">
@@ -723,7 +946,14 @@
                         <strong>/client/centers/{nombre}</strong>
                         <span class="card-badge badge-client">CLIENT</span>
                     </div>
-                    <p>Ficha del centro, con el nombre en la dirección (<code>CenterService.shortSlugs</code>: si dos centros se llaman igual, el más nuevo lleva -2, -3…; por número de id responde 404). Foto, nota en estrellas, botón «Compartir» (enlace corto <code>/c/{nombre}</code>), datos, horario de reservas, tratamientos con duración y precio, el paso «¿Con quién?» y las opiniones (resumen y carrusel con las 6 últimas; «Ver las N opiniones» abre <code>/client/centers/{nombre}/opiniones</code> con filtros). El calendario de la reserva (<code>fragments/datetime-picker.html</code> + <code>booking-picker.js</code>) marca cada día como con horas libres, completo o cerrado y enseña las horas libres del día elegido. Un centro sin publicar responde 404. Un trabajador que intenta ver un centro como cliente recibe un aviso con enlace a su panel.</p>
+                    <p>Ficha del centro para reservar.</p>
+                    <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.9rem;">
+                        <li><strong>Dirección:</strong> lleva el nombre del centro (<code>centers.slug</code>; si dos se llaman igual, el más nuevo lleva -2, -3…). Por número de id, o si el centro no está publicado, responde 404.</li>
+                        <li><strong>Qué enseña:</strong> foto, nota en estrellas, «Compartir» (enlace corto <code>/c/{nombre}</code>), datos, horario de reservas, tratamientos con duración y precio y el paso «¿Con quién?».</li>
+                        <li><strong>Opiniones:</strong> resumen y carrusel con las 6 últimas; «Ver las N opiniones» abre <code>/client/centers/{nombre}/opiniones</code> con filtros.</li>
+                        <li><strong>Calendario</strong> (<code>fragments/datetime-picker.html</code> + <code>booking-picker.js</code>): marca cada día como con horas libres, completo o cerrado y enseña las horas libres del día elegido.</li>
+                        <li>Un trabajador que la abre ve un aviso con enlace a su panel.</li>
+                    </ul>
                 </div>
 
                 <div class="card-feature" style="margin-bottom: 1.5rem;">
@@ -782,10 +1012,19 @@
                     <div class="section-header-title">
                         <div class="section-icon">🩺</div>
                         <div>
-                            <h2>Módulo 3: Operaciones de Especialista y Cabina</h2>
+                            <h2>3. Trabajadores y su centro</h2>
                             <p style="margin: 0; font-size: 0.95rem;">Controladores: <code>WorkerCalendarController</code>, <code>WorkerAppointmentApiController</code>, <code>InventoryController</code>, <code>TreatmentController</code>, <code>ClientCardController</code>, <code>WorkerCenterController</code>, <code>WorkerReviewController</code>, <code>WorkerDashboardController</code>, <code>GoogleCalendarController</code></p>
                         </div>
                     </div>
+                </div>
+
+                <div class="tldr">
+                    <div class="tldr-title">En 30 segundos</div>
+                    <ul>
+                        <li>Todo lo de <code>/worker/**</code> trabaja solo con el centro del trabajador: nunca ve otro.</li>
+                        <li>Lo marcado con 👑 lo cambia solo el dueño; el resto lo ve en lectura.</li>
+                        <li>Agenda (citas y bloqueos), clientes, inventario, tratamientos, reseñas, análisis y Mi Centro, en ese orden.</li>
+                    </ul>
                 </div>
 
                 <div class="callout callout-info" style="margin-bottom: 1.5rem;">
@@ -935,11 +1174,12 @@
                         <strong>/worker/center</strong>
                         <span class="card-badge badge-worker">WORKER</span>
                     </div>
-                    <p>«Mi Centro»: datos del centro y ubicación con pin, zona horaria (entre las de <code>CenterTimeZones.OPTIONS</code>), cabinas (1-50), datos personales y contraseña del trabajador (para cambiarla hay que escribir la actual).</p>
+                    <p>«Mi Centro»: datos del centro (el teléfono con el mismo campo de prefijo que el alta) y ubicación con pin, zona horaria (entre las de <code>CenterTimeZones.OPTIONS</code>), cabinas (1-50), datos personales y contraseña del trabajador (para cambiarla hay que escribir la actual).</p>
                     <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.9rem;">
                         <li><code>POST /worker/center/photo</code> · <code>/photo/delete</code> (<code>CenterPhotoService</code>): JPG o PNG hasta 8 MB y al menos 400×250 px. Se endereza con la orientación EXIF y se guarda en la base de datos como JPEG de 1200 px como mucho. Sale en el buscador, en la ficha del centro y detrás del saludo del panel; sin foto, las iniciales del centro.</li>
                         <li><code>POST /worker/center/my-photo</code> · <code>/my-photo/delete</code> (<code>WorkerPhotoService</code>): foto de perfil de cada trabajador (no hace falta ser el dueño). JPG o PNG hasta 8 MB y al menos 160×160 px; se recorta en cuadrado y se guarda como JPEG de 400 px. Sale al reservar («¿Con quién?») y en el Equipo; sin foto, la inicial.</li>
                         <li><code>POST /worker/center/bookings</code> (aceptar automáticamente) y <code>/reschedule</code> (<code>hours</code>: 0, 2, 12, 24 o 48; hasta cuántas horas antes puede el cliente cambiar la hora; 0 = no puede). En el mismo bloque, el enlace corto <code>/c/{nombre}</code> con «Copiar».</li>
+                        <li><code>GET /worker/center/cartel</code> (<code>CenterPosterController</code>): «Cartel con QR para el mostrador». Hoja A4 con la foto del centro (o sus iniciales), el nombre, el QR del enlace corto, tres pasos, la dirección y el horario; «Imprimir cartel» imprime solo la hoja, siempre en claro. <code>/qr.png</code> (1200 px) y <code>/qr.svg</code> descargan el QR (<code>QrCodeService</code>, ZXing). Lo abre cualquier trabajador del centro. El QR lleva la dirección de <code>SITE_URL</code>: si cambia el dominio, hay que imprimirlo de nuevo.</li>
                         <li><code>GET|POST /worker/center/team/{id}/horario</code> (<code>WorkerHoursService</code>): tramos de cada día en los que trabaja esa persona (dos el mismo día = jornada partida), siempre dentro del horario del centro. Sin tramos, trabaja siempre que el centro abre.</li>
                         <li><code>POST /worker/center/loyalty</code> (<code>LoyaltyService.updateSettings</code>): modo (desactivada, <code>PER_EURO</code> o <code>PER_ITEM</code>), puntos que se ganan (1-1000), puntos para la recompensa (1-100.000) y su texto (hasta 200 caracteres). Los tratamientos suman cuando la cita está completada y solo desde que se activó la tarjeta.</li>
                     </ul>
@@ -961,10 +1201,26 @@
                     <div class="section-header-title">
                         <div class="section-icon">🌐</div>
                         <div>
-                            <h2>Módulo 4: APIs REST de Disponibilidad y Geoposicionamiento</h2>
+                            <h2>4. API JSON de centros y huecos libres</h2>
                             <p style="margin: 0; font-size: 0.95rem;">Controlador: <code>CenterApiController</code> (<code>@ApiEndpoint</code>: los errores también salen en JSON)</p>
                         </div>
                     </div>
+                </div>
+
+                <div class="tldr">
+                    <div class="tldr-title">En 30 segundos</div>
+                    <ul>
+                        <li>La usan las propias páginas para el buscador y el selector de hora; devuelve JSON.</li>
+                        <li>Una hora sale llena si no queda cabina o ningún profesional libre (citas, bloqueos, horas propuestas y horario de cada uno).</li>
+                        <li>Si algo falla, el error también llega en JSON con el mensaje en español.</li>
+                    </ul>
+                </div>
+
+                <div class="equation">
+                    <span class="eq-term">Centro abierto<small>horario + sin cierre</small></span><span class="eq-op">+</span>
+                    <span class="eq-term">Cabina libre<small>citas a la vez &lt; cabinas</small></span><span class="eq-op">+</span>
+                    <span class="eq-term">Profesional libre<small>en su horario, sin cita, bloqueo ni propuesta</small></span><span class="eq-op">=</span>
+                    <span class="eq-term eq-result">Hueco libre en <code>availability</code></span>
                 </div>
 
                 <div class="card-feature" style="margin-bottom: 1.5rem;">
@@ -999,49 +1255,134 @@
                         <span class="card-badge badge-guest">JSON REST</span>
                     </div>
                     <p>
-                        Búsqueda de centros para la página <code>/centers</code>. Si se pasan <code>lat</code> y <code>lon</code>, calcula la distancia en kilómetros a cada centro con la <strong>fórmula de Haversine</strong> (<code>GeoDistance</code>). Filtros <code>withOffers</code>, <code>openNow</code> y <code>topRated</code> (4 estrellas o más). Cada centro trae su nombre en la dirección (<code>slug</code>), la nota (<code>rating</code>, <code>reviewCount</code>), si está abierto y el primer hueco libre de los próximos 14 días (<code>firstSlot</code>, solo para la página devuelta). Las tarjetas ya no pintan dirección, correo ni teléfono, aunque la respuesta los sigue trayendo.
+                        Búsqueda de centros para la página <code>/centers</code>.
                     </p>
+                    <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.9rem;">
+                        <li><strong>Distancia:</strong> con <code>lat</code> y <code>lon</code>, los kilómetros a cada centro (fórmula de Haversine, <code>GeoDistance</code>).</li>
+                        <li><strong>Filtros:</strong> <code>withOffers</code>, <code>openNow</code> y <code>topRated</code> (4 estrellas o más).</li>
+                        <li><strong>Cada centro trae:</strong> su nombre en la dirección (<code>slug</code>), la nota (<code>rating</code>, <code>reviewCount</code>), si está abierto y el primer hueco libre de los próximos 14 días (<code>firstSlot</code>, solo para la página devuelta). También trae dirección, correo y teléfono, aunque las tarjetas ya no los enseñan.</li>
+                    </ul>
                 </div>
             </section>
 
-            <!-- MÓDULO 5: CONTACTO, NOTIFICACIONES Y CERTIFICACIÓN DE CENTROS -->
+            <!-- MÓDULO 5: ALTA DE CENTROS Y CONTACTO -->
             <section class="doc-section" id="modulo-onboarding">
                 <div class="section-header">
                     <div class="section-header-title">
                         <div class="section-icon">📬</div>
                         <div>
-                            <h2>Módulo 5: Contacto, Correos y Alta de Centros</h2>
-                            <p style="margin: 0; font-size: 0.95rem;">Controladores: <code>ContactController</code>, <code>CenterRegistrationController</code>, <code>CenterPhotoController</code> · Correo: <code>EmailGateway</code>, <code>InquiryMailService</code>, <code>AppointmentMailService</code></p>
+                            <h2>5. Alta de centros y contacto</h2>
+                            <p style="margin: 0; font-size: 0.95rem;">Controladores: <code>CenterRegistrationController</code> (alta, revisión e invitaciones), <code>ContactController</code>, <code>CenterPhotoController</code></p>
                         </div>
                     </div>
                 </div>
 
-                <div class="card-feature" style="margin-bottom: 1.5rem;">
-                    <div class="card-feature-header">
-                        <span class="http-get">GET</span> <span class="http-post">POST</span>
-                        <strong>/register-center · /invitation · /contact</strong>
-                        <span class="card-badge badge-guest">Público</span>
-                    </div>
-                    <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.9rem; margin-bottom: 0.8rem;">
-                        <li><strong>Alta de centro</strong> (<code>CenterRegistrationController</code>, asistente de 6 pasos con vista previa a la derecha desde 1100 px; por debajo, «Ver vista previa» la añade como paso final de confirmación antes de enviar): datos del centro, foto opcional y CIF/NIF, dirección con pin en el mapa, zona horaria, horario de apertura por día, cabinas, responsable (queda como dueño del centro) y hasta 20 trabajadores más (nombre y correo), tarjeta de puntos opcional, especialidades y notas. Crea el centro <strong>oculto</strong> y a todo el equipo como trabajadores sin contraseña.</li>
-                        <li><strong>Invitaciones</strong> (<code>/invitation/{token}</code>): el responsable recibe su enlace al momento y el resto del equipo cuando se publica el centro; es de un solo uso (7 días) y sirve para crear la contraseña; si caduca, pide otro desde la misma página. También puede entrar con Google.</li>
-                        <li><strong>Publicación</strong> (<code>/register-center/approve/{token}</code>): el administrador (<code>CRM_ADMIN_EMAIL</code>) recibe el enlace, revisa los datos y pulsa «Publicar centro»; entonces sale en el buscador y el mapa y admite reservas, y el centro recibe un aviso.</li>
-                        <li><strong>Contacto:</strong> <code>name</code>, <code>email</code>, <code>phone</code>, <code>subject</code> y <code>message</code>, con acuse (asunto y texto fijos, no repite lo escrito) y aviso al administrador.</li>
-<li><strong>Freno a robots:</strong> contacto (5), alta de centro (5) y registro (10) envíos por conexión y hora (<code>PublicFormLimiter</code>), y un campo trampa oculto (<code>website</code>) en contacto y alta: si llega relleno, se descarta.</li>
-                        <li><strong>Validación</strong> en el navegador (botón desactivado hasta que el formulario es válido) y en el servidor.</li>
+                <div class="tldr">
+                    <div class="tldr-title">En 30 segundos</div>
+                    <ul>
+                        <li>El alta de un centro es un asistente de 6 pasos; el centro <strong>nace oculto</strong>.</li>
+                        <li>Administración recibe un correo y elige «Publicar centro» o «Rechazar registro».</li>
+                        <li>Más abajo: el formato de cada dato (teléfono, CIF, CP) y el mapa de los 9 correos.</li>
                     </ul>
                 </div>
 
-                <div class="card-feature">
+                <figure class="diagram">
+                    <div class="diagram-scroll">
+                        <svg class="dg" viewBox="0 0 1100 250" role="img" aria-label="Alta de un centro: el dueño rellena el asistente, el centro queda oculto, administración lo revisa y lo publica o lo rechaza">
+                            <rect x="20" y="40" width="210" height="84" rx="10" class="bx b-owner"/>
+                            <text x="125" y="70" text-anchor="middle" class="tt c-owner">1 · El dueño rellena</text>
+                            <text x="125" y="91" text-anchor="middle" class="ts">el asistente de 6 pasos</text>
+                            <text x="125" y="109" text-anchor="middle" class="tm">en /register-center</text>
+
+                            <rect x="290" y="40" width="210" height="84" rx="10" class="bx b-off"/>
+                            <text x="395" y="70" text-anchor="middle" class="tt">2 · Centro oculto</text>
+                            <text x="395" y="91" text-anchor="middle" class="ts">el dueño ya puede entrar</text>
+                            <text x="395" y="109" text-anchor="middle" class="ts">y preparar carta e inventario</text>
+
+                            <rect x="560" y="40" width="210" height="84" rx="10" class="bx b-admin"/>
+                            <text x="665" y="70" text-anchor="middle" class="tt c-admin">3 · Administración</text>
+                            <text x="665" y="91" text-anchor="middle" class="ts">recibe un correo con el</text>
+                            <text x="665" y="109" text-anchor="middle" class="ts">enlace para revisarlo</text>
+
+                            <rect x="840" y="0" width="245" height="84" rx="10" class="bx b-ok"/>
+                            <text x="962" y="30" text-anchor="middle" class="tt c-client">«Publicar centro»</text>
+                            <text x="962" y="51" text-anchor="middle" class="ts">sale en el buscador y el resto</text>
+                            <text x="962" y="69" text-anchor="middle" class="ts">del equipo recibe su invitación</text>
+
+                            <rect x="840" y="140" width="245" height="84" rx="10" class="bx b-bad"/>
+                            <text x="962" y="170" text-anchor="middle" class="tt c-bad">«Rechazar registro»</text>
+                            <text x="962" y="191" text-anchor="middle" class="ts">borra el centro y las cuentas</text>
+                            <text x="962" y="209" text-anchor="middle" class="ts">de su equipo · no se deshace</text>
+
+                            <line x1="230" y1="82" x2="286" y2="82" class="ar" marker-end="url(#dga)"/>
+                            <line x1="500" y1="82" x2="556" y2="82" class="ar" marker-end="url(#dga)"/>
+                            <path d="M770,74 H805 V42 H836" class="ar ok" marker-end="url(#dga-ok)"/>
+                            <path d="M770,90 H805 V182 H836" class="ar bad" marker-end="url(#dga-bad)"/>
+
+                            <text x="20" y="168" class="tm">Al enviar el alta, el dueño recibe al momento su invitación para crear la contraseña.</text>
+                            <text x="20" y="188" class="tm">Cada invitación sirve una sola vez y caduca a los 7 días; también se puede entrar con Google.</text>
+                        </svg>
+                    </div>
+                    <p class="swipe-hint">Desliza el dibujo hacia los lados para verlo entero →</p>
+                </figure>
+
+                <div class="card-feature" style="margin-bottom: 1.5rem;">
+                    <div class="card-feature-header">
+                        <span class="http-get">GET</span> <span class="http-post">POST</span>
+                        <strong>/register-center · /invitation · /register-center/approve · /contact</strong>
+                        <span class="card-badge badge-guest">Público</span>
+                    </div>
+                    <ol class="text-secondary" style="margin-left: 1.5rem; font-size: 0.9rem; margin-bottom: 0.8rem;">
+                        <li><strong>Alta</strong> (<code>/register-center</code> o <code>/alta-centro</code>): asistente de 6 pasos. Desde 1100 px la vista previa va a la derecha; por debajo, «Ver vista previa» la añade como último paso antes de enviar.
+                            <ul style="margin: 0.3rem 0 0 1.2rem;">
+                                <li>Pide: datos del centro, teléfono con prefijo, CIF/NIF, foto opcional, dirección con código postal y pin en el mapa, zona horaria, horario de apertura por día, cabinas, responsable (queda como dueño del centro), hasta 20 trabajadores más (nombre y correo), tarjeta de puntos opcional, especialidades y notas para la revisión (hasta 2000 caracteres).</li>
+                                <li>Crea el centro <strong>sin publicar</strong> y a todo el equipo como trabajadores sin contraseña.</li>
+                                <li>Comprueba los datos en el navegador (el botón no se activa hasta que todo es válido) y otra vez en el servidor, con las mismas reglas (<a href="#formato-datos">Formato de los datos</a>).</li>
+                            </ul>
+                        </li>
+                        <li><strong>Invitaciones</strong> (<code>/invitation/{token}</code>): el responsable recibe su enlace al momento y el resto del equipo cuando se publica el centro. Cada enlace sirve una vez, dura 7 días y es para crear la contraseña; si caduca, se pide otro en la misma página. También se puede entrar con Google.</li>
+                        <li><strong>Revisión</strong> (<code>/register-center/approve/{token}</code>): administración (<code>CRM_ADMIN_EMAIL</code>) recibe el enlace por correo, revisa los datos y elige:
+                            <ul style="margin: 0.3rem 0 0 1.2rem;">
+                                <li><strong>«Publicar centro»</strong>: sale en el buscador y el mapa, admite reservas, el dueño recibe un aviso y el equipo su invitación.</li>
+                                <li><strong>«Rechazar registro»</strong> (<code>POST /{token}/reject</code>, pide confirmación): borra el centro, las cuentas de su equipo y todo lo que hayan preparado (tratamientos, inventario, agenda, fichas…). Los clientes con cuenta se quedan; los apuntados a mano solo se borran si no salen en otro centro. No se puede deshacer, no manda ningún correo y el enlace deja de valer.</li>
+                            </ul>
+                        </li>
+                    </ol>
+                    <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.9rem; margin-bottom: 0.8rem;">
+                        <li><strong>Contacto</strong> (<code>/contact</code> o <code>/contacto</code>): <code>name</code>, <code>email</code>, <code>phone</code>, <code>subject</code> y <code>message</code>. Llega a administración y quien escribe recibe un acuse (asunto y texto fijos, no repite lo escrito).</li>
+                        <li><strong>Freno a robots:</strong> contacto (5), alta de centro (5) y registro (10) envíos por conexión y hora (<code>PublicFormLimiter</code>), y un campo trampa oculto (<code>website</code>) en contacto y alta: si llega relleno, se descarta.</li>
+                    </ul>
+                </div>
+
+                <div class="card-feature" id="formato-datos" style="margin-bottom: 1.5rem;">
+                    <div class="card-feature-header">
+                        <strong>Formato de los datos</strong>
+                        <span class="card-badge badge-admin">Navegador y servidor</span>
+                    </div>
+                    <p>Las mismas reglas se aplican en el navegador (mientras se escribe) y en el servidor (al guardar).</p>
+                    <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.9rem;">
+                        <li style="margin-bottom: 0.7rem;"><strong>Teléfono</strong> <span class="text-muted" style="font-size: 0.85rem;">· Alta de centro, registro de cliente y «Mi Centro»</span><br>Prefijo en su propia lista y el número aparte. El prefijo sale elegido según el país de la visita (cabecera <code>CF-IPCountry</code> de Cloudflare), si no por el idioma del navegador y si no +34. Se pueden escribir otros con <code>+NN</code> o <code>00NN</code>. Solo cifras, agrupadas al escribir, con el largo máximo de cada país y teclado numérico en el móvil. Se guarda como «+34 612 345 678» (<code>PhoneNumbers</code> y <code>phone-input.js</code>, que deben ir a la par).</li>
+                        <li style="margin-bottom: 0.7rem;"><strong>CIF / NIF / NIE</strong> <span class="text-muted" style="font-size: 0.85rem;">· Alta de centro</span><br>Se guarda sin espacios ni guiones (B12345674). En centros de España se comprueba la letra o el dígito de control y tiene 9 caracteres; en otros países basta con letras y números (<code>TaxIds</code>).</li>
+                        <li style="margin-bottom: 0.7rem;"><strong>Dirección</strong> <span class="text-muted" style="font-size: 0.85rem;">· Alta de centro</span><br>En España tiene que llevar código postal: 5 cifras que empiezan por 01 a 52.</li>
+                        <li style="margin-bottom: 0.7rem;"><strong>Correo</strong> <span class="text-muted" style="font-size: 0.85rem;">· Alta de centro, invitaciones al equipo y registro de cliente</span><br>Una sola regla (<code>Emails</code>): algo@dominio.xx, con terminación de 2 letras o más y 254 caracteres como mucho. Se guarda en minúsculas.</li>
+                        <li style="margin-bottom: 0.7rem;"><strong>Nombres</strong> <span class="text-muted" style="font-size: 0.85rem;">· Alta de centro y equipo</span><br>Sin espacios al principio ni al final, sin espacios dobles y con largo mínimo y máximo.</li>
+                    </ul>
+                    <p style="font-size: 0.9rem;">Los teléfonos de centros guardados antes de esta regla los pasa al formato nuevo la migración <code>V27__formato_telefonos_centros</code> (en Java, para usar las mismas reglas en H2 y PostgreSQL). Los que no se entienden como teléfono se quedan como estaban y el dueño los corrige en «Mi Centro».</p>
+                </div>
+
+                <div class="card-feature" id="correos">
                     <div class="card-feature-header">
                         <strong>Envío de correos</strong>
                         <span class="card-badge badge-admin">Servidor</span>
                     </div>
                     <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.9rem;">
-                        <li>Plantillas Thymeleaf en <code>templates/email/</code> enviadas con <code>EmailGateway</code>: por SMTP (Brevo, <code>MAIL_HOST</code>…) o, si no hay SMTP configurado, escritas en la consola (<code>LoggingEmailGateway</code>). EmailJS se retiró el 6 de octubre.</li>
-                        <li><strong>Alta de centros</strong> (<code>CenterOnboardingMailService</code>): acuse al centro, aviso a administración con el enlace de revisión, invitación a cada trabajador y aviso de centro publicado. Sin SMTP, la consola imprime los enlaces.</li>
+                        <li><strong>Cómo salen:</strong> plantillas Thymeleaf de <code>templates/email/</code> enviadas con <code>EmailGateway</code>, por SMTP (Brevo, <code>MAIL_HOST</code>…). Sin SMTP configurado se escriben en la consola (<code>LoggingEmailGateway</code>), también los enlaces.</li>
+                        <li><strong>HTML y texto plano:</strong> cada correo lleva las dos versiones (<code>multipart/alternative</code>). La de texto la saca <code>HtmlToText</code> del HTML: los filtros de spam se fían más y se lee en relojes, lectores de pantalla y programas sin HTML.</li>
+                        <li><strong>Alta de centros</strong> (<code>CenterOnboardingMailService</code>): acuse al centro, aviso a administración con el enlace de revisión (asunto «Nuevo centro para revisar: …»), invitación a cada trabajador y aviso de centro publicado.</li>
                         <li><strong>Correos de citas</strong> (<code>AppointmentMailService</code>): solicitud, confirmación, cambio de hora, propuesta, anulación y recordatorio 24 h antes (lo envía <code>AppointmentStatusScheduler</code>). Un centro sin publicar no escribe a clientes y cada centro puede mandar como mucho 150 al día (<code>crm.mail.max-client-emails-per-center-per-day</code>).</li>
-                        <li>Remitente: <code>CRM_FROM_EMAIL</code> (<code>citas@cuquora.com</code>, dominio autenticado en Brevo). Los correos de citas al cliente llevan como «Responder a» el correo del dueño del centro, para que las respuestas no lleguen al buzón de Cuquora. Los enlaces de los correos se escriben con <code>SITE_URL</code> (obligatoria en Docker), nunca con la dirección de la petición.</li>
+                        <li><strong>Remitente:</strong> «Cuquora» con <code>CRM_FROM_EMAIL</code> (<code>citas@cuquora.com</code>, dominio autenticado en Brevo con SPF, DKIM y DMARC en el DNS de Cloudflare).</li>
+                        <li><strong>Respuestas:</strong> los correos de citas al cliente llevan como «Responder a» (Reply-To) el correo del dueño del centro, o el del centro si no hay dueño. Lo que alguien escriba directamente a <code>citas@cuquora.com</code> lo recibe Cloudflare Email Routing y lo reenvía al correo de Alex; Cloudflare solo reenvía, no envía nada.</li>
+                        <li><strong>Enlaces:</strong> se escriben con <code>SITE_URL</code> (<code>https://cuquora.com</code> en producción), nunca con la dirección de la petición.</li>
                     </ul>
                 </div>
 
@@ -1060,6 +1401,7 @@
                                 <li><strong>Cloudflare</strong> guarda en el DNS de cuquora.com los registros SPF, DKIM y DMARC. Gmail, Outlook… los consultan para comprobar que Brevo puede enviar en nombre de <code>citas@cuquora.com</code> y que el correo no es spam.</li>
                                 <li>Brevo lo entrega con el remitente <code>CRM_FROM_EMAIL</code>. Todos los correos cuentan para el límite diario de Brevo (300 en el plan gratis; cada centro, como mucho 150 a clientes).</li>
                                 <li>Si un cliente contesta a un correo de citas, la respuesta va directamente al <strong>dueño del centro</strong> (cabecera Reply-To), no a Cuquora.</li>
+                                <li>Abajo, aparte: lo que alguien escriba a <code>citas@cuquora.com</code> lo reenvía <strong>Cloudflare Email Routing</strong> a un buzón personal.</li>
                             </ol>
                             <ul class="mm-legend">
                                 <li><span class="mm-dot b-admin"></span>Administración (<code>CRM_ADMIN_EMAIL</code>)</li>
@@ -1130,19 +1472,27 @@
                     <div class="section-header-title">
                         <div class="section-icon">⚖️</div>
                         <div>
-                            <h2>Reglas de Negocio & Control de Excepciones</h2>
+                            <h2>Reglas y mensajes de error</h2>
                             <p style="margin: 0; font-size: 0.95rem;">Los servicios lanzan <code>BusinessRuleException</code> con el mensaje en español; las páginas lo muestran como aviso y los endpoints JSON lo devuelven en el cuerpo</p>
                         </div>
                     </div>
+                </div>
+
+                <div class="tldr">
+                    <div class="tldr-title">En 30 segundos</div>
+                    <ul>
+                        <li>Cuando algo no se puede hacer, la app no falla: enseña un aviso con el motivo en español.</li>
+                        <li>Busca la acción en la primera columna y lee el mensaje que verá la persona.</li>
+                    </ul>
                 </div>
 
                 <div class="table-responsive">
                     <table class="doc-table">
                         <thead>
                             <tr>
-                                <th>Condición Detectada</th>
-                                <th>Regla de Negocio Aplicada</th>
-                                <th>Mensaje / Respuesta</th>
+                                <th>Caso</th>
+                                <th>Regla</th>
+                                <th>Mensaje que se ve</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -1232,7 +1582,7 @@
                                 <td><code>ResourceNotFoundException</code> → 404.</td>
                             </tr>
                             <tr>
-                                <td><strong>Stock decremental en 0 unidades</strong></td>
+                                <td><strong>Restar stock por debajo de 0</strong></td>
                                 <td>El stock no baja de 0.</td>
                                 <td>Se queda en 0.</td>
                             </tr>
@@ -1253,8 +1603,23 @@
                             </tr>
                             <tr>
                                 <td><strong>Alta de centro incompleta</strong></td>
-                                <td>CIF/NIF válido, dirección y pin en el mapa, zona horaria de la lista, cabinas entre 1 y 50, términos aceptados, hasta 20 trabajadores con correos válidos, distintos y sin cuenta en Cuquora.</td>
+                                <td>Dirección y pin en el mapa, zona horaria de la lista, cabinas entre 1 y 50, términos aceptados, hasta 20 trabajadores con nombre y correo válidos, distintos y sin cuenta en Cuquora.</td>
                                 <td>«Marca en el mapa dónde está tu centro…» / «El correo … está repetido…» / «Ya hay una cuenta de Cuquora con el correo …»</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Teléfono no válido</strong></td>
+                                <td>Prefijo de la lista (u otro escrito con +), solo cifras y espacios, largo según el país.</td>
+                                <td>«Escribe el teléfono.» / «El teléfono solo puede llevar números y espacios (y el prefijo con «+» delante).» / «Elige el prefijo del país en la lista.»</td>
+                            </tr>
+                            <tr>
+                                <td><strong>CIF o NIF incorrecto</strong></td>
+                                <td>En España, NIF (8 cifras y letra), NIE o CIF con su letra o dígito de control correcto.</td>
+                                <td>«Revisa el CIF o NIF: un NIF son 8 números y una letra (12345678Z)…» / «La letra o el último dígito del CIF o NIF … no cuadra: revisa que esté bien copiado.»</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Dirección sin código postal</strong></td>
+                                <td>En España, 5 cifras que empiezan por 01 a 52.</td>
+                                <td>«Añade el código postal a la dirección (5 cifras, ej.: Calle Mayor 12, 28013 Madrid).» / «Revisa el código postal de la dirección: en España empieza por 01 a 52…»</td>
                             </tr>
                             <tr>
                                 <td><strong>Invitación usada o caducada</strong></td>
@@ -1277,7 +1642,7 @@
             <li><a href="manual-acciones.html">Manual de Acciones</a></li>
             <li><a href="evolucion-proyecto.html">Evolución & Commits</a></li>
         </ul>
-        <p>© 2026 Cuquora CRM — Plataforma de Gestión para Centros de Estética y Bienestar.</p>
+        <p>© 2026 Cuquora — Plataforma de Gestión para Centros de Estética y Bienestar · Documentación de la versión 0.9.0-beta.</p>
     </footer>
 
 </body>

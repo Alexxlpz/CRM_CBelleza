@@ -21,11 +21,20 @@ Al sacar una versión:
 
 ## [Sin publicar]
 
+### Añadido
+
+- Botón «Rechazar registro» al revisar un centro nuevo: borra el centro sin publicar, las cuentas de su equipo y lo que hayan preparado.
+
 ### Cambiado
+
+- Teléfono con el prefijo de país en su propia lista y el número agrupado al escribir, en el alta de centros, el registro de clientes y «Mi Centro»; se guarda como «+34 612 345 678». La migración V27 pone así los teléfonos de centros ya guardados.
+- Alta de centros: se comprueba la letra o el dígito de control del CIF/NIF/NIE y las direcciones españolas tienen que llevar código postal. Una sola regla para los correos en el navegador y en el servidor.
 
 - Si un cliente contesta a un correo de su cita, la respuesta le llega al dueño del centro (antes iba al buzón de Cuquora).
 - Los correos llevan también una versión en texto plano, salen a nombre de «Cuquora» (antes «Cuquora CRM») y el aviso de centro nuevo al admin ya no lleva «[Cuquora Auditoría]» en el asunto, para que caigan menos en spam.
 - Documentación: diagrama de los correos que envía la app (Cuquora, Brevo y Cloudflare, y un apartado por cada tipo de correo).
+- Documentación al día con la 0.9.0-beta: producción en cuquora.com (NAS y túnel de Cloudflare), correo, formato de los datos del alta y «Rechazar registro»; textos más cortos y términos unificados.
+- Documentación más visual para entenderla a la primera: 25 capturas de la app (escritorio y móvil) con marcas numeradas, dibujos de cómo se habla con el centro, la vida de una cita, el alta de un centro, el mapa de la web, la arquitectura, el modelo de datos, el despliegue y la línea de tiempo del proyecto; resumen «En 30 segundos» en cada apartado, preguntas frecuentes y tablas largas plegadas. En el móvil la barra superior sigue enseñando los cuatro documentos.
 
 ## [0.9.0-beta] - 2026-11-03
 

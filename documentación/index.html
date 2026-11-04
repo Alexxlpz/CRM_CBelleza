@@ -11,6 +11,18 @@
 </head>
 <body>
 
+    <!-- Puntas de flecha que comparten todos los diagramas de esta página -->
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+        <defs>
+            <marker id="dga" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#8b857d"/></marker>
+            <marker id="dga-ok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#67b889"/></marker>
+            <marker id="dga-info" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#6fa9e8"/></marker>
+            <marker id="dga-bad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#e27171"/></marker>
+            <marker id="dga-wait" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#e0ad52"/></marker>
+        </defs>
+    </svg>
+
+
     <!-- Header / Navbar Principal -->
     <header class="doc-navbar">
         <a href="index.html" class="brand-wrapper">
@@ -29,7 +41,7 @@
             </ul>
         </nav>
         <div>
-            <span class="nav-badge-app">v1.3.0 • Producción</span>
+            <span class="nav-badge-app">v0.9.0-beta</span>
         </div>
     </header>
 
@@ -48,7 +60,8 @@
                     <li><a href="#auditoria-solid">Auditoría SOLID</a></li>
                     <li><a href="#modelo-datos">Modelo de Dominio</a></li>
                     <li><a href="#sedes-soportadas">Sedes del Negocio</a></li>
-                    <li><a href="#despliegue-rapido">Guía de Puesta en Marcha</a></li>
+                    <li><a href="#despliegue-rapido">Puesta en Marcha</a></li>
+                    <li><a href="#produccion">Producción en cuquora.com</a></li>
                     <li><a href="#credenciales-prueba">Credenciales Demo</a></li>
                 </ul>
             </div>
@@ -75,6 +88,10 @@
                 </p>
                 <div class="hero-meta-row">
                     <div class="hero-meta-item">
+                        <span>Versión:</span>
+                        <strong>0.9.0-beta · documentación del 4 de noviembre de 2026 · en cuquora.com</strong>
+                    </div>
+                    <div class="hero-meta-item">
                         <span>Tecnología:</span>
                         <strong>Java 21 + Spring Boot 4.1 + PostgreSQL 16 + Docker</strong>
                     </div>
@@ -95,7 +112,7 @@
                     <div class="section-header-title">
                         <div class="section-icon">📚</div>
                         <div>
-                            <h2>Documentación Requerida del Sistema</h2>
+                            <h2>Los tres documentos</h2>
                             <p style="margin: 0; font-size: 0.95rem;">Explora los tres pilares de conocimiento técnico y funcional desarrollados para la plataforma:</p>
                         </div>
                     </div>
@@ -109,7 +126,7 @@
                         </div>
                         <h3>1. Guía de Uso por Roles</h3>
                         <p>
-                            Manual práctico ilustrado paso a paso con los flujos de interacción para <strong>Clientes</strong> (reserva de citas, consulta de estado), <strong>Especialistas/Trabajadores</strong> (agenda de cabina, control de existencias, tratamiento de citas) y <strong>Directores</strong>.
+                            Manual práctico ilustrado paso a paso con los flujos de interacción para <strong>Clientes</strong> (reserva de citas, consulta de estado), <strong>Trabajadores</strong> (agenda, inventario, clientes y «Mi Centro»), <strong>dueños de centro</strong> y administración.
                         </p>
                         <a href="guia-roles.html" style="font-weight: 600; display: inline-flex; align-items: center; gap: 0.4rem;">
                             Acceder a la Guía por Roles →
@@ -137,7 +154,7 @@
                         </div>
                         <h3>3. Evolución del Proyecto</h3>
                         <p>
-                            Crónica detallada del proceso de desarrollo apoyada en los <strong>commits de Git</strong> y el paso de los prototipos de <strong>Figma</strong> al código: hitos Beta 1 y Beta 2, modularización de CSS, algoritmo de citas, dockerización, Spring Security, Flyway, login con Google, agenda flexible, ventas con tarjeta de puntos y alta de centros.
+                            Crónica detallada del proceso de desarrollo apoyada en los <strong>commits de Git</strong> y el paso de los prototipos de <strong>Figma</strong> al código: hitos Beta 1 y Beta 2 hasta la versión 0.9.0-beta, modularización de CSS, algoritmo de citas, dockerización, Spring Security, Flyway, login con Google, agenda flexible, ventas con tarjeta de puntos y alta de centros.
                         </p>
                         <a href="evolucion-proyecto.html" style="font-weight: 600; display: inline-flex; align-items: center; gap: 0.4rem;">
                             Ver Historial de Commits & Figma →
@@ -158,11 +175,77 @@
                     </div>
                 </div>
 
+                <div class="tldr">
+                    <div class="tldr-title">En 30 segundos</div>
+                    <ul>
+                        <li>Una sola aplicación Spring Boot: el servidor pinta las páginas (Thymeleaf) y un poco de JavaScript las hace interactivas.</li>
+                        <li>Cada petición baja por capas: <strong>seguridad → controlador → servicio → repositorio → PostgreSQL</strong>. Las reglas de negocio viven solo en los servicios.</li>
+                        <li>Hacia fuera habla con Brevo (correo), Google (login y Calendar) y OpenStreetMap (mapa y direcciones).</li>
+                    </ul>
+                </div>
+
+                <figure class="diagram">
+                    <div class="diagram-scroll">
+                        <svg class="dg" viewBox="0 0 1100 520" role="img" aria-label="Capas de la aplicación: navegador, seguridad, controladores, servicios, repositorios y base de datos, con las integraciones externas">
+                            <rect x="20" y="20" width="700" height="64" rx="10" class="bx b-client"/>
+                            <text x="370" y="47" text-anchor="middle" class="tt c-client">Navegador</text>
+                            <text x="370" y="67" text-anchor="middle" class="ts">páginas Thymeleaf + CSS propio (tokens.css, common.css y uno por área) + JS sin framework</text>
+
+                            <rect x="20" y="110" width="700" height="56" rx="10" class="bx b-admin"/>
+                            <text x="370" y="135" text-anchor="middle" class="tt c-admin">Seguridad · SecurityConfig</text>
+                            <text x="370" y="154" text-anchor="middle" class="ts">login (formulario o Google), CSRF, «Recordar mi sesión», rutas por rol, bloqueo tras fallos</text>
+
+                            <rect x="20" y="192" width="700" height="56" rx="10" class="bx b-worker"/>
+                            <text x="370" y="217" text-anchor="middle" class="tt c-worker">Controladores · uno por área</text>
+                            <text x="370" y="236" text-anchor="middle" class="ts">reciben el formulario (record), llaman al servicio y eligen la vista; @ApiEndpoint responde JSON</text>
+
+                            <rect x="20" y="274" width="700" height="56" rx="10" class="bx b-owner"/>
+                            <text x="370" y="299" text-anchor="middle" class="tt c-owner">Servicios · reglas de negocio</text>
+                            <text x="370" y="318" text-anchor="middle" class="ts">BookingService, AgendaAvailabilityService… lanzan BusinessRuleException con el mensaje en español</text>
+
+                            <rect x="20" y="356" width="700" height="56" rx="10" class="bx b-infra"/>
+                            <text x="370" y="381" text-anchor="middle" class="tt">Repositorios · Spring Data JPA</text>
+                            <text x="370" y="400" text-anchor="middle" class="ts">consultas con @EntityGraph; open-in-view desactivado</text>
+
+                            <rect x="20" y="438" width="700" height="64" rx="10" class="bx b-infra"/>
+                            <text x="370" y="465" text-anchor="middle" class="tt">PostgreSQL 16 (H2 en desarrollo)</text>
+                            <text x="370" y="485" text-anchor="middle" class="ts">esquema versionado con Flyway: migraciones V1 a V27</text>
+
+                            <line x1="370" y1="84" x2="370" y2="106" class="ar" marker-end="url(#dga)"/>
+                            <line x1="370" y1="166" x2="370" y2="188" class="ar" marker-end="url(#dga)"/>
+                            <line x1="370" y1="248" x2="370" y2="270" class="ar" marker-end="url(#dga)"/>
+                            <line x1="370" y1="330" x2="370" y2="352" class="ar" marker-end="url(#dga)"/>
+                            <line x1="370" y1="412" x2="370" y2="434" class="ar" marker-end="url(#dga)"/>
+
+                            <text x="910" y="40" text-anchor="middle" class="tz">FUERA DE LA APP</text>
+                            <rect x="800" y="60" width="220" height="64" rx="10" class="bx b-cf"/>
+                            <text x="910" y="87" text-anchor="middle" class="tt c-cf">Brevo (SMTP)</text>
+                            <text x="910" y="106" text-anchor="middle" class="ts">correos HTML + texto plano</text>
+                            <rect x="800" y="150" width="220" height="64" rx="10" class="bx b-info"/>
+                            <text x="910" y="177" text-anchor="middle" class="tt c-worker">Google</text>
+                            <text x="910" y="196" text-anchor="middle" class="ts">login OpenID y Calendar</text>
+                            <rect x="800" y="240" width="220" height="64" rx="10" class="bx b-ok"/>
+                            <text x="910" y="267" text-anchor="middle" class="tt c-client">OpenStreetMap</text>
+                            <text x="910" y="286" text-anchor="middle" class="ts">mapa (Leaflet) y Nominatim</text>
+                            <rect x="800" y="356" width="220" height="64" rx="10" class="bx b-off"/>
+                            <text x="910" y="383" text-anchor="middle" class="tt">Tareas cada minuto</text>
+                            <text x="910" y="402" text-anchor="middle" class="ts">completar citas, caducar, recordar</text>
+
+                            <path d="M720,302 H760 V92 H796" class="ar dash" marker-end="url(#dga)"/>
+                            <path d="M760,182 H796" class="ar dash" marker-end="url(#dga)"/>
+                            <path d="M760,272 H796" class="ar dash" marker-end="url(#dga)"/>
+                            <path d="M800,388 H740 V318 H724" class="ar dash" marker-end="url(#dga)"/>
+                        </svg>
+                    </div>
+                    <p class="swipe-hint">Desliza el dibujo hacia los lados para verlo entero →</p>
+                    <figcaption><strong>Cómo leerlo:</strong> una petición entra por arriba y baja capa a capa; ninguna capa se salta a la de dos niveles más abajo. Las flechas discontinuas son las llamadas de los servicios hacia fuera, y las tareas programadas, que entran por los servicios sin pasar por el navegador.</figcaption>
+                </figure>
+
                 <p>
                     Cuquora CRM implementa una arquitectura monolítica modular diseñada para alta cohesión y bajo acoplamiento. Se compone de Spring Boot 4.1 sobre Java 21 con Spring Security, persistencia relacional con JPA/Hibernate y esquema versionado con Flyway, plantillas Thymeleaf en el servidor con JavaScript sin framework y estilos CSS propios a partir de unos tokens de diseño.
                 </p>
 
-                <div class="table-responsive">
+                <details class="more"><summary>Ver las clases de cada capa</summary><div class="more-body"><div class="table-responsive">
                     <table class="doc-table">
                         <thead>
                             <tr>
@@ -195,7 +278,7 @@
                             <tr>
                                 <td><strong>Integraciones</strong></td>
                                 <td><code>mail/</code> (<code>EmailGateway</code>, <code>AppointmentMailService</code>, <code>CenterOnboardingMailService</code>), <code>googlecalendar/</code>, <code>scheduler/</code>, Nominatim (dirección a partir del pin del mapa)</td>
-                                <td>Correos de citas, contacto y alta de centros por SMTP (Brevo) o por consola; sincronización con Google Calendar de trabajadores y clientes en segundo plano tras cada cambio de cita (<code>AppointmentChangedEvent</code>); tarea cada 60 s que completa citas pasadas, caduca propuestas y envía recordatorios.</td>
+                                <td>Correos de citas, contacto y alta de centros por SMTP (Brevo), en HTML y texto plano (<code>HtmlToText</code>), o por consola; sincronización con Google Calendar de trabajadores y clientes en segundo plano tras cada cambio de cita (<code>AppointmentChangedEvent</code>); tarea cada 60 s que completa citas pasadas, caduca propuestas y envía recordatorios.</td>
                             </tr>
                             <tr>
                                 <td><strong>Acceso a Datos (Repositorios)</strong></td>
@@ -205,11 +288,11 @@
                             <tr>
                                 <td><strong>Persistencia & Datos</strong></td>
                                 <td><code>PostgreSQL 16</code> (Docker) o <code>H2</code> en memoria (desarrollo y tests)</td>
-                                <td>Esquema creado por <strong>Flyway</strong> (<code>db/migration/V1</code> a <code>V26</code>) con <code>ddl-auto=validate</code>; datos demo solo con <code>crm.seed-demo-data=true</code>.</td>
+                                <td>Esquema creado por <strong>Flyway</strong> (<code>db/migration/V1</code> a <code>V27</code>; la V27 está en Java, en <code>src/main/java/db/migration</code>) con <code>ddl-auto=validate</code>; datos demo solo con <code>crm.seed-demo-data=true</code>.</td>
                             </tr>
                         </tbody>
                     </table>
-                </div>
+                </div></div></details>
 
                 <div class="callout callout-info">
                     <div class="callout-icon">💡</div>
@@ -443,6 +526,74 @@
                     </div>
                 </div>
 
+                <div class="tldr">
+                    <div class="tldr-title">En 30 segundos</div>
+                    <ul>
+                        <li>Todo cuelga de un <strong>centro</strong>: su equipo, su carta, su inventario, sus citas y sus reseñas.</li>
+                        <li>Una <strong>cita</strong> une a un cliente, un tratamiento y un profesional de un centro. Clientes y trabajadores son la misma tabla <code>users</code>, distinguidos por el rol.</li>
+                        <li>Una <strong>reseña</strong> solo existe si hay una cita completada (una por cita).</li>
+                    </ul>
+                </div>
+
+                <figure class="diagram">
+                    <div class="diagram-scroll">
+                        <svg class="dg" viewBox="0 0 1100 470" role="img" aria-label="Relaciones entre las entidades principales: centro, usuarios, tratamientos, citas, reseñas, inventario y ventas">
+                            <rect x="420" y="190" width="200" height="80" rx="12" class="bx b-owner"/>
+                            <text x="520" y="222" text-anchor="middle" class="tl c-owner">Center</text>
+                            <text x="520" y="243" text-anchor="middle" class="ts">horario, cabinas, puntos,</text>
+                            <text x="520" y="259" text-anchor="middle" class="ts">dueño (owner_id)</text>
+
+                            <rect x="60" y="40" width="200" height="72" rx="10" class="bx b-worker"/>
+                            <text x="160" y="70" text-anchor="middle" class="tt c-worker">User · WORKER</text>
+                            <text x="160" y="90" text-anchor="middle" class="ts">center_id · worker_hours</text>
+
+                            <rect x="60" y="350" width="200" height="72" rx="10" class="bx b-client"/>
+                            <text x="160" y="380" text-anchor="middle" class="tt c-client">User · CLIENT</text>
+                            <text x="160" y="400" text-anchor="middle" class="ts">ClientCard por centro</text>
+
+                            <rect x="420" y="20" width="200" height="72" rx="10" class="bx b-infra"/>
+                            <text x="520" y="50" text-anchor="middle" class="tt">Treatment</text>
+                            <text x="520" y="70" text-anchor="middle" class="ts">precio, duración, oferta</text>
+
+                            <rect x="420" y="370" width="200" height="80" rx="10" class="bx b-wait"/>
+                            <text x="520" y="400" text-anchor="middle" class="tt c-admin">Appointment</text>
+                            <text x="520" y="420" text-anchor="middle" class="ts">fecha, estado, precio,</text>
+                            <text x="520" y="436" text-anchor="middle" class="ts">propuestas (hasta 3)</text>
+
+                            <rect x="760" y="370" width="200" height="72" rx="10" class="bx b-ok"/>
+                            <text x="860" y="400" text-anchor="middle" class="tt c-client">Review</text>
+                            <text x="860" y="420" text-anchor="middle" class="ts">1-5 ★ + respuesta</text>
+
+                            <rect x="820" y="40" width="220" height="72" rx="10" class="bx b-infra"/>
+                            <text x="930" y="70" text-anchor="middle" class="tt">Inventory → Product</text>
+                            <text x="930" y="90" text-anchor="middle" class="ts">stock por centro</text>
+
+                            <rect x="820" y="200" width="220" height="72" rx="10" class="bx b-infra"/>
+                            <text x="930" y="230" text-anchor="middle" class="tt">ProductSale · Loyalty</text>
+                            <text x="930" y="250" text-anchor="middle" class="ts">ventas y puntos del cliente</text>
+
+                            <rect x="60" y="200" width="200" height="60" rx="10" class="bx b-off"/>
+                            <text x="160" y="226" text-anchor="middle" class="tt">AgendaBlock</text>
+                            <text x="160" y="245" text-anchor="middle" class="ts">vacaciones o cierre</text>
+
+                            <!-- relaciones -->
+                            <path d="M260,90 L420,210" class="ar"/><text x="300" y="138" class="lbs">N trabajan en 1</text>
+                            <line x1="520" y1="92" x2="520" y2="190" class="ar"/><text x="530" y="146" class="lbs">1 centro → N</text>
+                            <line x1="520" y1="270" x2="520" y2="370" class="ar"/><text x="530" y="326" class="lbs">1 centro → N citas</text>
+                            <line x1="260" y1="386" x2="420" y2="406" class="ar"/><text x="290" y="378" class="lbs">pide N</text>
+                            <path d="M200,112 C230,250 330,380 420,396" class="ar dash"/><text x="300" y="300" class="lbs">la atiende</text>
+                            <path d="M470,92 C440,200 450,320 470,370" class="ar dash"/>
+                            <line x1="620" y1="406" x2="760" y2="406" class="ar ok"/><text x="640" y="398" class="lbs">1 → 0 o 1</text>
+                            <path d="M620,215 L820,90" class="ar"/>
+                            <path d="M620,240 L820,236" class="ar"/>
+                            <line x1="260" y1="230" x2="420" y2="230" class="ar"/>
+                            <path d="M260,370 C500,330 700,280 820,256" class="ar dash"/>
+                        </svg>
+                    </div>
+                    <p class="swipe-hint">Desliza el dibujo hacia los lados para verlo entero →</p>
+                    <figcaption><strong>Cómo leerlo:</strong> las líneas continuas son «pertenece a un centro»; las discontinuas unen una cita con quien la atiende y con su tratamiento, y al cliente con sus compras y puntos. El detalle de cada tabla está en las tarjetas de debajo.</figcaption>
+                </figure>
+
                 <div class="grid-2">
                     <div class="card-feature">
                         <h4>🏢 Center (Centros de Belleza)</h4>
@@ -553,6 +704,7 @@
 
                 <h3>Opción A: Ejecución con Docker Compose (PostgreSQL 16)</h3>
                 <p>Primero copia <code>.env.example</code> a <code>.env</code> y rellena los secretos: <code>docker compose</code> no arranca si falta <code>POSTGRES_DB</code>, <code>POSTGRES_USER</code>, <code>POSTGRES_PASSWORD</code>, <code>REMEMBER_ME_KEY</code> o <code>SITE_URL</code> (en local, <code>http://localhost:8080</code>). El esquema lo crea Flyway al arrancar.</p>
+                <p>Docker arranca con el perfil <code>prod</code>, pensado para HTTPS. Para probarlo en tu equipo por <code>http://</code>, pon en el <code>.env</code> <code>SPRING_PROFILES_ACTIVE=</code> (vacío), <code>COOKIE_SECURE=false</code> y <code>FORWARD_HEADERS_STRATEGY=none</code>.</p>
                 <pre><code># Desde la raíz del proyecto
 cp .env.example .env      # y rellenar los valores
 
@@ -567,11 +719,110 @@ mvnw.cmd spring-boot:run -Dspring-boot.run.profiles=dev
 # Linux (Maven del sistema)
 mvn spring-boot:run -Dspring-boot.run.profiles=dev
 
-# Tests (319)
+# Tests (353)
 mvn test</code></pre>
                 <p>
                     Con el perfil <code>dev</code> la aplicación usa H2 en memoria, carga los datos demo con <code>DatabaseSeeder</code> y activa <code>/login-selector</code> y la consola H2. Sin SMTP configurado, los correos se escriben en la consola. «Iniciar sesión con Google» y Google Calendar solo aparecen si están las variables <code>GOOGLE_CLIENT_ID</code>, <code>GOOGLE_CLIENT_SECRET</code> y <code>GOOGLE_TOKEN_KEY</code>.
                 </p>
+            </section>
+
+            <!-- Producción -->
+            <section class="doc-section" id="produccion">
+                <div class="section-header">
+                    <div class="section-header-title">
+                        <div class="section-icon">🌍</div>
+                        <div>
+                            <h2>Producción en cuquora.com</h2>
+                            <p style="margin: 0; font-size: 0.95rem;">Cómo está montada la web publicada. Los pasos completos están en <code>docker/DESPLIEGUE.md</code></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tldr">
+                    <div class="tldr-title">En 30 segundos</div>
+                    <ul>
+                        <li>La web corre en un <strong>NAS Synology</strong> con Docker; nadie entra al NAS desde fuera.</li>
+                        <li>Un <strong>túnel de Cloudflare</strong> sale del NAS hacia Cloudflare, que pone el HTTPS de <code>cuquora.com</code> y le pasa las visitas.</li>
+                        <li>Los correos salen por <strong>Brevo</strong>; la base de datos se copia cada noche.</li>
+                    </ul>
+                </div>
+
+                <figure class="diagram">
+                    <div class="diagram-scroll">
+                        <svg class="dg" viewBox="0 0 1100 340" role="img" aria-label="Despliegue: el visitante entra por Cloudflare, el túnel llega al NAS, la app usa PostgreSQL y envía correo por Brevo">
+                            <rect x="20" y="110" width="170" height="80" rx="12" class="bx b-client"/>
+                            <text x="105" y="143" text-anchor="middle" class="tt c-client">Visitante</text>
+                            <text x="105" y="164" text-anchor="middle" class="ts">https://cuquora.com</text>
+
+                            <rect x="260" y="110" width="200" height="80" rx="12" class="bx b-cf"/>
+                            <text x="360" y="143" text-anchor="middle" class="tt c-cf">Cloudflare</text>
+                            <text x="360" y="164" text-anchor="middle" class="ts">DNS + HTTPS</text>
+
+                            <rect x="540" y="20" width="540" height="300" rx="14" class="bx b-zone"/>
+                            <text x="810" y="44" text-anchor="middle" class="tz">NAS SYNOLOGY · DOCKER (cuquora-prod)</text>
+                            <rect x="565" y="110" width="150" height="80" rx="10" class="bx b-infra"/>
+                            <text x="640" y="143" text-anchor="middle" class="tt">cloudflared</text>
+                            <text x="640" y="164" text-anchor="middle" class="ts">túnel de salida</text>
+                            <rect x="760" y="110" width="140" height="80" rx="10" class="bx b-owner"/>
+                            <text x="830" y="143" text-anchor="middle" class="tt c-owner">app:8080</text>
+                            <text x="830" y="164" text-anchor="middle" class="ts">perfil prod</text>
+                            <rect x="940" y="110" width="120" height="80" rx="10" class="bx b-info"/>
+                            <text x="1000" y="143" text-anchor="middle" class="tt c-worker">PostgreSQL</text>
+                            <text x="1000" y="164" text-anchor="middle" class="ts">datos en volume2</text>
+                            <rect x="940" y="230" width="120" height="70" rx="10" class="bx b-off"/>
+                            <text x="1000" y="258" text-anchor="middle" class="tt">backup-db.sh</text>
+                            <text x="1000" y="278" text-anchor="middle" class="ts">cada noche, 30 días</text>
+
+                            <rect x="260" y="235" width="200" height="70" rx="10" class="bx b-cf"/>
+                            <text x="360" y="263" text-anchor="middle" class="tt c-cf">Brevo</text>
+                            <text x="360" y="283" text-anchor="middle" class="ts">envía los correos</text>
+
+                            <line x1="190" y1="150" x2="256" y2="150" class="ar ok" marker-end="url(#dga-ok)"/>
+                            <line x1="565" y1="150" x2="464" y2="150" class="ar" marker-end="url(#dga)"/>
+                            <text x="512" y="138" text-anchor="middle" class="lbs">conecta</text>
+                            <text x="512" y="176" text-anchor="middle" class="lbs">hacia fuera</text>
+                            <line x1="715" y1="150" x2="756" y2="150" class="ar" marker-end="url(#dga)"/>
+                            <line x1="900" y1="150" x2="936" y2="150" class="ar" marker-end="url(#dga)"/>
+                            <path d="M830,190 V270 H464" class="ar dash" marker-end="url(#dga)"/>
+                            <line x1="1000" y1="190" x2="1000" y2="226" class="ar dash" marker-end="url(#dga)"/>
+                            <text x="20" y="60" class="tm">Ningún puerto abierto en el router:</text>
+                            <text x="20" y="78" class="tm">es el NAS quien llama a Cloudflare.</text>
+                        </svg>
+                    </div>
+                    <p class="swipe-hint">Desliza el dibujo hacia los lados para verlo entero →</p>
+                </figure>
+
+                <div class="table-responsive">
+                    <table class="doc-table">
+                        <thead>
+                            <tr><th>Pieza</th><th>Qué hace</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><strong>NAS Synology</strong></td><td>Ejecuta la app y PostgreSQL con Docker (Container Manager). Los datos de la base de datos van en <code>volume2</code>.</td></tr>
+                            <tr><td><strong>Túnel de Cloudflare</strong></td><td>El contenedor <code>cloudflared</code> abre una conexión de salida hacia Cloudflare y le pasa las visitas de <code>cuquora.com</code> a <code>http://app:8080</code>. No hay que abrir puertos en el router y Cloudflare pone el HTTPS.</td></tr>
+                            <tr><td><strong>Perfil <code>prod</code></strong></td><td>Activo por defecto en Docker. La app no arranca si falta algo importante en el <code>.env</code> (<code>SITE_URL</code> con https, claves largas, cookies seguras, sin H2 ni cuentas demo) y el log dice qué corregir.</td></tr>
+                            <tr><td><strong>Brevo</strong></td><td>Envía todos los correos como «Cuquora &lt;citas@cuquora.com&gt;». El dominio está autenticado con SPF, DKIM y DMARC en el DNS de Cloudflare.</td></tr>
+                            <tr><td><strong>Cloudflare Email Routing</strong></td><td>Reenvía a un buzón personal lo que alguien escriba a <code>citas@cuquora.com</code>. Las respuestas de los clientes a sus correos de citas no pasan por aquí: van al dueño del centro.</td></tr>
+                            <tr><td><strong>Copias de seguridad</strong></td><td><code>docker/backup-db.sh</code> hace un <code>pg_dump</code> cada noche y guarda 30 días.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3 style="margin-top: 1.5rem;">Subir una versión nueva al NAS</h3>
+                <p>En el NAS no hay git: los archivos se copian a mano. El <code>Dockerfile</code> solo compila <code>pom.xml</code> y <code>src/</code>.</p>
+                <ol class="text-secondary" style="margin-left: 1.5rem; font-size: 0.92rem;">
+                    <li>Copia al NAS <code>pom.xml</code>, <code>src/</code>, <code>docker-compose.yml</code> y <code>docker/</code>. No hace falta <code>target/</code>, <code>.git</code>, <code>.idea</code> ni la documentación.</li>
+                    <li>El <code>.env</code> del NAS es el <code>.env.produccion</code> del equipo, renombrado. Lleva además <code>COMPOSE_PROFILES=cloudflare</code> y <code>CLOUDFLARE_TUNNEL_TOKEN</code>. No se sube a git.</li>
+                    <li>En Container Manager, en el proyecto, «Acción» › «Construir». Las migraciones de Flyway se aplican solas al arrancar.</li>
+                    <li>Comprueba en el registro de la app «Producción: configuración revisada» y «Started», y en el de <code>cloudflared</code> «Registered tunnel connection».</li>
+                </ol>
+                <div class="callout callout-warning">
+                    <div class="callout-icon">⚠️</div>
+                    <div class="callout-content">
+                        <strong>No borres los datos:</strong>
+                        <p>Nunca uses <code>docker compose down -v</code> en producción: la <code>-v</code> borra el volumen de la base de datos.</p>
+                    </div>
+                </div>
             </section>
 
             <!-- Credenciales de Prueba -->
@@ -680,7 +931,7 @@ mvn test</code></pre>
             <li><a href="evolucion-proyecto.html">Evolución & Commits</a></li>
         </ul>
         <p>© 2026 Cuquora CRM — Plataforma de Gestión para Centros de Estética y Bienestar.</p>
-        <p class="text-muted" style="font-size: 0.8rem;">Documentación generada en HTML autónomo y portable para el repositorio CRM_CBelleza.</p>
+        <p class="text-muted" style="font-size: 0.8rem;">Documentación de la versión 0.9.0-beta (3 de noviembre de 2026), en HTML sin dependencias, dentro del repositorio CRM_CBelleza.</p>
     </footer>
 
 </body>
