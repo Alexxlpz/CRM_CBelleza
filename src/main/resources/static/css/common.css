@@ -925,6 +925,7 @@ button.mobile-drawer-link {
 .notifications-body {
     max-height: 280px;
     overflow-y: auto;
+    overscroll-behavior: contain; /* al llegar al final, la página de detrás no se mueve (app.js cubre el resto) */
     background: var(--surface); /* Solid body background */
 }
 
@@ -1380,13 +1381,26 @@ footer {
     margin-top: auto;
 }
 
+/* El pie de la página es más bajo que el resto de <footer> (p. ej. el de las tarjetas de reseñas).
+   Mientras se ve el aviso de cookies, crece por abajo lo que mide el aviso en pantalla (--cookie-banner-height,
+   de app.js; 0 si está cerrado o lo esconde una extensión del navegador) para no quedar tapado. El hueco va
+   dentro del pie y no en <body>: así nunca asoma otro fondo debajo. */
+:root {
+    --cookie-banner-height: 0px;
+}
+
+body > footer {
+    padding-top: 20px;
+    padding-bottom: calc(14px + var(--cookie-banner-height));
+}
+
 /* Enlaces legales del pie */
 .footer-legal {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     gap: 6px 22px;
-    margin-top: 10px;
+    margin-top: 6px;
 }
 
 .footer-legal a {
@@ -1406,7 +1420,7 @@ footer {
 }
 
 /* ---------- Aviso de cookies (fragments/footer + app.js) ----------
-   Barra fija a todo el ancho de la parte inferior. Mientras se ve, la página reserva
+   Barra fija a todo el ancho de la parte inferior. Mientras se ve, el pie reserva
    espacio abajo para que la barra no tape el pie. */
 .cookie-banner {
     position: fixed;
@@ -1473,10 +1487,6 @@ footer {
     padding: 0 26px;
 }
 
-body:has(.cookie-banner:not([hidden])) {
-    padding-bottom: 104px;
-}
-
 @keyframes cookie-banner-in {
     from { opacity: 0; transform: translateY(100%); }
     to { opacity: 1; transform: translateY(0); }
@@ -1495,10 +1505,6 @@ body:has(.cookie-banner:not([hidden])) {
 
     .cookie-banner-actions .btn {
         flex: 1;
-    }
-
-    body:has(.cookie-banner:not([hidden])) {
-        padding-bottom: 170px;
     }
 }
 
@@ -1523,10 +1529,6 @@ body:has(.cookie-banner:not([hidden])) {
     .cookie-banner-actions .btn {
         width: 100%;
         min-width: 0;
-    }
-
-    body:has(.cookie-banner:not([hidden])) {
-        padding-bottom: 300px;
     }
 }
 

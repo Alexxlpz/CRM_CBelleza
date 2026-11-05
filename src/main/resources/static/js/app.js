@@ -263,6 +263,28 @@
             if (e.key === 'Escape') { setOpen(false); toggle.focus(); }
         });
         initNotificationDismiss(toggle, dropdown);
+        containScroll(dropdown, dropdown.querySelector('.notifications-body'));
+    }
+
+    /* Con el puntero (o el dedo) sobre el desplegable, la página de detrás no se mueve nunca:
+       solo se desplaza la lista, y cuando llega al final o no tiene scroll el gesto se queda ahí */
+    function containScroll(panel, list) {
+        const canScroll = (target, deltaY) => {
+            if (!list || !list.contains(target) || deltaY === 0) return false;
+            if (deltaY < 0) return list.scrollTop > 0;
+            return Math.ceil(list.scrollTop + list.clientHeight) < list.scrollHeight;
+        };
+        panel.addEventListener('wheel', e => {
+            if (!canScroll(e.target, e.deltaY)) e.preventDefault();
+        }, { passive: false });
+        let lastY = 0;
+        panel.addEventListener('touchstart', e => { lastY = e.touches[0].clientY; }, { passive: true });
+        panel.addEventListener('touchmove', e => {
+            const y = e.touches[0].clientY;
+            const deltaY = lastY - y;
+            lastY = y;
+            if (e.cancelable && !canScroll(e.target, deltaY)) e.preventDefault();
+        }, { passive: false });
     }
 
     /* «x» en cada aviso y «Limpiar todas»: el servidor recuerda los quitados y no vuelven a salir */
@@ -369,6 +391,13 @@
         try { seen = localStorage.getItem(COOKIE_NOTICE_KEY); } catch (e) { /* almacenamiento no disponible */ }
         if (seen === COOKIE_NOTICE_VERSION) return;
         banner.hidden = false;
+        // El pie reserva justo lo que mide el aviso en pantalla: cambia con el ancho y el salto de línea, y es 0
+        // al cerrarlo o si una extensión del navegador lo esconde (sin quitarle el atributo hidden)
+        if (window.ResizeObserver) {
+            new ResizeObserver(() => {
+                document.documentElement.style.setProperty('--cookie-banner-height', banner.offsetHeight + 'px');
+            }).observe(banner);
+        }
         banner.querySelector('[data-cookie-accept]')?.addEventListener('click', () => {
             try { localStorage.setItem(COOKIE_NOTICE_KEY, COOKIE_NOTICE_VERSION); } catch (e) { /* almacenamiento no disponible */ }
             banner.hidden = true;
@@ -460,7 +489,8 @@
         const update = () => {
             pending = false;
             const max = root.scrollHeight - window.innerHeight;
-            root.classList.toggle('is-near-end', max > 0 && window.scrollY > max / 2);
+            // En una página que no llega a hacer scroll, max es 0 y el rebote de abajo da scrollY > 0
+            root.classList.toggle('is-near-end', window.scrollY > max / 2);
         };
         const schedule = () => {
             if (!pending) {
