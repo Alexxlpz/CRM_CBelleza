@@ -59,7 +59,7 @@ class CenterPosterTests {
 
     @Test
     void myCenterLinksToThePoster() throws Exception {
-        mvc.perform(get("/worker/center").with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
+        mvc.perform(get("/worker/center/reservas").with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("/worker/center/cartel")));
     }

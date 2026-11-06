@@ -5,13 +5,13 @@
     <script th:src="@{/js/opening-hours.js}" defer></script>
 </head>
 <body>
-    <div th:replace="~{fragments/navbar :: worker('/worker/center#equipo', 'Volver al equipo', ${notifications})}"></div>
+    <div th:replace="~{fragments/navbar :: worker('/worker/center/equipo', 'Volver al equipo', ${notifications})}"></div>
 
     <main class="main-container settings-page">
         <header class="page-header page-header--panel">
             <span th:replace="~{worker/fragments/page-header :: icon('clock')}"></span>
             <div class="page-header-text">
-                <nav th:replace="~{worker/fragments/page-header :: subcrumb('Mi Centro', '/worker/center', 'Horario')}"></nav>
+                <nav th:replace="~{worker/fragments/page-header :: subcrumb('Mi Centro', '/worker/center/equipo', 'Horario')}"></nav>
                 <h1 th:text="'Horario de ' + ${member.name}">Horario de Lucía Romero</h1>
                 <p>Los días y horas en los que trabaja. Los clientes solo podrán pedirle cita dentro de ellos y la agenda no le dará citas fuera.</p>
             </div>
@@ -45,7 +45,7 @@
 
             <p class="form-help">Las citas que ya tiene no cambian. Para unas vacaciones o un día suelto, mejor bloquea su agenda.</p>
             <div class="settings-actions">
-                <a class="btn btn-secondary" th:href="@{/worker/center#equipo}">Cancelar</a>
+                <a class="btn btn-secondary" th:href="@{/worker/center/equipo}">Cancelar</a>
                 <button type="submit" class="btn btn-primary"><i class="lucide-save" aria-hidden="true"></i> Guardar horario</button>
             </div>
         </form>

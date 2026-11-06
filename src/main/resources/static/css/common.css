@@ -2389,15 +2389,79 @@ body.modal-open {
     margin-top: 24px;
 }
 
-/* «Mi Centro» en escritorio: todo el ancho, mitad y mitad. El formulario largo
-   (datos del centro y la cuenta) a la izquierda; foto, puntos y Google Calendar,
-   que se guardan por separado, a la derecha. */
+/* «Mi Centro»: menú de apartados a la izquierda y el apartado elegido a la derecha (cada uno en su página) */
 @media (min-width: 1100px) {
     .main-container.settings-page--split {
         max-width: none;
         padding: 32px 40px 48px;
     }
+}
 
+.center-settings-layout {
+    display: grid;
+    grid-template-columns: 220px minmax(0, 1fr);
+    gap: 28px;
+    align-items: start;
+}
+
+/* Bajo la navbar fija: el menú se queda a la vista en apartados largos como Centro */
+.center-settings-nav {
+    position: sticky;
+    top: 104px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.center-settings-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 14px;
+    border: 1px solid transparent;
+    border-radius: var(--border-radius-sm);
+    color: var(--text-main);
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.center-settings-link i {
+    flex: none;
+    font-size: 18px;
+    color: var(--text-muted);
+}
+
+.center-settings-link:hover {
+    background: var(--surface-muted);
+}
+
+.center-settings-link[aria-current="page"] {
+    background: var(--surface);
+    border-color: var(--border-soft);
+    color: var(--primary-text);
+}
+
+.center-settings-link[aria-current="page"] i {
+    color: var(--primary-text);
+}
+
+.center-settings-link-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+/* La línea de ayuda, la flecha y «‹ Mi Centro» son solo del móvil */
+.center-settings-link-hint,
+.center-settings-link-arrow,
+.center-settings-back {
+    display: none;
+}
+
+/* Con ancho de sobra, dentro del apartado: lo principal a la izquierda y lo que se guarda aparte a la derecha */
+@media (min-width: 1366px) {
     .settings-columns {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2407,6 +2471,77 @@ body.modal-open {
 
     .settings-side {
         margin-top: 0;
+    }
+
+    .settings-main:only-child {
+        grid-column: 1 / -1;
+        max-width: 860px;
+    }
+}
+
+/* Móvil: /worker/center es la lista de apartados (como los ajustes del teléfono) y cada apartado,
+   su página con «‹ Mi Centro» para volver */
+@media (max-width: 860px) {
+    .center-settings-layout {
+        display: block;
+    }
+
+    .center-settings.is-index .center-settings-content,
+    .center-settings:not(.is-index) .center-settings-nav {
+        display: none;
+    }
+
+    .center-settings-nav {
+        position: static;
+        gap: 0;
+        overflow: hidden;
+        background: var(--surface);
+        border: 1px solid var(--border-soft);
+        border-radius: var(--border-radius-md);
+    }
+
+    .center-settings-link,
+    .center-settings-link[aria-current="page"] {
+        padding: 16px 18px;
+        border: none;
+        border-bottom: 1px solid var(--border-soft);
+        border-radius: 0;
+        background: transparent;
+        color: var(--text-main);
+    }
+
+    .center-settings-link:last-child {
+        border-bottom: none;
+    }
+
+    .center-settings-link i,
+    .center-settings-link[aria-current="page"] i {
+        color: var(--primary-text);
+    }
+
+    .center-settings-link-hint {
+        display: block;
+        margin-top: 2px;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text-muted);
+    }
+
+    .center-settings-link .center-settings-link-arrow {
+        display: block;
+        margin-left: auto;
+        color: var(--text-soft);
+    }
+
+    .center-settings-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 16px;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--primary-text);
+        text-decoration: none;
     }
 }
 
@@ -3639,6 +3774,13 @@ body.modal-open {
     border-top: 1px dashed rgba(var(--primary-rgb), 0.25);
 }
 
+/* Sin ajustes encima (Reservas de quien no es el dueño: solo el enlace), sin la línea que los separa */
+.settings-section-title + .sync-setting--stacked {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+}
+
 .reschedule-setting {
     display: flex;
     gap: 10px;
@@ -3756,3 +3898,108 @@ body.modal-open {
         font-size: 28px;
     }
 }
+
+/* ---------- Escala de porcentajes: pct-0 … pct-100 ---------- */
+/* Para lo que se dibuja según los datos (barras del análisis y de las reseñas) sin style="" en la plantilla:
+   la plantilla pone la clase pct-N y el CSS de cada componente usa var(--pct) como alto o ancho. */
+.pct-0 { --pct: 0%; }
+.pct-1 { --pct: 1%; }
+.pct-2 { --pct: 2%; }
+.pct-3 { --pct: 3%; }
+.pct-4 { --pct: 4%; }
+.pct-5 { --pct: 5%; }
+.pct-6 { --pct: 6%; }
+.pct-7 { --pct: 7%; }
+.pct-8 { --pct: 8%; }
+.pct-9 { --pct: 9%; }
+.pct-10 { --pct: 10%; }
+.pct-11 { --pct: 11%; }
+.pct-12 { --pct: 12%; }
+.pct-13 { --pct: 13%; }
+.pct-14 { --pct: 14%; }
+.pct-15 { --pct: 15%; }
+.pct-16 { --pct: 16%; }
+.pct-17 { --pct: 17%; }
+.pct-18 { --pct: 18%; }
+.pct-19 { --pct: 19%; }
+.pct-20 { --pct: 20%; }
+.pct-21 { --pct: 21%; }
+.pct-22 { --pct: 22%; }
+.pct-23 { --pct: 23%; }
+.pct-24 { --pct: 24%; }
+.pct-25 { --pct: 25%; }
+.pct-26 { --pct: 26%; }
+.pct-27 { --pct: 27%; }
+.pct-28 { --pct: 28%; }
+.pct-29 { --pct: 29%; }
+.pct-30 { --pct: 30%; }
+.pct-31 { --pct: 31%; }
+.pct-32 { --pct: 32%; }
+.pct-33 { --pct: 33%; }
+.pct-34 { --pct: 34%; }
+.pct-35 { --pct: 35%; }
+.pct-36 { --pct: 36%; }
+.pct-37 { --pct: 37%; }
+.pct-38 { --pct: 38%; }
+.pct-39 { --pct: 39%; }
+.pct-40 { --pct: 40%; }
+.pct-41 { --pct: 41%; }
+.pct-42 { --pct: 42%; }
+.pct-43 { --pct: 43%; }
+.pct-44 { --pct: 44%; }
+.pct-45 { --pct: 45%; }
+.pct-46 { --pct: 46%; }
+.pct-47 { --pct: 47%; }
+.pct-48 { --pct: 48%; }
+.pct-49 { --pct: 49%; }
+.pct-50 { --pct: 50%; }
+.pct-51 { --pct: 51%; }
+.pct-52 { --pct: 52%; }
+.pct-53 { --pct: 53%; }
+.pct-54 { --pct: 54%; }
+.pct-55 { --pct: 55%; }
+.pct-56 { --pct: 56%; }
+.pct-57 { --pct: 57%; }
+.pct-58 { --pct: 58%; }
+.pct-59 { --pct: 59%; }
+.pct-60 { --pct: 60%; }
+.pct-61 { --pct: 61%; }
+.pct-62 { --pct: 62%; }
+.pct-63 { --pct: 63%; }
+.pct-64 { --pct: 64%; }
+.pct-65 { --pct: 65%; }
+.pct-66 { --pct: 66%; }
+.pct-67 { --pct: 67%; }
+.pct-68 { --pct: 68%; }
+.pct-69 { --pct: 69%; }
+.pct-70 { --pct: 70%; }
+.pct-71 { --pct: 71%; }
+.pct-72 { --pct: 72%; }
+.pct-73 { --pct: 73%; }
+.pct-74 { --pct: 74%; }
+.pct-75 { --pct: 75%; }
+.pct-76 { --pct: 76%; }
+.pct-77 { --pct: 77%; }
+.pct-78 { --pct: 78%; }
+.pct-79 { --pct: 79%; }
+.pct-80 { --pct: 80%; }
+.pct-81 { --pct: 81%; }
+.pct-82 { --pct: 82%; }
+.pct-83 { --pct: 83%; }
+.pct-84 { --pct: 84%; }
+.pct-85 { --pct: 85%; }
+.pct-86 { --pct: 86%; }
+.pct-87 { --pct: 87%; }
+.pct-88 { --pct: 88%; }
+.pct-89 { --pct: 89%; }
+.pct-90 { --pct: 90%; }
+.pct-91 { --pct: 91%; }
+.pct-92 { --pct: 92%; }
+.pct-93 { --pct: 93%; }
+.pct-94 { --pct: 94%; }
+.pct-95 { --pct: 95%; }
+.pct-96 { --pct: 96%; }
+.pct-97 { --pct: 97%; }
+.pct-98 { --pct: 98%; }
+.pct-99 { --pct: 99%; }
+.pct-100 { --pct: 100%; }

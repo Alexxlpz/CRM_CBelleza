@@ -191,7 +191,7 @@
                             <td data-label="Ticket medio" th:text="${row.visits == 0} ? '—' : ${#numbers.formatDecimal(row.averageTicket, 1, 'POINT', 2, 'COMMA')} + ' €'">38,50 €</td>
                             <td data-label="Ocupación">
                                 <span class="team-occupancy" th:if="${row.occupancy != null}">
-                                    <span class="team-occupancy-track" aria-hidden="true"><span th:style="'--size:' + ${row.occupancy} + '%'"></span></span>
+                                    <span class="team-occupancy-track" aria-hidden="true"><span class="team-occupancy-fill" th:classappend="${'pct-' + row.occupancy}"></span></span>
                                     <span th:text="${row.occupancy} + ' %'">62 %</span>
                                 </span>
                                 <span th:if="${row.occupancy == null}">—</span>
@@ -223,18 +223,18 @@
                     <li th:if="${paired}"><span class="chart-swatch chart-swatch--previous" aria-hidden="true"></span> <span th:text="${report.previousSeriesLabel}">2025</span></li>
                     <li th:if="${report.showsCuquoraStart()}"><span class="cuquora-dot cuquora-dot--legend" aria-hidden="true"></span> Primer mes con Cuquora</li>
                 </ul>
-                <div class="bar-chart" th:classappend="${#lists.size(report.monthly) <= 6} ? 'bar-chart--few'" th:style="'--columns:' + ${#lists.size(report.monthly)}">
+                <div class="bar-chart" th:classappend="${'bar-chart--cols-' + #lists.size(report.monthly) + (#lists.size(report.monthly) <= 6 ? ' bar-chart--few' : '')}">
                     <div class="bar-chart-col" tabindex="0" th:each="point : ${report.monthly}" th:classappend="${!point.hasData()} ? 'is-empty'"
                          th:aria-label="${point.label} + ': ' + (${point.hasData()} ? ${#numbers.formatDecimal(point.revenue, 1, 'POINT', 0, 'COMMA')} + ' €' : ${point.emptyNote})
                                 + (${point.previousRevenue != null} ? '; ' + ${report.previousSeriesLabel} + ': ' + ${#numbers.formatDecimal(point.previousRevenue, 1, 'POINT', 0, 'COMMA')} + ' €' : '')">
                         <span class="bar-chart-bars" th:unless="${paired}">
-                            <span class="bar-chart-bar" th:if="${point.hasData()}" th:style="'--size:' + ${report.revenueHeight(point)} + '%'"></span>
+                            <span class="bar-chart-bar" th:if="${point.hasData()}" th:classappend="${'pct-' + report.revenueHeight(point)}"></span>
                         </span>
                         <span class="bar-chart-pair" th:if="${paired}">
-                            <span class="bar-chart-bar bar-chart-bar--previous" th:classappend="${point.previousRevenue == null} ? 'is-missing'"
-                                  th:style="'--size:' + ${report.previousRevenueHeight(point)} + '%'"></span>
-                            <span class="bar-chart-bar" th:classappend="${!point.hasData()} ? 'is-missing'"
-                                  th:style="'--size:' + ${report.revenueHeight(point)} + '%'"></span>
+                            <span class="bar-chart-bar bar-chart-bar--previous"
+                                  th:classappend="${'pct-' + report.previousRevenueHeight(point) + (point.previousRevenue == null ? ' is-missing' : '')}"></span>
+                            <span class="bar-chart-bar"
+                                  th:classappend="${'pct-' + report.revenueHeight(point) + (!point.hasData() ? ' is-missing' : '')}"></span>
                         </span>
                         <span class="cuquora-dot" th:if="${point.cuquoraStart}" aria-hidden="true"></span>
                         <span class="bar-chart-label"><span class="bar-chart-label-long" th:text="${point.shortLabel}">oct</span><span class="bar-chart-label-short" aria-hidden="true" th:text="${point.initial()}">O</span></span>
@@ -299,19 +299,19 @@
                     </th:block>
                     <li th:if="${report.showsCuquoraStart()}"><span class="cuquora-dot cuquora-dot--legend" aria-hidden="true"></span> Primer mes con Cuquora</li>
                 </ul>
-                <div class="bar-chart" th:classappend="${#lists.size(report.monthly) <= 6} ? 'bar-chart--few'" th:style="'--columns:' + ${#lists.size(report.monthly)}">
+                <div class="bar-chart" th:classappend="${'bar-chart--cols-' + #lists.size(report.monthly) + (#lists.size(report.monthly) <= 6 ? ' bar-chart--few' : '')}">
                     <div class="bar-chart-col" tabindex="0" th:each="point : ${report.monthly}" th:classappend="${!point.hasData()} ? 'is-empty'"
                          th:aria-label="${point.label} + ': ' + (${point.hasData()} ? ${point.visits} + ' visitas, ' + ${point.newVisits} + ' de clientes nuevos' : ${point.emptyNote})
                                 + (${point.previousVisits != null} ? '; ' + ${report.previousSeriesLabel} + ': ' + ${point.previousVisits} + ' visitas' : '')">
                         <span class="bar-chart-bars" th:unless="${paired}">
-                            <span class="bar-chart-bar bar-chart-bar--new" th:if="${point.newVisits > 0}" th:style="'--size:' + ${report.newVisitsHeight(point)} + '%'"></span>
-                            <span class="bar-chart-bar" th:if="${point.returningVisits > 0}" th:style="'--size:' + ${report.returningVisitsHeight(point)} + '%'"></span>
+                            <span class="bar-chart-bar bar-chart-bar--new" th:if="${point.newVisits > 0}" th:classappend="${'pct-' + report.newVisitsHeight(point)}"></span>
+                            <span class="bar-chart-bar" th:if="${point.returningVisits > 0}" th:classappend="${'pct-' + report.returningVisitsHeight(point)}"></span>
                         </span>
                         <span class="bar-chart-pair" th:if="${paired}">
-                            <span class="bar-chart-bar bar-chart-bar--previous" th:classappend="${point.previousVisits == null} ? 'is-missing'"
-                                  th:style="'--size:' + ${report.previousVisitsHeight(point)} + '%'"></span>
-                            <span class="bar-chart-bar" th:classappend="${!point.hasData()} ? 'is-missing'"
-                                  th:style="'--size:' + ${report.visitsHeight(point)} + '%'"></span>
+                            <span class="bar-chart-bar bar-chart-bar--previous"
+                                  th:classappend="${'pct-' + report.previousVisitsHeight(point) + (point.previousVisits == null ? ' is-missing' : '')}"></span>
+                            <span class="bar-chart-bar"
+                                  th:classappend="${'pct-' + report.visitsHeight(point) + (!point.hasData() ? ' is-missing' : '')}"></span>
                         </span>
                         <span class="cuquora-dot" th:if="${point.cuquoraStart}" aria-hidden="true"></span>
                         <span class="bar-chart-label"><span class="bar-chart-label-long" th:text="${point.shortLabel}">oct</span><span class="bar-chart-label-short" aria-hidden="true" th:text="${point.initial()}">O</span></span>
@@ -422,7 +422,7 @@
                             <span class="rank-diff" th:if="${row.diff != null}" th:classappend="${row.diff > 0} ? 'is-better' : (${row.diff < 0} ? 'is-worse')"
                                   th:text="'(' + ${row.diffLabel()} + ')'">(+3)</span>
                         </span>
-                        <span class="rank-bars-track" aria-hidden="true"><span class="rank-bars-fill" th:style="'--size:' + ${row.share} + '%'"></span></span>
+                        <span class="rank-bars-track" aria-hidden="true"><span class="rank-bars-fill" th:classappend="${'pct-' + row.share}"></span></span>
                     </li>
                 </ul>
             </section>
@@ -442,7 +442,7 @@
                             <span class="rank-diff" th:if="${row.diff != null}" th:classappend="${row.diff > 0} ? 'is-better' : (${row.diff < 0} ? 'is-worse')"
                                   th:text="'(' + ${row.diffLabel()} + ')'">(+3)</span>
                         </span>
-                        <span class="rank-bars-track" aria-hidden="true"><span class="rank-bars-fill" th:style="'--size:' + ${row.share} + '%'"></span></span>
+                        <span class="rank-bars-track" aria-hidden="true"><span class="rank-bars-fill" th:classappend="${'pct-' + row.share}"></span></span>
                     </li>
                 </ul>
             </section>
@@ -454,11 +454,11 @@
                     <p th:if="${report.busiestHour != null}" th:text="'La hora con más citas: de ' + ${report.busiestHour} + ':00 a ' + ${report.busiestHour + 1} + ':00'">De 10:00 a 11:00</p>
                     <p th:if="${report.busiestHour == null}">Ninguna visita en el periodo</p>
                 </header>
-                <div class="bar-chart bar-chart--compact" th:style="'--columns:' + ${#lists.size(report.weekdays)}">
+                <div class="bar-chart bar-chart--compact" th:classappend="${'bar-chart--cols-' + #lists.size(report.weekdays)}">
                     <div class="bar-chart-col" tabindex="0" th:each="day : ${report.weekdays}"
                          th:aria-label="${day.name} + ': ' + ${day.visits} + ' visitas'">
                         <span class="bar-chart-bars">
-                            <span class="bar-chart-bar" th:classappend="${!day.busiest} ? 'bar-chart-bar--soft'" th:style="'--size:' + ${day.share} + '%'"></span>
+                            <span class="bar-chart-bar" th:classappend="${'pct-' + day.share + (!day.busiest ? ' bar-chart-bar--soft' : '')}"></span>
                         </span>
                         <span class="bar-chart-label" th:text="${day.shortName}">Lun</span>
                         <span class="chart-tip" aria-hidden="true">

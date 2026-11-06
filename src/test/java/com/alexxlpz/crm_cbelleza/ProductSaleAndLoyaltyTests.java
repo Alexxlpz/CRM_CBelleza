@@ -234,7 +234,7 @@ class ProductSaleAndLoyaltyTests {
 
     @Test
     void myCenterKeepsWhatWasTypedWhenSavingFails() throws Exception {
-        mvc.perform(get("/worker/center")
+        mvc.perform(get("/worker/center/reservas")
                         .flashAttr("loyaltyForm", new com.alexxlpz.crm_cbelleza.forms.LoyaltySettingsForm("PER_ITEM", 7, 70, ""))
                         .flashAttr("loyaltyError", "Escribe qué recompensa da el centro.")
                         .with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))

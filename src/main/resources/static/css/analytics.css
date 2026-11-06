@@ -258,6 +258,20 @@
     background-repeat: repeat-x;
 }
 
+/* Columnas del gráfico: tantas como meses (o días) se enseñan */
+.bar-chart--cols-1 { --columns: 1; }
+.bar-chart--cols-2 { --columns: 2; }
+.bar-chart--cols-3 { --columns: 3; }
+.bar-chart--cols-4 { --columns: 4; }
+.bar-chart--cols-5 { --columns: 5; }
+.bar-chart--cols-6 { --columns: 6; }
+.bar-chart--cols-7 { --columns: 7; }
+.bar-chart--cols-8 { --columns: 8; }
+.bar-chart--cols-9 { --columns: 9; }
+.bar-chart--cols-10 { --columns: 10; }
+.bar-chart--cols-11 { --columns: 11; }
+.bar-chart--cols-12 { --columns: 12; }
+
 .bar-chart--compact {
     --chart-height: 140px;
 }
@@ -299,10 +313,10 @@
     border-bottom: 1px solid var(--border-soft);
 }
 
+/* Alto en % del mes más alto: la clase pct-N de common.css */
 .bar-chart-bar {
-    --size: 0%;
     display: block;
-    height: var(--size);
+    height: var(--pct, 0%);
     min-height: 2px;
     background: var(--chart-1);
     border-radius: 4px 4px 0 0;
@@ -749,9 +763,8 @@ a.changes-list-name:hover {
 }
 
 .rank-bars-fill {
-    --size: 0%;
     display: block;
-    width: var(--size);
+    width: var(--pct, 0%);
     min-width: 2px;
     height: 100%;
     border-radius: 4px;
@@ -903,9 +916,9 @@ a.changes-list-name:hover {
     overflow: hidden;
 }
 
-.team-occupancy-track > span {
+.team-occupancy-fill {
     display: block;
-    width: var(--size, 0%);
+    width: var(--pct, 0%);
     height: 100%;
     border-radius: inherit;
     background: var(--primary);

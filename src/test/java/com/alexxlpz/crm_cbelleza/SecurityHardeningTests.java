@@ -208,7 +208,7 @@ class SecurityHardeningTests {
 
     @Test
     void myCenterAsksForTheCurrentPasswordToo() throws Exception {
-        mvc.perform(get("/worker/center").with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
+        mvc.perform(get("/worker/center/cuenta").with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
                 .andExpect(content().string(containsString("name=\"currentPassword\"")));
     }
 

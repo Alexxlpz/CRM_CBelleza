@@ -169,7 +169,7 @@
                 if (!center.reviewCount) {
                     return `
                     <p class="${className} center-rating--empty" aria-label="Sin valoraciones todavía">
-                        <span class="stars" aria-hidden="true" style="--stars: 0"><span class="stars-fill"></span></span>
+                        <span class="stars stars--h0" aria-hidden="true"><span class="stars-fill"></span></span>
                         <span>Sin valoraciones</span>
                     </p>`;
                 }
@@ -177,7 +177,7 @@
                 const count = center.reviewCount === 1 ? '1 reseña' : `${center.reviewCount} reseñas`;
                 return `
                     <p class="${className}" aria-label="Nota media ${average} de 5, ${count}">
-                        <span class="stars" aria-hidden="true" style="--stars: ${Math.round(center.rating * 2) / 2}"><span class="stars-fill"></span></span>
+                        <span class="stars stars--h${Math.round(center.rating * 2)}" aria-hidden="true"><span class="stars-fill"></span></span>
                         <strong>${average}</strong> <span>· ${count}</span>
                     </p>`;
             }

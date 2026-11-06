@@ -103,7 +103,7 @@ class AutoAcceptBookingTests {
         mvc.perform(post("/worker/center/bookings").param("autoAccept", "true").with(csrf())
                         .with(TestUsers.as(users, TestUsers.WORKER_CENTER_2)))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/worker/center#reservas"));
+                .andExpect(redirectedUrl("/worker/center/reservas"));
 
         assertTrue(centers.findById(centerOf(TestUsers.WORKER_CENTER_2).getId()).orElseThrow().isAutoAcceptBookings());
         assertFalse(centers.findById(centerOf(TestUsers.WORKER_CENTER_1).getId()).orElseThrow().isAutoAcceptBookings());
@@ -123,7 +123,7 @@ class AutoAcceptBookingTests {
 
     @Test
     void myCenterShowsTheSwitch() throws Exception {
-        mvc.perform(get("/worker/center").with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
+        mvc.perform(get("/worker/center/reservas").with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Aceptar las citas automáticamente")));
     }

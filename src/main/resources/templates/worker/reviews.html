@@ -57,7 +57,7 @@
                     <ul class="reviews-bars" aria-label="Reseñas por número de estrellas">
                         <li th:each="entry : ${ratingDistribution}">
                             <span class="reviews-bar-label" th:text="${entry.key + ' ★'}">5 ★</span>
-                            <span class="reviews-bar" aria-hidden="true"><span th:style="'width: ' + ${entry.value * 100 / totalCount} + '%'"></span></span>
+                            <span class="reviews-bar" aria-hidden="true"><span class="reviews-bar-fill" th:classappend="${'pct-' + (entry.value * 100 / totalCount)}"></span></span>
                             <span class="reviews-bar-count" th:text="${entry.value}">12</span>
                         </li>
                     </ul>

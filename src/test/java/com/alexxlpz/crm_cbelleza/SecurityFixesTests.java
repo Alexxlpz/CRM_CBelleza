@@ -88,6 +88,8 @@ class SecurityFixesTests {
                 .andExpect(status().isOk())
                 .andExpect(header().string("Content-Security-Policy", containsString("default-src 'self'")))
                 .andExpect(header().string("Content-Security-Policy", containsString("frame-ancestors")))
+                // Estilos solo de los .css: sin 'unsafe-inline' fuera de la consola H2
+                .andExpect(header().string("Content-Security-Policy", containsString("style-src 'self';")))
                 .andExpect(header().string("Referrer-Policy", "strict-origin-when-cross-origin"))
                 .andExpect(header().string("Permissions-Policy", containsString("camera=()")))
                 .andExpect(content().string(containsString("/vendor/leaflet/leaflet.js")))

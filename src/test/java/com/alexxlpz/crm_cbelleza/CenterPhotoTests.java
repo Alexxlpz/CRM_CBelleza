@@ -97,7 +97,7 @@ class CenterPhotoTests {
         mvc.perform(multipart("/worker/center/photo")
                         .file(new MockMultipartFile("photo", "fachada.png", "image/png", big))
                         .with(csrf()).with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
-                .andExpect(redirectedUrl("/worker/center#foto"))
+                .andExpect(redirectedUrl("/worker/center/centro#foto"))
                 .andExpect(flash().attribute("photoMessage", "Foto guardada."));
 
         Center saved = centers.findById(center.getId()).orElseThrow();
@@ -175,7 +175,7 @@ class CenterPhotoTests {
         String url = centers.findById(center.getId()).orElseThrow().getPhotoUrl();
 
         mvc.perform(post("/worker/center/photo/delete").with(csrf()).with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
-                .andExpect(redirectedUrl("/worker/center#foto"));
+                .andExpect(redirectedUrl("/worker/center/centro#foto"));
 
         assertNull(centers.findById(center.getId()).orElseThrow().getPhotoUrl());
         mvc.perform(get(url)).andExpect(status().isNotFound());

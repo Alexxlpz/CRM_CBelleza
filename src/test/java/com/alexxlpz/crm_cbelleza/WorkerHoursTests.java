@@ -93,7 +93,7 @@ class WorkerHoursTests {
             request.param("hoursDay", String.valueOf(day)).param("hoursFrom", "09:00").param("hoursTo", "14:00");
         }
         mvc.perform(request)
-                .andExpect(redirectedUrl("/worker/center#equipo"))
+                .andExpect(redirectedUrl("/worker/center/equipo"))
                 .andExpect(flash().attribute("teamMessage", containsString("Horario de Lucía Romero guardado")));
     }
 
@@ -118,7 +118,7 @@ class WorkerHoursTests {
                 saved.workingDays());
         assertEquals(List.of("Lunes a viernes: 09:00 - 14:00"), saved.describe());
 
-        mvc.perform(get("/worker/center").with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
+        mvc.perform(get("/worker/center/equipo").with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
                 .andExpect(content().string(containsString("Lunes a viernes: 09:00 - 14:00")))
                 .andExpect(content().string(containsString("/worker/center/team/" + lucia.getId() + "/horario")));
 

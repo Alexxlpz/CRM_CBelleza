@@ -114,6 +114,6 @@ public class AuthController {
 
     @GetMapping("/profile")
     public String profile(@AuthenticationPrincipal AppUserDetails user) {
-        return user.isWorker() ? "redirect:/worker/center" : "redirect:/client/profile";
+        return user.isWorker() ? "redirect:/worker/center/cuenta" : "redirect:/client/profile";
     }
 }

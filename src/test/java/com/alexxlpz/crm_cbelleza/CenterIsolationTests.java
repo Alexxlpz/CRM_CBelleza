@@ -182,6 +182,23 @@ class CenterIsolationTests {
     }
 
     @Test
+    void availabilityOfACenterUnderReviewIsNotPublic() throws Exception {
+        var center = users.findByEmailIgnoreCase(TestUsers.WORKER_CENTER_1).orElseThrow().getCenter();
+        mvc.perform(get("/api/centers/" + center.getId() + "/availability")).andExpect(status().isOk());
+        center.setPublished(false);
+        centers.save(center);
+        try {
+            mvc.perform(get("/api/centers/" + center.getId() + "/availability")).andExpect(status().isNotFound());
+            mvc.perform(get("/api/centers/" + center.getId() + "/availability").with(TestUsers.as(users, TestUsers.CLIENT)))
+                    .andExpect(status().isNotFound());
+        } finally {
+            // Esta clase no es @Transactional: se deja el centro como estaba para los demás tests
+            center.setPublished(true);
+            centers.save(center);
+        }
+    }
+
+    @Test
     void workerCannotSeePhotoOfAnotherCenterStillUnderReview() throws Exception {
         var center = users.findByEmailIgnoreCase(TestUsers.WORKER_CENTER_1).orElseThrow().getCenter();
         center.setPublished(false);

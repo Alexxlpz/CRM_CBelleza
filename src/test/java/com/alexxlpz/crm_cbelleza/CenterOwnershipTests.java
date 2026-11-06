@@ -79,7 +79,7 @@ class CenterOwnershipTests {
                         .param("hoursDay", "1", "1")
                         .param("hoursFrom", "10:00", "17:00")
                         .param("hoursTo", "14:00", "21:00"))
-                .andExpect(redirectedUrl("/worker/center#horario"))
+                .andExpect(redirectedUrl("/worker/center/centro#horario"))
                 .andExpect(flash().attributeExists("hoursMessage"));
 
         assertEquals(List.of("Lunes: 10:00 - 14:00 y 17:00 - 21:00"), openingHours.forCenter(center.getId()).describe());
@@ -110,7 +110,7 @@ class CenterOwnershipTests {
                         .param("hoursDay", "2", "2")
                         .param("hoursFrom", "09:00", "13:00")
                         .param("hoursTo", "14:00", "20:00"))
-                .andExpect(redirectedUrl("/worker/center#horario"))
+                .andExpect(redirectedUrl("/worker/center/centro#horario"))
                 .andExpect(flash().attribute("hoursError", containsString("se pisan")));
         assertEquals(before, openingHours.forCenter(center.getId()).describe());
     }
@@ -137,10 +137,13 @@ class CenterOwnershipTests {
         mvc.perform(post("/worker/reviews/1/reply").with(csrf()).with(TestUsers.as(users, LUCIA)).param("reply", "Gracias"))
                 .andExpect(redirectedUrl("/worker/reviews"));
 
-        // Los datos del centro tampoco entran por el formulario de su cuenta
+        // Los datos del centro: ni por su formulario ni colándolos en el de su cuenta
         mvc.perform(post("/worker/center").with(csrf()).with(TestUsers.as(users, LUCIA))
-                        .param("centerName", "Otro nombre").param("workerName", "Lucía Romero"))
+                        .param("centerName", "Otro nombre"))
                 .andExpect(flash().attribute("errorMessage", containsString("Solo el dueño del centro")));
+        mvc.perform(post("/worker/center/cuenta").with(csrf()).with(TestUsers.as(users, LUCIA))
+                        .param("centerName", "Otro nombre").param("workerName", "Lucía Romero"))
+                .andExpect(redirectedUrl("/worker/center/cuenta"));
 
         Center after = centers.findById(center.getId()).orElseThrow();
         assertEquals(center.getName(), after.getName());
@@ -150,19 +153,33 @@ class CenterOwnershipTests {
     }
 
     @Test
-    void standardWorkerManagesHisOwnAccountAndSeesTheCenterReadOnly() throws Exception {
-        mvc.perform(post("/worker/center").with(csrf()).with(TestUsers.as(users, LUCIA))
+    void standardWorkerManagesHisOwnAccountAndOnlySeesHerSections() throws Exception {
+        mvc.perform(post("/worker/center/cuenta").with(csrf()).with(TestUsers.as(users, LUCIA))
                         .param("workerName", "Lucía Romero Gil").param("workerPhone", "600999888"))
+                .andExpect(redirectedUrl("/worker/center/cuenta"))
                 .andExpect(flash().attribute("successMessage", containsString("tu cuenta")));
         assertEquals("Lucía Romero Gil", users.findById(lucia.getId()).orElseThrow().getName());
 
+        // Mi Centro le abre su cuenta, y en el menú solo tiene Mi cuenta y Reservas
         mvc.perform(get("/worker/center").with(TestUsers.as(users, LUCIA)))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("los gestiona Carlos Mendoza, dueño del centro")))
-                .andExpect(content().string(containsString("Lunes a viernes: 09:00 - 20:00")))
+                .andExpect(content().string(containsString("Guardar mis citas en Google Calendar")))
+                .andExpect(content().string(containsString("href=\"/worker/center/reservas\"")))
+                .andExpect(content().string(not(containsString("href=\"/worker/center/equipo\""))))
                 .andExpect(content().string(not(containsString("id=\"hoursForm\""))))
-                .andExpect(content().string(not(containsString("id=\"centerName\""))))
-                .andExpect(content().string(containsString("Guardar mis citas en Google Calendar")));
+                .andExpect(content().string(not(containsString("id=\"centerName\""))));
+        mvc.perform(get("/worker/center/centro").with(TestUsers.as(users, LUCIA)))
+                .andExpect(redirectedUrl("/worker/center/cuenta"));
+        mvc.perform(get("/worker/center/equipo").with(TestUsers.as(users, LUCIA)))
+                .andExpect(redirectedUrl("/worker/center/cuenta"));
+        // En Reservas, el enlace y el cartel, sin los ajustes del dueño
+        mvc.perform(get("/worker/center/reservas").with(TestUsers.as(users, LUCIA)))
+                .andExpect(content().string(containsString("Enlace para reservar")))
+                .andExpect(content().string(not(containsString("Aceptar las citas automáticamente"))))
+                .andExpect(content().string(not(containsString("id=\"loyaltyForm\""))));
+
+        // Al dueño, Mi Centro le abre los datos y el horario del centro
         mvc.perform(get("/worker/center").with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
                 .andExpect(content().string(containsString("id=\"hoursForm\"")))
                 .andExpect(content().string(containsString("id=\"centerName\"")));

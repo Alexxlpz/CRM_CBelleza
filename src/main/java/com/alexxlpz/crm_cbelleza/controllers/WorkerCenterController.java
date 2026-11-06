@@ -25,7 +25,6 @@ import com.alexxlpz.crm_cbelleza.security.AuthenticationSessionService;
 import com.alexxlpz.crm_cbelleza.services.CenterPhotoService;
 import com.alexxlpz.crm_cbelleza.services.WorkerPhotoService;
 import com.alexxlpz.crm_cbelleza.services.CenterService;
-import com.alexxlpz.crm_cbelleza.services.TreatmentService;
 import com.alexxlpz.crm_cbelleza.services.UserService;
 import com.alexxlpz.crm_cbelleza.services.WorkerHoursService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -47,15 +46,15 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * "Mi centro": datos públicos del centro, horario, equipo y configuración (solo el dueño los cambia; el resto del
- * equipo los ve) y la cuenta del profesional (cada uno la suya).
+ * "Mi centro", repartido en apartados con su página: Centro (datos, foto y horario), Reservas (reservas automáticas,
+ * enlace y cartel, tarjeta de puntos), Equipo (equipo y dueño) y Mi cuenta (datos, contraseña, foto y Google Calendar).
+ * Solo el dueño cambia el centro; el resto del equipo ve Mi cuenta y, en Reservas, el enlace y el cartel.
  */
 @Controller
 public class WorkerCenterController {
 
     private final CenterService centerService;
     private final UserService userService;
-    private final TreatmentService treatmentService;
     private final AuthenticationSessionService authSession;
     private final GoogleCalendarService googleCalendar;
     private final LoyaltyService loyaltyService;
@@ -70,7 +69,6 @@ public class WorkerCenterController {
 
     public WorkerCenterController(CenterService centerService,
                                   UserService userService,
-                                  TreatmentService treatmentService,
                                   AuthenticationSessionService authSession,
                                   GoogleCalendarService googleCalendar,
                                   LoyaltyService loyaltyService,
@@ -93,54 +91,91 @@ public class WorkerCenterController {
         this.workerPhotos = workerPhotos;
         this.centerService = centerService;
         this.userService = userService;
-        this.treatmentService = treatmentService;
         this.authSession = authSession;
         this.googleCalendar = googleCalendar;
     }
 
+    /** Apartados de «Mi Centro», cada uno en su página: /worker/center/{apartado}. */
+    static final String CENTER = "centro";
+    static final String BOOKINGS = "reservas";
+    static final String TEAM = "equipo";
+    static final String ACCOUNT = "cuenta";
+    private static final Map<String, String> SECTION_TITLES = Map.of(
+            CENTER, "Centro", BOOKINGS, "Reservas", TEAM, "Equipo", ACCOUNT, "Mi cuenta");
+
+    /**
+     * Entrada de «Mi Centro». En escritorio abre el primer apartado (Centro al dueño, Mi cuenta al resto); en el móvil
+     * la misma página enseña solo la lista de apartados.
+     */
     @GetMapping("/worker/center")
     public String view(@AuthenticationPrincipal AppUserDetails worker, Model model) {
+        boolean owner = access.isOwner(worker.getCenterId(), worker.getId());
+        model.addAttribute("isIndex", true);
+        return render(worker, owner ? CENTER : ACCOUNT, owner, model);
+    }
+
+    @GetMapping("/worker/center/{section:centro|reservas|equipo|cuenta}")
+    public String section(@AuthenticationPrincipal AppUserDetails worker, @PathVariable String section, Model model) {
+        boolean owner = access.isOwner(worker.getCenterId(), worker.getId());
+        // El resto del equipo no cambia nada en Centro ni en Equipo: no tiene esos apartados
+        if (!owner && (section.equals(CENTER) || section.equals(TEAM))) {
+            return "redirect:/worker/center/" + ACCOUNT;
+        }
+        model.addAttribute("isIndex", false);
+        return render(worker, section, owner, model);
+    }
+
+    /** Carga solo lo que necesita el apartado (el mapa, el equipo o Google Calendar no se consultan en los demás). */
+    private String render(AppUserDetails worker, String section, boolean owner, Model model) {
         Long centerId = worker.getCenterId();
         Center center = centerService.getCenterById(centerId);
-        OpeningHours hours = openingHours.forCenter(centerId);
-        boolean owner = center.isOwnedBy(worker.getId());
         model.addAttribute("center", center);
-        // Teléfono del centro con el prefijo aparte; si no lo lleva, el del país de su zona horaria
-        PhoneNumbers.Parts centerPhone = PhoneNumbers.split(center.getPhone(), PhoneNumbers.countryForTimeZone(center.getTimeZone()));
-        model.addAttribute("centerPhone", centerPhone);
-        model.addAttribute("phoneCountries", PhoneNumbers.countriesWith(centerPhone.country()));
-        model.addAttribute("callingCodes", PhoneNumbers.callingCodesText());
+        model.addAttribute("section", section);
+        model.addAttribute("sectionTitle", SECTION_TITLES.get(section));
         model.addAttribute("isOwner", owner);
         model.addAttribute("ownerName", access.ownerName(centerId));
-        model.addAttribute("openingHoursLines", hours.describe());
-        if (!model.containsAttribute("hourRows")) {
-            model.addAttribute("hourRows", openingHours.rows(hours));
-        }
-        model.addAttribute("hourOptions", openingHours.timeOptions());
-        model.addAttribute("teamMembers", team.members(centerId));
-        // Horario propio de quien lo tiene («Lunes a viernes: 09:00 - 14:00»); el resto trabaja todo el del centro
-        Map<Long, List<String>> teamHours = new HashMap<>();
-        workerHours.forCenter(centerId).forEach((id, ownHours) -> teamHours.put(id, ownHours.describe()));
-        model.addAttribute("teamHours", teamHours);
-        model.addAttribute("maxTeamSize", TeamService.MAX_TEAM_SIZE);
-        if (owner) {
-            // Quien puede quedarse con el centro: el resto del equipo con la cuenta ya activada
-            model.addAttribute("transferCandidates", userService.getWorkersByCenter(centerId).stream()
-                    .filter(w -> !w.getId().equals(worker.getId()) && w.hasAccount())
-                    .toList());
+        model.addAttribute("activePage", "center");
+        switch (section) {
+            case CENTER -> {
+                // Teléfono del centro con el prefijo aparte; si no lo lleva, el del país de su zona horaria
+                PhoneNumbers.Parts centerPhone = PhoneNumbers.split(center.getPhone(), PhoneNumbers.countryForTimeZone(center.getTimeZone()));
+                model.addAttribute("centerPhone", centerPhone);
+                model.addAttribute("phoneCountries", PhoneNumbers.countriesWith(centerPhone.country()));
+                model.addAttribute("callingCodes", PhoneNumbers.callingCodesText());
+                model.addAttribute("timeZones", CenterTimeZones.OPTIONS);
+                if (!model.containsAttribute("hourRows")) {
+                    model.addAttribute("hourRows", openingHours.rows(openingHours.forCenter(centerId)));
+                }
+                model.addAttribute("hourOptions", openingHours.timeOptions());
+                model.addAttribute("maxPhotoMb", CenterPhotoService.MAX_UPLOAD_MB);
+            }
+            case BOOKINGS -> {
+                model.addAttribute("shortLink", site.siteUrl() + "/c/" + centerService.shortSlug(center));
+                model.addAttribute("loyaltyModes", LoyaltyMode.values());
+            }
+            case TEAM -> {
+                model.addAttribute("teamMembers", team.members(centerId));
+                // Horario propio de quien lo tiene («Lunes a viernes: 09:00 - 14:00»); el resto trabaja todo el del centro
+                Map<Long, List<String>> teamHours = new HashMap<>();
+                workerHours.forCenter(centerId).forEach((id, ownHours) -> teamHours.put(id, ownHours.describe()));
+                model.addAttribute("teamHours", teamHours);
+                model.addAttribute("maxTeamSize", TeamService.MAX_TEAM_SIZE);
+                // Quien puede quedarse con el centro: el resto del equipo con la cuenta ya activada
+                model.addAttribute("transferCandidates", userService.getWorkersByCenter(centerId).stream()
+                        .filter(w -> !w.getId().equals(worker.getId()) && w.hasAccount())
+                        .toList());
+            }
+            default -> {
+                model.addAttribute("calendarSync", googleCalendar.status(worker.getId()));
+                model.addAttribute("maxPhotoMb", CenterPhotoService.MAX_UPLOAD_MB);
+            }
         }
         model.addAttribute("worker", userService.getUser(worker.getId()));
-        model.addAttribute("shortLink", site.siteUrl() + "/c/" + centerService.shortSlug(center));
-        model.addAttribute("treatmentsCount", treatmentService.countByCenter(centerId));
-        model.addAttribute("workersCount", userService.countWorkersByCenter(centerId));
-        model.addAttribute("timeZones", CenterTimeZones.OPTIONS);
-        model.addAttribute("loyaltyModes", LoyaltyMode.values());
-        model.addAttribute("calendarSync", googleCalendar.status(worker.getId()));
-        model.addAttribute("maxPhotoMb", CenterPhotoService.MAX_UPLOAD_MB);
-        model.addAttribute("activePage", "center");
         return "worker/center";
     }
 
+    /** Datos públicos del centro (apartado Centro). */
+    @CenterOwnerOnly
     @PostMapping("/worker/center")
     public String update(@AuthenticationPrincipal AppUserDetails worker,
                          @ModelAttribute WorkerCenterForm form,
@@ -148,23 +183,32 @@ public class WorkerCenterController {
                          HttpServletResponse response,
                          RedirectAttributes redirect) {
         try {
-            boolean owner = access.isOwner(worker.getCenterId(), worker.getId());
-            if (!owner && form.hasCenterData()) {
-                throw new BusinessRuleException(access.ownerOnlyMessage(worker.getCenterId()));
-            }
-            User updatedWorker = userService.updateProfile(worker.getId(), form.worker());
-            if (owner) {
-                centerService.updateCenter(worker.getCenterId(), form.center());
-            }
-            // Recarga nombre de usuario y de centro mostrados en la navbar.
-            authSession.refresh(userService.getUser(updatedWorker.getId()), request, response);
-            redirect.addFlashAttribute("successMessage", owner
-                    ? "Los datos de tu centro y tu cuenta se han actualizado correctamente."
-                    : "Los datos de tu cuenta se han actualizado correctamente.");
+            centerService.updateCenter(worker.getCenterId(), form.center());
+            // Recarga el nombre del centro que muestra la navbar
+            authSession.refresh(userService.getUser(worker.getId()), request, response);
+            redirect.addFlashAttribute("successMessage", "Datos del centro guardados.");
         } catch (BusinessRuleException e) {
             redirect.addFlashAttribute("errorMessage", e.getMessage());
         }
-        return "redirect:/worker/center";
+        return "redirect:/worker/center/" + CENTER;
+    }
+
+    /** Cuenta del profesional (apartado Mi cuenta): cada uno la suya. */
+    @PostMapping("/worker/center/cuenta")
+    public String updateAccount(@AuthenticationPrincipal AppUserDetails worker,
+                                @ModelAttribute WorkerCenterForm form,
+                                HttpServletRequest request,
+                                HttpServletResponse response,
+                                RedirectAttributes redirect) {
+        try {
+            User updatedWorker = userService.updateProfile(worker.getId(), form.worker());
+            // Recarga el nombre que muestra la navbar
+            authSession.refresh(userService.getUser(updatedWorker.getId()), request, response);
+            redirect.addFlashAttribute("successMessage", "Datos de tu cuenta guardados.");
+        } catch (BusinessRuleException e) {
+            redirect.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:/worker/center/" + ACCOUNT;
     }
 
     /** Horario de un profesional del equipo: todo el del centro o uno propio (solo el dueño lo cambia). */
@@ -202,7 +246,7 @@ public class WorkerCenterController {
             redirect.addFlashAttribute("teamMessage", custom
                     ? "Horario de " + name + " guardado. Solo recibirá citas dentro de él."
                     : name + " vuelve a trabajar todo el horario del centro.");
-            return "redirect:/worker/center#equipo";
+            return "redirect:/worker/center/equipo";
         } catch (BusinessRuleException e) {
             redirect.addFlashAttribute("errorMessage", e.getMessage());
             redirect.addFlashAttribute("customHours", custom);
@@ -224,7 +268,7 @@ public class WorkerCenterController {
             redirect.addFlashAttribute("hoursError", e.getMessage());
             redirect.addFlashAttribute("hourRows", openingHours.rows(form));
         }
-        return "redirect:/worker/center#horario";
+        return "redirect:/worker/center/centro#horario";
     }
 
     @CenterOwnerOnly
@@ -236,10 +280,12 @@ public class WorkerCenterController {
             User newOwner = access.transferOwnership(worker.getCenterId(), worker.getId(), newOwnerId);
             redirect.addFlashAttribute("successMessage", newOwner.getName()
                     + " es ahora el dueño del centro. Tú sigues en el equipo como trabajador.");
+            // Ya no es el dueño: /worker/center le abre su cuenta
+            return "redirect:/worker/center";
         } catch (BusinessRuleException e) {
             redirect.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/worker/center/" + TEAM;
         }
-        return "redirect:/worker/center";
     }
 
     @CenterOwnerOnly
@@ -268,7 +314,7 @@ public class WorkerCenterController {
             redirect.addFlashAttribute("inviteName", name);
             redirect.addFlashAttribute("inviteEmail", email);
         }
-        return "redirect:/worker/center#equipo";
+        return "redirect:/worker/center/equipo";
     }
 
     @CenterOwnerOnly
@@ -286,7 +332,7 @@ public class WorkerCenterController {
         } catch (BusinessRuleException e) {
             redirect.addFlashAttribute("teamError", e.getMessage());
         }
-        return "redirect:/worker/center#equipo";
+        return "redirect:/worker/center/equipo";
     }
 
     @CenterOwnerOnly
@@ -302,7 +348,7 @@ public class WorkerCenterController {
         } catch (BusinessRuleException e) {
             redirect.addFlashAttribute("teamError", e.getMessage());
         }
-        return "redirect:/worker/center#equipo";
+        return "redirect:/worker/center/equipo";
     }
 
     @CenterOwnerOnly
@@ -328,7 +374,7 @@ public class WorkerCenterController {
             redirect.addFlashAttribute("loyaltyError", e.getMessage());
             redirect.addFlashAttribute("loyaltyForm", form);
         }
-        return "redirect:/worker/center#puntos";
+        return "redirect:/worker/center/reservas#puntos";
     }
 
     @CenterOwnerOnly
@@ -340,7 +386,7 @@ public class WorkerCenterController {
         redirect.addFlashAttribute("bookingsMessage", autoAccept
                 ? "Activado: las citas que pidan tus clientes en un hueco libre quedarán confirmadas al momento."
                 : "Desactivado: las nuevas solicitudes esperarán a que alguien del equipo las acepte.");
-        return "redirect:/worker/center#reservas";
+        return "redirect:/worker/center/reservas";
     }
 
     @CenterOwnerOnly
@@ -352,7 +398,7 @@ public class WorkerCenterController {
         redirect.addFlashAttribute("bookingsMessage", hours == 0
                 ? "Guardado: los clientes tendrán que llamaros para cambiar la hora de una cita."
                 : "Guardado: los clientes podrán cambiar la hora de sus citas hasta " + hours + " h antes.");
-        return "redirect:/worker/center#reservas";
+        return "redirect:/worker/center/reservas";
     }
 
     @CenterOwnerOnly
@@ -368,7 +414,7 @@ public class WorkerCenterController {
         } catch (BusinessRuleException e) {
             redirect.addFlashAttribute("photoError", e.getMessage());
         }
-        return "redirect:/worker/center#foto";
+        return "redirect:/worker/center/centro#foto";
     }
 
     @CenterOwnerOnly
@@ -376,7 +422,7 @@ public class WorkerCenterController {
     public String removePhoto(@AuthenticationPrincipal AppUserDetails worker, RedirectAttributes redirect) {
         photoService.remove(worker.getCenterId());
         redirect.addFlashAttribute("photoMessage", "Foto quitada.");
-        return "redirect:/worker/center#foto";
+        return "redirect:/worker/center/centro#foto";
     }
 
     private boolean published(AppUserDetails worker) {
@@ -394,13 +440,13 @@ public class WorkerCenterController {
         } catch (BusinessRuleException e) {
             redirect.addFlashAttribute("myPhotoError", e.getMessage());
         }
-        return "redirect:/worker/center#mi-foto";
+        return "redirect:/worker/center/cuenta#mi-foto";
     }
 
     @PostMapping("/worker/center/my-photo/delete")
     public String removeMyPhoto(@AuthenticationPrincipal AppUserDetails worker, RedirectAttributes redirect) {
         workerPhotos.remove(worker.getId());
         redirect.addFlashAttribute("myPhotoMessage", "Foto quitada.");
-        return "redirect:/worker/center#mi-foto";
+        return "redirect:/worker/center/cuenta#mi-foto";
     }
 }

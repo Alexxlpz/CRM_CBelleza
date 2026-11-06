@@ -1,9 +1,10 @@
 <!--/* Reseñas verificadas: estrellas, ficha del centro, valorar desde «Mis citas» y respuestas del centro. */-->
 <div xmlns:th="http://www.thymeleaf.org">
 
-    <!--/* Cinco estrellas rellenas hasta «value» (admite medias: 4,5). Solo dibujo: el texto lo pone quien lo usa. */-->
+    <!--/* Cinco estrellas rellenas hasta «value» (admite medias: 4,5). Solo dibujo: el texto lo pone quien lo usa.
+           stars--hN: N medias estrellas (4,5 → stars--h9), definidas en reviews.css */-->
     <span th:fragment="stars(value)" class="stars" aria-hidden="true"
-          th:style="'--stars: ' + ${value}"><span class="stars-fill"></span></span>
+          th:classappend="${'stars--h' + #numbers.formatInteger(value * 2, 1)}"><span class="stars-fill"></span></span>
 
     <!--/* Modal único para valorar una cita del historial; el botón «Valorar» lo rellena (centro, tratamiento y fecha). */-->
     <div th:fragment="reviewModal" class="ui-modal-overlay" id="reviewModal" hidden>
@@ -115,7 +116,7 @@
                 <ul class="reviews-bars" aria-label="Opiniones por número de estrellas">
                     <li th:each="entry : ${ratingDistribution}">
                         <span class="reviews-bar-label" th:text="${entry.key + ' ★'}">5 ★</span>
-                        <span class="reviews-bar" aria-hidden="true"><span th:style="'width: ' + ${entry.value * 100 / rating.count} + '%'"></span></span>
+                        <span class="reviews-bar" aria-hidden="true"><span class="reviews-bar-fill" th:classappend="${'pct-' + (entry.value * 100 / rating.count)}"></span></span>
                         <span class="reviews-bar-count" th:text="${entry.value}">12</span>
                         <span class="visually-hidden" th:text="${entry.key == 1 ? 'con 1 estrella' : 'con ' + entry.key + ' estrellas'}">con 5 estrellas</span>
                     </li>

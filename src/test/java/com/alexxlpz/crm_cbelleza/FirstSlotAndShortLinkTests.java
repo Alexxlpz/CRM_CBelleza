@@ -167,7 +167,7 @@ class FirstSlotAndShortLinkTests {
     @Test
     void myCenterShowsTheLinkToCopy() throws Exception {
         Center center = center();
-        mvc.perform(get("/worker/center").with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
+        mvc.perform(get("/worker/center/reservas").with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Enlace para reservar")))
                 .andExpect(content().string(containsString("/c/" + centerService.shortSlug(center))));

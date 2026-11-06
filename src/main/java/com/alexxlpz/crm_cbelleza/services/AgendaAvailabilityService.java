@@ -90,7 +90,10 @@ public class AgendaAvailabilityService {
      */
     @Transactional(readOnly = true)
     public Availability availability(Long centerId, Long treatmentId, Long workerId, Long changingAppointmentId, Long clientId) {
+        // Es público (/api/centers/{id}/availability): un centro en revisión no enseña su horario ni sus huecos,
+        // igual que su ficha da 404
         Center center = centers.findById(centerId)
+                .filter(Center::isPublished)
                 .orElseThrow(() -> new ResourceNotFoundException("Centro no encontrado."));
         Long ignored = changingAppointmentId != null && clientId != null
                 && appointments.findByIdAndClientId(changingAppointmentId, clientId)

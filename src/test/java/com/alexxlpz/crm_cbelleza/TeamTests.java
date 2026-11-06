@@ -84,7 +84,7 @@ class TeamTests {
         mvc.perform(post("/worker/center/team").with(csrf()).with(TestUsers.as(users, TestUsers.WORKER_CENTER_1))
                         .param("name", "Marta López")
                         .param("email", "  Marta.Lopez@Correo.com "))
-                .andExpect(redirectedUrl("/worker/center#equipo"))
+                .andExpect(redirectedUrl("/worker/center/equipo"))
                 .andExpect(flash().attribute("teamMessage", containsString("marta.lopez@correo.com")));
 
         User marta = users.findByEmailIgnoreCase("marta.lopez@correo.com").orElseThrow();
@@ -95,7 +95,7 @@ class TeamTests {
 
         String token = invitationToken("marta.lopez@correo.com");
         mvc.perform(get("/invitation/" + token)).andExpect(content().string(containsString(center.getName())));
-        mvc.perform(get("/worker/center").with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
+        mvc.perform(get("/worker/center/equipo").with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
                 .andExpect(content().string(containsString("Marta López")))
                 .andExpect(content().string(containsString("Invitación enviada")));
     }
@@ -117,7 +117,7 @@ class TeamTests {
     }
 
     @Test
-    void standardWorkerSeesTheTeamButCannotChangeIt() throws Exception {
+    void standardWorkerCannotChangeTheTeam() throws Exception {
         long before = users.count();
         mvc.perform(post("/worker/center/team").with(csrf()).with(TestUsers.as(users, LUCIA))
                         .param("name", "Marta").param("email", "marta@correo.com"))
@@ -128,10 +128,9 @@ class TeamTests {
         assertEquals(before, users.count());
         assertEquals(center.getId(), users.findById(carlos.getId()).orElseThrow().getCenter().getId());
 
-        mvc.perform(get("/worker/center").with(TestUsers.as(users, LUCIA)))
-                .andExpect(content().string(containsString("Carlos")))
-                .andExpect(content().string(containsString("invita a gente nueva")))
-                .andExpect(content().string(org.hamcrest.Matchers.not(containsString("Enviar invitación"))));
+        // El apartado Equipo es solo del dueño
+        mvc.perform(get("/worker/center/equipo").with(TestUsers.as(users, LUCIA)))
+                .andExpect(redirectedUrl("/worker/center/cuenta"));
     }
 
     @Test
@@ -146,7 +145,7 @@ class TeamTests {
         AppUserDetails openSession = TestUsers.details(users, LUCIA);
 
         mvc.perform(post("/worker/center/team/" + lucia.getId() + "/remove").with(csrf()).with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
-                .andExpect(redirectedUrl("/worker/center#equipo"))
+                .andExpect(redirectedUrl("/worker/center/equipo"))
                 .andExpect(flash().attribute("teamMessage", containsString("ya no está en el equipo")));
 
         User removed = users.findById(lucia.getId()).orElseThrow();
@@ -161,7 +160,7 @@ class TeamTests {
         mvc.perform(get("/worker/calendar").with(user(openSession)))
                 .andExpect(redirectedUrl("/login"))
                 .andExpect(flash().attribute("errorMessage", containsString("Ya no formas parte del equipo de " + center.getName())));
-        mvc.perform(get("/worker/center").with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
+        mvc.perform(get("/worker/center/equipo").with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
                 .andExpect(content().string(org.hamcrest.Matchers.not(containsString(LUCIA))));
     }
 

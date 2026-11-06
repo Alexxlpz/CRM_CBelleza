@@ -26,7 +26,7 @@ public class GoogleCalendarController {
     /** Valor aleatorio que viaja a Google y vuelve: la respuesta tiene que ser de la petición que hizo esta persona. */
     static final String STATE_ATTRIBUTE = "GOOGLE_CALENDAR_STATE";
 
-    private static final String WORKER_PAGE = "/worker/center";
+    private static final String WORKER_PAGE = "/worker/center/cuenta";
     private static final String CLIENT_PAGE = "/client/profile";
 
     private final GoogleCalendarService calendar;

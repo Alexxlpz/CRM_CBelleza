@@ -5,7 +5,6 @@
 
 /* ---------- Estrellas (fragments/reviews :: stars): cinco estrellas rellenas hasta --stars (admite medias) ---------- */
 .stars {
-    --stars: 0; /* lo sustituye el style="--stars: …" de cada valoración */
     position: relative;
     display: inline-block;
     font-size: 15px;
@@ -30,6 +29,19 @@
 .stars-fill::before {
     content: "★★★★★";
 }
+
+/* Relleno de las estrellas en medias estrellas: stars--h9 = 4,5 */
+.stars--h0 { --stars: 0; }
+.stars--h1 { --stars: 0.5; }
+.stars--h2 { --stars: 1; }
+.stars--h3 { --stars: 1.5; }
+.stars--h4 { --stars: 2; }
+.stars--h5 { --stars: 2.5; }
+.stars--h6 { --stars: 3; }
+.stars--h7 { --stars: 3.5; }
+.stars--h8 { --stars: 4; }
+.stars--h9 { --stars: 4.5; }
+.stars--h10 { --stars: 5; }
 
 /* ---------- Cabecera de la ficha del centro ---------- */
 .hero-rating {
@@ -131,8 +143,9 @@
     overflow: hidden;
 }
 
-.reviews-bar > span {
+.reviews-bar-fill {
     display: block;
+    width: var(--pct, 0%);
     height: 100%;
     border-radius: inherit;
     background: var(--star);

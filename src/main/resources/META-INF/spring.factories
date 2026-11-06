@@ -1,0 +1,2 @@
+org.springframework.boot.env.PropertySourceLoader=\
+com.alexxlpz.crm_cbelleza.config.DotEnvPropertySourceLoader

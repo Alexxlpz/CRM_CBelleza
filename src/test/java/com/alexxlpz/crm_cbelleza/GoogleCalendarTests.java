@@ -83,7 +83,7 @@ class GoogleCalendarTests {
 
     @Test
     void profileShowsSwitchOff() throws Exception {
-        mvc.perform(get("/worker/center").with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
+        mvc.perform(get("/worker/center/cuenta").with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
                 .andExpect(status().isOk())
                 .andExpect(content().string(allOf(
                         containsString("Guardar mis citas en Google Calendar"),
@@ -124,7 +124,7 @@ class GoogleCalendarTests {
         assertNotEquals(REFRESH_TOKEN, link.getEncryptedRefreshToken(), "el token se guarda cifrado");
         assertEquals("evento-1", appointments.findById(upcoming.getId()).orElseThrow().getGoogleEventId());
 
-        mvc.perform(get("/worker/center").with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
+        mvc.perform(get("/worker/center/cuenta").with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
                 .andExpect(content().string(allOf(
                         containsString("role=\"switch\" aria-checked=\"true\""),
                         containsString("carlos.personal@gmail.com"))));
@@ -149,12 +149,12 @@ class GoogleCalendarTests {
         User carlos = users.findByEmailIgnoreCase(TestUsers.WORKER_CENTER_1).orElseThrow();
         mvc.perform(post("/worker/center").with(csrf()).with(TestUsers.as(users, TestUsers.WORKER_CENTER_1))
                         .param("workerName", carlos.getName()).param("timeZone", "Mars/Olympus"))
-                .andExpect(redirectedUrl("/worker/center"));
+                .andExpect(redirectedUrl("/worker/center/centro"));
         assertEquals("Europe/Madrid", users.findWithCenterById(carlos.getId()).orElseThrow().getCenter().getTimeZone());
 
         mvc.perform(post("/worker/center").with(csrf()).with(TestUsers.as(users, TestUsers.WORKER_CENTER_1))
                         .param("workerName", carlos.getName()).param("timeZone", "Atlantic/Canary"))
-                .andExpect(redirectedUrl("/worker/center"));
+                .andExpect(redirectedUrl("/worker/center/centro"));
         assertEquals("Atlantic/Canary", users.findWithCenterById(carlos.getId()).orElseThrow().getCenter().getTimeZone());
     }
 
@@ -167,7 +167,7 @@ class GoogleCalendarTests {
 
         mvc.perform(get("/worker/google-calendar/callback").param("code", "codigo-ok").param("state", "otro")
                         .session(session).with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
-                .andExpect(redirectedUrl("/worker/center"));
+                .andExpect(redirectedUrl("/worker/center/cuenta"));
 
         assertTrue(links.findByUserId(carlos.getId()).isEmpty());
         verify(google, never()).exchangeCode(anyString(), anyString());
@@ -221,12 +221,12 @@ class GoogleCalendarTests {
         // Otro trabajador (de otro centro) apaga su interruptor: no toca la conexión de Carlos
         mvc.perform(post("/worker/google-calendar/disconnect").with(csrf())
                         .with(TestUsers.as(users, TestUsers.WORKER_CENTER_2)))
-                .andExpect(redirectedUrl("/worker/center"));
+                .andExpect(redirectedUrl("/worker/center/cuenta"));
         assertTrue(links.findByUserId(carlos.getId()).isPresent());
 
         mvc.perform(post("/worker/google-calendar/disconnect").with(csrf())
                         .with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
-                .andExpect(redirectedUrl("/worker/center"));
+                .andExpect(redirectedUrl("/worker/center/cuenta"));
         assertTrue(links.findByUserId(carlos.getId()).isEmpty());
         verify(google).deleteCalendar(REFRESH_TOKEN, "calendario-cuquora");
         verify(google).revoke(REFRESH_TOKEN);
@@ -328,7 +328,7 @@ class GoogleCalendarTests {
 
     /** Pulsa el interruptor y simula la vuelta de Google con el mismo "state". */
     private void connect(String worker, String code) throws Exception {
-        connect(worker, code, "/worker/google-calendar", "/worker/center");
+        connect(worker, code, "/worker/google-calendar", "/worker/center/cuenta");
     }
 
     private void connectClient(String client, String code) throws Exception {

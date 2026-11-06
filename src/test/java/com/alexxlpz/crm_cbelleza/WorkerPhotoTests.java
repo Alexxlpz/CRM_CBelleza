@@ -66,7 +66,7 @@ class WorkerPhotoTests {
         mvc.perform(multipart("/worker/center/my-photo")
                         .file(new MockMultipartFile("photo", "yo.png", "image/png", photo))
                         .with(csrf()).with(TestUsers.as(users, email)))
-                .andExpect(redirectedUrl("/worker/center#mi-foto"));
+                .andExpect(redirectedUrl("/worker/center/cuenta#mi-foto"));
     }
 
     @Test
@@ -95,7 +95,7 @@ class WorkerPhotoTests {
         mvc.perform(get("/client/centers/" + slug).with(TestUsers.as(users, TestUsers.CLIENT)))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("src=\"" + lucia.getPhotoUrl().replace("&", "&amp;") + "\"")));
-        mvc.perform(get("/worker/center").with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
+        mvc.perform(get("/worker/center/equipo").with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString(lucia.getPhotoUrl())));
     }
@@ -115,7 +115,7 @@ class WorkerPhotoTests {
         String url = user(STANDARD_WORKER).getPhotoUrl();
 
         mvc.perform(post("/worker/center/my-photo/delete").with(csrf()).with(TestUsers.as(users, STANDARD_WORKER)))
-                .andExpect(redirectedUrl("/worker/center#mi-foto"));
+                .andExpect(redirectedUrl("/worker/center/cuenta#mi-foto"));
         assertNull(user(STANDARD_WORKER).getPhotoUrl());
         assertTrue(photos.findById(user(STANDARD_WORKER).getId()).isEmpty());
         mvc.perform(get(url)).andExpect(status().isNotFound());

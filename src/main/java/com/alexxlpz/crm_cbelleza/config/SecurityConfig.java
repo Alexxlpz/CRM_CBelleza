@@ -194,15 +194,19 @@ public class SecurityConfig {
 
     /**
      * Qué puede cargar una página: todo desde la propia web salvo las teselas y la búsqueda de direcciones de
-     * OpenStreetMap. Los {@code <script>} en línea de las plantillas obligan a 'unsafe-inline'; aun así, un script de
-     * otro dominio, un {@code <object>}, un {@code <base>} o enmarcar la web en otra quedan bloqueados.
+     * OpenStreetMap. Los {@code <script>} en línea de las plantillas obligan a 'unsafe-inline' en script-src; aun así,
+     * un script de otro dominio, un {@code <object>}, un {@code <base>} o enmarcar la web en otra quedan bloqueados.
+     * Los estilos, solo de los .css: las plantillas no llevan {@code style=""} ni {@code <style>} (lo que depende de
+     * los datos va con clases como pct-N), así que un HTML inyectado no puede cambiar el aspecto de la página.
+     * Lo que el JS pone con {@code element.style} (agenda, hojas, Leaflet) no lo frena la CSP.
      * {@code form-action} admite Google porque «Conectar Google Calendar» es un formulario que redirige allí.
      */
     static String contentSecurityPolicy(boolean h2ConsoleEnabled) {
         return String.join("; ",
                 "default-src 'self'",
                 "script-src 'self' 'unsafe-inline'",
-                "style-src 'self' 'unsafe-inline'",
+                // La consola H2 (solo con el perfil dev) sí usa estilos en línea
+                "style-src 'self'" + (h2ConsoleEnabled ? " 'unsafe-inline'" : ""),
                 "img-src 'self' data: blob: https://tile.openstreetmap.org",
                 "font-src 'self'",
                 "connect-src 'self' https://nominatim.openstreetmap.org",

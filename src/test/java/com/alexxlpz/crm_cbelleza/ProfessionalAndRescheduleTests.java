@@ -276,7 +276,7 @@ class ProfessionalAndRescheduleTests {
 
         // El dueño lo quita del todo
         mvc.perform(post("/worker/center/reschedule").with(csrf()).with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)).param("hours", "0"))
-                .andExpect(redirectedUrl("/worker/center#reservas"));
+                .andExpect(redirectedUrl("/worker/center/reservas"));
         assertEquals(0, centers.findById(center.getId()).orElseThrow().getClientRescheduleHours());
         mvc.perform(post("/client/appointments/" + later.getId() + "/cambiar").with(csrf()).with(TestUsers.as(users, TestUsers.CLIENT))
                         .param("dateTime", later.getDateTime().withHour(12).toString()))

@@ -57,7 +57,7 @@ class PageRenderingTests {
 
     @Test
     void googleCalendarSwitchIsDisabledWithoutGoogleKeys() throws Exception {
-        mvc.perform(get("/worker/center").with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
+        mvc.perform(get("/worker/center/cuenta").with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Guardar mis citas en Google Calendar")))
                 .andExpect(content().string(containsString("Próximamente")));
