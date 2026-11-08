@@ -209,6 +209,21 @@ class ReviewTests {
     }
 
     @Test
+    void theCenterCanOpenTheReviewersCardButTheNameIsPlainTextForClients() throws Exception {
+        review(appointment(AppointmentStatus.COMPLETED, LocalDateTime.now().minusDays(2)), 5, "Genial");
+        String cardLink = "href=\"/worker/clients/" + sofia.getId() + "\"";
+
+        mvc.perform(get("/worker/reviews").with(TestUsers.as(users, LUCIA)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString(cardLink)));
+        mvc.perform(get("/worker/clients/" + sofia.getId()).with(TestUsers.as(users, LUCIA)))
+                .andExpect(status().isOk());
+        mvc.perform(get("/client/centers/" + centerService.shortSlug(center) + "/opiniones").with(TestUsers.as(users, TestUsers.CLIENT)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(not(containsString(cardLink))));
+    }
+
+    @Test
     void aStandardWorkerReadsReviewsButCannotReply() throws Exception {
         review(appointment(AppointmentStatus.COMPLETED, LocalDateTime.now().minusDays(2)), 3, "Normal");
         Review saved = reviews.findByCenterIdOrderByCreatedAtDesc(center.getId()).getFirst();

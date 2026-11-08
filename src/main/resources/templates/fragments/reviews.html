@@ -37,13 +37,16 @@
         </div>
     </div>
 
-    <!--/* Una reseña tal y como la ven todos: autor, estrellas, tratamiento, comentario y la respuesta del centro. */-->
-    <article th:fragment="review(review, centerName)" class="review-item" th:id="${'resena-' + review.id}">
+    <!--/* Una reseña tal y como la ven todos: autor, estrellas, tratamiento, comentario y la respuesta del centro.
+           clientUrl: ficha del cliente, solo en las pantallas del centro; en las públicas va null y el nombre es texto. */-->
+    <article th:fragment="review(review, centerName, clientUrl)" class="review-item" th:id="${'resena-' + review.id}">
         <header class="review-item-head">
             <span class="review-avatar" aria-hidden="true" th:text="${#strings.substring(review.authorName, 0, 1)}">S</span>
             <div class="review-item-who">
                 <p class="review-author">
-                    <strong th:text="${review.authorName}">Sofía M.</strong>
+                    <strong th:unless="${clientUrl != null}" th:text="${review.authorName}">Sofía M.</strong>
+                    <a th:if="${clientUrl != null}" class="review-author-link" th:href="${clientUrl}" th:text="${review.authorName}"
+                       th:attr="aria-label=${'Ver la ficha de ' + review.authorName}">Sofía M.</a>
                     <span class="review-verified"><i class="lucide-badge-check" aria-hidden="true"></i> Cita verificada</span>
                 </p>
                 <p class="review-meta">

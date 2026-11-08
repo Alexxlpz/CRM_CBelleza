@@ -76,7 +76,7 @@
                 Ninguna opinión cumple estos filtros.
             </p>
             <th:block th:each="review : ${reviews}">
-                <article th:replace="~{fragments/reviews :: review(${review}, ${center.name})}"></article>
+                <article th:replace="~{fragments/reviews :: review(${review}, ${center.name}, null)}"></article>
             </th:block>
         </section>
 

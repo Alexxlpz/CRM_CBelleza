@@ -136,7 +136,15 @@
 
 .treatment-item-actions {
     display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
     padding-top: 4px;
+}
+
+.treatment-item-actions .btn {
+    gap: 6px;
+    padding: 6px 12px;
+    white-space: nowrap;
 }
 
 .offer-form .form-control {
@@ -218,8 +226,15 @@
     .treatments-list.is-list-view .treatment-item-actions {
         grid-column: 5;
         grid-row: 1;
-        justify-content: flex-end;
+        flex-direction: column;
+        flex-wrap: nowrap;
+        gap: 6px;
         padding-top: 0;
+    }
+
+    /* Apilados, con los iconos en la misma vertical: lado a lado no caben en la columna y se montan sobre el precio */
+    .treatments-list.is-list-view .treatment-item-actions .btn {
+        justify-content: flex-start;
     }
 }
 
@@ -239,6 +254,10 @@
 
     .treatment-item-card {
         padding: 16px 14px;
+    }
+
+    .treatment-item-actions .btn {
+        padding-block: 8px;
     }
 
     .treatment-item-header {

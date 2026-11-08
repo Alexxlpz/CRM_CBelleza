@@ -78,7 +78,7 @@
             <div class="worker-reviews-list">
                 <section class="glass-panel worker-review" th:each="review : ${reviews}" th:id="'resena-' + ${review.id}"
                          th:classappend="${!review.hasReply()} ? 'is-unanswered'">
-                    <article th:replace="~{fragments/reviews :: review(${review}, ${sessionCenterName})}"></article>
+                    <article th:replace="~{fragments/reviews :: review(${review}, ${sessionCenterName}, @{/worker/clients/{id}(id=${review.client.id})})}"></article>
                     <p class="review-meta review-meta--worker" th:if="${review.appointment.worker != null}">
                         <i class="lucide-user" aria-hidden="true"></i>
                         <span th:text="'Le atendió ' + ${review.appointment.worker.name} + ' el ' + ${#temporals.format(review.appointment.dateTime, 'd MMM yyyy')}">Le atendió Lucía</span>
