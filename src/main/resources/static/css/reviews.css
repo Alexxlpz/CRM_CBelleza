@@ -565,6 +565,16 @@
     color: var(--text-main);
 }
 
+.review-author-link {
+    font-weight: 700;
+    color: var(--primary-text);
+    text-decoration: none;
+}
+
+.review-author-link:hover {
+    text-decoration: underline;
+}
+
 .review-verified {
     display: inline-flex;
     align-items: center;

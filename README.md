@@ -114,7 +114,7 @@ Todos los cambios de una cita pasan por `BookingService`, que bloquea por centro
 
 ## Qué falta
 
-Packs y bonos, recordatorios por WhatsApp y una pasada de limpieza visual a parte de la interfaz. Los cambios de cada versión están en [`CHANGELOG.md`](CHANGELOG.md) y el trabajo abierto en [`PENDIENTES.md`](PENDIENTES.md).
+Packs y bonos, recordatorios por WhatsApp y una pasada de limpieza visual a parte de la interfaz. Los cambios de cada versión están en [`CHANGELOG.md`](CHANGELOG.md).
 
 La carpeta [`documentación/`](documentación/index.html) tiene una guía por roles y un manual de uso en HTML.
 
