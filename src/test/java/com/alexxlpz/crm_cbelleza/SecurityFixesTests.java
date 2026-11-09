@@ -168,7 +168,7 @@ class SecurityFixesTests {
     /** S-01: los formularios públicos se cortan tras unos pocos envíos por hora y por IP. */
     @Test
     void publicFormsAreLimitedPerIp() {
-        PublicFormLimiter limiter = new PublicFormLimiter(Clock.fixed(Instant.parse("2026-10-30T10:00:00Z"), ZoneId.of("UTC")), 2, 2, 2);
+        PublicFormLimiter limiter = new PublicFormLimiter(Clock.fixed(Instant.parse("2026-10-30T10:00:00Z"), ZoneId.of("UTC")), 2, 2, 2, 2);
         limiter.check(PublicFormLimiter.Form.CONTACT, "10.1.0.1");
         limiter.check(PublicFormLimiter.Form.CONTACT, "10.1.0.1");
         assertThrows(BusinessRuleException.class, () -> limiter.check(PublicFormLimiter.Form.CONTACT, "10.1.0.1"));

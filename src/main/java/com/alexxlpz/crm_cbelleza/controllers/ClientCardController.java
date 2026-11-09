@@ -16,6 +16,7 @@ import com.alexxlpz.crm_cbelleza.services.ProductSaleService;
 import com.alexxlpz.crm_cbelleza.services.ClientCardService;
 import com.alexxlpz.crm_cbelleza.services.ClientCardService.ClientCardView;
 import com.alexxlpz.crm_cbelleza.services.ClientCardTemplateService;
+import com.alexxlpz.crm_cbelleza.services.AppointmentMediaService;
 import com.alexxlpz.crm_cbelleza.services.TreatmentSummaryService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -45,6 +46,7 @@ public class ClientCardController {
     private final ClientCardTemplateService templateService;
     private final AppointmentService appointmentService;
     private final TreatmentSummaryService summaryService;
+    private final AppointmentMediaService mediaService;
     private final ProductSaleService saleService;
     private final LoyaltyService loyaltyService;
     private final InventoryService inventoryService;
@@ -54,6 +56,7 @@ public class ClientCardController {
                                 ClientCardTemplateService templateService,
                                 AppointmentService appointmentService,
                                 TreatmentSummaryService summaryService,
+                                AppointmentMediaService mediaService,
                                 ProductSaleService saleService,
                                 LoyaltyService loyaltyService,
                                 InventoryService inventoryService,
@@ -62,6 +65,7 @@ public class ClientCardController {
         this.templateService = templateService;
         this.appointmentService = appointmentService;
         this.summaryService = summaryService;
+        this.mediaService = mediaService;
         this.saleService = saleService;
         this.loyaltyService = loyaltyService;
         this.inventoryService = inventoryService;
@@ -96,6 +100,8 @@ public class ClientCardController {
         model.addAttribute("alerts", appointments.stream().filter(Appointment::isTreatmentAlert).toList());
         model.addAttribute("noShows", appointments.stream().filter(a -> a.getStatus() == AppointmentStatus.NO_SHOW).count());
         model.addAttribute("centerNow", summaryService.centerNow(worker.getCenterId()));
+        model.addAttribute("mediaByAppointment", mediaService.byAppointment(worker.getCenterId(),
+                appointments.stream().map(Appointment::getId).toList()));
         List<ProductSale> sales = saleService.salesOf(worker.getCenterId(), clientId);
         model.addAttribute("sales", sales);
         model.addAttribute("salesTotal", sales.stream().mapToDouble(ProductSale::getTotal).sum());

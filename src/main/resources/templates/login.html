@@ -49,12 +49,12 @@
                 <div class="form-group">
                     <div class="label-row">
                         <label for="passwordInput" class="form-label">Contraseña</label>
-                        <button type="button" class="forgot-link" data-modal-open="recoveryModal">¿Olvidaste tu contraseña?</button>
+                        <a th:href="@{/forgot-password}" href="/forgot-password" class="forgot-link" tabindex="-1">¿Olvidaste tu contraseña?</a>
                     </div>
                     <div class="password-wrapper">
                         <input type="password" id="passwordInput" name="password" class="form-control"
                                autocomplete="current-password" placeholder="Tu contraseña">
-                        <button type="button" class="password-toggle-btn" data-toggle-password="passwordInput"
+                        <button type="button" class="password-toggle-btn" tabindex="-1" data-toggle-password="passwordInput"
                                 aria-label="Mostrar u ocultar contraseña" aria-pressed="false">
                             <i class="lucide-eye" aria-hidden="true"></i>
                         </button>
@@ -92,22 +92,6 @@
             </div>
         </div>
     </main>
-
-    <!-- Ayuda para recuperar la contraseña -->
-    <div class="ui-modal-overlay" id="recoveryModal" hidden>
-        <div class="ui-modal ui-modal--left" role="dialog" aria-modal="true" aria-labelledby="recoveryTitle">
-            <button type="button" class="ui-modal-close" data-modal-close aria-label="Cerrar">
-                <i class="lucide-x" aria-hidden="true"></i>
-            </button>
-            <h2 class="ui-modal-title" id="recoveryTitle">Recuperación de contraseña</h2>
-            <p class="ui-modal-text">
-                Para restablecer tu acceso a <strong>Cuquora</strong>, contacta con la administración de tu centro de belleza habitual o con soporte técnico.
-            </p>
-            <div class="ui-modal-actions">
-                <button type="button" class="btn btn-primary btn-block" data-modal-close>Entendido</button>
-            </div>
-        </div>
-    </div>
 
     <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Software de gestión para centros de estética.')}"></div>
 

@@ -17,13 +17,24 @@
                 Marcar como aviso
             </label>
             <span class="form-hint">Para alergias, reacciones o productos que no le sientan bien: sale en su ficha y en sus próximas citas.</span>
+            <!--/* Fotos y vídeos: se guardan al elegirlos, aparte del texto (treatment-summary.js) */-->
+            <div class="summary-media-field">
+                <p class="form-label">Fotos y vídeos</p>
+                <div class="summary-media" id="treatmentSummaryMedia"></div>
+                <label class="btn btn-secondary btn-sm summary-media-add" id="treatmentSummaryMediaAdd">
+                    <i class="lucide-image-plus" aria-hidden="true"></i> <span>Añadir foto o vídeo</span>
+                    <input type="file" id="treatmentSummaryMediaInput" accept="image/jpeg,image/png,video/mp4,video/quicktime,video/webm,image/*,video/*" hidden>
+                </label>
+                <span class="form-hint">Para lo que se entiende mejor viéndolo, como un enrojecimiento poco habitual. Solo lo ve el equipo.
+                    Hasta 6 por cita; fotos de 8 MB y vídeos de 30 MB como mucho.</span>
+            </div>
             <label class="form-label summary-price-label" for="treatmentSummaryPrice">Precio cobrado (€)</label>
             <input type="number" id="treatmentSummaryPrice" class="form-control summary-price" min="0" max="10000" step="0.01"
                    inputmode="decimal" aria-describedby="treatmentSummaryPriceHint">
             <span class="form-hint" id="treatmentSummaryPriceHint">Cámbialo si hubo descuento o algún extra: cuenta en los ingresos y en los puntos.</span>
             <p class="agenda-form-error" role="alert" hidden></p>
             <div class="ui-modal-actions">
-                <button type="button" class="btn btn-secondary" data-modal-close>Cancelar</button>
+                <button type="button" class="btn btn-secondary" data-modal-close tabindex="-1">Cancelar</button>
                 <button type="submit" class="btn btn-primary"><i class="lucide-save" aria-hidden="true"></i> Guardar resumen</button>
             </div>
         </form>

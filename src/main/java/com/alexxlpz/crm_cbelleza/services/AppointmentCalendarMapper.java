@@ -3,6 +3,7 @@ package com.alexxlpz.crm_cbelleza.services;
 import com.alexxlpz.crm_cbelleza.dto.AppointmentCalendarDTO;
 import com.alexxlpz.crm_cbelleza.entities.Appointment;
 import com.alexxlpz.crm_cbelleza.entities.AppointmentChange;
+import com.alexxlpz.crm_cbelleza.entities.AppointmentMedia;
 import com.alexxlpz.crm_cbelleza.entities.AppointmentStatus;
 import com.alexxlpz.crm_cbelleza.entities.Treatment;
 import com.alexxlpz.crm_cbelleza.entities.User;
@@ -21,6 +22,12 @@ public class AppointmentCalendarMapper {
      * @param clientNoShows citas del centro a las que el cliente no se presentó
      */
     public AppointmentCalendarDTO toDto(Appointment app, LocalDateTime now, List<Appointment> clientAlerts, int clientNoShows) {
+        return toDto(app, now, clientAlerts, clientNoShows, List.of());
+    }
+
+    /** @param media fotos y vídeos del resumen de esta cita */
+    public AppointmentCalendarDTO toDto(Appointment app, LocalDateTime now, List<Appointment> clientAlerts, int clientNoShows,
+                                        List<AppointmentMedia> media) {
         return AppointmentCalendarDTO.builder()
                 .id(app.getId())
                 .dateTime(app.getDateTime() != null ? app.getDateTime().toString() : null)
@@ -44,6 +51,9 @@ public class AppointmentCalendarMapper {
                 .treatmentSummary(app.getTreatmentSummary())
                 .treatmentAlert(app.isTreatmentAlert())
                 .summaryEditable(app.isSummaryEditableAt(now))
+                .media(media.stream()
+                        .map(m -> new AppointmentCalendarDTO.MediaDTO(m.getId(), m.isVideo(), m.getUrl()))
+                        .toList())
                 .clientAlerts(clientAlerts.stream()
                         .filter(alert -> !alert.getId().equals(app.getId()))
                         .map(alert -> new AppointmentCalendarDTO.ClientAlertDTO(

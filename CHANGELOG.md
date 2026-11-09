@@ -23,12 +23,16 @@ Al sacar una versión:
 
 ### Añadido
 
+- Fotos y vídeos en el resumen del tratamiento: desde la agenda o la ficha del cliente se adjuntan hasta 6 por cita (fotos reducidas, vídeos MP4/MOV/WebM de hasta 30 MB) para enseñar al equipo algo que se entiende mejor viéndolo, como un enrojecimiento poco habitual. Solo los ve el equipo del centro y se ven en grande al pulsarlos.
+- «¿Olvidaste tu contraseña?» en el inicio de sesión: llega un enlace al correo para poner una contraseña nueva. Vale una hora y una sola vez; al guardarla se entra directamente en la cuenta y se cierran las sesiones recordadas. Si la cuenta aún no tenía contraseña, llega el enlace para crearla.
 - Botón «Rechazar registro» al revisar un centro nuevo: borra el centro sin publicar, las cuentas de su equipo y lo que hayan preparado.
 
 ### Cambiado
 
 - Teléfono con el prefijo de país en su propia lista y el número agrupado al escribir, en el alta de centros, el registro de clientes y «Mi Centro»; se guarda como «+34 612 345 678». La migración V27 pone así los teléfonos de centros ya guardados.
 - Alta de centros: se comprueba la letra o el dígito de control del CIF/NIF/NIE y las direcciones españolas tienen que llevar código postal. Una sola regla para los correos en el navegador y en el servidor.
+- En los formularios, el tabulador pasa solo de un campo a otro y al botón de enviar; se salta el ojo de la contraseña, los enlaces entre campos, los «Cancelar», las ✕ de quitar filas y los botones del mapa, que siguen funcionando con ratón o dedo.
+- Botón del ojo para ver la contraseña en todos los campos de contraseña (nueva contraseña, invitación, perfil del cliente y «Mi cuenta»).
 
 - Si un cliente contesta a un correo de su cita, la respuesta le llega al dueño del centro (antes iba al buzón de Cuquora).
 - Los correos llevan también una versión en texto plano, salen a nombre de «Cuquora» (antes «Cuquora CRM») y el aviso de centro nuevo al admin ya no lleva «[Cuquora Auditoría]» en el asunto, para que caigan menos en spam.

@@ -58,7 +58,7 @@
                         <div class="password-wrapper">
                             <input type="password" id="passwordInput" name="password" class="form-control"
                                    autocomplete="new-password" th:placeholder="${'Mínimo ' + minPasswordLength + ' caracteres'}" autofocus>
-                            <button type="button" class="password-toggle-btn" data-toggle-password="passwordInput"
+                            <button type="button" class="password-toggle-btn" tabindex="-1" data-toggle-password="passwordInput"
                                     aria-label="Mostrar u ocultar contraseña" aria-pressed="false">
                                 <i class="lucide-eye" aria-hidden="true"></i>
                             </button>
@@ -66,8 +66,14 @@
                     </div>
                     <div class="form-group">
                         <label for="confirmPasswordInput" class="form-label">Repite la contraseña</label>
-                        <input type="password" id="confirmPasswordInput" name="confirmPassword" class="form-control"
-                               autocomplete="new-password">
+                        <div class="password-wrapper">
+                            <input type="password" id="confirmPasswordInput" name="confirmPassword" class="form-control"
+                                   autocomplete="new-password">
+                            <button type="button" class="password-toggle-btn" tabindex="-1" data-toggle-password="confirmPasswordInput"
+                                    aria-label="Mostrar u ocultar contraseña" aria-pressed="false">
+                                <i class="lucide-eye" aria-hidden="true"></i>
+                            </button>
+                        </div>
                     </div>
                     <button type="submit" class="btn btn-primary btn-block btn-lg disabled" id="submitBtn" aria-disabled="true"
                             th:attr="data-min-length=${minPasswordLength}">

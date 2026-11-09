@@ -6,10 +6,10 @@
 <div xmlns:th="http://www.thymeleaf.org" th:fragment="picker(addressId, lat, lon)"
      class="location-picker" data-location-picker th:attr="data-address-input=${addressId}">
     <div class="location-picker-actions">
-        <button type="button" class="btn btn-secondary btn-sm" data-location-search>
+        <button type="button" class="btn btn-secondary btn-sm" data-location-search tabindex="-1">
             <i class="lucide-search" aria-hidden="true"></i> Buscar la dirección en el mapa
         </button>
-        <button type="button" class="btn btn-secondary btn-sm" data-location-here>
+        <button type="button" class="btn btn-secondary btn-sm" data-location-here tabindex="-1">
             <i class="lucide-locate-fixed" aria-hidden="true"></i> Estoy en el centro
         </button>
     </div>

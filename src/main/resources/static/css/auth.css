@@ -156,42 +156,6 @@
     color: var(--primary-text);
 }
 
-.password-wrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-    width: 100%;
-}
-
-.password-wrapper .form-control {
-    padding-right: 48px;
-}
-
-.password-toggle-btn {
-    position: absolute;
-    right: 8px;
-    width: 34px;
-    height: 34px;
-    border-radius: 8px;
-    background: transparent;
-    border: none;
-    color: var(--text-muted);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: var(--transition);
-}
-
-.password-toggle-btn:hover {
-    color: var(--primary-text);
-    background: rgba(var(--primary-rgb), 0.15);
-}
-
-.password-toggle-btn i {
-    font-size: 18px;
-}
-
 .form-options {
     margin: 16px 0 22px 0;
     display: flex;

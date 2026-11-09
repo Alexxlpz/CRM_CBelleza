@@ -9,7 +9,7 @@
         <h2 class="ui-modal-title" id="productSaleTitle"><i class="lucide-shopping-bag" aria-hidden="true"></i> Vender producto</h2>
         <p class="ui-modal-text" th:text="${client != null} ? 'Se resta del inventario del centro y queda en el historial de ' + ${client.name} + '.'
                                                          : 'Se resta del inventario del centro y queda en el historial del cliente.'">Se resta del inventario del centro.</p>
-        <form th:action="${client != null} ? @{/worker/clients/{id}/sales(id=${client.id})} : @{/worker/inventory/sales}"
+        <form th:action="@{${client != null ? '/worker/clients/' + client.id + '/sales' : '/worker/inventory/sales'}}"
               method="post" id="productSaleForm" class="sale-form"
               th:data-loyalty-mode="${loyalty.enabled()} ? ${loyalty.mode().name()} : 'OFF'"
               th:data-loyalty-per-unit="${loyalty.pointsPerUnit()}">
@@ -49,7 +49,7 @@
             <p class="agenda-form-error" id="saleError" role="alert" hidden></p>
 
             <div class="ui-modal-actions">
-                <button type="button" class="btn btn-secondary" data-modal-close>Cancelar</button>
+                <button type="button" class="btn btn-secondary" data-modal-close tabindex="-1">Cancelar</button>
                 <button type="submit" class="btn btn-primary" id="saleSubmit"><i class="lucide-check" aria-hidden="true"></i> Confirmar venta</button>
             </div>
         </form>

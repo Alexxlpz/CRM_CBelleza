@@ -3,6 +3,7 @@ package com.alexxlpz.crm_cbelleza.services;
 import com.alexxlpz.crm_cbelleza.booking.ClientVisitAnalyzer;
 import com.alexxlpz.crm_cbelleza.dto.AppointmentCalendarDTO;
 import com.alexxlpz.crm_cbelleza.entities.Appointment;
+import com.alexxlpz.crm_cbelleza.entities.AppointmentMedia;
 import com.alexxlpz.crm_cbelleza.entities.AppointmentStatus;
 import com.alexxlpz.crm_cbelleza.repositories.AppointmentRepository;
 import org.springframework.stereotype.Service;
@@ -28,17 +29,20 @@ public class AppointmentService {
     private final ClientVisitAnalyzer visitAnalyzer;
     private final AppointmentCalendarMapper calendarMapper;
     private final TreatmentSummaryService summaryService;
+    private final AppointmentMediaService mediaService;
     private final Clock clock;
 
     public AppointmentService(AppointmentRepository appointmentRepository,
                               ClientVisitAnalyzer visitAnalyzer,
                               AppointmentCalendarMapper calendarMapper,
                               TreatmentSummaryService summaryService,
+                              AppointmentMediaService mediaService,
                               Clock clock) {
         this.appointmentRepository = appointmentRepository;
         this.visitAnalyzer = visitAnalyzer;
         this.calendarMapper = calendarMapper;
         this.summaryService = summaryService;
+        this.mediaService = mediaService;
         this.clock = clock;
     }
 
@@ -102,7 +106,8 @@ public class AppointmentService {
                 : summaryService.alertsByClient(centerId).getOrDefault(clientId, List.of());
         int noShows = clientId == null ? 0
                 : (int) appointmentRepository.countByCenterIdAndClientIdAndStatus(centerId, clientId, AppointmentStatus.NO_SHOW);
-        return calendarMapper.toDto(appointment, summaryService.centerNow(centerId), alerts, noShows);
+        return calendarMapper.toDto(appointment, summaryService.centerNow(centerId), alerts, noShows,
+                mediaService.forAppointment(centerId, appointmentId));
     }
 
     public long countClientAppointments(Long clientId) {
@@ -120,15 +125,17 @@ public class AppointmentService {
     public List<AppointmentCalendarDTO> getCalendarAppointments(Long centerId) {
         LocalDateTime now = summaryService.centerNow(centerId);
         Map<Long, List<Appointment>> alerts = summaryService.alertsByClient(centerId);
+        Map<Long, List<AppointmentMedia>> media = mediaService.byAppointment(centerId);
         List<Appointment> appointments = getCenterAppointments(centerId);
         Map<Long, Long> noShows = appointments.stream()
                 .filter(app -> app.getClient() != null && app.getStatus() == AppointmentStatus.NO_SHOW)
                 .collect(Collectors.groupingBy(app -> app.getClient().getId(), Collectors.counting()));
         return appointments.stream()
                 .map(app -> app.getClient() == null
-                        ? calendarMapper.toDto(app, now, List.of(), 0)
+                        ? calendarMapper.toDto(app, now, List.of(), 0, media.getOrDefault(app.getId(), List.of()))
                         : calendarMapper.toDto(app, now, alerts.getOrDefault(app.getClient().getId(), List.of()),
-                                noShows.getOrDefault(app.getClient().getId(), 0L).intValue()))
+                                noShows.getOrDefault(app.getClient().getId(), 0L).intValue(),
+                                media.getOrDefault(app.getId(), List.of())))
                 .toList();
     }
 

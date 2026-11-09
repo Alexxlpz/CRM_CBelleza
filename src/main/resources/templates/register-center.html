@@ -180,7 +180,7 @@
                                 <label th:for="${'workerEmail' + it.index}" class="visually-hidden">Correo</label>
                                 <input type="email" th:id="${'workerEmail' + it.index}" name="workerEmails" th:value="${member.email()}" placeholder="correo@ejemplo.com" maxlength="254" spellcheck="false">
                             </div>
-                            <button type="button" class="btn btn-secondary btn-sm team-row-remove" data-remove-worker aria-label="Quitar trabajador">
+                            <button type="button" class="btn btn-secondary btn-sm team-row-remove" data-remove-worker tabindex="-1" aria-label="Quitar trabajador">
                                 <i class="lucide-x" aria-hidden="true"></i>
                             </button>
                         </li>
@@ -199,7 +199,7 @@
                                 <label class="visually-hidden">Correo</label>
                                 <input type="email" name="workerEmails" placeholder="correo@ejemplo.com" maxlength="254" spellcheck="false">
                             </div>
-                            <button type="button" class="btn btn-secondary btn-sm team-row-remove" data-remove-worker aria-label="Quitar trabajador">
+                            <button type="button" class="btn btn-secondary btn-sm team-row-remove" data-remove-worker tabindex="-1" aria-label="Quitar trabajador">
                                 <i class="lucide-x" aria-hidden="true"></i>
                             </button>
                         </li>
@@ -247,13 +247,13 @@
                     <div class="terms-check-row">
                         <label class="checkbox-chip">
                             <input type="checkbox" name="terms" value="true" required th:checked="${form.terms() == true}">
-                            <span>Confirmo que los datos corresponden a un centro con actividad legal en vigor y autorizo su verificación por el equipo de Cuquora. Acepto los <a th:href="@{/terms}" target="_blank" rel="noopener">términos y condiciones</a>.</span>
+                            <span>Confirmo que los datos corresponden a un centro con actividad legal en vigor y autorizo su verificación por el equipo de Cuquora. Acepto los <a th:href="@{/terms}" target="_blank" rel="noopener" tabindex="-1">términos y condiciones</a>.</span>
                         </label>
                     </div>
                 </fieldset>
 
                 <div class="wizard-nav">
-                    <button type="button" class="btn btn-secondary" id="wizardBack" hidden>
+                    <button type="button" class="btn btn-secondary" id="wizardBack" tabindex="-1" hidden>
                         <i class="lucide-arrow-left" aria-hidden="true"></i> Atrás
                     </button>
                     <button type="button" class="btn btn-primary" id="wizardNext" hidden>

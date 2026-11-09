@@ -27,12 +27,16 @@ document.addEventListener('DOMContentLoaded', () => {
         // En pantallas táctiles un dedo mueve la página, no el mapa: se acerca con los botones + y -
         const map = L.map(root.querySelector('[data-location-map]'), {
             scrollWheelZoom: false,
-            dragging: !L.Browser.mobile
+            dragging: !L.Browser.mobile,
+            // El mapa va dentro de un formulario: el tabulador salta de un campo al siguiente sin pararse en él
+            keyboard: false
         }).setView(start, hasPoint ? 17 : 6);
         L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         }).addTo(map);
+        // Botones + y - y enlaces del pie del mapa: se usan con ratón o dedo, fuera del orden del tabulador
+        map.getContainer().querySelectorAll('a').forEach(link => { link.tabIndex = -1; });
 
         let marker = null;
         let lookup = 0;
@@ -81,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         function place(latlng, zoom) {
             if (!marker) {
-                marker = L.marker(latlng, { draggable: true, title: 'Ubicación del centro' }).addTo(map);
+                marker = L.marker(latlng, { draggable: true, keyboard: false, title: 'Ubicación del centro' }).addTo(map);
                 marker.on('dragend', () => {
                     save(marker.getLatLng());
                     fillAddress(marker.getLatLng());

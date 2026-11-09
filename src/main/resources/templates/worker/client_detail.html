@@ -295,12 +295,26 @@
                             <span th:text="${app.workerMessage}"></span>
                         </div>
 
-                        <div class="treatment-summary" th:if="${app.treatmentSummary != null}" th:classappend="${app.treatmentAlert} ? 'is-alert'">
+                        <div class="treatment-summary"
+                             th:if="${app.treatmentSummary != null or mediaByAppointment.get(app.id) != null}" th:classappend="${app.treatmentAlert} ? 'is-alert'">
                             <p class="treatment-summary-head">
                                 <i th:class="${app.treatmentAlert} ? 'lucide-alert-triangle' : 'lucide-clipboard-pen-line'" aria-hidden="true"></i>
                                 <span th:text="${app.treatmentAlert} ? 'Resumen del tratamiento · aviso' : 'Resumen del tratamiento'">Resumen del tratamiento</span>
                             </p>
-                            <p class="treatment-summary-text" th:text="${app.treatmentSummary}">Limpieza con peeling suave.</p>
+                            <p class="treatment-summary-text" th:if="${app.treatmentSummary != null}" th:text="${app.treatmentSummary}">Limpieza con peeling suave.</p>
+                            <!--/* Mismas miniaturas que TreatmentSummary.mediaHtml (treatment-summary.js) */-->
+                            <div class="summary-media" th:if="${mediaByAppointment.get(app.id) != null}">
+                                <div class="summary-media-item" th:each="item : ${mediaByAppointment.get(app.id)}">
+                                    <button type="button" class="summary-media-view" th:data-media-id="${item.id}" th:data-media-view="${item.url}"
+                                            th:data-media-video="${item.video}" th:aria-label="${item.video} ? 'Ver vídeo' : 'Ver foto'">
+                                        <th:block th:if="${item.video}">
+                                            <video th:src="${item.url + '#t=0.1'}" preload="metadata" muted playsinline></video>
+                                            <span class="summary-media-play"><i class="lucide-play" aria-hidden="true"></i></span>
+                                        </th:block>
+                                        <img th:unless="${item.video}" th:src="${item.url}" alt="" loading="lazy">
+                                    </button>
+                                </div>
+                            </div>
                             <p class="treatment-summary-meta" th:if="${app.summaryUpdatedAt != null}"
                                th:text="${app.summaryUpdatedBy != null ? app.summaryUpdatedBy.name + ' · ' : ''} + ${#temporals.format(app.summaryUpdatedAt, 'dd/MM/yyyy HH:mm')}">Lucía · 14/07/2026 11:40</p>
                         </div>
@@ -313,7 +327,7 @@
                                 th:data-summary-price="${app.price}"
                                 th:data-summary-list-price="${app.treatment.price}">
                             <i class="lucide-clipboard-pen-line" aria-hidden="true"></i>
-                            <span th:text="${app.treatmentSummary != null} ? 'Editar resumen y precio' : 'Añadir resumen y precio'">Añadir resumen y precio</span>
+                            <span th:text="${app.treatmentSummary != null or mediaByAppointment.get(app.id) != null} ? 'Editar resumen y precio' : 'Añadir resumen y precio'">Añadir resumen y precio</span>
                         </button>
                     </div>
                 </div>
@@ -380,13 +394,14 @@
 
             // Resumen del tratamiento de cada cita: al guardarlo se repinta la cita y la lista de avisos
             const esc = Cuquora.escapeHtml;
-            const summaryHtml = app => app.treatmentSummary ? `
+            const summaryHtml = app => app.treatmentSummary || app.media?.length ? `
                 <div class="treatment-summary${app.treatmentAlert ? ' is-alert' : ''}">
                     <p class="treatment-summary-head">
                         <i class="${app.treatmentAlert ? 'lucide-alert-triangle' : 'lucide-clipboard-pen-line'}" aria-hidden="true"></i>
                         <span>${app.treatmentAlert ? 'Resumen del tratamiento · aviso' : 'Resumen del tratamiento'}</span>
                     </p>
-                    <p class="treatment-summary-text">${esc(app.treatmentSummary)}</p>
+                    ${app.treatmentSummary ? `<p class="treatment-summary-text">${esc(app.treatmentSummary)}</p>` : ''}
+                    ${TreatmentSummary.mediaHtml(app.media)}
                     <p class="treatment-summary-meta">Guardado ahora</p>
                 </div>` : '';
 
@@ -406,8 +421,9 @@
                     summary: button.dataset.summaryText,
                     alert: button.dataset.summaryAlert === 'true',
                     price: button.dataset.summaryPrice,
-                    listPrice: button.dataset.summaryListPrice
-                }, saved => {
+                    listPrice: button.dataset.summaryListPrice,
+                    media: TreatmentSummary.mediaIn(button.closest('.history-item').querySelector('.treatment-summary'))
+                }, (saved, { media } = {}) => {
                     button.closest('.history-item').querySelector('.treatment-summary')?.remove();
                     button.insertAdjacentHTML('beforebegin', summaryHtml(saved));
                     button.dataset.summaryText = saved.treatmentSummary || '';
@@ -415,9 +431,10 @@
                     button.dataset.summaryPrice = String(saved.price);
                     button.closest('.history-item').querySelector('.history-price').textContent =
                         Number(saved.price).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
-                    button.querySelector('span').textContent = saved.treatmentSummary ? 'Editar resumen y precio' : 'Añadir resumen y precio';
+                    button.querySelector('span').textContent = saved.treatmentSummary || saved.media?.length ? 'Editar resumen y precio' : 'Añadir resumen y precio';
                     renderAlerts();
-                    button.focus();
+                    // Al subir o quitar una foto el modal sigue abierto: el foco se queda en él
+                    if (!media) button.focus();
                 });
             }));
 

@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Freno a los formularios públicos que crean cuentas o envían correos (contacto, alta de centro, registro): cada IP
+ * Freno a los formularios públicos que crean cuentas o envían correos (contacto, alta de centro, registro, recuperar la contraseña): cada IP
  * puede enviar cada uno unas pocas veces por hora. Así un script no puede usarlos para mandar correos de Cuquora a
  * miles de direcciones ni para probar en bloque qué correos tienen cuenta. Se cuenta en memoria (se reinicia con la app).
  */
@@ -24,7 +24,8 @@ public class PublicFormLimiter {
     public enum Form {
         CONTACT("Has enviado varios mensajes seguidos. Espera un rato o escríbenos directamente por correo."),
         CENTER_REGISTRATION("Se han enviado varias altas de centro desde tu conexión. Espera un rato e inténtalo de nuevo."),
-        REGISTRATION("Demasiados intentos de registro desde tu conexión. Espera un rato e inténtalo de nuevo.");
+        REGISTRATION("Demasiados intentos de registro desde tu conexión. Espera un rato e inténtalo de nuevo."),
+        PASSWORD_RESET("Has pedido varios enlaces seguidos. Espera un rato y revisa tu correo, también la carpeta de no deseado.");
 
         private final String message;
 
@@ -40,9 +41,11 @@ public class PublicFormLimiter {
     public PublicFormLimiter(Clock clock,
                              @Value("${crm.security.form-limits.contact:5}") int contact,
                              @Value("${crm.security.form-limits.center-registration:5}") int centerRegistration,
-                             @Value("${crm.security.form-limits.registration:10}") int registration) {
+                             @Value("${crm.security.form-limits.registration:10}") int registration,
+                             @Value("${crm.security.form-limits.password-reset:5}") int passwordReset) {
         this.clock = clock;
-        this.limits = Map.of(Form.CONTACT, contact, Form.CENTER_REGISTRATION, centerRegistration, Form.REGISTRATION, registration);
+        this.limits = Map.of(Form.CONTACT, contact, Form.CENTER_REGISTRATION, centerRegistration, Form.REGISTRATION, registration,
+                Form.PASSWORD_RESET, passwordReset);
     }
 
     /** Apunta un envío de esa IP; si ya ha llegado al máximo de la última hora lanza {@link BusinessRuleException}. */

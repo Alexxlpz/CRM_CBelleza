@@ -3274,6 +3274,184 @@ body.modal-open {
     color: var(--text-muted);
 }
 
+/* Campo de contraseña con el botón del ojo (data-toggle-password, app.js) */
+.password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.password-wrapper .form-control {
+    padding-right: 48px;
+}
+
+.password-toggle-btn {
+    position: absolute;
+    right: 8px;
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.password-toggle-btn:hover {
+    color: var(--primary-text);
+    background: rgba(var(--primary-rgb), 0.15);
+}
+
+.password-toggle-btn i {
+    font-size: 18px;
+}
+
+/* Fotos y vídeos del resumen del tratamiento (treatment-summary.js) */
+.summary-media-field {
+    margin-top: 16px;
+}
+
+.summary-media {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 84px);
+    gap: 8px;
+    margin: 8px 0 0;
+}
+
+.summary-media-field .summary-media {
+    margin-bottom: 10px;
+}
+
+.summary-media-item {
+    position: relative;
+}
+
+.summary-media-view {
+    position: relative;
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+    padding: 0;
+    border: 1px solid var(--border-soft);
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--surface-muted);
+    cursor: zoom-in;
+}
+
+.summary-media-view img,
+.summary-media-view video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;
+}
+
+.summary-media-view:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+.summary-media-play {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 22px;
+    background: rgba(0, 0, 0, 0.25);
+}
+
+.summary-media-remove {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 1px solid var(--border-soft);
+    border-radius: 50%;
+    background: var(--surface, #fff);
+    color: var(--danger, #b42318);
+    cursor: pointer;
+}
+
+.summary-media-add {
+    cursor: pointer;
+}
+
+.summary-media-add.is-busy {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.summary-media-add + .form-hint {
+    display: block;
+    margin-top: 6px;
+}
+
+.media-viewer {
+    position: fixed;
+    inset: 0;
+    z-index: 10050;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 56px 16px 16px;
+    background: rgba(15, 12, 10, 0.88);
+}
+
+.media-viewer[hidden] {
+    display: none;
+}
+
+.media-viewer-body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.media-viewer-body img,
+.media-viewer-body video {
+    max-width: min(1200px, 100%);
+    max-height: calc(100dvh - 88px);
+    border-radius: 10px;
+    background: #000;
+}
+
+.media-viewer-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.14);
+    color: #fff;
+    font-size: 22px;
+    cursor: pointer;
+}
+
+body.media-viewer-open {
+    overflow: hidden;
+}
+
 .client-alerts {
     margin-top: 10px;
     padding: 10px 14px;

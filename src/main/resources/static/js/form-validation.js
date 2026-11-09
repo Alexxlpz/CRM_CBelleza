@@ -150,19 +150,6 @@
         return { isValid, refresh: refreshButton, check };
     }
 
-    /** Muestra u oculta la contraseña del campo asociado al botón (data-toggle-password="idDelInput"). */
-    document.addEventListener('click', e => {
-        const btn = e.target.closest('[data-toggle-password]');
-        if (!btn) return;
-        const input = document.getElementById(btn.dataset.togglePassword);
-        if (!input) return;
-        const show = input.type === 'password';
-        input.type = show ? 'text' : 'password';
-        btn.setAttribute('aria-pressed', String(show));
-        const icon = btn.querySelector('i');
-        if (icon) icon.className = show ? 'lucide-eye-off' : 'lucide-eye';
-    });
-
     window.Cuquora = window.Cuquora || {};
     window.Cuquora.validators = validators;
     window.Cuquora.validateForm = validateForm;

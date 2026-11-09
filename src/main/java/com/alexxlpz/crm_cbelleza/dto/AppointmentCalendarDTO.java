@@ -34,12 +34,23 @@ public class AppointmentCalendarDTO {
     private boolean treatmentAlert;
     /** La cita ya ha empezado: se puede escribir su resumen. */
     private boolean summaryEditable;
+    /** Fotos y vídeos del resumen (solo el equipo del centro). */
+    private List<MediaDTO> media;
     /** Avisos que el cliente tiene en otras citas del centro (reacciones, productos que no le sientan bien...). */
     private List<ClientAlertDTO> clientAlerts;
     /** Citas del centro a las que el cliente no se presentó. */
     private int clientNoShows;
     /** Solicitud en la que el cliente ha elegido profesional (sale en «La atiende»). */
     private boolean workerChosenByClient;
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class MediaDTO {
+        private Long id;
+        private boolean video;
+        private String url;
+    }
 
     @Data
     @Builder

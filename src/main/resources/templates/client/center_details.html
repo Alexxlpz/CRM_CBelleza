@@ -36,10 +36,10 @@
                     <!-- Solo si hay ofertas: filtra la misma lista, el servicio elegido no se pierde al cambiar -->
                     <div class="view-toggle view-toggle--always booking-filter" role="group" aria-label="Mostrar servicios"
                          th:if="${offerCount > 0}">
-                        <button type="button" class="view-toggle-btn" data-booking-filter="all" aria-pressed="true">
+                        <button type="button" class="view-toggle-btn" data-booking-filter="all" tabindex="-1" aria-pressed="true">
                             <i class="lucide-list" aria-hidden="true"></i> Todos los servicios
                         </button>
-                        <button type="button" class="view-toggle-btn" data-booking-filter="offers" aria-pressed="false">
+                        <button type="button" class="view-toggle-btn" data-booking-filter="offers" tabindex="-1" aria-pressed="false">
                             <i class="lucide-tag" aria-hidden="true"></i> En oferta
                             <span class="booking-filter-count" th:text="${offerCount}">2</span>
                         </button>
@@ -69,7 +69,7 @@
                         </label>
                     </div>
                     <!-- En móvil, tras elegir servicio la lista se pliega al elegido (booking-picker.js) -->
-                    <button type="button" class="btn btn-secondary btn-sm booking-change-service" id="changeService" hidden>
+                    <button type="button" class="btn btn-secondary btn-sm booking-change-service" id="changeService" tabindex="-1" hidden>
                         <i class="lucide-pen-line" aria-hidden="true"></i> Cambiar de servicio
                     </button>
                     <div th:if="${#lists.isEmpty(treatments)}" class="no-appointments-box">

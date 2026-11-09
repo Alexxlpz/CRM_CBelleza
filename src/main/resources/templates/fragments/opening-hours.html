@@ -40,7 +40,7 @@
                         <option th:each="time : ${options}" th:value="${time}" th:text="${time}"
                                 th:selected="${time == row.to2()}">20:00</option>
                     </select>
-                    <button type="button" class="hours-icon-btn" data-hours-remove
+                    <button type="button" class="hours-icon-btn" data-hours-remove tabindex="-1"
                             th:attr="aria-label=${'Quitar el tramo de tarde del ' + #strings.toLowerCase(row.name())}"
                             title="Quitar el tramo de tarde">
                         <i class="lucide-x" aria-hidden="true"></i>
@@ -52,7 +52,7 @@
                 <span class="hours-closed" th:hidden="${row.open()}">Cerrado</span>
             </div>
         </div>
-        <button type="button" class="btn btn-secondary btn-sm hours-copy" data-hours-copy hidden>
+        <button type="button" class="btn btn-secondary btn-sm hours-copy" data-hours-copy tabindex="-1" hidden>
             <i class="lucide-copy" aria-hidden="true"></i> Usar el horario del primer día abierto en todos los abiertos
         </button>
     </div>

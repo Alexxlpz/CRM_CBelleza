@@ -14,6 +14,7 @@
  * 10. Botones [data-copy="idDelCampo"]: copian el texto del campo y lo confirman en el propio botón.
  * 11. Color al estirar: <html> lleva .is-near-end en la mitad final de la página, para que el rebote
  *     de abajo enseñe el color del pie y el de arriba el de la cabecera (common.css).
+ * 12. Botón del ojo (data-toggle-password="idDelInput"): muestra u oculta lo escrito en un campo de contraseña.
  */
 (function () {
     'use strict';
@@ -481,6 +482,19 @@
             }
         }));
     }
+
+    /* ---------- 12. Ver la contraseña que se está escribiendo ---------- */
+    document.addEventListener('click', e => {
+        const btn = e.target.closest('[data-toggle-password]');
+        if (!btn) return;
+        const input = document.getElementById(btn.dataset.togglePassword);
+        if (!input) return;
+        const show = input.type === 'password';
+        input.type = show ? 'text' : 'password';
+        btn.setAttribute('aria-pressed', String(show));
+        const icon = btn.querySelector('i');
+        if (icon) icon.className = show ? 'lucide-eye-off' : 'lucide-eye';
+    });
 
     /* ---------- 11. Color al estirar más allá del principio o del final ---------- */
     function initOverscrollColor() {

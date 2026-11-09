@@ -292,7 +292,7 @@
             <input type="date" id="proposeDate${index}" class="form-control" required min="${todayKey()}" value="${esc(date)}">
             <label class="visually-hidden" for="proposeTime${index}">Hora de la opción ${index}</label>
             <select id="proposeTime${index}" class="form-control"></select>
-            <button type="button" class="icon-btn" aria-label="Quitar la opción ${index}" title="Quitar"><i class="lucide-x" aria-hidden="true"></i></button>`;
+            <button type="button" class="icon-btn" tabindex="-1" aria-label="Quitar la opción ${index}" title="Quitar"><i class="lucide-x" aria-hidden="true"></i></button>`;
         const dateInput = row.querySelector('input');
         const timeSelect = row.querySelector('select');
         const duration = proposeApp?.treatment?.duration;

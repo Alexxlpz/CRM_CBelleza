@@ -262,17 +262,18 @@ document.addEventListener('DOMContentLoaded', function () {
                 <p class="client-alerts-title"><i class="lucide-alert-triangle" aria-hidden="true"></i> Avisos de este cliente</p>
                 <ul>${noShows}${(app.clientAlerts || []).map(a => `<li><strong>${esc(shortDate(a.dateTime))} · ${esc(a.treatmentName)}:</strong> <span>${esc(a.summary)}</span></li>`).join('')}</ul>
             </div>` : '';
-        const summary = app.treatmentSummary ? `
+        const summary = app.treatmentSummary || app.media?.length ? `
             <div class="treatment-summary${app.treatmentAlert ? ' is-alert' : ''}">
                 <p class="treatment-summary-head">
                     <i class="${app.treatmentAlert ? 'lucide-alert-triangle' : 'lucide-clipboard-pen-line'}" aria-hidden="true"></i>
                     ${app.treatmentAlert ? 'Resumen del tratamiento · aviso' : 'Resumen del tratamiento'}
                 </p>
-                <p class="treatment-summary-text">${esc(app.treatmentSummary)}</p>
+                ${app.treatmentSummary ? `<p class="treatment-summary-text">${esc(app.treatmentSummary)}</p>` : ''}
+                ${window.TreatmentSummary?.mediaHtml(app.media) || ''}
             </div>` : '';
         const summaryButton = app.summaryEditable ? `
             <button type="button" class="btn btn-secondary btn-sm summary-button" data-action="summary">
-                <i class="lucide-clipboard-pen-line" aria-hidden="true"></i> ${app.treatmentSummary ? 'Editar resumen y precio' : 'Añadir resumen y precio'}
+                <i class="lucide-clipboard-pen-line" aria-hidden="true"></i> ${app.treatmentSummary || app.media?.length ? 'Editar resumen y precio' : 'Añadir resumen y precio'}
             </button>` : '';
 
         let actions = '';
@@ -385,7 +386,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 summary: app.treatmentSummary,
                 alert: app.treatmentAlert,
                 price: app.price,
-                listPrice: app.treatment?.price
+                listPrice: app.treatment?.price,
+                media: app.media
             }, () => reload());
         }
 

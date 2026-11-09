@@ -7,6 +7,7 @@ import com.alexxlpz.crm_cbelleza.forms.TaxIds;
 import com.alexxlpz.crm_cbelleza.services.CenterRegistrationService.Invitee;
 import com.alexxlpz.crm_cbelleza.services.CenterRegistrationService.Registration;
 import com.alexxlpz.crm_cbelleza.services.InvitationService;
+import com.alexxlpz.crm_cbelleza.services.PasswordResetService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -103,6 +104,17 @@ public class CenterOnboardingMailService {
                         "name", name,
                         "invitationUrl", invitationUrl(siteUrl, token),
                         "validityDays", InvitationService.VALIDITY_DAYS))));
+    }
+
+    /** Enlace de «¿Olvidaste tu contraseña?» (PasswordResetService). */
+    @Async
+    public void sendPasswordReset(String name, String email, String token, String siteUrl) {
+        sendSafely(new EmailMessage(email, null, null,
+                "Cambia tu contraseña de Cuquora",
+                render("email/password-reset", Map.of(
+                        "name", name,
+                        "resetUrl", siteUrl + "/reset-password/" + token,
+                        "validityMinutes", PasswordResetService.VALIDITY.toMinutes()))));
     }
 
     private void sendInvitation(String name, String email, String centerName, String token, String siteUrl) {
