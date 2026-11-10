@@ -109,7 +109,8 @@ public class ClientCardService {
 
         Map<Long, List<Appointment>> appointmentsByClient = new LinkedHashMap<>();
         for (Appointment app : appointmentRepository.findByCenterIdOrderByDateTimeDesc(centerId)) {
-            if (app.getClient() != null) {
+            // Quien ha borrado su cuenta ya no está en la cartera; sus citas pasadas solo cuentan en los números
+            if (app.getClient() != null && !app.getClient().isDeleted()) {
                 appointmentsByClient.computeIfAbsent(app.getClient().getId(), id -> new ArrayList<>()).add(app);
             }
         }

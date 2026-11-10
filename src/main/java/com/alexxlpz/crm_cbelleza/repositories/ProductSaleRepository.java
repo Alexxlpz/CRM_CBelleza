@@ -20,4 +20,8 @@ public interface ProductSaleRepository extends JpaRepository<ProductSale, Long> 
 
     @EntityGraph(attributePaths = {"product"})
     Optional<ProductSale> findByIdAndCenterIdAndClientId(Long id, Long centerId, Long clientId);
+
+    /** Compras de un cliente en todos los centros, con producto y centro (descargar sus datos). */
+    @EntityGraph(attributePaths = {"product", "center"})
+    List<ProductSale> findByClientIdOrderBySoldAtDesc(Long clientId);
 }

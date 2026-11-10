@@ -20,4 +20,7 @@ public interface PasswordResetRepository extends JpaRepository<PasswordReset, Lo
 
     /** Cuántos enlaces se han pedido para una cuenta desde ese momento (tope de correos por cuenta). */
     long countByUserIdAndCreatedAtAfter(Long userId, LocalDateTime since);
+
+    /** Todos los enlaces de una cuenta, usados o no (se borran con la cuenta). */
+    List<PasswordReset> findByUserId(Long userId);
 }

@@ -23,6 +23,7 @@ Al sacar una versión:
 
 ### Añadido
 
+- «Descargar mis datos» y «Borrar mi cuenta» en el perfil del cliente (RGPD). La descarga es un JSON con la cuenta, las citas, las fichas y resúmenes que tienen los centros, las reseñas, las compras y los puntos. Al borrar (con la contraseña, o escribiendo BORRAR si entra con Google) se anulan sus citas pendientes con aviso al centro, se borran su ficha, los resúmenes y fotos de sus tratamientos y sus puntos, y la cuenta se queda sin nombre, correo, teléfono ni acceso; las citas pasadas siguen contando en los números del centro y las reseñas se quedan como «Cliente eliminado». Las sesiones abiertas en otros dispositivos se cierran. Migración V30.
 - Fotos y vídeos en el resumen del tratamiento: desde la agenda o la ficha del cliente se adjuntan hasta 6 por cita (fotos reducidas, vídeos MP4/MOV/WebM de hasta 30 MB) para enseñar al equipo algo que se entiende mejor viéndolo, como un enrojecimiento poco habitual. Solo los ve el equipo del centro y se ven en grande al pulsarlos.
 - «¿Olvidaste tu contraseña?» en el inicio de sesión: llega un enlace al correo para poner una contraseña nueva. Vale una hora y una sola vez; al guardarla se entra directamente en la cuenta y se cierran las sesiones recordadas. Si la cuenta aún no tenía contraseña, llega el enlace para crearla.
 - Botón «Rechazar registro» al revisar un centro nuevo: borra el centro sin publicar, las cuentas de su equipo y lo que hayan preparado.

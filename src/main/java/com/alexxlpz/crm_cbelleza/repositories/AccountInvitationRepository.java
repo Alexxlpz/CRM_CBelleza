@@ -24,4 +24,7 @@ public interface AccountInvitationRepository extends JpaRepository<AccountInvita
 
     /** Invitaciones sin usar de un trabajador (se anulan al reenviarla o al sacarle del equipo). */
     List<AccountInvitation> findByUserIdAndUsedAtIsNull(Long userId);
+
+    /** Todas las invitaciones de una cuenta (se borran con la cuenta). */
+    List<AccountInvitation> findByUserId(Long userId);
 }

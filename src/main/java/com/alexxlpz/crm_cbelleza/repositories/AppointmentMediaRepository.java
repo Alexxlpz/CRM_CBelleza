@@ -22,4 +22,7 @@ public interface AppointmentMediaRepository extends JpaRepository<AppointmentMed
     List<AppointmentMedia> findByCenterIdOrderByCreatedAtAscIdAsc(Long centerId);
 
     long countByAppointmentId(Long appointmentId);
+
+    /** Los de las citas de un cliente, en cualquier centro (borrar su cuenta). */
+    List<AppointmentMedia> findByAppointmentIdIn(Collection<Long> appointmentIds);
 }

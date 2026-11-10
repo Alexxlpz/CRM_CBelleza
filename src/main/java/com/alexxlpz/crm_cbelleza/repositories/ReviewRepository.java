@@ -47,4 +47,8 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     /** Respuestas que ha recibido el cliente desde {@code since} (su campana). */
     @EntityGraph(attributePaths = {"center", "appointment", "appointment.treatment"})
     List<Review> findByClientIdAndRepliedAtAfter(Long clientId, LocalDateTime since);
+
+    /** Reseñas que ha escrito un cliente, con la cita y el centro (descargar sus datos). */
+    @EntityGraph(attributePaths = {"center", "appointment", "appointment.treatment"})
+    List<Review> findByClientIdOrderByCreatedAtDesc(Long clientId);
 }

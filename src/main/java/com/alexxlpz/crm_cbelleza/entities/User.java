@@ -56,6 +56,10 @@ public class User {
     @Column(name = "photo_updated_at")
     private LocalDateTime photoUpdatedAt;
 
+    /** Cuándo borró su cuenta (nula = activa). Una cuenta borrada se queda sin nombre, correo ni credenciales. */
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
     /**
      * Si se ha comprobado que el correo es de esta persona (enlace de un correo de Cuquora o Google). El registro público
      * crea la cuenta sin comprobar: hasta entonces su contraseña no basta para quedarse con una cuenta que entre con Google.
@@ -70,6 +74,11 @@ public class User {
      */
     public boolean hasAccount() {
         return password != null || googleId != null;
+    }
+
+    /** Ha borrado su cuenta desde «Mi Perfil». */
+    public boolean isDeleted() {
+        return deletedAt != null;
     }
 
     /** Dirección de la foto de perfil, o nula si no tiene. */

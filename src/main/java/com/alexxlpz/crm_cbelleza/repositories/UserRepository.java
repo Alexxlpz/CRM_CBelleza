@@ -41,4 +41,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @EntityGraph(attributePaths = {"center"})
     Optional<User> findWithCenterById(Long id);
+
+    /** La cuenta sigue activa (no la ha borrado su dueño). */
+    boolean existsByIdAndDeletedAtIsNull(Long id);
 }

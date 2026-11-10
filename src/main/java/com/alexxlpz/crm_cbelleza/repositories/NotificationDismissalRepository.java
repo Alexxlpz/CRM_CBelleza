@@ -19,4 +19,8 @@ public interface NotificationDismissalRepository extends JpaRepository<Notificat
     @Modifying
     @Query("DELETE FROM NotificationDismissal d WHERE d.userId = :userId AND d.notificationKey IN :keys")
     void deleteByUserIdAndKeys(@Param("userId") Long userId, @Param("keys") Collection<String> keys);
+
+    @Modifying
+    @Query("DELETE FROM NotificationDismissal d WHERE d.userId = :userId")
+    void deleteByUserId(@Param("userId") Long userId);
 }

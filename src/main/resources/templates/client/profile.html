@@ -117,6 +117,53 @@
                 </form>
             </div>
         </section>
+
+        <section class="settings-card" id="tus-datos">
+            <h2 class="settings-section-title"><i class="lucide-file-down" aria-hidden="true"></i> Descargar mis datos</h2>
+            <p class="settings-section-text">
+                Un archivo con todo lo que Cuquora guarda de ti: tu cuenta, tus citas, lo que los centros han apuntado
+                en tu ficha y en los resúmenes de tus tratamientos, tus reseñas, tus compras y tus puntos.
+            </p>
+            <a th:href="@{/client/profile/data}" class="btn btn-secondary" download>
+                <i class="lucide-download" aria-hidden="true"></i> Descargar mis datos
+            </a>
+
+            <div class="settings-section" id="borrar-cuenta">
+                <h2 class="settings-section-title"><i class="lucide-user-x" aria-hidden="true"></i> Borrar mi cuenta</h2>
+                <p class="settings-section-text">
+                    Se anulan tus citas pendientes y los centros dejan de tener tu ficha, los resúmenes y fotos de tus
+                    tratamientos y tus puntos. Tus reseñas se quedan, sin tu nombre. No se puede deshacer: si quieres
+                    guardar algo, descarga antes tus datos.
+                </p>
+                <form th:action="@{/client/profile/delete}" method="post"
+                      data-confirm="Se borrarán tus datos y se anularán tus citas pendientes. No se puede deshacer."
+                      data-confirm-title="¿Borrar tu cuenta?" data-confirm-button="Borrar mi cuenta">
+                    <div class="settings-grid">
+                        <div th:if="${hasPassword}">
+                            <label for="deletePassword" class="form-label">Escribe tu contraseña para confirmar</label>
+                            <div class="password-wrapper">
+                                <input type="password" id="deletePassword" name="confirmation" class="form-control"
+                                       required autocomplete="current-password">
+                                <button type="button" class="password-toggle-btn" tabindex="-1" data-toggle-password="deletePassword"
+                                        aria-label="Mostrar u ocultar contraseña" aria-pressed="false">
+                                    <i class="lucide-eye" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div th:unless="${hasPassword}">
+                            <label for="deleteWord" class="form-label">
+                                Escribe <strong th:text="${confirmationWord}">BORRAR</strong> para confirmar
+                            </label>
+                            <input type="text" id="deleteWord" name="confirmation" class="form-control"
+                                   required autocomplete="off" autocapitalize="characters" spellcheck="false">
+                        </div>
+                    </div>
+                    <div class="settings-actions">
+                        <button type="submit" class="btn btn-danger"><i class="lucide-trash-2" aria-hidden="true"></i> Borrar mi cuenta</button>
+                    </div>
+                </form>
+            </div>
+        </section>
     </main>
 
     <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Todos los derechos reservados.')}"></div>

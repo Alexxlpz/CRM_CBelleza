@@ -18,4 +18,8 @@ public interface ClientCardRepository extends JpaRepository<ClientCard, Long> {
 
     @EntityGraph(attributePaths = {"client", "updatedBy"})
     List<ClientCard> findByCenterId(Long centerId);
+
+    /** Fichas de un cliente en todos los centros, con el centro (descargar sus datos o borrar su cuenta). */
+    @EntityGraph(attributePaths = {"center"})
+    List<ClientCard> findByClientId(Long clientId);
 }
