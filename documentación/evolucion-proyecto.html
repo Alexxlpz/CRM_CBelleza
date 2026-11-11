@@ -1332,6 +1332,27 @@
                         </div>
                     </div>
 
+                    <!-- 11 nov: productos -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="commit-hash">—</span>
+                                <span class="commit-date">📅 11 de Noviembre, 2026</span>
+                                <span class="commit-author">👤 alejandro</span>
+                            </div>
+                            <h4>Fotos, código de barras y una base de productos propia</h4>
+                            <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.88rem;">
+                                <li>Los productos pueden llevar foto, al crearlos o desde «Ver Info».</li>
+                                <li>En «Añadir Producto» se escanea el código de barras con la cámara del móvil, con un lector USB o a mano. Si el producto ya está en el inventario o en el catálogo lo dice o lo elige; si no, rellena nombre, descripción, categoría y foto. Migración <code>V31</code>.</li>
+                                <li>Ninguna base de datos pública tiene las marcas de salón (Alissi Brontë, por ejemplo), así que Cuquora tiene su propia <strong>API de productos</strong> en otro contenedor (<code>product-api</code>, esquema <code>productos</code> de la misma PostgreSQL). Los centros la llenan entre todos al dar de alta productos con código, y si no conoce uno lo trae de Open Beauty Facts.</li>
+                                <li>Revisión de seguridad: solo comparten los centros publicados (60 al día), 150 búsquedas por hora y centro, fotos leídas con tope de 5 MB y la API solo accesible con clave por la red interna de Docker.</li>
+                                <li>Botón «Cuquora en Docker» en IntelliJ (<code>.run/</code> y <code>docker-compose.local.yml</code>): levanta todo en local en <code>http://localhost:8090</code> con el perfil dev.</li>
+                                <li>Tests: <code>ProductBarcodeTests</code>, <code>ProductApiClientTests</code> y 9 en la API; 388 en Cuquora.</li>
+                            </ul>
+                        </div>
+                    </div>
+
                 </div>
             </section>
 
@@ -1438,6 +1459,13 @@
                             La web corre en un NAS de casa. En lugar de abrir puertos en el router, el contenedor <code>cloudflared</code> llama hacia fuera a Cloudflare, que recibe las visitas de cuquora.com con HTTPS y se las pasa por ese túnel. Los correos no salen desde casa (IP sin reputación, puerto 25 cerrado): los envía Brevo con el dominio autenticado.
                         </p>
                     </div>
+
+                    <div class="card-feature">
+                        <h4>14. Una Base de Productos que se Llena Sola</h4>
+                        <p>
+                            Las bases de datos públicas no tienen los productos de peluquería y estética profesional. La API de productos guarda lo que dan de alta los centros para que el siguiente lo encuentre relleno, sin dejar que nadie lo estropee: solo aportan los centros revisados, con tope diario, y lo que llega rellena huecos pero nunca cambia el nombre ni la foto que ya hay. El precio y el stock nunca salen del centro.
+                        </p>
+                    </div>
                 </div>
             </section>
 
@@ -1491,6 +1519,14 @@
                         <div class="step-body">
                             <h4>Puesta en Producción: Últimos Pasos</h4>
                             <p>Hecho el 3 de noviembre: dominio <code>cuquora.com</code> en Cloudflare, túnel hasta el NAS, perfil <code>prod</code> y remitente <code>citas@cuquora.com</code> autenticado en Brevo. Falta: el alta en Google Search Console, publicar la app de Google (sale de «Prueba»), los datos legales del titular y que el dominio nuevo coja reputación (los primeros correos caen en no deseado de Hotmail). Lo que queda abierto está en <code>PENDIENTES.md</code>.</p>
+                        </div>
+                    </div>
+
+                    <div class="step-card">
+                        <div class="step-num">6</div>
+                        <div class="step-body">
+                            <h4>Vender Escaneando el Código de Barras</h4>
+                            <p>Igual que al dar de alta un producto, que en «Vender producto» se pueda escanear el código para elegir el producto del inventario sin buscarlo en la lista.</p>
                         </div>
                     </div>
                 </div>

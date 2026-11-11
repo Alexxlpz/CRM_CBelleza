@@ -17,6 +17,7 @@ No hace falta abrir puertos en el router ni en el servidor.
 - `COMPOSE_PROFILES=cloudflare` y `CLOUDFLARE_TUNNEL_TOKEN=` el token del paso 1.
 - `SITE_URL=https://cuquora.com` (con https, sin barra final).
 - `REMEMBER_ME_KEY` y `GOOGLE_TOKEN_KEY`: `openssl rand -base64 48` cada una (nuevas, no las de tu equipo).
+- `PRODUCT_API_KEY`: `openssl rand -hex 32` (la comparten la app y la API de productos).
 - `POSTGRES_PASSWORD`: una contraseña larga nueva.
 - `LEGAL_OWNER_NAME`, `LEGAL_OWNER_NIF`, `LEGAL_OWNER_ADDRESS` (LSSI).
 - `SEED_DEMO_DATA=false` y **sin** `SPRING_PROFILES_ACTIVE`, `COOKIE_SECURE` ni `FORWARD_HEADERS_STRATEGY` (los valores de producción ya vienen por defecto).
@@ -38,7 +39,7 @@ y en «Pantalla de consentimiento» el dominio autorizado y los enlaces a `/priv
 ```sh
 docker compose up -d --build
 docker compose logs -f app      # debe decir «Producción: configuración revisada» y «Started»
-docker compose ps               # app «healthy» y crm_cbelleza_tunnel en marcha
+docker compose ps               # app y product-api «healthy», crm_cbelleza_tunnel en marcha
 docker compose logs cloudflared  # debe decir «Registered tunnel connection»
 ```
 Si algo falta en el `.env`, la app no arranca y el log dice qué variable corregir. Los avisos `Producción: …` no paran el arranque, pero conviene resolverlos.
@@ -53,9 +54,11 @@ Si algo falta en el `.env`, la app no arranca y el log dice qué variable correg
 
 ## 7. En un NAS Synology (sin git)
 Así está montado cuquora.com.
-1. Copia al NAS `pom.xml`, `src/`, `docker-compose.yml` y `docker/` (el `Dockerfile` solo compila `pom.xml` y `src/`).
+1. Copia al NAS `pom.xml`, `src/`, `Dockerfile`, `docker-compose.yml`, `docker/` y `product-api/` (sin su `target/`).
+   El `Dockerfile` solo compila `pom.xml` y `src/`; el de `product-api/`, lo suyo.
    No hace falta `target/`, `.git`, `.idea` ni `documentación/`.
-2. El `.env` del NAS es tu `.env.produccion` renombrado a `.env`, con `COMPOSE_PROFILES=cloudflare` y `CLOUDFLARE_TUNNEL_TOKEN`.
+2. El `.env` del NAS es tu `.env.produccion` renombrado a `.env`, con `COMPOSE_PROFILES=cloudflare`, `CLOUDFLARE_TUNNEL_TOKEN`
+   y `PRODUCT_API_KEY`.
 3. Los datos de PostgreSQL van en `volume2`.
 4. Container Manager > Proyecto > **Acción > Construir**. Para cambiar solo el `.env` (por ejemplo `CRM_FROM_EMAIL`), edítalo y vuelve a construir.
 5. Mira el registro de la app («Producción: configuración revisada» y «Started») y el de `cloudflared` («Registered tunnel connection»).

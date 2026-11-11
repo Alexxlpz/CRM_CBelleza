@@ -94,7 +94,7 @@
                         <div class="form-field">
                             <label for="cabins">Cabinas o puestos *</label>
                             <input type="number" id="cabins" name="cabins" th:value="${form.cabins()}" min="1" max="50" step="1" required>
-                            <p class="form-help">Citas que podéis atender a la vez. Se puede cambiar después en «Mi Centro».</p>
+                            <p class="form-help">Citas que podéis atender a la vez. Se puede cambiar después en «Ajustes».</p>
                         </div>
                     </div>
                     <div class="form-field">
@@ -144,7 +144,7 @@
                 <fieldset class="registration-section">
                     <legend><i class="lucide-clock" aria-hidden="true"></i> Horario de apertura</legend>
                     <p class="form-help registration-intro">Tus clientes solo podrán pedir cita dentro de este horario. Si cerráis a mediodía,
-                        pulsa «Jornada partida». Lo puedes cambiar cuando quieras desde «Mi Centro».</p>
+                        pulsa «Jornada partida». Lo puedes cambiar cuando quieras desde «Ajustes».</p>
                     <div th:replace="~{fragments/opening-hours :: editor(${hourRows}, ${hourOptions})}"></div>
                 </fieldset>
 
@@ -206,11 +206,11 @@
                     </template>
                 </fieldset>
 
-                <!--/* Mismos campos e ids que en «Mi Centro»: loyalty-settings.js los rellena igual */-->
+                <!--/* Mismos campos e ids que en «Ajustes»: loyalty-settings.js los rellena igual */-->
                 <fieldset class="registration-section" id="loyaltyForm" th:with="modeValue=${form.mode() != null ? form.mode() : 'OFF'}">
                     <legend><i class="lucide-gift" aria-hidden="true"></i> Tarjeta de puntos <span class="form-label-hint">(opcional)</span></legend>
                     <p class="form-help registration-intro">Tus clientes suman puntos con cada tratamiento y cada producto, y al llegar a la cifra
-                        que elijas les das una recompensa. Puedes activarla o cambiarla cuando quieras desde «Mi Centro».</p>
+                        que elijas les das una recompensa. Puedes activarla o cambiarla cuando quieras desde «Ajustes».</p>
                     <div class="form-field">
                         <label for="loyaltyMode">¿Quieres tarjeta de puntos?</label>
                         <select id="loyaltyMode" name="mode">

@@ -1337,6 +1337,22 @@ button.mobile-drawer-link {
     color: var(--text-main);
 }
 
+/* Cabecera con solo la miga de pan (Ajustes): sin icono ni título visibles. En el móvil la miga se oculta, así que fuera. */
+.page-header.page-header--crumb-only {
+    padding-bottom: 14px;
+    margin-bottom: 24px;
+}
+
+.page-header--crumb-only .page-header-crumb {
+    margin-bottom: 0;
+}
+
+@media (max-width: 768px) {
+    .page-header.page-header--crumb-only {
+        display: none;
+    }
+}
+
 @media (max-width: 768px) {
     .page-header.page-header--panel {
         gap: 14px;
@@ -2402,6 +2418,12 @@ body.modal-open {
     grid-template-columns: 220px minmax(0, 1fr);
     gap: 28px;
     align-items: start;
+}
+
+/* .main-container lleva overflow-x: hidden, que lo vuelve contenedor de scroll y deja el menú pegado a él
+   (sin cabecera encima lo bajaba 44 px). Con clip el sticky va contra la ventana, como se pensó. */
+.main-container.center-settings {
+    overflow-x: clip;
 }
 
 /* Bajo la navbar fija: el menú se queda a la vista en apartados largos como Centro */

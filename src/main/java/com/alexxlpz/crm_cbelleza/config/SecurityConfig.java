@@ -191,8 +191,11 @@ public class SecurityConfig {
         return http.build();
     }
 
-    /** El buscador usa la ubicación para ordenar por distancia; cámara, micrófono y pagos no se usan nunca. */
-    static final String PERMISSIONS_POLICY = "geolocation=(self), camera=(), microphone=(), payment=(), usb=()";
+    /**
+     * El buscador usa la ubicación para ordenar por distancia y el inventario la cámara para escanear el código de
+     * barras de un producto (solo esta web, nunca un marco de otra); micrófono y pagos no se usan nunca.
+     */
+    static final String PERMISSIONS_POLICY = "geolocation=(self), camera=(self), microphone=(), payment=(), usb=()";
 
     /**
      * Qué puede cargar una página: todo desde la propia web salvo las teselas y la búsqueda de direcciones de

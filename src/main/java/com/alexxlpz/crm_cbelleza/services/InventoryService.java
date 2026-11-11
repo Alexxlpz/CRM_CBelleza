@@ -5,10 +5,12 @@ import com.alexxlpz.crm_cbelleza.entities.Inventory;
 import com.alexxlpz.crm_cbelleza.entities.Product;
 import com.alexxlpz.crm_cbelleza.exceptions.BusinessRuleException;
 import com.alexxlpz.crm_cbelleza.exceptions.ResourceNotFoundException;
+import com.alexxlpz.crm_cbelleza.forms.FormText;
 import com.alexxlpz.crm_cbelleza.forms.InventoryItemForm;
 import com.alexxlpz.crm_cbelleza.repositories.CenterRepository;
 import com.alexxlpz.crm_cbelleza.repositories.InventoryRepository;
 import com.alexxlpz.crm_cbelleza.repositories.ProductRepository;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,13 +29,16 @@ public class InventoryService {
     private final InventoryRepository inventoryRepository;
     private final ProductRepository productRepository;
     private final CenterRepository centerRepository;
+    private final ApplicationEventPublisher events;
 
     public InventoryService(InventoryRepository inventoryRepository,
                             ProductRepository productRepository,
-                            CenterRepository centerRepository) {
+                            CenterRepository centerRepository,
+                            ApplicationEventPublisher events) {
         this.inventoryRepository = inventoryRepository;
         this.productRepository = productRepository;
         this.centerRepository = centerRepository;
+        this.events = events;
     }
 
     @Transactional(readOnly = true)
@@ -60,21 +65,28 @@ public class InventoryService {
         return inventoryRepository.save(item).getStock();
     }
 
-    public void addToInventory(Long centerId, InventoryItemForm form) {
+    /** Añade el producto al inventario y devuelve el producto (nuevo o del catálogo). */
+    public Product addToInventory(Long centerId, InventoryItemForm form) {
         if (form.isExistingProduct()) {
-            addExistingProduct(centerId, form.productId(), form.stockOrZero());
+            return addExistingProduct(centerId, form.productId(), form.stockOrZero());
         } else if (form.isNewProduct()) {
-            addNewProduct(centerId, form);
+            return addNewProduct(centerId, form);
         } else {
             throw new BusinessRuleException("Completa los datos del producto antes de añadirlo.");
         }
+    }
+
+    /** Id del producto de una línea del inventario del centro. */
+    @Transactional(readOnly = true)
+    public Long productIdOf(Long centerId, Long inventoryId) {
+        return findInCenter(centerId, inventoryId).getProduct().getId();
     }
 
     public void removeFromInventory(Long centerId, Long inventoryId) {
         inventoryRepository.delete(findInCenter(centerId, inventoryId));
     }
 
-    private void addExistingProduct(Long centerId, Long productId, int stock) {
+    private Product addExistingProduct(Long centerId, Long productId, int stock) {
         Product product = productRepository.findById(productId)
                 .filter(p -> visibleTo(p, centerId))
                 .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado."));
@@ -89,17 +101,26 @@ public class InventoryService {
                         .stock(stock)
                         .build());
         inventoryRepository.save(item);
+        return product;
     }
 
-    private void addNewProduct(Long centerId, InventoryItemForm form) {
+    private Product addNewProduct(Long centerId, InventoryItemForm form) {
         if (form.price() != null && (form.price() < 0 || form.price().isNaN() || form.price().isInfinite())) {
             throw new BusinessRuleException("El precio no puede ser negativo.");
+        }
+        String barcode = FormText.isBlank(form.barcode()) ? null : ProductLookupService.normalize(form.barcode());
+        if (barcode != null) {
+            productRepository.findUsableByBarcode(barcode, centerId).stream().findFirst().ifPresent(existing -> {
+                throw new BusinessRuleException("Ya tienes «" + existing.getName() + "» con ese código de barras. "
+                        + "Elígelo en «Elegir del Catálogo» para sumar stock.");
+            });
         }
         Product product = productRepository.save(Product.builder()
                 .name(form.name().trim())
                 .description(form.description())
                 .category(form.category())
                 .price(form.price())
+                .barcode(barcode)
                 // Solo para este centro: si fuese al catálogo general, el resto vería los productos y precios que crea
                 .centerId(centerId)
                 .build());
@@ -108,6 +129,11 @@ public class InventoryService {
                 .product(product)
                 .stock(form.stockOrZero())
                 .build());
+        if (barcode != null) {
+            // El siguiente centro que lo escanee lo encontrará relleno (ProductSharingService)
+            events.publishEvent(new ProductSharedEvent(product.getId()));
+        }
+        return product;
     }
 
     /** Un producto del catálogo general (sin centro) o creado por este centro. */

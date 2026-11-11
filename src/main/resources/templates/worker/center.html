@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <th:block th:replace="~{fragments/head :: meta(${sectionTitle + ' · Mi Centro - Cuquora CRM'})}"></th:block>
+    <th:block th:replace="~{fragments/head :: meta(${sectionTitle + ' · Ajustes - Cuquora CRM'})}"></th:block>
     <!--/* Cada apartado carga solo su JS: el mapa (Leaflet) solo hace falta en Centro */-->
     <th:block th:if="${section == 'centro'}">
         <!-- Leaflet 1.9.4 servido por la propia web (static/vendor/leaflet): un CDN comprometido no puede meter código aquí -->
@@ -19,14 +19,11 @@
 
     <!--/* is-index: /worker/center. En el móvil enseña solo la lista de apartados; en un apartado, solo su contenido */-->
     <main class="main-container settings-page settings-page--split center-settings" th:classappend="${isIndex} ? 'is-index'">
-        <header class="page-header page-header--panel">
-            <span th:replace="~{worker/fragments/page-header :: icon('store')}"></span>
-            <div class="page-header-text">
-                <th:block th:if="${isIndex}"><nav th:replace="~{worker/fragments/page-header :: crumb('Mi Centro')}"></nav></th:block>
-                <th:block th:unless="${isIndex}"><nav th:replace="~{worker/fragments/page-header :: subcrumb('Mi Centro', '/worker/center', ${sectionTitle})}"></nav></th:block>
-                <h1 th:text="${center.name}">Mi Centro</h1>
-                <p th:text="${isOwner} ? 'Los datos de tu centro, cómo reservan tus clientes, tu equipo y tu cuenta' : 'Tu cuenta y el enlace para que tus clientes reserven'">Los datos de tu centro, cómo reservan tus clientes, tu equipo y tu cuenta</p>
-            </div>
+        <h1 class="visually-hidden">Ajustes</h1>
+        <!--/* Solo la miga de pan: en el móvil no se ve (allí ya está la flecha de volver) */-->
+        <header class="page-header page-header--panel page-header--crumb-only">
+            <th:block th:if="${isIndex}"><nav th:replace="~{worker/fragments/page-header :: crumb('Ajustes')}"></nav></th:block>
+            <th:block th:unless="${isIndex}"><nav th:replace="~{worker/fragments/page-header :: subcrumb('Ajustes', '/worker/center', ${sectionTitle})}"></nav></th:block>
         </header>
 
         <div th:replace="~{fragments/alerts :: flash}"></div>
@@ -36,12 +33,8 @@
             <span>Estamos revisando tu centro: todavía no sale en el buscador ni en el mapa. Mientras tanto, prepara tratamientos y precios para que los clientes puedan reservar desde el primer día.</span>
         </div>
 
-        <th:block th:if="${isIndex and !isOwner}">
-            <div th:replace="~{fragments/alerts :: ownerOnly(${'Los datos, el horario, el equipo y la configuración del centro los gestiona ' + ownerName + ', dueño del centro.'})}"></div>
-        </th:block>
-
         <div class="center-settings-layout">
-            <nav class="center-settings-nav" aria-label="Apartados de Mi Centro">
+            <nav class="center-settings-nav" aria-label="Apartados de Ajustes">
                 <!--/* Al dueño, en el orden del alta; al resto, primero lo que puede cambiar */-->
                 <th:block th:if="${isOwner}">
                     <a th:replace="~{worker/fragments/center-sections :: navItem('centro', 'store', 'Centro', 'Datos, ubicación, horario y foto')}"></a>
@@ -57,7 +50,7 @@
 
             <div class="center-settings-content">
                 <a class="center-settings-back" th:href="@{/worker/center}">
-                    <i class="lucide-chevron-left" aria-hidden="true"></i> Mi Centro
+                    <i class="lucide-chevron-left" aria-hidden="true"></i> Ajustes
                 </a>
                 <th:block th:replace="~{worker/fragments/center-sections :: __${section}__}"></th:block>
             </div>

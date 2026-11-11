@@ -73,6 +73,14 @@ Sin SMTP configurado, los correos se escriben en la consola. Es la forma de ver 
 mvn test
 ```
 
+Para levantar todo en Docker (app, API de productos y PostgreSQL) con el perfil `dev`, en IntelliJ basta con el botón «Cuquora en Docker» (carpeta `.run/`); por consola:
+
+```bash
+docker compose -p cuquora-local -f docker-compose.yml -f docker-compose.local.yml up --build
+```
+
+Queda en <http://localhost:8090>, con el selector de perfiles y los datos de ejemplo, y no choca con los contenedores de producción. Hace falta `PRODUCT_API_KEY` en el `.env` (`openssl rand -hex 32`).
+
 ## Desplegar con Docker
 
 ```bash
@@ -80,7 +88,7 @@ cp .env.example .env    # rellenar con los valores reales
 docker compose up -d --build
 ```
 
-Levanta la aplicación y PostgreSQL 16. Si falta una variable obligatoria, `docker compose` se para y dice cuál. Por defecto arranca con el perfil de producción, que espera HTTPS delante; para probarlo en local por `http://` hay tres líneas que descomentar, explicadas en [`.env.example`](.env.example).
+Levanta la aplicación, la API de productos (`product-api/`) y PostgreSQL 16. Si falta una variable obligatoria, `docker compose` se para y dice cuál. Por defecto arranca con el perfil de producción, que espera HTTPS delante; para probarlo en local por `http://` hay tres líneas que descomentar, explicadas en [`.env.example`](.env.example).
 
 Cada variable está comentada en ese mismo fichero. El correo, el inicio de sesión con Google y la sincronización con Google Calendar son opcionales: sin sus credenciales, esas funciones quedan apagadas. La de Calendar todavía no se ha probado con una cuenta real de Google.
 
@@ -88,7 +96,9 @@ Cada variable está comentada en ese mismo fichero. El correo, el inicio de sesi
 
 Java 21, Spring Boot 4 (MVC, Security, Data JPA, Mail) y Thymeleaf. PostgreSQL en producción, H2 en desarrollo y tests, y Flyway para las migraciones.
 
-El front es CSS propio y JavaScript sin framework, con iconos Lucide servidos desde la propia aplicación y mapas de Leaflet con OpenStreetMap.
+La API de productos (`product-api/`) es un segundo Spring Boot en su propio contenedor: guarda nombre, descripción, categoría y foto de cada producto por su código de barras, se llena con lo que dan de alta los centros y, si no conoce un código, lo busca en Open Beauty Facts. Solo la llama la app, con clave y por la red interna de Docker; su [README](product-api/README.md) tiene los endpoints.
+
+El front es CSS propio y JavaScript sin framework, con iconos Lucide servidos desde la propia aplicación, mapas de Leaflet con OpenStreetMap y ZXing para leer códigos de barras con la cámara donde el navegador no trae lector propio.
 
 ```
 src/main/java/com/alexxlpz/crm_cbelleza/
@@ -114,7 +124,7 @@ Todos los cambios de una cita pasan por `BookingService`, que bloquea por centro
 
 ## Qué falta
 
-Packs y bonos, recordatorios por WhatsApp y una pasada de limpieza visual a parte de la interfaz. Los cambios de cada versión están en [`CHANGELOG.md`](CHANGELOG.md).
+Packs y bonos, vender escaneando el código de barras, recordatorios por WhatsApp y una pasada de limpieza visual a parte de la interfaz. Los cambios de cada versión están en [`CHANGELOG.md`](CHANGELOG.md).
 
 La carpeta [`documentación/`](documentación/index.html) tiene una guía por roles y un manual de uso en HTML.
 

@@ -1141,6 +1141,39 @@
 
                 <div class="card-feature" style="margin-bottom: 1.5rem;">
                     <div class="card-feature-header">
+                        <span class="http-get">GET</span>
+                        <strong>Código de barras · /worker/inventory/barcode?code= · /worker/inventory/barcode/photo?code=</strong>
+                        <span class="card-badge badge-worker">DUEÑO</span>
+                    </div>
+                    <p>En «Añadir Producto» el código se escanea con la cámara del móvil (lector del navegador o ZXing, que solo se descarga al pulsar «Escanear»), con un lector USB (escribe el código y pulsa Intro) o a mano. <code>ProductLookupService.lookup</code> lo limpia y comprueba su dígito de control (EAN-8, EAN-13, UPC-A, GTIN-14 o un QR GS1 Digital Link) y lo busca por orden:</p>
+                    <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.9rem;">
+                        <li><strong>INVENTORY:</strong> el centro ya lo tiene; se avisa para sumarle stock con +1.</li>
+                        <li><strong>CATALOG:</strong> está en el catálogo de Cuquora; se elige en «Elegir del Catálogo».</li>
+                        <li><strong>FOUND:</strong> lo conoce la API de productos (<code>origin</code> = <code>CUQUORA</code> si lo dio de alta otro centro, <code>OPEN_BEAUTY_FACTS</code> si salió de esa base abierta); se rellenan nombre, descripción, categoría y foto.</li>
+                        <li><strong>NOT_FOUND:</strong> se rellena a mano; el código se guarda con el producto y no se puede repetir en el mismo centro.</li>
+                        <li>Límite: 150 búsquedas fuera de Cuquora por centro y hora («Has buscado muchos códigos seguidos…»).</li>
+                        <li><code>POST /worker/inventory/add</code> (multipart) admite <code>photo</code> o <code>useFoundPhoto=true</code>; desde «Ver Info», <code>POST /worker/inventory/{id}/photo</code> y <code>/photo/delete</code> cambian o quitan la foto de los productos propios del centro. La foto se sirve en <code>GET /worker/products/{id}/photo</code>.</li>
+                    </ul>
+                </div>
+
+                <div class="card-feature" style="margin-bottom: 1.5rem;">
+                    <div class="card-feature-header">
+                        <span class="http-get">GET</span> <span class="http-post">POST</span>
+                        <strong>API de productos · contenedor product-api · /api/products/{código}</strong>
+                        <span class="card-badge badge-worker">INTERNA</span>
+                    </div>
+                    <p>Base de datos propia de productos por código de barras, en su propio contenedor (<code>product-api/</code>). Solo la llama la app de Cuquora por la red interna de Docker con la cabecera <code>X-Api-Key</code> (<code>PRODUCT_API_KEY</code>); no tiene puerto abierto hacia fuera. Guarda los datos en el esquema <code>productos</code> de la misma PostgreSQL.</p>
+                    <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.9rem;">
+                        <li><code>GET /api/products/{código}</code>: nombre, marca, categoría, formato, descripción, origen y foto, o 404. Si no lo tiene, lo busca en Open Beauty Facts y se lo guarda (los códigos que tampoco conoce no se vuelven a preguntar en 30 minutos).</li>
+                        <li><code>GET /api/products/{código}/image</code>: la foto del envase.</li>
+                        <li><code>POST /api/products/{código}</code> (multipart): lo que aporta un centro. Cuquora lo llama sola, en segundo plano y después de guardar, al crear un producto con código o cambiarle la foto (<code>ProductSharingService</code>): nombre, categoría, descripción y foto, nunca el precio ni el stock.</li>
+                        <li>Solo comparten los centros ya publicados, como mucho 60 productos al día cada uno. Lo que llega solo rellena huecos: no cambia el nombre ni una foto que ya hay.</li>
+                        <li>Sin <code>PRODUCT_API_URL</code> (por ejemplo, arrancando solo Cuquora desde IntelliJ) se consulta Open Beauty Facts directamente y no se comparte nada.</li>
+                    </ul>
+                </div>
+
+                <div class="card-feature" style="margin-bottom: 1.5rem;">
+                    <div class="card-feature-header">
                         <span class="http-post">POST</span>
                         <strong>/worker/treatments/add</strong>
                         <span class="card-badge badge-worker">WORKER</span>

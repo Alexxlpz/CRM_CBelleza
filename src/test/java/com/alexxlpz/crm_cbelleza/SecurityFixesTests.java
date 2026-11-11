@@ -91,7 +91,7 @@ class SecurityFixesTests {
                 // Estilos solo de los .css: sin 'unsafe-inline' fuera de la consola H2
                 .andExpect(header().string("Content-Security-Policy", containsString("style-src 'self';")))
                 .andExpect(header().string("Referrer-Policy", "strict-origin-when-cross-origin"))
-                .andExpect(header().string("Permissions-Policy", containsString("camera=()")))
+                .andExpect(header().string("Permissions-Policy", containsString("camera=(self)")))
                 .andExpect(content().string(containsString("/vendor/leaflet/leaflet.js")))
                 .andExpect(content().string(org.hamcrest.Matchers.not(containsString("unpkg.com"))))
                 .andExpect(content().string(org.hamcrest.Matchers.not(containsString("fonts.googleapis.com"))));

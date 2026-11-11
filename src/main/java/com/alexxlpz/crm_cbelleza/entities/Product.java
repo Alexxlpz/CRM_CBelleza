@@ -3,6 +3,9 @@ package com.alexxlpz.crm_cbelleza.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+
 @Entity
 @Table(name = "products")
 @Getter
@@ -29,4 +32,27 @@ public class Product {
     /** Centro que lo creó (solo lo ve ese centro); nulo = producto del catálogo general. */
     @Column(name = "center_id")
     private Long centerId;
+
+    /** Código de barras del envase (EAN/UPC, solo dígitos); nulo si no se ha escaneado. */
+    @Column(length = 32)
+    private String barcode;
+
+    /** Cuándo se puso la foto actual (nula = sin foto); versiona la URL de la imagen. */
+    @Column(name = "photo_updated_at")
+    private LocalDateTime photoUpdatedAt;
+
+    /** Dirección de la foto, o nula si no tiene (se pinta la imagen genérica de su categoría). */
+    public String getPhotoUrl() {
+        return photoUpdatedAt == null ? null
+                : "/worker/products/" + id + "/photo?v=" + photoUpdatedAt.toEpochSecond(ZoneOffset.UTC);
+    }
+
+    /** Foto del producto o, si no tiene, la genérica de su categoría. */
+    public String getImageUrl() {
+        String photo = getPhotoUrl();
+        if (photo != null) return photo;
+        if ("Rostro".equals(category)) return "/images/face_serum.webp";
+        if ("Cabello".equals(category)) return "/images/hair_oil.webp";
+        return "/images/beauty_salon_hero.webp";
+    }
 }

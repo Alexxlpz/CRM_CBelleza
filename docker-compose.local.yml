@@ -1,0 +1,27 @@
+# Para probar Cuquora en Docker en tu equipo (lo usa el botón «Cuquora en Docker» de IntelliJ, carpeta .run/).
+# Se suma a docker-compose.yml: http://localhost:8090 con el perfil dev (selector de perfiles en /login para entrar
+# como cualquier usuario sin contraseña, datos de demostración y correos solo en la consola) y la base de datos en
+# un volumen de Docker de tu equipo (el de docker-compose.yml apunta a una carpeta del NAS).
+# NUNCA en el servidor: el selector deja entrar en cualquier cuenta.
+# Nombres y puerto propios: así no choca con los contenedores de producción (crm_cbelleza_*) si están en este equipo.
+services:
+  app:
+    container_name: cuquora_local_app
+    ports: !override
+      - "127.0.0.1:8090:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      # El perfil dev la enciende, pero aquí la base de datos es PostgreSQL
+      SPRING_H2_CONSOLE_ENABLED: "false"
+      COOKIE_SECURE: "false"
+      FORWARD_HEADERS_STRATEGY: none
+      SITE_URL: http://localhost:8090
+  product-api:
+    container_name: cuquora_local_product_api
+  db:
+    container_name: cuquora_local_db
+    volumes:
+      - postgres_local:/var/lib/postgresql/data
+
+volumes:
+  postgres_local:

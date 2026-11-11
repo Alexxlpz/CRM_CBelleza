@@ -86,7 +86,7 @@
             </th:block>
             <th:block th:if="${role == 'WORKER'}">
                 <a href="/worker/dashboard" class="nav-auth-btn nav-auth-register" title="Mi Panel"><i class="lucide-layout-dashboard" aria-hidden="true"></i> <span class="nav-btn-label">Mi Panel</span></a>
-                <a href="/worker/center" class="nav-auth-btn nav-auth-register" title="Mi Centro"><i class="lucide-store" aria-hidden="true"></i> <span class="nav-btn-label">Mi Centro</span></a>
+                <a href="/worker/center" class="nav-auth-btn nav-auth-register" title="Ajustes"><i class="lucide-settings" aria-hidden="true"></i> <span class="nav-btn-label">Ajustes</span></a>
             </th:block>
             <form th:action="@{/logout}" method="post" class="nav-logout-form">
                 <button type="submit" class="nav-logout" title="Cerrar sesión"><i class="lucide-log-out" aria-hidden="true"></i> <span class="nav-btn-label">Cerrar sesión</span></button>
@@ -156,7 +156,7 @@
                     <div class="mobile-drawer-nav" th:if="${role == 'WORKER'}">
                         <div class="mobile-user-badge worker-badge"><i class="lucide-sparkles" aria-hidden="true"></i> Profesional / Centro</div>
                         <a th:replace="~{fragments/navbar :: drawerLink('/worker/dashboard', 'Mi Panel', ${accountSection == 'panel'}, false)}"></a>
-                        <a th:replace="~{fragments/navbar :: drawerLink('/worker/center', 'Mi Centro', ${accountSection == 'center'}, false)}"></a>
+                        <a th:replace="~{fragments/navbar :: drawerLink('/worker/center', 'Ajustes', ${accountSection == 'center'}, false)}"></a>
                     </div>
 
                     <form th:if="${role != null}" th:action="@{/logout}" method="post" class="mobile-drawer-nav">

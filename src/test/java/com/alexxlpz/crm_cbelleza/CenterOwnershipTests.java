@@ -160,10 +160,10 @@ class CenterOwnershipTests {
                 .andExpect(flash().attribute("successMessage", containsString("tu cuenta")));
         assertEquals("Lucía Romero Gil", users.findById(lucia.getId()).orElseThrow().getName());
 
-        // Mi Centro le abre su cuenta, y en el menú solo tiene Mi cuenta y Reservas
+        // Ajustes le abre su cuenta, sin el aviso de que el centro lo gestiona el dueño,, y en el menú solo tiene Mi cuenta y Reservas
         mvc.perform(get("/worker/center").with(TestUsers.as(users, LUCIA)))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("los gestiona Carlos Mendoza, dueño del centro")))
+                .andExpect(content().string(not(containsString("los gestiona Carlos Mendoza"))))
                 .andExpect(content().string(containsString("Guardar mis citas en Google Calendar")))
                 .andExpect(content().string(containsString("href=\"/worker/center/reservas\"")))
                 .andExpect(content().string(not(containsString("href=\"/worker/center/equipo\""))))

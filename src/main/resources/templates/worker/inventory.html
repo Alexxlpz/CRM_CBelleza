@@ -6,6 +6,8 @@
     <link rel="stylesheet" th:href="@{/css/product-sale.css}">
     <script th:src="@{/js/product-sale.js}" defer></script>
     <script th:src="@{/js/sheets.js}" defer></script>
+    <script th:src="@{/js/photo-picker.js}" defer></script>
+    <script th:src="@{/js/product-scanner.js}" defer></script>
 </head>
 <body>
     <div th:replace="~{fragments/navbar :: worker('/worker/dashboard', 'Volver al panel principal', ${notifications})}"></div>
@@ -89,8 +91,8 @@
                 <span class="list-head-end">Acciones</span>
             </div>
             <article class="inventory-card glass-panel" th:each="item : ${inventoryItems}" th:data-category="${item.product.category}">
-                <img th:src="${item.product.category == 'Rostro' ? '/images/face_serum.webp' : (item.product.category == 'Cabello' ? '/images/hair_oil.webp' : '/images/beauty_salon_hero.webp')}"
-                     class="product-thumbnail" alt="" loading="lazy" width="96" height="96">
+                <img th:src="${item.product.imageUrl}" class="product-thumbnail"
+                     th:classappend="${item.product.photoUrl != null} ? 'product-thumbnail--photo'" alt="" loading="lazy" width="96" height="96">
 
                 <div class="inventory-card-info">
                     <h2 class="product-name" th:text="${item.product.name}">Producto</h2>
@@ -144,7 +146,7 @@
         </button>
     </main>
 
-    <div th:replace="~{worker/fragments/inventory-modals :: addProductSheet(${catalogProducts})}"></div>
+    <div th:replace="~{worker/fragments/inventory-modals :: addProductSheet(${catalogProducts}, ${maxPhotoMb})}"></div>
     <div th:replace="~{fragments/product-sale :: modal(null, ${saleClients}, ${inventoryItems}, ${loyalty})}"></div>
 
     <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Panel de gestión de centros.')}"></div>

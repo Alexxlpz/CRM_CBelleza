@@ -8,9 +8,25 @@
                     <h2 th:id="'detailTitle_' + ${item.id}" th:text="${item.product.name}">Detalle del Producto</h2>
                 </div>
                 <div class="info-modal-body">
-                    <div class="info-modal-media">
-                        <img th:src="${item.product.category == 'Rostro' ? '/images/face_serum.webp' : (item.product.category == 'Cabello' ? '/images/hair_oil.webp' : '/images/beauty_salon_hero.webp')}"
-                             alt="" loading="lazy">
+                    <div class="info-modal-media" th:classappend="${item.product.photoUrl != null} ? 'info-modal-media--photo'">
+                        <img th:src="${item.product.imageUrl}" alt="" loading="lazy">
+                    </div>
+                    <!-- Solo los productos creados por el centro: los del catálogo general son de todos -->
+                    <div class="product-photo-actions" th:if="${isCenterOwner and item.product.centerId != null}">
+                        <form th:action="@{/worker/inventory/{id}/photo(id=${item.id})}" method="post" enctype="multipart/form-data"
+                              data-photo-autosubmit>
+                            <label class="btn btn-secondary btn-sm" th:for="'productPhoto_' + ${item.id}">
+                                <i class="lucide-camera" aria-hidden="true"></i>
+                                <span th:text="${item.product.photoUrl != null ? 'Cambiar foto' : 'Poner foto'}">Poner foto</span>
+                            </label>
+                            <input type="file" class="visually-hidden" name="photo" accept="image/jpeg,image/png"
+                                   th:id="'productPhoto_' + ${item.id}">
+                        </form>
+                        <form th:if="${item.product.photoUrl != null}" th:action="@{/worker/inventory/{id}/photo/delete(id=${item.id})}"
+                              method="post" data-confirm="Volverá a salir la imagen genérica de su categoría."
+                              data-confirm-title="¿Quitar la foto?" data-confirm-button="Quitar">
+                            <button type="submit" class="btn btn-secondary btn-sm"><i class="lucide-image-off" aria-hidden="true"></i> Quitar foto</button>
+                        </form>
                     </div>
                     <div class="info-modal-details">
                         <div class="info-detail-row">
@@ -24,6 +40,10 @@
                         <div class="info-detail-row">
                             <span class="info-detail-label">Stock en Centro</span>
                             <span class="info-detail-stock" th:text="${item.stock} + ' unidades'">0 ud</span>
+                        </div>
+                        <div class="info-detail-row" th:if="${item.product.barcode != null}">
+                            <span class="info-detail-label">Código de barras</span>
+                            <span th:text="${item.product.barcode}">8412345678905</span>
                         </div>
                         <div class="info-detail-box">
                             <span class="info-detail-label">Descripción del Producto</span>
@@ -39,7 +59,7 @@
     </div>
 
     <!-- Panel para añadir productos al inventario -->
-    <div id="addProductModal" class="sheet-overlay" hidden th:fragment="addProductSheet(catalogProducts)">
+    <div id="addProductModal" class="sheet-overlay" hidden th:fragment="addProductSheet(catalogProducts, maxPhotoMb)">
         <div class="sheet-content" role="dialog" aria-modal="true" aria-labelledby="addProductTitle">
             <div class="bottom-sheet-handle" aria-hidden="true"></div>
             <div class="sheet-header">
@@ -47,8 +67,32 @@
                 <button type="button" class="sheet-close" data-sheet-close aria-label="Cerrar">&times;</button>
             </div>
 
-            <form th:action="@{/worker/inventory/add}" method="post">
+            <form th:action="@{/worker/inventory/add}" method="post" enctype="multipart/form-data">
                 <input type="hidden" name="mode" id="input-mode" value="existing">
+                <input type="hidden" name="useFoundPhoto" id="useFoundPhoto" value="false">
+
+                <!-- Código de barras: con la cámara del móvil, un lector USB (escribe el código y pulsa Intro) o a mano -->
+                <div class="form-group barcode-box" data-barcode-box>
+                    <label class="form-label" for="barcode">Código de barras <span class="settings-optional">(opcional)</span></label>
+                    <div class="barcode-row">
+                        <input type="text" name="barcode" id="barcode" class="form-control" inputmode="numeric" autocomplete="off"
+                               placeholder="Escanéalo o escribe los números" aria-describedby="barcodeStatus">
+                        <button type="button" class="btn btn-secondary barcode-btn" data-barcode-scan>
+                            <i class="lucide-scan-barcode" aria-hidden="true"></i> <span>Escanear</span>
+                        </button>
+                        <button type="button" class="btn btn-secondary barcode-btn" data-barcode-search tabindex="-1" aria-label="Buscar el código">
+                            <i class="lucide-search" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                    <div class="barcode-camera" data-barcode-camera hidden>
+                        <video muted playsinline aria-label="Cámara para leer el código de barras"></video>
+                        <span class="barcode-camera-guide" aria-hidden="true"></span>
+                        <button type="button" class="btn btn-secondary btn-sm barcode-camera-close" data-barcode-stop>Cancelar</button>
+                    </div>
+                    <p class="form-help" id="barcodeStatus" role="status" aria-live="polite" data-barcode-status>
+                        Rellenamos el nombre, la marca y la foto si el producto está en Open Beauty Facts.
+                    </p>
+                </div>
 
                 <div class="form-mode-tabs" role="tablist" aria-label="Origen del producto" id="addModeTabs" data-tabs>
                     <button type="button" class="form-mode-tab active" role="tab" id="tab-existing" data-mode="existing"
@@ -74,6 +118,23 @@
                 </div>
 
                 <div id="group-new" class="mode-content" role="tabpanel" aria-labelledby="tab-new" hidden>
+                    <div class="form-group">
+                        <span class="form-label">Foto <span class="settings-optional">(opcional)</span></span>
+                        <div class="photo-picker photo-picker--product" data-photo-picker th:attr="data-max-mb=${maxPhotoMb}">
+                            <div class="product-photo-preview">
+                                <img alt="Foto del producto" hidden data-photo-img>
+                                <i class="lucide-image-plus" aria-hidden="true" data-photo-initials></i>
+                            </div>
+                            <div class="photo-picker-controls">
+                                <input type="file" id="productPhoto" name="photo" accept="image/jpeg,image/png" aria-describedby="productPhotoHelp">
+                                <p class="form-help" id="productPhotoHelp"
+                                   th:text="${'JPG o PNG de hasta ' + maxPhotoMb + ' MB. Si el código de barras trae foto, se pone esa salvo que elijas otra.'}">
+                                    JPG o PNG de hasta 8 MB.</p>
+                                <p class="photo-picker-name" data-photo-name hidden></p>
+                                <p class="field-error-msg" role="alert" data-photo-error hidden></p>
+                            </div>
+                        </div>
+                    </div>
                     <div class="form-group">
                         <label class="form-label" for="name">Nombre del Producto</label>
                         <input type="text" name="name" id="name" class="form-control" placeholder="Ej. Sérum Reparador Noche...">

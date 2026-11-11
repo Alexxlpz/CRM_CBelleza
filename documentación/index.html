@@ -298,7 +298,7 @@
                     <div class="callout-icon">💡</div>
                     <div class="callout-content">
                         <strong>Principio de Aislamiento por Sede:</strong>
-                        <p>Cada centro de belleza dispone de su propio almacén de inventario y sus propios tratamientos asignados. El catálogo de productos es global, pero las existencias, umbrales y alertas se calculan de manera independiente por cada sede física. Un trabajador solo puede ver y modificar datos de su centro: cualquier recurso de otro centro responde 404.</p>
+                        <p>Cada centro de belleza dispone de su propio almacén de inventario y sus propios tratamientos asignados. El catálogo de productos es global, pero las existencias, umbrales y alertas se calculan de manera independiente por cada sede física. Un trabajador solo puede ver y modificar datos de su centro: cualquier recurso de otro centro responde 404. La excepción, buscada a propósito, es la API de productos (contenedor <code>product-api</code>): al escanear un código, un centro ve el nombre, la descripción, la categoría y la foto que dio otro centro, pero nunca su precio ni su stock.</p>
                     </div>
                 </div>
             </section>

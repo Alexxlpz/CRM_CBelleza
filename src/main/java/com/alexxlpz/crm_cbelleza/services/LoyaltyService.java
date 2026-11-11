@@ -137,7 +137,7 @@ public class LoyaltyService {
         centers.findByIdForUpdate(center.getId());
         LoyaltyCard card = cardFor(center, client);
         if (!card.enabled()) {
-            throw new BusinessRuleException("Tu centro no tiene activada la tarjeta de puntos. Actívala en «Mi Centro».");
+            throw new BusinessRuleException("Tu centro no tiene activada la tarjeta de puntos. Actívala en «Ajustes».");
         }
         if (!card.canRedeem()) {
             throw new BusinessRuleException("Le faltan " + card.missing() + " puntos para canjear la recompensa.");
@@ -153,7 +153,7 @@ public class LoyaltyService {
                 .build());
     }
 
-    /** Configuración desde «Mi Centro». Al activarla empieza a contar desde ahora (las citas pasadas no suman). */
+    /** Configuración desde «Ajustes». Al activarla empieza a contar desde ahora (las citas pasadas no suman). */
     public Center updateSettings(Long centerId, LoyaltySettingsForm form) {
         Center center = centers.findById(centerId).orElseThrow();
         LoyaltyMode mode = parseMode(form.mode());
