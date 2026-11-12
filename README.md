@@ -79,7 +79,7 @@ Para levantar todo en Docker (app, API de productos y PostgreSQL) con el perfil 
 docker compose -p cuquora-local -f docker-compose.yml -f docker-compose.local.yml up --build
 ```
 
-Queda en <http://localhost:8090>, con el selector de perfiles y los datos de ejemplo, y no choca con los contenedores de producción. Hace falta `PRODUCT_API_KEY` en el `.env` (`openssl rand -hex 32`).
+Queda en <http://localhost:8090>, con el selector de perfiles y los datos de ejemplo, y no choca con los contenedores de producción. Hace falta `PRODUCT_API_KEY` (`openssl rand -hex 32`) y `PRODUCT_API_DB_PASSWORD` (`openssl rand -hex 24`) en el `.env`.
 
 ## Desplegar con Docker
 

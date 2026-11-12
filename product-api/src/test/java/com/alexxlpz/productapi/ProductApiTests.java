@@ -9,6 +9,14 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.imageio.ImageIO;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,13 +41,16 @@ class ProductApiTests {
     /** Alissi Brontë Sublime: no está en Open Beauty Facts. */
     static final String SUBLIME = "8436595340863";
     static final String NIVEA = "4005808155767";
-    static final byte[] JPEG = {(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xE0, 0, 0x10, 'J', 'F', 'I', 'F', 0};
-    static final byte[] PNG = {(byte) 0x89, 'P', 'N', 'G', '\r', '\n', 0x1A, '\n', 0, 0};
+    /** Fotos de verdad (pequeñas, se guardan tal cual): la API las abre para reducirlas. */
+    static final byte[] JPEG = image("jpg", 120, 160);
+    static final byte[] PNG = image("png", 120, 160);
 
     @Autowired
     MockMvc mvc;
     @Autowired
     ProductRepository products;
+    @Autowired
+    ProductContributionRepository contributions;
     @MockitoBean
     OpenBeautyFacts openBeautyFacts;
 
@@ -130,6 +141,50 @@ class ProductApiTests {
     }
 
     @Test
+    void eachCenterContributionIsRecorded() throws Exception {
+        mvc.perform(multipart("/api/products/" + SUBLIME).param("name", "Sublime").param("center", "7")
+                        .header("X-Api-Key", KEY))
+                .andExpect(status().isCreated());
+        mvc.perform(multipart("/api/products/" + SUBLIME).file(new MockMultipartFile("image", "s.jpg", "image/jpeg", JPEG))
+                        .param("name", "Sublime").param("category", "Cabello").param("center", "9")
+                        .header("X-Api-Key", KEY))
+                .andExpect(status().isOk());
+        // Si no rellena nada nuevo no se apunta; sin centro (versión antigua de Cuquora) se apunta sin él
+        mvc.perform(multipart("/api/products/" + SUBLIME).param("name", "Sublime").param("center", "11")
+                        .header("X-Api-Key", KEY))
+                .andExpect(status().isOk());
+        mvc.perform(multipart("/api/products/" + SUBLIME).param("name", "Sublime").param("brand", "Alissi Brontë")
+                        .header("X-Api-Key", KEY))
+                .andExpect(status().isOk());
+
+        List<ProductContribution> log = contributions.findByGtinOrderById(SUBLIME);
+        assertEquals(3, log.size());
+        assertEquals(7L, log.get(0).getCenterId());
+        assertTrue(log.get(0).isCreated());
+        assertEquals("nombre", log.get(0).getFields());
+        assertEquals(9L, log.get(1).getCenterId());
+        assertFalse(log.get(1).isCreated());
+        assertEquals("categoria,foto", log.get(1).getFields());
+        assertNull(log.get(2).getCenterId());
+        assertEquals("marca", log.get(2).getFields());
+
+        // El centro tiene que ser un número
+        mvc.perform(multipart("/api/products/" + NIVEA).param("name", "Creme").param("center", "abc")
+                        .header("X-Api-Key", KEY))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("El centro tiene que ser un número."));
+        mvc.perform(multipart("/api/products/" + NIVEA).param("name", "Creme").param("center", "-1")
+                        .header("X-Api-Key", KEY))
+                .andExpect(status().isBadRequest());
+        assertTrue(products.findById(NIVEA).isEmpty());
+
+        // Borrar un producto borra también su registro
+        products.deleteById(SUBLIME);
+        products.flush();
+        assertTrue(contributions.findByGtinOrderById(SUBLIME).isEmpty());
+    }
+
+    @Test
     void contributionsAreValidated() throws Exception {
         mvc.perform(multipart("/api/products/" + SUBLIME).header("X-Api-Key", KEY))
                 .andExpect(status().isBadRequest())
@@ -146,6 +201,71 @@ class ProductApiTests {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.category").doesNotExist());
         assertTrue(products.findById(SUBLIME).isPresent());
+    }
+
+    @Test
+    void bigPhotosAreShrunkBeforeBeingStored() throws Exception {
+        // Una foto grande de Open Beauty Facts se guarda a 800 px en JPEG
+        byte[] big = image("jpg", 2400, 1800);
+        assertTrue(big.length > Images.SMALL_BYTES, "la de prueba tiene que ser pesada");
+        when(openBeautyFacts.find(NIVEA)).thenReturn(Optional.of(new ImportedProduct(
+                "Creme", "Nivea", "150 ml", "Cuerpo", "https://images.openbeautyfacts.org/nivea.png")));
+        when(openBeautyFacts.image("https://images.openbeautyfacts.org/nivea.png")).thenReturn(Optional.of(big));
+        mvc.perform(get("/api/products/" + NIVEA).header("X-Api-Key", KEY)).andExpect(status().isOk());
+        byte[] stored = mvc.perform(get("/api/products/" + NIVEA + "/image").header("X-Api-Key", KEY))
+                .andExpect(content().contentType("image/jpeg"))
+                .andReturn().getResponse().getContentAsByteArray();
+        BufferedImage saved = ImageIO.read(new ByteArrayInputStream(stored));
+        assertEquals(800, saved.getWidth());
+        assertEquals(600, saved.getHeight());
+        assertTrue(stored.length < big.length / 4);
+
+        // Lo mismo con la que aporta un centro, también si es alta y estrecha
+        mvc.perform(multipart("/api/products/" + SUBLIME).file(new MockMultipartFile("image", "s.jpg", "image/jpeg",
+                        image("jpg", 1000, 3000))).param("name", "Sublime").header("X-Api-Key", KEY))
+                .andExpect(status().isCreated());
+        saved = ImageIO.read(new ByteArrayInputStream(mvc.perform(get("/api/products/" + SUBLIME + "/image")
+                .header("X-Api-Key", KEY)).andReturn().getResponse().getContentAsByteArray()));
+        assertEquals(267, saved.getWidth());
+        assertEquals(800, saved.getHeight());
+
+        // Una pequeña se queda igual; una que no se puede abrir no se acepta
+        assertArrayEquals(PNG, Images.shrink(PNG).orElseThrow());
+        byte[] broken = java.util.Arrays.copyOf(JPEG, 40);
+        assertTrue(Images.shrink(broken).isEmpty());
+        // Una con demasiados píxeles se rechaza antes de abrirla (de un solo color: pesa poco pero ocuparía 80 MB)
+        assertTrue(Images.shrink(plain(5000, 4000)).isEmpty());
+    }
+
+    static byte[] plain(int width, int height) {
+        try {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            ImageIO.write(new BufferedImage(width, height, BufferedImage.TYPE_BYTE_GRAY), "png", out);
+            return out.toByteArray();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    /** Una foto de prueba con ruido (para que pese como una foto de verdad) del tamaño pedido. */
+    static byte[] image(String format, int width, int height) {
+        BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g = img.createGraphics();
+        java.util.Random random = new java.util.Random(width * 31L + height);
+        for (int x = 0; x < width; x += 4) {
+            for (int y = 0; y < height; y += 4) {
+                g.setColor(new Color((x + random.nextInt(40)) % 256, (y + random.nextInt(40)) % 256, random.nextInt(256)));
+                g.fillRect(x, y, 4, 4);
+            }
+        }
+        g.dispose();
+        try {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            ImageIO.write(img, format, out);
+            return out.toByteArray();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     @Test

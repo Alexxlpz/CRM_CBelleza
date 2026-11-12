@@ -19,8 +19,9 @@ import java.util.Map;
  * <ul>
  *   <li>{@code GET /api/products/{gtin}}: los datos del producto, o 404 si nadie lo conoce.</li>
  *   <li>{@code GET /api/products/{gtin}/image}: la foto del envase.</li>
- *   <li>{@code POST /api/products/{gtin}} (multipart: name, brand, category, quantity, description, image): un centro aporta
- *       un producto. 201 si es nuevo, 200 si ya estaba (solo se rellenan los huecos).</li>
+ *   <li>{@code POST /api/products/{gtin}} (multipart: name, brand, category, quantity, description, image, center): un
+ *       centro aporta un producto. 201 si es nuevo, 200 si ya estaba (solo se rellenan los huecos). {@code center} es el
+ *       número del centro en Cuquora y queda apuntado en el registro de aportaciones.</li>
  * </ul>
  */
 @RestController
@@ -57,15 +58,22 @@ public class ProductController {
                                                   @RequestParam(required = false) String category,
                                                   @RequestParam(required = false) String quantity,
                                                   @RequestParam(required = false) String description,
-                                                  @RequestParam(required = false) MultipartFile image) throws IOException {
+                                                  @RequestParam(required = false) MultipartFile image,
+                                                  @RequestParam(required = false) String center) throws IOException {
         byte[] data = image == null || image.isEmpty() ? null : image.getBytes();
-        CatalogService.Saved saved = catalog.contribute(gtin, new Contribution(name, brand, category, quantity, description, data));
+        CatalogService.Saved saved = catalog.contribute(gtin,
+                new Contribution(name, brand, category, quantity, description, data, centerId(center)));
         return ResponseEntity.status(saved.created() ? HttpStatus.CREATED : HttpStatus.OK).body(ProductJson.of(saved.product()));
     }
 
-    /** Para el healthcheck de Docker; no pide clave. */
-    @GetMapping("/health")
-    public Map<String, String> health() {
-        return Map.of("status", "UP");
+    private static Long centerId(String raw) {
+        if (raw == null || raw.isBlank()) return null;
+        try {
+            long id = Long.parseLong(raw.strip());
+            if (id > 0) return id;
+        } catch (NumberFormatException e) {
+            // cae al error de abajo
+        }
+        throw new InvalidRequestException("El centro tiene que ser un número.");
     }
 }

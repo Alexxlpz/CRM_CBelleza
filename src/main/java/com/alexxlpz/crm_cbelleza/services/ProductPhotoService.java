@@ -4,6 +4,7 @@ import com.alexxlpz.crm_cbelleza.entities.Product;
 import com.alexxlpz.crm_cbelleza.entities.ProductPhoto;
 import com.alexxlpz.crm_cbelleza.exceptions.BusinessRuleException;
 import com.alexxlpz.crm_cbelleza.exceptions.ResourceNotFoundException;
+import com.alexxlpz.crm_cbelleza.productdata.ProductOrigin;
 import com.alexxlpz.crm_cbelleza.repositories.ProductPhotoRepository;
 import com.alexxlpz.crm_cbelleza.repositories.ProductRepository;
 import org.springframework.context.ApplicationEventPublisher;
@@ -48,7 +49,7 @@ public class ProductPhotoService {
         if (file == null || file.isEmpty()) {
             throw new BusinessRuleException("Elige una foto para subirla.");
         }
-        store(ownProduct(centerId, productId), PhotoImages.fit(PhotoImages.bytesOf(file), SIDE, MIN_SIDE, MIN_SIDE, false));
+        store(ownProduct(centerId, productId), PhotoImages.fit(PhotoImages.bytesOf(file), SIDE, MIN_SIDE, MIN_SIDE, false), null);
     }
 
     /** Pone la foto que tiene la base de datos pública para el código del producto. Devuelve si la ha encontrado. */
@@ -57,8 +58,10 @@ public class ProductPhotoService {
         if (product.getBarcode() == null) {
             return false;
         }
-        Optional<byte[]> found = lookup.foundPhoto(product.getBarcode());
-        found.ifPresent(jpeg -> store(product, jpeg));
+        Optional<ProductLookupService.FoundPhoto> found = lookup.foundPhotoWithOrigin(product.getBarcode());
+        // Las de Open Beauty Facts se guardan marcadas: su licencia pide decir de dónde son
+        found.ifPresent(photo -> store(product, photo.jpeg(),
+                photo.origin() == ProductOrigin.OPEN_BEAUTY_FACTS ? Product.OPEN_BEAUTY_FACTS : null));
         return found.isPresent();
     }
 
@@ -66,6 +69,7 @@ public class ProductPhotoService {
         Product product = ownProduct(centerId, productId);
         photos.findById(product.getId()).ifPresent(photos::delete);
         product.setPhotoUpdatedAt(null);
+        product.setPhotoSource(null);
     }
 
     @Transactional(readOnly = true)
@@ -86,8 +90,9 @@ public class ProductPhotoService {
         return product;
     }
 
-    private void store(Product product, byte[] jpeg) {
+    private void store(Product product, byte[] jpeg, String source) {
         photos.save(new ProductPhoto(product.getId(), "image/jpeg", jpeg));
+        product.setPhotoSource(source);
         LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.SECONDS);
         // La URL lleva la hora en segundos: dos fotos en el mismo segundo tendrían la misma URL en caché
         if (product.getPhotoUpdatedAt() != null && !now.isAfter(product.getPhotoUpdatedAt())) {

@@ -67,7 +67,8 @@ services:
         condition: service_healthy
       product-api:
         condition: service_started
-    # Docker reinicia la app si deja de responder (y «docker compose ps» dice si está sana)
+    # «docker compose ps» dice si está sana. Ojo: Docker solo la marca como «unhealthy», no la reinicia; restart la
+    # vuelve a arrancar si el proceso se cae.
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8080/robots.txt || exit 1"]
       interval: 30s
@@ -100,9 +101,29 @@ services:
     logging: *logs
     restart: unless-stopped
 
+  # Prepara el usuario propio de la API de productos (productos_api), dueño solo del esquema «productos» y sin
+  # permisos sobre las tablas de Cuquora. Se ejecuta en cada «up», tarda un segundo y se para (docker/postgres/db-setup.sh).
+  db-setup:
+    image: postgres:16-alpine
+    container_name: crm_cbelleza_db_setup
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?Falta POSTGRES_DB en .env}
+      POSTGRES_USER: ${POSTGRES_USER:?Falta POSTGRES_USER en .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Falta POSTGRES_PASSWORD en .env}
+      PRODUCT_API_DB_PASSWORD: ${PRODUCT_API_DB_PASSWORD:?Falta PRODUCT_API_DB_PASSWORD en .env}
+    volumes:
+      - ./docker/postgres/db-setup.sh:/db-setup.sh:ro
+    entrypoint: ["sh", "/db-setup.sh"]
+    depends_on:
+      db:
+        condition: service_healthy
+    logging: *logs
+    restart: "no"
+
   # API de productos por código de barras (carpeta product-api/). Solo la usa la app, por la red interna de Docker
   # y con la clave PRODUCT_API_KEY: sin "ports", no se puede llegar a ella desde fuera.
-  # Guarda los productos en la misma base de datos, en su propio esquema «productos» (entra en la copia de seguridad).
+  # Guarda los productos en la misma base de datos, en su propio esquema «productos» (entra en la copia de seguridad),
+  # con su propio usuario (productos_api, lo prepara db-setup): no puede ver las tablas de Cuquora.
   # Si un código no lo conoce, lo busca en Open Beauty Facts: necesita salida a world.openbeautyfacts.org
   # e images.openbeautyfacts.org. Si se cae, la app sigue funcionando y los productos se rellenan a mano.
   product-api:
@@ -112,14 +133,14 @@ services:
     container_name: crm_cbelleza_product_api
     environment:
       DB_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:?Falta POSTGRES_DB en .env}
-      DB_USERNAME: ${POSTGRES_USER:?Falta POSTGRES_USER en .env}
-      DB_PASSWORD: ${POSTGRES_PASSWORD:?Falta POSTGRES_PASSWORD en .env}
+      DB_USERNAME: productos_api
+      DB_PASSWORD: ${PRODUCT_API_DB_PASSWORD:?Falta PRODUCT_API_DB_PASSWORD en .env}
       PRODUCT_API_KEY: ${PRODUCT_API_KEY:?Falta PRODUCT_API_KEY en .env}
       OPEN_BEAUTY_FACTS_ENABLED: ${OPEN_BEAUTY_FACTS_ENABLED:-true}
       TZ: ${TZ:-Europe/Madrid}
     depends_on:
-      db:
-        condition: service_healthy
+      db-setup:
+        condition: service_completed_successfully
     mem_limit: 384m
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8081/health || exit 1"]

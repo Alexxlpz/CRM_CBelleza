@@ -23,6 +23,10 @@ Al sacar una versión:
 
 ### Añadido
 
+- La API de productos apunta qué centro aporta cada dato: al compartir un producto, Cuquora manda el número del centro (nada más de él) y la API guarda en un registro qué huecos rellenó y cuándo. Así se puede ver quién metió un dato malo y borrar de una vez lo que haya aportado un centro (SQL en `product-api/README.md`). Migración V3 de la API.
+- La API de productos guarda las fotos reducidas a 800 px por el lado largo, en JPEG: las de Open Beauty Facts podían pesar varios megas y ahora rondan los 100-200 KB, así que la base de datos y la copia diaria crecen mucho menos. Las que ya son pequeñas se guardan tal cual.
+- `docker/corregir-producto.sh` para arreglar a mano un producto de la API de productos sin escribir SQL: ver sus datos y quién lo aportó, cambiar nombre, marca, categoría, formato o descripción, quitar la foto o borrarlo. Cada corrección queda en el registro de aportaciones.
+- Crédito a Open Beauty Facts: si la foto de un producto es la que se encontró al escanear y viene de allí, «Ver Info» lo dice debajo («Foto: Open Beauty Facts», licencia CC BY-SA, con enlace a su ficha), y deja de salir si el centro pone su propia foto. Esas fotos tampoco se comparten con la API de productos como si fueran del centro. Párrafo de créditos en los Términos (datos ODbL, fotos CC BY-SA). Migración V32.
 - API de productos propia en su propio contenedor (`product-api/`, servicio `product-api` del `docker-compose.yml`): guarda los productos por código de barras en el esquema `productos` de la misma base de datos. Cuando un centro da de alta un producto con código, Cuquora le pasa el nombre, la categoría, la descripción y la foto (nunca el precio ni el stock), y el siguiente centro que lo escanee lo encuentra relleno con el aviso «Otro centro de Cuquora ya lo dio de alta». Si un código no está, la API lo busca en Open Beauty Facts y lo guarda. Lo que aporta un centro solo rellena huecos: no cambia el nombre ni una foto que ya hay. Nueva variable `PRODUCT_API_KEY` en el `.env`.
 - Fotos y código de barras en los productos del inventario. Al crear un producto se le puede subir una foto, y desde «Ver Info» se pone, cambia o quita la de los productos propios del centro. En «Añadir Producto» se escanea el código de barras con la cámara del móvil (o con un lector USB, o escribiéndolo): si el producto ya está en el inventario o en el catálogo lo dice o lo elige, y si no, lo busca en Open Beauty Facts y rellena nombre, marca, formato, categoría y foto. Los QR de los envases solo sirven si llevan el código dentro (GS1 Digital Link). El código se guarda con el producto y no se puede repetir en el mismo centro. Migración V31.
 - «Descargar mis datos» y «Borrar mi cuenta» en el perfil del cliente (RGPD). La descarga es un JSON con la cuenta, las citas, las fichas y resúmenes que tienen los centros, las reseñas, las compras y los puntos. Al borrar (con la contraseña, o escribiendo BORRAR si entra con Google) se anulan sus citas pendientes con aviso al centro, se borran su ficha, los resúmenes y fotos de sus tratamientos y sus puntos, y la cuenta se queda sin nombre, correo, teléfono ni acceso; las citas pasadas siguen contando en los números del centro y las reseñas se quedan como «Cliente eliminado». Las sesiones abiertas en otros dispositivos se cierran. Migración V30.
@@ -31,8 +35,14 @@ Al sacar una versión:
 - Botón «Rechazar registro» al revisar un centro nuevo: borra el centro sin publicar, las cuentas de su equipo y lo que hayan preparado.
 - Botón «Cuquora en Docker» en IntelliJ (`.run/` y `docker-compose.local.yml`): levanta la app, la API de productos y PostgreSQL en http://localhost:8090 con el perfil dev (selector de perfiles y datos de ejemplo), sin chocar con los contenedores de producción.
 
+### Seguridad
+
+- La API de productos entra en PostgreSQL con su propio usuario (`productos_api`), dueño solo del esquema `productos` y sin ningún permiso sobre las tablas de Cuquora. Antes usaba `POSTGRES_USER`, que es superusuario. Lo prepara el servicio nuevo `db-setup` del `docker-compose.yml` en cada arranque. Nueva variable `PRODUCT_API_DB_PASSWORD` en el `.env`.
+
 ### Cambiado
 
+- El healthcheck de la API de productos (`/health`) comprueba la base de datos: si no responde en 2 segundos dice «DOWN» y Docker marca el contenedor como «unhealthy». Antes decía «UP» siempre.
+- Reconstruir las imágenes de Docker es mucho más rápido: los dos `Dockerfile` bajan las dependencias de Maven en una capa aparte que se reutiliza mientras no cambie el `pom.xml` (en las pruebas, la app pasó de 81 a 19 segundos y la API de productos de 49 a 10).
 - «Mi Centro» pasa a llamarse «Ajustes», y la trabajadora que no es dueña ya no ve el aviso de dueño.
 - Documentación: API de productos, código de barras y fotos de productos en el manual, la guía por roles, la evolución del proyecto y el README.
 - Teléfono con el prefijo de país en su propia lista y el número agrupado al escribir, en el alta de centros, el registro de clientes y «Mi Centro»; se guarda como «+34 612 345 678». La migración V27 pone así los teléfonos de centros ya guardados.

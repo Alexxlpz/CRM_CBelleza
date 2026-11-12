@@ -4,7 +4,10 @@
 # --- Build Stage ---
 FROM maven:3.9.9-eclipse-temurin-21 AS build
 WORKDIR /workspace
+# Primero solo pom.xml y las dependencias: Docker guarda esta capa y, mientras pom.xml no cambie, cada
+# reconstrucción se la salta y solo compila el código.
 COPY pom.xml .
+RUN mvn -B -q dependency:go-offline
 COPY src ./src
 RUN mvn -B -DskipTests clean package
 

@@ -83,7 +83,10 @@ public class ProductSharingService {
                 .map(p -> new Shared(p.getCenterId(), p.getBarcode(), new ProductContribution(
                         p.getName().length() > 200 ? p.getName().substring(0, 200).strip() : p.getName(), p.getCategory(),
                         p.getDescription() == null || p.getDescription().isBlank() ? null : p.getDescription().strip(),
-                        photos.findById(p.getId()).map(ProductPhoto::getData).orElse(null))));
+                        // La foto de Open Beauty Facts no es del centro: la API ya la tiene de allí
+                        p.isPhotoFromOpenBeautyFacts() ? null
+                                : photos.findById(p.getId()).map(ProductPhoto::getData).orElse(null),
+                        p.getCenterId())));
     }
 
     boolean withinDailyLimit(Long centerId) {

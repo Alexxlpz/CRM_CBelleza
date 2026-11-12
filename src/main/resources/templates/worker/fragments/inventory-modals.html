@@ -11,6 +11,11 @@
                     <div class="info-modal-media" th:classappend="${item.product.photoUrl != null} ? 'info-modal-media--photo'">
                         <img th:src="${item.product.imageUrl}" alt="" loading="lazy">
                     </div>
+                    <!-- Crédito que pide la licencia de las fotos de Open Beauty Facts (CC BY-SA) -->
+                    <p class="photo-credit" th:if="${item.product.photoFromOpenBeautyFacts}">
+                        Foto: <a th:href="${item.product.openBeautyFactsUrl}" target="_blank" rel="noopener noreferrer">Open Beauty Facts</a>
+                        (<a href="https://creativecommons.org/licenses/by-sa/3.0/deed.es" target="_blank" rel="noopener noreferrer">CC BY-SA</a>)
+                    </p>
                     <!-- Solo los productos creados por el centro: los del catálogo general son de todos -->
                     <div class="product-photo-actions" th:if="${isCenterOwner and item.product.centerId != null}">
                         <form th:action="@{/worker/inventory/{id}/photo(id=${item.id})}" method="post" enctype="multipart/form-data"

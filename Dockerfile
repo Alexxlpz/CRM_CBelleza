@@ -4,11 +4,18 @@
 FROM maven:3.9.9-eclipse-temurin-21 AS build
 WORKDIR /workspace
 
-# Copy dependencies descriptor and source code
+# Primero solo pom.xml y las dependencias: Docker guarda esta capa y, mientras pom.xml no cambie, cada
+# reconstrucción se la salta (no vuelve a bajar todo de Maven Central) y solo compila el código.
+# go-offline no baja los procesadores de anotaciones (Lombok, configuration-processor): se compila una clase vacía
+# para que también queden en esta capa, y luego se borra.
 COPY pom.xml .
-COPY src ./src
+RUN mvn -B -q dependency:go-offline \
+    && mkdir -p src/main/java && echo 'class Warmup {}' > src/main/java/Warmup.java \
+    && mvn -B -q compile \
+    && rm -rf src target
 
 # Build production jar skipping tests
+COPY src ./src
 RUN mvn -B -DskipTests clean package
 
 # --- Runtime Stage ---

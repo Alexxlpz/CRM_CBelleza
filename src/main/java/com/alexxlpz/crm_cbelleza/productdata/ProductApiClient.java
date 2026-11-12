@@ -98,6 +98,7 @@ public class ProductApiClient implements ProductDatabase {
         form.add("name", product.name());
         if (product.category() != null) form.add("category", product.category());
         if (product.description() != null) form.add("description", product.description());
+        if (product.centerId() != null) form.add("center", String.valueOf(product.centerId()));
         if (product.photo() != null) {
             form.add("image", new ByteArrayResource(product.photo()) {
                 @Override

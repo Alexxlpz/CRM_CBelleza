@@ -102,16 +102,25 @@ public class ProductLookupService {
 
     /** Foto que tiene la base de datos pública para ese código, ya reducida a JPEG; vacía si no hay o no sirve. */
     public Optional<byte[]> foundPhoto(String raw) {
+        return foundPhotoWithOrigin(raw).map(FoundPhoto::jpeg);
+    }
+
+    /** Como {@link #foundPhoto}, y además de dónde salió (para el crédito de las de Open Beauty Facts). */
+    public Optional<FoundPhoto> foundPhotoWithOrigin(String raw) {
         return external(normalize(raw))
-                .map(ExternalProduct::imageUrl)
-                .flatMap(database::image)
-                .flatMap(bytes -> {
+                .filter(p -> p.imageUrl() != null)
+                .flatMap(p -> database.image(p.imageUrl()).flatMap(bytes -> {
                     try {
-                        return Optional.of(PhotoImages.fit(bytes, PHOTO_SIDE, PHOTO_MIN_SIDE, PHOTO_MIN_SIDE, false));
+                        return Optional.of(new FoundPhoto(
+                                PhotoImages.fit(bytes, PHOTO_SIDE, PHOTO_MIN_SIDE, PHOTO_MIN_SIDE, false), p.origin()));
                     } catch (BusinessRuleException e) {
                         return Optional.empty(); // formato raro (WebP) o demasiado pequeña: mejor sin foto
                     }
-                });
+                }));
+    }
+
+    /** Una foto encontrada por el código y su procedencia. */
+    public record FoundPhoto(byte[] jpeg, ProductOrigin origin) {
     }
 
     /**

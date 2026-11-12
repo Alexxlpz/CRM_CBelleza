@@ -95,15 +95,17 @@ class ProductApiClientTests {
     }
 
     @Test
-    void sharesNameCategoryDescriptionAndPhoto() {
+    void sharesNameCategoryDescriptionPhotoAndCenter() {
         client.contribute("8436595340863", new ProductContribution("Alissi Brontë Sublime", "Cabello", "Champú de brillo",
-                new byte[]{(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, 1}));
+                new byte[]{(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, 1}, 7L));
         assertEquals("POST /api/products/8436595340863 " + KEY, requests.getFirst());
         String body = bodies.getFirst();
         assertTrue(body.contains("name=\"name\""));
         assertTrue(body.contains("name=\"category\""));
         assertTrue(body.contains("name=\"description\""));
         assertTrue(body.contains("name=\"image\"; filename=\"foto.jpg\""));
+        assertTrue(body.contains("name=\"center\""));
+        assertTrue(body.contains("\r\n\r\n7\r\n"), "solo el número del centro");
         assertFalse(body.contains("price"));
     }
 

@@ -1153,6 +1153,7 @@
                         <li><strong>NOT_FOUND:</strong> se rellena a mano; el código se guarda con el producto y no se puede repetir en el mismo centro.</li>
                         <li>Límite: 150 búsquedas fuera de Cuquora por centro y hora («Has buscado muchos códigos seguidos…»).</li>
                         <li><code>POST /worker/inventory/add</code> (multipart) admite <code>photo</code> o <code>useFoundPhoto=true</code>; desde «Ver Info», <code>POST /worker/inventory/{id}/photo</code> y <code>/photo/delete</code> cambian o quitan la foto de los productos propios del centro. La foto se sirve en <code>GET /worker/products/{id}/photo</code>.</li>
+                        <li>Si la foto encontrada viene de Open Beauty Facts, «Ver Info» lo dice debajo («Foto: Open Beauty Facts», licencia CC BY-SA, con enlace a su ficha). Desaparece si el centro pone su propia foto (<code>products.photo_source</code>, V32).</li>
                     </ul>
                 </div>
 
@@ -1169,6 +1170,10 @@
                         <li><code>POST /api/products/{código}</code> (multipart): lo que aporta un centro. Cuquora lo llama sola, en segundo plano y después de guardar, al crear un producto con código o cambiarle la foto (<code>ProductSharingService</code>): nombre, categoría, descripción y foto, nunca el precio ni el stock.</li>
                         <li>Solo comparten los centros ya publicados, como mucho 60 productos al día cada uno. Lo que llega solo rellena huecos: no cambia el nombre ni una foto que ya hay.</li>
                         <li>Sin <code>PRODUCT_API_URL</code> (por ejemplo, arrancando solo Cuquora desde IntelliJ) se consulta Open Beauty Facts directamente y no se comparte nada.</li>
+                        <li>Cuquora manda también el número del centro; la API apunta en <code>product_contributions</code> qué huecos rellenó cada uno y cuándo (para ver o borrar lo que aportó un centro: SQL en <code>product-api/README.md</code>). Las fotos de Open Beauty Facts no se comparten como si fueran del centro.</li>
+                        <li>Las fotos se guardan reducidas a 800 px por el lado largo, en JPEG; las de más de 16 megapíxeles se rechazan.</li>
+                        <li>Corregir a mano un producto (nombre, marca, categoría, formato, descripción, quitar la foto o borrarlo): <code>sh docker/corregir-producto.sh &lt;código&gt; ...</code> en el servidor.</li>
+                        <li>Entra en PostgreSQL con su propio usuario <code>productos_api</code> (lo prepara el servicio <code>db-setup</code>), dueño solo del esquema <code>productos</code>. <code>/health</code> (sin clave) dice «DOWN» si la base de datos no responde.</li>
                     </ul>
                 </div>
 

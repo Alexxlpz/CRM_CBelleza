@@ -746,6 +746,20 @@
     filter: none;
 }
 
+/* «Foto: Open Beauty Facts» debajo de la foto: discreto, pero se tiene que poder leer y pulsar */
+.photo-credit {
+    margin: -12px 0 0;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    text-align: right;
+}
+
+.photo-credit a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
 .product-photo-actions {
     display: flex;
     flex-wrap: wrap;

@@ -165,10 +165,16 @@ class ProductBarcodeTests {
         mvc.perform(get(created.getPhotoUrl()).with(TestUsers.as(users, TestUsers.WORKER_CENTER_2)))
                 .andExpect(status().isNotFound());
 
-        // El inventario pinta la foto en vez de la imagen genérica
+        // El inventario pinta la foto en vez de la imagen genérica, con el crédito que pide su licencia
+        assertTrue(created.isPhotoFromOpenBeautyFacts());
         mvc.perform(get("/worker/inventory").with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
                 .andExpect(content().string(containsString(created.getPhotoUrl().replace("&", "&amp;"))))
+                .andExpect(content().string(containsString("https://world.openbeautyfacts.org/product/" + EAN)))
                 .andExpect(content().string(containsString("data-barcode-box")));
+        // La foto de Open Beauty Facts no se comparte con la API como si fuera del centro (el resto sí)
+        ProductSharingService.Shared shared = sharing.contributionOf(created.getId()).orElseThrow();
+        assertNull(shared.product().photo());
+        assertEquals("Lumière Sérum Hidratante", shared.product().name());
     }
 
     @Test
@@ -180,6 +186,7 @@ class ProductBarcodeTests {
                 .andExpect(flash().attribute("successMessage", "Producto añadido al inventario."));
         Product created = productWithBarcode(EAN);
         assertNotNull(created.getPhotoUrl());
+        assertFalse(created.isPhotoFromOpenBeautyFacts(), "la foto es del centro: sin crédito");
         verify(database, times(0)).image(anyString());
 
         Long inventoryId = inventory.findByCenterIdAndProductId(carlos.getCenter().getId(), created.getId()).orElseThrow().getId();
@@ -192,6 +199,28 @@ class ProductBarcodeTests {
                         .with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
                 .andExpect(flash().attribute("successMessage", "Foto del producto guardada."));
         assertNotNull(products.findById(created.getId()).orElseThrow().getPhotoUrl());
+    }
+
+    @Test
+    void theCreditGoesAwayWhenTheCenterPutsItsOwnPhoto() throws Exception {
+        when(database.image(IMAGE)).thenReturn(Optional.of(png(600, 900)));
+        mvc.perform(multipart("/worker/inventory/add").with(csrf()).with(TestUsers.as(users, TestUsers.WORKER_CENTER_1))
+                        .param("mode", "new").param("name", "Sérum").param("category", "Rostro")
+                        .param("price", "20").param("stock", "1").param("barcode", EAN).param("useFoundPhoto", "true"))
+                .andExpect(flash().attribute("successMessage", "Producto añadido al inventario."));
+        Product created = productWithBarcode(EAN);
+        assertTrue(created.isPhotoFromOpenBeautyFacts());
+
+        Long inventoryId = inventory.findByCenterIdAndProductId(carlos.getCenter().getId(), created.getId()).orElseThrow().getId();
+        mvc.perform(multipart("/worker/inventory/" + inventoryId + "/photo")
+                        .file(new MockMultipartFile("photo", "mia.png", "image/png", png(500, 500))).with(csrf())
+                        .with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
+                .andExpect(flash().attribute("successMessage", "Foto del producto guardada."));
+        Product updated = products.findById(created.getId()).orElseThrow();
+        assertFalse(updated.isPhotoFromOpenBeautyFacts());
+        assertNotNull(sharing.contributionOf(created.getId()).orElseThrow().product().photo(), "la suya sí se comparte");
+        mvc.perform(get("/worker/inventory").with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
+                .andExpect(content().string(org.hamcrest.Matchers.not(containsString("openbeautyfacts.org/product/" + EAN))));
     }
 
     @Test
@@ -234,6 +263,7 @@ class ProductBarcodeTests {
         assertEquals("Alissi Brontë Sublime", shared.product().name());
         assertEquals("Cabello", shared.product().category());
         assertEquals("Lo usamos en el ritual de brillo", shared.product().description());
+        assertEquals(carlos.getCenter().getId(), shared.product().centerId(), "la API apunta qué centro lo aportó");
         assertNotNull(ImageIO.read(new ByteArrayInputStream(shared.product().photo())), "la foto ya reducida, en JPEG");
 
         // Un centro sin revisar todavía no comparte: lo que llega a la API lo ven todos

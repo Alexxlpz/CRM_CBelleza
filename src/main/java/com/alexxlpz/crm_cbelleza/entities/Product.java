@@ -41,6 +41,22 @@ public class Product {
     @Column(name = "photo_updated_at")
     private LocalDateTime photoUpdatedAt;
 
+    /** De dónde salió la foto: nulo = la subió el centro; {@link #OPEN_BEAUTY_FACTS} = la encontrada al escanear. */
+    @Column(name = "photo_source", length = 30)
+    private String photoSource;
+
+    public static final String OPEN_BEAUTY_FACTS = "OPEN_BEAUTY_FACTS";
+
+    /** Si la foto es de Open Beauty Facts (licencia CC BY-SA): hay que decirlo al enseñarla. */
+    public boolean isPhotoFromOpenBeautyFacts() {
+        return photoUpdatedAt != null && OPEN_BEAUTY_FACTS.equals(photoSource);
+    }
+
+    /** La ficha del producto en Open Beauty Facts, para el crédito de la foto. */
+    public String getOpenBeautyFactsUrl() {
+        return barcode == null ? "https://world.openbeautyfacts.org" : "https://world.openbeautyfacts.org/product/" + barcode;
+    }
+
     /** Dirección de la foto, o nula si no tiene (se pinta la imagen genérica de su categoría). */
     public String getPhotoUrl() {
         return photoUpdatedAt == null ? null

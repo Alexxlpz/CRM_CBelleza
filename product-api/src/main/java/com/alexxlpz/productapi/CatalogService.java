@@ -11,7 +11,9 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -30,6 +32,7 @@ public class CatalogService {
 
     private final ProductRepository products;
     private final ProductImageRepository images;
+    private final ProductContributionRepository contributions;
     private final OpenBeautyFacts openBeautyFacts;
     private final boolean useOpenBeautyFacts;
     private final TransactionTemplate tx;
@@ -41,11 +44,13 @@ public class CatalogService {
         }
     };
 
-    public CatalogService(ProductRepository products, ProductImageRepository images, OpenBeautyFacts openBeautyFacts,
+    public CatalogService(ProductRepository products, ProductImageRepository images,
+                          ProductContributionRepository contributions, OpenBeautyFacts openBeautyFacts,
                           @Value("${product-api.open-beauty-facts:true}") boolean useOpenBeautyFacts,
                           TransactionTemplate tx, Clock clock) {
         this.products = products;
         this.images = images;
+        this.contributions = contributions;
         this.openBeautyFacts = openBeautyFacts;
         this.useOpenBeautyFacts = useOpenBeautyFacts;
         this.tx = tx;
@@ -66,7 +71,7 @@ public class CatalogService {
             return Optional.empty();
         }
         ImportedProduct p = imported.get();
-        Optional<byte[]> image = Optional.ofNullable(p.imageUrl()).flatMap(openBeautyFacts::image);
+        Optional<byte[]> image = Optional.ofNullable(p.imageUrl()).flatMap(openBeautyFacts::image).flatMap(Images::shrink);
         try {
             return Optional.of(tx.execute(status -> {
                 Product product = new Product(gtin, p.name(), Source.OPEN_BEAUTY_FACTS, now());
@@ -105,32 +110,38 @@ public class CatalogService {
         String quantity = optional(c.quantity(), "formato", 40);
         String description = optional(c.description(), "texto de la descripción", 1000);
         String category = Categories.valid(c.category());
-        byte[] image = c.image() == null || c.image().length == 0 ? null : c.image();
-        if (image != null && Images.contentType(image).isEmpty()) {
-            throw new InvalidRequestException("La foto tiene que ser un JPEG o PNG de 5 MB como mucho.");
-        }
+        byte[] image = c.image() == null || c.image().length == 0 ? null : Images.shrink(c.image())
+                .orElseThrow(() -> new InvalidRequestException("La foto tiene que ser un JPEG o PNG de 5 MB como mucho."));
         try {
-            return save(gtin, name, brand, category, quantity, description, image);
+            return save(gtin, name, brand, category, quantity, description, image, c.centerId());
         } catch (DataIntegrityViolationException e) {
             // Dos centros a la vez con el mismo código: el segundo solo rellena huecos
-            return save(gtin, name, brand, category, quantity, description, image);
+            return save(gtin, name, brand, category, quantity, description, image, c.centerId());
         }
     }
 
     private Saved save(String gtin, String name, String brand, String category, String quantity, String description,
-                       byte[] image) {
+                       byte[] image, Long centerId) {
         return tx.execute(status -> {
             Optional<Product> existing = products.findById(gtin);
             Product product = existing.orElseGet(() -> new Product(gtin, name, Source.CUQUORA, now()));
-            boolean changed = existing.isEmpty();
-            if (product.getBrand() == null && brand != null) { product.setBrand(brand); changed = true; }
-            if (product.getCategory() == null && category != null) { product.setCategory(category); changed = true; }
-            if (product.getQuantity() == null && quantity != null) { product.setQuantity(quantity); changed = true; }
-            if (product.getDescription() == null && description != null) { product.setDescription(description); changed = true; }
-            if (changed) product.setUpdatedAt(now());
+            List<String> filled = new ArrayList<>();
+            if (existing.isEmpty()) filled.add("nombre");
+            if (product.getBrand() == null && brand != null) { product.setBrand(brand); filled.add("marca"); }
+            if (product.getCategory() == null && category != null) { product.setCategory(category); filled.add("categoria"); }
+            if (product.getQuantity() == null && quantity != null) { product.setQuantity(quantity); filled.add("formato"); }
+            if (product.getDescription() == null && description != null) { product.setDescription(description); filled.add("descripcion"); }
+            if (!filled.isEmpty()) product.setUpdatedAt(now());
             product = products.saveAndFlush(product);
-            if (image != null && !images.existsById(gtin)) storeImage(product, image);
-            if (existing.isEmpty()) log.info("Nuevo producto aportado por Cuquora: {}", gtin);
+            if (image != null && !images.existsById(gtin)) {
+                storeImage(product, image);
+                filled.add("foto");
+            }
+            // Solo se apunta si de verdad ha cambiado algo: así el registro dice de dónde salió cada dato
+            if (!filled.isEmpty()) {
+                contributions.save(new ProductContribution(gtin, centerId, existing.isEmpty(), String.join(",", filled), now()));
+            }
+            if (existing.isEmpty()) log.info("Nuevo producto aportado por {}: {}", centerId == null ? "un centro sin identificar" : "el centro " + centerId, gtin);
             return new Saved(product, existing.isEmpty());
         });
     }

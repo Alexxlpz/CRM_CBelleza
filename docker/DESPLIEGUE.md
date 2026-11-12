@@ -18,6 +18,10 @@ No hace falta abrir puertos en el router ni en el servidor.
 - `SITE_URL=https://cuquora.com` (con https, sin barra final).
 - `REMEMBER_ME_KEY` y `GOOGLE_TOKEN_KEY`: `openssl rand -base64 48` cada una (nuevas, no las de tu equipo).
 - `PRODUCT_API_KEY`: `openssl rand -hex 32` (la comparten la app y la API de productos).
+- `PRODUCT_API_DB_PASSWORD`: `openssl rand -hex 24`. Es la contraseña del usuario propio de la API de productos en
+  PostgreSQL (`productos_api`), que solo puede tocar el esquema `productos`. Lo crea y lo revisa en cada arranque el
+  servicio `db-setup` (`docker/postgres/db-setup.sh`), que se ejecuta un segundo y se para: en Container Manager sale
+  como «Detenido» y es lo normal.
 - `POSTGRES_PASSWORD`: una contraseña larga nueva.
 - `LEGAL_OWNER_NAME`, `LEGAL_OWNER_NIF`, `LEGAL_OWNER_ADDRESS` (LSSI).
 - `SEED_DEMO_DATA=false` y **sin** `SPRING_PROFILES_ACTIVE`, `COOKIE_SECURE` ni `FORWARD_HEADERS_STRATEGY` (los valores de producción ya vienen por defecto).
@@ -57,8 +61,9 @@ Así está montado cuquora.com.
 1. Copia al NAS `pom.xml`, `src/`, `Dockerfile`, `docker-compose.yml`, `docker/` y `product-api/` (sin su `target/`).
    El `Dockerfile` solo compila `pom.xml` y `src/`; el de `product-api/`, lo suyo.
    No hace falta `target/`, `.git`, `.idea` ni `documentación/`.
-2. El `.env` del NAS es tu `.env.produccion` renombrado a `.env`, con `COMPOSE_PROFILES=cloudflare`, `CLOUDFLARE_TUNNEL_TOKEN`
-   y `PRODUCT_API_KEY`.
+2. El `.env` del NAS es tu `.env.produccion` renombrado a `.env`, con `COMPOSE_PROFILES=cloudflare`, `CLOUDFLARE_TUNNEL_TOKEN`,
+   `PRODUCT_API_KEY` y `PRODUCT_API_DB_PASSWORD`.
 3. Los datos de PostgreSQL van en `volume2`.
-4. Container Manager > Proyecto > **Acción > Construir**. Para cambiar solo el `.env` (por ejemplo `CRM_FROM_EMAIL`), edítalo y vuelve a construir.
+4. Container Manager > Proyecto > **Acción > Construir**. La primera vez baja todas las dependencias de Maven; las
+   siguientes, mientras no cambie ningún `pom.xml`, se las saltan y solo compilan el código (mucho más rápido). Para cambiar solo el `.env` (por ejemplo `CRM_FROM_EMAIL`), edítalo y vuelve a construir.
 5. Mira el registro de la app («Producción: configuración revisada» y «Started») y el de `cloudflared` («Registered tunnel connection»).
