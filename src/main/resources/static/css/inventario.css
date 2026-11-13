@@ -781,67 +781,9 @@
     outline-offset: 2px;
 }
 
-.barcode-row {
-    display: flex;
-    gap: 8px;
-}
-
-.barcode-row .form-control {
-    flex: 1;
-    min-width: 0;
-    font-variant-numeric: tabular-nums;
-    letter-spacing: 0.04em;
-}
-
-.barcode-btn {
-    flex-shrink: 0;
-    padding-inline: 14px;
-}
-
-.barcode-camera {
-    position: relative;
-    margin-top: 10px;
-    border-radius: var(--border-radius-md);
-    overflow: hidden;
-    background: #000;
-    aspect-ratio: 4 / 3;
-    max-height: 280px;
-}
-
-.barcode-camera video {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-}
-
-/* Franja donde colocar el código */
-.barcode-camera-guide {
-    position: absolute;
-    inset: 32% 10%;
-    border: 2px solid rgba(255, 255, 255, 0.9);
-    border-radius: 10px;
-    box-shadow: 0 0 0 999px rgba(0, 0, 0, 0.35);
-    pointer-events: none;
-}
-
-.barcode-camera-close {
-    position: absolute;
-    right: 10px;
-    bottom: 10px;
-    background: var(--surface);
-}
-
+/* Fila del código de barras, cámara y mensajes: barcode.css */
 .barcode-box .form-help {
     margin: 8px 0 0;
-}
-
-.barcode-status--ok {
-    color: var(--success-strong);
-}
-
-.barcode-status--error {
-    color: var(--danger-text);
 }
 
 .photo-picker--product {

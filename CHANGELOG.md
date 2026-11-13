@@ -23,6 +23,7 @@ Al sacar una versión:
 
 ### Añadido
 
+- «Vender producto» (inventario y ficha del cliente) busca el producto por su código de barras: con «Escanear» se abre la cámara dentro del modal y, al leer el código, elige el producto y pasa a la cantidad. También vale un lector USB o escribir el código, y escribir parte del nombre reduce la lista (Intro elige si solo queda uno). Avisa si el código no está en el inventario o el producto está agotado. La cámara no se enciende sola. La cámara es la misma que en «Añadir Producto» (`barcode-camera.js`, común a los dos).
 - La API de productos apunta qué centro aporta cada dato: al compartir un producto, Cuquora manda el número del centro (nada más de él) y la API guarda en un registro qué huecos rellenó y cuándo. Así se puede ver quién metió un dato malo y borrar de una vez lo que haya aportado un centro (SQL en `product-api/README.md`). Migración V3 de la API.
 - La API de productos guarda las fotos reducidas a 800 px por el lado largo, en JPEG: las de Open Beauty Facts podían pesar varios megas y ahora rondan los 100-200 KB, así que la base de datos y la copia diaria crecen mucho menos. Las que ya son pequeñas se guardan tal cual.
 - `docker/corregir-producto.sh` para arreglar a mano un producto de la API de productos sin escribir SQL: ver sus datos y quién lo aportó, cambiar nombre, marca, categoría, formato o descripción, quitar la foto o borrarlo. Cada corrección queda en el registro de aportaciones.
@@ -41,6 +42,7 @@ Al sacar una versión:
 
 ### Cambiado
 
+- Fuera los avisos azules «esto lo hace el dueño del centro» que veía un trabajador que no es el dueño en Inventario, Tratamientos y Reseñas. Los botones que no puede usar siguen sin aparecer.
 - El healthcheck de la API de productos (`/health`) comprueba la base de datos: si no responde en 2 segundos dice «DOWN» y Docker marca el contenedor como «unhealthy». Antes decía «UP» siempre.
 - Reconstruir las imágenes de Docker es mucho más rápido: los dos `Dockerfile` bajan las dependencias de Maven en una capa aparte que se reutiliza mientras no cambie el `pom.xml` (en las pruebas, la app pasó de 81 a 19 segundos y la API de productos de 49 a 10).
 - «Mi Centro» pasa a llamarse «Ajustes», y la trabajadora que no es dueña ya no ve el aviso de dueño.

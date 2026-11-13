@@ -18,9 +18,6 @@
         </div>
 
         <div th:replace="~{fragments/alerts :: flash}"></div>
-        <th:block th:unless="${isCenterOwner}">
-            <div th:replace="~{fragments/alerts :: ownerOnly(${'Puedes leer todas las reseñas. Responderlas en público lo hace ' + ownerName + ', dueño del centro.'})}"></div>
-        </th:block>
 
         <div class="glass-panel reviews-empty-panel" th:if="${totalCount == 0}">
             <i class="lucide-star" aria-hidden="true"></i>

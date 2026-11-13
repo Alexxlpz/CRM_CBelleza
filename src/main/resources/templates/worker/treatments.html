@@ -27,9 +27,6 @@
         </div>
 
         <div th:replace="~{fragments/alerts :: flash}"></div>
-        <th:block th:unless="${isCenterOwner}">
-            <div th:replace="~{fragments/alerts :: ownerOnly(${'La carta, los precios y las ofertas los cambia ' + ownerName + ', dueño del centro.'})}"></div>
-        </th:block>
 
         <div class="stats-strip" th:if="${not #lists.isEmpty(treatments)}">
             <div class="stat-tile">

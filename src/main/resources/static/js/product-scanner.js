@@ -3,8 +3,7 @@
  *  - Código de barras: con la cámara del móvil («Escanear»), con un lector USB (escribe el código y pulsa Intro)
  *    o a mano. Se busca en Cuquora y en la API de productos u Open Beauty Facts (/worker/inventory/barcode) y se
  *    rellena el formulario.
- *  - La cámara usa el lector del navegador (BarcodeDetector, Chrome y Android) y, si no lo hay (iPhone, Firefox),
- *    ZXing, que solo se descarga al pulsar «Escanear».
+ *  - La cámara es la de barcode-camera.js (BarcodeDetector o ZXing), la misma que usa la venta.
  *  - «Poner foto» en «Ver Info»: el formulario se envía al elegir la foto.
  */
 document.addEventListener('DOMContentLoaded', () => {
@@ -153,20 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
     input.addEventListener('input', () => { lastLookup = null; });
     box.querySelector('[data-barcode-search]').addEventListener('click', () => lookup(input.value));
 
-    /* ---------- Cámara ---------- */
-    const constraints = { video: { facingMode: { ideal: 'environment' } }, audio: false };
-
-    function cameraError(err) {
-        const name = err && err.name;
-        if (name === 'NotAllowedError' || name === 'SecurityError') {
-            return 'No tenemos permiso para usar la cámara. Actívalo en el navegador o escribe el código.';
-        }
-        if (name === 'NotFoundError' || name === 'OverconstrainedError') {
-            return 'No encontramos ninguna cámara. Escribe el código o usa un lector de códigos.';
-        }
-        return 'No se ha podido abrir la cámara. Escribe el código o usa un lector de códigos.';
-    }
-
+    /* ---------- Cámara (barcode-camera.js) ---------- */
     function found(code) {
         stop();
         input.value = code;
@@ -181,73 +167,8 @@ document.addEventListener('DOMContentLoaded', () => {
         scanButton.disabled = false;
     }
 
-    async function nativeDetector() {
-        if (!('BarcodeDetector' in window)) return null;
-        try {
-            const supported = await window.BarcodeDetector.getSupportedFormats();
-            const wanted = ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'qr_code'].filter(f => supported.includes(f));
-            return wanted.includes('ean_13') ? new window.BarcodeDetector({ formats: wanted }) : null;
-        } catch (e) {
-            return null;
-        }
-    }
-
-    let zxingLoading = null;
-    function loadZxing() {
-        if (window.ZXing) return Promise.resolve(window.ZXing);
-        zxingLoading ??= new Promise((resolve, reject) => {
-            const script = document.createElement('script');
-            script.src = '/vendor/zxing/zxing.min.js';
-            script.onload = () => resolve(window.ZXing);
-            script.onerror = () => { zxingLoading = null; reject(new Error('zxing')); };
-            document.head.appendChild(script);
-        });
-        return zxingLoading;
-    }
-
-    async function startNative(detector) {
-        const stream = await navigator.mediaDevices.getUserMedia(constraints);
-        video.srcObject = stream;
-        await video.play();
-        let timer = null;
-        const tick = async () => {
-            try {
-                const codes = video.readyState >= 2 ? await detector.detect(video) : [];
-                if (codes.length) {
-                    found(codes[0].rawValue);
-                    return;
-                }
-            } catch (e) { /* fotograma sin leer: se prueba con el siguiente */ }
-            timer = setTimeout(tick, 200);
-        };
-        tick();
-        return () => {
-            clearTimeout(timer);
-            stream.getTracks().forEach(track => track.stop());
-            video.srcObject = null;
-        };
-    }
-
-    async function startZxing() {
-        const ZXing = await loadZxing();
-        const hints = new Map();
-        hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [
-            ZXing.BarcodeFormat.EAN_13, ZXing.BarcodeFormat.EAN_8, ZXing.BarcodeFormat.UPC_A,
-            ZXing.BarcodeFormat.UPC_E, ZXing.BarcodeFormat.QR_CODE
-        ]);
-        const reader = new ZXing.BrowserMultiFormatReader(hints, 250);
-        let done = false;
-        await reader.decodeFromConstraints(constraints, video, result => {
-            if (result && !done) {
-                done = true;
-                found(result.getText());
-            }
-        });
-        return () => reader.reset();
-    }
-
     scanButton.addEventListener('click', async () => {
-        if (!navigator.mediaDevices?.getUserMedia || !window.isSecureContext) {
+        if (!CuquoraBarcode.supported()) {
             say('Este navegador no deja usar la cámara aquí. Escribe el código o usa un lector de códigos.', 'error');
             return;
         }
@@ -255,8 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
         camera.hidden = false;
         say('Apunta al código de barras de la etiqueta.');
         try {
-            const detector = await nativeDetector();
-            const stopper = detector ? await startNative(detector) : await startZxing();
+            const stopper = await CuquoraBarcode.start(video, found);
             if (camera.hidden) {
                 stopper(); // se cerró mientras arrancaba
             } else {
@@ -264,7 +184,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (err) {
             stop();
-            say(cameraError(err), 'error');
+            say(CuquoraBarcode.errorMessage(err, 'escribe el código o usa un lector de códigos'), 'error');
         }
     });
     box.querySelector('[data-barcode-stop]').addEventListener('click', () => {

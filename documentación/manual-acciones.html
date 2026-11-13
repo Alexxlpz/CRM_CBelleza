@@ -1145,7 +1145,8 @@
                         <strong>Código de barras · /worker/inventory/barcode?code= · /worker/inventory/barcode/photo?code=</strong>
                         <span class="card-badge badge-worker">DUEÑO</span>
                     </div>
-                    <p>En «Añadir Producto» el código se escanea con la cámara del móvil (lector del navegador o ZXing, que solo se descarga al pulsar «Escanear»), con un lector USB (escribe el código y pulsa Intro) o a mano. <code>ProductLookupService.lookup</code> lo limpia y comprueba su dígito de control (EAN-8, EAN-13, UPC-A, GTIN-14 o un QR GS1 Digital Link) y lo busca por orden:</p>
+                    <p>En «Vender producto» no se consulta nada fuera: <code>product-sale.js</code> busca el código (limpio con <code>CuquoraBarcode.normalize</code>, el mismo criterio que el servidor) entre los productos del inventario que ya trae la página y lo elige; escribir parte del nombre filtra la lista.</p>
+                    <p>En «Añadir Producto» el código se escanea con la cámara del móvil (<code>barcode-camera.js</code>, común con la venta: lector del navegador o ZXing, que solo se descarga al pulsar «Escanear»), con un lector USB (escribe el código y pulsa Intro) o a mano. <code>ProductLookupService.lookup</code> lo limpia y comprueba su dígito de control (EAN-8, EAN-13, UPC-A, GTIN-14 o un QR GS1 Digital Link) y lo busca por orden:</p>
                     <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.9rem;">
                         <li><strong>INVENTORY:</strong> el centro ya lo tiene; se avisa para sumarle stock con +1.</li>
                         <li><strong>CATALOG:</strong> está en el catálogo de Cuquora; se elige en «Elegir del Catálogo».</li>

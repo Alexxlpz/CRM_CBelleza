@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <body>
-<!--/* Vender un producto del inventario a un cliente. La previsión de stock la calcula product-sale.js.
+<!--/* Vender un producto del inventario a un cliente. La previsión de stock la calcula product-sale.js,
+       que también busca el producto por su código de barras (cámara o lector) o por su nombre.
        Desde la ficha llega el cliente (clients nulo); desde el inventario, la cartera para elegirlo (client nulo). */-->
 <div th:fragment="modal(client, clients, items, loyalty)" class="ui-modal-overlay" id="productSaleModal" hidden>
     <div class="ui-modal ui-modal--form" role="dialog" aria-modal="true" aria-labelledby="productSaleTitle">
@@ -22,10 +23,30 @@
                 </select>
             </th:block>
 
-            <label class="form-label" for="saleInventoryId">Producto</label>
-            <select id="saleInventoryId" name="inventoryId" class="form-control">
+            <!--/* Buscar el producto: cámara (barcode-camera.js), lector USB o parte del nombre. Filtra la lista de abajo. */-->
+            <div class="sale-scan" data-sale-scan>
+                <label class="form-label" for="saleSearch">Producto</label>
+                <div class="barcode-row">
+                    <input type="search" id="saleSearch" class="form-control" autocomplete="off" enterkeyhint="search"
+                           placeholder="Código o nombre" aria-describedby="saleScanStatus">
+                    <button type="button" class="btn btn-secondary barcode-btn" data-sale-scan-start>
+                        <i class="lucide-scan-barcode" aria-hidden="true"></i> <span>Escanear</span>
+                    </button>
+                </div>
+                <div class="barcode-camera" data-sale-camera hidden>
+                    <video muted playsinline aria-label="Cámara para leer el código de barras"></video>
+                    <span class="barcode-camera-guide" aria-hidden="true"></span>
+                    <button type="button" class="btn btn-secondary btn-sm barcode-camera-close" data-sale-scan-stop tabindex="-1">Cancelar</button>
+                </div>
+                <p class="form-help" id="saleScanStatus" role="status" aria-live="polite" data-sale-scan-status>
+                    Usa la cámara, un lector de códigos o búscalo por su nombre.
+                </p>
+            </div>
+
+            <select id="saleInventoryId" name="inventoryId" class="form-control" aria-label="Producto que se vende">
                 <option value="">Elige un producto</option>
                 <option th:each="item : ${items}" th:value="${item.id}" th:disabled="${item.stock == 0}"
+                        th:data-barcode="${item.product.barcode}" th:data-name="${item.product.name}"
                         th:data-stock="${item.stock}" th:data-price="${item.product.price}"
                         th:text="${item.product.name} + ' · ' + (${item.stock == 0} ? 'agotado' : ${item.stock} + ' en stock')">Sérum vitamina C · 5 en stock</option>
             </select>

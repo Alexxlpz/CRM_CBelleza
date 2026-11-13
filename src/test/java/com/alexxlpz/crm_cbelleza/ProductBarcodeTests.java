@@ -319,4 +319,29 @@ class ProductBarcodeTests {
         assertEquals(false, own.invoke(null, "https://openbeautyfacts.org.evil.example/x.jpg"));
         assertEquals(false, own.invoke(null, "https://127.0.0.1/x.jpg"));
     }
+
+    @Test
+    void saleModalCanFindTheProductByItsBarcode() throws Exception {
+        mvc.perform(multipart("/worker/inventory/add").with(csrf()).with(TestUsers.as(users, TestUsers.WORKER_CENTER_1))
+                        .param("mode", "new").param("name", "Champú sólido").param("category", "Cabello")
+                        .param("price", "12").param("stock", "3").param("barcode", EAN))
+                .andExpect(flash().attribute("successMessage", "Producto añadido al inventario."));
+        assertNotNull(productWithBarcode(EAN));
+
+        // El modal de venta lleva el buscador con la cámara y el código de cada producto, en el inventario…
+        mvc.perform(get("/worker/inventory").with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
+                .andExpect(content().string(containsString("id=\"saleSearch\"")))
+                .andExpect(content().string(containsString("data-sale-scan-start")))
+                .andExpect(content().string(containsString("data-barcode=\"" + EAN + "\"")))
+                .andExpect(content().string(containsString("/js/barcode-camera")));
+        // …y en la ficha del cliente
+        User sofia = users.findByNameIgnoreCase(TestUsers.CLIENT).orElseThrow();
+        mvc.perform(get("/worker/clients/" + sofia.getId()).with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
+                .andExpect(content().string(containsString("id=\"saleSearch\"")))
+                .andExpect(content().string(containsString("data-barcode=\"" + EAN + "\"")));
+
+        // Otro centro no tiene ese producto en su lista
+        mvc.perform(get("/worker/inventory").with(TestUsers.as(users, TestUsers.WORKER_CENTER_2)))
+                .andExpect(content().string(org.hamcrest.Matchers.not(containsString("data-barcode=\"" + EAN + "\""))));
+    }
 }

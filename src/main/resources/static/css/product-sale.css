@@ -11,6 +11,25 @@
     margin-top: 8px;
 }
 
+.sale-form > .sale-scan:not(:first-child) {
+    margin-top: 8px;
+}
+
+.sale-scan .form-label {
+    display: block;
+    margin-bottom: 8px;
+}
+
+.sale-scan .form-help {
+    margin: 8px 0 0;
+}
+
+/* Aquí también se busca por nombre: sin el espaciado de los números del código */
+.sale-scan .barcode-row .form-control {
+    letter-spacing: normal;
+    font-variant-numeric: normal;
+}
+
 .sale-preview {
     margin: 12px 0 8px;
     padding: 14px 16px;

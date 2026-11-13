@@ -4,6 +4,8 @@
     <th:block th:replace="~{fragments/head :: meta('Control de Inventario - Cuquora CRM')}"></th:block>
     <link rel="stylesheet" th:href="@{/css/inventario.css}">
     <link rel="stylesheet" th:href="@{/css/product-sale.css}">
+    <link rel="stylesheet" th:href="@{/css/barcode.css}">
+    <script th:src="@{/js/barcode-camera.js}" defer></script>
     <script th:src="@{/js/product-sale.js}" defer></script>
     <script th:src="@{/js/sheets.js}" defer></script>
     <script th:src="@{/js/photo-picker.js}" defer></script>
@@ -32,9 +34,6 @@
         </div>
 
         <div th:replace="~{fragments/alerts :: flash}"></div>
-        <th:block th:unless="${isCenterOwner}">
-            <div th:replace="~{fragments/alerts :: ownerOnly(${'Puedes vender productos y ajustar el stock. Añadir o retirar productos lo hace ' + ownerName + ', dueño del centro.'})}"></div>
-        </th:block>
 
         <div class="stats-strip" th:if="${not #lists.isEmpty(inventoryItems)}">
             <div class="stat-tile">

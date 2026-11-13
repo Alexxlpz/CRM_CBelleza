@@ -185,7 +185,7 @@ class CenterOwnershipTests {
                 .andExpect(content().string(containsString("id=\"centerName\"")));
         mvc.perform(get("/worker/treatments").with(TestUsers.as(users, LUCIA)))
                 .andExpect(content().string(not(containsString("data-offer-edit"))))
-                .andExpect(content().string(containsString("dueño del centro")));
+                .andExpect(content().string(not(containsString("alert-info"))));
     }
 
     @Test
