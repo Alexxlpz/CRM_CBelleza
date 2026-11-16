@@ -5,11 +5,13 @@ import com.alexxlpz.crm_cbelleza.config.GoogleLoginSettings;
 import com.alexxlpz.crm_cbelleza.config.SiteModelAdvice;
 import com.alexxlpz.crm_cbelleza.entities.Center;
 import com.alexxlpz.crm_cbelleza.entities.LoyaltyMode;
+import com.alexxlpz.crm_cbelleza.exceptions.ApprovalLinkExpiredException;
 import com.alexxlpz.crm_cbelleza.exceptions.BusinessRuleException;
 import com.alexxlpz.crm_cbelleza.forms.CenterRegistrationForm;
 import com.alexxlpz.crm_cbelleza.forms.PhoneNumbers;
 import com.alexxlpz.crm_cbelleza.forms.PasswordPolicy;
 import com.alexxlpz.crm_cbelleza.mail.CenterOnboardingMailService;
+import com.alexxlpz.crm_cbelleza.security.AppUserDetails;
 import com.alexxlpz.crm_cbelleza.security.PublicFormLimiter;
 import com.alexxlpz.crm_cbelleza.services.CenterPhotoService;
 import com.alexxlpz.crm_cbelleza.services.CenterRegistrationService;
@@ -20,6 +22,10 @@ import com.alexxlpz.crm_cbelleza.services.OpeningHoursService;
 import com.alexxlpz.crm_cbelleza.services.TeamService;
 import com.alexxlpz.crm_cbelleza.services.UserService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -122,12 +128,35 @@ public class CenterRegistrationController {
     @GetMapping("/register-center/approve/{token}")
     public String approvalPage(@PathVariable String token, Model model) {
         model.addAttribute("token", token);
-        return approvalView(registrationService.pendingCenter(token), model);
+        try {
+            return approvalView(registrationService.pendingCenter(token), model);
+        } catch (ApprovalLinkExpiredException e) {
+            return expiredApproval(e, token, model);
+        }
+    }
+
+    /** Enlace caducado: se manda uno nuevo, siempre al correo de administración (CRM_ADMIN_EMAIL). */
+    @PostMapping("/register-center/approve/{token}/renew")
+    public String renewApproval(@PathVariable String token, Model model) {
+        CenterRegistrationService.ApprovalRenewal renewal;
+        try {
+            renewal = registrationService.renewApproval(token);
+        } catch (BusinessRuleException stillValid) {
+            return "redirect:/register-center/approve/" + token;
+        }
+        mailService.sendApprovalRenewed(renewal.centerName(), renewal.approvalToken(), site.siteUrl());
+        model.addAttribute("renewedCenter", renewal.centerName());
+        return "center-approval";
     }
 
     @PostMapping("/register-center/approve/{token}")
     public String approve(@PathVariable String token, Model model) {
-        Center center = registrationService.publish(token);
+        Center center;
+        try {
+            center = registrationService.publish(token);
+        } catch (ApprovalLinkExpiredException e) {
+            return expiredApproval(e, token, model);
+        }
         mailService.sendPublished(center.getName(), center.getEmail(), site.siteUrl());
         // Hasta ahora solo el responsable había recibido su enlace (ver TeamService.invitationsOnPublish)
         team.invitationsOnPublish(center.getId()).forEach(invitee -> mailService.sendInvitationAsync(
@@ -139,7 +168,18 @@ public class CenterRegistrationController {
     /** Rechaza el alta: el centro y las cuentas de su equipo se borran. */
     @PostMapping("/register-center/approve/{token}/reject")
     public String reject(@PathVariable String token, Model model) {
-        model.addAttribute("rejectedCenter", registrationService.reject(token));
+        try {
+            model.addAttribute("rejectedCenter", registrationService.reject(token));
+        } catch (ApprovalLinkExpiredException e) {
+            return expiredApproval(e, token, model);
+        }
+        return "center-approval";
+    }
+
+    private static String expiredApproval(ApprovalLinkExpiredException e, String token, Model model) {
+        model.addAttribute("expiredCenter", e.getCenterName());
+        model.addAttribute("token", token);
+        model.addAttribute("approvalValidityDays", CenterRegistrationService.APPROVAL_VALIDITY_DAYS);
         return "center-approval";
     }
 
@@ -168,11 +208,37 @@ public class CenterRegistrationController {
         }
     }
 
+    /**
+     * Aceptar la invitación a unirse a un equipo (quien ya tenía cuenta). Si tenía la sesión abierta, se cierra: al
+     * volver a entrar ya llega al panel de su centro.
+     */
+    @PostMapping("/invitation/{token}/join")
+    public String joinTeam(@PathVariable String token, Model model, RedirectAttributes redirect,
+                           HttpServletRequest request, HttpServletResponse response) {
+        try {
+            var joined = invitationService.join(token);
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null && auth.getPrincipal() instanceof AppUserDetails current && current.getId().equals(joined.userId())) {
+                new SecurityContextLogoutHandler().logout(request, response, auth);
+            }
+            redirect.addFlashAttribute("successMessage", "Ya formas parte del equipo de " + joined.centerName()
+                    + ". Inicia sesión con " + joined.email() + " para entrar en su panel.");
+            return "redirect:/login";
+        } catch (BusinessRuleException e) {
+            model.addAttribute("errorMessage", e.getMessage());
+            return invitation(token, model);
+        }
+    }
+
     @PostMapping("/invitation/{token}/renew")
     public String renewInvitation(@PathVariable String token, Model model) {
         try {
             Renewal renewal = invitationService.renew(token);
-            mailService.sendInvitationAsync(renewal.name(), renewal.email(), renewal.centerName(), renewal.token(), site.siteUrl());
+            if (renewal.teamInvitation()) {
+                mailService.sendTeamInvitationAsync(renewal.name(), renewal.email(), renewal.centerName(), renewal.token(), site.siteUrl());
+            } else {
+                mailService.sendInvitationAsync(renewal.name(), renewal.email(), renewal.centerName(), renewal.token(), site.siteUrl());
+            }
             model.addAttribute("renewedEmail", renewal.email());
         } catch (BusinessRuleException e) {
             model.addAttribute("errorMessage", e.getMessage());

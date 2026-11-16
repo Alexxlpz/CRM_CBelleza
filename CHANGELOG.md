@@ -56,10 +56,19 @@ Al sacar una versión:
 
 ### Seguridad
 
+- Cambiar la contraseña (perfil del cliente o «Mi cuenta» del trabajador) o restablecerla con «¿Olvidaste tu contraseña?» cierra las demás sesiones abiertas de esa cuenta: quien la tuviera abierta en otro navegador sale en su siguiente pantalla con el aviso «Tu contraseña ha cambiado. Vuelve a iniciar sesión.». La sesión desde la que se cambia sigue abierta. Antes solo se olvidaban los dispositivos con «Recordar mi sesión».
+- La app entra en PostgreSQL con su propio usuario (`cuquora_app`), dueño solo de las tablas de Cuquora: puede crear y cambiar sus tablas (las migraciones de Flyway), pero no crear usuarios ni bases de datos ni leer el esquema `productos`. Antes usaba `POSTGRES_USER`, que es superusuario y ahora solo usan `db-setup` y la copia de seguridad. Lo crea `db-setup`, que tras restaurar una copia vuelve a poner bien los dueños. Nueva variable `APP_DB_PASSWORD` en el `.env` (sin ella, `docker compose up` se para con un aviso).
+- Sin scripts en línea: los 11 que había dentro de las plantillas (login, registro, contacto, buscador de centros, agenda, ficha del cliente, plantilla de la ficha, tratamientos, inventario, horario del profesional y «Mis citas») pasan a ficheros de `js/pages/`, y la política de seguridad del navegador (CSP) ya solo deja ejecutar los `.js` de la propia web (`script-src 'self'`, sin `'unsafe-inline'`). Un HTML que alguien consiguiera colar no podría ejecutar nada. Los datos de la agenda van en un bloque JSON que no se ejecuta. Un test nuevo falla si vuelve a aparecer un script en línea.
+- S-12: nadie entra en un equipo sin aceptarlo. Si el dueño añade el correo de un trabajador que ya tiene cuenta y está sin centro, le llega «Centro te invita a su equipo» y solo entra al pulsar «Unirme a Centro» en el enlace (o al crear su contraseña, si aún no tenía). Antes entraba directamente. La invitación dura 7 días y se puede pedir otra en la misma página.
+- El enlace «Publicar centro» del correo a administración caduca a los 30 días. Después, la página dice «Enlace caducado» y deja pedir otro, que llega siempre al correo de administración; el viejo deja de valer.
+- Ajuste rápido de stock (+/−): cada ajuste suma o resta como mucho 10 unidades, ningún producto pasa de 999 (también al darlo de alta) y la fila se bloquea mientras tanto, así dos ajustes a la vez se aplican los dos. Antes un número enorme podía desbordar el contador.
+- `cloudflared` con versión fija (`2026.10.7`) en vez de `latest`: una reconstrucción ya no trae una versión nueva sin probar.
+- Fuera `SPRING_FLYWAY_BASELINE_ON_MIGRATE=true` del `docker-compose.yml`: solo hacía falta para bases de datos de antes de Flyway. Si un día faltase el historial de Flyway, la app no arranca en vez de dar por hechas migraciones que no se han aplicado.
 - La API de productos entra en PostgreSQL con su propio usuario (`productos_api`), dueño solo del esquema `productos` y sin ningún permiso sobre las tablas de Cuquora. Antes usaba `POSTGRES_USER`, que es superusuario. Lo prepara el servicio nuevo `db-setup` del `docker-compose.yml` en cada arranque. Nueva variable `PRODUCT_API_DB_PASSWORD` en el `.env`.
 
 ### Cambiado
 
+- Tope de memoria de la app en Docker: 1 GB (`mem_limit` en `docker-compose.yml`). Java usa como mucho el 75 %, unos 768 MB; así no se come la RAM del NAS ni deja sin memoria a los demás programas.
 - Fuera los avisos azules «esto lo hace el dueño del centro» que veía un trabajador que no es el dueño en Inventario, Tratamientos y Reseñas. Los botones que no puede usar siguen sin aparecer.
 - El healthcheck de la API de productos (`/health`) comprueba la base de datos: si no responde en 2 segundos dice «DOWN» y Docker marca el contenedor como «unhealthy». Antes decía «UP» siempre.
 - Reconstruir las imágenes de Docker es mucho más rápido: los dos `Dockerfile` bajan las dependencias de Maven en una capa aparte que se reutiliza mientras no cambie el `pom.xml` (en las pruebas, la app pasó de 81 a 19 segundos y la API de productos de 49 a 10).
@@ -81,6 +90,10 @@ Al sacar una versión:
 - El logo de la cabecera decía «COQUORA»: ahora dice «CUQUORA» (`big_icon.png`, también en la documentación).
 - Centros fuera de la hora de España (Canarias, Portugal, América): las citas se marcaban como completadas antes de tiempo (en Canarias una cita de 30 minutos, antes de empezar; en México, horas antes) y los recordatorios de 24 h se contaban con la hora de España. Ahora se usa la hora local de cada centro para completar citas, enviar recordatorios, decidir si una cita ya ha pasado, en «Mis reservas» y en los contadores de hoy y mañana del panel y de la campana.
 - Copia de seguridad (`docker/backup-db.sh`): si `pg_dump` fallaba se guardaba un archivo vacío como si fuera una copia buena y se seguían borrando las de más de 30 días. Ahora comprueba que la copia está completa, sale con error si no lo está y no borra nada; siempre conserva las 7 más recientes y puede dejar una segunda copia en otra carpeta (`BACKUP_COPY_DIR`).
+- Solicitudes que nadie contestó a tiempo: cuando pasaba su hora seguían contando como pendientes en el contador del panel, en la campana (que llevaba a un día ya pasado) y en la agenda, aunque «Por aprobar» no las enseñaba; y aún se podían aceptar o proponerles otra hora. Ahora no cuentan, no se pueden aceptar ni proponer, y en la agenda, en la ficha del cliente y en el historial de «Mis reservas» salen como «Sin respuesta».
+- Al aceptar una de las horas que propone el centro se comprueba, como al reservar, que la clienta no tenga otra cita a esa hora (en ese centro o en otro).
+- Inventario: el botón «+1» se apaga al llegar a 999 unidades en vez de dar error.
+- Anular una venta devuelve las unidades bloqueando el producto, como vender y ajustar: un ajuste a la vez ya no se pierde.
 
 ## [0.9.0-beta] - 2026-11-03
 

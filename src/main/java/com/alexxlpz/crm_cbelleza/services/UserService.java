@@ -12,6 +12,7 @@ import com.alexxlpz.crm_cbelleza.forms.ProfileForm;
 import com.alexxlpz.crm_cbelleza.forms.RegistrationForm;
 import com.alexxlpz.crm_cbelleza.repositories.UserRepository;
 import com.alexxlpz.crm_cbelleza.security.AppUserDetails;
+import com.alexxlpz.crm_cbelleza.security.PasswordChangeSessions;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 import org.springframework.stereotype.Service;
@@ -31,14 +32,17 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final PasswordPolicy passwordPolicy;
     private final PersistentTokenRepository rememberMeTokens;
+    private final PasswordChangeSessions passwordChangeSessions;
     private final InvitationService invitations;
 
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, PasswordPolicy passwordPolicy,
-                       PersistentTokenRepository rememberMeTokens, InvitationService invitations) {
+                       PersistentTokenRepository rememberMeTokens, InvitationService invitations,
+                       PasswordChangeSessions passwordChangeSessions) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.passwordPolicy = passwordPolicy;
         this.rememberMeTokens = rememberMeTokens;
+        this.passwordChangeSessions = passwordChangeSessions;
         this.invitations = invitations;
     }
 
@@ -145,6 +149,7 @@ public class UserService {
                 // así no puede seguir entrando en la cuenta que ahora es de quien tiene el correo de verdad
                 user.setPassword(null);
                 rememberMeTokens.removeUserTokens(AppUserDetails.usernameOf(user));
+                passwordChangeSessions.endOtherSessions(user.getId());
             }
             user.setGoogleId(googleId);
             user.setEmailVerified(true);
@@ -192,8 +197,10 @@ public class UserService {
         }
         if (changesPassword) {
             user.setPassword(passwordEncoder.encode(form.newPassword()));
-            // Al cambiar la contraseña se olvidan los dispositivos con «Recordar mi sesión»
+            // Al cambiar la contraseña se olvidan los dispositivos con «Recordar mi sesión» y se cierran las demás
+            // sesiones abiertas; la de quien la cambia sigue abierta
             rememberMeTokens.removeUserTokens(AppUserDetails.usernameOf(user));
+            passwordChangeSessions.endOtherSessions(user.getId());
         }
         return userRepository.save(user);
     }

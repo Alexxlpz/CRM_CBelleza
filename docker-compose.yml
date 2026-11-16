@@ -25,8 +25,9 @@ services:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE-prod}
       DB_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:?Falta POSTGRES_DB en .env}
       DB_DRIVER_CLASS_NAME: org.postgresql.Driver
-      DB_USERNAME: ${POSTGRES_USER:?Falta POSTGRES_USER en .env}
-      DB_PASSWORD: ${POSTGRES_PASSWORD:?Falta POSTGRES_PASSWORD en .env}
+      # Usuario propio de la app (lo prepara db-setup): dueño solo de las tablas de Cuquora, nunca el superusuario
+      DB_USERNAME: cuquora_app
+      DB_PASSWORD: ${APP_DB_PASSWORD:?Falta APP_DB_PASSWORD en .env (openssl rand -hex 24)}
       H2_CONSOLE_ENABLED: "false"
       # Correo (vacío = los correos se escriben en la consola en lugar de enviarse)
       MAIL_HOST: ${MAIL_HOST:-}
@@ -56,17 +57,19 @@ services:
       GOOGLE_TOKEN_KEY: ${GOOGLE_TOKEN_KEY:-}
       # Cuentas demo con contraseña pública: solo "true" en una instalación de pruebas
       SEED_DEMO_DATA: ${SEED_DEMO_DATA:-false}
-      # Una base de datos creada antes de Flyway (con el antiguo init.sql) se marca como versión 1
-      # en lugar de fallar; en un volumen nuevo las migraciones se ejecutan desde cero.
-      SPRING_FLYWAY_BASELINE_ON_MIGRATE: "true"
       # API de productos propia (servicio product-api de abajo): datos y foto de un producto por su código de barras
       PRODUCT_API_URL: http://product-api:8081
       PRODUCT_API_KEY: ${PRODUCT_API_KEY:?Falta PRODUCT_API_KEY en .env}
     depends_on:
       db:
         condition: service_healthy
+      db-setup:
+        condition: service_completed_successfully
       product-api:
         condition: service_started
+    # Tope de memoria: Java usa como mucho el 75 % (Dockerfile), unos 768 MB con 1g. Así la app nunca se come la RAM
+    # del NAS ni deja sin memoria a los demás programas; si le faltase, se reinicia sola.
+    mem_limit: 1g
     # «docker compose ps» dice si está sana. Ojo: Docker solo la marca como «unhealthy», no la reinicia; restart la
     # vuelve a arrancar si el proceso se cae.
     healthcheck:
@@ -101,8 +104,9 @@ services:
     logging: *logs
     restart: unless-stopped
 
-  # Prepara el usuario propio de la API de productos (productos_api), dueño solo del esquema «productos» y sin
-  # permisos sobre las tablas de Cuquora. Se ejecuta en cada «up», tarda un segundo y se para (docker/postgres/db-setup.sh).
+  # Prepara los usuarios propios de la app (cuquora_app, dueño solo de las tablas de Cuquora) y de la API de productos
+  # (productos_api, dueño solo del esquema «productos»): ninguna de las dos entra con el superusuario.
+  # Se ejecuta en cada «up», tarda un segundo y se para (docker/postgres/db-setup.sh).
   db-setup:
     image: postgres:16-alpine
     container_name: crm_cbelleza_db_setup
@@ -110,6 +114,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:?Falta POSTGRES_DB en .env}
       POSTGRES_USER: ${POSTGRES_USER:?Falta POSTGRES_USER en .env}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Falta POSTGRES_PASSWORD en .env}
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD:?Falta APP_DB_PASSWORD en .env (openssl rand -hex 24)}
       PRODUCT_API_DB_PASSWORD: ${PRODUCT_API_DB_PASSWORD:?Falta PRODUCT_API_DB_PASSWORD en .env}
     volumes:
       - ./docker/postgres/db-setup.sh:/db-setup.sh:ro
@@ -156,7 +161,9 @@ services:
   # El túnel y su dominio se configuran en Cloudflare (Zero Trust > Networks > Tunnels); aquí solo va su token.
   # Solo arranca con COMPOSE_PROFILES=cloudflare en el .env (en el servidor), así en local no hace falta token.
   cloudflared:
-    image: cloudflare/cloudflared:latest
+    # Versión fija: con «latest» cada reconstrucción podría traer una versión nueva sin probar. Para actualizar, cambia
+    # el número por uno de https://github.com/cloudflare/cloudflared/releases y vuelve a construir.
+    image: cloudflare/cloudflared:2026.10.7
     container_name: crm_cbelleza_tunnel
     profiles: ["cloudflare"]
     command: tunnel --no-autoupdate run

@@ -95,6 +95,10 @@ public class Center {
     @Column(name = "approval_token_hash", unique = true, length = 64)
     private String approvalTokenHash;
 
+    /** Cuándo se envió ese enlace (caduca a los 30 días); nula en las altas de antes, que cuentan desde registeredAt. */
+    @Column(name = "approval_requested_at")
+    private LocalDateTime approvalRequestedAt;
+
     /** Enlace corto ({@code /c/<slug>}): se fija una vez y no cambia al renombrar el centro (ver CenterService.shortSlugs). */
     @Column(unique = true, length = 120)
     private String slug;

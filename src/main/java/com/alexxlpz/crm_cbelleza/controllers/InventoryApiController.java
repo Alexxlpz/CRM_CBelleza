@@ -27,6 +27,7 @@ public class InventoryApiController {
                                             @PathVariable Long id,
                                             @RequestParam int change) {
         int stock = inventoryService.adjustStock(worker.getCenterId(), id, change);
-        return Map.of("stock", stock, "lowStockThreshold", InventoryService.LOW_STOCK_THRESHOLD);
+        return Map.of("stock", stock, "lowStockThreshold", InventoryService.LOW_STOCK_THRESHOLD,
+                "maxStock", InventoryService.MAX_STOCK);
     }
 }

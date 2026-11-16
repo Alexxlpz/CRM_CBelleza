@@ -208,6 +208,42 @@ class CenterRegistrationTests {
     }
 
     @Test
+    void approvalLinkExpiresAfterThirtyDaysAndANewOneCanBeRequested() throws Exception {
+        Registration registration = registrationService.register(form("hola@estudioalba.es", List.of(), List.of()));
+        Center center = centers.findById(registration.centerId()).orElseThrow();
+        center.setApprovalRequestedAt(LocalDateTime.now().minusDays(CenterRegistrationService.APPROVAL_VALIDITY_DAYS).minusMinutes(1));
+        centers.save(center);
+        String approve = "/register-center/approve/" + registration.approvalToken();
+
+        // Caducado: ni se ve, ni se publica, ni se rechaza; la foto da 404
+        mvc.perform(get(approve)).andExpect(status().isOk())
+                .andExpect(content().string(containsString("Enlace caducado")))
+                .andExpect(content().string(not(containsString("B12345674"))));
+        mvc.perform(post(approve).with(csrf())).andExpect(content().string(containsString("Enlace caducado")));
+        mvc.perform(post(approve + "/reject").with(csrf())).andExpect(content().string(containsString("Enlace caducado")));
+        mvc.perform(get(approve + "/photo")).andExpect(status().isNotFound());
+        assertFalse(centers.findById(center.getId()).orElseThrow().isPublished());
+
+        // Se pide otro (llega al correo de administración) y el viejo deja de servir, también para pedir más
+        mvc.perform(post(approve + "/renew").with(csrf()))
+                .andExpect(content().string(containsString("Enlace enviado")));
+        Center renewed = centers.findById(center.getId()).orElseThrow();
+        assertFalse(renewed.isPublished());
+        assertTrue(renewed.getApprovalRequestedAt().isAfter(LocalDateTime.now().minusMinutes(1)));
+        mvc.perform(get(approve)).andExpect(status().isNotFound());
+        mvc.perform(post(approve + "/renew").with(csrf())).andExpect(status().isNotFound());
+    }
+
+    @Test
+    void aValidApprovalLinkCannotBeSwappedForANewOne() throws Exception {
+        Registration registration = registrationService.register(form("hola@estudioalba.es", List.of(), List.of()));
+        String approve = "/register-center/approve/" + registration.approvalToken();
+        mvc.perform(post(approve + "/renew").with(csrf()));
+        // Sigue valiendo el mismo enlace
+        mvc.perform(get(approve)).andExpect(status().isOk()).andExpect(content().string(containsString("B12345674")));
+    }
+
+    @Test
     void unknownLinksAnswerNotFound() throws Exception {
         mvc.perform(get("/invitation/no-existe")).andExpect(status().isNotFound());
         mvc.perform(get("/register-center/approve/no-existe")).andExpect(status().isNotFound());

@@ -25,6 +25,10 @@ public class InventoryService {
 
     /** A partir de estas unidades (incluidas) el stock se considera bajo. */
     public static final int LOW_STOCK_THRESHOLD = 3;
+    /** Tope de unidades de un producto en el inventario: ningún centro necesita más y así el número nunca se desborda. */
+    public static final int MAX_STOCK = 999;
+    /** Lo más que se puede sumar o restar en un ajuste rápido (los botones envían 1). */
+    public static final int MAX_ADJUSTMENT = 10;
 
     private final InventoryRepository inventoryRepository;
     private final ProductRepository productRepository;
@@ -58,10 +62,21 @@ public class InventoryService {
                 .toList();
     }
 
-    /** Suma o resta unidades y devuelve el stock resultante (nunca negativo). */
+    /**
+     * Suma o resta unidades y devuelve el stock resultante (entre 0 y {@link #MAX_STOCK}). La fila queda bloqueada
+     * mientras tanto: dos ajustes a la vez (dos pestañas, dos trabajadores) se aplican los dos, uno detrás de otro.
+     */
     public int adjustStock(Long centerId, Long inventoryId, int change) {
-        Inventory item = findInCenter(centerId, inventoryId);
-        item.setStock(Math.max(0, item.getStock() + change));
+        if (change == 0 || Math.abs(change) > MAX_ADJUSTMENT) {
+            throw new BusinessRuleException("Cada ajuste puede sumar o restar entre 1 y " + MAX_ADJUSTMENT + " unidades.");
+        }
+        Inventory item = inventoryRepository.findForUpdate(inventoryId, centerId)
+                .orElseThrow(() -> new ResourceNotFoundException("El producto no existe en el inventario de tu centro."));
+        if (change > 0 && item.getStock() >= MAX_STOCK) {
+            throw new BusinessRuleException("Como mucho puede haber " + MAX_STOCK + " unidades de un producto en el inventario.");
+        }
+        // Hacia arriba se queda en el tope; un stock antiguo por encima del tope solo baja si se resta
+        item.setStock(Math.max(0, change > 0 ? Math.min(MAX_STOCK, item.getStock() + change) : item.getStock() + change));
         return inventoryRepository.save(item).getStock();
     }
 
@@ -92,13 +107,13 @@ public class InventoryService {
                 .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado."));
         Inventory item = inventoryRepository.findByCenterIdAndProductId(centerId, productId)
                 .map(existing -> {
-                    existing.setStock(existing.getStock() + stock);
+                    existing.setStock(checkedStock((long) existing.getStock() + stock));
                     return existing;
                 })
                 .orElseGet(() -> Inventory.builder()
                         .center(center(centerId))
                         .product(product)
-                        .stock(stock)
+                        .stock(checkedStock(stock))
                         .build());
         inventoryRepository.save(item);
         return product;
@@ -127,7 +142,7 @@ public class InventoryService {
         inventoryRepository.save(Inventory.builder()
                 .center(center(centerId))
                 .product(product)
-                .stock(form.stockOrZero())
+                .stock(checkedStock(form.stockOrZero()))
                 .build());
         if (barcode != null) {
             // El siguiente centro que lo escanee lo encontrará relleno (ProductSharingService)
@@ -139,6 +154,14 @@ public class InventoryService {
     /** Un producto del catálogo general (sin centro) o creado por este centro. */
     private static boolean visibleTo(Product product, Long centerId) {
         return product.getCenterId() == null || product.getCenterId().equals(centerId);
+    }
+
+    /** El stock que se guarda al dar de alta o sumar desde el catálogo: nunca por encima de {@link #MAX_STOCK}. */
+    private static int checkedStock(long stock) {
+        if (stock > MAX_STOCK) {
+            throw new BusinessRuleException("Como mucho puede haber " + MAX_STOCK + " unidades de un producto en el inventario.");
+        }
+        return (int) stock;
     }
 
     private Inventory findInCenter(Long centerId, Long inventoryId) {

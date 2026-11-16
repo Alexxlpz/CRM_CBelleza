@@ -1,5 +1,8 @@
 package com.alexxlpz.crm_cbelleza;
 
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import java.util.List;
+import com.alexxlpz.crm_cbelleza.services.InventoryService;
 import com.alexxlpz.crm_cbelleza.entities.Appointment;
 import com.alexxlpz.crm_cbelleza.entities.Inventory;
 import com.alexxlpz.crm_cbelleza.forms.NewClientForm;
@@ -179,6 +182,38 @@ class CenterIsolationTests {
                         .with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
                 .andExpect(status().isOk());
         assertEquals(own.getStock() + 1, inventory.findById(own.getId()).orElseThrow().getStock());
+    }
+
+    @Test
+    void stockAdjustmentsHaveLimitsAndNeverOverflow() throws Exception {
+        Inventory own = inventory.findByCenterId(centerOf(TestUsers.WORKER_CENTER_1)).getFirst();
+        int before = own.getStock();
+        // Más de 10 de una vez, 0 o un número que no cabe: no se toca el stock
+        for (String change : List.of("11", "-11", "0")) {
+            mvc.perform(post("/worker/inventory/" + own.getId() + "/adjust-stock").param("change", change).with(csrf())
+                            .with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
+                    .andExpect(status().isConflict());
+        }
+        mvc.perform(post("/worker/inventory/" + own.getId() + "/adjust-stock").param("change", "3000000000").with(csrf())
+                        .with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
+                .andExpect(status().is4xxClientError());
+        assertEquals(before, inventory.findById(own.getId()).orElseThrow().getStock());
+
+        // Nunca pasa de 999 ni baja de 0
+        own.setStock(InventoryService.MAX_STOCK - 2);
+        inventory.save(own);
+        mvc.perform(post("/worker/inventory/" + own.getId() + "/adjust-stock").param("change", "10").with(csrf())
+                        .with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.stock").value(InventoryService.MAX_STOCK));
+        mvc.perform(post("/worker/inventory/" + own.getId() + "/adjust-stock").param("change", "1").with(csrf())
+                        .with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
+                .andExpect(status().isConflict());
+        own.setStock(5);
+        inventory.save(own);
+        mvc.perform(post("/worker/inventory/" + own.getId() + "/adjust-stock").param("change", "-10").with(csrf())
+                        .with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
+                .andExpect(jsonPath("$.stock").value(0));
     }
 
     @Test

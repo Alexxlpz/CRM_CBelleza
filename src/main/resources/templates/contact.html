@@ -91,26 +91,7 @@
         </section>
     </main>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const V = Cuquora.validators;
-            const form = document.getElementById('contactForm');
-            const submitBtn = document.getElementById('contactSubmitBtn');
-            Cuquora.validateForm(form, {
-                name: [V.required('Por favor, introduce tu nombre y apellidos.')],
-                email: [V.required('Por favor, introduce tu correo electrónico.'), V.email()],
-                subject: [V.required('Por favor, selecciona un motivo de consulta.')],
-                message: [V.required('Por favor, escribe tu consulta o mensaje.')]
-            }, {
-                submitButton: submitBtn,
-                onSubmit: () => {
-                    submitBtn.classList.add('is-loading');
-                    submitBtn.setAttribute('aria-busy', 'true');
-                    submitBtn.querySelector('span').textContent = 'Enviando...';
-                }
-            });
-        });
-    </script>
+    <script th:src="@{/js/pages/contact.js}" defer></script>
 
     <!-- Footer -->
     <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Software de gestión para centros de estética, salones y spas.')}"></div>

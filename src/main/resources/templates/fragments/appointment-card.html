@@ -113,8 +113,8 @@
                 <span class="visually-hidden" th:text="${myRating + ' de 5 estrellas'}">4 de 5 estrellas</span>
             </p>
         </div>
-        <span class="badge" th:classappend="${'badge-' + #strings.toLowerCase(app.status.name())}"
-              th:text="${app.status.name() == 'NO_SHOW' ? 'No asististe' : app.status.label()}">Completada</span>
+        <span class="badge" th:classappend="${app.statusBadge}"
+              th:text="${app.status.name() == 'NO_SHOW' ? 'No asististe' : app.statusLabel}">Completada</span>
         <div class="history-row-actions" th:if="${canReview or app.center.published}">
             <button type="button" class="btn btn-primary btn-sm" th:if="${canReview}" data-review-open
                     th:attr="data-id=${app.id}, data-context=${app.treatment.name + ' · ' + app.center.name + ' · ' + #temporals.format(app.dateTime, 'd MMM yyyy')},

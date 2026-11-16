@@ -199,15 +199,46 @@ class TeamTests {
     }
 
     @Test
-    void someoneWhoLeftCanBeInvitedBackWithHerAccount() throws Exception {
+    void someoneWhoLeftOnlyComesBackIfSheAcceptsTheInvitation() throws Exception {
         upcomingOf(lucia).forEach(a -> a.setWorker(carlos));
         mvc.perform(post("/worker/center/team/" + lucia.getId() + "/remove").with(csrf()).with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)));
         assertNull(users.findById(lucia.getId()).orElseThrow().getCenter());
 
+        // S-12: el dueño la invita, pero no entra en el equipo hasta que ella acepte desde su correo
         mvc.perform(post("/worker/center/team").with(csrf()).with(TestUsers.as(users, TestUsers.WORKER_CENTER_1))
                         .param("name", "Lucía").param("email", LUCIA))
-                .andExpect(flash().attribute("teamMessage", containsString("ya tenía cuenta")));
+                .andExpect(flash().attribute("teamMessage", containsString("cuando la acepte")));
+        assertNull(users.findById(lucia.getId()).orElseThrow().getCenter(), "no entra sin aceptar");
+        String token = invitationToken(LUCIA);
+        mvc.perform(get("/invitation/" + token))
+                .andExpect(content().string(containsString("te invita a unirte a su equipo")))
+                .andExpect(content().string(containsString("Unirme a " + center.getName())));
+
+        mvc.perform(post("/invitation/" + token + "/join").with(csrf()))
+                .andExpect(redirectedUrl("/login"))
+                .andExpect(flash().attribute("successMessage", containsString("Ya formas parte del equipo de " + center.getName())));
         assertEquals(center.getId(), users.findById(lucia.getId()).orElseThrow().getCenter().getId());
+        assertNotNull(lucia.getPassword(), "sigue con su contraseña de siempre");
+
+        // El enlace sirve una sola vez
+        mvc.perform(post("/invitation/" + token + "/join").with(csrf()))
+                .andExpect(content().string(containsString("Ya has aceptado esta invitación")));
+    }
+
+    @Test
+    void anInvitationToJoinCannotPullSomeoneOutOfAnotherTeam() throws Exception {
+        upcomingOf(lucia).forEach(a -> a.setWorker(carlos));
+        mvc.perform(post("/worker/center/team/" + lucia.getId() + "/remove").with(csrf()).with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)));
+        mvc.perform(post("/worker/center/team").with(csrf()).with(TestUsers.as(users, TestUsers.WORKER_CENTER_1))
+                .param("name", "Lucía").param("email", LUCIA));
+        String token = invitationToken(LUCIA);
+
+        // Mientras tanto se ha unido a otro centro: la invitación ya no la mueve
+        Center other = centers.findAll().stream().filter(c -> !c.getId().equals(center.getId())).findFirst().orElseThrow();
+        users.findById(lucia.getId()).orElseThrow().setCenter(other);
+        mvc.perform(post("/invitation/" + token + "/join").with(csrf()))
+                .andExpect(content().string(containsString("Ya formas parte del equipo de " + other.getName())));
+        assertEquals(other.getId(), users.findById(lucia.getId()).orElseThrow().getCenter().getId());
     }
 
     private List<Appointment> upcomingOf(User worker) {

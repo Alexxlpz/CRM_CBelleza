@@ -24,7 +24,30 @@
             </div>
         </section>
 
-        <section class="form-card form-card--wide" th:if="${rejectedCenter == null}">
+        <!--/* El enlace caducó (vale 30 días): se puede pedir otro, que llega al correo de administración */-->
+        <section class="form-card form-card--wide" th:if="${expiredCenter != null}">
+            <div class="form-card-header">
+                <h1 class="approval-title"><i class="lucide-clock" aria-hidden="true"></i> Enlace caducado</h1>
+                <p>El enlace para revisar <strong th:text="${expiredCenter}">Centro</strong> valía
+                    <span th:text="${approvalValidityDays}">30</span> días. El centro sigue pendiente: pide otro y te
+                    llegará al correo de administración.</p>
+            </div>
+            <form th:action="@{/register-center/approve/{token}/renew(token=${token})}" method="post">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="lucide-send" aria-hidden="true"></i> Enviar un enlace nuevo
+                </button>
+            </form>
+        </section>
+
+        <section class="form-card form-card--wide" th:if="${renewedCenter != null}">
+            <div class="form-card-header">
+                <h1 class="approval-title"><i class="lucide-mail-check" aria-hidden="true"></i> Enlace enviado</h1>
+                <p>Te hemos enviado al correo de administración un enlace nuevo para revisar
+                    <strong th:text="${renewedCenter}">Centro</strong>. Este ya no sirve.</p>
+            </div>
+        </section>
+
+        <section class="form-card form-card--wide" th:if="${rejectedCenter == null and expiredCenter == null and renewedCenter == null}">
             <div class="form-card-header form-card-header--divided">
                 <h1 class="approval-title" th:text="${center.name}">Centro</h1>
                 <p th:if="${justPublished == null}">Pendiente de revisión. Comprueba el CIF o NIF y la ubicación antes de publicarlo.</p>

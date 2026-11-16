@@ -301,14 +301,10 @@
 
     <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Panel de gestión de centros.')}"></div>
 
-    <!-- Citas del centro (JSON) para el calendario -->
-    <script th:inline="javascript">
-        window.CALENDAR_APPOINTMENTS = /*[[${appointments}]]*/ [];
-        window.CALENDAR_HOURS = /*[[${openingHours}]]*/ {};
-        window.CALENDAR_BLOCKS = /*[[${blocks}]]*/ [];
-        window.CALENDAR_STAFF = /*[[${calendarStaff}]]*/ {};
-        window.CALENDAR_NEW_FOR = /*[[${newAppointmentClient}]]*/ null;
-    </script>
+    <!--/* Datos del calendario en JSON (los prepara WorkerCalendarController): el navegador no lo ejecuta (la CSP no
+         permite scripts en línea); lo lee js/pages/calendar-data.js */-->
+    <script type="application/json" id="calendarData" th:utext="${calendarData}">{}</script>
+    <script th:src="@{/js/pages/calendar-data.js}" defer></script>
     <script th:src="@{/js/worker-agenda-forms.js}" defer></script>
     <script th:src="@{/js/treatment-summary.js}" defer></script>
     <script th:src="@{/js/worker-calendar.js}" defer></script>

@@ -69,6 +69,7 @@ public class InventoryController {
                 .sorted(Comparator.comparing(ClientSummaryDTO::getName, Comparator.nullsLast(Collator.getInstance(Locale.of("es")))))
                 .toList());
         model.addAttribute("maxPhotoMb", ProductPhotoService.MAX_UPLOAD_MB);
+        model.addAttribute("maxStock", InventoryService.MAX_STOCK);
         model.addAttribute("loyalty", loyaltyService.settingsOf(centerService.getCenterById(worker.getCenterId())));
         return "worker/inventory";
     }

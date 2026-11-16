@@ -60,7 +60,8 @@ public class SecurityConfig {
             "/login", "/register", "/error",
             // Enlaces de los correos del alta de centros: el secreto va en la propia ruta
             "/register-center/approve/*", "/register-center/approve/*/photo", "/register-center/approve/*/reject",
-            "/invitation/*", "/invitation/*/renew",
+            "/register-center/approve/*/renew",
+            "/invitation/*", "/invitation/*/renew", "/invitation/*/join",
             // «¿Olvidaste tu contraseña?» (PasswordResetController)
             "/forgot-password", "/reset-password/*",
             // Fotos de presentación de los centros (las de un centro sin publicar solo las sirve a su equipo)
@@ -199,8 +200,11 @@ public class SecurityConfig {
 
     /**
      * Qué puede cargar una página: todo desde la propia web salvo las teselas y la búsqueda de direcciones de
-     * OpenStreetMap. Los {@code <script>} en línea de las plantillas obligan a 'unsafe-inline' en script-src; aun así,
-     * un script de otro dominio, un {@code <object>}, un {@code <base>} o enmarcar la web en otra quedan bloqueados.
+     * OpenStreetMap. Los scripts, solo los .js de la propia web: las plantillas no llevan {@code <script>} en línea ni
+     * atributos {@code on...=} (los datos que necesita una página van en un bloque JSON, que no se ejecuta, o en
+     * atributos {@code data-}), así que un HTML inyectado no puede ejecutar nada. Lo comprueba InlineScriptsTests.
+     * Un script de otro dominio, un {@code <object>}, un {@code <base>} o enmarcar la web en otra también quedan
+     * bloqueados.
      * Los estilos, solo de los .css: las plantillas no llevan {@code style=""} ni {@code <style>} (lo que depende de
      * los datos va con clases como pct-N), así que un HTML inyectado no puede cambiar el aspecto de la página.
      * Lo que el JS pone con {@code element.style} (agenda, hojas, Leaflet) no lo frena la CSP.
@@ -209,7 +213,8 @@ public class SecurityConfig {
     static String contentSecurityPolicy(boolean h2ConsoleEnabled) {
         return String.join("; ",
                 "default-src 'self'",
-                "script-src 'self' 'unsafe-inline'",
+                // La consola H2 (solo con el perfil dev) sí usa scripts en línea
+                "script-src 'self'" + (h2ConsoleEnabled ? " 'unsafe-inline'" : ""),
                 // La consola H2 (solo con el perfil dev) sí usa estilos en línea
                 "style-src 'self'" + (h2ConsoleEnabled ? " 'unsafe-inline'" : ""),
                 "img-src 'self' data: blob: https://tile.openstreetmap.org",

@@ -296,18 +296,24 @@ public class WorkerCenterController {
                          RedirectAttributes redirect) {
         // Los avisos van dentro de la tarjeta del equipo (#equipo)
         try {
+            if (!published(worker) && team.isWorkerWithoutTeam(email)) {
+                // Un centro sin publicar no envía correos a nadie salvo a su responsable
+                throw new BusinessRuleException("Ese correo ya tiene cuenta en Cuquora: podrás invitarle a tu equipo en cuanto publiquemos tu centro.");
+            }
             Invitee invitee = team.invite(worker.getCenterId(), worker.getId(), name, email);
-            if (invitee.token() != null && !published(worker)) {
+            if (invitee.joinInvitation()) {
+                // Ya tenía cuenta: entra cuando acepte desde su correo (nadie entra en un equipo sin quererlo)
+                onboardingMail.sendTeamInvitationAsync(invitee.name(), invitee.email(), invitee.centerName(), invitee.token(), site.siteUrl());
+                redirect.addFlashAttribute("teamMessage", invitee.name() + " ya tenía cuenta en Cuquora. Le hemos enviado una invitación a "
+                        + invitee.email() + ": entrará en tu equipo cuando la acepte.");
+            } else if (!published(worker)) {
                 // Un centro sin publicar no envía correos: la invitación sale al publicarlo (TeamService.invitationsOnPublish)
                 redirect.addFlashAttribute("teamMessage", invitee.name() + " ya está en tu equipo. Le enviaremos la invitación a "
                         + invitee.email() + " en cuanto publiquemos tu centro.");
-            } else if (invitee.token() != null) {
+            } else {
                 onboardingMail.sendInvitationAsync(invitee.name(), invitee.email(), invitee.centerName(), invitee.token(), site.siteUrl());
                 redirect.addFlashAttribute("teamMessage", "Invitación enviada a " + invitee.email()
                         + ". " + invitee.name() + " entrará en cuanto cree su contraseña.");
-            } else {
-                redirect.addFlashAttribute("teamMessage", invitee.name()
-                        + " ya tenía cuenta en Cuquora: desde ahora entra en tu centro con su correo y su contraseña.");
             }
         } catch (BusinessRuleException e) {
             redirect.addFlashAttribute("teamError", e.getMessage());

@@ -4,6 +4,7 @@ import com.alexxlpz.crm_cbelleza.entities.LoyaltyMode;
 import com.alexxlpz.crm_cbelleza.forms.CenterRegistrationForm;
 import com.alexxlpz.crm_cbelleza.forms.PhoneNumbers;
 import com.alexxlpz.crm_cbelleza.forms.TaxIds;
+import com.alexxlpz.crm_cbelleza.services.CenterRegistrationService;
 import com.alexxlpz.crm_cbelleza.services.CenterRegistrationService.Invitee;
 import com.alexxlpz.crm_cbelleza.services.CenterRegistrationService.Registration;
 import com.alexxlpz.crm_cbelleza.services.InvitationService;
@@ -75,6 +76,32 @@ public class CenterOnboardingMailService {
                         "validityDays", InvitationService.VALIDITY_DAYS))));
         // El resto del equipo recibe su invitación al publicar el centro (CenterRegistrationController.approve): el alta
         // es pública y, si no, serviría para mandar correos de Cuquora con el texto que se quiera a cualquier dirección.
+    }
+
+    /**
+     * Invitación a unirse a un equipo para quien ya tiene cuenta de trabajador sin centro: entra cuando la acepta
+     * (también la que se pide de nuevo cuando caduca).
+     */
+    @Async
+    public void sendTeamInvitationAsync(String name, String email, String centerName, String token, String siteUrl) {
+        sendSafely(new EmailMessage(email, null, null,
+                centerName + " te invita a su equipo - Cuquora",
+                render("email/team-invitation", Map.of(
+                        "name", name,
+                        "centerName", centerName,
+                        "invitationUrl", invitationUrl(siteUrl, token),
+                        "validityDays", InvitationService.VALIDITY_DAYS))));
+    }
+
+    /** Enlace nuevo para revisar un centro cuyo enlace de «Publicar» caducó: siempre a administración, nunca a otro. */
+    @Async
+    public void sendApprovalRenewed(String centerName, String approvalToken, String siteUrl) {
+        sendSafely(new EmailMessage(adminEmail, null, null,
+                "Nuevo enlace para revisar: " + centerName,
+                render("email/center-approval-renewed", Map.of(
+                        "centerName", centerName,
+                        "publishUrl", siteUrl + "/register-center/approve/" + approvalToken,
+                        "validityDays", CenterRegistrationService.APPROVAL_VALIDITY_DAYS))));
     }
 
     /** Invitación de un trabajador (también la que se pide de nuevo cuando caduca). */

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{email/layout :: layout(${centerName} + ' sigue pendiente', 'Nuevo enlace para revisar el centro', ~{::content})}">
+<body>
+<th:block th:fragment="content">
+    <p style="font-size:15px; color:#5c5550; line-height:1.6; margin:0 0 16px;">
+        El enlace para publicar <strong th:text="${centerName}">Centro</strong> había caducado. Este es el nuevo: revisa los
+        datos y publícalo o recházalo desde ahí.
+    </p>
+    <p style="margin:0 0 20px;">
+        <a th:href="${publishUrl}" style="display:inline-block; padding:12px 22px; background:#8a6a45; color:#ffffff; text-decoration:none; border-radius:10px; font-weight:700; font-size:14px;">Revisar el centro</a>
+    </p>
+    <p style="font-size:13px; color:#857b74; margin:0;">
+        Vale <span th:text="${validityDays}">30</span> días. El enlace anterior ya no sirve.
+    </p>
+</th:block>
+</body>
+</html>

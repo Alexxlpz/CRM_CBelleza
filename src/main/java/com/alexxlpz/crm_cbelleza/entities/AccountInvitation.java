@@ -5,7 +5,10 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
-/** Enlace de un solo uso para que un trabajador dado de alta con su centro ponga su contraseña. */
+/**
+ * Enlace de un solo uso para que un trabajador dado de alta con su centro ponga su contraseña, o para que alguien que
+ * ya tenía cuenta de trabajador sin centro acepte unirse a un equipo ({@link #center}).
+ */
 @Entity
 @Table(name = "account_invitations")
 @Getter
@@ -36,6 +39,15 @@ public class AccountInvitation {
     /** Cuándo se puso la contraseña; un enlace usado ya no vale. */
     @Column(name = "used_at")
     private LocalDateTime usedAt;
+
+    /** Equipo al que se le invita a unirse; nulo en las invitaciones para crear la contraseña de quien ya está en él. */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "center_id")
+    private Center center;
+
+    public boolean isTeamInvitation() {
+        return center != null;
+    }
 
     public boolean isUsable(LocalDateTime now) {
         return usedAt == null && now.isBefore(expiresAt);

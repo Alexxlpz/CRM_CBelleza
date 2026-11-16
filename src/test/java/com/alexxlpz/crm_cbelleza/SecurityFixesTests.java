@@ -90,6 +90,9 @@ class SecurityFixesTests {
                 .andExpect(header().string("Content-Security-Policy", containsString("frame-ancestors")))
                 // Estilos solo de los .css: sin 'unsafe-inline' fuera de la consola H2
                 .andExpect(header().string("Content-Security-Policy", containsString("style-src 'self';")))
+                // Ni scripts en línea: solo los .js de la propia web
+                .andExpect(header().string("Content-Security-Policy", containsString("script-src 'self';")))
+                .andExpect(header().string("Content-Security-Policy", org.hamcrest.Matchers.not(containsString("unsafe-inline"))))
                 .andExpect(header().string("Referrer-Policy", "strict-origin-when-cross-origin"))
                 .andExpect(header().string("Permissions-Policy", containsString("camera=(self)")))
                 .andExpect(content().string(containsString("/vendor/leaflet/leaflet.js")))

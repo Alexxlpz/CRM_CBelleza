@@ -11,6 +11,7 @@ import com.alexxlpz.crm_cbelleza.repositories.PasswordResetRepository;
 import com.alexxlpz.crm_cbelleza.repositories.UserRepository;
 import com.alexxlpz.crm_cbelleza.security.AppUserDetails;
 import com.alexxlpz.crm_cbelleza.security.LoginAttemptService;
+import com.alexxlpz.crm_cbelleza.security.PasswordChangeSessions;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 import org.springframework.stereotype.Service;
@@ -41,11 +42,13 @@ public class PasswordResetService {
     private final PasswordEncoder passwordEncoder;
     private final PersistentTokenRepository rememberMeTokens;
     private final LoginAttemptService loginAttempts;
+    private final PasswordChangeSessions passwordChangeSessions;
     private final Clock clock;
 
     public PasswordResetService(PasswordResetRepository resets, UserRepository users, InvitationService invitations,
                                 PasswordPolicy passwordPolicy, PasswordEncoder passwordEncoder,
-                                PersistentTokenRepository rememberMeTokens, LoginAttemptService loginAttempts, Clock clock) {
+                                PersistentTokenRepository rememberMeTokens, LoginAttemptService loginAttempts,
+                                PasswordChangeSessions passwordChangeSessions, Clock clock) {
         this.resets = resets;
         this.users = users;
         this.invitations = invitations;
@@ -53,6 +56,7 @@ public class PasswordResetService {
         this.passwordEncoder = passwordEncoder;
         this.rememberMeTokens = rememberMeTokens;
         this.loginAttempts = loginAttempts;
+        this.passwordChangeSessions = passwordChangeSessions;
         this.clock = clock;
     }
 
@@ -132,6 +136,8 @@ public class PasswordResetService {
         reset.setUsedAt(now);
         expirePending(user, now);
         rememberMeTokens.removeUserTokens(AppUserDetails.usernameOf(user));
+        // Quien tuviera la sesión abierta en otro navegador sale; aquí se entra después con la contraseña nueva
+        passwordChangeSessions.endOtherSessions(user.getId());
         loginAttempts.recordSuccess(user.getEmail());
         return users.save(user);
     }

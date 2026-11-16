@@ -62,12 +62,13 @@ public class NotificationService {
             return List.of();
         }
         // «Hoy» y «mañana» en la hora local del centro, la misma en la que se guardan sus citas
-        LocalDate today = CenterClock.now(clock, centerRepository.findById(centerId).orElse(null)).toLocalDate();
+        LocalDateTime now = CenterClock.now(clock, centerRepository.findById(centerId).orElse(null));
+        LocalDate today = now.toLocalDate();
         List<NotificationItem> notifications = new ArrayList<>(stockAlerts(centerId));
         List<Appointment> appointments = appointmentRepository.findByCenterIdOrderByDateTimeDesc(centerId);
         notifications.addAll(clientResponseAlerts(appointments));
         notifications.addAll(reviewAlerts(centerId));
-        notifications.addAll(appointmentAlerts(appointments, today));
+        notifications.addAll(appointmentAlerts(appointments, now));
         pendingCardsAlert(centerId, appointments, today).ifPresent(notifications::add);
         return notifications;
     }
@@ -85,10 +86,12 @@ public class NotificationService {
         return alerts;
     }
 
-    private List<NotificationItem> appointmentAlerts(List<Appointment> appointments, LocalDate today) {
+    private List<NotificationItem> appointmentAlerts(List<Appointment> appointments, LocalDateTime now) {
+        LocalDate today = now.toLocalDate();
         LocalDate tomorrow = today.plusDays(1);
+        // Solo las que aún se pueden contestar: una solicitud cuya hora ya pasó no se puede aceptar (como en «Por aprobar»)
         List<Appointment> pending = appointments.stream()
-                .filter(a -> a.getStatus() == AppointmentStatus.PENDING)
+                .filter(a -> a.getStatus() == AppointmentStatus.PENDING && a.getDateTime().isAfter(now))
                 .toList();
         long todayCount = countConfirmedOn(appointments, today);
         long tomorrowCount = countConfirmedOn(appointments, tomorrow);

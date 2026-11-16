@@ -124,7 +124,7 @@
                         <button type="button" class="btn-adjust btn-decrement" th:data-id="${item.id}" data-change="-1"
                                 th:disabled="${item.stock == 0}" th:aria-label="'Restar una unidad de ' + ${item.product.name}">-1</button>
                         <button type="button" class="btn-adjust btn-increment" th:data-id="${item.id}" data-change="1"
-                                th:aria-label="'Sumar una unidad de ' + ${item.product.name}">+1</button>
+                                th:disabled="${item.stock >= maxStock}" th:aria-label="'Sumar una unidad de ' + ${item.product.name}">+1</button>
                     </div>
                     <span class="badge badge-pill badge-micro stock-badge"
                           th:classappend="${item.stock == 0 ? 'badge-rejected' : (item.stock <= 3 ? 'badge-pending' : 'badge-confirmed')}"
@@ -150,87 +150,6 @@
 
     <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Panel de gestión de centros.')}"></div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            /* ---- Filtro por categoría ---- */
-            document.querySelectorAll('[data-category-filter]').forEach(button => {
-                button.addEventListener('click', () => {
-                    const category = button.dataset.categoryFilter;
-                    document.querySelectorAll('[data-category-filter]').forEach(b => {
-                        b.classList.toggle('active', b === button);
-                        b.setAttribute('aria-pressed', String(b === button));
-                    });
-                    document.querySelectorAll('#inventoryGrid .inventory-card').forEach(card => {
-                        card.hidden = category !== 'ALL' && card.dataset.category !== category;
-                    });
-                });
-            });
-
-            /* ---- Alta: catálogo existente o producto nuevo ---- */
-            const modeInput = document.getElementById('input-mode');
-            const productSelect = document.getElementById('productId');
-            const newRequired = [document.getElementById('name'), document.getElementById('price')];
-            function applyMode(mode) {
-                modeInput.value = mode;
-                productSelect.required = mode === 'existing';
-                newRequired.forEach(input => { input.required = mode === 'new'; });
-            }
-            const tablist = document.getElementById('addModeTabs');
-            tablist.addEventListener('tabchange', e => applyMode(e.detail.tab.dataset.mode));
-            applyMode(tablist.querySelector('[aria-selected="true"]')?.dataset.mode || 'existing');
-
-            /* ---- Ajuste rápido de stock ---- */
-            function stockBadge(badge, stock, lowThreshold) {
-                badge.classList.remove('badge-rejected', 'badge-pending', 'badge-confirmed');
-                if (stock === 0) { badge.classList.add('badge-rejected'); badge.textContent = 'Agotado'; }
-                else if (stock <= lowThreshold) { badge.classList.add('badge-pending'); badge.textContent = 'Bajo Stock'; }
-                else { badge.classList.add('badge-confirmed'); badge.textContent = 'Normal'; }
-            }
-
-            /* Resumen superior: se recalcula con el stock visible en las tarjetas */
-            function updateStats(lowThreshold) {
-                const stocks = [...document.querySelectorAll('#inventoryGrid .stock-count-val')].map(el => Number(el.textContent));
-                const set = (name, value) => {
-                    const el = document.querySelector(`[data-stat="${name}"]`);
-                    if (el) el.textContent = value;
-                };
-                set('units', stocks.reduce((total, stock) => total + stock, 0));
-                set('low', stocks.filter(stock => stock > 0 && stock <= lowThreshold).length);
-                set('out', stocks.filter(stock => stock === 0).length);
-            }
-
-            document.querySelectorAll('.btn-adjust').forEach(button => {
-                button.addEventListener('click', async () => {
-                    const card = button.closest('.inventory-card');
-                    const stockValue = card.querySelector('.stock-count-val');
-                    const decrement = card.querySelector('.btn-decrement');
-                    card.querySelectorAll('.btn-adjust').forEach(b => { b.disabled = true; });
-                    try {
-                        const response = await fetch(`/worker/inventory/${encodeURIComponent(button.dataset.id)}/adjust-stock`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                            body: new URLSearchParams({ change: button.dataset.change })
-                        });
-                        if (!response.ok) {
-                            throw new Error(await Cuquora.errorMessage(response, 'No se ha podido actualizar el stock.'));
-                        }
-                        const { stock, lowStockThreshold } = await response.json();
-                        stockValue.textContent = stock;
-                        stockValue.classList.remove('pulsing');
-                        void stockValue.offsetWidth;
-                        stockValue.classList.add('pulsing');
-                        stockBadge(card.querySelector('.stock-badge'), stock, lowStockThreshold);
-                        updateStats(lowStockThreshold);
-                        card.querySelector('.btn-increment').disabled = false;
-                        decrement.disabled = stock === 0;
-                    } catch (err) {
-                        card.querySelectorAll('.btn-adjust').forEach(b => { b.disabled = false; });
-                        decrement.disabled = Number(stockValue.textContent) === 0;
-                        Cuquora.alert(err.message || 'Error de conexión al actualizar el stock.', 'No se ha podido actualizar el stock');
-                    }
-                });
-            });
-        });
-    </script>
+    <script th:src="@{/js/pages/inventory.js}" defer></script>
 </body>
 </html>

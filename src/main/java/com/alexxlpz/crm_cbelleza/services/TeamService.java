@@ -25,6 +25,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -85,7 +86,8 @@ public class TeamService {
 
     /**
      * Añade a alguien al equipo y le prepara la invitación para que cree su contraseña.
-     * Si ese correo ya era de un trabajador que dejó otro centro, se le vuelve a dar de alta con su cuenta.
+     * Si ese correo ya era de un trabajador que dejó otro centro, no entra todavía: recibe una invitación para unirse
+     * y entra cuando la acepta (InvitationService.join). Nadie entra en un equipo sin quererlo.
      */
     public Invitee invite(Long centerId, Long ownerId, String name, String email) {
         Center center = ownedCenter(centerId, ownerId);
@@ -103,17 +105,27 @@ public class TeamService {
         if (users.countByCenterIdAndRole(centerId, Role.WORKER) >= MAX_TEAM_SIZE) {
             throw new BusinessRuleException("Tu equipo ya tiene " + MAX_TEAM_SIZE + " personas, el máximo. Escríbenos desde Contacto si necesitas más.");
         }
-        User worker = users.findByEmailIgnoreCase(cleanEmail)
-                .map(existing -> rejoin(existing, center))
-                .orElseGet(() -> users.save(User.builder()
+        Optional<User> existing = users.findByEmailIgnoreCase(cleanEmail);
+        if (existing.isPresent()) {
+            User former = checkCanJoin(existing.get(), center);
+            return new Invitee(former.getName(), former.getEmail(), center.getName(),
+                    invitations.inviteToTeam(former, center), true);
+        }
+        User worker = users.save(User.builder()
                         .name(cleanName)
                         .email(cleanEmail)
                         .role(Role.WORKER)
                         .center(center)
-                        .build()));
-        // Quien ya tenía cuenta entra con ella: no hace falta enlace para crear contraseña
-        String token = worker.hasAccount() ? null : invitations.invite(worker);
-        return new Invitee(worker.getName(), worker.getEmail(), center.getName(), token);
+                        .build());
+        return new Invitee(worker.getName(), worker.getEmail(), center.getName(), invitations.invite(worker), false);
+    }
+
+    /** ¿Es el correo de un trabajador con cuenta que no está en ningún equipo? (Solo se le puede invitar a unirse.) */
+    @Transactional(readOnly = true)
+    public boolean isWorkerWithoutTeam(String email) {
+        return !FormText.isBlank(email) && users.findByEmailIgnoreCase(email.trim())
+                .filter(user -> user.getRole() == Role.WORKER && user.getCenter() == null)
+                .isPresent();
     }
 
     /** Un enlace nuevo para quien todavía no ha creado su contraseña; el anterior deja de valer. */
@@ -124,7 +136,7 @@ public class TeamService {
             throw new BusinessRuleException(worker.getName() + " ya ha activado su cuenta: puede entrar con su correo.");
         }
         expireInvitations(worker.getId());
-        return new Invitee(worker.getName(), worker.getEmail(), center.getName(), invitations.invite(worker));
+        return new Invitee(worker.getName(), worker.getEmail(), center.getName(), invitations.invite(worker), false);
     }
 
     /**
@@ -139,7 +151,7 @@ public class TeamService {
                 .filter(worker -> !worker.hasAccount() && !center.isOwnedBy(worker.getId()))
                 .map(worker -> {
                     expireInvitations(worker.getId());
-                    return new Invitee(worker.getName(), worker.getEmail(), center.getName(), invitations.invite(worker));
+                    return new Invitee(worker.getName(), worker.getEmail(), center.getName(), invitations.invite(worker), false);
                 })
                 .toList();
     }
@@ -166,7 +178,8 @@ public class TeamService {
         return users.save(worker);
     }
 
-    private User rejoin(User existing, Center center) {
+    /** Quien ya tiene cuenta solo puede unirse si es trabajador y no está en ningún equipo. */
+    private User checkCanJoin(User existing, Center center) {
         if (existing.getRole() == Role.WORKER && existing.getCenter() != null && existing.getCenter().getId().equals(center.getId())) {
             throw new BusinessRuleException(existing.getName() + " ya está en tu equipo.");
         }
@@ -174,8 +187,7 @@ public class TeamService {
             throw new BusinessRuleException("El correo " + existing.getEmail() + " ya tiene una cuenta en Cuquora de cliente o de otro centro. "
                     + "Pídele que use otro correo para trabajar en tu centro.");
         }
-        existing.setCenter(center);
-        return users.save(existing);
+        return existing;
     }
 
     private Center ownedCenter(Long centerId, Long ownerId) {
@@ -233,6 +245,7 @@ public class TeamService {
     }
 
     /** Datos para enviar la invitación por correo; {@code token} es nulo si ya tenía cuenta. */
-    public record Invitee(String name, String email, String centerName, String token) {
+    /** joinInvitation: ya tenía cuenta y se le invita a unirse; no está en el equipo hasta que acepte. */
+    public record Invitee(String name, String email, String centerName, String token, boolean joinInvitation) {
     }
 }

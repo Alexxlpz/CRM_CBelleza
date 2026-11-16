@@ -6,6 +6,7 @@ import com.alexxlpz.crm_cbelleza.entities.Center;
 import com.alexxlpz.crm_cbelleza.entities.LoyaltyMode;
 import com.alexxlpz.crm_cbelleza.entities.Role;
 import com.alexxlpz.crm_cbelleza.entities.User;
+import com.alexxlpz.crm_cbelleza.exceptions.ApprovalLinkExpiredException;
 import com.alexxlpz.crm_cbelleza.exceptions.BusinessRuleException;
 import com.alexxlpz.crm_cbelleza.exceptions.ResourceNotFoundException;
 import com.alexxlpz.crm_cbelleza.forms.CenterRegistrationForm;
@@ -42,6 +43,8 @@ public class CenterRegistrationService {
 
     /** Trabajadores que se pueden añadir en el alta además del responsable. */
     public static final int MAX_EXTRA_WORKERS = 20;
+    /** Días que vale el enlace «Publicar centro» del correo a administración; después hay que pedir otro. */
+    public static final int APPROVAL_VALIDITY_DAYS = 30;
 
     static final int MAX_CENTER_NAME = 120;
     static final int MAX_PERSON_NAME = 100;
@@ -149,6 +152,7 @@ public class CenterRegistrationService {
                 .cabins(cabins)
                 .published(false)
                 .approvalTokenHash(SecureTokens.hash(approvalToken))
+                .approvalRequestedAt(now)
                 .registeredAt(now)
                 .build());
         // El enlace corto se fija ya: si se calculase al vuelo, otro centro podría quitárselo (CenterService.shortSlug)
@@ -183,6 +187,23 @@ public class CenterRegistrationService {
     @Transactional(readOnly = true)
     public Center pendingCenter(String approvalToken) {
         return findByApprovalToken(approvalToken);
+    }
+
+    /**
+     * Cambia un enlace caducado por otro nuevo, que vale otros {@value #APPROVAL_VALIDITY_DAYS} días. Devuelve el nombre
+     * del centro y el enlace; el correo va siempre a administración (CRM_ADMIN_EMAIL), nunca a quien lo pide.
+     * El enlace viejo deja de valer, así que cada enlace caducado solo sirve para pedir uno nuevo una vez.
+     */
+    public ApprovalRenewal renewApproval(String expiredToken) {
+        Center center = findByToken(expiredToken);
+        if (!isExpired(center)) {
+            throw new BusinessRuleException("Este enlace todavía vale: no hace falta pedir otro.");
+        }
+        String token = SecureTokens.newToken();
+        center.setApprovalTokenHash(SecureTokens.hash(token));
+        center.setApprovalRequestedAt(LocalDateTime.now(clock));
+        centers.save(center);
+        return new ApprovalRenewal(center.getName(), token);
     }
 
     /** Publica el centro: sale en el buscador y el mapa y admite reservas. El enlace deja de valer. */
@@ -239,7 +260,21 @@ public class CenterRegistrationService {
         return name;
     }
 
+    /** El centro del enlace, si todavía vale (caduca a los {@value #APPROVAL_VALIDITY_DAYS} días de enviarse). */
     private Center findByApprovalToken(String token) {
+        Center center = findByToken(token);
+        if (isExpired(center)) {
+            throw new ApprovalLinkExpiredException(center.getName());
+        }
+        return center;
+    }
+
+    private boolean isExpired(Center center) {
+        LocalDateTime sentAt = center.getApprovalRequestedAt() != null ? center.getApprovalRequestedAt() : center.getRegisteredAt();
+        return sentAt != null && !LocalDateTime.now(clock).isBefore(sentAt.plusDays(APPROVAL_VALIDITY_DAYS));
+    }
+
+    private Center findByToken(String token) {
         if (token == null || token.isBlank()) {
             throw new ResourceNotFoundException("El enlace no es válido o el centro ya está publicado.");
         }
@@ -299,6 +334,10 @@ public class CenterRegistrationService {
         return latitude != null && longitude != null
                 && latitude >= -90 && latitude <= 90 && longitude >= -180 && longitude <= 180
                 && !(latitude == 0 && longitude == 0);
+    }
+
+    /** Enlace nuevo para revisar un centro (el anterior había caducado). */
+    public record ApprovalRenewal(String centerName, String approvalToken) {
     }
 
     /** Resultado del alta: lo necesario para los correos (enlaces en claro, que no se guardan). */

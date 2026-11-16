@@ -51,13 +51,17 @@ public class DashboardService {
 
     /** Contadores del panel; «hoy» y «mañana» son los de la hora local del centro. */
     public DashboardStats statsFor(Long centerId) {
-        LocalDate today = CenterClock.now(clock, centerRepository.findById(centerId).orElse(null)).toLocalDate();
+        LocalDateTime now = CenterClock.now(clock, centerRepository.findById(centerId).orElse(null));
+        LocalDate today = now.toLocalDate();
         LocalDate tomorrow = today.plusDays(1);
         List<Appointment> appointments = appointmentRepository.findByCenterIdOrderByDateTimeDesc(centerId);
 
         int todayCount = countAttendedOn(appointments, today);
         int tomorrowCount = countAttendedOn(appointments, tomorrow);
-        int pending = (int) appointments.stream().filter(a -> a.getStatus() == AppointmentStatus.PENDING).count();
+        // Las mismas que salen en «Por aprobar»: una solicitud cuya hora ya pasó no se puede aceptar
+        int pending = (int) appointments.stream()
+                .filter(a -> a.getStatus() == AppointmentStatus.PENDING && a.getDateTime().isAfter(now))
+                .count();
         int lowStock = (int) inventoryRepository.findByCenterId(centerId).stream()
                 .filter(item -> item.getStock() <= InventoryService.LOW_STOCK_THRESHOLD)
                 .count();
@@ -82,6 +86,8 @@ public class DashboardService {
         List<Appointment> todays = appointments.stream()
                 .filter(a -> a.getDateTime().toLocalDate().isEqual(today))
                 .filter(a -> TODAY_LIST.contains(a.getStatus()))
+                // Una solicitud de esta mañana que nadie contestó ya no se puede aceptar: no sale en «Hoy»
+                .filter(a -> a.getStatus() != AppointmentStatus.PENDING || a.getDateTime().isAfter(now))
                 .sorted(Comparator.comparing(Appointment::getDateTime))
                 .toList();
         Long nextId = todays.stream()

@@ -168,14 +168,14 @@ class WorkerPanelTests {
         mvc.perform(get("/worker/calendar").param("nuevaCita", sofia.toString())
                         .with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("CALENDAR_NEW_FOR = {\"id\":" + sofia + ",")));
+                .andExpect(content().string(containsString("\"newFor\":{\"id\":" + sofia + ",")));
 
         User stranger = newClient();
         save(stranger, worker(TestUsers.WORKER_CENTER_2), todayAt(10, 0).minusDays(3), AppointmentStatus.COMPLETED);
         mvc.perform(get("/worker/calendar").param("nuevaCita", stranger.getId().toString())
                         .with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("CALENDAR_NEW_FOR = null")))
+                .andExpect(content().string(containsString("\"newFor\":null")))
                 .andExpect(content().string(not(containsString(stranger.getName()))));
     }
 

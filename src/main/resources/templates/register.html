@@ -99,17 +99,6 @@
 
     <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Software de gestión para centros de estética.')}"></div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const V = Cuquora.validators;
-            Cuquora.validateForm(document.getElementById('registerForm'), {
-                name: [V.required('Por favor, introduce tu nombre y apellidos.'), V.minLength(2, 'El nombre debe tener al menos 2 caracteres.')],
-                email: [V.required('Por favor, introduce tu correo electrónico.'), V.email()],
-                phone: [V.phoneNumber()],
-                password: [V.required('Por favor, introduce una contraseña.'), V.minLength(8, 'La contraseña debe tener al menos 8 caracteres.')],
-                confirmPassword: [V.required('Por favor, confirma tu contraseña.'), V.sameAs('password', 'Las contraseñas no coinciden. Por favor, revísalas.')]
-            });
-        });
-    </script>
+    <script th:src="@{/js/pages/register.js}" defer></script>
 </body>
 </html>

@@ -141,23 +141,6 @@
 
     <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Panel de gestión de centros.')}"></div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            /* ---- Filtro por categoría ---- */
-            document.querySelectorAll('[data-category-filter]').forEach(button => {
-                button.addEventListener('click', () => {
-                    const category = button.dataset.categoryFilter;
-                    document.querySelectorAll('[data-category-filter]').forEach(b => {
-                        b.classList.toggle('active', b === button);
-                        b.setAttribute('aria-pressed', String(b === button));
-                    });
-                    document.querySelectorAll('#treatmentsList .treatment-item-card').forEach(card => {
-                        const matches = category === 'OFFER' ? card.dataset.offer === 'true' : card.dataset.category === category;
-                        card.hidden = category !== 'ALL' && !matches;
-                    });
-                });
-            });
-        });
-    </script>
+    <script th:src="@{/js/pages/treatments.js}" defer></script>
 </body>
 </html>

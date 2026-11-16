@@ -194,6 +194,8 @@ public class BookingService {
         if (problem != null) {
             throw new BusinessRuleException("Esa hora ya no está disponible. Elige otra de la propuesta.");
         }
+        // Igual que al reservar: la clienta no puede quedarse con dos citas a la vez (en este centro o en otro)
+        ensureClientIsFree(clientId, center, chosen.getDateTime(), duration(appointment), appointment.getId());
         appointment.setDateTime(chosen.getDateTime());
         appointment.setStatus(AppointmentStatus.CONFIRMED);
         clearProposal(appointment);
@@ -364,6 +366,7 @@ public class BookingService {
         if (!appointment.getStatus().isOpen()) {
             throw new BusinessRuleException("Esta cita ya no está pendiente.");
         }
+        ensureNotPast(appointment, center);
         User worker = workerOfCenter(centerId, workerId != null ? workerId
                 : appointment.getWorker() != null ? appointment.getWorker().getId() : approverId);
         AgendaSnapshot agenda = availability.snapshot(center, appointment.getDateTime(), appointment.getDateTime().plusDays(1));
@@ -402,6 +405,10 @@ public class BookingService {
         Appointment appointment = findInCenter(centerId, appointmentId);
         if (!appointment.getStatus().isOpen()) {
             throw new BusinessRuleException("Solo se pueden proponer horas para solicitudes pendientes.");
+        }
+        if (appointment.getStatus() == AppointmentStatus.PENDING) {
+            // Una propuesta abierta sí se puede cambiar aunque ya haya pasado la hora que pidió el cliente
+            ensureNotPast(appointment, center);
         }
         List<LocalDateTime> times = (dateTimes == null ? List.<String>of() : dateTimes).stream()
                 .filter(value -> !FormText.isBlank(value))
@@ -699,6 +706,17 @@ public class BookingService {
         }
         return userRepository.findByIdAndCenterIdAndRole(workerId, centerId, Role.WORKER)
                 .orElseThrow(() -> new ResourceNotFoundException("Ese profesional no es de tu centro."));
+    }
+
+    /**
+     * Una solicitud cuya hora ya pasó sin respuesta no se acepta ni se le proponen horas (en la agenda sale como
+     * «Sin respuesta»): si el cliente sigue interesado, se le pone una cita nueva.
+     */
+    private void ensureNotPast(Appointment appointment, Center center) {
+        if (!appointment.getDateTime().isAfter(CenterClock.now(clock, center))) {
+            throw new BusinessRuleException("La hora de esta solicitud ya ha pasado y no se puede aceptar. "
+                    + "Si el cliente sigue interesado, ponle una cita nueva.");
+        }
     }
 
     private static void ensureFits(AgendaSnapshot agenda, AgendaSnapshot.Request request) {

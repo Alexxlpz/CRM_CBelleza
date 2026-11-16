@@ -91,7 +91,7 @@ public class ProductSaleService {
         clientCards.requireClientOfCenter(centerId, clientId);
         ProductSale sale = sales.findByIdAndCenterIdAndClientId(saleId, centerId, clientId)
                 .orElseThrow(() -> new ResourceNotFoundException("La venta no existe."));
-        Inventory item = inventories.findByCenterIdAndProductId(centerId, sale.getProduct().getId())
+        Inventory item = inventories.findByCenterAndProductForUpdate(centerId, sale.getProduct().getId())
                 .orElseGet(() -> Inventory.builder()
                         .center(sale.getCenter())
                         .product(sale.getProduct())

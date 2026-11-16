@@ -1,0 +1,390 @@
+// Buscador de centros: filtros, búsqueda avanzada, mapa y carga infinita.
+// Va en un fichero aparte (no dentro de la plantilla) para que la CSP no tenga que permitir scripts en línea.
+// Rol de quien mira (null sin sesión): lo pone el servidor en data-session-role del listado
+const currentSessionRole = document.getElementById('centersGrid').dataset.sessionRole || null;
+
+document.addEventListener('DOMContentLoaded', () => {
+    const esc = Cuquora.escapeHtml;
+    const PAGE_SIZE = 10;
+
+    const centersGrid = document.getElementById('centersGrid');
+    const trigger = document.getElementById('infiniteScrollTrigger');
+    const mapContainer = document.getElementById('mapContainer');
+    const btnMapToggle = document.getElementById('btnMapToggle');
+    const btnAdvSearch = document.getElementById('btnAdvSearch');
+    const advancedPanel = document.getElementById('advancedSearchPanel');
+    const treatmentBadge = document.getElementById('treatmentBadge');
+    const searchName = document.getElementById('searchName');
+    const searchTreatment = document.getElementById('searchTreatment');
+    const btnOffers = document.getElementById('btnOffers');
+    let onlyOffers = false;
+    const btnOpenNow = document.getElementById('btnOpenNow');
+    let onlyOpen = false;
+    const btnTopRated = document.getElementById('btnTopRated');
+    let onlyTopRated = false;
+
+    let userLat = null;
+    let userLon = null;
+    let currentPage = 0;
+    let isLoading = false;
+    let hasMore = true;
+    let isMapView = false;
+    let map = null;
+    let mapMarkers = new Map();
+    let firstLoadDone = false;
+
+    /* ---- Acceso a un centro ---- */
+    /*
+     * Acceso a la ficha de un centro (/client/centers/{nombre}):
+     *  - Trabajador: no puede consultar otros centros → aviso y no se navega.
+     *  - Sin sesión: se navega igualmente; el servidor redirige al inicio de sesión
+     *    y, tras entrar, devuelve al usuario al centro que eligió.
+     *  - Cliente: navega directamente.
+     */
+    const centerUrl = center => `/client/centers/${encodeURIComponent(center.slug)}`;
+
+    async function showWorkerRestriction() {
+        const goToPanel = await Cuquora.confirm(
+            'Has iniciado sesión como trabajador y un trabajador no puede consultar otros centros. Para reservar una cita, entra con una cuenta de cliente.',
+            { title: 'Acceso no disponible', confirmText: 'Ir a mi panel', cancelText: 'Entendido', tone: 'default' });
+        if (goToPanel) window.location.href = '/worker/dashboard';
+    }
+
+    /** Botón «Ver tratamientos» del globo del mapa: sin sesión se avisa antes de mandar al inicio de sesión. */
+    async function openCenterFromMap(center) {
+        if (currentSessionRole === 'WORKER') {
+            showWorkerRestriction();
+            return;
+        }
+        if (!currentSessionRole) {
+            const goToLogin = await Cuquora.confirm(
+                'Para ver los tratamientos y reservar en ' + center.name + ' tienes que iniciar sesión. Después volverás directamente a este centro.',
+                { title: 'Inicia sesión para continuar', confirmText: 'Iniciar sesión', cancelText: 'Ahora no', tone: 'default' });
+            if (!goToLogin) return;
+        }
+        window.location.href = centerUrl(center);
+    }
+
+    const offersLabel = count => count === 1 ? '1 tratamiento en oferta' : `${count} tratamientos en oferta`;
+
+    /** Una sola línea aunque el centro tenga muchas ofertas; el detalle se ve en la ficha del centro. */
+    function offersBlock(offers) {
+        if (!offers.length) return '';
+        const best = Math.max(...offers.map(o => o.discountPercent));
+        return `
+            <p class="center-offers">
+                <i class="lucide-tag" aria-hidden="true"></i>
+                <span class="center-offers-label">${offersLabel(offers.length)}</span>
+                <strong class="center-offer-discount">${offers.length === 1 ? '' : 'hasta '}-${best} %</strong>
+            </p>`;
+    }
+
+    /** Estrellas de las reseñas verificadas («★★★★½ 4,7 · 23 reseñas»); sin reseñas, vacías y «Sin valoraciones». */
+    function ratingBlock(center, className) {
+        if (!center.reviewCount) {
+            return `
+            <p class="${className} center-rating--empty" aria-label="Sin valoraciones todavía">
+                <span class="stars stars--h0" aria-hidden="true"><span class="stars-fill"></span></span>
+                <span>Sin valoraciones</span>
+            </p>`;
+        }
+        const average = center.rating.toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+        const count = center.reviewCount === 1 ? '1 reseña' : `${center.reviewCount} reseñas`;
+        return `
+            <p class="${className}" aria-label="Nota media ${average} de 5, ${count}">
+                <span class="stars stars--h${Math.round(center.rating * 2)}" aria-hidden="true"><span class="stars-fill"></span></span>
+                <strong>${average}</strong> <span>· ${count}</span>
+            </p>`;
+    }
+
+    /** «Abierto · cierra a las 20:00» o «Cerrado · abre mañana a las 9:00», con el estado destacado. */
+    /** «Primer hueco: hoy a las 17:30» (el primero libre de las próximas dos semanas). */
+    function firstSlotBlock(center, className) {
+        if (!center.firstSlot) return '';
+        return `
+            <p class="${className}">
+                <i class="lucide-calendar-check" aria-hidden="true"></i>
+                <span>Primer hueco: <strong>${esc(center.firstSlot)}</strong></span>
+            </p>`;
+    }
+
+    function hoursStatus(center, className) {
+        if (!center.hoursLabel) return '';
+        const [state, ...rest] = center.hoursLabel.split(' · ');
+        return `
+            <p class="${className} ${center.openNow ? 'is-open' : 'is-closed'}">
+                <i class="lucide-clock" aria-hidden="true"></i>
+                <span><strong>${esc(state)}</strong>${rest.length ? ' · ' + esc(rest.join(' · ')) : ''}</span>
+            </p>`;
+    }
+
+    /** Globo que aparece al tocar un centro en el mapa: primero se ve qué centro es y luego se decide entrar. */
+    function centerPopup(center) {
+        const el = document.createElement('div');
+        el.className = 'map-popup';
+        const distance = center.distanceKm !== null && center.distanceKm !== undefined
+            ? `<span class="map-popup-distance">A ${center.distanceKm.toFixed(1)} km</span>` : '';
+        const offers = center.offers.length
+            ? `<span class="map-popup-offers"><i class="lucide-tag" aria-hidden="true"></i> ${offersLabel(center.offers.length)}</span>` : '';
+        el.innerHTML = `
+            <strong class="map-popup-title">${esc(center.name)}</strong>
+            ${center.address ? `<span class="map-popup-address">${esc(center.address)}</span>` : ''}
+            ${distance}
+            ${hoursStatus(center, 'center-hours-status map-popup-hours')}
+            ${firstSlotBlock(center, 'center-first-slot map-popup-hours')}
+            ${ratingBlock(center, 'center-rating map-popup-rating')}
+            ${offers}
+            <button type="button" class="btn btn-primary btn-sm map-popup-btn">
+                <i class="lucide-calendar-plus" aria-hidden="true"></i> Ver tratamientos
+            </button>`;
+        el.querySelector('button').addEventListener('click', () => openCenterFromMap(center));
+        return el;
+    }
+
+    /* ---- Filtros ---- */
+    btnAdvSearch.addEventListener('click', () => {
+        const open = advancedPanel.classList.toggle('is-open');
+        btnAdvSearch.classList.toggle('is-active', open);
+        btnAdvSearch.setAttribute('aria-expanded', String(open));
+    });
+
+    btnMapToggle.addEventListener('click', () => {
+        isMapView = !isMapView;
+        btnMapToggle.classList.toggle('is-active', isMapView);
+        btnMapToggle.setAttribute('aria-pressed', String(isMapView));
+        mapContainer.classList.toggle('is-visible', isMapView);
+        centersGrid.hidden = isMapView;
+        trigger.hidden = isMapView || !hasMore;
+        if (isMapView) initMap(); else resetAndFetch();
+    });
+
+    document.getElementById('btnSearch').addEventListener('click', resetAndFetch);
+
+    let searchTimeout;
+    searchName.addEventListener('input', () => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(resetAndFetch, 400);
+    });
+    // Móvil: «Con ofertas», «Abierto ahora» y «4 o más» pasan al panel de ajustes para que la barra no se llene
+    const quickFilters = document.getElementById('quickFilters');
+    const advancedFields = document.getElementById('advancedSearchFields');
+    const mobileFilters = window.matchMedia('(max-width: 600px)');
+    function placeQuickFilters() {
+        if (mobileFilters.matches) advancedFields.prepend(quickFilters);
+        else btnMapToggle.before(quickFilters);
+        updateFilterBadge();
+    }
+
+    // El número del botón de ajustes cuenta los filtros puestos que hay dentro del panel
+    function updateFilterBadge() {
+        let count = searchTreatment.value !== '' ? 1 : 0;
+        if (mobileFilters.matches) count += [onlyOffers, onlyOpen, onlyTopRated].filter(Boolean).length;
+        treatmentBadge.textContent = count > 1 ? String(count) : '';
+        treatmentBadge.classList.toggle('is-visible', count > 0);
+    }
+
+    btnOffers.addEventListener('click', () => {
+        onlyOffers = !onlyOffers;
+        btnOffers.classList.toggle('is-active', onlyOffers);
+        btnOffers.setAttribute('aria-pressed', String(onlyOffers));
+        updateFilterBadge();
+        resetAndFetch();
+    });
+    btnOpenNow.addEventListener('click', () => {
+        onlyOpen = !onlyOpen;
+        btnOpenNow.classList.toggle('is-active', onlyOpen);
+        btnOpenNow.setAttribute('aria-pressed', String(onlyOpen));
+        updateFilterBadge();
+        resetAndFetch();
+    });
+    btnTopRated.addEventListener('click', () => {
+        onlyTopRated = !onlyTopRated;
+        btnTopRated.classList.toggle('is-active', onlyTopRated);
+        btnTopRated.setAttribute('aria-pressed', String(onlyTopRated));
+        updateFilterBadge();
+        resetAndFetch();
+    });
+    searchTreatment.addEventListener('change', () => {
+        updateFilterBadge();
+        resetAndFetch();
+    });
+    mobileFilters.addEventListener('change', placeQuickFilters);
+    placeQuickFilters();
+
+    function filterParams(extra) {
+        const params = new URLSearchParams(extra);
+        if (searchName.value) params.append('searchName', searchName.value);
+        if (searchTreatment.value) params.append('searchTreatment', searchTreatment.value);
+        if (onlyOffers) params.append('withOffers', 'true');
+        if (onlyOpen) params.append('openNow', 'true');
+        if (onlyTopRated) params.append('topRated', 'true');
+        return params;
+    }
+
+    /* ---- Mapa ---- */
+    const markerIcon = color => L.icon({
+        iconUrl: `/vendor/leaflet/markers/marker-icon-${color}.png`,
+        iconRetinaUrl: `/vendor/leaflet/markers/marker-icon-2x-${color}.png`,
+        shadowUrl: '/vendor/leaflet/images/marker-shadow.png',
+        iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34]
+    });
+
+    function initMap() {
+        if (map) {
+            map.invalidateSize();
+            fetchMapCenters();
+            return;
+        }
+        map = L.map('mapContainer').setView([userLat || 40.4168, userLon || -3.7038], 12);
+        // Teselas oficiales de OpenStreetMap: gratuitas y sin API key (CARTO ahora exige clave).
+        // Política de uso: https://operations.osmfoundation.org/policies/tiles/
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            maxZoom: 19
+        }).addTo(map);
+        if (userLat && userLon) {
+            L.marker([userLat, userLon], { icon: markerIcon('blue') }).addTo(map).bindPopup('Tu ubicación');
+        }
+        map.on('moveend', fetchMapCenters);
+        fetchMapCenters();
+    }
+
+    async function fetchMapCenters() {
+        if (!map) return;
+        const b = map.getBounds();
+        const params = filterParams({ north: b.getNorth(), south: b.getSouth(), east: b.getEast(), west: b.getWest() });
+        try {
+            const centers = await (await fetch('/api/centers?' + params)).json();
+            // Se conservan los marcadores que siguen visibles: así el globo abierto no se cierra
+            // cuando el mapa se desplaza para mostrarlo entero.
+            const visible = new Set();
+            centers
+                .filter(c => c.latitude && c.longitude)
+                .forEach(center => {
+                    visible.add(center.id);
+                    if (mapMarkers.has(center.id)) return;
+                    const marker = L.marker([center.latitude, center.longitude], { icon: markerIcon('gold'), title: center.name }).addTo(map);
+                    marker.bindPopup(() => centerPopup(center), { className: 'map-popup-wrapper', minWidth: 200, maxWidth: 260 });
+                    mapMarkers.set(center.id, marker);
+                });
+            mapMarkers.forEach((marker, id) => {
+                if (!visible.has(id)) {
+                    map.removeLayer(marker);
+                    mapMarkers.delete(id);
+                }
+            });
+        } catch (e) {
+            console.error('Error al cargar los centros del mapa', e);
+        }
+    }
+
+    /* ---- Listado con scroll infinito ---- */
+    function resetAndFetch() {
+        if (isMapView) {
+            fetchMapCenters();
+            return;
+        }
+        currentPage = 0;
+        hasMore = true;
+        centersGrid.innerHTML = '';
+        trigger.hidden = false;
+        fetchCenters();
+    }
+
+    function centerCard(center) {
+        const card = document.createElement('article');
+        card.className = 'center-card glass-panel';
+        const distance = center.distanceKm !== null
+            ? `<span class="center-distance-badge">A ${center.distanceKm.toFixed(1)} km</span>`
+            : '<i class="lucide-map-pin center-meta-icon" aria-hidden="true"></i>';
+        // Sin foto, las iniciales ocupan el mismo hueco: todas las tarjetas miden lo mismo
+        const photo = center.photoUrl
+            ? `<img src="${esc(center.photoUrl)}" alt="" loading="lazy" decoding="async">`
+            : `<span class="center-photo-initials" aria-hidden="true">${esc(Cuquora.initials(center.name))}</span>`;
+        card.innerHTML = `
+            <div class="center-photo center-card-photo">${photo}</div>
+            <div class="center-card-header">
+                <h2 class="center-card-title">${esc(center.name)}</h2>
+                ${distance}
+            </div>
+            ${hoursStatus(center, 'center-hours-status')}
+            ${firstSlotBlock(center, 'center-first-slot')}
+            ${ratingBlock(center, 'center-rating')}
+            ${offersBlock(center.offers)}
+            <div class="center-card-footer">
+                <a href="/client/centers/${encodeURIComponent(center.slug)}" class="btn btn-primary center-select-btn">
+                    <i class="lucide-calendar-plus" aria-hidden="true"></i> Ver Tratamientos y Reservar
+                </a>
+            </div>`;
+        // El enlace navega de forma normal (también con Ctrl/clic central); solo se intercepta para trabajadores.
+        card.querySelector('a').addEventListener('click', e => {
+            if (currentSessionRole === 'WORKER') {
+                e.preventDefault();
+                showWorkerRestriction();
+            }
+        });
+        return card;
+    }
+
+    function emptyMessage() {
+        if (onlyTopRated) return 'Ningún centro que coincida con tu búsqueda tiene todavía 4 estrellas o más. Quita «4 o más» para verlos todos.';
+        if (onlyOpen && onlyOffers) return 'Ahora mismo no hay ningún centro abierto con ofertas que coincida con tu búsqueda.';
+        if (onlyOpen) return 'Ahora mismo no hay ningún centro abierto que coincida con tu búsqueda. Quita «Abierto ahora» para ver también los cerrados y reservar para otro día.';
+        if (onlyOffers) return 'Ahora mismo ningún centro que coincida con tu búsqueda tiene ofertas.';
+        return 'No se encontraron centros de belleza que coincidan con tus criterios.';
+    }
+
+    async function fetchCenters() {
+        if (isLoading || !hasMore) return;
+        isLoading = true;
+        const params = filterParams({ page: currentPage, size: PAGE_SIZE });
+        if (userLat) params.append('lat', userLat);
+        if (userLon) params.append('lon', userLon);
+        try {
+            const centers = await (await fetch('/api/centers?' + params)).json();
+            if (centers.length < PAGE_SIZE) {
+                hasMore = false;
+                trigger.hidden = true;
+            }
+            if (centers.length === 0 && currentPage === 0) {
+                centersGrid.innerHTML = `
+                    <div class="no-appointments-box glass-panel grid-col-full">
+                        <i class="lucide-map-pin-off" aria-hidden="true"></i>
+                        <p>${emptyMessage()}</p>
+                    </div>`;
+            }
+            centers.forEach(center => centersGrid.appendChild(centerCard(center)));
+            currentPage++;
+            firstLoadDone = true;
+        } catch (err) {
+            console.error('Error al cargar los centros', err);
+        } finally {
+            isLoading = false;
+        }
+    }
+
+    new IntersectionObserver(entries => {
+        if (entries[0].isIntersecting && hasMore && !isLoading && !isMapView && firstLoadDone) fetchCenters();
+    }, { rootMargin: '100px' }).observe(trigger);
+
+    // Primera carga: se intenta ordenar por cercanía; si no hay ubicación en 3 s, se carga sin ella.
+    const fallback = setTimeout(() => { if (!firstLoadDone) resetAndFetch(); }, 3000);
+    if ('geolocation' in navigator) {
+        navigator.geolocation.getCurrentPosition(pos => {
+            clearTimeout(fallback);
+            userLat = pos.coords.latitude;
+            userLon = pos.coords.longitude;
+            if (map) {
+                map.setView([userLat, userLon], 12);
+                L.marker([userLat, userLon], { icon: markerIcon('blue') }).addTo(map).bindPopup('Tu ubicación');
+            }
+            resetAndFetch();
+        }, () => {
+            clearTimeout(fallback);
+            if (!firstLoadDone) resetAndFetch();
+        });
+    } else {
+        clearTimeout(fallback);
+        resetAndFetch();
+    }
+});

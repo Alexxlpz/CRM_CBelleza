@@ -22,7 +22,9 @@ No hace falta abrir puertos en el router ni en el servidor.
   PostgreSQL (`productos_api`), que solo puede tocar el esquema `productos`. Lo crea y lo revisa en cada arranque el
   servicio `db-setup` (`docker/postgres/db-setup.sh`), que se ejecuta un segundo y se para: en Container Manager sale
   como «Detenido» y es lo normal.
-- `POSTGRES_PASSWORD`: una contraseña larga nueva.
+- `POSTGRES_PASSWORD`: una contraseña larga nueva. Es la del superusuario de PostgreSQL: solo la usan `db-setup` y la copia de seguridad.
+- `APP_DB_PASSWORD`: `openssl rand -hex 24`. Es la contraseña del usuario propio de la app en PostgreSQL (`cuquora_app`),
+  dueño solo de las tablas de Cuquora (no es superusuario). Lo crea y lo revisa `db-setup` en cada arranque.
 - `LEGAL_OWNER_NAME`, `LEGAL_OWNER_NIF`, `LEGAL_OWNER_ADDRESS` (LSSI).
 - `SEED_DEMO_DATA=false` y **sin** `SPRING_PROFILES_ACTIVE`, `COOKIE_SECURE` ni `FORWARD_HEADERS_STRATEGY` (los valores de producción ya vienen por defecto).
 
@@ -55,6 +57,10 @@ Si algo falta en el `.env`, la app no arranca y el log dice qué variable correg
 - Imprime de nuevo los carteles con QR: el QR lleva la dirección de `SITE_URL`.
 - Para actualizar con git: `git pull` y `docker compose up -d --build` (las migraciones de Flyway se aplican solas al arrancar).
 - **Nunca** `docker compose down -v`: la `-v` borra el volumen de la base de datos.
+- `cloudflared` va con versión fija en el `docker-compose.yml`. Para actualizarlo, cambia el número por uno de
+  https://github.com/cloudflare/cloudflared/releases y vuelve a construir.
+- Restaurar una copia de seguridad deja las tablas a nombre de `POSTGRES_USER`: al volver a arrancar, `db-setup` se las
+  devuelve a `cuquora_app` y `productos_api` (por eso la app espera a que `db-setup` termine bien).
 
 ## 7. En un NAS Synology (sin git)
 Así está montado cuquora.com.
@@ -62,7 +68,8 @@ Así está montado cuquora.com.
    El `Dockerfile` solo compila `pom.xml` y `src/`; el de `product-api/`, lo suyo.
    No hace falta `target/`, `.git`, `.idea` ni `documentación/`.
 2. El `.env` del NAS es tu `.env.produccion` renombrado a `.env`, con `COMPOSE_PROFILES=cloudflare`, `CLOUDFLARE_TUNNEL_TOKEN`,
-   `PRODUCT_API_KEY` y `PRODUCT_API_DB_PASSWORD`.
+   `PRODUCT_API_KEY`, `PRODUCT_API_DB_PASSWORD` y `APP_DB_PASSWORD`. Si el NAS ya tiene su `.env`, añádele la línea
+   `APP_DB_PASSWORD=` de tu `.env.produccion` antes de construir: sin ella, el proyecto no arranca y lo dice.
 3. Los datos de PostgreSQL van en `volume2`.
 4. Container Manager > Proyecto > **Acción > Construir**. La primera vez baja todas las dependencias de Maven; las
    siguientes, mientras no cambie ningún `pom.xml`, se las saltan y solo compilan el código (mucho más rápido). Para cambiar solo el `.env` (por ejemplo `CRM_FROM_EMAIL`), edítalo y vuelve a construir.

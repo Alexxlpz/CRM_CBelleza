@@ -13,7 +13,11 @@
         <div class="auth-card">
             <div class="auth-header">
                 <h1 th:text="${'Hola, ' + invitation.name()}">Hola, Lucía</h1>
-                <p th:if="${invitation.centerName() != null}">
+                <p th:if="${invitation.teamInvitation()}">
+                    <strong th:text="${invitation.centerName()}">Centro</strong> te invita a unirte a su equipo.
+                    Entrarás en su panel con <strong th:text="${invitation.email()}">correo</strong>.
+                </p>
+                <p th:if="${invitation.centerName() != null and !invitation.teamInvitation()}">
                     Te han dado de alta en <strong th:text="${invitation.centerName()}">Centro</strong>.
                     Entrarás con <strong th:text="${invitation.email()}">correo</strong>.
                 </p>
@@ -34,7 +38,7 @@
             </div>
 
             <th:block th:if="${renewedEmail == null and invitation.state().name() == 'USED'}">
-                <p class="auth-note">Ya has creado tu contraseña con este enlace.</p>
+                <p class="auth-note" th:text="${invitation.teamInvitation() ? 'Ya has aceptado esta invitación.' : 'Ya has creado tu contraseña con este enlace.'}">Ya has creado tu contraseña con este enlace.</p>
                 <a th:href="@{/login}" class="btn btn-primary btn-block btn-lg">
                     <i class="lucide-log-in" aria-hidden="true"></i><span>Iniciar sesión</span>
                 </a>
@@ -49,7 +53,18 @@
                 </form>
             </th:block>
 
-            <th:block th:if="${invitation.state().name() == 'VALID'}">
+            <!--/* Ya tiene cuenta: solo tiene que aceptar (hasta entonces no está en el equipo) */-->
+            <th:block th:if="${invitation.state().name() == 'VALID' and invitation.teamInvitation() and invitation.hasAccount()}">
+                <form th:action="@{/invitation/{token}/join(token=${token})}" method="post">
+                    <button type="submit" class="btn btn-primary btn-block btn-lg">
+                        <i class="lucide-users" aria-hidden="true"></i>
+                        <span th:text="${'Unirme a ' + invitation.centerName()}">Unirme</span>
+                    </button>
+                </form>
+                <p class="auth-note">Si no quieres unirte, no hagas nada: la invitación caduca sola.</p>
+            </th:block>
+
+            <th:block th:if="${invitation.state().name() == 'VALID' and !(invitation.teamInvitation() and invitation.hasAccount())}">
                 <form th:action="@{/invitation/{token}(token=${token})}" method="post" id="invitationForm" novalidate>
                     <!--/* Para que el gestor de contraseñas guarde la cuenta con su correo */-->
                     <input type="email" name="username" th:value="${invitation.email()}" autocomplete="username" hidden>
@@ -82,7 +97,8 @@
                     </button>
                 </form>
 
-                <th:block th:if="${googleLoginEnabled}">
+                <!--/* Entrar con Google no acepta la invitación a un equipo: para eso, crear la contraseña aquí */-->
+                <th:block th:if="${googleLoginEnabled and !invitation.teamInvitation()}">
                     <div class="auth-divider"><span>o, si tu correo es de Google</span></div>
                     <a th:href="@{${googleLoginUrl}}" class="btn btn-secondary btn-block btn-lg btn-google">
                         <img th:src="@{/images/google-g.svg}" src="/images/google-g.svg" alt="" width="20" height="20">

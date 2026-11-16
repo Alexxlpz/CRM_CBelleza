@@ -279,6 +279,7 @@
                     <li><span><span class="chip chip-ok">Confirmada</span></span><span>Ya tiene día, hora y profesional. Un día antes sale un recordatorio por correo.</span></li>
                     <li><span><span class="chip chip-ok">Completada</span></span><span>Cuquora la marca sola cuando termina. Suma puntos y el cliente puede valorarla durante 90 días.</span></li>
                     <li><span><span class="chip chip-off">No se presentó</span></span><span>Lo marca el centro si el cliente no vino. No suma puntos y se puede deshacer («Sí vino»).</span></li>
+                    <li><span><span class="chip chip-off">Sin respuesta</span></span><span>Una solicitud a la que el centro no contestó antes de su hora. Ya no se puede aceptar ni cuenta como pendiente; si el cliente sigue interesado, se le pone una cita nueva.</span></li>
                     <li><span><span class="chip chip-bad">Rechazada</span> <span class="chip chip-off">Anulada</span></span><span>Ya no se hará. Cada cambio llega al otro por correo y a la campana.</span></li>
                 </ul>
             </section>
@@ -433,7 +434,7 @@
                     <details><summary>¿Por qué no me deja pedir una cita a esa hora?</summary><div><p>Porque ya tienes otra cita que se pisa con ella, en ese centro o en otro. El aviso te dice cuál: elige otra hora o anula la que tenías desde «Mis citas».</p></div></details>
                     <details><summary>¿Por qué no aparece el botón «Cambiar hora»?</summary><div><p>El centro decide hasta cuántas horas antes puedes cambiarla tú (nunca, 2, 12, 24 o 48 h). Pasado ese plazo, la tarjeta te da el teléfono del centro.</p></div></details>
                     <details><summary>¿Qué pasa si no contesto a una propuesta?</summary><div><p>Caduca a las 48 h, o 2 h antes de la primera hora propuesta si eso llega antes, y la cita queda anulada. Te llega un correo avisando.</p></div></details>
-                    <details><summary>¿Mi contraseña está segura?</summary><div><p>Se guarda cifrada (BCrypt), necesita al menos 8 caracteres y no puede ser de las más usadas. Tras varios intentos fallidos el acceso se cierra 15 minutos. Con «Recordar mi sesión» el dispositivo te mantiene dentro 14 días.</p></div></details>
+                    <details><summary>¿Mi contraseña está segura?</summary><div><p>Se guarda cifrada (BCrypt), necesita al menos 8 caracteres y no puede ser de las más usadas. Tras varios intentos fallidos el acceso se cierra 15 minutos. Con «Recordar mi sesión» el dispositivo te mantiene dentro 14 días. Si cambias la contraseña, se cierra la sesión en todos tus otros dispositivos.</p></div></details>
                 </div>
             </section>
 
@@ -605,7 +606,7 @@
                         <ul class="tasks">
                             <li><span>Datos del centro</span><span>Nombre, teléfono con su prefijo de país, ubicación con pin en el mapa, zona horaria y número de cabinas (citas a la vez, de 1 a 50).</span></li>
                             <li><span>Horario de apertura</span><span>Uno o dos tramos por día (jornada partida), sábados y domingos incluidos. Es el que ven los clientes y el que pinta la agenda.</span></li>
-                            <li><span>Equipo</span><span>Invitar por correo, reenviar la invitación o sacar a alguien (no si tiene citas por delante; conserva su historial). «Horario» pone los días y horas de cada profesional dentro del horario del centro.</span></li>
+                            <li><span>Equipo</span><span>Invitar por correo (si ya tenía cuenta de trabajador, entra cuando acepta la invitación), reenviar la invitación o sacar a alguien (no si tiene citas por delante; conserva su historial). «Horario» pone los días y horas de cada profesional dentro del horario del centro.</span></li>
                             <li><span>Reservas de clientes</span><span>«Aceptar automáticamente» (con «Cualquiera» se asigna el profesional libre con menos citas ese día), plazo para que el cliente cambie la hora (nunca, 2, 12, 24 o 48 h) y enlace corto con «Copiar».</span></li>
                             <li><span>Foto del centro</span><span>JPG o PNG, hasta 8 MB, mínimo 400×250 px. Sale en el buscador, en la ficha y detrás del saludo del panel.</span></li>
                             <li><span>Mi foto de perfil</span><span>Cada trabajador sube la suya (no hace falta ser el dueño). Sale en «¿Con quién?» y en el equipo.</span></li>
@@ -739,6 +740,7 @@
                             <li>Contraseñas cifradas, mínimo 8 caracteres y fuera las más usadas.</li>
                             <li>5 fallos con una cuenta desde la misma conexión, 20 desde una conexión o 50 con una cuenta desde cualquier sitio cierran el login 15 minutos.</li>
                             <li>«Recordar mi sesión» se borra al cerrar sesión o cambiar la contraseña.</li>
+                            <li>Al cambiar o restablecer la contraseña se cierra la sesión en los demás navegadores donde estuviera abierta.</li>
                             <li>Quien sale del equipo pierde el acceso al panel al momento.</li>
                         </ul>
                     </div>

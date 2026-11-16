@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{email/layout :: layout('Hola, ' + ${name}, ${centerName} + ' te invita a su equipo', ~{::content})}">
+<body>
+<th:block th:fragment="content">
+    <p style="font-size:15px; color:#5c5550; line-height:1.6; margin:0 0 16px;">
+        <strong th:text="${centerName}">Centro</strong> quiere que formes parte de su equipo en Cuquora. Si aceptas, entrarás
+        en su panel con tu correo y tu contraseña de siempre, y te podrán dar citas en su agenda.
+    </p>
+    <p style="margin:0 0 20px;">
+        <a th:href="${invitationUrl}" style="display:inline-block; padding:12px 22px; background:#8a6a45; color:#ffffff; text-decoration:none; border-radius:10px; font-weight:700; font-size:14px;">Ver la invitación</a>
+    </p>
+    <p style="font-size:13px; color:#857b74; margin:0;">
+        La invitación vale <span th:text="${validityDays}">7</span> días. Mientras no la aceptes, no entras en el equipo.
+        Si no esperabas este correo, ignóralo.
+    </p>
+</th:block>
+</body>
+</html>

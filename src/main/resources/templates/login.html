@@ -95,27 +95,6 @@
 
     <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Software de gestión para centros de estética.')}"></div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const V = Cuquora.validators;
-            Cuquora.validateForm(document.getElementById('loginForm'), {
-                identifier: [
-                    V.required('Por favor, introduce tu correo electrónico o usuario.'),
-                    V.emailOrUsername(3, 'El nombre de usuario debe tener al menos 3 caracteres.')
-                ],
-                password: [V.required('Por favor, introduce tu contraseña.')]
-            });
-
-            // «Recordar mi sesión» también vale para entrar con Google: el botón lleva la casilla en la URL
-            const googleBtn = document.getElementById('googleLoginBtn');
-            const remember = document.getElementById('rememberMeInput');
-            if (googleBtn && remember) {
-                const baseUrl = googleBtn.getAttribute('href');
-                const sync = () => googleBtn.setAttribute('href', remember.checked ? baseUrl + '?rememberMe=true' : baseUrl);
-                remember.addEventListener('change', sync);
-                sync();
-            }
-        });
-    </script>
+    <script th:src="@{/js/pages/login.js}" defer></script>
 </body>
 </html>

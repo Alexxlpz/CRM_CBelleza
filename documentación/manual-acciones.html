@@ -787,6 +787,7 @@
                         <li><strong>Error:</strong> <code>LoginFailureHandler</code> vuelve a <code>/login</code> con el aviso y el identificador escrito, y apunta el fallo en <code>LoginAttemptService</code>.</li>
                         <li><strong>Freno a los intentos:</strong> 5 fallos seguidos con una cuenta (exista o no) desde una misma IP la cierran para esa IP; 20 desde una IP cierran la IP entera y 50 con una cuenta desde cualquier IP, la cuenta. Dura 15 minutos y así nadie puede dejar sin entrar a otra persona a propósito. Mientras dura, <code>LoginThrottleFilter</code> corta el envío sin comprobar la contraseña y vuelve a <code>/login?blocked</code> («Demasiados intentos fallidos…»). Se guarda en memoria: reiniciar la aplicación lo borra.</li>
                         <li><strong>«Recordar mi sesión»:</strong> 14 días con tokens en <code>persistent_logins</code>, firmados con <code>REMEMBER_ME_KEY</code>; se borran al cerrar sesión y al cambiar la contraseña.</li>
+                        <li><strong>Cambio de contraseña:</strong> al cambiarla o restablecerla, las demás sesiones abiertas de la cuenta dejan de valer (<code>PasswordChangeSessions</code> y <code>PasswordChangeInterceptor</code>): en su siguiente petición vuelven a <code>/login</code> con el aviso «Tu contraseña ha cambiado». La sesión desde la que se cambia sigue abierta.</li>
                     </ul>
                 </div>
 
@@ -1109,7 +1110,7 @@
                         <span class="card-badge badge-worker">WORKER · JSON</span>
                     </div>
                     <p>
-                        Suma o resta unidades (parámetro <code>change</code>) y devuelve <code>{"stock", "lowStockThreshold"}</code>. El stock nunca baja de 0.
+                        Suma o resta unidades (parámetro <code>change</code>) y devuelve <code>{"stock", "lowStockThreshold"}</code>. Cada ajuste suma o resta entre 1 y 10 unidades (si no, 409 con el aviso); el stock nunca baja de 0 ni pasa de 999, y la fila se bloquea mientras tanto (<code>findForUpdate</code>).
                     </p>
                 </div>
 
@@ -1381,8 +1382,8 @@
                                 <li>Comprueba los datos en el navegador (el botón no se activa hasta que todo es válido) y otra vez en el servidor, con las mismas reglas (<a href="#formato-datos">Formato de los datos</a>).</li>
                             </ul>
                         </li>
-                        <li><strong>Invitaciones</strong> (<code>/invitation/{token}</code>): el responsable recibe su enlace al momento y el resto del equipo cuando se publica el centro. Cada enlace sirve una vez, dura 7 días y es para crear la contraseña; si caduca, se pide otro en la misma página. También se puede entrar con Google.</li>
-                        <li><strong>Revisión</strong> (<code>/register-center/approve/{token}</code>): administración (<code>CRM_ADMIN_EMAIL</code>) recibe el enlace por correo, revisa los datos y elige:
+                        <li><strong>Invitaciones</strong> (<code>/invitation/{token}</code>): el responsable recibe su enlace al momento y el resto del equipo cuando se publica el centro. Cada enlace sirve una vez, dura 7 días y es para crear la contraseña; si caduca, se pide otro en la misma página. También se puede entrar con Google. Si el dueño invita a un trabajador que ya tiene cuenta y está sin centro, la invitación es para unirse (<code>account_invitations.center_id</code>): no entra en el equipo hasta que pulsa «Unirme a …» (<code>POST /invitation/{token}/join</code>) o crea su contraseña si aún no tenía.</li>
+                        <li><strong>Revisión</strong> (<code>/register-center/approve/{token}</code>): administración (<code>CRM_ADMIN_EMAIL</code>) recibe el enlace por correo, revisa los datos y elige. El enlace caduca a los 30 días (<code>centers.approval_requested_at</code>); después la página dice «Enlace caducado» y «Enviar un enlace nuevo» (<code>POST /{token}/renew</code>) manda otro a <code>CRM_ADMIN_EMAIL</code>, nunca a quien lo pide:
                             <ul style="margin: 0.3rem 0 0 1.2rem;">
                                 <li><strong>«Publicar centro»</strong>: sale en el buscador y el mapa, admite reservas, el dueño recibe un aviso y el equipo su invitación.</li>
                                 <li><strong>«Rechazar registro»</strong> (<code>POST /{token}/reject</code>, pide confirmación): borra el centro, las cuentas de su equipo y todo lo que hayan preparado (tratamientos, inventario, agenda, fichas…). Los clientes con cuenta se quedan; los apuntados a mano solo se borran si no salen en otro centro. No se puede deshacer, no manda ningún correo y el enlace deja de valer.</li>

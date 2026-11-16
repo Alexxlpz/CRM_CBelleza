@@ -18,7 +18,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const esc = Cuquora.escapeHtml;
     const forms = window.AgendaForms;
-    let appointments = window.CALENDAR_APPOINTMENTS || [];
+    /**
+     * Una solicitud cuya hora ya pasó sin que nadie la contestara: ya no se puede aceptar ni proponer otra hora (el
+     * servidor tampoco lo deja). Se enseña como «Sin respuesta» y no cuenta como solicitud pendiente.
+     */
+    const markUnanswered = list => list.map(app => app.status === 'PENDING' && new Date(app.dateTime) <= new Date()
+        ? { ...app, status: 'UNANSWERED' } : app);
+    let appointments = markUnanswered(window.CALENDAR_APPOINTMENTS || []);
     let blocks = window.CALENDAR_BLOCKS || [];
     const hours = window.CALENDAR_HOURS || {};
     const staff = window.CALENDAR_STAFF || {};
@@ -40,7 +46,8 @@ document.addEventListener('DOMContentLoaded', function () {
         COMPLETED: { css: 'badge-completed', label: 'Completada' },
         REJECTED: { css: 'badge-rejected', label: 'Rechazada' },
         CANCELLED: { css: 'badge-cancelled', label: 'Anulada' },
-        NO_SHOW: { css: 'badge-no_show', label: 'No se presentó' }
+        NO_SHOW: { css: 'badge-no_show', label: 'No se presentó' },
+        UNANSWERED: { css: 'badge-cancelled', label: 'Sin respuesta' }
     };
 
     const grid = document.getElementById('calendarDays');
@@ -90,8 +97,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const longDate = dateTime => new Date(dateTime).toLocaleString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
     const isFuture = app => new Date(app.dateTime) > new Date();
     const shortDate = dateTime => new Date(dateTime).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
-    /** Las rechazadas y anuladas no ocupan agenda: no se pintan en la semana. */
-    const occupiesAgenda = app => app.status !== 'REJECTED' && app.status !== 'CANCELLED';
+    /** Las rechazadas, anuladas y solicitudes sin respuesta no ocupan agenda: no se pintan en la semana. */
+    const occupiesAgenda = app => app.status !== 'REJECTED' && app.status !== 'CANCELLED' && app.status !== 'UNANSWERED';
     const isOpenRequest = app => app.status === 'PENDING' || app.status === 'PROPOSED';
 
     /** Bloqueos que tocan un día (con la parte del día que ocupan, en minutos). */
@@ -120,7 +127,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const response = await fetch('/worker/calendar/data');
             if (response.ok) {
                 const data = await response.json();
-                appointments = data.appointments || [];
+                appointments = markUnanswered(data.appointments || []);
                 blocks = data.blocks || [];
             }
         } catch (err) {
@@ -475,6 +482,7 @@ document.addEventListener('DOMContentLoaded', function () {
             [count('NO_SHOW'), 'no se presentó', 'no se presentaron'],
             [count('PENDING'), 'solicitud pendiente', 'solicitudes pendientes'],
             [count('PROPOSED'), 'propuesta enviada', 'propuestas enviadas'],
+            [count('UNANSWERED'), 'sin respuesta', 'sin respuesta'],
             [dayBlocks.length, 'bloqueo', 'bloqueos']
         ].filter(([n]) => n > 0).map(([n, one, many]) => plural(n, one, many)).join(', ') || 'Sin citas este día';
         renderShifts(new Date(year, month, day));

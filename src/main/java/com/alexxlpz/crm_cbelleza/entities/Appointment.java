@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 @Entity
 @Table(name = "appointments")
@@ -164,6 +165,24 @@ public class Appointment {
             // Centro sin cargar y sin sesión: la hora del servidor, como antes
         }
         return LocalDateTime.now();
+    }
+
+    /**
+     * Solicitud que nadie contestó y cuya hora ya ha pasado (hora local del centro): ya no se puede aceptar ni proponer
+     * otra hora, no cuenta como pendiente y en los historiales sale como «Sin respuesta».
+     */
+    public boolean isUnanswered() {
+        return status == AppointmentStatus.PENDING && dateTime != null && !dateTime.isAfter(centerNow());
+    }
+
+    /** Lo que dice la etiqueta de estado en los historiales (cliente y ficha del cliente). */
+    public String getStatusLabel() {
+        return isUnanswered() ? "Sin respuesta" : getStatus().label();
+    }
+
+    /** Clase CSS de esa etiqueta ({@code badge-...}): una solicitud sin respuesta se pinta como anulada. */
+    public String getStatusBadge() {
+        return "badge-" + (isUnanswered() ? "cancelled" : getStatus().name().toLowerCase(Locale.ROOT));
     }
 
     /** El resumen del tratamiento se escribe cuando la cita confirmada ya ha empezado ({@code now}: hora del centro). */
