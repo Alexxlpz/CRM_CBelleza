@@ -14,6 +14,8 @@ import com.alexxlpz.crm_cbelleza.entities.User;
 import com.alexxlpz.crm_cbelleza.dto.AgendaBlockDTO;
 import com.alexxlpz.crm_cbelleza.entities.Center;
 import com.alexxlpz.crm_cbelleza.exceptions.ResourceNotFoundException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -40,6 +42,7 @@ public class WorkerCalendarController {
     private final OpeningHoursService openingHours;
     private final WorkerHoursService workerHours;
     private final ClientCardService clientCardService;
+    private final ObjectMapper json;
 
     public WorkerCalendarController(AppointmentService appointmentService,
                                     AgendaBlockService blockService,
@@ -48,7 +51,9 @@ public class WorkerCalendarController {
                                     CenterService centerService,
                                     OpeningHoursService openingHours,
                                     WorkerHoursService workerHours,
-                                    ClientCardService clientCardService) {
+                                    ClientCardService clientCardService,
+                                    ObjectMapper json) {
+        this.json = json;
         this.workerHours = workerHours;
         this.clientCardService = clientCardService;
         this.appointmentService = appointmentService;
@@ -64,13 +69,14 @@ public class WorkerCalendarController {
                            @RequestParam(name = "nuevaCita", required = false) Long newAppointmentClientId,
                            Model model) {
         Long centerId = worker.getCenterId();
-        model.addAttribute("newAppointmentClient", newAppointmentClient(centerId, newAppointmentClientId));
-        model.addAttribute("appointments", appointmentService.getCalendarAppointments(centerId));
-        model.addAttribute("blocks", blockService.upcoming(centerId).stream().map(AgendaBlockDTO::of).toList());
         Center center = centerService.getCenterById(centerId);
-        model.addAttribute("openingHours", openingHours(centerId, center.getCabins()));
         List<User> team = userService.getWorkersByCenter(centerId);
-        model.addAttribute("calendarStaff", Map.of(
+        // Todo lo que pinta la agenda va en un bloque JSON (calendar.html, lo lee js/pages/calendar-data.js)
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put("appointments", appointmentService.getCalendarAppointments(centerId));
+        data.put("hours", openingHours(centerId, center.getCabins()));
+        data.put("blocks", blockService.upcoming(centerId).stream().map(AgendaBlockDTO::of).toList());
+        data.put("staff", Map.of(
                 "shifts", shifts(team, workerHours.forCenter(centerId)),
                 "currentWorkerId", worker.getId(),
                 // Solo el dueño cierra el centro o bloquea la agenda de otros (worker-agenda-forms.js)
@@ -81,7 +87,18 @@ public class WorkerCalendarController {
                 "treatments", treatmentService.getTreatmentsByCenter(centerId).stream()
                         .map(t -> Map.of("id", t.getId(), "name", t.getName(), "duration", t.getDuration(), "price", t.getPrice()))
                         .toList()));
+        data.put("newFor", newAppointmentClient(centerId, newAppointmentClientId));
+        model.addAttribute("calendarData", toJson(data));
         return "worker/calendar";
+    }
+
+    /** «<» escapado: un «</script>» dentro de un nombre o una nota no puede cerrar el bloque antes de tiempo. */
+    private String toJson(Object data) {
+        try {
+            return json.writeValueAsString(data).replace("<", "\\u003c");
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("No se han podido preparar los datos de la agenda.", e);
+        }
     }
 
     /**
