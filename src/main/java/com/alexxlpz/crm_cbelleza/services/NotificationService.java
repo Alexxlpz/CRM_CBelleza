@@ -1,11 +1,13 @@
 package com.alexxlpz.crm_cbelleza.services;
 
+import com.alexxlpz.crm_cbelleza.booking.CenterClock;
 import com.alexxlpz.crm_cbelleza.entities.Appointment;
 import com.alexxlpz.crm_cbelleza.entities.AppointmentStatus;
 import com.alexxlpz.crm_cbelleza.entities.ClientCard;
 import com.alexxlpz.crm_cbelleza.entities.Inventory;
 import com.alexxlpz.crm_cbelleza.entities.User;
 import com.alexxlpz.crm_cbelleza.repositories.AppointmentRepository;
+import com.alexxlpz.crm_cbelleza.repositories.CenterRepository;
 import com.alexxlpz.crm_cbelleza.repositories.ClientCardRepository;
 import com.alexxlpz.crm_cbelleza.repositories.InventoryRepository;
 import com.alexxlpz.crm_cbelleza.repositories.ReviewRepository;
@@ -36,6 +38,7 @@ public class NotificationService {
     private final ClientCardRepository clientCardRepository;
     private final ClientCardJson json;
     private final ReviewRepository reviewRepository;
+    private final CenterRepository centerRepository;
     private final Clock clock;
 
     public NotificationService(InventoryRepository inventoryRepository,
@@ -43,8 +46,10 @@ public class NotificationService {
                                ClientCardRepository clientCardRepository,
                                ClientCardJson json,
                                ReviewRepository reviewRepository,
+                               CenterRepository centerRepository,
                                Clock clock) {
         this.reviewRepository = reviewRepository;
+        this.centerRepository = centerRepository;
         this.inventoryRepository = inventoryRepository;
         this.appointmentRepository = appointmentRepository;
         this.clientCardRepository = clientCardRepository;
@@ -56,12 +61,14 @@ public class NotificationService {
         if (centerId == null) {
             return List.of();
         }
+        // «Hoy» y «mañana» en la hora local del centro, la misma en la que se guardan sus citas
+        LocalDate today = CenterClock.now(clock, centerRepository.findById(centerId).orElse(null)).toLocalDate();
         List<NotificationItem> notifications = new ArrayList<>(stockAlerts(centerId));
         List<Appointment> appointments = appointmentRepository.findByCenterIdOrderByDateTimeDesc(centerId);
         notifications.addAll(clientResponseAlerts(appointments));
         notifications.addAll(reviewAlerts(centerId));
-        notifications.addAll(appointmentAlerts(appointments));
-        pendingCardsAlert(centerId, appointments).ifPresent(notifications::add);
+        notifications.addAll(appointmentAlerts(appointments, today));
+        pendingCardsAlert(centerId, appointments, today).ifPresent(notifications::add);
         return notifications;
     }
 
@@ -78,8 +85,7 @@ public class NotificationService {
         return alerts;
     }
 
-    private List<NotificationItem> appointmentAlerts(List<Appointment> appointments) {
-        LocalDate today = LocalDate.now(clock);
+    private List<NotificationItem> appointmentAlerts(List<Appointment> appointments, LocalDate today) {
         LocalDate tomorrow = today.plusDays(1);
         List<Appointment> pending = appointments.stream()
                 .filter(a -> a.getStatus() == AppointmentStatus.PENDING)
@@ -149,8 +155,7 @@ public class NotificationService {
     }
 
     /** Clientes atendidos (hasta hoy) cuya ficha sigue vacía. */
-    private Optional<NotificationItem> pendingCardsAlert(Long centerId, List<Appointment> appointments) {
-        LocalDate today = LocalDate.now(clock);
+    private Optional<NotificationItem> pendingCardsAlert(Long centerId, List<Appointment> appointments, LocalDate today) {
         Map<Long, String> cardsData = clientCardRepository.findByCenterId(centerId).stream()
                 .filter(card -> card.getClient() != null)
                 .collect(Collectors.toMap(card -> card.getClient().getId(), ClientCard::getDataJson, (a, b) -> a));

@@ -4,7 +4,7 @@
  *  2. Menú lateral móvil (drawer) accesible: foco atrapado, Escape y retorno del foco.
  *  3. Diálogos propios (Cuquora.confirm / Cuquora.alert) en lugar de confirm()/alert() del navegador.
  *  4. Formularios con data-confirm="Mensaje": piden confirmación antes de enviarse.
- *  5. Cuquora.escapeHtml: para insertar texto del servidor en plantillas HTML de JavaScript.
+ *  5. Cuquora.escapeHtml: para insertar texto del servidor en plantillas HTML de JavaScript; Cuquora.telLink: teléfono que llama.
  *  6. Modales estáticos: <div class="ui-modal-overlay" id="x" hidden> se abren con
  *     [data-modal-open="x"] y se cierran con [data-modal-close], Escape o clic fuera.
  *  7. Selector de vista Tarjetas / Lista: [data-view-toggle="idDelListado"] con botones
@@ -15,6 +15,7 @@
  * 11. Color al estirar: <html> lleva .is-near-end en la mitad final de la página, para que el rebote
  *     de abajo enseñe el color del pie y el de arriba el de la cabecera (common.css).
  * 12. Botón del ojo (data-toggle-password="idDelInput"): muestra u oculta lo escrito en un campo de contraseña.
+ * 13. «Cómo llegar» (enlaces [data-directions] a Google Maps): en iPhone, iPad y Mac deja elegir Apple Maps o Google Maps.
  */
 (function () {
     'use strict';
@@ -47,6 +48,13 @@
             .replace(/>/g, '&gt;')
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&#39;');
+    }
+
+    /** Teléfono que se pulsa para llamar (.tel-link), como Phones.telHref en las plantillas; sin número, «—». */
+    function telLink(phone) {
+        const digits = String(phone ?? '').replace(/[^\d+]/g, '');
+        if (!digits) return '—';
+        return `<a class="tel-link" href="tel:${escapeHtml(digits)}">${escapeHtml(phone)}</a>`;
     }
 
     /** Hasta dos iniciales de un nombre, como Center.getInitials() (hueco de la foto de un centro sin foto). */
@@ -161,6 +169,7 @@
     const Cuquora = Object.assign(window.Cuquora || {}, {
         escapeHtml,
         initials,
+        telLink,
         /** 'smooth' salvo si el sistema pide reducir el movimiento (el CSS no frena el scroll hecho con JS). */
         scrollBehavior() {
             return window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
@@ -518,10 +527,53 @@
         update();
     }
 
+    /* ---------- 13. «Cómo llegar» ---------- */
+    /* El enlace ya abre Google Maps en cualquier dispositivo. En iPhone, iPad y Mac (el iPad dice ser un Mac)
+       sale antes una hoja para elegir Apple Maps, que es el mapa que esas personas suelen tener. */
+    function initDirections() {
+        const links = document.querySelectorAll('a[data-directions][data-apple-maps-url]');
+        if (!links.length || !/iPhone|iPad|iPod|Macintosh/.test(navigator.userAgent)) return;
+
+        const overlay = document.createElement('div');
+        overlay.className = 'ui-modal-overlay ui-modal-overlay--sheet';
+        overlay.id = 'directionsModal';
+        overlay.hidden = true;
+        overlay.innerHTML = `
+            <div class="ui-modal ui-modal--sheet" role="dialog" aria-modal="true" aria-labelledby="directionsTitle">
+                <button type="button" class="ui-modal-close" data-modal-close aria-label="Cerrar"><i class="lucide-x" aria-hidden="true"></i></button>
+                <h2 class="ui-modal-title" id="directionsTitle"><i class="lucide-navigation" aria-hidden="true"></i> Cómo llegar</h2>
+                <p class="ui-modal-text" data-directions-address></p>
+                <div class="directions-options">
+                    <a class="btn btn-secondary" data-directions-apple target="_blank" rel="noopener noreferrer">
+                        <i class="lucide-map" aria-hidden="true"></i> Abrir en Apple Maps</a>
+                    <a class="btn btn-secondary" data-directions-google target="_blank" rel="noopener noreferrer">
+                        <i class="lucide-map-pinned" aria-hidden="true"></i> Abrir en Google Maps</a>
+                </div>
+            </div>`;
+        document.body.appendChild(overlay);
+        const address = overlay.querySelector('[data-directions-address]');
+        const apple = overlay.querySelector('[data-directions-apple]');
+        const google = overlay.querySelector('[data-directions-google]');
+        // Al elegir un mapa se abre en otra pestaña o app: la hoja se cierra sola
+        [apple, google].forEach(option => option.addEventListener('click', () => closeModal(overlay)));
+
+        links.forEach(link => link.addEventListener('click', e => {
+            const appleUrl = link.dataset.appleMapsUrl;
+            if (!appleUrl) return;
+            e.preventDefault();
+            apple.href = appleUrl;
+            google.href = link.href;
+            address.textContent = link.dataset.directions || '';
+            address.hidden = !link.dataset.directions;
+            openModal(overlay);
+        }));
+    }
+
     function init() {
         initOverscrollColor();
         initCopyButtons();
         initShareButtons();
+        initDirections();
         initMobileNav();
         initNotifications();
         initViewToggles();

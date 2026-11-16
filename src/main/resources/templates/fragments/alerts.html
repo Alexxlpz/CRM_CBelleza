@@ -1,8 +1,14 @@
 <!--/* Mensajes flash (successMessage / errorMessage) con el componente .alert común. */-->
 <th:block xmlns:th="http://www.thymeleaf.org" th:fragment="flash">
-    <div class="alert alert-success" role="status" th:if="${successMessage != null}">
+    <!--/* successTitle (opcional): título en negrita encima del mensaje, p. ej. «Solicitud enviada» al reservar */-->
+    <div class="alert alert-success" role="status" th:if="${successMessage != null}"
+         th:classappend="${successTitle != null} ? 'alert--titled'">
         <i class="lucide-check-circle-2" aria-hidden="true"></i>
-        <span th:text="${successMessage}">Operación realizada correctamente.</span>
+        <span th:unless="${successTitle != null}" th:text="${successMessage}">Operación realizada correctamente.</span>
+        <div class="alert-body" th:if="${successTitle != null}">
+            <strong class="alert-title" th:text="${successTitle}">Solicitud enviada</strong>
+            <span th:text="${successMessage}">Te avisaremos en cuanto el centro la confirme.</span>
+        </div>
     </div>
     <div class="alert alert-error" role="alert" th:if="${errorMessage != null}">
         <i class="lucide-alert-circle" aria-hidden="true"></i>

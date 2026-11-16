@@ -1,6 +1,126 @@
 
 /* Client Centers list, details, and booking layouts */
 
+/* ---- Próxima cita del cliente, encima del buscador (centers.html) ---- */
+.next-appointment {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px 22px;
+    margin-bottom: 24px;
+    padding: 20px 24px;
+}
+
+.next-appointment-date {
+    flex: none;
+    display: grid;
+    place-content: center;
+    gap: 2px;
+    min-width: 88px;
+    min-height: 84px;
+    padding: 8px 12px;
+    border-radius: var(--border-radius-md);
+    background: var(--brand-gradient);
+    color: var(--on-primary);
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+}
+
+.next-appointment-day {
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.next-appointment-time {
+    font-size: 25px;
+    font-weight: 800;
+    line-height: 1.1;
+}
+
+.next-appointment-body {
+    flex: 1 1 260px;
+    min-width: 0;
+    display: grid;
+    gap: 3px;
+}
+
+.next-appointment-label {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 10px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--primary-text);
+}
+
+.next-appointment-treatment {
+    font-size: 20px;
+    letter-spacing: -0.3px;
+    color: var(--text-main);
+}
+
+.next-appointment-meta {
+    font-size: 15px;
+    color: var(--text-muted);
+}
+
+.next-appointment-sep {
+    margin: 0 6px;
+}
+
+.next-appointment-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.next-appointment-actions .btn {
+    white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+    .next-appointment {
+        gap: 14px;
+        padding: 16px;
+    }
+
+    .next-appointment-date {
+        min-width: 70px;
+        min-height: 68px;
+    }
+
+    .next-appointment-time {
+        font-size: 20px;
+    }
+
+    .next-appointment-body {
+        flex-basis: 0;
+        flex-grow: 1;
+    }
+
+    .next-appointment-treatment {
+        font-size: 17px;
+    }
+
+    .next-appointment-meta {
+        font-size: 14px;
+    }
+
+    .next-appointment-actions {
+        width: 100%;
+    }
+
+    .next-appointment-actions .btn {
+        flex: 1 1 0;
+        justify-content: center;
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+}
+
 /* Search bar wrapper */
 .filter-search-bar {
     margin-bottom: 30px;
@@ -105,11 +225,20 @@
     font-size: 14px;
 }
 
+/* «Cómo llegar» y «Compartir», uno al lado del otro */
+.hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 24px;
+}
+
+.hero-directions,
 .hero-share {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
-    margin-top: 24px;
 }
 
 .hero-share-status {

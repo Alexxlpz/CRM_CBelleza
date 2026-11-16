@@ -2,6 +2,7 @@ package com.alexxlpz.crm_cbelleza.services;
 
 import com.alexxlpz.crm_cbelleza.booking.AgendaSnapshot;
 import com.alexxlpz.crm_cbelleza.booking.CenterClock;
+import com.alexxlpz.crm_cbelleza.booking.CenterTimeZones;
 import com.alexxlpz.crm_cbelleza.booking.OpeningHours;
 import com.alexxlpz.crm_cbelleza.entities.Appointment;
 import com.alexxlpz.crm_cbelleza.entities.AppointmentChange;
@@ -27,7 +28,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.Serial;
 import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
@@ -133,6 +136,7 @@ public class BookingService {
 
         User client = userRepository.findById(clientId)
                 .orElseThrow(() -> new BusinessRuleException("Cliente no encontrado en el sistema."));
+        ensureClientIsFree(clientId, center, start, treatment.getDuration(), null);
         boolean confirmed = center.isAutoAcceptBookings() && free != null;
         if (appointmentRepository.countByCenterIdAndClientIdAndStatusInAndDateTimeAfter(centerId, clientId,
                 List.of(AppointmentStatus.PENDING, AppointmentStatus.PROPOSED, AppointmentStatus.CONFIRMED), now)
@@ -244,6 +248,7 @@ public class BookingService {
         if (!openingHours.forCenter(center.getId()).fits(start, treatment.getDuration())) {
             throw new BusinessRuleException("El servicio no cabe completo dentro del horario del centro.");
         }
+        ensureClientIsFree(clientId, center, start, treatment.getDuration(), appointment.getId());
         AgendaSnapshot.Request slot = new AgendaSnapshot.Request(start, treatment.getDuration(), null, appointment.getId(), true);
         AgendaSnapshot agenda = availability.snapshot(center, start.toLocalDate().atStartOfDay(), start.plusDays(1));
         ensureFits(agenda, slot);
@@ -273,6 +278,38 @@ public class BookingService {
             releaseTakenProposals(center, saved);
         }
         return saved;
+    }
+
+    /** Estados en los que una cita ocupa al cliente (aún no ha pasado ni se ha anulado). */
+    private static final List<AppointmentStatus> CLIENT_BUSY = List.of(
+            AppointmentStatus.PENDING, AppointmentStatus.PROPOSED, AppointmentStatus.CONFIRMED);
+    private static final DateTimeFormatter CLASH_FORMAT = DateTimeFormatter.ofPattern("dd/MM 'a las' HH:mm");
+
+    /**
+     * Una persona no puede estar en dos sitios: falla si el cliente ya tiene otra cita (en este centro o en otro) que
+     * se solapa con la nueva. Se compara en instantes porque cada centro guarda sus citas en su hora local.
+     * {@code ignoreId} es la cita que se está moviendo (al cambiar la hora no choca consigo misma).
+     */
+    private void ensureClientIsFree(Long clientId, Center center, LocalDateTime start, int duration, Long ignoreId) {
+        Instant from = toInstant(start, center);
+        Instant to = toInstant(start.plusMinutes(duration), center);
+        // Margen de un día a cada lado: cubre centros en otra zona horaria y citas largas que empiezan antes
+        appointmentRepository.findByClientIdAndStatusInAndDateTimeBetween(clientId, CLIENT_BUSY,
+                        start.minusDays(1), start.plusMinutes(duration).plusDays(1)).stream()
+                .filter(other -> !other.getId().equals(ignoreId))
+                .filter(other -> toInstant(other.getDateTime(), other.getCenter()).isBefore(to)
+                        && toInstant(other.getEndDateTime(), other.getCenter()).isAfter(from))
+                .findFirst()
+                .ifPresent(other -> {
+                    throw new BusinessRuleException("Ya tienes una cita a esa hora: " + other.getTreatment().getName()
+                            + " el " + other.getDateTime().format(CLASH_FORMAT) + " en " + other.getCenter().getName()
+                            + ". Elige otra hora o anula esa desde «Mis citas».");
+                });
+    }
+
+    private static Instant toInstant(LocalDateTime local, Center center) {
+        String zone = center != null && center.getTimeZone() != null ? center.getTimeZone() : CenterTimeZones.DEFAULT;
+        return local.atZone(ZoneId.of(zone)).toInstant();
     }
 
     /** Con «Cualquiera» en una cita confirmada se queda quien la tenía si sigue libre a la nueva hora. */

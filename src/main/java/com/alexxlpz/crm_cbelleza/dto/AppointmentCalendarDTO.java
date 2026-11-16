@@ -38,6 +38,8 @@ public class AppointmentCalendarDTO {
     private List<MediaDTO> media;
     /** Avisos que el cliente tiene en otras citas del centro (reacciones, productos que no le sientan bien...). */
     private List<ClientAlertDTO> clientAlerts;
+    /** Lo que dice de alergias la ficha técnica del cliente en el centro (nulo si nada). */
+    private String clientAllergies;
     /** Citas del centro a las que el cliente no se presentó. */
     private int clientNoShows;
     /** Solicitud en la que el cliente ha elegido profesional (sale en «La atiende»). */

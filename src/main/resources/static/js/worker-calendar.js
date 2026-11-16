@@ -254,13 +254,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 ${app.proposalExpiresAt ? `<p class="agenda-proposals-expiry">Si no responde, se anulará el ${esc(longDate(app.proposalExpiresAt))}.</p>` : ''}
             </div>` : '';
 
-        // Avisos de otras citas del cliente (reacciones, productos que no le sientan bien...) y veces que no vino
+        // Avisos del cliente: alergias de su ficha técnica (lo primero), veces que no vino y avisos de otras citas
+        // (reacciones, productos que no le sientan bien...)
+        const allergies = app.clientAllergies
+            ? `<li><strong>Alergias:</strong> <span>${esc(app.clientAllergies)}</span></li>` : '';
         const noShows = app.status !== 'NO_SHOW' && app.clientNoShows > 0
             ? `<li><strong>No se ha presentado ${app.clientNoShows === 1 ? 'a 1 cita' : `a ${esc(String(app.clientNoShows))} citas`}.</strong></li>` : '';
-        const alerts = occupiesAgenda(app) && (app.clientAlerts?.length || noShows) ? `
+        const alerts = occupiesAgenda(app) && (app.clientAlerts?.length || noShows || allergies) ? `
             <div class="client-alerts">
                 <p class="client-alerts-title"><i class="lucide-alert-triangle" aria-hidden="true"></i> Avisos de este cliente</p>
-                <ul>${noShows}${(app.clientAlerts || []).map(a => `<li><strong>${esc(shortDate(a.dateTime))} · ${esc(a.treatmentName)}:</strong> <span>${esc(a.summary)}</span></li>`).join('')}</ul>
+                <ul>${allergies}${noShows}${(app.clientAlerts || []).map(a => `<li><strong>${esc(shortDate(a.dateTime))} · ${esc(a.treatmentName)}:</strong> <span>${esc(a.summary)}</span></li>`).join('')}</ul>
             </div>` : '';
         const summary = app.treatmentSummary || app.media?.length ? `
             <div class="treatment-summary${app.treatmentAlert ? ' is-alert' : ''}">
@@ -351,7 +354,7 @@ document.addEventListener('DOMContentLoaded', function () {
             </div>
             <div class="agenda-item-detail">
                 <i class="lucide-phone" aria-hidden="true"></i>
-                <span>Teléfono: ${esc(client.phone || app.guestPhone || '—')}</span>
+                <span>Teléfono: ${Cuquora.telLink(client.phone || app.guestPhone)}</span>
             </div>
             <div class="agenda-item-detail">
                 <i class="lucide-sparkles" aria-hidden="true"></i>
@@ -1047,6 +1050,16 @@ document.addEventListener('DOMContentLoaded', function () {
         try { savedView = localStorage.getItem(VIEW_KEY); } catch (e) { /* almacenamiento no disponible */ }
     }
     if (savedView === 'week') setView('week');
+
+    // «Darle cita» desde la ficha del cliente (?nuevaCita=id): «Nueva cita» abierta con ese cliente ya elegido.
+    // Se quita de la URL para que al recargar no se vuelva a abrir.
+    const preselected = window.CALENDAR_NEW_FOR;
+    if (preselected) {
+        forms.openNew({ date: selectedOrToday(), client: preselected });
+        const url = new URL(window.location.href);
+        url.searchParams.delete('nuevaCita');
+        history.replaceState(null, '', url);
+    }
 
     refreshFinishedAppointments();
     setInterval(() => {

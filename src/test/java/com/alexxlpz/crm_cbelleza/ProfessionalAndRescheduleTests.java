@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.TemporalAdjusters;
 import java.util.Set;
+import java.util.UUID;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasItem;
@@ -84,11 +85,22 @@ class ProfessionalAndRescheduleTests {
     }
 
     private Appointment confirmed(LocalDateTime at, User worker) {
+        return confirmed(at, worker, sofia);
+    }
+
+    /** Cita confirmada de otra clienta: ocupa al profesional sin ocupar a Sofía (ella no puede tener dos a la vez). */
+    private Appointment confirmedForSomeoneElse(LocalDateTime at, User worker) {
+        User other = users.save(User.builder().name("Otra clienta " + UUID.randomUUID())
+                .email(UUID.randomUUID() + "@ejemplo.com").role(Role.CLIENT).build());
+        return confirmed(at, worker, other);
+    }
+
+    private Appointment confirmed(LocalDateTime at, User worker, User client) {
         return appointments.saveAndFlush(Appointment.builder()
                 .dateTime(at)
                 .treatment(treatment)
                 .center(center)
-                .client(sofia)
+                .client(client)
                 .worker(worker)
                 .status(AppointmentStatus.CONFIRMED)
                 .price(treatment.getPrice())
@@ -167,7 +179,7 @@ class ProfessionalAndRescheduleTests {
     @Test
     void busyChosenWorkerBlocksTheSlotButAnyoneStillWorks() throws Exception {
         LocalDateTime at = farWednesday(20, 12);
-        confirmed(at, carlos);
+        confirmedForSomeoneElse(at, carlos);
 
         book(carlos.getId().toString(), at)
                 .andExpect(flash().attribute("bookingError", containsString("no está libre")));
@@ -238,7 +250,7 @@ class ProfessionalAndRescheduleTests {
     void movingToAHourWhereTheWorkerIsBusyFails() throws Exception {
         LocalDateTime at = farWednesday(37, 10);
         Appointment app = confirmed(at, carlos);
-        confirmed(at.withHour(13), carlos);
+        confirmedForSomeoneElse(at.withHour(13), carlos);
         mvc.perform(post("/client/appointments/" + app.getId() + "/cambiar").with(csrf()).with(TestUsers.as(users, TestUsers.CLIENT))
                         .param("workerId", carlos.getId().toString()).param("dateTime", at.withHour(13).toString()))
                 .andExpect(redirectedUrl("/client/appointments/" + app.getId() + "/cambiar"))

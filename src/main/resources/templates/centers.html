@@ -20,6 +20,36 @@
 
         <div th:replace="~{fragments/alerts :: flash}"></div>
 
+        <!-- Próxima cita del cliente (solo con sesión de cliente y citas por venir): lo que más busca al entrar -->
+        <section class="next-appointment glass-panel" th:if="${nextAppointment != null}"
+                 th:with="app=${nextAppointment.appointment}" aria-labelledby="nextAppointmentTitle">
+            <div class="next-appointment-date">
+                <span class="next-appointment-day" th:text="${nextAppointment.dayLabel}">Hoy</span>
+                <time class="next-appointment-time" th:datetime="${app.dateTime}" th:text="${#temporals.format(app.dateTime, 'HH:mm')}">11:00</time>
+            </div>
+            <div class="next-appointment-body">
+                <p class="next-appointment-label" id="nextAppointmentTitle">Tu próxima cita
+                    <span class="badge badge-pending" th:if="${app.status.name() == 'PENDING'}">Pendiente de confirmar</span>
+                    <span class="badge badge-proposed" th:if="${app.status.name() == 'PROPOSED'}">Te proponen otra hora</span>
+                </p>
+                <h2 class="next-appointment-treatment" th:text="${app.treatment.name}">Manicura rusa</h2>
+                <p class="next-appointment-meta">
+                    <span th:text="${app.center.name}">Centro Histórico</span><th:block th:if="${app.worker != null}"><span class="next-appointment-sep" aria-hidden="true">·</span><span th:text="${'con ' + app.worker.name}">con Carlos</span></th:block>
+                </p>
+            </div>
+            <div class="next-appointment-actions">
+                <a class="btn btn-primary" th:if="${app.center.directionsUrl != null}"
+                   th:href="${app.center.directionsUrl}" target="_blank" rel="noopener noreferrer"
+                   th:attr="data-directions=${app.center.address},data-apple-maps-url=${app.center.appleMapsUrl},aria-label=${'Cómo llegar a ' + app.center.name}">
+                    <i class="lucide-navigation" aria-hidden="true"></i> Cómo llegar
+                </a>
+                <a class="btn btn-secondary" href="/client/appointments">
+                    <i class="lucide-calendar-check" aria-hidden="true"></i>
+                    <span th:text="${'Mis citas (' + nextAppointment.upcomingCount + ')'}">Mis citas (3)</span>
+                </a>
+            </div>
+        </section>
+
         <!-- Buscador -->
         <div class="filter-search-bar filter-search-container glass-panel" role="search">
             <div class="filter-search-row">

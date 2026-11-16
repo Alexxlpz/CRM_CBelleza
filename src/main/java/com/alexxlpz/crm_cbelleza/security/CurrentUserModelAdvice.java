@@ -57,6 +57,7 @@ public class CurrentUserModelAdvice {
         model.addAttribute("sessionRole", user.getRole().name());
         model.addAttribute("sessionUserName", user.getName());
         model.addAttribute("accountSection", accountSection(request.getRequestURI()));
+        model.addAttribute("workerSection", workerSection(request.getRequestURI()));
         if (user.isWorker()) {
             model.addAttribute("sessionCenterId", user.getCenterId());
             model.addAttribute("sessionCenterName", user.getCenterName());
@@ -83,6 +84,19 @@ public class CurrentUserModelAdvice {
      * Apartado de "Mi Cuenta" al que pertenece la página actual; el menú lateral móvil lo marca como activo.
      * Todas las pantallas de gestión (agenda, inventario, clientes...) cuelgan de "Mi Panel".
      */
+    /** Apartado del panel en la barra de arriba del trabajador (Agenda, Clientes, Tratamientos, Inventario). */
+    static String workerSection(String uri) {
+        if (uri == null || !uri.startsWith("/worker/")) {
+            return null;
+        }
+        for (String section : List.of("calendar", "clients", "treatments", "inventory")) {
+            if (uri.equals("/worker/" + section) || uri.startsWith("/worker/" + section + "/")) {
+                return section;
+            }
+        }
+        return null;
+    }
+
     static String accountSection(String uri) {
         if (uri == null) {
             return null;

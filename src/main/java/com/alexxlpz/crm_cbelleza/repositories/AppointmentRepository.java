@@ -101,6 +101,12 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     long countByCenterIdAndClientIdAndStatusInAndDateTimeAfter(Long centerId, Long clientId,
                                                                Collection<AppointmentStatus> statuses, LocalDateTime dateTime);
 
-    @EntityGraph(attributePaths = {"treatment"})
+    /** Citas de un cliente en cualquier centro entre dos horas: para no darle dos citas a la vez. */
+    @EntityGraph(attributePaths = {"treatment", "center"})
+    List<Appointment> findByClientIdAndStatusInAndDateTimeBetween(Long clientId, Collection<AppointmentStatus> statuses,
+                                                                 LocalDateTime from, LocalDateTime to);
+
+    /** Con el centro: cada cita se compara con la hora local de su centro. */
+    @EntityGraph(attributePaths = {"treatment", "center"})
     List<Appointment> findByStatusAndDateTimeBefore(AppointmentStatus status, LocalDateTime dateTime);
 }

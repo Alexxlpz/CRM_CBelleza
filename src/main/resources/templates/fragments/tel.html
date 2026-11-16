@@ -1,0 +1,3 @@
+<!--/* Teléfono que se puede pulsar para llamar (sobre todo desde el móvil). Sin número válido, se pinta como texto. */-->
+<th:block xmlns:th="http://www.thymeleaf.org" th:fragment="link(phone)"
+          th:with="telHref=${T(com.alexxlpz.crm_cbelleza.forms.PhoneNumbers).telHref(phone)}"><a class="tel-link" th:if="${telHref != null}" th:href="${telHref}" th:text="${phone}">+34 600 111 222</a><span th:unless="${telHref != null}" th:text="${phone}">600 111 222</span></th:block>

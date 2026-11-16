@@ -4,6 +4,8 @@
     <th:block th:replace="~{fragments/head :: meta('Panel de Control - Cuquora CRM')}"></th:block>
     <link rel="stylesheet" th:href="@{/css/worker.css}">
     <link rel="stylesheet" th:href="@{/css/analytics.css}">
+    <script th:src="@{/js/worker-today.js}" defer></script>
+    <script th:src="@{/js/worker-requests.js}" defer></script>
 </head>
 <body>
     <div th:replace="~{fragments/navbar :: worker(null, null, ${notifications})}"></div>
@@ -20,6 +22,137 @@
             </header>
 
             <div th:replace="~{fragments/alerts :: flash}"></div>
+
+            <!-- «Por aprobar»: solicitudes de clientes que esperan respuesta; se aceptan o rechazan sin ir a la agenda -->
+            <section class="today-panel requests-panel glass-panel" id="porAprobar" aria-labelledby="requestsTitle"
+                     th:if="${!pendingRequests.isEmpty()}">
+                <header class="today-header">
+                    <div class="today-heading">
+                        <h2 id="requestsTitle"><i class="lucide-inbox" aria-hidden="true"></i> Por aprobar
+                            <span class="requests-count" data-requests-count th:text="${pendingRequests.size()}">2</span></h2>
+                        <p class="today-date">Solicitudes de clientes que esperan tu respuesta</p>
+                    </div>
+                    <div class="today-tools">
+                        <a href="/worker/calendar" class="btn btn-secondary btn-sm today-agenda-link">
+                            <i class="lucide-calendar-days" aria-hidden="true"></i> Ver en la agenda
+                        </a>
+                    </div>
+                </header>
+
+                <ol class="today-list">
+                    <li th:each="req : ${pendingRequests}" class="today-item request-item" th:attr="data-request=${req.id}">
+                        <a class="today-time request-time" th:href="@{/worker/calendar(date=${#temporals.format(req.start, 'yyyy-MM-dd')})}"
+                           th:attr="aria-label=${'Ver el ' + req.dayLabel + ' en la agenda'}">
+                            <time th:datetime="${req.start}" th:text="${#temporals.format(req.start, 'HH:mm')}">10:30</time>
+                            <span class="today-end" th:text="${req.dayLabel}">vie 20 nov</span>
+                        </a>
+                        <div class="today-body">
+                            <div class="today-line">
+                                <a class="today-client" th:if="${req.clientHasCard}" th:href="@{/worker/clients/{id}(id=${req.clientId})}"
+                                   th:text="${req.clientName}">Sofía Martínez</a>
+                                <span class="today-client" th:unless="${req.clientHasCard}" th:text="${req.clientName}">Cliente</span>
+                            </div>
+                            <p class="today-meta">
+                                <span th:text="${req.treatmentName}">Exfoliación</span>
+                                <span class="today-worker"><span class="today-sep" aria-hidden="true">·</span><span th:text="${req.workerName != null} ? ${req.workerName} : 'Sin asignar: al aceptarla, contigo'">Sin asignar</span></span>
+                            </p>
+                            <p class="today-phone" th:if="${req.clientPhone != null}">
+                                <i class="lucide-phone" aria-hidden="true"></i>
+                                <th:block th:replace="~{fragments/tel :: link(${req.clientPhone})}"></th:block>
+                            </p>
+                        </div>
+                        <div class="today-side request-actions">
+                            <button type="button" class="btn btn-secondary btn-sm request-reject" data-request-action="reject"
+                                    th:attr="data-id=${req.id},data-context=${req.clientName + ' · ' + req.treatmentName + ' · ' + req.dayLabel + ' a las ' + #temporals.format(req.start, 'HH:mm')}">
+                                <i class="lucide-x" aria-hidden="true"></i> Rechazar
+                            </button>
+                            <button type="button" class="btn btn-primary btn-sm" data-request-action="approve" th:attr="data-id=${req.id}">
+                                <i class="lucide-check" aria-hidden="true"></i> Aceptar
+                            </button>
+                        </div>
+                    </li>
+                </ol>
+            </section>
+
+            <!-- «Hoy»: las citas del día por hora, lo primero que se mira al abrir el panel -->
+            <section class="today-panel glass-panel" id="hoy" aria-labelledby="todayTitle"
+                     th:attr="data-only-mine=${todayOnlyMine},data-me=${currentWorkerId}">
+                <header class="today-header">
+                    <div class="today-heading">
+                        <h2 id="todayTitle"><i class="lucide-sunrise" aria-hidden="true"></i> Hoy</h2>
+                        <p class="today-date" th:text="${#temporals.format(todayDate, 'EEEE, d ''de'' MMMM')}">sábado, 14 de noviembre</p>
+                    </div>
+                    <div class="today-tools">
+                        <div class="view-toggle view-toggle--always" role="group" aria-label="Qué citas ver" th:if="${todayFilter}">
+                            <button type="button" class="view-toggle-btn" data-today-filter="mine"
+                                    th:attr="aria-pressed=${todayOnlyMine}">
+                                <i class="lucide-user-round" aria-hidden="true"></i>
+                                <span th:text="'Las mías (' + ${todayMineCount} + ')'">Las mías (2)</span>
+                            </button>
+                            <button type="button" class="view-toggle-btn" data-today-filter="all"
+                                    th:attr="aria-pressed=${!todayOnlyMine}">
+                                <i class="lucide-users" aria-hidden="true"></i>
+                                <span th:text="'Todo el centro (' + ${todayAppointments.size()} + ')'">Todo el centro (5)</span>
+                            </button>
+                        </div>
+                        <a href="/worker/calendar" class="btn btn-secondary btn-sm today-agenda-link">
+                            <i class="lucide-calendar-days" aria-hidden="true"></i> Ver agenda
+                        </a>
+                    </div>
+                </header>
+
+                <ol class="today-list" th:unless="${todayAppointments.isEmpty()}">
+                    <li th:each="app : ${todayAppointments}" class="today-item"
+                        th:classappend="${(app.past ? ' is-past' : '') + (app.now ? ' is-now' : '') + (app.next ? ' is-next' : '')}"
+                        th:attr="data-worker=${app.workerId}"
+                        th:hidden="${todayOnlyMine and app.workerId != currentWorkerId}">
+                        <div class="today-time">
+                            <time th:datetime="${app.start}" th:text="${#temporals.format(app.start, 'HH:mm')}">11:00</time>
+                            <span class="today-end" th:text="${#temporals.format(app.end, 'HH:mm')}">11:50</span>
+                        </div>
+                        <div class="today-body">
+                            <div class="today-line">
+                                <a class="today-client" th:if="${app.clientHasCard}" th:href="@{/worker/clients/{id}(id=${app.clientId})}"
+                                   th:text="${app.clientName}">Sofía Martínez</a>
+                                <span class="today-client" th:unless="${app.clientHasCard}" th:text="${app.clientName}">Cliente</span>
+                                <span class="today-chip today-chip--now" th:if="${app.now}">Ahora</span>
+                                <span class="today-chip today-chip--next" th:if="${app.next}">Siguiente</span>
+                            </div>
+                            <p class="today-meta">
+                                <span th:text="${app.treatmentName}">Manicura rusa</span>
+                                <span class="today-worker"><span class="today-sep" aria-hidden="true">·</span><span th:text="${app.workerName != null} ? ${app.workerName} : 'Sin asignar'">Carlos Mendoza</span></span>
+                            </p>
+                            <p class="today-phone" th:if="${app.clientPhone != null}">
+                                <i class="lucide-phone" aria-hidden="true"></i>
+                                <th:block th:replace="~{fragments/tel :: link(${app.clientPhone})}"></th:block>
+                            </p>
+                            <p class="today-warning" th:if="${app.clientAllergies != null}">
+                                <i class="lucide-alert-triangle" aria-hidden="true"></i>
+                                <span><strong>Alergias:</strong> <th:block th:text="${app.clientAllergies}">Amoníaco</th:block></span>
+                            </p>
+                            <p class="today-warning" th:if="${app.clientNoShows > 0 and app.status.name() != 'NO_SHOW'}">
+                                <i class="lucide-alert-triangle" aria-hidden="true"></i>
+                                <span th:text="${app.clientNoShows == 1} ? 'No se presentó a 1 cita' : 'No se presentó a ' + ${app.clientNoShows} + ' citas'">No se presentó a 1 cita</span>
+                            </p>
+                        </div>
+                        <div class="today-side">
+                            <span class="badge" th:classappend="${app.statusCss()}" th:text="${app.statusLabel()}">Confirmada</span>
+                            <a class="btn btn-secondary btn-sm today-card-link" th:if="${app.clientHasCard}"
+                               th:href="@{/worker/clients/{id}(id=${app.clientId})}"
+                               th:attr="aria-label=${'Ficha de ' + app.clientName}">
+                                <i class="lucide-clipboard-list" aria-hidden="true"></i> <span>Ficha</span>
+                            </a>
+                        </div>
+                    </li>
+                </ol>
+
+                <p class="today-empty" th:hidden="${!todayAppointments.isEmpty() and !(todayOnlyMine and todayMineCount == 0)}"
+                   th:attr="data-empty-all=${todayAppointments.isEmpty()}">
+                    <i class="lucide-calendar-check" aria-hidden="true"></i>
+                    <span class="today-empty-mine" th:hidden="${todayAppointments.isEmpty()}">Hoy no tienes citas. En «Todo el centro» ves las de tus compañeros.</span>
+                    <span class="today-empty-all" th:hidden="${!todayAppointments.isEmpty()}">Hoy no hay citas en el centro.</span>
+                </p>
+            </section>
 
             <nav class="actions-grid" aria-label="Accesos directos">
                 <a href="/worker/calendar" class="action-card glass-panel">

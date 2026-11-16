@@ -28,7 +28,7 @@
                 <i class="lucide-phone" aria-hidden="true"></i>
                 <div>
                     <span class="hero-meta-label">Teléfono:</span>
-                    <span class="hero-meta-value" th:text="${center.phone}">Teléfono</span>
+                    <span class="hero-meta-value"><th:block th:replace="~{fragments/tel :: link(${center.phone})}"></th:block></span>
                 </div>
             </div>
             <div class="hero-meta-item">
@@ -46,10 +46,18 @@
                 </div>
             </div>
         </div>
-        <button type="button" class="btn btn-secondary hero-share" th:if="${centerSlug != null}"
-                th:attr="data-share-path=@{/c/{s}(s=${centerSlug})},data-share-title=${center.name}">
-            <i class="lucide-share-2" aria-hidden="true"></i> <span>Compartir</span>
-        </button>
+        <div class="hero-actions" th:if="${center.directionsUrl != null or centerSlug != null}">
+            <!--/* «Cómo llegar»: abre la ruta en Google Maps; en iPhone, iPad y Mac app.js deja elegir Apple Maps o Google Maps */-->
+            <a class="btn btn-primary hero-directions" th:if="${center.directionsUrl != null}"
+               th:href="${center.directionsUrl}" target="_blank" rel="noopener noreferrer"
+               th:attr="data-directions=${center.address},data-apple-maps-url=${center.appleMapsUrl}">
+                <i class="lucide-navigation" aria-hidden="true"></i> <span>Cómo llegar</span>
+            </a>
+            <button type="button" class="btn btn-secondary hero-share" th:if="${centerSlug != null}"
+                    th:attr="data-share-path=@{/c/{s}(s=${centerSlug})},data-share-title=${center.name}">
+                <i class="lucide-share-2" aria-hidden="true"></i> <span>Compartir</span>
+            </button>
+        </div>
         <p class="hero-share-status" role="status" aria-live="polite"></p>
     </div>
 </div>

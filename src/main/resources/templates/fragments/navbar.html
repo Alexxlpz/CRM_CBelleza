@@ -3,7 +3,8 @@
         Barra de navegación común.
         - brand(showSession): páginas públicas (muestra Login/Registro si no hay sesión).
         - client(backUrl, backLabel): zona de cliente.
-        - worker(backUrl, backLabel, notifications): panel del trabajador.
+        - worker(backUrl, backLabel, notifications): panel del trabajador. Arriba lleva los apartados del panel
+          (Agenda, Clientes, Tratamientos, Inventario) en vez de los enlaces de la web pública.
         Todas comparten los mismos fragmentos internos (enlaces, acciones de sesión y drawer móvil).
     */-->
 
@@ -19,7 +20,7 @@
                 <th:block th:replace="~{fragments/navbar :: hamburger}"></th:block>
             </div>
         </nav>
-        <th:block th:replace="~{fragments/navbar :: mobileDrawer(${showSession}, ${sessionRole})}"></th:block>
+        <th:block th:replace="~{fragments/navbar :: mobileDrawer(${showSession}, ${sessionRole}, false)}"></th:block>
     </th:block>
 
     <!-- ===== Navbar del cliente ===== -->
@@ -35,7 +36,7 @@
                 <th:block th:replace="~{fragments/navbar :: hamburger}"></th:block>
             </div>
         </nav>
-        <th:block th:replace="~{fragments/navbar :: mobileDrawer(true, 'CLIENT')}"></th:block>
+        <th:block th:replace="~{fragments/navbar :: mobileDrawer(true, 'CLIENT', false)}"></th:block>
     </th:block>
 
     <!-- ===== Navbar del trabajador ===== -->
@@ -44,14 +45,14 @@
             <div class="nav-left-group">
                 <th:block th:replace="~{fragments/navbar :: backButton(${backUrl}, ${backLabel})}"></th:block>
                 <th:block th:replace="~{fragments/navbar :: logo}"></th:block>
-                <th:block th:replace="~{fragments/navbar :: menuLinks}"></th:block>
+                <th:block th:replace="~{fragments/navbar :: workerLinks}"></th:block>
             </div>
             <div class="nav-right-group">
                 <th:block th:replace="~{fragments/navbar :: sessionActions('WORKER', true, ${notifications})}"></th:block>
                 <th:block th:replace="~{fragments/navbar :: hamburger}"></th:block>
             </div>
         </nav>
-        <th:block th:replace="~{fragments/navbar :: mobileDrawer(true, 'WORKER')}"></th:block>
+        <th:block th:replace="~{fragments/navbar :: mobileDrawer(true, 'WORKER', true)}"></th:block>
     </th:block>
 
     <!-- ===== Piezas internas ===== -->
@@ -70,6 +71,14 @@
         <a href="/centers" class="nav-menu-link" th:classappend="${activePage == 'centers'} ? ' active'" th:attr="aria-current=${activePage == 'centers'} ? 'page'">Centros</a>
         <a href="/register-center" class="nav-menu-link" th:classappend="${activePage == 'register-center'} ? ' active'" th:attr="aria-current=${activePage == 'register-center'} ? 'page'">Registra tu Centro</a>
         <a href="/contact" class="nav-menu-link" th:classappend="${activePage == 'contact'} ? ' active'" th:attr="aria-current=${activePage == 'contact'} ? 'page'">Contacto</a>
+    </div>
+
+    <!-- Apartados del panel del trabajador: lo que más usa en el día, a un toque desde cualquier pantalla -->
+    <div th:fragment="workerLinks" class="nav-links-menu">
+        <a href="/worker/calendar" class="nav-menu-link" th:classappend="${workerSection == 'calendar'} ? ' active'" th:attr="aria-current=${workerSection == 'calendar'} ? 'page'">Agenda</a>
+        <a href="/worker/clients" class="nav-menu-link" th:classappend="${workerSection == 'clients'} ? ' active'" th:attr="aria-current=${workerSection == 'clients'} ? 'page'">Clientes</a>
+        <a href="/worker/treatments" class="nav-menu-link" th:classappend="${workerSection == 'treatments'} ? ' active'" th:attr="aria-current=${workerSection == 'treatments'} ? 'page'">Tratamientos</a>
+        <a href="/worker/inventory" class="nav-menu-link" th:classappend="${workerSection == 'inventory'} ? ' active'" th:attr="aria-current=${workerSection == 'inventory'} ? 'page'">Inventario</a>
     </div>
 
     <th:block th:fragment="sessionActions(role, showSession, notifications)">
@@ -115,7 +124,8 @@
     </a>
 
     <!-- Menú lateral móvil (se controla desde /js/app.js) -->
-    <th:block th:fragment="mobileDrawer(showSession, role)">
+    <!-- panel = true en el panel del trabajador: «Navegación» lleva sus apartados en vez de la web pública -->
+    <th:block th:fragment="mobileDrawer(showSession, role, panel)">
         <div class="mobile-nav-backdrop" id="mobileNavBackdrop"></div>
         <aside class="mobile-nav-drawer" id="mobileNavDrawer" aria-hidden="true" aria-label="Menú">
             <div class="mobile-drawer-header">
@@ -133,7 +143,13 @@
             <div class="mobile-drawer-body">
                 <div class="mobile-drawer-section">
                     <div class="mobile-drawer-label">Navegación</div>
-                    <nav class="mobile-drawer-nav">
+                    <nav class="mobile-drawer-nav" th:if="${panel}">
+                        <a th:replace="~{fragments/navbar :: drawerLink('/worker/calendar', 'Agenda', ${workerSection == 'calendar'}, false)}"></a>
+                        <a th:replace="~{fragments/navbar :: drawerLink('/worker/clients', 'Clientes', ${workerSection == 'clients'}, false)}"></a>
+                        <a th:replace="~{fragments/navbar :: drawerLink('/worker/treatments', 'Tratamientos', ${workerSection == 'treatments'}, false)}"></a>
+                        <a th:replace="~{fragments/navbar :: drawerLink('/worker/inventory', 'Inventario', ${workerSection == 'inventory'}, false)}"></a>
+                    </nav>
+                    <nav class="mobile-drawer-nav" th:unless="${panel}">
                         <a th:replace="~{fragments/navbar :: drawerLink('/home', 'Inicio', ${activePage == 'home'}, false)}"></a>
                         <a th:replace="~{fragments/navbar :: drawerLink('/centers', 'Centros', ${activePage == 'centers'}, false)}"></a>
                         <a th:replace="~{fragments/navbar :: drawerLink('/register-center', 'Registra tu Centro', ${activePage == 'register-center'}, false)}"></a>

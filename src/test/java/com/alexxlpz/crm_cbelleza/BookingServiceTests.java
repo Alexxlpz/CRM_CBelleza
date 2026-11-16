@@ -24,6 +24,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /** Reglas de reserva: horario, tratamiento del centro, franjas ocupadas y aislamiento por centro. */
 @SpringBootTest
@@ -52,10 +53,15 @@ class BookingServiceTests {
      */
     private User client() {
         if (client == null) {
-            client = users.save(User.builder().name("Cliente " + UUID.randomUUID())
-                    .email(UUID.randomUUID() + "@ejemplo.com").role(Role.CLIENT).build());
+            client = newClient();
         }
         return client;
+    }
+
+    /** Otro cliente distinto: una misma persona no puede tener dos citas a la vez. */
+    private User newClient() {
+        return users.save(User.builder().name("Cliente " + UUID.randomUUID())
+                .email(UUID.randomUUID() + "@ejemplo.com").role(Role.CLIENT).build());
     }
 
     private Long centerOf(String email) {
@@ -99,7 +105,7 @@ class BookingServiceTests {
         Long workerId = users.findByEmailIgnoreCase(TestUsers.WORKER_CENTER_1).orElseThrow().getId();
 
         Appointment first = bookingService.requestBooking(client().getId(), center, treatmentId, slot);
-        Appointment second = bookingService.requestBooking(client().getId(), center, treatmentId, slot);
+        Appointment second = bookingService.requestBooking(newClient().getId(), center, treatmentId, slot);
 
         bookingService.approve(center, first.getId(), workerId, null, "ok");
         assertThrows(BusinessRuleException.class, () -> bookingService.approve(center, second.getId(), workerId, null, "ok"));
@@ -117,11 +123,11 @@ class BookingServiceTests {
 
         Appointment first = bookingService.requestBooking(client().getId(), center, treatmentId, slot);
         bookingService.approve(center, first.getId(), carlos, null, null);
-        Appointment second = bookingService.requestBooking(client().getId(), center, treatmentId, slot);
+        Appointment second = bookingService.requestBooking(newClient().getId(), center, treatmentId, slot);
         bookingService.approve(center, second.getId(), lucia, null, null);
 
         assertThrows(BusinessRuleException.class,
-                () -> bookingService.requestBooking(client().getId(), center, treatmentId, slot));
+                () -> bookingService.requestBooking(newClient().getId(), center, treatmentId, slot));
     }
 
     @Test
@@ -130,5 +136,49 @@ class BookingServiceTests {
         Long center2 = centerOf(TestUsers.WORKER_CENTER_2);
         Appointment app = bookingService.requestBooking(client().getId(), center1, treatmentOf(center1).getId(), farMonday(25, 10));
         assertThrows(ResourceNotFoundException.class, () -> bookingService.reject(center2, app.getId(), "no"));
+    }
+
+    /** Una misma persona no puede pedir dos citas que se pisan, ni en el mismo centro ni en otro. */
+    @Test
+    void clientCannotBookTwoAppointmentsAtTheSameTime() {
+        Long center1 = centerOf(TestUsers.WORKER_CENTER_1);
+        Long center2 = centerOf(TestUsers.WORKER_CENTER_2);
+        User someone = newClient();
+        LocalDateTime slot = farMonday(26, 10);
+        bookingService.requestBooking(someone.getId(), center1, treatmentOf(center1).getId(), slot);
+
+        BusinessRuleException sameCenter = assertThrows(BusinessRuleException.class, () -> bookingService.requestBooking(
+                someone.getId(), center1, treatmentOf(center1).getId(), slot));
+        assertTrue(sameCenter.getMessage().startsWith("Ya tienes una cita a esa hora"));
+        assertThrows(BusinessRuleException.class, () -> bookingService.requestBooking(
+                someone.getId(), center2, treatmentOf(center2).getId(), slot.plusMinutes(15)));
+    }
+
+    /** En la primera hora libre tras la primera cita ya se puede pedir otra, y otra persona sí puede pedir la misma hora. */
+    @Test
+    void backToBackAndOtherClientsAreAllowed() {
+        Long center = centerOf(TestUsers.WORKER_CENTER_1);
+        Treatment treatment = treatmentOf(center);
+        User someone = newClient();
+        LocalDateTime slot = farMonday(29, 10);
+        bookingService.requestBooking(someone.getId(), center, treatment.getId(), slot);
+
+        // Las horas van de media en media: la siguiente que no pisa la primera cita
+        int nextFreeMinutes = (treatment.getDuration() + 29) / 30 * 30;
+        bookingService.requestBooking(someone.getId(), center, treatment.getId(), slot.plusMinutes(nextFreeMinutes));
+        bookingService.requestBooking(newClient().getId(), center, treatment.getId(), slot);
+    }
+
+    /** Una cita anulada ya no ocupa: se puede volver a pedir esa hora. */
+    @Test
+    void cancelledAppointmentFreesTheClient() {
+        Long center = centerOf(TestUsers.WORKER_CENTER_1);
+        User someone = newClient();
+        LocalDateTime slot = farMonday(28, 10);
+        Appointment first = bookingService.requestBooking(someone.getId(), center, treatmentOf(center).getId(), slot);
+        bookingService.cancelByClient(someone.getId(), first.getId());
+
+        assertEquals(AppointmentStatus.PENDING, bookingService.requestBooking(
+                someone.getId(), center, treatmentOf(center).getId(), slot).getStatus());
     }
 }

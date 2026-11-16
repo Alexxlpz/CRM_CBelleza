@@ -62,14 +62,15 @@
             </section>
 
             <div class="appointments-list">
-                <!-- Próximas: lo que el cliente tiene que mirar o hacer. La más cercana, destacada -->
+                <!-- Próximas: lo que el cliente tiene que mirar o hacer. La más cercana, destacada; justo después de
+                     reservar, la recién pedida va la primera y en verde -->
                 <section class="appointments-block" aria-labelledby="upcomingTitle">
                     <h2 class="appointments-block-title" id="upcomingTitle">Próximas citas
                         <span class="appointments-block-count" th:if="${!appointments.upcoming().isEmpty()}"
                               th:text="${appointments.upcoming().size()}">9</span></h2>
                     <div class="appointments-grid" th:if="${!appointments.upcoming().isEmpty()}">
                         <th:block th:each="app, stat : ${appointments.upcoming()}">
-                            <div th:replace="~{fragments/appointment-card :: card(${app}, ${stat.first})}"></div>
+                            <div th:replace="~{fragments/appointment-card :: card(${app}, ${app.id == nextAppointmentId}, ${justBookedId != null and app.id == justBookedId})}"></div>
                         </th:block>
                     </div>
                     <div class="no-appointments-box glass-panel" th:if="${appointments.upcoming().isEmpty()}">

@@ -31,7 +31,7 @@
                     <div class="profile-contact-chips">
                         <span class="profile-chip" th:if="${!#strings.isEmpty(client.phone)}">
                             <i class="lucide-phone" aria-hidden="true"></i>
-                            <span th:text="${client.phone}">+34 600 111 222</span>
+                            <th:block th:replace="~{fragments/tel :: link(${client.phone})}"></th:block>
                         </span>
                         <span class="profile-chip" th:if="${!#strings.isEmpty(client.email)}">
                             <i class="lucide-mail" aria-hidden="true"></i>
@@ -51,7 +51,43 @@
                     <i class="lucide-sliders" aria-hidden="true"></i>
                     <span>Configurar Plantilla</span>
                 </a>
+                <!-- Abre «Nueva cita» de la agenda con este cliente ya elegido -->
+                <a class="btn btn-primary client-book-btn" th:href="@{/worker/calendar(nuevaCita=${client.id})}">
+                    <i class="lucide-calendar-plus" aria-hidden="true"></i>
+                    <span>Darle cita</span>
+                </a>
             </div>
+
+            <!-- Resumen de un vistazo: visitas, gasto, última visita y lo que más repite -->
+            <dl class="client-visit-summary" th:if="${visitSummary.hasVisits() or !sales.isEmpty()}">
+                <div class="visit-stat">
+                    <dt><i class="lucide-repeat" aria-hidden="true"></i> Visitas</dt>
+                    <dd th:text="${visitSummary.visits()}">18</dd>
+                </div>
+                <div class="visit-stat">
+                    <dt><i class="lucide-wallet" aria-hidden="true"></i> Gasto total</dt>
+                    <!--/* La cifra solo la ve el dueño (como el resumen del mes del panel); el resto, tapada.
+                         Se tapa en el servidor: el importe no llega a la página del trabajador estándar. */-->
+                    <dd th:if="${isCenterOwner}" th:text="${#numbers.formatDecimal(visitSummary.totalSpent(), 1, 'POINT', 2, 'COMMA')} + ' €'">672,90 €</dd>
+                    <dd th:unless="${isCenterOwner}" class="visit-stat-hidden" aria-label="Importe oculto">*****,** €</dd>
+                </div>
+                <div class="visit-stat">
+                    <dt><i class="lucide-history" aria-hidden="true"></i> Última visita</dt>
+                    <dd th:if="${visitSummary.hasVisits()}">
+                        <span th:text="${visitSummary.lastVisitLabel()}">Hace 7 días</span>
+                        <small th:text="${#temporals.format(visitSummary.lastVisit(), 'dd/MM/yyyy')}">07/11/2026</small>
+                    </dd>
+                    <dd th:unless="${visitSummary.hasVisits()}">Aún no ha venido</dd>
+                </div>
+                <div class="visit-stat">
+                    <dt><i class="lucide-sparkles" aria-hidden="true"></i> Lo que más repite</dt>
+                    <dd th:if="${visitSummary.favoriteTreatment() != null}">
+                        <span th:text="${visitSummary.favoriteTreatment()}">Depilación láser</span>
+                        <small th:text="${visitSummary.favoriteCount()} + ' veces'">11 veces</small>
+                    </dd>
+                    <dd th:unless="${visitSummary.favoriteTreatment() != null}">Aún nada</dd>
+                </div>
+            </dl>
         </div>
 
         <!-- Avisos de los resúmenes de tratamiento (reacciones, productos que no le sientan bien...) -->
@@ -214,7 +250,7 @@
                     <div>
                         <h2 class="panel-title" id="salesTitle">Productos comprados</h2>
                         <span class="client-appointments-count" th:if="${!sales.isEmpty()}"
-                              th:text="${sales.size()} + (${sales.size() == 1} ? ' compra · ' : ' compras · ') + ${#numbers.formatDecimal(salesTotal, 1, 'POINT', 2, 'COMMA')} + ' €'">3 compras · 45,00 €</span>
+                              th:text="${sales.size()} + (${sales.size() == 1} ? ' compra' : ' compras') + (${isCenterOwner} ? ' · ' + ${#numbers.formatDecimal(salesTotal, 1, 'POINT', 2, 'COMMA')} + ' €' : '')">3 compras · 45,00 €</span>
                     </div>
                     <button type="button" class="btn btn-primary btn-sm" data-modal-open="productSaleModal" th:disabled="${saleItems.isEmpty()}"
                             th:title="${saleItems.isEmpty()} ? 'Añade productos al inventario para poder venderlos'">
@@ -268,8 +304,11 @@
                     </select>
                 </div>
 
-                <div class="history-list" th:if="${appointments != null and !appointments.isEmpty()}">
-                    <div class="history-item" th:each="app : ${appointments}" th:id="'cita-' + ${app.id}"
+                <!-- Se ven las 6 primeras (3 filas de 2 en escritorio); «Ver las N citas» enseña el resto. Al buscar o
+                     filtrar se mira en todas. Sin JavaScript se ven todas (el plegado lo activa el script). -->
+                <div class="history-list" id="historyList" th:if="${appointments != null and !appointments.isEmpty()}">
+                    <div class="history-item" th:each="app, stat : ${appointments}" th:id="'cita-' + ${app.id}"
+                         th:classappend="${stat.index >= 6} ? 'history-item--extra'"
                          th:data-date="${#temporals.format(app.dateTime, 'dd/MM/yyyy')}" th:data-treatment="${app.treatment.name}">
                         <div class="history-top">
                             <span class="history-date">
@@ -333,6 +372,12 @@
                         </button>
                     </div>
                 </div>
+
+                <button type="button" class="btn btn-secondary history-more" id="historyMore" hidden
+                        th:if="${appointments != null and appointments.size() > 6}">
+                    <i class="lucide-chevrons-down" aria-hidden="true"></i>
+                    <span th:text="${'Ver las ' + appointments.size() + ' citas'}">Ver las 25 citas</span>
+                </button>
 
                 <div class="notification-empty notification-empty--padded" id="historyNoResults" hidden>
                     <i class="lucide-search-x" aria-hidden="true"></i>
@@ -440,6 +485,31 @@
                 });
             }));
 
+            // Historial plegado: solo las 6 primeras hasta pulsar «Ver las N citas» (o si se llega con #cita-<id> a una plegada)
+            const historyList = document.getElementById('historyList');
+            const historyMore = document.getElementById('historyMore');
+            let historyExpanded = false;
+            const setSearching = searching => {
+                if (!historyList || !historyMore) return;
+                historyList.classList.toggle('is-collapsed', !historyExpanded && !searching);
+                historyMore.hidden = historyExpanded || searching;
+            };
+            if (historyList && historyMore) {
+                const target = location.hash.startsWith('#cita-') ? document.getElementById(location.hash.slice(1)) : null;
+                historyExpanded = !!target?.classList.contains('history-item--extra');
+                setSearching(false);
+                historyMore.addEventListener('click', () => {
+                    historyExpanded = true;
+                    setSearching(false);
+                    // El botón desaparece: el foco pasa a la primera cita que estaba plegada
+                    const first = historyList.querySelector('.history-item--extra:not([hidden])');
+                    if (first) {
+                        first.tabIndex = -1;
+                        first.focus({ preventScroll: true });
+                    }
+                });
+            }
+
             // Filtro del historial: por tratamiento y por texto, sin distinguir mayúsculas ni tildes
             const historySearch = document.getElementById('historySearch');
             const historyTreatment = document.getElementById('historyTreatment');
@@ -462,6 +532,8 @@
                 const applyFilter = () => {
                     const words = normalize(historySearch.value).split(/\s+/).filter(Boolean);
                     const treatment = historyTreatment.value;
+                    // Buscando o filtrando se mira en todas las citas, también en las plegadas
+                    setSearching(words.length > 0 || treatment !== '');
                     let visible = 0;
                     items.forEach(item => {
                         const text = searchableText(item);

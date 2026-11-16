@@ -4,6 +4,7 @@ import com.alexxlpz.crm_cbelleza.security.AppUserDetails;
 import com.alexxlpz.crm_cbelleza.services.AgendaBlockService;
 import com.alexxlpz.crm_cbelleza.services.AppointmentService;
 import com.alexxlpz.crm_cbelleza.services.CenterService;
+import com.alexxlpz.crm_cbelleza.services.ClientCardService;
 import com.alexxlpz.crm_cbelleza.services.OpeningHoursService;
 import com.alexxlpz.crm_cbelleza.services.TreatmentService;
 import com.alexxlpz.crm_cbelleza.services.UserService;
@@ -12,10 +13,12 @@ import com.alexxlpz.crm_cbelleza.booking.OpeningHours;
 import com.alexxlpz.crm_cbelleza.entities.User;
 import com.alexxlpz.crm_cbelleza.dto.AgendaBlockDTO;
 import com.alexxlpz.crm_cbelleza.entities.Center;
+import com.alexxlpz.crm_cbelleza.exceptions.ResourceNotFoundException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.DayOfWeek;
 import java.util.LinkedHashMap;
@@ -36,6 +39,7 @@ public class WorkerCalendarController {
     private final CenterService centerService;
     private final OpeningHoursService openingHours;
     private final WorkerHoursService workerHours;
+    private final ClientCardService clientCardService;
 
     public WorkerCalendarController(AppointmentService appointmentService,
                                     AgendaBlockService blockService,
@@ -43,8 +47,10 @@ public class WorkerCalendarController {
                                     UserService userService,
                                     CenterService centerService,
                                     OpeningHoursService openingHours,
-                                    WorkerHoursService workerHours) {
+                                    WorkerHoursService workerHours,
+                                    ClientCardService clientCardService) {
         this.workerHours = workerHours;
+        this.clientCardService = clientCardService;
         this.appointmentService = appointmentService;
         this.blockService = blockService;
         this.treatmentService = treatmentService;
@@ -54,8 +60,11 @@ public class WorkerCalendarController {
     }
 
     @GetMapping("/worker/calendar")
-    public String calendar(@AuthenticationPrincipal AppUserDetails worker, Model model) {
+    public String calendar(@AuthenticationPrincipal AppUserDetails worker,
+                           @RequestParam(name = "nuevaCita", required = false) Long newAppointmentClientId,
+                           Model model) {
         Long centerId = worker.getCenterId();
+        model.addAttribute("newAppointmentClient", newAppointmentClient(centerId, newAppointmentClientId));
         model.addAttribute("appointments", appointmentService.getCalendarAppointments(centerId));
         model.addAttribute("blocks", blockService.upcoming(centerId).stream().map(AgendaBlockDTO::of).toList());
         Center center = centerService.getCenterById(centerId);
@@ -73,6 +82,29 @@ public class WorkerCalendarController {
                         .map(t -> Map.of("id", t.getId(), "name", t.getName(), "duration", t.getDuration(), "price", t.getPrice()))
                         .toList()));
         return "worker/calendar";
+    }
+
+    /**
+     * «Darle cita» desde la ficha: el cliente que «Nueva cita» abre ya elegido (id, nombre y teléfono, como el buscador
+     * de clientes). Solo si es de la cartera del centro y no ha borrado su cuenta; si no, la agenda se abre sin más.
+     */
+    private Map<String, Object> newAppointmentClient(Long centerId, Long clientId) {
+        if (clientId == null) {
+            return null;
+        }
+        try {
+            User client = clientCardService.requireClientOfCenter(centerId, clientId);
+            if (client.isDeleted()) {
+                return null;
+            }
+            Map<String, Object> data = new LinkedHashMap<>();
+            data.put("id", client.getId());
+            data.put("name", client.getName());
+            data.put("phone", client.getPhone() != null ? client.getPhone() : "");
+            return data;
+        } catch (ResourceNotFoundException e) {
+            return null;
+        }
     }
 
     /** Quien tiene horario propio: su nombre y, por día (1 = lunes), sus horas en texto; sin entrada, no trabaja. */

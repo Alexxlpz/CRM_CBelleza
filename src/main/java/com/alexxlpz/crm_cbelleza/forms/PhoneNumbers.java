@@ -155,6 +155,17 @@ public final class PhoneNumbers {
             Map.entry("PA", "507"), Map.entry("GQ", "240"));
 
     /**
+     * Enlace para llamar desde el móvil («tel:+34612345678»): solo cifras y el «+» inicial. Nulo si no hay número, y
+     * entonces el teléfono se pinta como texto.
+     */
+    public static String telHref(String phone) {
+        if (phone == null) return null;
+        String digits = phone.replaceAll("[^\\d+]", "");
+        if (digits.indexOf('+', 1) > 0) digits = digits.charAt(0) + digits.substring(1).replace("+", "");
+        return digits.replace("+", "").isEmpty() ? null : "tel:" + digits;
+    }
+
+    /**
      * Prefijo que sale elegido al abrir un formulario: el del país desde el que se conecta la persona
      * ({@code CF-IPCountry}, que añade Cloudflare) o, si no se sabe, el del idioma del navegador (es-MX → México).
      * España si no hay ninguna pista o el país no se conoce.

@@ -1988,6 +1988,29 @@ body.modal-open {
     color: var(--success-strong);
 }
 
+/* Aviso con título (p. ej. «Solicitud enviada» al reservar): el título en grande y el texto debajo */
+.alert--titled {
+    align-items: flex-start;
+}
+
+.alert--titled i {
+    margin-top: 1px;
+}
+
+.alert-body {
+    display: grid;
+    gap: 2px;
+}
+
+.alert-title {
+    font-size: 16px;
+    font-weight: 800;
+}
+
+.alert-body span {
+    font-weight: 500;
+}
+
 .alert-error {
     background: var(--error-bg);
     border-color: var(--error-border);
@@ -2821,6 +2844,34 @@ body.modal-open {
     flex: 1 1 140px;
     padding: 11px 20px;
     border-radius: 12px;
+}
+
+/* Hoja de abajo en móvil (p. ej. «Cómo llegar» en iPhone); en pantallas anchas es un modal normal */
+.directions-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.directions-options .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 13px 20px;
+    border-radius: 12px;
+}
+
+@media (max-width: 600px) {
+    .ui-modal-overlay--sheet {
+        align-items: flex-end;
+        padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
+    }
+
+    .ui-modal--sheet {
+        max-width: none;
+        border-radius: 20px;
+    }
 }
 
 .ui-modal-close {
@@ -4097,6 +4148,21 @@ body.media-viewer-open {
         height: 72px;
         font-size: 28px;
     }
+}
+
+/* ---------- Teléfono que llama al pulsarlo (fragments/tel.html y Cuquora.telLink) ---------- */
+.tel-link {
+    color: var(--primary-text);
+    font-weight: 700;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+    white-space: nowrap;
+}
+
+.tel-link:hover,
+.tel-link:focus-visible {
+    text-decoration-thickness: 2px;
 }
 
 /* ---------- Escala de porcentajes: pct-0 … pct-100 ---------- */

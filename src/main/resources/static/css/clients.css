@@ -1152,6 +1152,21 @@
     }
 }
 
+/* Historial plegado (client_detail.html): las 6 primeras y «Ver las N citas» */
+.history-list.is-collapsed .history-item--extra {
+    display: none;
+}
+
+.history-more {
+    width: 100%;
+    justify-content: center;
+    margin-top: 14px;
+}
+
+.history-more[hidden] {
+    display: none;
+}
+
 /* Filtro del historial de citas de la ficha */
 .history-filters {
     display: flex;
@@ -1209,4 +1224,80 @@
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
+}
+
+/* ---- Ficha: «Darle cita» y resumen de visitas en la cabecera ---- */
+.client-book-btn {
+    gap: 8px;
+}
+
+.client-visit-summary {
+    flex-basis: 100%;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin: 0;
+    padding-top: 18px;
+    border-top: 1px solid var(--border-soft);
+}
+
+.visit-stat {
+    min-width: 0;
+    padding: 12px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--border-radius-md);
+}
+
+.visit-stat dt {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: var(--text-muted);
+}
+
+.visit-stat dt i {
+    color: var(--primary-text);
+}
+
+.visit-stat dd {
+    margin: 4px 0 0;
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--text-main);
+    overflow-wrap: anywhere;
+}
+
+.visit-stat dd small {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+@media (max-width: 960px) {
+    .client-visit-summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .client-visit-summary {
+        padding-top: 14px;
+        gap: 10px;
+    }
+
+    .visit-stat dd {
+        font-size: 15px;
+    }
+}
+
+/* Gasto total tapado para quien no es el dueño */
+.visit-stat dd.visit-stat-hidden {
+    color: var(--text-muted);
+    letter-spacing: 1px;
 }

@@ -4,8 +4,11 @@ import com.alexxlpz.crm_cbelleza.booking.CenterTimeZones;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.Locale;
 
 @Entity
 @Table(name = "centers")
@@ -129,5 +132,31 @@ public class Center {
 
     public boolean isLoyaltyEnabled() {
         return loyaltyMode != null && loyaltyMode != LoyaltyMode.OFF;
+    }
+
+    /**
+     * Enlace «Cómo llegar» de Google Maps (ruta hasta el centro desde donde esté la persona). Funciona en cualquier
+     * dispositivo: abre la app de Google Maps si la tiene o la web. Nulo si el centro no tiene coordenadas ni dirección.
+     */
+    public String getDirectionsUrl() {
+        String destination = directionsDestination();
+        return destination == null ? null : "https://www.google.com/maps/dir/?api=1&destination=" + destination;
+    }
+
+    /** El mismo destino en Apple Maps, para iPhone, iPad y Mac. Nulo si el centro no tiene coordenadas ni dirección. */
+    public String getAppleMapsUrl() {
+        String destination = directionsDestination();
+        return destination == null ? null : "https://maps.apple.com/?daddr=" + destination;
+    }
+
+    /** Coordenadas si las hay (son exactas: se eligen en el mapa al dar de alta el centro); si no, la dirección escrita. */
+    private String directionsDestination() {
+        if (latitude != null && longitude != null && Double.isFinite(latitude) && Double.isFinite(longitude)) {
+            return String.format(Locale.ROOT, "%.6f,%.6f", latitude, longitude);
+        }
+        if (address != null && !address.isBlank()) {
+            return URLEncoder.encode(address.trim(), StandardCharsets.UTF_8);
+        }
+        return null;
     }
 }

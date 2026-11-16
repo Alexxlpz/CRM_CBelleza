@@ -1,9 +1,12 @@
 package com.alexxlpz.crm_cbelleza.entities;
 
+import com.alexxlpz.crm_cbelleza.booking.CenterTimeZones;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -143,9 +146,24 @@ public class Appointment {
         this.lastChangeAt = at;
     }
 
-    /** Aún no ha empezado (hora del servidor): el cliente todavía puede anularla. */
+    /** Aún no ha empezado (hora local del centro): el cliente todavía puede anularla. */
     public boolean isUpcoming() {
-        return dateTime != null && dateTime.isAfter(LocalDateTime.now());
+        return dateTime != null && dateTime.isAfter(centerNow());
+    }
+
+    /**
+     * «Ahora» en la hora local del centro, que es en la que se guarda {@link #dateTime}. Si el centro no se puede
+     * leer (cita sin centro o fuera de la sesión de Hibernate), la hora del servidor (TZ=Europe/Madrid en Docker).
+     */
+    private LocalDateTime centerNow() {
+        try {
+            if (center != null) {
+                return LocalDateTime.now(ZoneId.of(center.getTimeZone() != null ? center.getTimeZone() : CenterTimeZones.DEFAULT));
+            }
+        } catch (RuntimeException ignored) {
+            // Centro sin cargar y sin sesión: la hora del servidor, como antes
+        }
+        return LocalDateTime.now();
     }
 
     /** El resumen del tratamiento se escribe cuando la cita confirmada ya ha empezado ({@code now}: hora del centro). */
@@ -175,20 +193,14 @@ public class Appointment {
         return this.dateTime.plusMinutes(durationMinutes);
     }
 
-    @PostLoad
-    public void updateStatusIfCompleted() {
-        if (this.status == AppointmentStatus.CONFIRMED && this.dateTime != null) {
-            LocalDateTime end = getEndDateTime();
-            if (end != null && !LocalDateTime.now().isBefore(end)) {
-                this.status = AppointmentStatus.COMPLETED;
-            }
-        }
-    }
-
+    /**
+     * Una cita confirmada cuya hora de fin (hora del centro) ya ha pasado se lee como COMPLETED. En la base de datos
+     * la guarda así el {@code AppointmentStatusScheduler} cada minuto; aquí no se cambia el campo al cargarla.
+     */
     public AppointmentStatus getStatus() {
         if (this.status == AppointmentStatus.CONFIRMED && this.dateTime != null) {
             LocalDateTime end = getEndDateTime();
-            if (end != null && !LocalDateTime.now().isBefore(end)) {
+            if (end != null && !centerNow().isBefore(end)) {
                 return AppointmentStatus.COMPLETED;
             }
         }
@@ -198,7 +210,7 @@ public class Appointment {
     public void setStatus(AppointmentStatus status) {
         if (status == AppointmentStatus.CONFIRMED && this.dateTime != null) {
             LocalDateTime end = getEndDateTime();
-            if (end != null && !LocalDateTime.now().isBefore(end)) {
+            if (end != null && !centerNow().isBefore(end)) {
                 this.status = AppointmentStatus.COMPLETED;
                 return;
             }

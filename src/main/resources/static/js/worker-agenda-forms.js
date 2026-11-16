@@ -174,10 +174,11 @@
         }
     }
 
-    function openNew({ date, minute } = {}) {
+    /** Nueva cita; con {@code client} (desde «Darle cita» de la ficha) ya va elegido y el foco pasa al tratamiento. */
+    function openNew({ date, minute, client } = {}) {
         newForm.reset();
         showError(newForm, '');
-        selectClient(null);
+        selectClient(client || null);
         updateClientMode();
         newTreatment.innerHTML = treatments.length
             ? treatments.map(t => `<option value="${esc(String(t.id))}">${esc(t.name)} · ${esc(String(t.duration))} min</option>`).join('')
@@ -187,7 +188,7 @@
         fillTimes(newTime, newDate.value, minute ?? null, treatmentDuration(newTreatment.value));
         fillWorkers(newWorker, me);
         Cuquora.openModal('newAppointmentModal');
-        setTimeout(() => clientSearch.focus(), 50);
+        setTimeout(() => (client ? newTreatment : clientSearch).focus(), 50);
     }
 
     newForm.querySelectorAll('input[name="clientMode"]').forEach(radio => radio.addEventListener('change', updateClientMode));

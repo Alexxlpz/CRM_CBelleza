@@ -152,6 +152,24 @@
     color: var(--text-muted);
 }
 
+/* «Anular» a la izquierda y «Cómo llegar» a la derecha, en la misma fila */
+.appointment-card-actions {
+    flex: 1 1 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.appointment-directions {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    /* Más ancho que su texto para que se vea como la acción principal, sin llenar toda la fila */
+    width: min(240px, 58%);
+    margin-left: auto;
+}
+
 .btn-link-danger {
     display: inline-flex;
     align-items: center;
@@ -204,6 +222,22 @@
     font-size: 12.5px;
     font-weight: 700;
     color: var(--primary-text);
+}
+
+/* Recién pedida (solo al volver de reservar): borde verde y un halo suave, como el aviso «Solicitud enviada» */
+.appointment-card--just-booked {
+    border: 2px solid var(--success-strong);
+    box-shadow: 0 0 0 5px var(--success-bg), var(--shadow-soft);
+}
+
+.appointment-just-booked-label {
+    color: var(--success-strong);
+}
+
+/* Fecha de la cita («Hoy · 11:00»): lo primero que se busca en la tarjeta */
+.appointment-when {
+    font-weight: 700;
+    color: var(--text-main);
 }
 
 .appointments-history > summary {

@@ -1,5 +1,6 @@
 package com.alexxlpz.crm_cbelleza.services;
 
+import com.alexxlpz.crm_cbelleza.booking.CenterClock;
 import com.alexxlpz.crm_cbelleza.booking.ClientVisitAnalyzer;
 import com.alexxlpz.crm_cbelleza.dto.AppointmentCalendarDTO;
 import com.alexxlpz.crm_cbelleza.entities.Appointment;
@@ -13,8 +14,10 @@ import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /** Consultas de citas (solo lectura). Los cambios de estado están en {@link BookingService}. */
@@ -30,6 +33,7 @@ public class AppointmentService {
     private final AppointmentCalendarMapper calendarMapper;
     private final TreatmentSummaryService summaryService;
     private final AppointmentMediaService mediaService;
+    private final ClientAllergyService allergyService;
     private final Clock clock;
 
     public AppointmentService(AppointmentRepository appointmentRepository,
@@ -37,12 +41,14 @@ public class AppointmentService {
                               AppointmentCalendarMapper calendarMapper,
                               TreatmentSummaryService summaryService,
                               AppointmentMediaService mediaService,
+                              ClientAllergyService allergyService,
                               Clock clock) {
         this.appointmentRepository = appointmentRepository;
         this.visitAnalyzer = visitAnalyzer;
         this.calendarMapper = calendarMapper;
         this.summaryService = summaryService;
         this.mediaService = mediaService;
+        this.allergyService = allergyService;
         this.clock = clock;
     }
 
@@ -56,13 +62,13 @@ public class AppointmentService {
         appointments.stream()
                 .filter(app -> app.getStatus() == AppointmentStatus.PROPOSED)
                 .forEach(app -> app.getProposals().size());
-        LocalDateTime now = LocalDateTime.now(clock);
+        // Cada cita, con la hora local de su centro (el cliente puede tener citas en centros de otra zona)
         List<Appointment> ordered = new ArrayList<>(appointments.stream()
-                .filter(app -> !app.getDateTime().isBefore(now))
+                .filter(app -> !hasStarted(app))
                 .sorted(Comparator.comparing(Appointment::getDateTime))
                 .toList());
         appointments.stream()
-                .filter(app -> app.getDateTime().isBefore(now))
+                .filter(this::hasStarted)
                 .forEach(ordered::add);
         return ordered;
     }
@@ -72,15 +78,19 @@ public class AppointmentService {
      * empezado), de la más cercana a la más lejana, y el historial con todo lo demás, de la más reciente a la más antigua.
      */
     public ClientAppointments getClientAppointmentsSplit(Long clientId) {
-        LocalDateTime now = LocalDateTime.now(clock);
         List<Appointment> upcoming = new ArrayList<>();
         List<Appointment> history = new ArrayList<>();
         for (Appointment app : getClientAppointments(clientId)) {
             AppointmentStatus status = app.getStatus();
             boolean pending = status.isOpen() || status == AppointmentStatus.CONFIRMED;
-            (pending && app.getDateTime().isAfter(now) ? upcoming : history).add(app);
+            (pending && app.getDateTime().isAfter(CenterClock.now(clock, app.getCenter())) ? upcoming : history).add(app);
         }
         return new ClientAppointments(upcoming, history);
+    }
+
+    /** Ya ha llegado su hora, en la hora local de su centro. */
+    private boolean hasStarted(Appointment app) {
+        return app.getDateTime().isBefore(CenterClock.now(clock, app.getCenter()));
     }
 
     /** Una cita del cliente, con tratamiento (y quién lo hace), centro y profesional. */
@@ -95,6 +105,45 @@ public class AppointmentService {
         public boolean isEmpty() {
             return upcoming.isEmpty() && history.isEmpty();
         }
+
+        /** Las mismas citas, con la que se acaba de pedir la primera de las próximas (si está entre ellas). */
+        public ClientAppointments withFirst(Long appointmentId) {
+            if (appointmentId == null || upcoming.stream().noneMatch(a -> appointmentId.equals(a.getId()))) {
+                return this;
+            }
+            List<Appointment> reordered = new ArrayList<>(upcoming.size());
+            upcoming.stream().filter(a -> appointmentId.equals(a.getId())).forEach(reordered::add);
+            upcoming.stream().filter(a -> !appointmentId.equals(a.getId())).forEach(reordered::add);
+            return new ClientAppointments(reordered, history);
+        }
+    }
+
+    /**
+     * La próxima cita del cliente para la tarjeta de arriba del buscador de centros (la misma que «Tu próxima cita» de
+     * «Mis reservas»), con el día dicho como se dice («Hoy», «Mañana», «vie 20 nov») y cuántas tiene por venir.
+     */
+    public Optional<NextAppointment> nextForClient(Long clientId) {
+        List<Appointment> upcoming = getClientAppointmentsSplit(clientId).upcoming();
+        if (upcoming.isEmpty()) {
+            return Optional.empty();
+        }
+        Appointment next = upcoming.get(0);
+        String day = FriendlyDates.day(next.getDateTime().toLocalDate(), CenterClock.now(clock, next.getCenter()).toLocalDate());
+        return Optional.of(new NextAppointment(next, day, upcoming.size()));
+    }
+
+    /** @param dayLabel «Hoy», «Mañana» o «vie 20 nov»; {@code upcomingCount} = citas por venir (para «Mis citas (N)») */
+    public record NextAppointment(Appointment appointment, String dayLabel, int upcomingCount) {
+    }
+
+    /** Fecha de cada cita como se dice («Hoy · 11:00», «Mañana, lun 16 nov · 09:00»), con el hoy de su centro. */
+    public Map<Long, String> friendlyDates(List<Appointment> appointments) {
+        Map<Long, String> labels = new HashMap<>();
+        for (Appointment app : appointments) {
+            labels.put(app.getId(), FriendlyDates.dateTime(app.getDateTime(),
+                    CenterClock.now(clock, app.getCenter()).toLocalDate()));
+        }
+        return labels;
     }
 
     /** Una cita del centro en el formato de la agenda (respuesta de las acciones de la agenda). */
@@ -106,8 +155,10 @@ public class AppointmentService {
                 : summaryService.alertsByClient(centerId).getOrDefault(clientId, List.of());
         int noShows = clientId == null ? 0
                 : (int) appointmentRepository.countByCenterIdAndClientIdAndStatus(centerId, clientId, AppointmentStatus.NO_SHOW);
-        return calendarMapper.toDto(appointment, summaryService.centerNow(centerId), alerts, noShows,
+        AppointmentCalendarDTO dto = calendarMapper.toDto(appointment, summaryService.centerNow(centerId), alerts, noShows,
                 mediaService.forAppointment(centerId, appointmentId));
+        dto.setClientAllergies(allergyService.of(centerId, clientId));
+        return dto;
     }
 
     public long countClientAppointments(Long clientId) {
@@ -126,16 +177,22 @@ public class AppointmentService {
         LocalDateTime now = summaryService.centerNow(centerId);
         Map<Long, List<Appointment>> alerts = summaryService.alertsByClient(centerId);
         Map<Long, List<AppointmentMedia>> media = mediaService.byAppointment(centerId);
+        Map<Long, String> allergies = allergyService.byClient(centerId);
         List<Appointment> appointments = getCenterAppointments(centerId);
         Map<Long, Long> noShows = appointments.stream()
                 .filter(app -> app.getClient() != null && app.getStatus() == AppointmentStatus.NO_SHOW)
                 .collect(Collectors.groupingBy(app -> app.getClient().getId(), Collectors.counting()));
         return appointments.stream()
-                .map(app -> app.getClient() == null
-                        ? calendarMapper.toDto(app, now, List.of(), 0, media.getOrDefault(app.getId(), List.of()))
-                        : calendarMapper.toDto(app, now, alerts.getOrDefault(app.getClient().getId(), List.of()),
-                                noShows.getOrDefault(app.getClient().getId(), 0L).intValue(),
-                                media.getOrDefault(app.getId(), List.of())))
+                .map(app -> {
+                    if (app.getClient() == null) {
+                        return calendarMapper.toDto(app, now, List.of(), 0, media.getOrDefault(app.getId(), List.of()));
+                    }
+                    Long clientId = app.getClient().getId();
+                    AppointmentCalendarDTO dto = calendarMapper.toDto(app, now, alerts.getOrDefault(clientId, List.of()),
+                            noShows.getOrDefault(clientId, 0L).intValue(), media.getOrDefault(app.getId(), List.of()));
+                    dto.setClientAllergies(allergies.get(clientId));
+                    return dto;
+                })
                 .toList();
     }
 

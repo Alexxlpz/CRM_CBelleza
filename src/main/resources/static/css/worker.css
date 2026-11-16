@@ -208,3 +208,307 @@
 .counter-card--link:hover {
     box-shadow: 0 10px 24px rgba(var(--primary-rgb), 0.16);
 }
+
+/* ---- «Hoy»: citas del día en el panel ---- */
+.today-panel {
+    padding: 22px 24px;
+}
+
+.today-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px 20px;
+    margin-bottom: 14px;
+}
+
+.today-heading h2 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 20px;
+    letter-spacing: -0.3px;
+}
+
+.today-heading h2 i {
+    color: var(--primary-text);
+}
+
+.today-date {
+    color: var(--text-muted);
+    font-size: 13.5px;
+}
+
+.today-date::first-letter {
+    text-transform: uppercase;
+}
+
+.today-tools {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+.today-list {
+    list-style: none;
+    display: grid;
+    gap: 10px;
+}
+
+/* En escritorio ancho, dos columnas para no estirar cada fila de lado a lado */
+@media (min-width: 1100px) {
+    .today-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+.today-item {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--border-radius-md);
+    transition: opacity var(--dur-fast) ease, border-color var(--dur-fast) ease;
+}
+
+.today-item[hidden] {
+    display: none;
+}
+
+.today-item.is-now {
+    border-color: rgba(var(--primary-rgb), 0.55);
+    box-shadow: 0 6px 18px rgba(var(--primary-rgb), 0.14);
+}
+
+.today-item.is-past {
+    opacity: 0.62;
+}
+
+.today-time {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 56px;
+    padding: 6px 8px;
+    border-radius: var(--border-radius-sm);
+    background: rgba(var(--primary-rgb), 0.12);
+    font-variant-numeric: tabular-nums;
+}
+
+.today-time time {
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--primary-text);
+}
+
+.today-end {
+    font-size: 11.5px;
+    color: var(--text-muted);
+}
+
+.today-body {
+    min-width: 0;
+}
+
+.today-line {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 8px;
+}
+
+.today-client {
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--text-main);
+    text-decoration: none;
+}
+
+a.today-client:hover {
+    color: var(--primary-text);
+    text-decoration: underline;
+}
+
+.today-chip {
+    padding: 2px 8px;
+    border-radius: var(--radius-pill);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.today-chip--now {
+    background: var(--brand-gradient);
+    color: var(--on-primary);
+}
+
+.today-chip--next {
+    background: rgba(var(--primary-rgb), 0.16);
+    color: var(--primary-text);
+}
+
+.today-meta {
+    margin-top: 2px;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.today-worker {
+    white-space: nowrap;
+}
+
+.today-sep {
+    margin: 0 6px 0 4px;
+}
+
+.today-warning {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--warning-text);
+}
+
+.today-side {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+}
+
+.today-empty {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 16px;
+    border: 1px dashed var(--border-soft);
+    border-radius: var(--border-radius-md);
+    color: var(--text-muted);
+    font-size: 14px;
+}
+
+.today-empty[hidden],
+.today-empty span[hidden] {
+    display: none;
+}
+
+@media (max-width: 600px) {
+    .today-panel {
+        padding: 18px 16px;
+    }
+
+    .today-tools {
+        width: 100%;
+    }
+
+    .today-tools .view-toggle {
+        flex: 1 1 100%;
+    }
+
+    /* En el móvil la agenda ya está justo debajo (tarjeta «Calendario de Agenda») y en el menú */
+    .today-agenda-link {
+        display: none;
+    }
+
+    .today-tools .view-toggle-btn {
+        flex: 1;
+        justify-content: center;
+        padding: 0 8px;
+    }
+
+    .today-item {
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 12px;
+    }
+
+    /* En el móvil el estado y la ficha bajan debajo, alineados con el texto */
+    .today-side {
+        grid-column: 2;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .today-item {
+        transition: none;
+    }
+}
+
+/* Aviso largo (alergias): el icono arriba y el texto en varias líneas */
+.today-warning i {
+    align-self: flex-start;
+    margin-top: 2px;
+}
+
+.today-phone {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 2px;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+/* ---- «Por aprobar»: solicitudes que se aceptan o rechazan desde el panel ---- */
+.requests-count {
+    display: inline-grid;
+    place-items: center;
+    min-width: 26px;
+    height: 26px;
+    padding: 0 8px;
+    border-radius: var(--radius-pill);
+    background: var(--warning-bg);
+    color: var(--warning-text);
+    font-size: 13px;
+    font-weight: 800;
+}
+
+a.request-time {
+    text-decoration: none;
+    transition: background var(--dur-fast) ease;
+}
+
+a.request-time:hover {
+    background: rgba(var(--primary-rgb), 0.2);
+}
+
+.request-actions {
+    flex-direction: row;
+    align-items: center;
+}
+
+.request-item.is-leaving {
+    opacity: 0;
+    transform: translateY(-4px);
+    transition: opacity var(--dur-fast) ease, transform var(--dur-fast) ease;
+}
+
+@media (max-width: 600px) {
+    .request-actions {
+        justify-content: flex-end;
+    }
+
+    .request-actions .btn {
+        flex: 1;
+        justify-content: center;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .request-item.is-leaving {
+        transform: none;
+        transition: none;
+    }
+}
+
+/* En «Por aprobar» quién la haría va en su propia línea: así el «·» nunca empieza una línea. */
+.request-item .today-worker { display: block; white-space: normal; }
+.request-item .today-sep { display: none; }

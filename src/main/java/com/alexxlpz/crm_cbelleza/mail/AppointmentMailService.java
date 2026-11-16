@@ -1,5 +1,6 @@
 package com.alexxlpz.crm_cbelleza.mail;
 
+import com.alexxlpz.crm_cbelleza.booking.CenterClock;
 import com.alexxlpz.crm_cbelleza.entities.Appointment;
 import com.alexxlpz.crm_cbelleza.entities.AppointmentChange;
 import com.alexxlpz.crm_cbelleza.entities.AppointmentStatus;
@@ -131,13 +132,18 @@ public class AppointmentMailService {
      * Recordatorio a los clientes con cita confirmada en las próximas 24 h. Devuelve cuántos se han enviado.
      * Cada cita se apunta como recordada antes de enviar el correo y en su propia transacción: si algo falla
      * (la BD, el SMTP) se pierde como mucho ese recordatorio, pero nunca se reenvía cada minuto ni bloquea los demás.
+     * Las 24 h se cuentan en la hora local de cada centro (la de la cita): se busca con un día de margen a cada lado.
      */
     public int sendReminders() {
         LocalDateTime now = LocalDateTime.now(clock);
-        List<Appointment> upcoming = appointments.findByStatusAndReminderSentAtIsNullAndDateTimeBetween(
-                AppointmentStatus.CONFIRMED, now, now.plusHours(24));
+        List<Appointment> candidates = appointments.findByStatusAndReminderSentAtIsNullAndDateTimeBetween(
+                AppointmentStatus.CONFIRMED, now.minusDays(1), now.plusDays(2));
         int sent = 0;
-        for (Appointment app : upcoming) {
+        for (Appointment app : candidates) {
+            LocalDateTime centerNow = CenterClock.now(clock, app.getCenter());
+            if (app.getDateTime().isBefore(centerNow) || app.getDateTime().isAfter(centerNow.plusHours(24))) {
+                continue;
+            }
             if (appointments.markReminderSent(app.getId(), now) == 0) {
                 continue;
             }
@@ -166,7 +172,7 @@ public class AppointmentMailService {
             return;
         }
         send(client.getEmail(), replyToFor(app.getCenter()), app.getCenter().getName(),
-                subject, heading, "Hola, " + client.getName(), intro, app, "/client/appointments", "Ver mis citas");
+                subject, heading, "Hola, " + client.getName(), intro, app, "/client/appointments", "Ver mis citas", true);
     }
 
     private void toCenter(Appointment app, String subject, String heading, String intro) {
@@ -178,7 +184,7 @@ public class AppointmentMailService {
             return;
         }
         send(to, null, null, subject, heading, app.getCenter().getName(), intro, app,
-                "/worker/calendar?date=" + app.getDateTime().toLocalDate(), "Abrir la agenda");
+                "/worker/calendar?date=" + app.getDateTime().toLocalDate(), "Abrir la agenda", false);
     }
 
     /** A quién llega la respuesta del cliente: el dueño del centro y, si no tiene correo real, el correo del centro. */
@@ -193,7 +199,7 @@ public class AppointmentMailService {
     }
 
     private void send(String to, String replyTo, String replyToName, String subject, String heading, String subtitle, String intro,
-                      Appointment app, String path, String buttonLabel) {
+                      Appointment app, String path, String buttonLabel, boolean toClient) {
         Map<String, Object> vars = new HashMap<>();
         vars.put("heading", heading);
         vars.put("subtitle", subtitle);
@@ -205,6 +211,8 @@ public class AppointmentMailService {
         vars.put("note", app.getWorkerMessage() == null || app.getWorkerMessage().isBlank() ? null : app.getWorkerMessage());
         vars.put("buttonUrl", siteUrl.isEmpty() ? null : siteUrl + path);
         vars.put("buttonLabel", buttonLabel);
+        // «Cómo llegar» solo a la clienta y con la cita confirmada (confirmación, cambio de hora y recordatorio)
+        vars.put("directionsUrl", toClient && app.getStatus() == AppointmentStatus.CONFIRMED ? app.getCenter().getDirectionsUrl() : null);
         try {
             String html = templateEngine.process("email/appointment", new Context(ES, vars));
             gateway.send(new EmailMessage(to, replyTo, replyTo == null ? null : replyToName, subject + " - Cuquora", html));

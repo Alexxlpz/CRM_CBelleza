@@ -3,6 +3,7 @@ package com.alexxlpz.crm_cbelleza.controllers;
 import com.alexxlpz.crm_cbelleza.config.LegalOwner;
 import com.alexxlpz.crm_cbelleza.security.AppUserDetails;
 import com.alexxlpz.crm_cbelleza.security.RoleHomes;
+import com.alexxlpz.crm_cbelleza.services.AppointmentService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -32,10 +33,13 @@ public class PublicPagesController {
 
     private final String contactEmail;
     private final LegalOwner legalOwner;
+    private final AppointmentService appointmentService;
 
-    public PublicPagesController(@Value("${crm.mail.admin-email}") String contactEmail, LegalOwner legalOwner) {
+    public PublicPagesController(@Value("${crm.mail.admin-email}") String contactEmail, LegalOwner legalOwner,
+                                 AppointmentService appointmentService) {
         this.contactEmail = contactEmail;
         this.legalOwner = legalOwner;
+        this.appointmentService = appointmentService;
     }
 
     @GetMapping("/")
@@ -57,8 +61,12 @@ public class PublicPagesController {
 
     /** Buscador público de centros. Los resultados se cargan desde /api/centers. */
     @GetMapping("/centers")
-    public String centers(Model model) {
+    public String centers(@AuthenticationPrincipal AppUserDetails user, Model model) {
         model.addAttribute("activePage", "centers");
+        // Un cliente con citas por venir ve arriba la próxima (es su página de inicio al entrar)
+        if (user != null && user.isClient()) {
+            appointmentService.nextForClient(user.getId()).ifPresent(next -> model.addAttribute("nextAppointment", next));
+        }
         model.addAttribute("pageDescription",
                 "Encuentra centros de belleza cerca de ti, consulta sus tratamientos y pide cita online.");
         return "centers";

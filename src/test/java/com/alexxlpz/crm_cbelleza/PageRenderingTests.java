@@ -1,5 +1,6 @@
 package com.alexxlpz.crm_cbelleza;
 
+import com.alexxlpz.crm_cbelleza.booking.CenterClock;
 import com.alexxlpz.crm_cbelleza.services.CenterService;
 import com.alexxlpz.crm_cbelleza.repositories.UserRepository;
 import org.junit.jupiter.api.Test;
@@ -10,7 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.time.LocalDateTime;
+import java.time.Clock;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -67,9 +68,9 @@ class PageRenderingTests {
     void clientAppointmentsShowUpcomingFirstSoonestFirst() {
         Long sofia = users.findByNameIgnoreCase(TestUsers.CLIENT).orElseThrow().getId();
         var list = appointmentService.getClientAppointments(sofia);
-        LocalDateTime now = LocalDateTime.now();
-        var upcoming = list.stream().filter(a -> !a.getDateTime().isBefore(now)).toList();
-        var past = list.stream().filter(a -> a.getDateTime().isBefore(now)).toList();
+        // Cada cita con la hora local de su centro (los datos demo tienen centros en otras zonas)
+        var upcoming = list.stream().filter(a -> !a.getDateTime().isBefore(CenterClock.now(Clock.systemDefaultZone(), a.getCenter()))).toList();
+        var past = list.stream().filter(a -> a.getDateTime().isBefore(CenterClock.now(Clock.systemDefaultZone(), a.getCenter()))).toList();
         org.junit.jupiter.api.Assertions.assertEquals(upcoming, list.subList(0, upcoming.size()), "primero las próximas");
         for (int i = 1; i < upcoming.size(); i++) {
             org.junit.jupiter.api.Assertions.assertFalse(upcoming.get(i).getDateTime().isBefore(upcoming.get(i - 1).getDateTime()));

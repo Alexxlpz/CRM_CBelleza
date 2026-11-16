@@ -49,7 +49,7 @@ docker compose logs cloudflared  # debe decir «Registered tunnel connection»
 Si algo falta en el `.env`, la app no arranca y el log dice qué variable corregir. Los avisos `Producción: …` no paran el arranque, pero conviene resolverlos.
 
 ## 6. Después
-- Copia de seguridad cada noche: `crontab -e` → `0 3 * * * cd /ruta/a/CRM_CBelleza && sh docker/backup-db.sh` (y guarda alguna copia fuera del servidor).
+- Copia de seguridad cada noche: `crontab -e` → `0 3 * * * cd /ruta/a/CRM_CBelleza && sh docker/backup-db.sh` (en un Synology, con el Programador de tareas: ver el paso 6 del apartado 7). Si `pg_dump` falla, el script sale con error y no borra ninguna copia. Para guardar también una copia en otro disco: `BACKUP_COPY_DIR=/otra/carpeta sh docker/backup-db.sh`.
 - Da de alta tu primer centro desde `/alta-centro`; el enlace «Publicar» llega a `CRM_ADMIN_EMAIL`.
 - Google Search Console: añade el dominio y envía `https://cuquora.com/sitemap.xml`.
 - Imprime de nuevo los carteles con QR: el QR lleva la dirección de `SITE_URL`.
@@ -67,3 +67,9 @@ Así está montado cuquora.com.
 4. Container Manager > Proyecto > **Acción > Construir**. La primera vez baja todas las dependencias de Maven; las
    siguientes, mientras no cambie ningún `pom.xml`, se las saltan y solo compilan el código (mucho más rápido). Para cambiar solo el `.env` (por ejemplo `CRM_FROM_EMAIL`), edítalo y vuelve a construir.
 5. Mira el registro de la app («Producción: configuración revisada» y «Started») y el de `cloudflared` («Registered tunnel connection»).
+6. Copia de seguridad cada noche: Panel de control > **Programador de tareas** > Crear > Tarea programada > Script definido por el usuario.
+   Usuario `root`, cada día a las 3:00, y en «Ejecutar comando»:
+   `cd /ruta/a/cuquora && BACKUP_COPY_DIR=/ruta/a/otra/carpeta sh docker/backup-db.sh`
+   (mejor una carpeta de otro volumen o de un disco USB; también vale una carpeta que copie Hyper Backup).
+   En «Configuración de tareas», marca enviar los detalles por correo **solo cuando el script termine de forma anormal**:
+   así te llega un correo si una noche la copia falla. Pruébala una vez con «Ejecutar» y mira que aparezca el `.sql.gz` en `backups/`.

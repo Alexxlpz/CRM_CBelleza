@@ -4,6 +4,7 @@ import com.alexxlpz.crm_cbelleza.entities.Appointment;
 import com.alexxlpz.crm_cbelleza.entities.AppointmentChange;
 import com.alexxlpz.crm_cbelleza.entities.AppointmentStatus;
 import com.alexxlpz.crm_cbelleza.entities.Center;
+import com.alexxlpz.crm_cbelleza.entities.Role;
 import com.alexxlpz.crm_cbelleza.entities.User;
 import com.alexxlpz.crm_cbelleza.repositories.CenterRepository;
 import com.alexxlpz.crm_cbelleza.repositories.TreatmentRepository;
@@ -21,6 +22,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.TemporalAdjusters;
+import java.util.UUID;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;
@@ -63,7 +65,10 @@ class AutoAcceptBookingTests {
     }
 
     private Appointment book(Center center, LocalDateTime start) {
-        User client = users.findByNameIgnoreCase(TestUsers.CLIENT).orElseThrow();
+        return book(center, start, users.findByNameIgnoreCase(TestUsers.CLIENT).orElseThrow());
+    }
+
+    private Appointment book(Center center, LocalDateTime start, User client) {
         Long treatmentId = treatments.findByCenterId(center.getId()).getFirst().getId();
         return bookingService.requestBooking(client.getId(), center.getId(), treatmentId, start);
     }
@@ -93,7 +98,10 @@ class AutoAcceptBookingTests {
         Center center = withAutoAccept(TestUsers.WORKER_CENTER_1);
         LocalDateTime slot = farTuesday(32, 11);
         Appointment first = book(center, slot);
-        Appointment second = book(center, slot);
+        // Otra clienta: una misma persona no puede tener dos citas a la vez
+        User other = users.save(User.builder().name("Otra clienta " + UUID.randomUUID())
+                .email(UUID.randomUUID() + "@ejemplo.com").role(Role.CLIENT).build());
+        Appointment second = book(center, slot, other);
         assertEquals(AppointmentStatus.CONFIRMED, second.getStatus());
         assertNotEquals(first.getWorker().getId(), second.getWorker().getId());
     }

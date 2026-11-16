@@ -338,6 +338,7 @@
                             <li>Un tratamiento en oferta lleva la etiqueta <span class="chip chip-bad">-20 %</span> y el precio de carta tachado.</li>
                             <li>Solo opina quien ha tenido una cita completada en ese centro, y el centro puede responder.</li>
                             <li>«Compartir» copia el enlace corto o abre el menú de compartir del móvil.</li>
+                            <li>«Cómo llegar» abre la ruta hasta el centro en Google Maps. En iPhone, iPad y Mac deja elegir entre Apple Maps y Google Maps. No sale si el centro no tiene ubicación ni dirección.</li>
                             <li>Al pulsar <strong>«Solicitar cita»</strong> sin sesión, Cuquora pide entrar y vuelve a la reserva con el tratamiento ya elegido.</li>
                         </ul>
                     </div>
@@ -406,7 +407,7 @@
                     <div class="walk-text">
                         <h3><span class="walk-n">5</span>«Mis reservas»</h3>
                         <p class="where">Botón «Mis Citas» · <code>/client/appointments</code></p>
-                        <p>Arriba, tus <strong>puntos</strong> en cada centro con tarjeta. Después las <strong>próximas citas</strong> (la más cercana destacada) y, plegado al final, el <strong>historial</strong>.</p>
+                        <p>Arriba, tus <strong>puntos</strong> en cada centro con tarjeta. Después las <strong>próximas citas</strong> (la más cercana destacada) y, plegado al final, el <strong>historial</strong>. Las fechas se dicen como en voz alta («Hoy · 11:00», «Mañana, lun 16 nov · 09:00») y el teléfono del centro se pulsa para llamar. Justo después de reservar, sale un aviso verde y la cita nueva la primera, con borde verde. Tu próxima cita también sale arriba de «Centros», con «Cómo llegar».</p>
                     </div>
                     <div class="shot-pair">
                         <figure class="shot"><div class="shot-frame browser"><a href="images/capturas/mis-reservas.webp" target="_blank" title="Abrir la captura a tamaño completo"><img src="images/capturas/mis-reservas.webp" alt="Mis reservas en escritorio" loading="lazy"></a></div><figcaption>Escritorio</figcaption></figure>
@@ -417,6 +418,7 @@
                 <ul class="tasks">
                     <li><span>Cambiar la hora (o el profesional)</span><span>«Cambiar hora» en la cita. Solo si el centro lo permite y faltan más horas de las que pide (por ejemplo 24 h). Si ya no se puede, la tarjeta dice a qué teléfono llamar.</span></li>
                     <li><span>Anular una cita</span><span>«Anular cita». El centro recibe un aviso.</span></li>
+                    <li><span>Ir al centro</span><span>«Cómo llegar», a la derecha de «Anular cita», abre el mapa con la ruta. También viene en los correos de cita confirmada y en el recordatorio.</span></li>
                     <li><span>Elegir una hora propuesta</span><span>En la tarjeta de la propuesta, o «Ninguna me viene bien».</span></li>
                     <li><span>Volver a reservar lo mismo</span><span>En el historial, «Volver a reservar» abre la reserva con ese tratamiento elegido.</span></li>
                     <li><span>Valorar una cita</span><span>De 1 a 5 ★ y un comentario, durante 90 días. Tras una cita sale una vez «¿Qué tal tu cita?»; tocar una estrella abre la valoración.</span></li>
@@ -428,6 +430,7 @@
                 <div class="faq">
                     <details><summary>¿Necesito cuenta para mirar?</summary><div><p>No. El buscador, la ficha del centro y sus opiniones son públicos. Solo al reservar se pide entrar o registrarse (en <code>/register</code> o con «Continuar con Google»). Si el centro ya te había dado de alta con ese correo, al registrarte completas esa misma ficha en vez de crear otra.</p></div></details>
                     <details><summary>¿Por qué no me deja pedir más citas?</summary><div><p>Puedes tener como mucho <strong>3 solicitudes sin responder</strong> en el mismo centro. En cuanto el centro conteste alguna, puedes pedir otra.</p></div></details>
+                    <details><summary>¿Por qué no me deja pedir una cita a esa hora?</summary><div><p>Porque ya tienes otra cita que se pisa con ella, en ese centro o en otro. El aviso te dice cuál: elige otra hora o anula la que tenías desde «Mis citas».</p></div></details>
                     <details><summary>¿Por qué no aparece el botón «Cambiar hora»?</summary><div><p>El centro decide hasta cuántas horas antes puedes cambiarla tú (nunca, 2, 12, 24 o 48 h). Pasado ese plazo, la tarjeta te da el teléfono del centro.</p></div></details>
                     <details><summary>¿Qué pasa si no contesto a una propuesta?</summary><div><p>Caduca a las 48 h, o 2 h antes de la primera hora propuesta si eso llega antes, y la cita queda anulada. Te llega un correo avisando.</p></div></details>
                     <details><summary>¿Mi contraseña está segura?</summary><div><p>Se guarda cifrada (BCrypt), necesita al menos 8 caracteres y no puede ser de las más usadas. Tras varios intentos fallidos el acceso se cierra 15 minutos. Con «Recordar mi sesión» el dispositivo te mantiene dentro 14 días.</p></div></details>
@@ -489,6 +492,11 @@
                             <li><b>4</b><span><strong>Campana:</strong> productos agotados y solicitudes para hoy o mañana. Al pulsar un aviso se abre ese día o el inventario.</span></li>
                         </ol>
                     </div>
+                    <ul style="margin-top: 1rem;">
+                        <li><strong>Por aprobar:</strong> encima de «Hoy», las solicitudes que esperan respuesta, con Aceptar y Rechazar (pide confirmación y avisa al cliente). Si no tiene profesional, al aceptarla queda a tu nombre. Sin solicitudes no sale.</li>
+                        <li><strong>Hoy:</strong> debajo de las cifras, las citas del día por hora, con el cliente, el tratamiento, quién la hace, si alguna vez no se presentó y un botón a su ficha, con su teléfono (se pulsa para llamar) y sus alergias si la ficha técnica las apunta. Marca la que está «Ahora» y la «Siguiente», y las que ya pasaron salen más claras. Con «Las mías» / «Todo el centro» se elige qué ver: la trabajadora empieza con las suyas y el dueño con todo el centro.</li>
+                        <li><strong>Barra de arriba:</strong> en todo el panel lleva Agenda, Clientes, Tratamientos e Inventario (en el móvil, en el menú), en vez de los enlaces de la web pública.</li>
+                    </ul>
                 </div>
 
                 <div class="walk" id="trab-agenda">
@@ -555,6 +563,7 @@
                             <li>Buscador y resumen (total, fichas al día, pendientes, citas). «Registrado» = el cliente tiene cuenta.</li>
                             <li>«Nuevo Cliente» da de alta a alguien a mano (también desde «Nueva cita»). Solo reutiliza clientes que ya son del centro.</li>
                             <li>La <strong>ficha</strong> tiene el historial (con filtro y buscador sin tildes), la ficha técnica y los avisos.</li>
+                            <li>Arriba de la ficha, un <strong>resumen</strong>: visitas (citas completadas), gasto total (lo cobrado en ellas más sus compras; solo lo ve el dueño, el resto del equipo ve «*****,** €»), última visita y el tratamiento que más repite. <strong>«Darle cita»</strong> abre «Nueva cita» de la agenda con ese cliente ya elegido.</li>
                             <li><strong>Vender producto:</strong> eliges el producto escaneando su código de barras con la cámara («Escanear»), con un lector USB o buscándolo por su nombre, pones la cantidad (1 a 99) y ves el stock antes y después. Nunca se vende más de lo que hay; «Anular» devuelve las unidades.</li>
                             <li><strong>Tarjeta de puntos:</strong> si el centro la tiene, la ficha enseña los puntos y el botón para canjear la recompensa.</li>
                         </ul>

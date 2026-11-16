@@ -23,6 +23,24 @@ Al sacar una versión:
 
 ### Añadido
 
+- «Por aprobar» en el panel del trabajador, encima de «Hoy»: las solicitudes de cita que esperan respuesta, con el cliente, el tratamiento, quién la haría (o «Sin asignar: al aceptarla, contigo»), su teléfono y los botones Aceptar y Rechazar, sin pasar por la agenda. Rechazar pide confirmación y avisa al cliente. Al responder, la fila se va y bajan los contadores de solicitudes; sin solicitudes, el bloque no sale.
+- Tu próxima cita arriba de «Centros» para el cliente: día y hora, tratamiento, centro y profesional, con «Cómo llegar» y «Mis citas (N)». Sin próximas citas, o sin cuenta de cliente, no sale.
+- Recién reservada: al pedir una cita se vuelve a «Mis reservas» con un aviso verde con título («Solicitud enviada» o «¡Cita confirmada!») y la cita nueva la primera de «Próximas citas», con borde verde y la etiqueta «Acabas de pedirla».
+- Teléfonos que se pulsan para llamar: el del centro en «Mis reservas» y en la ficha del centro, y el del cliente en la agenda, en «Hoy», en «Por aprobar» y en su ficha.
+- Alergias en el aviso amarillo de la cita, en la agenda y en «Hoy»: salen de la ficha técnica del cliente, de cualquier campo cuyo nombre hable de alergias (como «Alergias o Sensibilidades» de la plantilla).
+
+### Cambiado
+
+- Fechas amables en las tarjetas de cita del cliente y en «Por aprobar»: «Hoy · 11:00», «Mañana, lun 16 nov · 09:00» o «vie 20 nov · 10:30» (con el año si no es el de este). Al pasar el ratón se ve la fecha completa; el historial sigue con la fecha entera.
+- Si el cliente elige «Cualquiera», la tarjeta dice «Profesional: te la asigna el centro» en vez de «Sin asignar».
+- El historial de citas de la ficha del cliente enseña las 6 últimas y «Ver las N citas»; buscar o filtrar busca en todas.
+- La trabajadora sin rol de dueño ya no ve el total de las compras del cliente en su ficha, solo cuántas son (igual que el gasto total).
+
+- «Hoy» en el panel del trabajador: debajo de las cifras, las citas del día por hora con el cliente, el tratamiento, quién la hace, si alguna vez no se presentó y un botón a su ficha. Marca la que está en curso y la siguiente, y aclara las que ya pasaron. «Las mías» / «Todo el centro» elige qué ver: la trabajadora empieza con las suyas y el dueño con todo el centro.
+- La barra de arriba del panel lleva Agenda, Clientes, Tratamientos e Inventario (también en el menú del móvil) en vez de los enlaces de la web pública.
+- Ficha del cliente: resumen arriba con visitas, gasto total (solo lo ve el dueño; el resto del equipo ve «*****,** €»), última visita y el tratamiento que más repite, y botón «Darle cita», que abre «Nueva cita» de la agenda con ese cliente ya elegido (solo clientes de la cartera del centro).
+
+- «Cómo llegar» abre la ruta hasta el centro en el mapa: un botón al lado de «Compartir» en la ficha del centro (también la pública, sin cuenta), otro a la derecha de «Anular cita» en cada cita próxima de «Mis citas» y un enlace en los correos de cita confirmada, de cambio de hora y de recordatorio. Abre Google Maps; en iPhone, iPad y Mac sale antes una hoja para elegir Apple Maps o Google Maps. Usa las coordenadas del centro y, si no las tiene, la dirección; sin ninguna de las dos no sale. Es solo un enlace: la página no carga nada de Google. Sin migración.
 - «Vender producto» (inventario y ficha del cliente) busca el producto por su código de barras: con «Escanear» se abre la cámara dentro del modal y, al leer el código, elige el producto y pasa a la cantidad. También vale un lector USB o escribir el código, y escribir parte del nombre reduce la lista (Intro elige si solo queda uno). Avisa si el código no está en el inventario o el producto está agotado. La cámara no se enciende sola. La cámara es la misma que en «Añadir Producto» (`barcode-camera.js`, común a los dos).
 - La API de productos apunta qué centro aporta cada dato: al compartir un producto, Cuquora manda el número del centro (nada más de él) y la API guarda en un registro qué huecos rellenó y cuándo. Así se puede ver quién metió un dato malo y borrar de una vez lo que haya aportado un centro (SQL en `product-api/README.md`). Migración V3 de la API.
 - La API de productos guarda las fotos reducidas a 800 px por el lado largo, en JPEG: las de Open Beauty Facts podían pesar varios megas y ahora rondan los 100-200 KB, así que la base de datos y la copia diaria crecen mucho menos. Las que ya son pequeñas se guardan tal cual.
@@ -57,6 +75,12 @@ Al sacar una versión:
 - Documentación: diagrama de los correos que envía la app (Cuquora, Brevo y Cloudflare, y un apartado por cada tipo de correo).
 - Documentación al día con la 0.9.0-beta: producción en cuquora.com (NAS y túnel de Cloudflare), correo, formato de los datos del alta y «Rechazar registro»; textos más cortos y términos unificados.
 - Documentación más visual para entenderla a la primera: 25 capturas de la app (escritorio y móvil) con marcas numeradas, dibujos de cómo se habla con el centro, la vida de una cita, el alta de un centro, el mapa de la web, la arquitectura, el modelo de datos, el despliegue y la línea de tiempo del proyecto; resumen «En 30 segundos» en cada apartado, preguntas frecuentes y tablas largas plegadas. En el móvil la barra superior sigue enseñando los cuatro documentos.
+### Corregido
+
+- Una clienta ya no puede pedir dos citas que se pisan (pasaba al pulsar dos veces o al pedir la misma hora en otro centro): al reservar y al cambiar la hora se comprueba que no tenga otra cita pendiente, con propuesta o confirmada a esa hora, en ese centro o en otro, y si la tiene se le dice cuál. Se compara en hora real, porque cada centro guarda sus citas en su hora local.
+- El logo de la cabecera decía «COQUORA»: ahora dice «CUQUORA» (`big_icon.png`, también en la documentación).
+- Centros fuera de la hora de España (Canarias, Portugal, América): las citas se marcaban como completadas antes de tiempo (en Canarias una cita de 30 minutos, antes de empezar; en México, horas antes) y los recordatorios de 24 h se contaban con la hora de España. Ahora se usa la hora local de cada centro para completar citas, enviar recordatorios, decidir si una cita ya ha pasado, en «Mis reservas» y en los contadores de hoy y mañana del panel y de la campana.
+- Copia de seguridad (`docker/backup-db.sh`): si `pg_dump` fallaba se guardaba un archivo vacío como si fuera una copia buena y se seguían borrando las de más de 30 días. Ahora comprueba que la copia está completa, sale con error si no lo está y no borra nada; siempre conserva las 7 más recientes y puede dejar una segunda copia en otra carpeta (`BACKUP_COPY_DIR`).
 
 ## [0.9.0-beta] - 2026-11-03
 

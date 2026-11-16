@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <!--/* Correo de cita (cliente o centro). Variables: heading, subtitle, intro, details (lista de [etiqueta, valor]),
-       proposals (horas propuestas, opcional), note (mensaje del centro, opcional), buttonUrl/buttonLabel (opcional). */-->
+       proposals (horas propuestas, opcional), note (mensaje del centro, opcional), buttonUrl/buttonLabel (opcional),
+       directionsUrl («Cómo llegar» en Google Maps, opcional). */-->
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{email/layout :: layout(${heading}, ${subtitle}, ~{::content})}">
 <body>
@@ -10,6 +11,9 @@
     <div style="background:#fdfcfb; border:1px solid #eee8e2; border-radius:12px; padding:18px; margin-bottom:20px;">
         <p style="margin:0 0 6px; font-size:14px;" th:each="row : ${details}">
             <strong th:text="${row[0]} + ':'">Etiqueta:</strong> <span th:text="${row[1]}">Valor</span>
+        </p>
+        <p th:if="${directionsUrl != null}" style="margin:10px 0 0; font-size:14px;">
+            <a th:href="${directionsUrl}" style="color:#84653d; font-weight:700; text-decoration:underline;">Cómo llegar (abre el mapa)</a>
         </p>
     </div>
 

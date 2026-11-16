@@ -112,9 +112,14 @@ public class ClientBookingController {
                        RedirectAttributes redirect) {
         try {
             Appointment appointment = bookingService.requestBooking(client.getId(), centerId, treatmentId, workerId, parse(dateTime));
-            redirect.addFlashAttribute("successMessage", appointment.getStatus() == AppointmentStatus.CONFIRMED
-                    ? "¡Cita confirmada! " + appointment.getCenter().getName() + " te espera."
-                    : "Solicitud enviada. Te avisaremos en cuanto " + appointment.getCenter().getName() + " la confirme.");
+            boolean confirmed = appointment.getStatus() == AppointmentStatus.CONFIRMED;
+            String center = appointment.getCenter().getName();
+            // «Mis reservas» la enseña la primera y resaltada (solo en esta visita: es un atributo flash)
+            redirect.addFlashAttribute("justBookedId", appointment.getId());
+            redirect.addFlashAttribute("successTitle", confirmed ? "¡Cita confirmada!" : "Solicitud enviada");
+            redirect.addFlashAttribute("successMessage", confirmed
+                    ? center + " te espera. La tienes aquí abajo, con «Cómo llegar»."
+                    : center + " la revisará y te avisaremos en cuanto la confirme. Mientras, puedes cambiar la hora o retirarla.");
             return "redirect:/client/appointments";
         } catch (BusinessRuleException e) {
             redirect.addFlashAttribute("bookingError", e.getMessage());
@@ -124,8 +129,16 @@ public class ClientBookingController {
 
     @GetMapping("/client/appointments")
     public String appointments(@AuthenticationPrincipal AppUserDetails client, Model model) {
-        AppointmentService.ClientAppointments appointments = appointmentService.getClientAppointmentsSplit(client.getId());
+        // Recién reservada (atributo flash de book): va la primera y resaltada; «Tu próxima cita» pasa a la siguiente
+        Long justBooked = model.getAttribute("justBookedId") instanceof Long id ? id : null;
+        AppointmentService.ClientAppointments appointments = appointmentService.getClientAppointmentsSplit(client.getId())
+                .withFirst(justBooked);
         model.addAttribute("appointments", appointments);
+        model.addAttribute("nextAppointmentId", appointments.upcoming().stream()
+                .map(Appointment::getId)
+                .filter(id -> !id.equals(justBooked))
+                .findFirst().orElse(null));
+        model.addAttribute("dateLabels", appointmentService.friendlyDates(appointments.upcoming()));
         // Las que el cliente puede cambiar de hora él mismo (plazo de cada centro)
         Set<Long> changeable = appointments.upcoming().stream()
                 .filter(app -> bookingService.clientRescheduleProblem(app).isEmpty())

@@ -14,6 +14,7 @@ import com.alexxlpz.crm_cbelleza.services.InventoryService;
 import com.alexxlpz.crm_cbelleza.services.LoyaltyService;
 import com.alexxlpz.crm_cbelleza.services.ProductSaleService;
 import com.alexxlpz.crm_cbelleza.services.ClientCardService;
+import com.alexxlpz.crm_cbelleza.services.ClientVisitSummary;
 import com.alexxlpz.crm_cbelleza.services.ClientCardService.ClientCardView;
 import com.alexxlpz.crm_cbelleza.services.ClientCardTemplateService;
 import com.alexxlpz.crm_cbelleza.services.AppointmentMediaService;
@@ -105,6 +106,8 @@ public class ClientCardController {
         List<ProductSale> sales = saleService.salesOf(worker.getCenterId(), clientId);
         model.addAttribute("sales", sales);
         model.addAttribute("salesTotal", sales.stream().mapToDouble(ProductSale::getTotal).sum());
+        model.addAttribute("visitSummary", ClientVisitSummary.of(appointments, sales,
+                summaryService.centerNow(worker.getCenterId()).toLocalDate()));
         model.addAttribute("saleItems", inventoryService.getInventoryByCenter(worker.getCenterId()));
         model.addAttribute("loyalty", loyaltyService.cardFor(centerService.getCenterById(worker.getCenterId()), view.client()));
         return "worker/client_detail";

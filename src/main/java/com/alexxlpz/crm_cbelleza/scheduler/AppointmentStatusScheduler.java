@@ -8,9 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.time.Clock;
-import java.time.LocalDateTime;
-
 /**
  * Tareas de cada minuto: marca como completadas las citas confirmadas que ya han terminado,
  * anula las propuestas que han caducado sin respuesta y envía los recordatorios de 24 h.
@@ -22,22 +19,19 @@ public class AppointmentStatusScheduler {
     private final AppointmentLifecycleService lifecycleService;
     private final BookingService bookingService;
     private final AppointmentMailService mailService;
-    private final Clock clock;
 
     public AppointmentStatusScheduler(AppointmentLifecycleService lifecycleService,
                                       BookingService bookingService,
-                                      AppointmentMailService mailService,
-                                      Clock clock) {
+                                      AppointmentMailService mailService) {
         this.lifecycleService = lifecycleService;
         this.bookingService = bookingService;
         this.mailService = mailService;
-        this.clock = clock;
     }
 
     @Scheduled(fixedRate = 60_000)
     public void autoUpdateCompletedAppointments() {
         run("actualizar el estado de las citas finalizadas", () -> {
-            int updated = lifecycleService.completePastAppointments(LocalDateTime.now(clock));
+            int updated = lifecycleService.completePastAppointments();
             if (updated > 0) {
                 log.info("Marcadas como completadas {} cita(s) finalizadas", updated);
             }
