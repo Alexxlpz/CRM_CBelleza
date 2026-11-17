@@ -5,7 +5,7 @@
     <link rel="stylesheet" th:href="@{/css/clients.css}">
 </head>
 <body>
-    <div th:replace="~{fragments/navbar :: worker('/worker/dashboard', 'Volver al panel principal', ${notifications})}"></div>
+    <div th:replace="~{fragments/navbar :: worker(${notifications})}"></div>
 
     <!-- Main Container -->
     <main class="main-container main-container--wide">

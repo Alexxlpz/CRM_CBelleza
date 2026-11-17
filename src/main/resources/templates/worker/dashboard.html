@@ -8,7 +8,7 @@
     <script th:src="@{/js/worker-requests.js}" defer></script>
 </head>
 <body>
-    <div th:replace="~{fragments/navbar :: worker(null, null, ${notifications})}"></div>
+    <div th:replace="~{fragments/navbar :: worker(${notifications})}"></div>
 
     <main class="main-container main-container--wide">
         <div class="worker-dashboard-container">
@@ -146,11 +146,11 @@
                     </li>
                 </ol>
 
-                <p class="today-empty" th:hidden="${!todayAppointments.isEmpty() and !(todayOnlyMine and todayMineCount == 0)}"
-                   th:attr="data-empty-all=${todayAppointments.isEmpty()}">
+                <!-- El filtro funciona también sin citas: cada vista tiene su propio mensaje vacío -->
+                <p class="today-empty" th:hidden="${todayOnlyMine ? todayMineCount > 0 : !todayAppointments.isEmpty()}">
                     <i class="lucide-calendar-check" aria-hidden="true"></i>
-                    <span class="today-empty-mine" th:hidden="${todayAppointments.isEmpty()}">Hoy no tienes citas. En «Todo el centro» ves las de tus compañeros.</span>
-                    <span class="today-empty-all" th:hidden="${!todayAppointments.isEmpty()}">Hoy no hay citas en el centro.</span>
+                    <span class="today-empty-mine" th:hidden="${!todayOnlyMine}">Hoy no tienes citas.<span th:if="${!todayAppointments.isEmpty()}"> En «Todo el centro» ves las de tus compañeros.</span></span>
+                    <span class="today-empty-all" th:hidden="${todayOnlyMine}">Hoy no hay citas en el centro.</span>
                 </p>
             </section>
 

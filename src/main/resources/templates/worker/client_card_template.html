@@ -6,7 +6,7 @@
     <script th:src="@{/js/unsaved-changes.js}" defer></script>
 </head>
 <body>
-    <div th:replace="~{fragments/navbar :: worker('/worker/clients', 'Volver a lista de clientes', ${notifications})}"></div>
+    <div th:replace="~{fragments/navbar :: worker(${notifications})}"></div>
 
     <!-- Main Container -->
     <main class="main-container card-template-page">

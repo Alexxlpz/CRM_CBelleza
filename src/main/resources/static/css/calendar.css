@@ -935,7 +935,9 @@ button.calendar-day-cell {
     z-index: 1200;
     display: flex;
     flex-direction: column;
-    padding: 18px 24px 20px;
+    /* Más el hueco de la isla y las esquinas del iPhone (en ordenador valen 0) */
+    padding: calc(18px + env(safe-area-inset-top)) calc(24px + env(safe-area-inset-right))
+             calc(20px + env(safe-area-inset-bottom)) calc(24px + env(safe-area-inset-left));
     border: 0;
     border-radius: 0;
     background: var(--bg-gradient);

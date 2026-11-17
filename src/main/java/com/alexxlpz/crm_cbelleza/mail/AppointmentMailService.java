@@ -32,7 +32,7 @@ import java.util.Map;
  *     <li>Al cliente, lo que hace el centro: confirmar, rechazar, crear, mover, proponer horas, anular.</li>
  *     <li>Al centro, lo que hace el cliente: nueva solicitud (o cita ya confirmada si el centro las acepta
  *     automáticamente), aceptar o no una propuesta, anular.</li>
- *     <li>Recordatorio al cliente unas 24 h antes de la cita.</li>
+ *     <li>Recordatorio al cliente el día antes (en las 24 h previas a la cita), salvo si acaba de recibir otro aviso de esa cita.</li>
  * </ul>
  * Los clientes sin correo real (alta a mano sin correo) no reciben nada. Los correos al cliente llevan como «Responder a»
  * el correo del dueño del centro (o el del centro): si el cliente contesta, le llega al centro y no al buzón de Cuquora.
@@ -44,6 +44,10 @@ public class AppointmentMailService {
     private static final Locale ES = Locale.forLanguageTag("es");
     private static final DateTimeFormatter DATE = DateTimeFormatter.ofPattern("EEEE d 'de' MMMM", ES);
     private static final DateTimeFormatter TIME = DateTimeFormatter.ofPattern("HH:mm");
+    /** Sin recordatorio si se avisó de la cita (reserva, confirmación, cambio de hora) hace menos de estas horas. */
+    static final int REMINDER_QUIET_HOURS = 12;
+    /** Sin recordatorio si la cita empieza en menos de estas horas: ya no sirve. */
+    static final int REMINDER_MIN_LEAD_HOURS = 2;
 
     private final AppointmentRepository appointments;
     private final UserRepository users;
@@ -133,6 +137,10 @@ public class AppointmentMailService {
      * Cada cita se apunta como recordada antes de enviar el correo y en su propia transacción: si algo falla
      * (la BD, el SMTP) se pierde como mucho ese recordatorio, pero nunca se reenvía cada minuto ni bloquea los demás.
      * Las 24 h se cuentan en la hora local de cada centro (la de la cita): se busca con un día de margen a cada lado.
+     * <p>No se recuerda una cita de la que se avisó hace menos de {@link #REMINDER_QUIET_HOURS} h (acaba de reservarla,
+     * de confirmarse o de cambiar de hora: ya tiene ese correo) ni la que empieza en menos de
+     * {@link #REMINDER_MIN_LEAD_HOURS} h (llegaría tarde). Esas citas no se apuntan como recordadas: si más tarde
+     * vuelven a cumplir las condiciones (pasan las horas de calma), se recuerdan entonces.
      */
     public int sendReminders() {
         LocalDateTime now = LocalDateTime.now(clock);
@@ -141,21 +149,37 @@ public class AppointmentMailService {
         int sent = 0;
         for (Appointment app : candidates) {
             LocalDateTime centerNow = CenterClock.now(clock, app.getCenter());
-            if (app.getDateTime().isBefore(centerNow) || app.getDateTime().isAfter(centerNow.plusHours(24))) {
+            if (app.getDateTime().isBefore(centerNow.plusHours(REMINDER_MIN_LEAD_HOURS))
+                    || app.getDateTime().isAfter(centerNow.plusHours(24))) {
+                continue;
+            }
+            // lastChangeAt se guarda con el reloj del servidor, igual que «now»
+            if (app.getLastChangeAt() != null && app.getLastChangeAt().isAfter(now.minusHours(REMINDER_QUIET_HOURS))) {
                 continue;
             }
             if (appointments.markReminderSent(app.getId(), now) == 0) {
                 continue;
             }
-            toClient(app, "Recordatorio: " + app.getTreatment().getName() + ", " + when(app.getDateTime()),
-                    "Te esperamos pronto", "Te recordamos tu cita en " + app.getCenter().getName() + " el " + when(app.getDateTime())
-                            + ". Si no puedes venir, anúlala desde «Mis Citas» para que otra persona pueda aprovechar el hueco.");
+            boolean today = app.getDateTime().toLocalDate().equals(centerNow.toLocalDate());
+            String day = today ? "hoy" : "mañana";
+            String time = app.getDateTime().format(TIME);
+            String treatment = app.getTreatment().getName();
+            String center = app.getCenter().getName();
+            toClient(app, "Recordatorio: " + day + " a las " + time + ", " + treatment + " en " + center,
+                    today ? "Hoy tienes cita" : "Mañana tienes cita",
+                    "Te recordamos tu cita de " + treatment + " en " + center + " " + day + ", " + when(app.getDateTime())
+                            + ". Si no puedes venir, anúlala para que otra persona pueda aprovechar el hueco.",
+                    "Ver o anular mi cita");
             sent++;
         }
         return sent;
     }
 
     private void toClient(Appointment app, String subject, String heading, String intro) {
+        toClient(app, subject, heading, intro, "Ver mis citas");
+    }
+
+    private void toClient(Appointment app, String subject, String heading, String intro, String buttonLabel) {
         User client = app.getClient();
         if (client == null || !hasRealEmail(client.getEmail())) {
             return;
@@ -172,7 +196,7 @@ public class AppointmentMailService {
             return;
         }
         send(client.getEmail(), replyToFor(app.getCenter()), app.getCenter().getName(),
-                subject, heading, "Hola, " + client.getName(), intro, app, "/client/appointments", "Ver mis citas", true);
+                subject, heading, "Hola, " + client.getName(), intro, app, "/client/appointments", buttonLabel, true);
     }
 
     private void toCenter(Appointment app, String subject, String heading, String intro) {

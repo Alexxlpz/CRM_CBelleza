@@ -8,7 +8,7 @@
     <script th:src="@{/js/treatment-workers.js}" defer></script>
 </head>
 <body>
-    <div th:replace="~{fragments/navbar :: worker('/worker/dashboard', 'Volver al panel principal', ${notifications})}"></div>
+    <div th:replace="~{fragments/navbar :: worker(${notifications})}"></div>
 
     <main class="main-container main-container--wide">
         <div class="page-header page-header--panel treatments-header">

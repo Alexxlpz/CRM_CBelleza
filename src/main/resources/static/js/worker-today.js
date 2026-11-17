@@ -12,7 +12,10 @@
     const buttons = panel.querySelectorAll('[data-today-filter]');
     const items = panel.querySelectorAll('.today-item');
     const empty = panel.querySelector('.today-empty');
-    if (!buttons.length || !empty || !items.length) return;
+    const emptyMine = panel.querySelector('.today-empty-mine');
+    const emptyAll = panel.querySelector('.today-empty-all');
+    // Sin citas hoy el filtro también se puede cambiar: solo cambia el mensaje vacío
+    if (!buttons.length || !empty) return;
 
     function show(filter) {
         let visible = 0;
@@ -23,6 +26,8 @@
         });
         buttons.forEach(btn => btn.setAttribute('aria-pressed', String(btn.dataset.todayFilter === filter)));
         empty.hidden = visible > 0;
+        if (emptyMine) emptyMine.hidden = filter !== 'mine';
+        if (emptyAll) emptyAll.hidden = filter === 'mine';
     }
 
     buttons.forEach(btn => btn.addEventListener('click', () => show(btn.dataset.todayFilter)));

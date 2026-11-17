@@ -19,7 +19,9 @@
     <!--/*@thymesVar id="pageImage" type="java.lang.String"*/-->
     <!--/*@thymesVar id="_csrf" type="org.springframework.security.web.csrf.CsrfToken"*/-->
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- viewport-fit=cover: en el iPhone la web llega hasta el borde (también junto a la isla dinámica)
+         en vez de dejar esas franjas en negro. common.css aparta el contenido con env(safe-area-inset-*). -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="color-scheme" content="light dark">
     <!-- Color de la barra del navegador (Android, Safari de iOS anteriores al 26): el de la cabecera.
          Igual que --chrome-top de tokens.css en cada modo. -->

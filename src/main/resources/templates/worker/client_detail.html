@@ -11,7 +11,7 @@
     <script th:src="@{/js/product-sale.js}" defer></script>
 </head>
 <body>
-    <div th:replace="~{fragments/navbar :: worker('/worker/clients', 'Volver a lista de clientes', ${notifications})}"></div>
+    <div th:replace="~{fragments/navbar :: worker(${notifications})}"></div>
 
     <!-- Main Container -->
     <main class="main-container client-detail-page">
@@ -304,8 +304,9 @@
                     </select>
                 </div>
 
-                <!-- Se ven las 6 primeras (3 filas de 2 en escritorio); «Ver las N citas» enseña el resto. Al buscar o
-                     filtrar se mira en todas. Sin JavaScript se ven todas (el plegado lo activa el script). -->
+                <!-- Se ven las 6 primeras (3 filas de 2 en escritorio); «Ver las N citas» enseña el resto y «Ver menos»
+                     las vuelve a plegar. Al buscar o filtrar se mira en todas. Sin JavaScript se ven todas (el plegado lo
+                     activa el script). -->
                 <div class="history-list" id="historyList" th:if="${appointments != null and !appointments.isEmpty()}">
                     <div class="history-item" th:each="app, stat : ${appointments}" th:id="'cita-' + ${app.id}"
                          th:classappend="${stat.index >= 6} ? 'history-item--extra'"
@@ -374,7 +375,9 @@
                 </div>
 
                 <button type="button" class="btn btn-secondary history-more" id="historyMore" hidden
-                        th:if="${appointments != null and appointments.size() > 6}">
+                        aria-controls="historyList" aria-expanded="false"
+                        th:if="${appointments != null and appointments.size() > 6}"
+                        th:data-more-label="${'Ver las ' + appointments.size() + ' citas'}" data-less-label="Ver menos">
                     <i class="lucide-chevrons-down" aria-hidden="true"></i>
                     <span th:text="${'Ver las ' + appointments.size() + ' citas'}">Ver las 25 citas</span>
                 </button>

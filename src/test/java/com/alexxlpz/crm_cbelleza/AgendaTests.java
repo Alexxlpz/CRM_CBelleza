@@ -1,5 +1,6 @@
 package com.alexxlpz.crm_cbelleza;
 
+import com.alexxlpz.crm_cbelleza.booking.CenterClock;
 import com.alexxlpz.crm_cbelleza.entities.AgendaBlock;
 import com.alexxlpz.crm_cbelleza.entities.Appointment;
 import com.alexxlpz.crm_cbelleza.entities.AppointmentChange;
@@ -30,6 +31,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Clock;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -459,11 +461,13 @@ class AgendaTests {
         verify(emailGateway, org.mockito.Mockito.never()).send(any());
     }
 
-    @Test
-    void reminderIsMarkedBeforeSendingAndNeverSentTwice() {
-        // Se guarda directamente: con la agenda, el profesional podría tener a esa hora una cita de los datos demo
-        Appointment app = appointments.saveAndFlush(Appointment.builder()
-                .dateTime(LocalDateTime.now().plusHours(3).withMinute(0).withSecond(0).withNano(0))
+    /**
+     * Cita confirmada guardada directamente (con la agenda, el profesional podría tener a esa hora una cita de los datos
+     * demo), dentro de unas horas en la hora del centro. Minuto 7 para reconocer su correo entre los de las citas demo.
+     */
+    private Appointment confirmedInHours(int hours, LocalDateTime lastChangeAt) {
+        Appointment app = Appointment.builder()
+                .dateTime(CenterClock.now(Clock.systemDefaultZone(), center).plusHours(hours).withMinute(7).withSecond(0).withNano(0))
                 .treatment(treatment)
                 .center(center)
                 .client(sofia)
@@ -472,18 +476,81 @@ class AgendaTests {
                 .price(treatment.getPrice())
                 .workerMessage("")
                 .createdAt(LocalDateTime.now())
-                .build());
+                .build();
+        if (lastChangeAt != null) {
+            app.recordChange(AppointmentChange.CONFIRMED, lastChangeAt);
+        }
+        return appointments.saveAndFlush(app);
+    }
+
+    private boolean reminded(Appointment app) {
+        return appointments.findByStatusAndReminderSentAtIsNullAndDateTimeBetween(AppointmentStatus.CONFIRMED,
+                app.getDateTime().minusMinutes(1), app.getDateTime().plusMinutes(1)).isEmpty();
+    }
+
+    private List<EmailMessage> remindersTo(User client, Appointment app) {
+        ArgumentCaptor<EmailMessage> sent = ArgumentCaptor.forClass(EmailMessage.class);
+        verify(emailGateway, org.mockito.Mockito.atLeast(0)).send(sent.capture());
+        String time = app.getDateTime().toLocalTime().toString();
+        return sent.getAllValues().stream()
+                .filter(m -> m.to().equals(client.getEmail()) && m.subject().startsWith("Recordatorio")
+                        && m.subject().contains(" a las " + time + ", "))
+                .toList();
+    }
+
+    @Test
+    void reminderIsMarkedBeforeSendingAndNeverSentTwice() {
+        Appointment app = confirmedInHours(5, null);
         org.mockito.Mockito.clearInvocations(emailGateway);
 
         assertTrue(mail.sendReminders() >= 1);
         assertEquals(0, mail.sendReminders(), "una cita ya recordada no se vuelve a recordar");
 
-        ArgumentCaptor<EmailMessage> sent = ArgumentCaptor.forClass(EmailMessage.class);
-        verify(emailGateway, atLeastOnce()).send(sent.capture());
-        assertEquals(1, sent.getAllValues().stream()
-                .filter(m -> m.to().equals(sofia.getEmail()) && m.subject().startsWith("Recordatorio"))
-                .count());
-        assertTrue(appointments.findByStatusAndReminderSentAtIsNullAndDateTimeBetween(AppointmentStatus.CONFIRMED,
-                app.getDateTime().minusMinutes(1), app.getDateTime().plusMinutes(1)).isEmpty());
+        assertEquals(1, remindersTo(sofia, app).size());
+        assertTrue(reminded(app));
+    }
+
+    @Test
+    void reminderSaysTodayOrTomorrowAndOffersToCancel() {
+        Appointment app = confirmedInHours(5, null);
+        org.mockito.Mockito.clearInvocations(emailGateway);
+
+        mail.sendReminders();
+
+        EmailMessage message = remindersTo(sofia, app).getFirst();
+        boolean today = app.getDateTime().toLocalDate().equals(CenterClock.now(Clock.systemDefaultZone(), center).toLocalDate());
+        String day = today ? "hoy" : "mañana";
+        assertEquals("Recordatorio: " + day + " a las " + app.getDateTime().toLocalTime() + ", " + treatment.getName()
+                + " en " + center.getName() + " - Cuquora", message.subject());
+        assertTrue(message.htmlBody().contains(today ? "Hoy tienes cita" : "Mañana tienes cita"));
+        // El botón «Ver o anular mi cita» solo sale con crm.site-url (vacía en los tests)
+        assertTrue(message.htmlBody().contains("Si no puedes venir, anúlala"));
+    }
+
+    @Test
+    void noReminderRightAfterTheClientWasToldAboutTheAppointment() {
+        // Confirmada hace una hora: ya tiene el correo de «Cita confirmada»
+        Appointment justConfirmed = confirmedInHours(5, LocalDateTime.now().minusHours(1));
+        // Confirmada hace 13 h: ya toca recordársela
+        Appointment confirmedLongAgo = confirmedInHours(6, LocalDateTime.now().minusHours(13));
+        org.mockito.Mockito.clearInvocations(emailGateway);
+
+        mail.sendReminders();
+
+        assertFalse(reminded(justConfirmed), "no se apunta: se recordará cuando pasen las horas de calma");
+        assertTrue(remindersTo(sofia, justConfirmed).isEmpty());
+        assertTrue(reminded(confirmedLongAgo));
+        assertEquals(1, remindersTo(sofia, confirmedLongAgo).size());
+    }
+
+    @Test
+    void noReminderWhenTheAppointmentIsAboutToStart() {
+        Appointment soon = confirmedInHours(1, null);
+        org.mockito.Mockito.clearInvocations(emailGateway);
+
+        mail.sendReminders();
+
+        assertFalse(reminded(soon));
+        assertTrue(remindersTo(sofia, soon).isEmpty());
     }
 }

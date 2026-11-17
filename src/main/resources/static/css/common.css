@@ -1041,10 +1041,6 @@ button.mobile-drawer-link {
     .nav-left-group {
         gap: 8px;
     }
-    .nav-left-group .back-arrow-btn {
-        width: 34px;
-        height: 34px;
-    }
     .main-container {
         padding: 20px 14px;
     }
@@ -1673,43 +1669,6 @@ body > footer {
         left: 12px;
         width: auto;
     }
-}
-
-/* Back Arrow Button (Aesthetic, good focus, doesn't span full width) */
-.back-arrow-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    background: rgba(var(--surface-rgb), 0.7);
-    border: 1px solid rgba(var(--primary-rgb), 0.25);
-    color: var(--text-main);
-    transition: var(--transition);
-    margin: 0;
-    text-decoration: none;
-    cursor: pointer;
-    align-self: center;
-    flex-shrink: 0;
-}
-
-.back-arrow-btn:hover, .back-arrow-btn:focus {
-    background: var(--primary-light);
-    color: var(--primary-text);
-    border-color: var(--primary);
-    transform: translateX(-3px);
-    outline: none;
-    box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.15);
-}
-
-.back-arrow-btn:focus-visible {
-    outline: none;
-    box-shadow: var(--focus-ring);
-}
-
-.back-arrow-btn i, .back-arrow-btn svg {
-    display: block;
 }
 
 /* ---------- 7. Paneles deslizantes (sheets.js) ----------
@@ -4269,3 +4228,116 @@ body.media-viewer-open {
 .pct-98 { --pct: 98%; }
 .pct-99 { --pct: 99%; }
 .pct-100 { --pct: 100%; }
+
+/* ---------- Pantalla hasta el borde (isla dinámica / notch del iPhone) ----------
+   fragments/head pone viewport-fit=cover: la web se pinta también bajo la isla y junto a las
+   esquinas redondeadas, en vez de dejar esas zonas en negro. Para que nada quede tapado, cada
+   elemento pegado a un borde suma el hueco seguro (env(safe-area-inset-*)) a su relleno.
+   En pantallas sin isla (ordenador, Android sin muesca) los env() valen 0 y nada cambia. */
+
+/* Horizontal: el contenido se aparta de la isla y de las esquinas; el degradado del fondo
+   sigue llegando al borde porque es el relleno de <body>. */
+body {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+}
+
+/* La cabecera y el pie recuperan ese hueco con margen negativo para pintar de borde a borde,
+   y lo devuelven como relleno para que el logo, los enlaces y los textos no queden debajo. */
+.navbar {
+    margin-left: calc(-1 * env(safe-area-inset-left));
+    margin-right: calc(-1 * env(safe-area-inset-right));
+    min-height: calc(78px + env(safe-area-inset-top));
+    padding-top: calc(2px + env(safe-area-inset-top));
+    padding-left: calc(20px + env(safe-area-inset-left));
+    padding-right: calc(clamp(18px, 2.5vw, 36px) + env(safe-area-inset-right));
+}
+
+@media (min-width: 1200px) {
+    .navbar {
+        padding-right: calc(36px + env(safe-area-inset-right));
+    }
+}
+
+@media (max-width: 768px) {
+    .navbar {
+        min-height: calc(58px + env(safe-area-inset-top));
+        padding: calc(6px + env(safe-area-inset-top)) calc(14px + env(safe-area-inset-right))
+                 6px calc(14px + env(safe-area-inset-left));
+    }
+
+    .notifications-dropdown {
+        top: calc(65px + env(safe-area-inset-top));
+        left: calc(16px + env(safe-area-inset-left));
+        right: calc(16px + env(safe-area-inset-right));
+    }
+}
+
+body > footer {
+    margin-left: calc(-1 * env(safe-area-inset-left));
+    margin-right: calc(-1 * env(safe-area-inset-right));
+    padding-left: calc(24px + env(safe-area-inset-left));
+    padding-right: calc(24px + env(safe-area-inset-right));
+    padding-bottom: calc(14px + var(--cookie-banner-height) + env(safe-area-inset-bottom));
+}
+
+/* Menú móvil: el panel ya sobresale por arriba y por abajo (--nav-bleed). Su cabecera crece lo
+   que ocupe la isla (así su color sigue debajo de ella) y su pie, lo que ocupe la barra de inicio. */
+.mobile-nav-drawer {
+    padding-right: env(safe-area-inset-right);
+}
+
+.mobile-drawer-header {
+    padding-top: calc(16px + env(safe-area-inset-top));
+}
+
+.mobile-drawer-footer {
+    padding-bottom: calc(14px + env(safe-area-inset-bottom));
+}
+
+/* Avisos y botones fijos a los bordes */
+.cookie-banner {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+}
+
+@media (min-width: 601px) {
+    .cookie-banner {
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .review-prompt {
+        right: calc(24px + env(safe-area-inset-right));
+        bottom: calc(24px + env(safe-area-inset-bottom));
+    }
+
+    .sheet-content {
+        padding-top: calc(36px + env(safe-area-inset-top));
+        padding-right: calc(30px + env(safe-area-inset-right));
+        padding-bottom: calc(36px + env(safe-area-inset-bottom));
+    }
+
+    /* Modales centrados: en horizontal no se acercan a la isla */
+    .ui-modal-overlay {
+        padding-top: max(20px, env(safe-area-inset-top));
+        padding-left: max(20px, env(safe-area-inset-left));
+        padding-right: max(20px, env(safe-area-inset-right));
+    }
+}
+
+@media (max-width: 600px) {
+    .review-prompt {
+        left: calc(12px + env(safe-area-inset-left));
+        right: calc(12px + env(safe-area-inset-right));
+    }
+}
+
+.fab-add-btn {
+    bottom: calc(24px + env(safe-area-inset-bottom));
+    right: calc(20px + env(safe-area-inset-right));
+}
+
+.media-viewer {
+    padding: calc(56px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right))
+             calc(16px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left));
+}

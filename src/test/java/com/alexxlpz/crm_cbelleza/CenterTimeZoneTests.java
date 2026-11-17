@@ -138,8 +138,8 @@ class CenterTimeZoneTests {
 
     @Test
     void remindersCountTheNext24HoursInTheCenterTime() {
-        // Dentro de 2 h en México: en hora de España «ya ha pasado», pero hay que recordarla
-        Appointment soon = confirmedAt(mexicoNow().plusHours(2));
+        // Dentro de 3 h en México: en hora de España «ya ha pasado», pero hay que recordarla
+        Appointment soon = confirmedAt(mexicoNow().plusHours(3));
         // Dentro de 27 h en México: en hora de España caería en las próximas 24 h, pero aún es pronto
         Appointment dayAfter = confirmedAt(mexicoNow().plusHours(27));
         clearInvocations(emailGateway);

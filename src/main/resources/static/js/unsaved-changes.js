@@ -125,10 +125,7 @@
             const href = link.getAttribute('href');
             if (!href || href.startsWith('#') || href.startsWith('javascript:')) return;
             link.addEventListener('click', e => {
-                if (link.dataset.exitLink !== undefined) {
-                    e.preventDefault();
-                    isDirty() ? openModal() : exit();
-                } else if (isDirty()) {
+                if (isDirty()) {
                     e.preventDefault();
                     openModal();
                 }

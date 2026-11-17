@@ -122,6 +122,21 @@ class WorkerPanelTests {
                 .andExpect(content().string(containsString("data-only-mine=\"false\"")));
     }
 
+    /** Sin citas suyas hoy el filtro sigue ahí y el mensaje vacío es el de «Las mías». */
+    @Test
+    void todayFilterIsShownEvenWithoutAppointments() throws Exception {
+        assertTrue(dashboardService.todayFor(worker(LUCIA).getCenter()).stream()
+                .noneMatch(a -> worker(LUCIA).getId().equals(a.workerId())), "Lucía no tiene citas hoy en los datos de prueba");
+
+        mvc.perform(get("/worker/dashboard").with(TestUsers.as(users, LUCIA)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("data-today-filter=\"mine\"")))
+                .andExpect(content().string(containsString("data-today-filter=\"all\"")))
+                .andExpect(content().string(containsString("<p class=\"today-empty\">")))
+                .andExpect(content().string(containsString("<span class=\"today-empty-mine\">Hoy no tienes citas.")))
+                .andExpect(content().string(containsString("<span class=\"today-empty-all\" hidden=\"hidden\">")));
+    }
+
     @Test
     void workerBarShowsPanelSectionsInsteadOfPublicLinks() throws Exception {
         mvc.perform(get("/worker/inventory").with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))

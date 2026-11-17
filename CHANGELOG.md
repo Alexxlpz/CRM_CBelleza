@@ -31,10 +31,14 @@ Al sacar una versión:
 
 ### Cambiado
 
+- Recordatorio de cita por correo, más claro y sin correos de más: el título dice «Mañana tienes cita» o «Hoy tienes cita», el asunto empieza por el día y la hora («Recordatorio: mañana a las 10:00, Manicura en Centro Histórico») y el botón pasa a «Ver o anular mi cita». Ya no llega justo después del correo de «Cita confirmada» o «Tu cita ha cambiado»: si a la clienta se le avisó de la cita hace menos de 12 horas, espera, y si faltan menos de 2 horas para la cita no se manda. Sin migración.
 - Fechas amables en las tarjetas de cita del cliente y en «Por aprobar»: «Hoy · 11:00», «Mañana, lun 16 nov · 09:00» o «vie 20 nov · 10:30» (con el año si no es el de este). Al pasar el ratón se ve la fecha completa; el historial sigue con la fecha entera.
 - Si el cliente elige «Cualquiera», la tarjeta dice «Profesional: te la asigna el centro» en vez de «Sin asignar».
 - El historial de citas de la ficha del cliente enseña las 6 últimas y «Ver las N citas»; buscar o filtrar busca en todas.
+- Al desplegar el historial de citas de la ficha, el mismo botón pasa a «Ver menos» y lo vuelve a plegar a las 6 últimas (si el principio de la lista quedó fuera de la pantalla, sube hasta él).
+- «Las mías» / «Todo el centro» en «Hoy» también se puede cambiar cuando no hay citas: cada vista dice lo suyo («Hoy no tienes citas.» o «Hoy no hay citas en el centro.»).
 - La trabajadora sin rol de dueño ya no ve el total de las compras del cliente en su ficha, solo cuántas son (igual que el gasto total).
+- Fuera la flecha de volver que salía a la izquierda del logo en la cabecera del panel (Clientes, Agenda, Ajustes…): para moverse ya están los apartados de arriba, «Mi Panel» y la miga de pan de cada pantalla.
 
 - «Hoy» en el panel del trabajador: debajo de las cifras, las citas del día por hora con el cliente, el tratamiento, quién la hace, si alguna vez no se presentó y un botón a su ficha. Marca la que está en curso y la siguiente, y aclara las que ya pasaron. «Las mías» / «Todo el centro» elige qué ver: la trabajadora empieza con las suyas y el dueño con todo el centro.
 - La barra de arriba del panel lleva Agenda, Clientes, Tratamientos e Inventario (también en el menú del móvil) en vez de los enlaces de la web pública.
@@ -65,6 +69,7 @@ Al sacar una versión:
 - `cloudflared` con versión fija (`2026.10.7`) en vez de `latest`: una reconstrucción ya no trae una versión nueva sin probar.
 - Fuera `SPRING_FLYWAY_BASELINE_ON_MIGRATE=true` del `docker-compose.yml`: solo hacía falta para bases de datos de antes de Flyway. Si un día faltase el historial de Flyway, la app no arranca en vez de dar por hechas migraciones que no se han aplicado.
 - La API de productos entra en PostgreSQL con su propio usuario (`productos_api`), dueño solo del esquema `productos` y sin ningún permiso sobre las tablas de Cuquora. Antes usaba `POSTGRES_USER`, que es superusuario. Lo prepara el servicio nuevo `db-setup` del `docker-compose.yml` en cada arranque. Nueva variable `PRODUCT_API_DB_PASSWORD` en el `.env`.
+- Librerías al día con sus parches de seguridad: Spring Boot pasa de 4.1.0 a 4.1.2 en la app y en la API de productos, lo que trae Tomcat 11.0.27 (corrige, entre otros, saltos de las restricciones de seguridad CVE-2026-65182 y CVE-2026-76183, respuestas cruzadas entre peticiones CVE-2026-86350 y CVE-2026-101356 y varios cuelgues por HTTP/2 y WebSocket), Spring Framework 7.0.10 (CVE-2026-59281, XSS en mensajes de error), Spring Security 7.1.2 y el driver de PostgreSQL 42.7.14 (CVE-2026-54291). La librería de códigos de barras zxing pasa de 3.5.3 a 3.5.4.
 
 ### Cambiado
 

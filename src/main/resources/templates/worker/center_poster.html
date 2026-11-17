@@ -8,7 +8,7 @@
 <body class="poster-page">
     <!--/*@thymesVar id="center" type="com.alexxlpz.crm_cbelleza.entities.Center"*/-->
     <!--/*@thymesVar id="qrSvg" type="java.lang.String"*/-->
-    <div th:replace="~{fragments/navbar :: worker('/worker/center/reservas', 'Volver a Reservas', ${notifications})}"></div>
+    <div th:replace="~{fragments/navbar :: worker(${notifications})}"></div>
 
     <main class="main-container poster-layout">
         <header class="page-header page-header--panel poster-toolbar">

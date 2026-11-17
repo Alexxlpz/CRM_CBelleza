@@ -223,7 +223,10 @@ class ExperienceTests {
         mvc.perform(get("/worker/clients/" + client.getId()).with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
                 .andExpect(content().string(containsString("1 compra · ")))
                 .andExpect(content().string(containsString("history-item--extra")))
-                .andExpect(content().string(containsString("Ver las 8 citas")));
+                .andExpect(content().string(containsString("Ver las 8 citas")))
+                // Desplegado, el mismo botón vuelve a plegarlo
+                .andExpect(content().string(containsString("data-less-label=\"Ver menos\"")))
+                .andExpect(content().string(containsString("aria-controls=\"historyList\" aria-expanded=\"false\"")));
         mvc.perform(get("/worker/clients/" + client.getId()).with(TestUsers.as(users, LUCIA)))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("1 compra")))

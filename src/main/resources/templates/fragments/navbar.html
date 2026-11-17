@@ -2,8 +2,7 @@
     <!--/*
         Barra de navegación común.
         - brand(showSession): páginas públicas (muestra Login/Registro si no hay sesión).
-        - client(backUrl, backLabel): zona de cliente.
-        - worker(backUrl, backLabel, notifications): panel del trabajador. Arriba lleva los apartados del panel
+        - worker(notifications): panel del trabajador. Arriba lleva los apartados del panel
           (Agenda, Clientes, Tratamientos, Inventario) en vez de los enlaces de la web pública.
         Todas comparten los mismos fragmentos internos (enlaces, acciones de sesión y drawer móvil).
     */-->
@@ -23,27 +22,10 @@
         <th:block th:replace="~{fragments/navbar :: mobileDrawer(${showSession}, ${sessionRole}, false)}"></th:block>
     </th:block>
 
-    <!-- ===== Navbar del cliente ===== -->
-    <th:block th:fragment="client(backUrl, backLabel)">
-        <nav class="navbar" aria-label="Navegación principal">
-            <div class="nav-left-group">
-                <th:block th:replace="~{fragments/navbar :: backButton(${backUrl}, ${backLabel})}"></th:block>
-                <th:block th:replace="~{fragments/navbar :: logo}"></th:block>
-                <th:block th:replace="~{fragments/navbar :: menuLinks}"></th:block>
-            </div>
-            <div class="nav-right-group">
-                <th:block th:replace="~{fragments/navbar :: sessionActions('CLIENT', true, null)}"></th:block>
-                <th:block th:replace="~{fragments/navbar :: hamburger}"></th:block>
-            </div>
-        </nav>
-        <th:block th:replace="~{fragments/navbar :: mobileDrawer(true, 'CLIENT', false)}"></th:block>
-    </th:block>
-
     <!-- ===== Navbar del trabajador ===== -->
-    <th:block th:fragment="worker(backUrl, backLabel, notifications)">
+    <th:block th:fragment="worker(notifications)">
         <nav class="navbar" aria-label="Navegación principal">
             <div class="nav-left-group">
-                <th:block th:replace="~{fragments/navbar :: backButton(${backUrl}, ${backLabel})}"></th:block>
                 <th:block th:replace="~{fragments/navbar :: logo}"></th:block>
                 <th:block th:replace="~{fragments/navbar :: workerLinks}"></th:block>
             </div>
@@ -58,12 +40,6 @@
     <!-- ===== Piezas internas ===== -->
     <a th:fragment="logo" href="/home" class="nav-brand" aria-label="Cuquora, ir al inicio">
         <img th:src="@{/images/big_icon.png}" alt="Cuquora">
-    </a>
-
-    <a th:fragment="backButton(backUrl, backLabel)" th:if="${backUrl != null}" th:href="${backUrl}"
-       class="back-arrow-btn" data-exit-link th:title="${backLabel != null ? backLabel : 'Volver'}"
-       th:aria-label="${backLabel != null ? backLabel : 'Volver'}">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m15 18-6-6 6-6"/></svg>
     </a>
 
     <div th:fragment="menuLinks" class="nav-links-menu">

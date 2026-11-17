@@ -5,7 +5,7 @@
     <script th:src="@{/js/opening-hours.js}" defer></script>
 </head>
 <body>
-    <div th:replace="~{fragments/navbar :: worker('/worker/center/equipo', 'Volver al equipo', ${notifications})}"></div>
+    <div th:replace="~{fragments/navbar :: worker(${notifications})}"></div>
 
     <main class="main-container settings-page">
         <header class="page-header page-header--panel">

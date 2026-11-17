@@ -15,7 +15,7 @@
     <script th:if="${section == 'centro' or section == 'cuenta'}" th:src="@{/js/photo-picker.js}" defer></script>
 </head>
 <body>
-    <div th:replace="~{fragments/navbar :: worker('/worker/dashboard', 'Volver al panel', ${notifications})}"></div>
+    <div th:replace="~{fragments/navbar :: worker(${notifications})}"></div>
 
     <!--/* is-index: /worker/center. En el móvil enseña solo la lista de apartados; en un apartado, solo su contenido */-->
     <main class="main-container settings-page settings-page--split center-settings" th:classappend="${isIndex} ? 'is-index'">

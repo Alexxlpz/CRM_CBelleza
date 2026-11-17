@@ -62,27 +62,37 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }));
 
-    // Historial plegado: solo las 6 primeras hasta pulsar «Ver las N citas» (o si se llega con #cita-<id> a una plegada)
+    // Historial plegado: solo las 6 primeras hasta pulsar «Ver las N citas» (o si se llega con #cita-<id> a una plegada).
+    // Desplegado, el mismo botón pasa a «Ver menos» y vuelve a dejar las 6 primeras.
     const historyList = document.getElementById('historyList');
     const historyMore = document.getElementById('historyMore');
     let historyExpanded = false;
     const setSearching = searching => {
         if (!historyList || !historyMore) return;
         historyList.classList.toggle('is-collapsed', !historyExpanded && !searching);
-        historyMore.hidden = historyExpanded || searching;
+        historyMore.hidden = searching;
+        historyMore.setAttribute('aria-expanded', String(historyExpanded));
+        historyMore.querySelector('i').className = historyExpanded ? 'lucide-chevrons-up' : 'lucide-chevrons-down';
+        historyMore.querySelector('span').textContent = historyExpanded
+            ? historyMore.dataset.lessLabel : historyMore.dataset.moreLabel;
     };
     if (historyList && historyMore) {
         const target = location.hash.startsWith('#cita-') ? document.getElementById(location.hash.slice(1)) : null;
         historyExpanded = !!target?.classList.contains('history-item--extra');
         setSearching(false);
         historyMore.addEventListener('click', () => {
-            historyExpanded = true;
+            historyExpanded = !historyExpanded;
             setSearching(false);
-            // El botón desaparece: el foco pasa a la primera cita que estaba plegada
-            const first = historyList.querySelector('.history-item--extra:not([hidden])');
-            if (first) {
-                first.tabIndex = -1;
-                first.focus({ preventScroll: true });
+            if (historyExpanded) {
+                // El foco pasa a la primera cita que estaba plegada
+                const first = historyList.querySelector('.history-item--extra:not([hidden])');
+                if (first) {
+                    first.tabIndex = -1;
+                    first.focus({ preventScroll: true });
+                }
+            } else if (historyList.getBoundingClientRect().top < 0) {
+                // Al plegar, la lista encoge: si su principio quedó fuera de la pantalla, se vuelve a él
+                historyList.closest('section').scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         });
     }
