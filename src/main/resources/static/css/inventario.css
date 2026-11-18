@@ -810,3 +810,55 @@
     height: 100%;
     object-fit: contain;
 }
+
+/* «Ver Info»: editar un producto propio y el aviso de stock bajo */
+.product-edit-form,
+.low-stock-form {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(var(--primary-rgb), 0.12);
+}
+
+.product-edit-form .btn-block {
+    margin-top: 10px;
+}
+
+.product-edit-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.low-stock-form .form-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.low-stock-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-main);
+    font-size: 14px;
+}
+
+.low-stock-input {
+    width: 84px;
+    text-align: center;
+}
+
+.low-stock-row .btn {
+    gap: 6px;
+    margin-left: auto;
+}
+
+@media (max-width: 420px) {
+    .product-edit-row {
+        grid-template-columns: 1fr;
+    }
+}

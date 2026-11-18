@@ -84,7 +84,7 @@ public class WorkerCalendarController {
                 "workers", team.stream()
                         .map(w -> Map.of("id", w.getId(), "name", w.getName()))
                         .toList(),
-                "treatments", treatmentService.getTreatmentsByCenter(centerId).stream()
+                "treatments", treatmentService.getVisibleTreatmentsByCenter(centerId).stream()
                         .map(t -> Map.of("id", t.getId(), "name", t.getName(), "duration", t.getDuration(), "price", t.getPrice()))
                         .toList()));
         data.put("newFor", newAppointmentClient(centerId, newAppointmentClientId));

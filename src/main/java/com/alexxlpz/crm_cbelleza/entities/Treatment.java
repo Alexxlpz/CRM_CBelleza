@@ -58,6 +58,11 @@ public class Treatment {
     @Builder.Default
     private Set<Long> workerIds = new HashSet<>();
 
+    /** Oculto de la carta: no se reserva ni se da cita con él, pero sus citas siguen en el historial y el análisis. */
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean hidden = false;
+
     /** true si lo hace ese profesional (o lo hace todo el equipo). */
     public boolean isDoneBy(Long workerId) {
         return workerIds.isEmpty() || workerIds.contains(workerId);

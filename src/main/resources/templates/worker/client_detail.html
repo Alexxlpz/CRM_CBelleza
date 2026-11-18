@@ -33,7 +33,7 @@
                             <i class="lucide-phone" aria-hidden="true"></i>
                             <th:block th:replace="~{fragments/tel :: link(${client.phone})}"></th:block>
                         </span>
-                        <span class="profile-chip" th:if="${!#strings.isEmpty(client.email)}">
+                        <span class="profile-chip" th:if="${client.hasRealEmail()}">
                             <i class="lucide-mail" aria-hidden="true"></i>
                             <span th:text="${client.email}">cliente@email.com</span>
                         </span>
@@ -47,6 +47,11 @@
             </div>
 
             <div class="profile-header-actions">
+                <!-- Solo clientes creados por el centro (sin cuenta propia): los demás cambian sus datos en su perfil -->
+                <button type="button" class="btn btn-secondary client-edit-btn" data-modal-open="clientContactModal" th:if="${canEditContact}">
+                    <i class="lucide-pen-line" aria-hidden="true"></i>
+                    <span>Editar datos</span>
+                </button>
                 <a href="/worker/clients/template" class="btn-template-config" th:if="${isCenterOwner}">
                     <i class="lucide-sliders" aria-hidden="true"></i>
                     <span>Configurar Plantilla</span>
@@ -328,7 +333,7 @@
                             </span>
                             <span>
                                 <strong class="history-price" th:text="${#numbers.formatDecimal(app.price, 1, 'POINT', 2, 'COMMA') + ' €'}">35,00 €</strong>
-                                <span th:text="'(' + ${app.treatment.duration} + ' min)'">(45 min)</span>
+                                <span th:text="'(' + ${app.durationMinutes} + ' min)'">(45 min)</span>
                             </span>
                         </div>
 
@@ -417,6 +422,37 @@
                     <span>Seguir editando</span>
                 </button>
             </div>
+        </div>
+    </div>
+
+    <!-- Corregir nombre, teléfono y correo de un cliente creado por el centro -->
+    <div class="ui-modal-overlay" id="clientContactModal" hidden th:if="${canEditContact}">
+        <div class="ui-modal ui-modal--form" role="dialog" aria-modal="true" aria-labelledby="clientContactTitle">
+            <button type="button" class="ui-modal-close" data-modal-close aria-label="Cerrar"><i class="lucide-x" aria-hidden="true"></i></button>
+            <h2 class="ui-modal-title" id="clientContactTitle"><i class="lucide-pen-line" aria-hidden="true"></i> Datos del cliente</h2>
+            <p class="ui-modal-text">Lo diste de alta desde el centro y aún no tiene cuenta, así que puedes corregir sus datos.</p>
+            <form th:action="@{/worker/clients/{id}/contact(id=${client.id})}" method="post" class="client-contact-form">
+                <div class="form-group">
+                    <label class="form-label" for="contactName">Nombre y apellidos</label>
+                    <input type="text" name="name" id="contactName" class="form-control" maxlength="120" required
+                           autocomplete="off" th:value="${client.name}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="contactPhone">Teléfono</label>
+                    <input type="tel" name="phone" id="contactPhone" class="form-control" maxlength="24" required
+                           inputmode="tel" autocomplete="off" th:value="${client.phone}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="contactEmail">Correo <span class="form-label-hint">(opcional)</span></label>
+                    <input type="email" name="email" id="contactEmail" class="form-control" maxlength="254"
+                           autocomplete="off" th:value="${client.hasRealEmail()} ? ${client.email} : ''" aria-describedby="contactEmailHint">
+                    <span class="form-hint" id="contactEmailHint">Si se registra en Cuquora con este correo, verá sus citas con vosotros.</span>
+                </div>
+                <div class="ui-modal-actions">
+                    <button type="button" class="btn btn-secondary" data-modal-close tabindex="-1">Cancelar</button>
+                    <button type="submit" class="btn btn-primary"><i class="lucide-save" aria-hidden="true"></i> Guardar</button>
+                </div>
+            </form>
         </div>
     </div>
 

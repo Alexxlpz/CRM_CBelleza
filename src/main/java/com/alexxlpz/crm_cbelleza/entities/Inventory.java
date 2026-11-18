@@ -27,4 +27,13 @@ public class Inventory {
 
     @Column(nullable = false)
     private Integer stock;
+
+    /** Con estas unidades o menos avisa «Stock bajo»; nulo = no avisa (solo «Agotado» al llegar a 0). */
+    @Column(name = "low_stock_alert")
+    private Integer lowStockAlert;
+
+    /** Le quedan pocas unidades según el aviso que puso el centro (agotado no cuenta: tiene su propio aviso). */
+    public boolean isLowStock() {
+        return stock != null && stock > 0 && lowStockAlert != null && stock <= lowStockAlert;
+    }
 }

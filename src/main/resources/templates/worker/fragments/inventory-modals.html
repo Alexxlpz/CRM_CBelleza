@@ -33,7 +33,57 @@
                             <button type="submit" class="btn btn-secondary btn-sm"><i class="lucide-image-off" aria-hidden="true"></i> Quitar foto</button>
                         </form>
                     </div>
+                    <!-- Producto propio del centro: el dueño cambia sus datos. Los del catálogo general solo se leen. -->
+                    <form class="product-edit-form" th:if="${isCenterOwner and item.product.centerId != null}"
+                          th:action="@{/worker/inventory/{id}/edit(id=${item.id})}" method="post">
+                        <div class="form-group">
+                            <label class="form-label" th:for="'editName_' + ${item.id}">Nombre</label>
+                            <input type="text" name="name" class="form-control" maxlength="120" required
+                                   th:id="'editName_' + ${item.id}" th:value="${item.product.name}">
+                        </div>
+                        <div class="product-edit-row">
+                            <div class="form-group">
+                                <label class="form-label" th:for="'editCategory_' + ${item.id}">Categoría</label>
+                                <select name="category" class="form-control" th:id="'editCategory_' + ${item.id}">
+                                    <option th:if="${item.product.category != null and not productCategories.contains(item.product.category)}"
+                                            th:value="${item.product.category}" th:text="${item.product.category}" selected>Otra</option>
+                                    <option th:each="c : ${productCategories}" th:value="${c}" th:text="${c}"
+                                            th:selected="${c == item.product.category}">Rostro</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" th:for="'editPrice_' + ${item.id}">Precio de venta (€)</label>
+                                <input type="number" name="price" class="form-control" step="0.01" min="0" max="10000" inputmode="decimal" required
+                                       th:id="'editPrice_' + ${item.id}"
+                                       th:value="${item.product.price != null} ? ${#numbers.formatDecimal(item.product.price, 1, 'NONE', 2, 'POINT')} : ''">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" th:for="'editDesc_' + ${item.id}">Descripción</label>
+                            <textarea name="description" class="form-control form-textarea-fixed" rows="3" maxlength="1000"
+                                      th:id="'editDesc_' + ${item.id}" th:text="${item.product.description}"></textarea>
+                        </div>
+                        <span class="form-hint">Las ventas ya hechas mantienen el precio con el que se vendieron.</span>
+                        <button type="submit" class="btn btn-primary btn-block"><i class="lucide-save" aria-hidden="true"></i> Guardar cambios</button>
+                    </form>
+
+                    <!-- Aviso de stock bajo: vacío = no avisa (solo «Agotado» al llegar a 0) -->
+                    <form class="low-stock-form" th:if="${isCenterOwner}"
+                          th:action="@{/worker/inventory/{id}/low-stock(id=${item.id})}" method="post">
+                        <label class="form-label" th:for="'lowStock_' + ${item.id}"><i class="lucide-bell" aria-hidden="true"></i> Avisarme de stock bajo</label>
+                        <div class="low-stock-row">
+                            <span>Cuando queden</span>
+                            <input type="number" name="units" class="form-control low-stock-input" min="1" max="999" inputmode="numeric"
+                                   placeholder="—" th:id="'lowStock_' + ${item.id}" th:value="${item.lowStockAlert}"
+                                   th:attr="aria-describedby='lowStockHint_' + ${item.id}">
+                            <span>ud o menos</span>
+                            <button type="submit" class="btn btn-secondary btn-sm"><i class="lucide-save" aria-hidden="true"></i> Guardar</button>
+                        </div>
+                        <span class="form-hint" th:id="'lowStockHint_' + ${item.id}">Déjalo vacío para no recibir avisos. Al agotarse avisa siempre.</span>
+                    </form>
+
                     <div class="info-modal-details">
+                        <th:block th:unless="${isCenterOwner and item.product.centerId != null}">
                         <div class="info-detail-row">
                             <span class="info-detail-label">Categoría</span>
                             <span class="product-category" th:text="${item.product.category}">Categoría</span>
@@ -46,6 +96,10 @@
                             <span class="info-detail-label">Stock en Centro</span>
                             <span class="info-detail-stock" th:text="${item.stock} + ' unidades'">0 ud</span>
                         </div>
+                        <div class="info-detail-row" th:unless="${isCenterOwner}">
+                            <span class="info-detail-label">Aviso de stock bajo</span>
+                            <span class="info-detail-stock" th:text="${item.lowStockAlert != null} ? 'Con ' + ${item.lowStockAlert} + ' ud o menos' : 'Sin aviso'">Sin aviso</span>
+                        </div>
                         <div class="info-detail-row" th:if="${item.product.barcode != null}">
                             <span class="info-detail-label">Código de barras</span>
                             <span th:text="${item.product.barcode}">8412345678905</span>
@@ -53,6 +107,15 @@
                         <div class="info-detail-box">
                             <span class="info-detail-label">Descripción del Producto</span>
                             <p th:text="${item.product.description}">Descripción detallada...</p>
+                        </div>
+                        </th:block>
+                        <div class="info-detail-row" th:if="${isCenterOwner and item.product.centerId != null}">
+                            <span class="info-detail-label">Stock en Centro</span>
+                            <span class="info-detail-stock" th:text="${item.stock} + ' unidades'">0 ud</span>
+                        </div>
+                        <div class="info-detail-row" th:if="${isCenterOwner and item.product.centerId != null and item.product.barcode != null}">
+                            <span class="info-detail-label">Código de barras</span>
+                            <span th:text="${item.product.barcode}">8412345678905</span>
                         </div>
                     </div>
                 </div>

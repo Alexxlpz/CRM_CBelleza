@@ -79,7 +79,7 @@ public class NotificationService {
             String product = item.getProduct().getName();
             if (item.getStock() == 0) {
                 alerts.add(new NotificationItem("¡Agotado! " + product + " requiere reposición urgente.", "/worker/inventory"));
-            } else if (item.getStock() <= InventoryService.LOW_STOCK_THRESHOLD) {
+            } else if (item.isLowStock()) {
                 alerts.add(new NotificationItem("Stock bajo: quedan " + item.getStock() + " ud de " + product + ".", "/worker/inventory"));
             }
         }

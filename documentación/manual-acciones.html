@@ -1044,7 +1044,7 @@
                         <strong>/worker/dashboard</strong>
                         <span class="card-badge badge-worker">WORKER</span>
                     </div>
-                    <p>Métricas del centro: citas de hoy, citas de mañana, solicitudes pendientes y productos con stock bajo (≤ 3 unidades). Encima de «Hoy», «Por aprobar» (<code>DashboardService.pendingFor</code>: solicitudes pendientes futuras del centro, con Aceptar y Rechazar en <code>worker-requests.js</code>, que llaman a <code>/worker/appointments/{id}/approve</code> y <code>/reject</code>). Debajo, «Hoy» (<code>DashboardService.todayFor</code>, con teléfono y alergias de <code>ClientAllergyService</code>): las citas del día en la hora local del centro (pendientes, confirmadas, completadas y no presentadas) por hora, con a cuántas citas del centro no se presentó ese cliente, y el filtro «Las mías» / «Todo el centro» (<code>worker-today.js</code>; la trabajadora empieza con las suyas y el dueño con todo, sin filtro si el equipo es de una persona). Cinco accesos directos: agenda, inventario, tratamientos, clientes y reseñas (con la nota media).</p>
+                    <p>Métricas del centro: citas de hoy, citas de mañana, solicitudes pendientes y productos agotados o con stock bajo (por debajo del aviso que el dueño puso a cada producto; sin aviso, solo cuentan los agotados). Encima de «Hoy», «Por aprobar» (<code>DashboardService.pendingFor</code>: solicitudes pendientes futuras del centro, con Aceptar y Rechazar en <code>worker-requests.js</code>, que llaman a <code>/worker/appointments/{id}/approve</code> y <code>/reject</code>). Debajo, «Hoy» (<code>DashboardService.todayFor</code>, con teléfono y alergias de <code>ClientAllergyService</code>): las citas del día en la hora local del centro (pendientes, confirmadas, completadas y no presentadas) por hora, con a cuántas citas del centro no se presentó ese cliente, y el filtro «Las mías» / «Todo el centro» (<code>worker-today.js</code>; la trabajadora empieza con las suyas y el dueño con todo, sin filtro si el equipo es de una persona). Cinco accesos directos: agenda, inventario, tratamientos, clientes y reseñas (con la nota media).</p>
                 </div>
 
                 <div class="card-feature" style="margin-bottom: 1.5rem;">
@@ -1110,8 +1110,20 @@
                         <span class="card-badge badge-worker">WORKER · JSON</span>
                     </div>
                     <p>
-                        Suma o resta unidades (parámetro <code>change</code>) y devuelve <code>{"stock", "lowStockThreshold"}</code>. Cada ajuste suma o resta entre 1 y 10 unidades (si no, 409 con el aviso); el stock nunca baja de 0 ni pasa de 999, y la fila se bloquea mientras tanto (<code>findForUpdate</code>).
+                        Suma o resta unidades (parámetro <code>change</code>) y devuelve <code>{"stock", "lowStock", "maxStock"}</code> (<code>lowStock</code>: queda por debajo del aviso de ese producto). Cada ajuste suma o resta entre 1 y 10 unidades (si no, 409 con el aviso); el stock nunca baja de 0 ni pasa de 999, y la fila se bloquea mientras tanto (<code>findForUpdate</code>).
                     </p>
+                </div>
+
+                <div class="card-feature" style="margin-bottom: 1.5rem;">
+                    <div class="card-feature-header">
+                        <span class="http-post">POST</span>
+                        <strong>/worker/inventory/{id}/edit · /worker/inventory/{id}/low-stock</strong>
+                        <span class="card-badge badge-worker">DUEÑO</span>
+                    </div>
+                    <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.9rem;">
+                        <li><code>/edit</code>: desde «Ver Info», cambia <code>name</code>, <code>category</code>, <code>price</code> (0-10.000 €) y <code>description</code> de un producto creado por el centro. Los del catálogo general no se tocan. Las ventas ya hechas guardan su precio.</li>
+                        <li><code>/low-stock</code>: <code>units</code> (1-999) a partir de las que avisa «Stock bajo» en la campana, el panel, la etiqueta de la tarjeta y el mensaje al vender (<code>inventories.low_stock_alert</code>, V34). Vacío = sin aviso, que es como nacen todos los productos; «Agotado» avisa siempre.</li>
+                    </ul>
                 </div>
 
                 <div class="card-feature" style="margin-bottom: 1.5rem;">
@@ -1193,6 +1205,9 @@
                     <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.9rem;">
                         <li><code>POST /worker/treatments/{id}/workers</code> (<code>workerIds</code> repetido): quién hace el tratamiento, guardado en <code>treatment_workers</code>. Sin nadie marcado lo hace todo el equipo. Lo usan el paso «¿Con quién?» del cliente, los huecos libres y la asignación automática.</li>
                         <li><code>POST /worker/treatments/{id}/offer</code> · <code>/offer/delete</code>: poner o quitar una oferta.</li>
+                        <li><code>POST /worker/treatments/{id}/edit</code> (solo el dueño): cambia nombre, tipo, descripción, precio (0-10.000 €, mayor que la oferta si la tiene) y duración (5-720 min). Las citas ya pedidas no cambian: guardan su precio y su duración (<code>appointments.duration_minutes</code>, V34).</li>
+                        <li><code>POST /worker/treatments/{id}/hide</code> · <code>/show</code> (solo el dueño): oculta o vuelve a mostrar el tratamiento (<code>treatments.hidden</code>, V34). Oculto no sale en la carta pública ni en la del cliente, ni al dar cita en la agenda, y no se puede reservar; sus citas siguen en el historial y en el análisis. El dueño lo ve con el filtro «Ocultos».</li>
+                        <li><code>POST /worker/treatments/{id}/delete</code> (solo el dueño): lo borra solo si nunca ha tenido citas (de ningún estado); si tiene alguna, explica cuántas y pide ocultarlo.</li>
                     </ul>
                 </div>
 
@@ -1204,7 +1219,8 @@
                     </div>
                     <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.9rem;">
                         <li><strong><code>GET /worker/clients</code>:</strong> cartera del centro con buscador (<code>?search=</code>) y resumen. <code>GET /worker/clients/search</code> devuelve JSON para el buscador de «Nueva cita».</li>
-                        <li><strong><code>POST /worker/clients/create</code>:</strong> alta manual (<code>name</code>, <code>phone</code>, <code>email</code>, <code>initialNotes</code>). Solo reutiliza clientes del propio centro con ese teléfono o correo; si el correo ya es de otra cuenta, el cliente se guarda sin él. Sin correo recibe uno interno <code>cliente_&lt;teléfono&gt;@cbelleza.local</code>.</li>
+                        <li><strong><code>POST /worker/clients/create</code>:</strong> alta manual (<code>name</code>, <code>phone</code>, <code>email</code>, <code>initialNotes</code>). Solo reutiliza clientes del propio centro con ese teléfono o correo; si el correo ya es de otra cuenta, el cliente se guarda sin él. Sin correo recibe uno interno <code>cliente_&lt;teléfono&gt;@cbelleza.local</code>, que la ficha no enseña.</li>
+                        <li><strong><code>POST /worker/clients/{clientId}/contact</code>:</strong> «Editar datos» de la ficha (todo el equipo). Corrige <code>name</code>, <code>phone</code> y <code>email</code> solo de un cliente creado por el centro: sin contraseña ni Google, sin borrar y sin ficha ni citas en otro centro (<code>ClientCardService.canEditContact</code>). Correo vacío = uno interno; si el correo ya es de otra cuenta, se guarda el resto y se avisa.</li>
                         <li><strong><code>/worker/clients/{clientId}</code></strong> y <strong><code>POST /{clientId}/card</code>:</strong> ver y guardar la ficha técnica (valores en JSON en <code>client_cards.data_json</code>). La ficha incluye el historial de citas (las 6 últimas y «Ver las N citas»; con filtro por tratamiento y buscador en notas y resúmenes, en el navegador, que buscan en todas), las ventas (el total en euros solo para el dueño) y la tarjeta de puntos.</li>
                         <li><strong><code>/worker/clients/template</code>:</strong> campos de la ficha del centro (<code>text</code>, <code>textarea</code>, <code>select</code>, <code>checkbox</code>, <code>date</code>, <code>number</code>).</li>
                     </ul>

@@ -38,7 +38,7 @@ public class AppointmentCalendarMapper {
                 .guestPhone(app.getGuestPhone())
                 .client(toClient(app.getClient()))
                 .worker(toWorker(app.getWorker()))
-                .treatment(toTreatment(app.getTreatment()))
+                .treatment(toTreatment(app.getTreatment(), app.getDurationMinutes()))
                 .price(app.getPrice())
                 .previousDateTime(app.getPreviousDateTime() != null ? app.getPreviousDateTime().toString() : null)
                 // Las horas propuestas solo se cargan en las citas PROPOSED (pocas): así no hay una consulta por cita
@@ -82,13 +82,14 @@ public class AppointmentCalendarMapper {
                 .build();
     }
 
-    private AppointmentCalendarDTO.TreatmentDTO toTreatment(Treatment treatment) {
+    /** {@code duration}: la de la cita, que puede ser distinta de la que tiene hoy el tratamiento. */
+    private AppointmentCalendarDTO.TreatmentDTO toTreatment(Treatment treatment, int duration) {
         if (treatment == null) return null;
         return AppointmentCalendarDTO.TreatmentDTO.builder()
                 .id(treatment.getId())
                 .name(treatment.getName())
                 .price(treatment.getPrice())
-                .duration(treatment.getDuration())
+                .duration(duration)
                 .build();
     }
 }

@@ -6,6 +6,7 @@ import com.alexxlpz.crm_cbelleza.entities.Inventory;
 import com.alexxlpz.crm_cbelleza.entities.Product;
 import com.alexxlpz.crm_cbelleza.exceptions.BusinessRuleException;
 import com.alexxlpz.crm_cbelleza.forms.InventoryItemForm;
+import com.alexxlpz.crm_cbelleza.forms.ProductEditForm;
 import com.alexxlpz.crm_cbelleza.forms.ProductSaleForm;
 import com.alexxlpz.crm_cbelleza.security.AppUserDetails;
 import com.alexxlpz.crm_cbelleza.services.CenterService;
@@ -43,7 +44,6 @@ public class InventoryController {
     private final ProductPhotoService productPhotos;
 
     /** Mismo umbral que usa el script de la plantilla para la etiqueta «Bajo Stock». */
-    private static final int LOW_STOCK_THRESHOLD = 3;
 
     public InventoryController(InventoryService inventoryService, ProductSaleService saleService,
                                ClientCardService clientCards, LoyaltyService loyaltyService, CenterService centerService,
@@ -62,7 +62,7 @@ public class InventoryController {
         List<Integer> stocks = items.stream().map(Inventory::getStock).filter(Objects::nonNull).toList();
         model.addAttribute("inventoryItems", items);
         model.addAttribute("totalUnits", stocks.stream().mapToInt(Integer::intValue).sum());
-        model.addAttribute("lowStockCount", stocks.stream().filter(s -> s > 0 && s <= LOW_STOCK_THRESHOLD).count());
+        model.addAttribute("lowStockCount", items.stream().filter(Inventory::isLowStock).count());
         model.addAttribute("outOfStockCount", stocks.stream().filter(s -> s == 0).count());
         model.addAttribute("catalogProducts", inventoryService.getAvailableCatalogProducts(worker.getCenterId()));
         model.addAttribute("saleClients", clientCards.getClientsForCenter(worker.getCenterId(), null).stream()
@@ -70,6 +70,7 @@ public class InventoryController {
                 .toList());
         model.addAttribute("maxPhotoMb", ProductPhotoService.MAX_UPLOAD_MB);
         model.addAttribute("maxStock", InventoryService.MAX_STOCK);
+        model.addAttribute("productCategories", ProductEditForm.CATEGORIES);
         model.addAttribute("loyalty", loyaltyService.settingsOf(centerService.getCenterById(worker.getCenterId())));
         return "worker/inventory";
     }
@@ -145,6 +146,42 @@ public class InventoryController {
         try {
             productPhotos.remove(worker.getCenterId(), inventoryService.productIdOf(worker.getCenterId(), id));
             redirect.addFlashAttribute("successMessage", "Foto del producto quitada.");
+        } catch (BusinessRuleException e) {
+            redirect.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:/worker/inventory";
+    }
+
+    /** Nombre, categoría, precio y descripción de un producto creado por el centro (desde «Ver Info»). */
+    @CenterOwnerOnly
+    @PostMapping("/worker/inventory/{id}/edit")
+    public String edit(@AuthenticationPrincipal AppUserDetails worker,
+                       @PathVariable Long id,
+                       @ModelAttribute ProductEditForm form,
+                       RedirectAttributes redirect) {
+        try {
+            Product product = inventoryService.updateOwnProduct(worker.getCenterId(), id, form);
+            redirect.addFlashAttribute("successMessage", "«" + product.getName()
+                    + "» guardado. Las ventas ya hechas mantienen su precio.");
+        } catch (BusinessRuleException e) {
+            redirect.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:/worker/inventory";
+    }
+
+    /** Aviso de stock bajo de un producto: unidades a partir de las que avisa, o vacío para no avisar. */
+    @CenterOwnerOnly
+    @PostMapping("/worker/inventory/{id}/low-stock")
+    public String lowStock(@AuthenticationPrincipal AppUserDetails worker,
+                           @PathVariable Long id,
+                           @RequestParam(required = false) Integer units,
+                           RedirectAttributes redirect) {
+        try {
+            Inventory item = inventoryService.setLowStockAlert(worker.getCenterId(), id, units);
+            redirect.addFlashAttribute("successMessage", units == null
+                    ? "«" + item.getProduct().getName() + "»: sin aviso de stock bajo (solo avisa al agotarse)."
+                    : "«" + item.getProduct().getName() + "»: avisará cuando queden " + units
+                      + (units == 1 ? " unidad" : " unidades") + " o menos.");
         } catch (BusinessRuleException e) {
             redirect.addFlashAttribute("errorMessage", e.getMessage());
         }

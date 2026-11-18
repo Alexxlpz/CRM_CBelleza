@@ -37,7 +37,7 @@
                   th:attr="data-changing=${appointment.id}">
                 <input type="hidden" name="centerId" th:value="${center.id}">
                 <input type="radio" name="treatmentId" th:value="${treatment.id}" checked hidden
-                       th:attr="data-duration=${treatment.duration},data-workers=${treatment.doneByIds(workers)},data-name=${treatment.name}">
+                       th:attr="data-duration=${appointment.durationMinutes},data-workers=${treatment.doneByIds(workers)},data-name=${treatment.name}">
 
                 <th:block th:if="${#lists.size(workers) > 1}">
                     <fieldset th:replace="~{fragments/booking-workers :: workers(${workers}, ${selectedWorkerId}, 1)}"></fieldset>

@@ -139,8 +139,9 @@ class NotificationDismissTests {
         dismissals.dismiss(carlos.getId(), List.of(soldOutItem().key()));
         assertTrue(bellOf(carlos).stream().noneMatch(n -> n.message().startsWith(soldOut)));
 
-        // Repone y vuelve a bajar: «Stock bajo: quedan 2 ud» es otro aviso
+        // Repone y vuelve a bajar (con aviso de stock bajo en 3): «Stock bajo: quedan 2 ud» es otro aviso
         product.setStock(2);
+        product.setLowStockAlert(3);
         inventory.saveAndFlush(product);
         assertTrue(bellOf(carlos).stream().anyMatch(n -> n.message().startsWith("Stock bajo: quedan 2 ud de " + product.getProduct().getName())));
     }

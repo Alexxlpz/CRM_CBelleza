@@ -29,22 +29,29 @@ document.addEventListener('DOMContentLoaded', () => {
     applyMode(tablist.querySelector('[aria-selected="true"]')?.dataset.mode || 'existing');
 
     /* ---- Ajuste rápido de stock ---- */
-    function stockBadge(badge, stock, lowThreshold) {
+    // Cada producto tiene su aviso de stock bajo (data-low-alert); sin él, nunca sale «Bajo Stock»
+    const isLow = (card, stock) => {
+        const alert = Number(card.dataset.lowAlert);
+        return stock > 0 && alert > 0 && stock <= alert;
+    };
+
+    function stockBadge(badge, stock, low) {
         badge.classList.remove('badge-rejected', 'badge-pending', 'badge-confirmed');
         if (stock === 0) { badge.classList.add('badge-rejected'); badge.textContent = 'Agotado'; }
-        else if (stock <= lowThreshold) { badge.classList.add('badge-pending'); badge.textContent = 'Bajo Stock'; }
+        else if (low) { badge.classList.add('badge-pending'); badge.textContent = 'Bajo Stock'; }
         else { badge.classList.add('badge-confirmed'); badge.textContent = 'Normal'; }
     }
 
     /* Resumen superior: se recalcula con el stock visible en las tarjetas */
-    function updateStats(lowThreshold) {
-        const stocks = [...document.querySelectorAll('#inventoryGrid .stock-count-val')].map(el => Number(el.textContent));
+    function updateStats() {
+        const cards = [...document.querySelectorAll('#inventoryGrid .inventory-card')];
+        const stocks = cards.map(card => Number(card.querySelector('.stock-count-val').textContent));
         const set = (name, value) => {
             const el = document.querySelector(`[data-stat="${name}"]`);
             if (el) el.textContent = value;
         };
         set('units', stocks.reduce((total, stock) => total + stock, 0));
-        set('low', stocks.filter(stock => stock > 0 && stock <= lowThreshold).length);
+        set('low', cards.filter((card, i) => isLow(card, stocks[i])).length);
         set('out', stocks.filter(stock => stock === 0).length);
     }
 
@@ -63,13 +70,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!response.ok) {
                     throw new Error(await Cuquora.errorMessage(response, 'No se ha podido actualizar el stock.'));
                 }
-                const { stock, lowStockThreshold, maxStock } = await response.json();
+                const { stock, maxStock } = await response.json();
                 stockValue.textContent = stock;
                 stockValue.classList.remove('pulsing');
                 void stockValue.offsetWidth;
                 stockValue.classList.add('pulsing');
-                stockBadge(card.querySelector('.stock-badge'), stock, lowStockThreshold);
-                updateStats(lowStockThreshold);
+                stockBadge(card.querySelector('.stock-badge'), stock, isLow(card, stock));
+                updateStats();
                 // En el tope (999) no se puede sumar más: el botón se apaga en lugar de dar error
                 card.querySelector('.btn-increment').disabled = stock >= maxStock;
                 decrement.disabled = stock === 0;

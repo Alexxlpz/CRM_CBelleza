@@ -10,6 +10,7 @@ import com.alexxlpz.crm_cbelleza.entities.Role;
 import com.alexxlpz.crm_cbelleza.entities.User;
 import com.alexxlpz.crm_cbelleza.exceptions.BusinessRuleException;
 import com.alexxlpz.crm_cbelleza.exceptions.ResourceNotFoundException;
+import com.alexxlpz.crm_cbelleza.forms.Emails;
 import com.alexxlpz.crm_cbelleza.forms.FormText;
 import com.alexxlpz.crm_cbelleza.forms.NewClientForm;
 import com.alexxlpz.crm_cbelleza.repositories.AppointmentRepository;
@@ -44,6 +45,9 @@ public class ClientCardService {
 
     private static final Set<AppointmentStatus> VISIT_STATUSES = Set.of(AppointmentStatus.CONFIRMED, AppointmentStatus.COMPLETED);
     /** Campo de la plantilla por defecto donde se guardan las notas iniciales del alta manual. */
+    private static final int MAX_NAME = 120;
+    private static final int MAX_PHONE = 24;
+    private static final int MIN_PHONE_DIGITS = 6;
     private static final String DEFAULT_NOTES_FIELD = "observaciones_preferencias";
 
     private final ClientCardRepository clientCardRepository;
@@ -200,6 +204,61 @@ public class ClientCardService {
 
     private static String digits(String phone) {
         return phone == null ? "" : phone.replaceAll("[^0-9]", "");
+    }
+
+    /**
+     * Se pueden corregir nombre, teléfono y correo de un cliente que creó el centro: sin cuenta propia (ni contraseña
+     * ni Google), sin borrar y que no sea cliente de ningún otro centro. Los que tienen cuenta los cambian ellos.
+     */
+    @Transactional(readOnly = true)
+    public boolean canEditContact(Long centerId, User client) {
+        return client.getRole() == Role.CLIENT && !client.hasAccount() && client.getDeletedAt() == null
+                && clientCardRepository.findByClientId(client.getId()).stream()
+                        .allMatch(card -> card.getCenter().getId().equals(centerId))
+                && !appointmentRepository.existsByClientIdAndCenterIdNot(client.getId(), centerId);
+    }
+
+    /**
+     * Corrige nombre, teléfono y correo de un cliente creado por el centro ({@link #canEditContact}). Sin correo se le
+     * deja uno inventado, como en el alta. Un correo que ya usa otra cuenta no se guarda (igual que en el alta) y se
+     * avisa con {@code emailSkipped}; el resto de cambios sí.
+     */
+    public NewClient updateContact(Long centerId, Long clientId, NewClientForm form) {
+        User client = requireClientOfCenter(centerId, clientId);
+        if (!canEditContact(centerId, client)) {
+            throw new BusinessRuleException("Este cliente tiene su propia cuenta en Cuquora: sus datos los cambia él desde su perfil.");
+        }
+        String name = FormText.collapseSpaces(FormText.trimToNull(form.name()));
+        String phone = FormText.trimToNull(form.phone());
+        if (name == null || phone == null) {
+            throw new BusinessRuleException("El nombre y el teléfono son obligatorios.");
+        }
+        if (name.length() > MAX_NAME) {
+            throw new BusinessRuleException("El nombre puede tener como mucho " + MAX_NAME + " caracteres.");
+        }
+        if (phone.length() > MAX_PHONE || digits(phone).length() < MIN_PHONE_DIGITS || !phone.matches("[0-9+()\\s.-]+")) {
+            throw new BusinessRuleException("Escribe un teléfono válido (solo números, espacios y el prefijo con +).");
+        }
+        String email = FormText.trimToNull(form.email());
+        boolean emailSkipped = false;
+        if (email == null) {
+            if (client.hasRealEmail() || !digits(client.getEmail()).equals(digits(phone))) {
+                client.setEmail(placeholderEmail(phone));
+            }
+        } else if (!email.equalsIgnoreCase(client.getEmail())) {
+            email = Emails.normalize(email);
+            if (!Emails.isValid(email) || email.toLowerCase(Locale.ROOT).endsWith(User.PLACEHOLDER_EMAIL_DOMAIN)) {
+                throw new BusinessRuleException("El correo no es válido.");
+            }
+            emailSkipped = userRepository.findByEmailIgnoreCase(email).isPresent();
+            if (!emailSkipped) {
+                client.setEmail(email);
+            }
+        }
+        client.setName(name);
+        client.setPhone(phone);
+        userRepository.save(client);
+        return new NewClient(client.getId(), emailSkipped);
     }
 
     /** Resultado del alta: {@code emailSkipped} si el correo no se pudo guardar por estar ya en uso. */

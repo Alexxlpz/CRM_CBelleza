@@ -38,9 +38,14 @@ public class TreatmentController {
 
     @GetMapping("/worker/treatments")
     public String treatments(@AuthenticationPrincipal AppUserDetails worker, Model model) {
-        List<Treatment> treatments = treatmentService.getTreatmentsByCenter(worker.getCenterId());
+        List<Treatment> all = treatmentService.getTreatmentsByCenter(worker.getCenterId());
+        // Las cifras y los filtros de categoría son de la carta; los ocultos van aparte (solo los ve el dueño)
+        List<Treatment> treatments = all.stream().filter(t -> !t.isHidden()).toList();
+        List<Treatment> hiddenTreatments = all.stream().filter(Treatment::isHidden).toList();
         LocalDate today = treatmentService.todayAt(worker.getCenterId());
         model.addAttribute("treatments", treatments);
+        model.addAttribute("hiddenTreatments", hiddenTreatments);
+        model.addAttribute("appointmentCounts", treatmentService.appointmentCounts(worker.getCenterId()));
         model.addAttribute("team", userService.getWorkersByCenter(worker.getCenterId()));
         model.addAttribute("today", today);
         model.addAttribute("activeOfferCount", treatments.stream().filter(t -> t.hasActiveOffer(today)).count());
@@ -65,6 +70,51 @@ public class TreatmentController {
         try {
             treatmentService.addTreatment(worker.getCenterId(), form);
             redirect.addFlashAttribute("successMessage", "Tratamiento añadido a la carta del centro.");
+        } catch (BusinessRuleException e) {
+            redirect.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:/worker/treatments";
+    }
+
+    @CenterOwnerOnly
+    @PostMapping("/worker/treatments/{id}/edit")
+    public String edit(@AuthenticationPrincipal AppUserDetails worker,
+                       @PathVariable Long id,
+                       @ModelAttribute TreatmentForm form,
+                       RedirectAttributes redirect) {
+        try {
+            Treatment treatment = treatmentService.updateTreatment(worker.getCenterId(), id, form);
+            redirect.addFlashAttribute("successMessage", "«" + treatment.getName()
+                    + "» guardado. Las citas ya pedidas mantienen su precio y su duración.");
+        } catch (BusinessRuleException e) {
+            redirect.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:/worker/treatments";
+    }
+
+    @CenterOwnerOnly
+    @PostMapping("/worker/treatments/{id}/hide")
+    public String hide(@AuthenticationPrincipal AppUserDetails worker, @PathVariable Long id, RedirectAttributes redirect) {
+        Treatment treatment = treatmentService.setHidden(worker.getCenterId(), id, true);
+        redirect.addFlashAttribute("successMessage", "«" + treatment.getName()
+                + "» ya no sale en la carta. Lo tienes en «Ocultos» para volver a mostrarlo.");
+        return "redirect:/worker/treatments";
+    }
+
+    @CenterOwnerOnly
+    @PostMapping("/worker/treatments/{id}/show")
+    public String show(@AuthenticationPrincipal AppUserDetails worker, @PathVariable Long id, RedirectAttributes redirect) {
+        Treatment treatment = treatmentService.setHidden(worker.getCenterId(), id, false);
+        redirect.addFlashAttribute("successMessage", "«" + treatment.getName() + "» vuelve a estar en la carta.");
+        return "redirect:/worker/treatments";
+    }
+
+    @CenterOwnerOnly
+    @PostMapping("/worker/treatments/{id}/delete")
+    public String delete(@AuthenticationPrincipal AppUserDetails worker, @PathVariable Long id, RedirectAttributes redirect) {
+        try {
+            String name = treatmentService.deleteTreatment(worker.getCenterId(), id);
+            redirect.addFlashAttribute("successMessage", "«" + name + "» borrado de la carta.");
         } catch (BusinessRuleException e) {
             redirect.addFlashAttribute("errorMessage", e.getMessage());
         }

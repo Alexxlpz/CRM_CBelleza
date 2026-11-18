@@ -345,7 +345,7 @@ public class AnalyticsService {
                     || appointment.getTreatment() == null) {
                 continue;
             }
-            long minutes = appointment.getTreatment().getDuration();
+            long minutes = appointment.getDurationMinutes();
             booked += minutes;
             if (appointment.getWorker() != null) {
                 bookedByWorker.merge(appointment.getWorker().getId(), minutes, Long::sum);

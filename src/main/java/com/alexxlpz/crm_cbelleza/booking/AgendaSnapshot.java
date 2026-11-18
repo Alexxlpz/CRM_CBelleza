@@ -57,7 +57,7 @@ public final class AgendaSnapshot {
         this.blocks = blocks;
         this.holds = new ArrayList<>();
         for (Appointment app : proposed) {
-            int duration = app.getTreatment().getDuration();
+            int duration = app.getDurationMinutes();
             Long workerId = app.getWorker() != null ? app.getWorker().getId() : null;
             for (AppointmentProposal proposal : app.getProposals()) {
                 holds.add(new Hold(app.getId(), workerId, proposal.getDateTime(), proposal.getDateTime().plusMinutes(duration)));

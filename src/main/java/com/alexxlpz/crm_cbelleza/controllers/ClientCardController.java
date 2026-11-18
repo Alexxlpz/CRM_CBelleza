@@ -93,6 +93,7 @@ public class ClientCardController {
                          Model model) {
         ClientCardView view = clientCardService.getCardView(worker.getCenterId(), clientId);
         model.addAttribute("client", view.client());
+        model.addAttribute("canEditContact", clientCardService.canEditContact(worker.getCenterId(), view.client()));
         model.addAttribute("card", view.card());
         model.addAttribute("fields", view.fields());
         model.addAttribute("cardData", view.data());
@@ -111,6 +112,23 @@ public class ClientCardController {
         model.addAttribute("saleItems", inventoryService.getInventoryByCenter(worker.getCenterId()));
         model.addAttribute("loyalty", loyaltyService.cardFor(centerService.getCenterById(worker.getCenterId()), view.client()));
         return "worker/client_detail";
+    }
+
+    /** Corrige nombre, teléfono y correo de un cliente creado por el centro (sin cuenta propia). Todo el equipo. */
+    @PostMapping("/{clientId}/contact")
+    public String saveContact(@AuthenticationPrincipal AppUserDetails worker,
+                              @PathVariable Long clientId,
+                              @ModelAttribute NewClientForm form,
+                              RedirectAttributes redirect) {
+        try {
+            var result = clientCardService.updateContact(worker.getCenterId(), clientId, form);
+            redirect.addFlashAttribute("successMessage", result.emailSkipped()
+                    ? "Datos guardados, menos el correo: ya lo usa otra cuenta de Cuquora."
+                    : "Datos del cliente guardados.");
+        } catch (BusinessRuleException e) {
+            redirect.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:/worker/clients/" + clientId;
     }
 
     @PostMapping("/{clientId}/card")

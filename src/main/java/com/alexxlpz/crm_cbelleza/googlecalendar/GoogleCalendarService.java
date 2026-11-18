@@ -310,7 +310,7 @@ public class GoogleCalendarService {
             description.append("\nTeléfono: ").append(phone);
         }
         description.append("\nTratamiento: ").append(treatment.getName())
-                .append(" (").append(treatment.getDuration()).append(" min)");
+                .append(" (").append(appointment.getDurationMinutes()).append(" min)");
         if (appointment.getWorkerMessage() != null && !appointment.getWorkerMessage().isBlank()) {
             description.append("\nMensaje al cliente: ").append(appointment.getWorkerMessage());
         }
@@ -328,7 +328,7 @@ public class GoogleCalendarService {
 
         StringBuilder description = new StringBuilder();
         description.append("Tratamiento: ").append(treatment.getName())
-                .append(" (").append(treatment.getDuration()).append(" min)");
+                .append(" (").append(appointment.getDurationMinutes()).append(" min)");
         description.append("\nCentro: ").append(center.getName());
         if (center.getPhone() != null && !center.getPhone().isBlank()) {
             description.append("\nTeléfono del centro: ").append(center.getPhone());

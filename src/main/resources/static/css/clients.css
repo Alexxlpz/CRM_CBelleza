@@ -1227,8 +1227,16 @@
 }
 
 /* ---- Ficha: «Darle cita» y resumen de visitas en la cabecera ---- */
-.client-book-btn {
+.client-book-btn,
+.client-edit-btn {
     gap: 8px;
+}
+
+/* Móvil: «Configurar Plantilla» ocupa su fila arriba; «Editar datos» y «Darle cita» van juntos debajo */
+@media (max-width: 768px) {
+    .profile-header-actions .btn-template-config {
+        order: -1;
+    }
 }
 
 .client-visit-summary {

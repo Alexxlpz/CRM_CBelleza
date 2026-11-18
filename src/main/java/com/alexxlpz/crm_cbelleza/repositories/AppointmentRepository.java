@@ -18,6 +18,15 @@ import java.util.Optional;
 @Repository
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
 
+    /** Citas de cada tratamiento del centro (todas, de cualquier estado): [id del tratamiento, número de citas]. */
+    @Query("select a.treatment.id, count(a) from Appointment a where a.center.id = :centerId group by a.treatment.id")
+    List<Object[]> countByTreatmentOfCenter(@Param("centerId") Long centerId);
+
+    long countByTreatmentId(Long treatmentId);
+
+    /** Tiene citas en algún otro centro (de cualquier estado). */
+    boolean existsByClientIdAndCenterIdNot(Long clientId, Long centerId);
+
     /** Carga también tratamiento, cliente y trabajador para evitar una consulta por cita al pintar listas. */
     @EntityGraph(attributePaths = {"treatment", "client", "worker"})
     List<Appointment> findByCenterIdOrderByDateTimeDesc(Long centerId);

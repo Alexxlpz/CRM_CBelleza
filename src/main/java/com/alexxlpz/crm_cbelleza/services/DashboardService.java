@@ -63,7 +63,7 @@ public class DashboardService {
                 .filter(a -> a.getStatus() == AppointmentStatus.PENDING && a.getDateTime().isAfter(now))
                 .count();
         int lowStock = (int) inventoryRepository.findByCenterId(centerId).stream()
-                .filter(item -> item.getStock() <= InventoryService.LOW_STOCK_THRESHOLD)
+                .filter(item -> item.getStock() == 0 || item.isLowStock())
                 .count();
 
         return new DashboardStats(todayCount, tomorrowCount, pending, lowStock);

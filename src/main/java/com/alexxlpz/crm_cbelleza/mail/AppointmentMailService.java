@@ -249,7 +249,7 @@ public class AppointmentMailService {
 
     private static List<String[]> details(Appointment app) {
         List<String[]> rows = new ArrayList<>();
-        rows.add(new String[]{"Tratamiento", app.getTreatment().getName() + " (" + app.getTreatment().getDuration() + " min)"});
+        rows.add(new String[]{"Tratamiento", app.getTreatment().getName() + " (" + app.getDurationMinutes() + " min)"});
         rows.add(new String[]{"Centro", app.getCenter().getName()});
         if (app.getCenter().getAddress() != null && !app.getCenter().getAddress().isBlank()) {
             rows.add(new String[]{"Dirección", app.getCenter().getAddress()});

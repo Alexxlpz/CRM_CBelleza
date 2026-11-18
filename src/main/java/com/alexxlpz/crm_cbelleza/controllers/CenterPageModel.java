@@ -56,7 +56,7 @@ class CenterPageModel {
      */
     List<Treatment> addCenter(Model model, Center center, boolean publicPage) {
         Long id = center.getId();
-        List<Treatment> treatments = treatmentService.getTreatmentsByCenter(id);
+        List<Treatment> treatments = treatmentService.getVisibleTreatmentsByCenter(id);
         LocalDate today = treatmentService.todayAt(id);
         addLinks(model, center, publicPage);
         model.addAttribute("treatments", treatments);

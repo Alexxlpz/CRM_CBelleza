@@ -9,9 +9,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 b.classList.toggle('active', b === button);
                 b.setAttribute('aria-pressed', String(b === button));
             });
+            // Los ocultos solo salen con su filtro; el resto de filtros son de la carta
             document.querySelectorAll('#treatmentsList .treatment-item-card').forEach(card => {
+                const isHidden = card.dataset.hidden === 'true';
                 const matches = category === 'OFFER' ? card.dataset.offer === 'true' : card.dataset.category === category;
-                card.hidden = category !== 'ALL' && !matches;
+                card.hidden = category === 'HIDDEN' ? !isHidden : isHidden || (category !== 'ALL' && !matches);
             });
         });
     });

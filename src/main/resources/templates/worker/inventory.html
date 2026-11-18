@@ -89,7 +89,8 @@
                 <span>Stock</span>
                 <span class="list-head-end">Acciones</span>
             </div>
-            <article class="inventory-card glass-panel" th:each="item : ${inventoryItems}" th:data-category="${item.product.category}">
+            <article class="inventory-card glass-panel" th:each="item : ${inventoryItems}" th:data-category="${item.product.category}"
+                     th:attr="data-low-alert=${item.lowStockAlert}">
                 <img th:src="${item.product.imageUrl}" class="product-thumbnail"
                      th:classappend="${item.product.photoUrl != null} ? 'product-thumbnail--photo'" alt="" loading="lazy" width="96" height="96">
 
@@ -127,8 +128,8 @@
                                 th:disabled="${item.stock >= maxStock}" th:aria-label="'Sumar una unidad de ' + ${item.product.name}">+1</button>
                     </div>
                     <span class="badge badge-pill badge-micro stock-badge"
-                          th:classappend="${item.stock == 0 ? 'badge-rejected' : (item.stock <= 3 ? 'badge-pending' : 'badge-confirmed')}"
-                          th:text="${item.stock == 0 ? 'Agotado' : (item.stock <= 3 ? 'Bajo Stock' : 'Normal')}">Normal</span>
+                          th:classappend="${item.stock == 0 ? 'badge-rejected' : (item.lowStock ? 'badge-pending' : 'badge-confirmed')}"
+                          th:text="${item.stock == 0 ? 'Agotado' : (item.lowStock ? 'Bajo Stock' : 'Normal')}">Normal</span>
                 </div>
             </article>
         </div>

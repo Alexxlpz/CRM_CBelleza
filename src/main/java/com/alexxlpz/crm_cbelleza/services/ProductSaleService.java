@@ -83,7 +83,7 @@ public class ProductSaleService {
                 .soldAt(CenterClock.now(clock, center))
                 .build());
         loyalty.awardSale(sale, workerId);
-        return new SaleResult(sale, item.getStock());
+        return new SaleResult(sale, item.getStock(), item.isLowStock());
     }
 
     /** Anula una venta (por error al registrarla): devuelve las unidades al inventario y quita sus puntos. */
@@ -104,7 +104,8 @@ public class ProductSaleService {
         return sale;
     }
 
-    public record SaleResult(ProductSale sale, int stockLeft) {
+    /** {@code lowStock}: queda por debajo del aviso que el centro puso a ese producto (sin aviso, nunca). */
+    public record SaleResult(ProductSale sale, int stockLeft, boolean lowStock) {
 
         /** Aviso tras vender, igual desde la ficha del cliente que desde el inventario. */
         public String message() {
@@ -116,7 +117,7 @@ public class ProductSaleService {
                 return "El producto se ha agotado.";
             }
             String units = stockLeft == 1 ? "Queda 1 unidad" : "Quedan " + stockLeft + " unidades";
-            return stockLeft <= InventoryService.LOW_STOCK_THRESHOLD ? units + ": stock bajo." : units + ".";
+            return lowStock ? units + ": stock bajo." : units + ".";
         }
     }
 }

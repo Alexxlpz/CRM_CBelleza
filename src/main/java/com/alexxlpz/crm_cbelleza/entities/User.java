@@ -76,6 +76,11 @@ public class User {
         return password != null || googleId != null;
     }
 
+    /** Correo de verdad: los clientes dados de alta sin correo llevan uno inventado ({@link #PLACEHOLDER_EMAIL_DOMAIN}). */
+    public boolean hasRealEmail() {
+        return email != null && !email.toLowerCase(java.util.Locale.ROOT).endsWith(PLACEHOLDER_EMAIL_DOMAIN);
+    }
+
     /** Ha borrado su cuenta desde «Mi Perfil». */
     public boolean isDeleted() {
         return deletedAt != null;

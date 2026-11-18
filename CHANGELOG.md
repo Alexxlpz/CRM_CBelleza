@@ -23,6 +23,12 @@ Al sacar una versión:
 
 ### Añadido
 
+- Editar los tratamientos de la carta: el dueño pulsa «Editar» en cada tratamiento y cambia el nombre, la categoría, la descripción, el precio y la duración. Las citas que ya están pedidas no cambian: guardan su precio y, desde ahora, también su duración, así que alargar un tratamiento no pisa la agenda que ya hay. El precio de carta no puede quedar por debajo de su oferta.
+- Ocultar y borrar tratamientos: desde «Editar», «Ocultar de la carta» lo quita de la carta del centro (también la pública), de la reserva y de «Nueva cita» en la agenda, sin tocar sus citas ni el análisis; el filtro «Ocultos» de la carta los enseña al dueño con «Mostrar en la carta». «Borrar» solo está si el tratamiento nunca ha tenido citas; si las tiene, se explica cuántas y se ofrece ocultarlo. Migración V34.
+- Editar productos del inventario: en «Ver Info», el dueño cambia el nombre, la categoría, el precio y la descripción de los productos que creó el centro (los del catálogo general no). Las ventas ya hechas guardan su precio.
+- Aviso de stock bajo a medida: en «Ver Info» de cada producto, el dueño elige «Avisarme cuando queden N ud o menos». Ese límite lo usan la campana, el contador del panel, la etiqueta «Bajo Stock» y el mensaje al vender. Vacío no avisa, y así empiezan todos los productos, también los que ya había; «Agotado» avisa siempre.
+- «Editar datos» en la ficha del cliente: cualquier trabajadora corrige el nombre, el teléfono y el correo de un cliente que dio de alta el centro y que aún no tiene cuenta (ni contraseña ni Google, y que no es cliente de otro centro). Si el correo ya lo usa otra cuenta, se guarda lo demás y se avisa.
+
 - «Por aprobar» en el panel del trabajador, encima de «Hoy»: las solicitudes de cita que esperan respuesta, con el cliente, el tratamiento, quién la haría (o «Sin asignar: al aceptarla, contigo»), su teléfono y los botones Aceptar y Rechazar, sin pasar por la agenda. Rechazar pide confirmación y avisa al cliente. Al responder, la fila se va y bajan los contadores de solicitudes; sin solicitudes, el bloque no sale.
 - Tu próxima cita arriba de «Centros» para el cliente: día y hora, tratamiento, centro y profesional, con «Cómo llegar» y «Mis citas (N)». Sin próximas citas, o sin cuenta de cliente, no sale.
 - Recién reservada: al pedir una cita se vuelve a «Mis reservas» con un aviso verde con título («Solicitud enviada» o «¡Cita confirmada!») y la cita nueva la primera de «Próximas citas», con borde verde y la etiqueta «Acabas de pedirla».
@@ -31,6 +37,8 @@ Al sacar una versión:
 
 ### Cambiado
 
+- Antes, cualquier producto con 3 unidades o menos salía como «Bajo Stock» y avisaba en la campana; ahora solo avisan los que tienen aviso puesto (ver arriba).
+- La ficha del cliente ya no enseña el correo interno (`cliente_…@cbelleza.local`) de los clientes dados de alta sin correo.
 - Recordatorio de cita por correo, más claro y sin correos de más: el título dice «Mañana tienes cita» o «Hoy tienes cita», el asunto empieza por el día y la hora («Recordatorio: mañana a las 10:00, Manicura en Centro Histórico») y el botón pasa a «Ver o anular mi cita». Ya no llega justo después del correo de «Cita confirmada» o «Tu cita ha cambiado»: si a la clienta se le avisó de la cita hace menos de 12 horas, espera, y si faltan menos de 2 horas para la cita no se manda. Sin migración.
 - Fechas amables en las tarjetas de cita del cliente y en «Por aprobar»: «Hoy · 11:00», «Mañana, lun 16 nov · 09:00» o «vie 20 nov · 10:30» (con el año si no es el de este). Al pasar el ratón se ve la fecha completa; el historial sigue con la fecha entera.
 - Si el cliente elige «Cualquiera», la tarjeta dice «Profesional: te la asigna el centro» en vez de «Sin asignar».

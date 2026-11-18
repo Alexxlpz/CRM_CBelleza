@@ -66,6 +66,10 @@ public class Appointment {
     @Column(nullable = false)
     private Double price;
 
+    /** Minutos que dura: los del tratamiento al crearla. Cambiar la duración del tratamiento no mueve las citas ya hechas. */
+    @Column(name = "duration_minutes")
+    private Integer durationMinutes;
+
     @Column(name = "worker_message", length = 500)
     private String workerMessage;
 
@@ -140,6 +144,24 @@ public class Appointment {
         if (price == null && treatment != null) {
             price = treatment.getPrice();
         }
+        if (durationMinutes == null && treatment != null) {
+            durationMinutes = treatment.getDuration();
+        }
+    }
+
+    /** Duración de esta cita en minutos: la guardada al crearla o, en citas sin ella, la del tratamiento (60 si no hay). */
+    public int getDurationMinutes() {
+        if (durationMinutes != null && durationMinutes > 0) {
+            return durationMinutes;
+        }
+        try {
+            if (treatment != null && treatment.getDuration() != null && treatment.getDuration() > 0) {
+                return treatment.getDuration();
+            }
+        } catch (Exception ignored) {
+            // Sin sesión para leer el tratamiento: se usa la duración por defecto
+        }
+        return 60;
     }
 
     public void recordChange(AppointmentChange change, LocalDateTime at) {
@@ -201,15 +223,7 @@ public class Appointment {
         if (this.dateTime == null) {
             return null;
         }
-        int durationMinutes = 60;
-        try {
-            if (this.treatment != null && this.treatment.getDuration() != null && this.treatment.getDuration() > 0) {
-                durationMinutes = this.treatment.getDuration();
-            }
-        } catch (Exception ignored) {
-            // Safe fallback if proxy initialization is unavailable
-        }
-        return this.dateTime.plusMinutes(durationMinutes);
+        return this.dateTime.plusMinutes(getDurationMinutes());
     }
 
     /**

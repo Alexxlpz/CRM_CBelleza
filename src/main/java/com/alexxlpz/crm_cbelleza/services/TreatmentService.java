@@ -11,6 +11,7 @@ import com.alexxlpz.crm_cbelleza.exceptions.ResourceNotFoundException;
 import com.alexxlpz.crm_cbelleza.forms.FormText;
 import com.alexxlpz.crm_cbelleza.forms.TreatmentForm;
 import com.alexxlpz.crm_cbelleza.forms.TreatmentOfferForm;
+import com.alexxlpz.crm_cbelleza.repositories.AppointmentRepository;
 import com.alexxlpz.crm_cbelleza.repositories.CenterRepository;
 import com.alexxlpz.crm_cbelleza.repositories.TreatmentRepository;
 import com.alexxlpz.crm_cbelleza.repositories.UserRepository;
@@ -21,9 +22,11 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
 /** Carta de tratamientos de cada centro. */
@@ -31,16 +34,24 @@ import java.util.Set;
 @Transactional
 public class TreatmentService {
 
+    static final double MAX_PRICE = 10_000;
+    static final int MIN_DURATION = 5;
+    static final int MAX_DURATION = 720;
+    static final int MAX_NAME = 120;
+    static final int MAX_DESCRIPTION = 1000;
+
     private final TreatmentRepository treatmentRepository;
     private final CenterRepository centerRepository;
     private final UserRepository userRepository;
+    private final AppointmentRepository appointmentRepository;
     private final Clock clock;
 
     public TreatmentService(TreatmentRepository treatmentRepository, CenterRepository centerRepository,
-                            UserRepository userRepository, Clock clock) {
+                            UserRepository userRepository, AppointmentRepository appointmentRepository, Clock clock) {
         this.treatmentRepository = treatmentRepository;
         this.centerRepository = centerRepository;
         this.userRepository = userRepository;
+        this.appointmentRepository = appointmentRepository;
         this.clock = clock;
     }
 
@@ -57,29 +68,114 @@ public class TreatmentService {
         return treatmentRepository.findByCenterId(centerId);
     }
 
+    /** Los de la carta, sin los ocultos: lo que ve el cliente y lo que se puede elegir al dar cita. */
+    @Transactional(readOnly = true)
+    public List<Treatment> getVisibleTreatmentsByCenter(Long centerId) {
+        return treatmentRepository.findByCenterId(centerId).stream().filter(t -> !t.isHidden()).toList();
+    }
+
     @Transactional(readOnly = true)
     public long countByCenter(Long centerId) {
         return treatmentRepository.countByCenterId(centerId);
     }
 
+    /** Citas de cada tratamiento del centro (de cualquier estado). Un tratamiento sin citas no está en el mapa. */
+    @Transactional(readOnly = true)
+    public Map<Long, Long> appointmentCounts(Long centerId) {
+        Map<Long, Long> counts = new HashMap<>();
+        for (Object[] row : appointmentRepository.countByTreatmentOfCenter(centerId)) {
+            counts.put((Long) row[0], (Long) row[1]);
+        }
+        return counts;
+    }
+
     public void addTreatment(Long centerId, TreatmentForm form) {
+        validate(form);
+        Center center = centerRepository.findById(centerId)
+                .orElseThrow(() -> new ResourceNotFoundException("Centro no encontrado."));
+        treatmentRepository.save(Treatment.builder()
+                .name(form.name().trim())
+                .description(FormText.trimToNull(form.description()))
+                .price(roundPrice(form.price()))
+                .duration(form.duration())
+                .type(parseType(form.type()))
+                .center(center)
+                .workerIds(teamSelection(centerId, form.workerIds()))
+                .build());
+    }
+
+    /**
+     * Cambia nombre, tipo, descripción, precio y duración. Las citas ya pedidas no cambian: guardan su precio y su
+     * duración. Quién lo hace y la oferta se cambian aparte; el precio de carta no puede bajar de la oferta.
+     */
+    public Treatment updateTreatment(Long centerId, Long treatmentId, TreatmentForm form) {
+        Treatment treatment = find(centerId, treatmentId);
+        validate(form);
+        double price = roundPrice(form.price());
+        if (treatment.hasOffer() && treatment.getOfferPrice() >= price) {
+            throw new BusinessRuleException("El precio de carta tiene que ser mayor que el de la oferta ("
+                    + String.format(Locale.forLanguageTag("es"), "%.2f", treatment.getOfferPrice())
+                    + " €). Cambia o quita antes la oferta.");
+        }
+        treatment.setName(form.name().trim());
+        treatment.setDescription(FormText.trimToNull(form.description()));
+        treatment.setPrice(price);
+        treatment.setDuration(form.duration());
+        treatment.setType(parseType(form.type()));
+        return treatment;
+    }
+
+    /** Oculta o vuelve a mostrar un tratamiento en la carta. Sus citas no cambian. */
+    public Treatment setHidden(Long centerId, Long treatmentId, boolean hidden) {
+        Treatment treatment = find(centerId, treatmentId);
+        treatment.setHidden(hidden);
+        return treatment;
+    }
+
+    /**
+     * Borra un tratamiento que nunca ha tenido citas (con su oferta y quién lo hace). Si tiene alguna, de cualquier
+     * estado, no se borra: desaparecería del historial de los clientes y del análisis. Entonces se oculta.
+     */
+    public String deleteTreatment(Long centerId, Long treatmentId) {
+        Treatment treatment = find(centerId, treatmentId);
+        long appointments = appointmentRepository.countByTreatmentId(treatmentId);
+        if (appointments > 0) {
+            throw new BusinessRuleException("«" + treatment.getName() + "» tiene " + appointments
+                    + (appointments == 1 ? " cita" : " citas") + " y no se puede borrar sin quitarlas del historial "
+                    + "de sus clientes y del análisis. Ocúltalo: deja de salir en la carta y lo puedes volver a mostrar.");
+        }
+        treatmentRepository.delete(treatment);
+        return treatment.getName();
+    }
+
+    private Treatment find(Long centerId, Long treatmentId) {
+        return treatmentRepository.findByIdAndCenterId(treatmentId, centerId)
+                .orElseThrow(() -> new ResourceNotFoundException("Tratamiento no encontrado."));
+    }
+
+    private static void validate(TreatmentForm form) {
         if (FormText.isBlank(form.name()) || form.price() == null || form.duration() == null || form.duration() <= 0) {
             throw new BusinessRuleException("Completa nombre, precio y duración del tratamiento.");
         }
         if (form.price() < 0 || form.price().isNaN() || form.price().isInfinite()) {
             throw new BusinessRuleException("El precio no puede ser negativo.");
         }
-        Center center = centerRepository.findById(centerId)
-                .orElseThrow(() -> new ResourceNotFoundException("Centro no encontrado."));
-        treatmentRepository.save(Treatment.builder()
-                .name(form.name().trim())
-                .description(form.description())
-                .price(form.price())
-                .duration(form.duration())
-                .type(parseType(form.type()))
-                .center(center)
-                .workerIds(teamSelection(centerId, form.workerIds()))
-                .build());
+        if (form.price() > MAX_PRICE) {
+            throw new BusinessRuleException("El precio no puede pasar de 10.000 €.");
+        }
+        if (form.duration() < MIN_DURATION || form.duration() > MAX_DURATION) {
+            throw new BusinessRuleException("La duración tiene que estar entre 5 minutos y 12 horas.");
+        }
+        if (form.name().trim().length() > MAX_NAME) {
+            throw new BusinessRuleException("El nombre puede tener como mucho " + MAX_NAME + " caracteres.");
+        }
+        if (form.description() != null && form.description().trim().length() > MAX_DESCRIPTION) {
+            throw new BusinessRuleException("La descripción puede tener como mucho " + MAX_DESCRIPTION + " caracteres.");
+        }
+    }
+
+    private static double roundPrice(Double price) {
+        return Math.round(price * 100) / 100.0;
     }
 
     /** Quién hace el tratamiento. Sin nadie marcado, o con todo el equipo, lo hace todo el equipo. */

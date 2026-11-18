@@ -340,3 +340,63 @@
 .treatment-workers-form .ui-modal-actions {
     align-self: stretch;
 }
+
+/* Editar tratamiento: precio y duración en una fila; ocultar y borrar debajo, separados del guardar */
+.treatment-edit-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.treatment-edit-more {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border-soft);
+}
+
+.treatment-edit-more .btn {
+    gap: 6px;
+}
+
+.treatment-edit-note {
+    flex-basis: 100%;
+    margin: 0;
+    text-align: center;
+}
+
+.btn-delete-treatment {
+    color: var(--danger-text);
+    border-color: var(--danger);
+}
+
+.btn-delete-treatment:hover {
+    color: var(--danger-text);
+    background: var(--danger-bg);
+    border-color: var(--danger-dark);
+}
+
+/* Tratamiento oculto: atenuado y con su etiqueta */
+.treatment-item-card--hidden {
+    opacity: 0.85;
+    border-style: dashed;
+}
+
+.treatment-hidden-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--text-muted);
+}
+
+@media (max-width: 420px) {
+    .treatment-edit-row {
+        grid-template-columns: 1fr;
+    }
+}

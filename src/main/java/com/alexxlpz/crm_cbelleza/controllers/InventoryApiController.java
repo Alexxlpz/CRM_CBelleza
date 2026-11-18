@@ -1,5 +1,6 @@
 package com.alexxlpz.crm_cbelleza.controllers;
 
+import com.alexxlpz.crm_cbelleza.entities.Inventory;
 import com.alexxlpz.crm_cbelleza.exceptions.ApiEndpoint;
 import com.alexxlpz.crm_cbelleza.security.AppUserDetails;
 import com.alexxlpz.crm_cbelleza.services.InventoryService;
@@ -23,11 +24,11 @@ public class InventoryApiController {
     }
 
     @PostMapping("/worker/inventory/{id}/adjust-stock")
-    public Map<String, Integer> adjustStock(@AuthenticationPrincipal AppUserDetails worker,
-                                            @PathVariable Long id,
-                                            @RequestParam int change) {
-        int stock = inventoryService.adjustStock(worker.getCenterId(), id, change);
-        return Map.of("stock", stock, "lowStockThreshold", InventoryService.LOW_STOCK_THRESHOLD,
-                "maxStock", InventoryService.MAX_STOCK);
+    public Map<String, Object> adjustStock(@AuthenticationPrincipal AppUserDetails worker,
+                                           @PathVariable Long id,
+                                           @RequestParam int change) {
+        Inventory item = inventoryService.adjustStock(worker.getCenterId(), id, change);
+        // lowStock: con el aviso que el centro puso a este producto (sin aviso, nunca es «Bajo Stock»)
+        return Map.of("stock", item.getStock(), "lowStock", item.isLowStock(), "maxStock", InventoryService.MAX_STOCK);
     }
 }

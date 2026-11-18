@@ -6,6 +6,7 @@
     <script th:src="@{/js/sheets.js}" defer></script>
     <script th:src="@{/js/treatment-offer.js}" defer></script>
     <script th:src="@{/js/treatment-workers.js}" defer></script>
+    <script th:src="@{/js/treatment-edit.js}" defer></script>
 </head>
 <body>
     <div th:replace="~{fragments/navbar :: worker(${notifications})}"></div>
@@ -52,7 +53,7 @@
             </div>
         </div>
 
-        <div class="list-toolbar" th:if="${not #lists.isEmpty(treatments)}">
+        <div class="list-toolbar" th:if="${not #lists.isEmpty(treatments) or (isCenterOwner and not #lists.isEmpty(hiddenTreatments))}">
             <div class="category-filter-bar" role="toolbar" aria-label="Filtrar por categoría">
                 <button type="button" class="category-pill active" data-category-filter="ALL" aria-pressed="true">Todos</button>
                 <button type="button" class="category-pill" data-category-filter="OFFER" aria-pressed="false" th:if="${activeOfferCount > 0}">
@@ -62,6 +63,10 @@
                     <button type="button" class="category-pill"
                             th:data-category-filter="${type}" aria-pressed="false" th:text="${type.displayName}">Facial</button>
                 </th:block>
+                <button type="button" class="category-pill" data-category-filter="HIDDEN" aria-pressed="false"
+                        th:if="${isCenterOwner and not #lists.isEmpty(hiddenTreatments)}">
+                    <i class="lucide-eye-off" aria-hidden="true"></i> <span th:text="'Ocultos (' + ${#lists.size(hiddenTreatments)} + ')'">Ocultos (1)</span>
+                </button>
             </div>
             <div class="view-toggle" role="group" aria-label="Modo de vista" data-view-toggle="treatmentsList">
                 <button type="button" class="view-toggle-btn" data-view="grid" aria-pressed="true"><i class="lucide-layout-grid" aria-hidden="true"></i> Tarjetas</button>
@@ -71,7 +76,7 @@
 
         <div class="treatments-full-layout">
             <section class="treatments-section" aria-label="Tratamientos del centro">
-                <div class="treatments-list" id="treatmentsList" th:if="${not #lists.isEmpty(treatments)}">
+                <div class="treatments-list" id="treatmentsList" th:if="${not #lists.isEmpty(treatments) or (isCenterOwner and not #lists.isEmpty(hiddenTreatments))}">
                     <div class="list-head" aria-hidden="true">
                         <span>Tratamiento</span>
                         <span>Descripción</span>
@@ -106,6 +111,10 @@
                             </span>
                         </div>
                         <div class="treatment-item-actions">
+                            <button type="button" class="btn btn-secondary btn-sm" data-treatment-edit th:if="${isCenterOwner}"
+                                    th:attr="data-id=${t.id},data-name=${t.name},data-type=${t.type},data-description=${t.description},data-price=${t.price},data-duration=${t.duration},data-appointments=${appointmentCounts[t.id] ?: 0}">
+                                <i class="lucide-pen-line" aria-hidden="true"></i> Editar
+                            </button>
                             <button type="button" class="btn btn-secondary btn-sm" data-offer-edit th:if="${isCenterOwner}"
                                     th:attr="data-id=${t.id},data-name=${t.name},data-price=${t.price},data-offer-price=${t.offerPrice},data-ends-on=${t.offerEndsOn},data-has-offer=${t.hasOffer()}">
                                 <i class="lucide-tag" aria-hidden="true"></i>
@@ -117,6 +126,40 @@
                             </button>
                         </div>
                     </article>
+
+                    <!-- Ocultos: solo con el filtro «Ocultos». Se vuelven a mostrar o, si nunca tuvieron citas, se borran. -->
+                    <th:block th:if="${isCenterOwner}">
+                        <article class="treatment-item-card treatment-item-card--hidden glass-panel" th:each="t : ${hiddenTreatments}"
+                                 data-category="HIDDEN" data-hidden="true" hidden
+                                 th:with="appointments=${appointmentCounts[t.id] ?: 0}">
+                            <div class="treatment-item-header">
+                                <h2 class="treatment-item-name" th:text="${t.name}">Manicura</h2>
+                                <span class="treatment-item-price">
+                                    <span th:text="${#numbers.formatDecimal(t.price, 1, 'POINT', 2, 'COMMA')} + ' €'">0,00 €</span>
+                                </span>
+                            </div>
+                            <p class="treatment-item-desc" th:text="${t.description}">Descripción del tratamiento...</p>
+                            <div class="treatment-item-tags">
+                                <span class="treatment-hidden-badge"><i class="lucide-eye-off" aria-hidden="true"></i> Oculto</span>
+                                <span class="treatment-item-type" th:if="${t.type != null}" th:text="${t.type.displayName}">Facial</span>
+                                <span class="treatment-item-meta"><i class="lucide-clock" aria-hidden="true"></i> <span th:text="${t.duration} + ' min'">30 min</span></span>
+                                <span class="treatment-item-meta" th:if="${appointments > 0}">
+                                    <i class="lucide-calendar-check" aria-hidden="true"></i>
+                                    <span th:text="${appointments} + (${appointments == 1} ? ' cita' : ' citas')">3 citas</span>
+                                </span>
+                            </div>
+                            <div class="treatment-item-actions">
+                                <form th:action="@{/worker/treatments/{id}/show(id=${t.id})}" method="post">
+                                    <button type="submit" class="btn btn-secondary btn-sm"><i class="lucide-eye" aria-hidden="true"></i> Mostrar en la carta</button>
+                                </form>
+                                <form th:if="${appointments == 0}" th:action="@{/worker/treatments/{id}/delete(id=${t.id})}" method="post"
+                                      th:data-confirm="'Se borra «' + ${t.name} + '» para siempre, con su oferta. No tiene citas, así que no se pierde nada del historial.'"
+                                      data-confirm-title="¿Borrar el tratamiento?" data-confirm-button="Borrar">
+                                    <button type="submit" class="btn btn-secondary btn-sm btn-delete-treatment"><i class="lucide-trash-2" aria-hidden="true"></i> Borrar</button>
+                                </form>
+                            </div>
+                        </article>
+                    </th:block>
                 </div>
 
                 <div class="no-appointments-box glass-panel" th:if="${#lists.isEmpty(treatments)}">
@@ -134,6 +177,7 @@
     <th:block th:if="${isCenterOwner}">
         <div th:replace="~{worker/fragments/treatment-modals :: addTreatmentSheet}"></div>
         <div th:replace="~{worker/fragments/treatment-modals :: offerModal(${today})}"></div>
+        <div th:replace="~{worker/fragments/treatment-modals :: editModal}"></div>
         <th:block th:if="${#lists.size(team) > 1}">
             <div th:replace="~{worker/fragments/treatment-modals :: workersModal(${team})}"></div>
         </th:block>

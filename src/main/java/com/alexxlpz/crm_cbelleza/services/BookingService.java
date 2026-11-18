@@ -126,6 +126,9 @@ public class BookingService {
         }
         Treatment treatment = treatmentRepository.findByIdAndCenterId(treatmentId, centerId)
                 .orElseThrow(() -> new BusinessRuleException("El tratamiento seleccionado no pertenece a este centro."));
+        if (treatment.isHidden()) {
+            throw new BusinessRuleException("Ese tratamiento ya no está en la carta del centro. Elige otro.");
+        }
         if (!openingHours.forCenter(centerId).fits(start, treatment.getDuration())) {
             throw new BusinessRuleException("El servicio no cabe completo dentro del horario del centro.");
         }
@@ -247,11 +250,11 @@ public class BookingService {
             throw new BusinessRuleException("Elige una hora que no haya pasado.");
         }
         Treatment treatment = appointment.getTreatment();
-        if (!openingHours.forCenter(center.getId()).fits(start, treatment.getDuration())) {
+        if (!openingHours.forCenter(center.getId()).fits(start, appointment.getDurationMinutes())) {
             throw new BusinessRuleException("El servicio no cabe completo dentro del horario del centro.");
         }
-        ensureClientIsFree(clientId, center, start, treatment.getDuration(), appointment.getId());
-        AgendaSnapshot.Request slot = new AgendaSnapshot.Request(start, treatment.getDuration(), null, appointment.getId(), true);
+        ensureClientIsFree(clientId, center, start, appointment.getDurationMinutes(), appointment.getId());
+        AgendaSnapshot.Request slot = new AgendaSnapshot.Request(start, appointment.getDurationMinutes(), null, appointment.getId(), true);
         AgendaSnapshot agenda = availability.snapshot(center, start.toLocalDate().atStartOfDay(), start.plusDays(1));
         ensureFits(agenda, slot);
         boolean confirmed = appointment.getStatus() == AppointmentStatus.CONFIRMED;
@@ -479,6 +482,9 @@ public class BookingService {
         }
         Treatment treatment = treatmentRepository.findByIdAndCenterId(form.treatmentId(), centerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Ese tratamiento no es de tu centro."));
+        if (treatment.isHidden()) {
+            throw new BusinessRuleException("Ese tratamiento está oculto en la carta. Vuelve a mostrarlo para darle cita.");
+        }
         LocalDateTime start = parse(form.dateTime());
         User worker = workerOfCenter(centerId, form.workerId() != null ? form.workerId() : creatorId);
         checkSchedule(center, now, start, treatment.getDuration(), worker.getId(), null, form.outsideHoursAllowed());
@@ -742,7 +748,7 @@ public class BookingService {
     }
 
     private static int duration(Appointment appointment) {
-        return appointment.getTreatment().getDuration();
+        return appointment.getDurationMinutes();
     }
 
     private static LocalDateTime earliest(LocalDateTime a, LocalDateTime b) {
