@@ -248,6 +248,44 @@
     color: var(--text-muted);
 }
 
+/* Redes del centro: botones redondos con el icono de cada red */
+.hero-social {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.hero-social-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid var(--border-soft);
+    background: var(--surface);
+    color: var(--primary-text);
+    font-size: 20px;
+    text-decoration: none;
+    transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
+}
+
+.hero-social-link:hover,
+.hero-social-link:focus-visible {
+    background: var(--primary);
+    color: var(--on-primary);
+    transform: translateY(-1px);
+}
+
+.hero-social-svg {
+    width: 20px;
+    height: 20px;
+}
+
 .hero-meta-item {
     display: flex;
     align-items: flex-start;

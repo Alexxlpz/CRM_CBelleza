@@ -46,7 +46,7 @@
                 </div>
             </div>
         </div>
-        <div class="hero-actions" th:if="${center.directionsUrl != null or centerSlug != null}">
+        <div class="hero-actions" th:if="${center.directionsUrl != null or centerSlug != null or !#lists.isEmpty(center.socialLinks)}">
             <!--/* «Cómo llegar»: abre la ruta en Google Maps; en iPhone, iPad y Mac app.js deja elegir Apple Maps o Google Maps */-->
             <a class="btn btn-primary hero-directions" th:if="${center.directionsUrl != null}"
                th:href="${center.directionsUrl}" target="_blank" rel="noopener noreferrer"
@@ -57,6 +57,20 @@
                     th:attr="data-share-path=@{/c/{s}(s=${centerSlug})},data-share-title=${center.name}">
                 <i class="lucide-share-2" aria-hidden="true"></i> <span>Compartir</span>
             </button>
+            <!--/* Redes del centro (Ajustes > Centro > Redes sociales): solo las que tiene, en otra pestaña */-->
+            <ul class="hero-social" th:unless="${#lists.isEmpty(center.socialLinks)}" aria-label="Redes sociales del centro">
+                <li th:each="link : ${center.socialLinks}">
+                    <a class="hero-social-link" th:href="${link.url}" target="_blank" rel="noopener noreferrer nofollow"
+                       th:attr="aria-label=${link.label + ' de ' + center.name},title=${link.label}">
+                        <i th:if="${link.network == 'instagram'}" class="lucide-instagram" aria-hidden="true"></i>
+                        <i th:if="${link.network == 'facebook'}" class="lucide-facebook" aria-hidden="true"></i>
+                        <i th:if="${link.network == 'website'}" class="lucide-globe" aria-hidden="true"></i>
+                        <svg th:if="${link.network == 'tiktok'}" class="hero-social-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path fill="currentColor" d="M16.6 5.82A4.28 4.28 0 0 1 15.54 3h-3.09v12.4a2.59 2.59 0 1 1-2.59-2.59c.27 0 .53.04.77.12V9.77a5.7 5.7 0 0 0-.77-.05A5.68 5.68 0 1 0 15.54 15.4V9.01a7.35 7.35 0 0 0 4.3 1.38V7.3a4.3 4.3 0 0 1-3.24-1.48z"/>
+                        </svg>
+                    </a>
+                </li>
+            </ul>
         </div>
         <p class="hero-share-status" role="status" aria-live="polite"></p>
     </div>

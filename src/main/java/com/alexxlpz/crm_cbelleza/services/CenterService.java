@@ -5,6 +5,8 @@ import com.alexxlpz.crm_cbelleza.entities.Center;
 import com.alexxlpz.crm_cbelleza.exceptions.BusinessRuleException;
 import com.alexxlpz.crm_cbelleza.exceptions.ResourceNotFoundException;
 import com.alexxlpz.crm_cbelleza.forms.CenterForm;
+import com.alexxlpz.crm_cbelleza.forms.CenterSocialForm;
+import com.alexxlpz.crm_cbelleza.forms.SocialLinks;
 import com.alexxlpz.crm_cbelleza.forms.FormText;
 import com.alexxlpz.crm_cbelleza.forms.PhoneNumbers;
 import com.alexxlpz.crm_cbelleza.repositories.CenterRepository;
@@ -184,6 +186,20 @@ public class CenterService {
         }
         Center center = getCenterById(centerId);
         center.setClientRescheduleHours(hours);
+        return centerRepository.save(center);
+    }
+
+    /** Redes sociales del centro: cada campo vacío quita esa red; si alguno no es válido no se guarda ninguno. */
+    public Center updateSocialLinks(Long centerId, CenterSocialForm form) {
+        Center center = getCenterById(centerId);
+        String instagram = SocialLinks.instagram(form.instagram());
+        String tiktok = SocialLinks.tiktok(form.tiktok());
+        String facebook = SocialLinks.facebook(form.facebook());
+        String website = SocialLinks.website(form.website());
+        center.setInstagram(instagram);
+        center.setTiktok(tiktok);
+        center.setFacebook(facebook);
+        center.setWebsite(website);
         return centerRepository.save(center);
     }
 

@@ -18,6 +18,7 @@ import com.alexxlpz.crm_cbelleza.services.LoyaltyService;
 import com.alexxlpz.crm_cbelleza.exceptions.BusinessRuleException;
 import com.alexxlpz.crm_cbelleza.exceptions.ResourceNotFoundException;
 import com.alexxlpz.crm_cbelleza.forms.PhoneNumbers;
+import com.alexxlpz.crm_cbelleza.forms.CenterSocialForm;
 import com.alexxlpz.crm_cbelleza.forms.WorkerCenterForm;
 import com.alexxlpz.crm_cbelleza.googlecalendar.GoogleCalendarService;
 import com.alexxlpz.crm_cbelleza.security.AppUserDetails;
@@ -191,6 +192,21 @@ public class WorkerCenterController {
             redirect.addFlashAttribute("errorMessage", e.getMessage());
         }
         return "redirect:/worker/center/" + CENTER;
+    }
+
+    /** Redes sociales del centro (apartado Centro): salen en la ficha que ven los clientes. */
+    @CenterOwnerOnly
+    @PostMapping("/worker/center/social")
+    public String updateSocial(@AuthenticationPrincipal AppUserDetails worker,
+                               @ModelAttribute CenterSocialForm form,
+                               RedirectAttributes redirect) {
+        try {
+            centerService.updateSocialLinks(worker.getCenterId(), form);
+            redirect.addFlashAttribute("successMessage", "Redes sociales guardadas.");
+        } catch (BusinessRuleException e) {
+            redirect.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:/worker/center/" + CENTER + "#redes";
     }
 
     /** Cuenta del profesional (apartado Mi cuenta): cada uno la suya. */

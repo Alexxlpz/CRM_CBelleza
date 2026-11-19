@@ -54,6 +54,9 @@ public class CenterStructuredData {
         data.put("@id", pageUrl + "#centro");
         data.put("name", center.getName());
         data.put("url", pageUrl);
+        if (!center.getSocialLinks().isEmpty()) {
+            data.put("sameAs", center.getSocialLinks().stream().map(Center.SocialLink::url).toList());
+        }
         putIfPresent(data, "telephone", center.getPhone());
         putIfPresent(data, "email", center.getEmail());
         if (center.getPhotoUrl() != null) {

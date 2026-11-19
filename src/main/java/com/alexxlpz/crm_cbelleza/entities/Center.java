@@ -1,6 +1,7 @@
 package com.alexxlpz.crm_cbelleza.entities;
 
 import com.alexxlpz.crm_cbelleza.booking.CenterTimeZones;
+import com.alexxlpz.crm_cbelleza.forms.SocialLinks;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -8,6 +9,8 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 @Entity
@@ -109,6 +112,33 @@ public class Center {
     /** Cuándo se subió la foto de presentación (nula = sin foto); versiona la URL de la imagen. */
     @Column(name = "photo_updated_at")
     private LocalDateTime photoUpdatedAt;
+
+    /** Redes sociales (V35): usuario de Instagram y TikTok, página de Facebook y web propia. Ver {@link SocialLinks}. */
+    @Column(length = 30)
+    private String instagram;
+
+    @Column(length = 24)
+    private String tiktok;
+
+    @Column(length = 80)
+    private String facebook;
+
+    @Column(length = SocialLinks.MAX_WEBSITE)
+    private String website;
+
+    /** Un botón de red social de la ficha: la clave (para el icono), el nombre y el enlace. */
+    public record SocialLink(String network, String label, String url) {
+    }
+
+    /** Las redes que tiene el centro, en este orden, con su enlace ya montado (vacía si no tiene ninguna). */
+    public List<SocialLink> getSocialLinks() {
+        List<SocialLink> links = new ArrayList<>();
+        if (instagram != null) links.add(new SocialLink("instagram", "Instagram", SocialLinks.instagramUrl(instagram)));
+        if (tiktok != null) links.add(new SocialLink("tiktok", "TikTok", SocialLinks.tiktokUrl(tiktok)));
+        if (facebook != null) links.add(new SocialLink("facebook", "Facebook", SocialLinks.facebookUrl(facebook)));
+        if (website != null) links.add(new SocialLink("website", "Web", website));
+        return links;
+    }
 
     /** Dirección de la foto de presentación, o nula si el centro no tiene. */
     public String getPhotoUrl() {
