@@ -1,0 +1,1584 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuquora CRM - Guía para Desarrolladores</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+    <link rel="icon" type="image/png" href="images/icon.png">
+    <link rel="apple-touch-icon" href="images/icon.png">
+</head>
+<body>
+
+    <!-- Puntas de flecha que comparten todos los diagramas de esta página -->
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+        <defs>
+            <marker id="dga" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#8b857d"/></marker>
+            <marker id="dga-ok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#67b889"/></marker>
+            <marker id="dga-info" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#6fa9e8"/></marker>
+            <marker id="dga-bad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#e27171"/></marker>
+            <marker id="dga-wait" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#e0ad52"/></marker>
+        </defs>
+    </svg>
+
+    <header class="doc-navbar">
+        <a href="index.html" class="brand-wrapper">
+            <img src="images/icon.png" alt="Logo Cuquora" class="brand-logo-img">
+            <div class="brand-titles">
+                <span class="brand-name">Cuquora<span>CRM</span></span>
+                <span class="brand-subtitle">Documentación Técnica & Operativa</span>
+            </div>
+        </a>
+        <nav>
+            <ul class="nav-links">
+                <li class="nav-link-item"><a href="index.html">Portal General</a></li>
+                <li class="nav-link-item"><a href="guia-roles.html">Guía por Roles</a></li>
+                <li class="nav-link-item"><a href="manual-acciones.html">Manual de Acciones</a></li>
+                <li class="nav-link-item active"><a href="desarrolladores.html">Desarrolladores</a></li>
+                <li class="nav-link-item"><a href="evolucion-proyecto.html">Evolución & Commits</a></li>
+            </ul>
+        </nav>
+        <div>
+            <span class="nav-badge-app">v0.9.0-beta</span>
+        </div>
+    </header>
+
+    <div class="doc-layout">
+
+        <aside class="doc-sidebar">
+            <div class="sidebar-group">
+                <div class="sidebar-title">Entender el sistema</div>
+                <ul class="sidebar-nav">
+                    <li><a href="#inicio" class="active">En 30 segundos</a></li>
+                    <li><a href="#mapa">Mapa del sistema</a></li>
+                    <li><a href="#entornos">Entornos y perfiles</a></li>
+                    <li><a href="#peticion">Recorrido de una petición</a></li>
+                    <li><a href="#paquetes">Paquetes del código</a></li>
+                    <li><a href="#datos">Modelo de datos</a></li>
+                </ul>
+            </div>
+            <div class="sidebar-group">
+                <div class="sidebar-title">Las piezas clave</div>
+                <ul class="sidebar-nav">
+                    <li><a href="#citas">Ciclo de vida de una cita</a></li>
+                    <li><a href="#huecos">¿Cabe una cita?</a></li>
+                    <li><a href="#eventos">Eventos y tareas en segundo plano</a></li>
+                    <li><a href="#seguridad">Seguridad y permisos</a></li>
+                    <li><a href="#aislamiento">Aislamiento entre centros</a></li>
+                    <li><a href="#enlaces">Enlaces de un solo uso</a></li>
+                    <li><a href="#productos">API de productos</a></li>
+                    <li><a href="#correo">Correo</a></li>
+                    <li><a href="#frontend">Interfaz (front)</a></li>
+                </ul>
+            </div>
+            <div class="sidebar-group">
+                <div class="sidebar-title">Trabajar en el código</div>
+                <ul class="sidebar-nav">
+                    <li><a href="#migraciones">Migraciones</a></li>
+                    <li><a href="#tests">Tests</a></li>
+                    <li><a href="#nueva">Añadir una funcionalidad</a></li>
+                    <li><a href="#donde">¿Dónde está…?</a></li>
+                    <li><a href="#trampas">Trampas conocidas</a></li>
+                </ul>
+            </div>
+        </aside>
+
+        <main class="doc-content">
+
+            <!-- ============================================================ -->
+            <section class="doc-hero" id="inicio">
+                <span class="doc-tag">Para quien va a tocar el código</span>
+                <h1>Guía para desarrolladores</h1>
+                <p>
+                    Cómo está montado Cuquora por dentro: qué contenedores hay, por dónde pasa una petición, cómo se guardan los datos y dónde vive cada regla.
+                    Primero va el dibujo y después lo justo para entenderlo. El detalle fino (cada endpoint, cada pantalla) está en el
+                    <a href="manual-acciones.html">Manual de Acciones</a>; las reglas para trabajar en el repositorio, en <code>CLAUDE.md</code>.
+                </p>
+                <div class="hero-meta-row">
+                    <div class="hero-meta-item"><span>Estado:</span><strong>0.9.0-beta + cambios sin publicar · 21 nov 2026 · en cuquora.com</strong></div>
+                    <div class="hero-meta-item"><span>Backend:</span><strong>Java 21 · Spring Boot 4.1 · JPA · Flyway</strong></div>
+                    <div class="hero-meta-item"><span>Front:</span><strong>Thymeleaf + CSS propio + JS sin framework</strong></div>
+                    <div class="hero-meta-item"><span>Datos:</span><strong>PostgreSQL 16 (H2 en dev y tests)</strong></div>
+                </div>
+            </section>
+
+            <section class="doc-section">
+                <div class="tldr">
+                    <div class="tldr-title">En 30 segundos</div>
+                    <ul>
+                        <li><strong>Un monolito Spring Boot</strong> que pinta las páginas en el servidor (Thymeleaf). El JavaScript solo añade interactividad: no hay SPA ni API pública general.</li>
+                        <li><strong>Dos tipos de usuario</strong>: clientes (buscan centros y piden cita) y trabajadores (gestionan su centro). Entre los trabajadores, el <strong>dueño</strong> tiene permisos de más.</li>
+                        <li><strong>Todo cuelga de un centro.</strong> Un trabajador solo ve lo de su centro; lo de otro centro responde 404 aunque adivine el id.</li>
+                        <li><strong>Las reglas viven en los servicios</strong>, nunca en controladores ni plantillas. Los errores para el usuario son <code>BusinessRuleException</code> con el texto en español.</li>
+                        <li><strong>Todo cambio de cita pasa por <code>BookingService</code></strong> y publica un evento; correos y Google Calendar reaccionan después del commit, en segundo plano.</li>
+                        <li><strong>Un segundo servicio pequeño</strong>, <code>product-api</code>, guarda productos por código de barras que comparten todos los centros.</li>
+                    </ul>
+                </div>
+
+                <div class="stats">
+                    <div><b>2</b><span>aplicaciones (Cuquora + API de productos)</span></div>
+                    <div><b>28</b><span>controladores</span></div>
+                    <div><b>≈140</b><span>rutas HTTP</span></div>
+                    <div><b>50</b><span>servicios</span></div>
+                    <div><b>28</b><span>entidades JPA</span></div>
+                    <div><b>35</b><span>migraciones (V1–V35)</span></div>
+                    <div><b>457</b><span>tests (+9 en la API)</span></div>
+                </div>
+            </section>
+
+            <!-- ============================================================ -->
+            <section class="doc-section" id="mapa">
+                <div class="section-header">
+                    <div class="section-header-title">
+                        <div class="section-icon">🗺️</div>
+                        <div>
+                            <h2>Mapa del sistema</h2>
+                            <p style="margin: 0; font-size: 0.95rem;">Qué contenedores hay en producción y con quién habla cada uno</p>
+                        </div>
+                    </div>
+                </div>
+
+                <figure class="diagram">
+                    <div class="diagram-scroll">
+                        <svg class="dg" viewBox="0 0 1100 560" role="img" aria-label="Contenedores de producción: Cloudflare, cloudflared, app, product-api, db y db-setup, con los servicios externos">
+                            <!-- Internet -->
+                            <rect x="20" y="30" width="170" height="70" rx="10" class="bx b-client"/>
+                            <text x="105" y="60" text-anchor="middle" class="tt c-client">Navegador</text>
+                            <text x="105" y="80" text-anchor="middle" class="ts">cliente o trabajador</text>
+
+                            <rect x="250" y="30" width="200" height="70" rx="10" class="bx b-cf"/>
+                            <text x="350" y="60" text-anchor="middle" class="tt c-cf">Cloudflare</text>
+                            <text x="350" y="80" text-anchor="middle" class="ts">HTTPS, DNS, cuquora.com</text>
+                            <line x1="190" y1="65" x2="246" y2="65" class="ar" marker-end="url(#dga)"/>
+
+                            <!-- Servidor -->
+                            <rect x="20" y="140" width="760" height="400" rx="14" class="bx b-zone"/>
+                            <text x="40" y="166" class="tz">SERVIDOR (NAS) · docker compose</text>
+
+                            <rect x="250" y="185" width="200" height="64" rx="10" class="bx b-cf"/>
+                            <text x="350" y="212" text-anchor="middle" class="tt c-cf">cloudflared</text>
+                            <text x="350" y="231" text-anchor="middle" class="ts">túnel, sin abrir puertos</text>
+                            <line x1="350" y1="100" x2="350" y2="181" class="ar" marker-end="url(#dga)"/>
+
+                            <rect x="200" y="290" width="300" height="84" rx="10" class="bx b-owner"/>
+                            <text x="350" y="320" text-anchor="middle" class="tl c-owner">app :8080</text>
+                            <text x="350" y="341" text-anchor="middle" class="ts">Cuquora (Spring Boot, perfil prod)</text>
+                            <text x="350" y="359" text-anchor="middle" class="tm">usuario de BD: cuquora_app</text>
+                            <line x1="350" y1="249" x2="350" y2="286" class="ar" marker-end="url(#dga)"/>
+
+                            <rect x="580" y="290" width="190" height="84" rx="10" class="bx b-worker"/>
+                            <text x="675" y="320" text-anchor="middle" class="tt c-worker">product-api :8081</text>
+                            <text x="675" y="341" text-anchor="middle" class="ts">productos por código</text>
+                            <text x="675" y="359" text-anchor="middle" class="tm">usuario: productos_api</text>
+                            <line x1="500" y1="332" x2="576" y2="332" class="ar info" marker-end="url(#dga-info)"/>
+                            <text x="540" y="322" text-anchor="middle" class="lbs">X-Api-Key</text>
+
+                            <rect x="200" y="430" width="560" height="90" rx="10" class="bx b-infra"/>
+                            <text x="512" y="457" text-anchor="middle" class="tt">db · PostgreSQL 16</text>
+                            <rect x="220" y="470" width="250" height="38" rx="8" class="bx b-owner"/>
+                            <text x="345" y="494" text-anchor="middle" class="lb">public · tablas de Cuquora</text>
+                            <rect x="490" y="470" width="250" height="38" rx="8" class="bx b-worker"/>
+                            <text x="615" y="494" text-anchor="middle" class="lb">productos · API de productos</text>
+                            <line x1="350" y1="374" x2="350" y2="466" class="ar" marker-end="url(#dga)"/>
+                            <line x1="675" y1="374" x2="675" y2="466" class="ar info" marker-end="url(#dga-info)"/>
+
+                            <rect x="40" y="430" width="140" height="90" rx="10" class="bx b-off"/>
+                            <text x="110" y="460" text-anchor="middle" class="tt">db-setup</text>
+                            <text x="110" y="480" text-anchor="middle" class="ts">crea usuarios y</text>
+                            <text x="110" y="497" text-anchor="middle" class="ts">permisos y se para</text>
+                            <line x1="180" y1="475" x2="196" y2="475" class="ar dash" marker-end="url(#dga)"/>
+
+                            <rect x="40" y="290" width="140" height="84" rx="10" class="bx b-off"/>
+                            <text x="110" y="320" text-anchor="middle" class="tt">backup-db.sh</text>
+                            <text x="110" y="340" text-anchor="middle" class="ts">pg_dump cada noche</text>
+                            <text x="110" y="357" text-anchor="middle" class="ts">30 días de copias</text>
+                            <path d="M110,374 V410 H230 V426" class="ar dash" marker-end="url(#dga)"/>
+
+                            <!-- Fuera -->
+                            <text x="935" y="166" text-anchor="middle" class="tz">SERVICIOS DE FUERA</text>
+                            <rect x="830" y="185" width="210" height="58" rx="10" class="bx b-cf"/>
+                            <text x="935" y="210" text-anchor="middle" class="tt c-cf">Brevo (SMTP)</text>
+                            <text x="935" y="229" text-anchor="middle" class="ts">todos los correos</text>
+                            <rect x="830" y="255" width="210" height="58" rx="10" class="bx b-info"/>
+                            <text x="935" y="280" text-anchor="middle" class="tt c-worker">Google</text>
+                            <text x="935" y="299" text-anchor="middle" class="ts">login OpenID y Calendar</text>
+                            <rect x="830" y="325" width="210" height="58" rx="10" class="bx b-ok"/>
+                            <text x="935" y="350" text-anchor="middle" class="tt c-client">OpenStreetMap</text>
+                            <text x="935" y="369" text-anchor="middle" class="ts">teselas y Nominatim</text>
+                            <rect x="830" y="395" width="210" height="58" rx="10" class="bx b-off"/>
+                            <text x="935" y="420" text-anchor="middle" class="tt">Open Beauty Facts</text>
+                            <text x="935" y="439" text-anchor="middle" class="ts">productos que faltan</text>
+
+                            <path d="M450,290 V270 H800 V214 H826" class="ar dash" marker-end="url(#dga)"/>
+                            <path d="M800,270 V284 H826" class="ar dash" marker-end="url(#dga)"/>
+                            <path d="M770,350 H795 V424 H826" class="ar dash info" marker-end="url(#dga-info)"/>
+                            <path d="M105,30 V14 H1065 V354 H1044" class="ar dash ok" marker-end="url(#dga-ok)"/>
+                            <text x="760" y="32" text-anchor="middle" class="lbs">el navegador pide las teselas del mapa y las direcciones directamente</text>
+                        </svg>
+                    </div>
+                    <p class="swipe-hint">Desliza el dibujo hacia los lados para verlo entero →</p>
+                    <figcaption><strong>Cómo leerlo:</strong> nadie llega al servidor sin pasar por Cloudflare. Dentro de Docker, solo la app ve la API de productos y solo las dos aplicaciones ven PostgreSQL; cada una entra con su usuario y no puede tocar el esquema de la otra. <code>db-setup</code> se ejecuta en cada <code>up</code>, prepara usuarios y dueños de tablas y se para («Detenido» es lo normal).</figcaption>
+                </figure>
+
+                <div class="grid-2">
+                    <div class="card-feature">
+                        <h4>Por qué dos usuarios de base de datos</h4>
+                        <p>El superusuario (<code>POSTGRES_USER</code>) solo lo usan <code>db-setup</code> y la copia. La app entra como <code>cuquora_app</code>: puede migrar sus tablas pero no crear usuarios ni leer <code>productos</code>. Un fallo en una aplicación no deja leer los datos de la otra.</p>
+                    </div>
+                    <div class="card-feature">
+                        <h4>Por qué la API de productos va aparte</h4>
+                        <p>Es lo único que se comparte entre centros (nombre, foto y categoría de un producto por su código). Separarla deja claro que nada más cruza de un centro a otro, y nunca recibe precios ni stock.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================================ -->
+            <section class="doc-section" id="entornos">
+                <div class="section-header">
+                    <div class="section-header-title">
+                        <div class="section-icon">🧪</div>
+                        <div>
+                            <h2>Entornos y perfiles</h2>
+                            <p style="margin: 0; font-size: 0.95rem;">Cuatro maneras de arrancar Cuquora, de la más ligera a producción</p>
+                        </div>
+                    </div>
+                </div>
+
+                <figure class="diagram">
+                    <div class="diagram-scroll">
+                        <svg class="dg" viewBox="0 0 1100 300" role="img" aria-label="Cuatro entornos: dev con H2, dev con contenedores, Cuquora en Docker local y producción">
+                            <rect x="20" y="20" width="245" height="260" rx="12" class="bx b-ok"/>
+                            <text x="142" y="50" text-anchor="middle" class="tl c-client">1 · dev</text>
+                            <text x="142" y="74" text-anchor="middle" class="ts">perfil dev · :8080</text>
+                            <text x="40" y="110" class="ts">• H2 en memoria</text>
+                            <text x="40" y="132" class="ts">• se borra al reiniciar</text>
+                            <text x="40" y="154" class="ts">• datos demo + historial</text>
+                            <text x="40" y="176" class="ts">• /login-selector</text>
+                            <text x="40" y="198" class="ts">• consola H2</text>
+                            <text x="40" y="220" class="ts">• sin API de productos</text>
+                            <text x="142" y="262" text-anchor="middle" class="tm">mvn spring-boot:run</text>
+
+                            <rect x="292" y="20" width="245" height="260" rx="12" class="bx b-info"/>
+                            <text x="414" y="50" text-anchor="middle" class="tl c-worker">2 · dev + contenedores</text>
+                            <text x="414" y="74" text-anchor="middle" class="ts">perfiles dev,containers · :8080</text>
+                            <text x="312" y="110" class="ts">• app en IntelliJ (depurar)</text>
+                            <text x="312" y="132" class="ts">• PostgreSQL en :5433</text>
+                            <text x="312" y="154" class="ts">• product-api en :8092</text>
+                            <text x="312" y="176" class="ts">• los datos se quedan</text>
+                            <text x="312" y="198" class="ts">• comparte volumen con 3</text>
+                            <text x="414" y="262" text-anchor="middle" class="tm">«Cuquora (dev + contenedores)»</text>
+
+                            <rect x="564" y="20" width="245" height="260" rx="12" class="bx b-owner"/>
+                            <text x="686" y="50" text-anchor="middle" class="tl c-owner">3 · Docker local</text>
+                            <text x="686" y="74" text-anchor="middle" class="ts">perfil dev · :8090</text>
+                            <text x="584" y="110" class="ts">• todo en contenedores</text>
+                            <text x="584" y="132" class="ts">• proyecto cuquora-local</text>
+                            <text x="584" y="154" class="ts">• docker-compose.local.yml</text>
+                            <text x="584" y="176" class="ts">• no choca con producción</text>
+                            <text x="686" y="262" text-anchor="middle" class="tm">«Cuquora en Docker»</text>
+
+                            <rect x="836" y="20" width="245" height="260" rx="12" class="bx b-cf"/>
+                            <text x="958" y="50" text-anchor="middle" class="tl c-cf">4 · producción</text>
+                            <text x="958" y="74" text-anchor="middle" class="ts">perfil prod · NAS</text>
+                            <text x="856" y="110" class="ts">• HTTPS por Cloudflare</text>
+                            <text x="856" y="132" class="ts">• cookies Secure, HSTS</text>
+                            <text x="856" y="154" class="ts">• IP real (native)</text>
+                            <text x="856" y="176" class="ts">• ProductionChecks: no</text>
+                            <text x="868" y="196" class="ts">arranca si falta algo</text>
+                            <text x="856" y="218" class="ts">• sin datos demo</text>
+                            <text x="958" y="262" text-anchor="middle" class="tm">docker compose up -d --build</text>
+                        </svg>
+                    </div>
+                    <p class="swipe-hint">Desliza el dibujo hacia los lados para verlo entero →</p>
+                    <figcaption><strong>Regla práctica:</strong> para cambiar pantallas y lógica, el 1 (rápido, sin nada instalado). Para probar algo que depende de PostgreSQL o de la API de productos, el 2. El 3 es ensayar el despliegue sin tocar producción.</figcaption>
+                </figure>
+
+                <div class="table-responsive">
+                    <table class="doc-table">
+                        <thead><tr><th>Fichero</th><th>Cuándo se aplica</th><th>Qué pone</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>application.properties</code></td><td>Siempre</td><td>Base común. Todo se lee de variables de entorno con un valor por defecto seguro (H2, correo por consola, sin Google).</td></tr>
+                            <tr><td><code>application-dev.properties</code></td><td>Perfil <code>dev</code></td><td>Datos demo, historial (<code>crm.seed-demo-history</code>), consola H2, sin cachés de Thymeleaf ni de recursos. Lee el <code>.env</code> en UTF-8 (<code>DotEnvPropertySourceLoader</code>).</td></tr>
+                            <tr><td><code>application-containers.properties</code></td><td>Perfil <code>containers</code> (con dev)</td><td>PostgreSQL en <code>127.0.0.1:5433</code> como <code>cuquora_app</code> y la API de productos en <code>:8092</code>.</td></tr>
+                            <tr><td><code>application-prod.properties</code></td><td>Perfil <code>prod</code> (lo activa <code>docker-compose.yml</code>)</td><td>Cookies seguras, cabeceras reenviadas, errores sin trazas, gzip, Flyway sin <code>clean</code>. <code>ProductionChecks</code> revisa la configuración al arrancar.</td></tr>
+                            <tr><td><code>src/test/resources/config/application.properties</code></td><td>Tests</td><td>H2 y datos demo (sin historial).</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="callout callout-warning">
+                    <div class="callout-icon">⚠️</div>
+                    <div class="callout-content">
+                        <strong>Secretos solo en <code>.env</code>.</strong>
+                        <p>Nunca en <code>docker-compose*.yml</code>, <code>application*.properties</code> ni en el código. Si añades una variable, añádela también a <code>.env.example</code> con un comentario. <code>docker compose</code> se niega a arrancar si falta una obligatoria (<code>POSTGRES_*</code>, <code>APP_DB_PASSWORD</code>, <code>PRODUCT_API_KEY</code>, <code>PRODUCT_API_DB_PASSWORD</code>, <code>REMEMBER_ME_KEY</code>, <code>SITE_URL</code>).</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================================ -->
+            <section class="doc-section" id="peticion">
+                <div class="section-header">
+                    <div class="section-header-title">
+                        <div class="section-icon">🛤️</div>
+                        <div>
+                            <h2>Recorrido de una petición</h2>
+                            <p style="margin: 0; font-size: 0.95rem;">Qué controles atraviesa, por orden, desde que llega hasta que sale la página</p>
+                        </div>
+                    </div>
+                </div>
+
+                <figure class="diagram">
+                    <div class="diagram-scroll">
+                        <svg class="dg" viewBox="0 0 1100 430" role="img" aria-label="Cadena de una petición: filtros de seguridad, interceptores, controlador, servicio, repositorio y plantilla">
+                            <text x="20" y="24" class="tz">1 · FILTROS DE SPRING SECURITY</text>
+                            <rect x="20" y="36" width="200" height="74" rx="10" class="bx b-admin"/>
+                            <text x="120" y="64" text-anchor="middle" class="tt c-admin">LoginThrottleFilter</text>
+                            <text x="120" y="84" text-anchor="middle" class="ts">5 fallos cuenta+IP, 20 por IP</text>
+                            <text x="120" y="100" text-anchor="middle" class="ts">o 50 por cuenta = 15 min</text>
+                            <rect x="245" y="36" width="200" height="74" rx="10" class="bx b-admin"/>
+                            <text x="345" y="64" text-anchor="middle" class="tt c-admin">Sesión / recordada</text>
+                            <text x="345" y="84" text-anchor="middle" class="ts">cookie, «Recordar mi</text>
+                            <text x="345" y="100" text-anchor="middle" class="ts">sesión» 14 días, Google</text>
+                            <rect x="470" y="36" width="200" height="74" rx="10" class="bx b-admin"/>
+                            <text x="570" y="64" text-anchor="middle" class="tt c-admin">CSRF + CSP</text>
+                            <text x="570" y="84" text-anchor="middle" class="ts">token en formularios y</text>
+                            <text x="570" y="100" text-anchor="middle" class="ts">fetch; solo JS/CSS propios</text>
+                            <rect x="695" y="36" width="385" height="74" rx="10" class="bx b-admin"/>
+                            <text x="887" y="62" text-anchor="middle" class="tt c-admin">¿Puede entrar en esta ruta?</text>
+                            <text x="887" y="82" text-anchor="middle" class="ts">públicas · /client/** = CLIENT</text>
+                            <text x="887" y="100" text-anchor="middle" class="ts">/worker/** = WORKER con centro · inexistente = 404</text>
+                            <line x1="220" y1="73" x2="241" y2="73" class="ar" marker-end="url(#dga)"/>
+                            <line x1="445" y1="73" x2="466" y2="73" class="ar" marker-end="url(#dga)"/>
+                            <line x1="670" y1="73" x2="691" y2="73" class="ar" marker-end="url(#dga)"/>
+
+                            <text x="20" y="150" class="tz">2 · INTERCEPTORES (WebConfig)</text>
+                            <rect x="20" y="162" width="250" height="74" rx="10" class="bx b-worker"/>
+                            <text x="145" y="190" text-anchor="middle" class="tt c-worker">PasswordChange</text>
+                            <text x="145" y="210" text-anchor="middle" class="ts">/** · sesión anterior al último</text>
+                            <text x="145" y="226" text-anchor="middle" class="ts">cambio de contraseña = fuera</text>
+                            <rect x="290" y="162" width="250" height="74" rx="10" class="bx b-worker"/>
+                            <text x="415" y="190" text-anchor="middle" class="tt c-worker">CenterMembership</text>
+                            <text x="415" y="210" text-anchor="middle" class="ts">/worker/** · ¿sigue en su</text>
+                            <text x="415" y="226" text-anchor="middle" class="ts">centro? si no, cierra sesión</text>
+                            <rect x="560" y="162" width="250" height="74" rx="10" class="bx b-owner"/>
+                            <text x="685" y="190" text-anchor="middle" class="tt c-owner">CenterOwner</text>
+                            <text x="685" y="210" text-anchor="middle" class="ts">/worker/** · @CenterOwnerOnly</text>
+                            <text x="685" y="226" text-anchor="middle" class="ts">sin ser dueño = aviso o 403</text>
+                            <rect x="830" y="162" width="250" height="74" rx="10" class="bx b-client"/>
+                            <text x="955" y="190" text-anchor="middle" class="tt c-client">DeletedAccount</text>
+                            <text x="955" y="210" text-anchor="middle" class="ts">/client/** · cuenta borrada</text>
+                            <text x="955" y="226" text-anchor="middle" class="ts">en otro dispositivo = fuera</text>
+                            <path d="M887,110 V130 H145 V158" class="ar" marker-end="url(#dga)"/>
+                            <line x1="270" y1="199" x2="286" y2="199" class="ar" marker-end="url(#dga)"/>
+                            <line x1="540" y1="199" x2="556" y2="199" class="ar" marker-end="url(#dga)"/>
+                            <line x1="810" y1="199" x2="826" y2="199" class="ar" marker-end="url(#dga)"/>
+
+                            <text x="20" y="276" class="tz">3 · TU CÓDIGO</text>
+                            <rect x="20" y="288" width="240" height="84" rx="10" class="bx b-worker"/>
+                            <text x="140" y="316" text-anchor="middle" class="tt c-worker">Controlador</text>
+                            <text x="140" y="336" text-anchor="middle" class="ts">recibe un record (forms/),</text>
+                            <text x="140" y="352" text-anchor="middle" class="ts">saca centerId de la sesión</text>
+                            <rect x="290" y="288" width="240" height="84" rx="10" class="bx b-owner"/>
+                            <text x="410" y="316" text-anchor="middle" class="tt c-owner">Servicio</text>
+                            <text x="410" y="336" text-anchor="middle" class="ts">valida y decide · @Transactional</text>
+                            <text x="410" y="352" text-anchor="middle" class="ts">BusinessRuleException / 404</text>
+                            <rect x="560" y="288" width="240" height="84" rx="10" class="bx b-infra"/>
+                            <text x="680" y="316" text-anchor="middle" class="tt">Repositorio</text>
+                            <text x="680" y="336" text-anchor="middle" class="ts">findByIdAndCenterId,</text>
+                            <text x="680" y="352" text-anchor="middle" class="ts">@EntityGraph (sin N+1)</text>
+                            <rect x="830" y="288" width="250" height="84" rx="10" class="bx b-client"/>
+                            <text x="955" y="316" text-anchor="middle" class="tt c-client">Vista Thymeleaf</text>
+                            <text x="955" y="336" text-anchor="middle" class="ts">+ ModelAdvice (usuario, dueño,</text>
+                            <text x="955" y="352" text-anchor="middle" class="ts">sitio) · o JSON (@ApiEndpoint)</text>
+                            <path d="M955,236 V256 H140 V284" class="ar" marker-end="url(#dga)"/>
+                            <line x1="260" y1="330" x2="286" y2="330" class="ar" marker-end="url(#dga)"/>
+                            <line x1="530" y1="330" x2="556" y2="330" class="ar" marker-end="url(#dga)"/>
+                            <path d="M260,360 C280,400 800,400 826,360" class="ar dash ok" marker-end="url(#dga-ok)"/>
+                            <text x="545" y="414" text-anchor="middle" class="lbs">el controlador pone en el modelo lo que devuelve el servicio y elige la vista (open-in-view = false: el servicio carga todo)</text>
+                        </svg>
+                    </div>
+                    <p class="swipe-hint">Desliza el dibujo hacia los lados para verlo entero →</p>
+                    <figcaption><strong>Errores:</strong> en una página, <code>GlobalExceptionHandler</code> devuelve a la pantalla con <code>errorMessage</code> o pinta la 404. En un endpoint marcado con <code>@ApiEndpoint</code>, <code>ApiExceptionHandler</code> responde JSON <code>{"error": "…"}</code> con 400, 404 o 409 (por ejemplo <code>code: OUTSIDE_HOURS</code> en la agenda).</figcaption>
+                </figure>
+
+                <div class="compare">
+                    <div class="cmp-owner yes">
+                        <h4>✅ Un controlador hace</h4>
+                        <ul>
+                            <li>Leer el formulario (un <code>record</code> de <code>forms/</code>).</li>
+                            <li>Sacar el usuario y el <code>centerId</code> de la sesión (<code>AppUserDetails</code>).</li>
+                            <li>Llamar a <strong>un</strong> servicio y elegir la vista o la redirección.</li>
+                            <li>Poner en el modelo totales y medias ya calculados.</li>
+                        </ul>
+                    </div>
+                    <div class="cmp-team yes">
+                        <h4>🚫 Un controlador no hace</h4>
+                        <ul>
+                            <li>Usar repositorios directamente.</li>
+                            <li>Validar reglas de negocio ni calcular precios o huecos.</li>
+                            <li>Leer el id del centro de la URL o del formulario.</li>
+                            <li>Dejar que la plantilla recorra colecciones con <code>lista.![campo]</code> o <code>lista.?[cond]</code>.</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================================ -->
+            <section class="doc-section" id="paquetes">
+                <div class="section-header">
+                    <div class="section-header-title">
+                        <div class="section-icon">📦</div>
+                        <div>
+                            <h2>Paquetes del código</h2>
+                            <p style="margin: 0; font-size: 0.95rem;"><code>src/main/java/com/alexxlpz/crm_cbelleza/</code>: qué guarda cada carpeta</p>
+                        </div>
+                    </div>
+                </div>
+
+                <figure class="diagram">
+                    <div class="diagram-scroll">
+                        <svg class="dg" viewBox="0 0 1100 484" role="img" aria-label="Paquetes del código y quién usa a quién">
+                            <!-- Entrada -->
+                            <text x="20" y="24" class="tz">ENTRADA</text>
+                            <rect x="20" y="36" width="250" height="80" rx="10" class="bx b-admin"/>
+                            <text x="145" y="62" text-anchor="middle" class="tt c-admin">security/</text>
+                            <text x="145" y="82" text-anchor="middle" class="ts">login, Google, interceptores,</text>
+                            <text x="145" y="99" text-anchor="middle" class="ts">freno al login, @CenterOwnerOnly</text>
+                            <rect x="290" y="36" width="250" height="80" rx="10" class="bx b-worker"/>
+                            <text x="415" y="62" text-anchor="middle" class="tt c-worker">controllers/</text>
+                            <text x="415" y="82" text-anchor="middle" class="ts">28 controladores, uno por área</text>
+                            <text x="415" y="99" text-anchor="middle" class="ts">sin lógica ni repositorios</text>
+                            <rect x="560" y="36" width="250" height="80" rx="10" class="bx b-worker"/>
+                            <text x="685" y="62" text-anchor="middle" class="tt c-worker">forms/ · dto/</text>
+                            <text x="685" y="82" text-anchor="middle" class="ts">records de entrada (con reglas de</text>
+                            <text x="685" y="99" text-anchor="middle" class="ts">formato) y DTO de lectura</text>
+                            <rect x="830" y="36" width="250" height="80" rx="10" class="bx b-bad"/>
+                            <text x="955" y="62" text-anchor="middle" class="tt c-bad">exceptions/</text>
+                            <text x="955" y="82" text-anchor="middle" class="ts">BusinessRule, NotFound,</text>
+                            <text x="955" y="99" text-anchor="middle" class="ts">handlers HTML y JSON</text>
+
+                            <!-- Negocio -->
+                            <text x="20" y="150" class="tz">NEGOCIO</text>
+                            <rect x="20" y="162" width="520" height="96" rx="10" class="bx b-owner"/>
+                            <text x="280" y="190" text-anchor="middle" class="tl c-owner">services/ · 50 servicios</text>
+                            <text x="280" y="212" text-anchor="middle" class="ts">BookingService (todas las citas), AgendaAvailabilityService,</text>
+                            <text x="280" y="230" text-anchor="middle" class="ts">TeamService, InventoryService, ProductSaleService, LoyaltyService,</text>
+                            <text x="280" y="248" text-anchor="middle" class="ts">AnalyticsService, CenterRegistrationService, ReviewService…</text>
+                            <rect x="560" y="162" width="250" height="96" rx="10" class="bx b-owner"/>
+                            <text x="685" y="190" text-anchor="middle" class="tt c-owner">booking/</text>
+                            <text x="685" y="210" text-anchor="middle" class="ts">OpeningHours, AgendaSnapshot,</text>
+                            <text x="685" y="227" text-anchor="middle" class="ts">CenterClock, CenterTimeZones</text>
+                            <text x="685" y="244" text-anchor="middle" class="tm">cálculo puro, sin BD</text>
+                            <rect x="830" y="162" width="250" height="96" rx="10" class="bx b-off"/>
+                            <text x="955" y="190" text-anchor="middle" class="tt">scheduler/</text>
+                            <text x="955" y="210" text-anchor="middle" class="ts">cada 60 s: completar citas,</text>
+                            <text x="955" y="227" text-anchor="middle" class="ts">caducar propuestas,</text>
+                            <text x="955" y="244" text-anchor="middle" class="ts">recordatorios 24 h</text>
+
+                            <!-- Salida -->
+                            <text x="20" y="292" class="tz">DATOS E INTEGRACIONES</text>
+                            <rect x="20" y="304" width="250" height="80" rx="10" class="bx b-infra"/>
+                            <text x="145" y="330" text-anchor="middle" class="tt">entities/ · repositories/</text>
+                            <text x="145" y="350" text-anchor="middle" class="ts">28 entidades JPA y 23</text>
+                            <text x="145" y="367" text-anchor="middle" class="ts">repositorios Spring Data</text>
+                            <rect x="290" y="304" width="250" height="80" rx="10" class="bx b-cf"/>
+                            <text x="415" y="330" text-anchor="middle" class="tt c-cf">mail/</text>
+                            <text x="415" y="350" text-anchor="middle" class="ts">EmailGateway (SMTP o consola),</text>
+                            <text x="415" y="367" text-anchor="middle" class="ts">correos de citas, alta y contacto</text>
+                            <rect x="560" y="304" width="250" height="80" rx="10" class="bx b-info"/>
+                            <text x="685" y="330" text-anchor="middle" class="tt c-worker">googlecalendar/</text>
+                            <text x="685" y="350" text-anchor="middle" class="ts">OAuth propio, tokens cifrados,</text>
+                            <text x="685" y="367" text-anchor="middle" class="ts">sincronización tras el commit</text>
+                            <rect x="830" y="304" width="250" height="80" rx="10" class="bx b-worker"/>
+                            <text x="955" y="330" text-anchor="middle" class="tt c-worker">productdata/</text>
+                            <text x="955" y="350" text-anchor="middle" class="ts">cliente de product-api y de</text>
+                            <text x="955" y="367" text-anchor="middle" class="ts">Open Beauty Facts</text>
+
+                            <rect x="20" y="404" width="1060" height="66" rx="10" class="bx b-off"/>
+                            <text x="550" y="425" text-anchor="middle" class="tt">config/</text>
+                            <text x="550" y="444" text-anchor="middle" class="ts">SecurityConfig, WebConfig, ProductionChecks, DotEnvPropertySourceLoader, CenterSlugBackfill</text>
+                            <text x="550" y="461" text-anchor="middle" class="ts">DatabaseSeeder + DemoHistory + DemoReviews (datos demo), LegalOwner, SiteModelAdvice</text>
+
+                            <line x1="415" y1="116" x2="415" y2="158" class="ar" marker-end="url(#dga)"/>
+                            <line x1="540" y1="210" x2="556" y2="210" class="ar" marker-end="url(#dga)"/>
+                            <line x1="830" y1="210" x2="814" y2="210" class="ar" marker-end="url(#dga)"/>
+                            <line x1="145" y1="258" x2="145" y2="300" class="ar" marker-end="url(#dga)"/>
+                            <line x1="415" y1="258" x2="415" y2="300" class="ar" marker-end="url(#dga)"/>
+                            <path d="M500,258 V280 H685 V300" class="ar" marker-end="url(#dga)"/>
+                            <path d="M520,258 V272 H955 V300" class="ar" marker-end="url(#dga)"/>
+                        </svg>
+                    </div>
+                    <p class="swipe-hint">Desliza el dibujo hacia los lados para verlo entero →</p>
+                    <figcaption><strong>Dirección de las dependencias:</strong> siempre hacia abajo. <code>booking/</code> no conoce repositorios ni Spring: recibe datos y responde, por eso se prueba con tests unitarios rápidos. Hay además un segundo árbol, <code>src/main/java/db/migration/</code>, con la única migración en Java (<code>V27</code>).</figcaption>
+                </figure>
+
+                <details class="more"><summary>Plantillas, CSS y JS: dónde está cada cosa</summary><div class="more-body"><div class="table-responsive">
+                    <table class="doc-table">
+                        <thead><tr><th>Carpeta</th><th>Qué hay</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>templates/</code> (raíz)</td><td>Páginas públicas: inicio (<code>landing</code>), centros, ficha pública (<code>center_public</code>), contacto, alta de centro y su revisión, invitación, login, registro, recuperar contraseña, legales.</td></tr>
+                            <tr><td><code>templates/client/</code></td><td>Reserva (<code>center_details</code>), opiniones, mis citas, cambiar hora, perfil.</td></tr>
+                            <tr><td><code>templates/worker/</code></td><td>Panel, agenda, clientes y ficha, plantilla de ficha, tratamientos, inventario, reseñas, análisis, Mi Centro (y sus apartados), horario de un profesional, cartel con QR.</td></tr>
+                            <tr><td><code>templates/fragments/</code></td><td>Piezas compartidas: <code>head</code>, <code>navbar</code>, <code>footer</code>, <code>alerts</code>, <code>modals</code>, selector de fecha y hora, horario, foto, ubicación, teléfono, reseñas, venta de producto, resumen de tratamiento…</td></tr>
+                            <tr><td><code>templates/email/</code></td><td>12 correos con <code>layout.html</code> común. Llevan estilos en línea (los clientes de correo no leen hojas de estilo).</td></tr>
+                            <tr><td><code>static/css/</code></td><td><code>tokens.css</code> (colores y medidas, modo oscuro) + <code>common.css</code> + uno por área.</td></tr>
+                            <tr><td><code>static/js/</code> y <code>static/js/pages/</code></td><td><code>app.js</code> (común: <code>Cuquora.confirm</code>, CSRF en fetch, campanas, cookies), un fichero por componente y, en <code>pages/</code>, el JS propio de cada página (no hay scripts dentro de las plantillas).</td></tr>
+                            <tr><td><code>static/vendor/leaflet/</code> · <code>static/icons/lucide/</code></td><td>Leaflet 1.9.4 e iconos Lucide 0.321.0 servidos por la propia web (no hay CDN).</td></tr>
+                        </tbody>
+                    </table>
+                </div></div></details>
+            </section>
+
+            <!-- ============================================================ -->
+            <section class="doc-section" id="datos">
+                <div class="section-header">
+                    <div class="section-header-title">
+                        <div class="section-icon">🗄️</div>
+                        <div>
+                            <h2>Modelo de datos</h2>
+                            <p style="margin: 0; font-size: 0.95rem;">Las tablas principales y cómo se relacionan (26 tablas, todas creadas por Flyway)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tldr">
+                    <div class="tldr-title">La idea</div>
+                    <ul>
+                        <li><code>centers</code> es el centro de todo: casi cada tabla tiene <code>center_id</code>, y por ahí se aísla un centro de otro.</li>
+                        <li><code>users</code> guarda clientes y trabajadores (<code>role</code>). Solo los trabajadores tienen <code>center_id</code>; un cliente se relaciona con un centro a través de sus citas, su ficha y sus puntos.</li>
+                        <li><code>products</code> es el único catálogo global (<code>center_id</code> nulo); los productos que crea un centro llevan su <code>center_id</code>.</li>
+                        <li>Lo que se cobra se copia en el momento: <code>appointments.price</code> y <code>duration_minutes</code>, <code>product_sales.unit_price</code>. Cambiar la carta no reescribe el pasado.</li>
+                    </ul>
+                </div>
+
+                <figure class="diagram">
+                    <div class="diagram-title">Tablas y relaciones (las flechas apuntan a la tabla de la que dependen)</div>
+                    <div class="diagram-scroll">
+                        <svg class="dg" viewBox="0 0 1100 640" role="img" aria-label="Diagrama entidad-relación de las tablas principales de Cuquora">
+                            <!-- Centro -->
+                            <rect x="420" y="250" width="260" height="120" rx="12" class="bx b-owner"/>
+                            <text x="550" y="278" text-anchor="middle" class="tl c-owner">centers</text>
+                            <text x="550" y="300" text-anchor="middle" class="ts">nombre, slug, dirección, lat/lng,</text>
+                            <text x="550" y="317" text-anchor="middle" class="ts">time_zone, cabins, published,</text>
+                            <text x="550" y="334" text-anchor="middle" class="ts">owner_id, loyalty_*, redes,</text>
+                            <text x="550" y="351" text-anchor="middle" class="ts">auto_accept, reschedule_hours</text>
+
+                            <!-- Configuración del centro (arriba) -->
+                            <text x="20" y="24" class="tz">CONFIGURACIÓN DEL CENTRO</text>
+                            <rect x="20" y="36" width="185" height="56" rx="9" class="bx b-off"/>
+                            <text x="112" y="60" text-anchor="middle" class="lb">center_opening_hours</text>
+                            <text x="112" y="78" text-anchor="middle" class="lbs">1-2 tramos por día</text>
+                            <rect x="215" y="36" width="145" height="56" rx="9" class="bx b-off"/>
+                            <text x="287" y="60" text-anchor="middle" class="lb">center_photos</text>
+                            <text x="287" y="78" text-anchor="middle" class="lbs">JPEG en la BD</text>
+                            <rect x="370" y="36" width="190" height="56" rx="9" class="bx b-off"/>
+                            <text x="465" y="60" text-anchor="middle" class="lb">client_card_templates</text>
+                            <text x="465" y="78" text-anchor="middle" class="lbs">campos de la ficha</text>
+                            <rect x="570" y="36" width="155" height="56" rx="9" class="bx b-off"/>
+                            <text x="647" y="60" text-anchor="middle" class="lb">agenda_blocks</text>
+                            <text x="647" y="78" text-anchor="middle" class="lbs">worker nulo = cierre</text>
+                            <rect x="735" y="36" width="145" height="56" rx="9" class="bx b-off"/>
+                            <text x="807" y="60" text-anchor="middle" class="lb">treatments</text>
+                            <text x="807" y="78" text-anchor="middle" class="lbs">precio, oferta, oculto</text>
+                            <rect x="895" y="36" width="185" height="56" rx="9" class="bx b-off"/>
+                            <text x="987" y="60" text-anchor="middle" class="lb">treatment_workers</text>
+                            <text x="987" y="78" text-anchor="middle" class="lbs">quién lo hace</text>
+                            <line x1="895" y1="64" x2="884" y2="64" class="ar" marker-end="url(#dga)"/>
+                            <path d="M112,92 V200 H470 V246" class="ar" marker-end="url(#dga)"/>
+                            <path d="M287,92 V180 H500 V246" class="ar" marker-end="url(#dga)"/>
+                            <line x1="530" y1="92" x2="530" y2="246" class="ar" marker-end="url(#dga)"/>
+                            <path d="M647,92 V180 H590 V246" class="ar" marker-end="url(#dga)"/>
+                            <path d="M807,92 V200 H630 V246" class="ar" marker-end="url(#dga)"/>
+
+                            <!-- Personas (izquierda) -->
+                            <text x="20" y="250" class="tz">PERSONAS</text>
+                            <rect x="20" y="262" width="260" height="110" rx="12" class="bx b-client"/>
+                            <text x="150" y="290" text-anchor="middle" class="tl c-client">users</text>
+                            <text x="150" y="312" text-anchor="middle" class="ts">role CLIENT | WORKER, email único,</text>
+                            <text x="150" y="329" text-anchor="middle" class="ts">password BCrypt (puede ser nula),</text>
+                            <text x="150" y="346" text-anchor="middle" class="ts">google_id, email_verified, deleted_at,</text>
+                            <text x="150" y="363" text-anchor="middle" class="ts">center_id solo si es trabajador</text>
+                            <line x1="280" y1="300" x2="416" y2="300" class="ar" marker-end="url(#dga)"/>
+                            <text x="348" y="292" text-anchor="middle" class="lbs">trabaja en</text>
+                            <line x1="416" y1="330" x2="284" y2="330" class="ar dash" marker-end="url(#dga)"/>
+                            <text x="348" y="322" text-anchor="middle" class="lbs">owner_id</text>
+
+                            <rect x="20" y="398" width="125" height="50" rx="9" class="bx b-off"/>
+                            <text x="82" y="420" text-anchor="middle" class="lb">worker_hours</text>
+                            <text x="82" y="437" text-anchor="middle" class="lbs">horario propio</text>
+                            <rect x="155" y="398" width="125" height="50" rx="9" class="bx b-off"/>
+                            <text x="217" y="420" text-anchor="middle" class="lb">user_photos</text>
+                            <text x="217" y="437" text-anchor="middle" class="lbs">foto 400 px</text>
+                            <line x1="82" y1="398" x2="82" y2="376" class="ar" marker-end="url(#dga)"/>
+                            <line x1="217" y1="398" x2="217" y2="376" class="ar" marker-end="url(#dga)"/>
+                            <rect x="20" y="458" width="260" height="50" rx="9" class="bx b-admin"/>
+                            <text x="150" y="480" text-anchor="middle" class="lb">account_invitations</text>
+                            <text x="150" y="497" text-anchor="middle" class="lbs">+ password_resets · huella SHA-256</text>
+                            <rect x="20" y="516" width="260" height="50" rx="9" class="bx b-admin"/>
+                            <text x="150" y="538" text-anchor="middle" class="lb">persistent_logins</text>
+                            <text x="150" y="555" text-anchor="middle" class="lbs">+ google_calendar_links (cifrados)</text>
+                            <rect x="20" y="574" width="260" height="50" rx="9" class="bx b-off"/>
+                            <text x="150" y="596" text-anchor="middle" class="lb">notification_dismissals</text>
+                            <text x="150" y="613" text-anchor="middle" class="lbs">avisos de campana ya vistos</text>
+
+                            <!-- Citas (abajo centro) -->
+                            <text x="310" y="420" class="tz">CITAS</text>
+                            <text x="296" y="392" class="lbs">cliente y profesional</text>
+                            <rect x="310" y="432" width="340" height="100" rx="12" class="bx b-worker"/>
+                            <text x="480" y="460" text-anchor="middle" class="tl c-worker">appointments</text>
+                            <text x="480" y="482" text-anchor="middle" class="ts">centro, tratamiento, cliente, profesional,</text>
+                            <text x="480" y="499" text-anchor="middle" class="ts">status, date_time, price, duration_minutes,</text>
+                            <text x="480" y="516" text-anchor="middle" class="ts">last_change, resumen + aviso, google_event_id</text>
+                            <line x1="480" y1="432" x2="480" y2="374" class="ar" marker-end="url(#dga)"/>
+                            <path d="M310,470 H296 V360 H284" class="ar" marker-end="url(#dga)"/>
+
+                            <rect x="310" y="560" width="150" height="66" rx="9" class="bx b-off"/>
+                            <text x="385" y="584" text-anchor="middle" class="lb">appointment_</text>
+                            <text x="385" y="600" text-anchor="middle" class="lb">proposals</text>
+                            <text x="385" y="617" text-anchor="middle" class="lbs">máx. 3 horas</text>
+                            <rect x="472" y="560" width="170" height="66" rx="9" class="bx b-off"/>
+                            <text x="557" y="584" text-anchor="middle" class="lb">appointment_media</text>
+                            <text x="557" y="601" text-anchor="middle" class="lbs">(+ _data) fotos y vídeos</text>
+                            <text x="557" y="617" text-anchor="middle" class="lbs">internos del equipo</text>
+                            <rect x="655" y="560" width="110" height="66" rx="9" class="bx b-ok"/>
+                            <text x="710" y="590" text-anchor="middle" class="lb">reviews</text>
+                            <text x="710" y="607" text-anchor="middle" class="lbs">una por cita</text>
+                            <line x1="385" y1="560" x2="385" y2="536" class="ar" marker-end="url(#dga)"/>
+                            <line x1="557" y1="560" x2="557" y2="536" class="ar" marker-end="url(#dga)"/>
+                            <path d="M710,560 V500 H654" class="ar" marker-end="url(#dga)"/>
+
+                            <!-- Ventas e inventario (derecha) -->
+                            <text x="760" y="250" class="tz">INVENTARIO, VENTAS Y CLIENTES</text>
+                            <rect x="760" y="262" width="160" height="56" rx="9" class="bx b-info"/>
+                            <text x="840" y="286" text-anchor="middle" class="lb">inventories</text>
+                            <text x="840" y="304" text-anchor="middle" class="lbs">stock por centro</text>
+                            <rect x="935" y="262" width="150" height="56" rx="9" class="bx b-info"/>
+                            <text x="1010" y="286" text-anchor="middle" class="lb">products</text>
+                            <text x="1010" y="304" text-anchor="middle" class="lbs">global o del centro</text>
+                            <line x1="920" y1="290" x2="931" y2="290" class="ar" marker-end="url(#dga)"/>
+                            <rect x="935" y="330" width="150" height="40" rx="9" class="bx b-off"/>
+                            <text x="1010" y="355" text-anchor="middle" class="lb">product_photos</text>
+                            <line x1="1010" y1="330" x2="1010" y2="322" class="ar" marker-end="url(#dga)"/>
+                            <rect x="760" y="386" width="160" height="56" rx="9" class="bx b-info"/>
+                            <text x="840" y="410" text-anchor="middle" class="lb">product_sales</text>
+                            <text x="840" y="428" text-anchor="middle" class="lbs">unit_price del día</text>
+                            <path d="M920,414 H965 V374" class="ar" marker-end="url(#dga)"/>
+                            <rect x="760" y="456" width="160" height="56" rx="9" class="bx b-owner"/>
+                            <text x="840" y="480" text-anchor="middle" class="lb">loyalty_movements</text>
+                            <text x="840" y="498" text-anchor="middle" class="lbs">ganados y canjeados</text>
+                            <rect x="935" y="456" width="150" height="56" rx="9" class="bx b-client"/>
+                            <text x="1010" y="480" text-anchor="middle" class="lb">client_cards</text>
+                            <text x="1010" y="498" text-anchor="middle" class="lbs">ficha técnica (JSON)</text>
+                            <path d="M760,290 H700 V310 H684" class="ar" marker-end="url(#dga)"/>
+                            <path d="M760,414 H710 V340 H684" class="ar" marker-end="url(#dga)"/>
+                            <path d="M760,484 H700 V360 H684" class="ar" marker-end="url(#dga)"/>
+                            <path d="M1010,512 V548 H730 V366 H684" class="ar dash" marker-end="url(#dga)"/>
+                            <path d="M840,512 V528 H654" class="ar dash" marker-end="url(#dga)"/>
+                            <text x="790" y="540" class="lbs">appointment_id único</text>
+                        </svg>
+                    </div>
+                    <p class="swipe-hint">Desliza el dibujo hacia los lados para verlo entero →</p>
+                    <figcaption><strong>Colores:</strong> dorado = centro, verde = personas y lo que ve el cliente, azul = operación diaria, amarillo = seguridad, gris = tablas de apoyo. Las fotos (centro, perfil, producto, multimedia) se guardan <strong>en la base de datos</strong>, no en disco: así entran en la copia de PostgreSQL y Docker no necesita otro volumen.</figcaption>
+                </figure>
+
+                <details class="more"><summary>Ver todas las columnas que importan, tabla por tabla</summary><div class="more-body"><div class="table-responsive">
+                    <table class="doc-table">
+                        <thead><tr><th>Tabla</th><th>Columnas y reglas que conviene saber</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>centers</code></td><td><code>slug</code> único y fijo (enlace corto <code>/c/{slug}</code>; no cambia al renombrar), <code>published</code> (oculto = fuera del buscador, 404 y sin reservas), <code>approval_token_hash</code> + <code>approval_requested_at</code> (caduca a los 30 días), <code>photo_updated_at</code> (versiona la URL de la foto), <code>instagram</code>/<code>tiktok</code>/<code>facebook</code>/<code>website</code>.</td></tr>
+                            <tr><td><code>users</code></td><td><code>hasAccount()</code> = tiene contraseña o Google. Sin cuenta: clientes dados de alta a mano y trabajadores invitados. <code>deleted_at</code>: cuenta vaciada por RGPD (sin nombre, correo ni acceso; sus citas pasadas siguen contando). Correos internos <code>cliente_…@cbelleza.local</code> para clientes sin correo.</td></tr>
+                            <tr><td><code>treatments</code></td><td><code>treatment_type</code>, <code>price</code>, <code>duration_minutes</code>, <code>offer_price</code> + <code>offer_ends_on</code>, <code>hidden</code> (fuera de la carta sin borrar). Sin filas en <code>treatment_workers</code> = lo hace todo el equipo.</td></tr>
+                            <tr><td><code>appointments</code></td><td><code>status</code> (ver ciclo de vida), <code>price</code> y <code>duration_minutes</code> copiados al pedirla, <code>previous_date_time</code>, <code>proposal_expires_at</code>, <code>reminder_sent_at</code>, <code>treatment_summary</code> + <code>treatment_alert</code>, <code>google_event_id</code>/<code>google_event_owner_id</code> y <code>client_google_event_id</code>.</td></tr>
+                            <tr><td><code>agenda_blocks</code></td><td>Vacaciones o descansos de un profesional; <code>worker_id</code> nulo = todo el centro cerrado.</td></tr>
+                            <tr><td><code>inventories</code></td><td>Único por (centro, producto). <code>low_stock_alert</code> opcional; nulo = sin aviso (salvo agotado). Máximo 999 unidades y ±10 por ajuste rápido.</td></tr>
+                            <tr><td><code>products</code></td><td><code>center_id</code> nulo = catálogo general. <code>barcode</code> (EAN/UPC), <code>photo_source</code> (nula = la subió el centro; <code>OPEN_BEAUTY_FACTS</code> = crédito CC BY-SA).</td></tr>
+                            <tr><td><code>loyalty_movements</code></td><td>Puntos que se guardan al ganarse (cambiar la configuración no altera el pasado). <code>appointment_id</code> único: una cita no suma dos veces.</td></tr>
+                            <tr><td><code>reviews</code></td><td>Solo de una cita completada, una por cita. <code>reply</code>/<code>replied_at</code>: respuesta pública del dueño.</td></tr>
+                            <tr><td><code>client_cards</code></td><td>Una por centro y cliente; <code>data_json</code> con los valores de los campos de <code>client_card_templates.fields_json</code>. Un campo cuyo nombre hable de alergias sale como aviso en la agenda.</td></tr>
+                        </tbody>
+                    </table>
+                </div></div></details>
+            </section>
+
+            <!-- ============================================================ -->
+            <section class="doc-section" id="citas">
+                <div class="section-header">
+                    <div class="section-header-title">
+                        <div class="section-icon">🔄</div>
+                        <div>
+                            <h2>Ciclo de vida de una cita</h2>
+                            <p style="margin: 0; font-size: 0.95rem;"><code>AppointmentStatus</code>: siete estados y quién mueve cada flecha</p>
+                        </div>
+                    </div>
+                </div>
+
+                <figure class="diagram">
+                    <div class="diagram-scroll">
+                        <svg class="dg" viewBox="0 0 1100 470" role="img" aria-label="Máquina de estados de una cita: pendiente, propuesta, confirmada, rechazada, anulada, completada y no se presentó">
+                            <!-- Entradas -->
+                            <rect x="20" y="70" width="170" height="60" rx="30" class="bx b-client"/>
+                            <text x="105" y="96" text-anchor="middle" class="tt c-client">Cliente pide</text>
+                            <text x="105" y="115" text-anchor="middle" class="tm">requestBooking</text>
+                            <rect x="20" y="300" width="170" height="60" rx="30" class="bx b-worker"/>
+                            <text x="105" y="326" text-anchor="middle" class="tt c-worker">Trabajador crea</text>
+                            <text x="105" y="345" text-anchor="middle" class="tm">createByWorker</text>
+
+                            <!-- Estados -->
+                            <rect x="270" y="70" width="170" height="60" rx="12" class="bx b-wait"/>
+                            <text x="355" y="98" text-anchor="middle" class="tt c-admin">PENDING</text>
+                            <text x="355" y="117" text-anchor="middle" class="tm">Pendiente</text>
+                            <rect x="560" y="20" width="170" height="60" rx="12" class="bx b-info"/>
+                            <text x="645" y="48" text-anchor="middle" class="tt c-worker">PROPOSED</text>
+                            <text x="645" y="67" text-anchor="middle" class="tm">Propuesta (1-3 horas)</text>
+                            <rect x="560" y="200" width="200" height="70" rx="12" class="bx b-ok"/>
+                            <text x="660" y="232" text-anchor="middle" class="tl c-client">CONFIRMED</text>
+                            <text x="660" y="253" text-anchor="middle" class="tm">Confirmada</text>
+                            <rect x="270" y="190" width="170" height="60" rx="12" class="bx b-bad"/>
+                            <text x="355" y="218" text-anchor="middle" class="tt c-bad">REJECTED</text>
+                            <text x="355" y="237" text-anchor="middle" class="tm">Rechazada</text>
+                            <rect x="890" y="60" width="180" height="60" rx="12" class="bx b-bad"/>
+                            <text x="980" y="88" text-anchor="middle" class="tt c-bad">CANCELLED</text>
+                            <text x="980" y="107" text-anchor="middle" class="tm">Anulada</text>
+                            <rect x="890" y="250" width="180" height="60" rx="12" class="bx b-owner"/>
+                            <text x="980" y="278" text-anchor="middle" class="tt c-owner">COMPLETED</text>
+                            <text x="980" y="297" text-anchor="middle" class="tm">Completada (suma puntos)</text>
+                            <rect x="560" y="380" width="200" height="60" rx="12" class="bx b-off"/>
+                            <text x="660" y="408" text-anchor="middle" class="tt">NO_SHOW</text>
+                            <text x="660" y="427" text-anchor="middle" class="tm">No se presentó (quita puntos)</text>
+
+                            <!-- Flechas -->
+                            <line x1="190" y1="100" x2="266" y2="100" class="ar" marker-end="url(#dga)"/>
+                            <path d="M440,88 C500,50 520,50 556,50" class="ar info" marker-end="url(#dga-info)"/>
+                            <text x="500" y="40" text-anchor="middle" class="lbs">propose</text>
+                            <path d="M440,112 C520,140 540,200 556,222" class="ar ok" marker-end="url(#dga-ok)"/>
+                            <text x="530" y="152" text-anchor="middle" class="lbs">approve</text>
+                            <text x="530" y="167" text-anchor="middle" class="lbs">o auto-aceptar</text>
+                            <line x1="355" y1="130" x2="355" y2="186" class="ar bad" marker-end="url(#dga-bad)"/>
+                            <text x="365" y="164" class="lbs">reject</text>
+                            <path d="M190,330 H500 V250 H556" class="ar ok" marker-end="url(#dga-ok)"/>
+                            <text x="345" y="322" text-anchor="middle" class="lbs">nace confirmada</text>
+                            <path d="M645,80 V196" class="ar ok" marker-end="url(#dga-ok)"/>
+                            <text x="655" y="140" class="lbs">el cliente acepta una hora</text>
+                            <path d="M730,45 C820,45 860,70 886,80" class="ar bad" marker-end="url(#dga-bad)"/>
+                            <text x="815" y="35" text-anchor="middle" class="lbs">rechaza o caduca (48 h)</text>
+                            <path d="M440,80 C600,0 800,0 900,56" class="ar bad dash" marker-end="url(#dga-bad)"/>
+                            <text x="700" y="12" text-anchor="middle" class="lbs">el cliente anula su solicitud</text>
+                            <path d="M760,215 C840,190 860,130 886,110" class="ar bad" marker-end="url(#dga-bad)"/>
+                            <text x="905" y="165" class="lbs">anular (cliente</text>
+                            <text x="905" y="180" class="lbs">o centro)</text>
+                            <path d="M760,250 C830,260 860,275 886,278" class="ar" marker-end="url(#dga)"/>
+                            <text x="825" y="292" text-anchor="middle" class="lbs">termina la hora</text>
+                            <path d="M640,270 V376" class="ar" marker-end="url(#dga)"/>
+                            <path d="M680,376 V270" class="ar dash" marker-end="url(#dga)"/>
+                            <text x="630" y="345" text-anchor="end" class="lbs">markNoShow</text>
+                            <text x="690" y="330" class="lbs">undoNoShow</text>
+                            <path d="M760,225 C795,225 795,240 760,240" class="ar info" marker-end="url(#dga-info)"/>
+                            <text x="800" y="236" class="lbs">reschedule</text>
+                        </svg>
+                    </div>
+                    <p class="swipe-hint">Desliza el dibujo hacia los lados para verlo entero →</p>
+                    <figcaption><strong>Ojo con COMPLETED:</strong> una cita confirmada cuya hora de fin ya pasó <em>se lee</em> como completada (<code>Appointment.getStatus()</code> usa la hora del centro) aunque en la BD siga como CONFIRMED; la tarea de cada minuto (<code>AppointmentLifecycleService</code>) la guarda después. «No se presentó» solo se marca en una cita confirmada que ya ha empezado. Cambiar la hora (<code>reschedule</code>, <code>rescheduleByClient</code>) la deja confirmada y guarda <code>previous_date_time</code>.</figcaption>
+                </figure>
+
+                <div class="callout callout-info">
+                    <div class="callout-icon">🔒</div>
+                    <div class="callout-content">
+                        <strong>Todo pasa por <code>BookingService</code>.</strong>
+                        <p>Cada método bloquea la fila del centro (<code>@Lock(PESSIMISTIC_WRITE)</code> en <code>CenterRepository</code>) antes de comprobar huecos, así dos reservas a la vez no pueden coger la misma franja. Cada cambio anota <code>lastChange</code> (qué y quién, para campanas y correos) y publica <code>AppointmentChangedEvent</code>. Si añades otra forma de cambiar una cita, hazlo ahí, nunca con el repositorio desde otro servicio.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================================ -->
+            <section class="doc-section" id="huecos">
+                <div class="section-header">
+                    <div class="section-header-title">
+                        <div class="section-icon">🧩</div>
+                        <div>
+                            <h2>¿Cabe una cita?</h2>
+                            <p style="margin: 0; font-size: 0.95rem;"><code>AgendaSnapshot</code>, cargado por <code>AgendaAvailabilityService</code>, decide en memoria</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equation">
+                    <div class="eq-term">Centro abierto<small>horario del día y sin cierre de todo el centro</small></div>
+                    <span class="eq-op">+</span>
+                    <div class="eq-term">Profesional libre<small>en su horario, sin cita ni bloqueo, y hace ese tratamiento</small></div>
+                    <span class="eq-op">+</span>
+                    <div class="eq-term">Cabina libre<small>no más citas a la vez que <code>centers.cabins</code></small></div>
+                    <span class="eq-op">+</span>
+                    <div class="eq-term">Cabe entera<small>de inicio a fin, en franjas de 30 min</small></div>
+                    <span class="eq-op">=</span>
+                    <div class="eq-term eq-result">Hueco reservable</div>
+                </div>
+
+                <figure class="diagram">
+                    <div class="diagram-title">Una reserva del cliente, de principio a fin</div>
+                    <div class="diagram-scroll">
+                        <svg class="dg" viewBox="0 0 1100 420" role="img" aria-label="Secuencia de una reserva: navegador, API de disponibilidad, BookingService, base de datos y tareas tras el commit">
+                            <rect x="20" y="20" width="150" height="44" rx="8" class="bx b-client"/>
+                            <text x="95" y="47" text-anchor="middle" class="tt c-client">Navegador</text>
+                            <rect x="230" y="20" width="200" height="44" rx="8" class="bx b-worker"/>
+                            <text x="330" y="47" text-anchor="middle" class="tt c-worker">Controladores</text>
+                            <rect x="490" y="20" width="200" height="44" rx="8" class="bx b-owner"/>
+                            <text x="590" y="47" text-anchor="middle" class="tt c-owner">BookingService</text>
+                            <rect x="750" y="20" width="140" height="44" rx="8" class="bx b-infra"/>
+                            <text x="820" y="47" text-anchor="middle" class="tt">BD</text>
+                            <rect x="940" y="20" width="140" height="44" rx="8" class="bx b-cf"/>
+                            <text x="1010" y="47" text-anchor="middle" class="tt c-cf">Tras commit</text>
+                            <line x1="95" y1="64" x2="95" y2="410" class="ar dash"/>
+                            <line x1="330" y1="64" x2="330" y2="410" class="ar dash"/>
+                            <line x1="590" y1="64" x2="590" y2="410" class="ar dash"/>
+                            <line x1="820" y1="64" x2="820" y2="410" class="ar dash"/>
+                            <line x1="1010" y1="64" x2="1010" y2="410" class="ar dash"/>
+
+                            <line x1="95" y1="100" x2="326" y2="100" class="ar" marker-end="url(#dga)"/>
+                            <text x="210" y="92" text-anchor="middle" class="lbs">GET /api/centers/{id}/availability</text>
+                            <path d="M330,115 H360" class="ar"/>
+                            <text x="370" y="120" class="lbs">AgendaSnapshot: días, tramos y franjas libres</text>
+                            <line x1="326" y1="140" x2="99" y2="140" class="ar ok" marker-end="url(#dga-ok)"/>
+                            <text x="210" y="133" text-anchor="middle" class="lbs">JSON con huecos</text>
+
+                            <line x1="95" y1="185" x2="326" y2="185" class="ar" marker-end="url(#dga)"/>
+                            <text x="210" y="177" text-anchor="middle" class="lbs">POST /client/booking</text>
+                            <line x1="330" y1="205" x2="586" y2="205" class="ar" marker-end="url(#dga)"/>
+                            <text x="458" y="197" text-anchor="middle" class="lbs">requestBooking(cliente, centro, …)</text>
+                            <line x1="590" y1="228" x2="816" y2="228" class="ar" marker-end="url(#dga)"/>
+                            <text x="703" y="220" text-anchor="middle" class="lbs">bloquea el centro</text>
+                            <path d="M590,250 H620" class="ar"/>
+                            <text x="628" y="255" class="lbs">¿cabe? · precio = priceOn(hoy) · ¿auto-aceptar?</text>
+                            <line x1="590" y1="280" x2="816" y2="280" class="ar" marker-end="url(#dga)"/>
+                            <text x="703" y="272" text-anchor="middle" class="lbs">INSERT appointment</text>
+                            <line x1="590" y1="305" x2="1006" y2="305" class="ar wait dash" marker-end="url(#dga-wait)"/>
+                            <text x="800" y="298" text-anchor="middle" class="lbs">publica AppointmentChangedEvent</text>
+                            <line x1="586" y1="335" x2="334" y2="335" class="ar ok" marker-end="url(#dga-ok)"/>
+                            <line x1="326" y1="355" x2="99" y2="355" class="ar ok" marker-end="url(#dga-ok)"/>
+                            <text x="210" y="348" text-anchor="middle" class="lbs">302 a Mis reservas</text>
+                            <path d="M1010,330 V395" class="ar wait"/>
+                            <text x="1000" y="350" text-anchor="end" class="lbs">correo al centro</text>
+                            <text x="1000" y="368" text-anchor="end" class="lbs">y al cliente</text>
+                            <text x="1000" y="386" text-anchor="end" class="lbs">+ Google Calendar</text>
+                        </svg>
+                    </div>
+                    <p class="swipe-hint">Desliza el dibujo hacia los lados para verlo entero →</p>
+                    <figcaption><strong>Lo que el navegador ve no es la última palabra:</strong> la API de huecos solo sirve para pintar el selector. <code>BookingService</code> lo vuelve a comprobar todo con el centro bloqueado. «Ahora» siempre es <code>CenterClock.now</code>: la hora en la zona del centro, no la del servidor.</figcaption>
+                </figure>
+
+                <div class="grid-2">
+                    <div class="card-feature">
+                        <h4>Propuestas</h4>
+                        <p>Las horas propuestas reservan su hueco frente a otros clientes y otras propuestas, pero el trabajador puede ocuparlas: esa opción desaparece de la propuesta. Caduca a las 48 h (<code>crm.booking.proposal-hours</code>) o 2 h antes de la primera hora.</p>
+                    </div>
+                    <div class="card-feature">
+                        <h4>Fuera de horario</h4>
+                        <p>El trabajador sí puede poner una cita fuera de horario: el servidor responde 409 con <code>code: OUTSIDE_HOURS</code>, la agenda pregunta y reenvía con <code>allowOutsideHours</code>. Los solapes con otra cita del mismo profesional nunca se permiten.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================================ -->
+            <section class="doc-section" id="eventos">
+                <div class="section-header">
+                    <div class="section-header-title">
+                        <div class="section-icon">⏱️</div>
+                        <div>
+                            <h2>Eventos y tareas en segundo plano</h2>
+                            <p style="margin: 0; font-size: 0.95rem;">Lo que pasa sin que el usuario espere: correos, Google Calendar, API de productos y la tarea de cada minuto</p>
+                        </div>
+                    </div>
+                </div>
+
+                <figure class="diagram">
+                    <div class="diagram-scroll">
+                        <svg class="dg" viewBox="0 0 1100 400" role="img" aria-label="Eventos de Spring tras el commit y tarea programada cada minuto">
+                            <text x="20" y="24" class="tz">EVENTOS (se procesan después del commit, en otro hilo)</text>
+                            <rect x="20" y="40" width="230" height="70" rx="10" class="bx b-owner"/>
+                            <text x="135" y="68" text-anchor="middle" class="tt c-owner">BookingService</text>
+                            <text x="135" y="88" text-anchor="middle" class="ts">cualquier cambio de cita</text>
+                            <rect x="320" y="40" width="260" height="70" rx="10" class="bx b-wait"/>
+                            <text x="450" y="68" text-anchor="middle" class="tt c-admin">AppointmentChangedEvent</text>
+                            <text x="450" y="88" text-anchor="middle" class="ts">qué cambió y quién (lastChange)</text>
+                            <line x1="250" y1="75" x2="316" y2="75" class="ar wait" marker-end="url(#dga-wait)"/>
+                            <rect x="650" y="20" width="430" height="50" rx="10" class="bx b-cf"/>
+                            <text x="865" y="42" text-anchor="middle" class="tt c-cf">AppointmentMailListener</text>
+                            <text x="865" y="60" text-anchor="middle" class="ts">correo al cliente y/o al centro según el cambio</text>
+                            <rect x="650" y="82" width="430" height="50" rx="10" class="bx b-info"/>
+                            <text x="865" y="104" text-anchor="middle" class="tt c-worker">GoogleCalendarSyncListener</text>
+                            <text x="865" y="122" text-anchor="middle" class="ts">crea, mueve o borra el evento (trabajador y cliente)</text>
+                            <path d="M580,65 H615 V45 H646" class="ar wait" marker-end="url(#dga-wait)"/>
+                            <path d="M615,65 V107 H646" class="ar wait" marker-end="url(#dga-wait)"/>
+
+                            <rect x="20" y="150" width="230" height="70" rx="10" class="bx b-info"/>
+                            <text x="135" y="178" text-anchor="middle" class="tt c-worker">InventoryService</text>
+                            <text x="135" y="198" text-anchor="middle" class="ts">alta de producto con código</text>
+                            <rect x="320" y="150" width="260" height="70" rx="10" class="bx b-wait"/>
+                            <text x="450" y="178" text-anchor="middle" class="tt c-admin">ProductSharedEvent</text>
+                            <text x="450" y="198" text-anchor="middle" class="ts">solo centros publicados</text>
+                            <rect x="650" y="155" width="430" height="60" rx="10" class="bx b-worker"/>
+                            <text x="865" y="180" text-anchor="middle" class="tt c-worker">ProductSharingService → product-api</text>
+                            <text x="865" y="200" text-anchor="middle" class="ts">nombre, categoría, descripción y foto; nunca precio ni stock</text>
+                            <line x1="250" y1="185" x2="316" y2="185" class="ar wait" marker-end="url(#dga-wait)"/>
+                            <line x1="580" y1="185" x2="646" y2="185" class="ar wait" marker-end="url(#dga-wait)"/>
+
+                            <text x="20" y="262" class="tz">TAREA PROGRAMADA · AppointmentStatusScheduler · cada 60 s</text>
+                            <rect x="20" y="278" width="330" height="96" rx="10" class="bx b-off"/>
+                            <text x="185" y="306" text-anchor="middle" class="tt">1 · Completar citas</text>
+                            <text x="185" y="328" text-anchor="middle" class="ts">CONFIRMED con fin pasado (hora del</text>
+                            <text x="185" y="345" text-anchor="middle" class="ts">centro) → COMPLETED</text>
+                            <text x="185" y="362" text-anchor="middle" class="tm">AppointmentLifecycleService</text>
+                            <rect x="385" y="278" width="330" height="96" rx="10" class="bx b-off"/>
+                            <text x="550" y="306" text-anchor="middle" class="tt">2 · Caducar propuestas</text>
+                            <text x="550" y="328" text-anchor="middle" class="ts">PROPOSED sin respuesta a tiempo</text>
+                            <text x="550" y="345" text-anchor="middle" class="ts">→ CANCELLED (con aviso)</text>
+                            <text x="550" y="362" text-anchor="middle" class="tm">BookingService.expireProposals</text>
+                            <rect x="750" y="278" width="330" height="96" rx="10" class="bx b-off"/>
+                            <text x="915" y="306" text-anchor="middle" class="tt">3 · Recordatorios</text>
+                            <text x="915" y="328" text-anchor="middle" class="ts">24 h antes; no si se avisó hace &lt; 12 h</text>
+                            <text x="915" y="345" text-anchor="middle" class="ts">ni si faltan &lt; 2 h · cupo diario</text>
+                            <text x="915" y="362" text-anchor="middle" class="tm">AppointmentMailService.sendReminders</text>
+                            <line x1="350" y1="326" x2="381" y2="326" class="ar" marker-end="url(#dga)"/>
+                            <line x1="715" y1="326" x2="746" y2="326" class="ar" marker-end="url(#dga)"/>
+                        </svg>
+                    </div>
+                    <p class="swipe-hint">Desliza el dibujo hacia los lados para verlo entero →</p>
+                    <figcaption><strong>Por qué después del commit (<code>@TransactionalEventListener(AFTER_COMMIT)</code> + <code>@Async</code>):</strong> si la transacción falla no sale ningún correo, y si Google o Brevo tardan o fallan, la cita ya está guardada. Las tres tareas van en <code>try/catch</code> por separado: un fallo en una no para las demás. Los correos de alta, invitación y contacto también son <code>@Async</code>.</figcaption>
+                </figure>
+            </section>
+
+            <!-- ============================================================ -->
+            <section class="doc-section" id="seguridad">
+                <div class="section-header">
+                    <div class="section-header-title">
+                        <div class="section-icon">🛡️</div>
+                        <div>
+                            <h2>Seguridad y permisos</h2>
+                            <p style="margin: 0; font-size: 0.95rem;">Quién entra dónde, y qué puede hacer el dueño que no puede el resto</p>
+                        </div>
+                    </div>
+                </div>
+
+                <figure class="diagram">
+                    <div class="diagram-title">Cinco papeles, de menos a más acceso</div>
+                    <div class="diagram-scroll">
+                        <svg class="dg" viewBox="0 0 1100 250" role="img" aria-label="Papeles: visitante, cliente, trabajador, dueño y administración">
+                            <rect x="20" y="30" width="190" height="190" rx="12" class="bx b-off"/>
+                            <text x="115" y="60" text-anchor="middle" class="tt">Visitante</text>
+                            <text x="115" y="80" text-anchor="middle" class="tm">sin sesión</text>
+                            <text x="35" y="112" class="ts">• inicio, centros, mapa</text>
+                            <text x="35" y="132" class="ts">• ficha pública /c/{slug}</text>
+                            <text x="35" y="152" class="ts">• contacto, alta de centro</text>
+                            <text x="35" y="172" class="ts">• login, registro, legales</text>
+                            <text x="35" y="192" class="ts">• /api/centers/**</text>
+
+                            <rect x="235" y="30" width="190" height="190" rx="12" class="bx b-client"/>
+                            <text x="330" y="60" text-anchor="middle" class="tt c-client">Cliente</text>
+                            <text x="330" y="80" text-anchor="middle" class="tm">ROLE_CLIENT · /client/**</text>
+                            <text x="250" y="112" class="ts">• reservar y cambiar hora</text>
+                            <text x="250" y="132" class="ts">• mis citas y propuestas</text>
+                            <text x="250" y="152" class="ts">• reseñas, tarjetas</text>
+                            <text x="250" y="172" class="ts">• perfil, mis datos (RGPD)</text>
+                            <text x="250" y="192" class="ts">• su Google Calendar</text>
+
+                            <rect x="450" y="30" width="190" height="190" rx="12" class="bx b-worker"/>
+                            <text x="545" y="60" text-anchor="middle" class="tt c-worker">Trabajador</text>
+                            <text x="545" y="80" text-anchor="middle" class="tm">WORKER con centro · /worker/**</text>
+                            <text x="465" y="112" class="ts">• agenda y citas</text>
+                            <text x="465" y="132" class="ts">• clientes y fichas</text>
+                            <text x="465" y="152" class="ts">• ventas, stock, canjes</text>
+                            <text x="465" y="172" class="ts">• sus bloqueos</text>
+                            <text x="465" y="192" class="ts">• su cuenta y Calendar</text>
+
+                            <rect x="665" y="30" width="200" height="190" rx="12" class="bx b-owner"/>
+                            <text x="765" y="60" text-anchor="middle" class="tt c-owner">Dueño</text>
+                            <text x="765" y="80" text-anchor="middle" class="tm">centers.owner_id · @CenterOwnerOnly</text>
+                            <text x="680" y="112" class="ts">• + datos, horario, foto</text>
+                            <text x="680" y="132" class="ts">• + equipo y ceder centro</text>
+                            <text x="680" y="152" class="ts">• + carta, ofertas, productos</text>
+                            <text x="680" y="172" class="ts">• + puntos, reservas auto</text>
+                            <text x="680" y="192" class="ts">• + análisis, responder reseñas</text>
+
+                            <rect x="890" y="30" width="190" height="190" rx="12" class="bx b-admin"/>
+                            <text x="985" y="60" text-anchor="middle" class="tt c-admin">Administración</text>
+                            <text x="985" y="80" text-anchor="middle" class="tm">sin cuenta: enlace por correo</text>
+                            <text x="905" y="112" class="ts">• revisar un centro nuevo</text>
+                            <text x="905" y="132" class="ts">• publicarlo o rechazarlo</text>
+                            <text x="905" y="152" class="ts">• recibe el contacto</text>
+                            <text x="905" y="172" class="ts">• (CRM_ADMIN_EMAIL)</text>
+                            <line x1="210" y1="125" x2="231" y2="125" class="ar" marker-end="url(#dga)"/>
+                            <line x1="640" y1="125" x2="661" y2="125" class="ar" marker-end="url(#dga)"/>
+                        </svg>
+                    </div>
+                    <p class="swipe-hint">Desliza el dibujo hacia los lados para verlo entero →</p>
+                    <figcaption><strong>El dueño es un trabajador más</strong> con permisos de más. Las acciones solo del dueño llevan <code>@CenterOwnerOnly</code>; las frena <code>CenterOwnerInterceptor</code> (formulario → vuelve con <code>errorMessage</code>; fetch → 403 JSON). Las vistas usan <code>isCenterOwner</code> y <code>ownerName</code> (de <code>CurrentUserModelAdvice</code>) para esconder botones. Un trabajador no puede usar el área de cliente: desde un centro ve un aviso con enlace a su panel.</figcaption>
+                </figure>
+
+                <div class="table-responsive">
+                    <table class="doc-table">
+                        <thead><tr><th>Defensa</th><th>Dónde</th><th>Qué hace</th></tr></thead>
+                        <tbody>
+                            <tr><td>Contraseñas</td><td><code>PasswordPolicy</code></td><td>BCrypt. Mínimo 8 caracteres, ni las más usadas ni un carácter repetido. Cambiarla pide la actual. <strong>Falta el máximo de 72 bytes</strong> (pendiente #15).</td></tr>
+                            <tr><td>Freno al login</td><td><code>LoginAttemptService</code>, <code>LoginThrottleFilter</code></td><td>5 fallos con una cuenta desde una IP, 20 desde una IP o 50 con una cuenta desde cualquier IP: 15 min sin comprobar la contraseña. Cuenta por lo escrito en <code>identifier</code>, exista o no. En memoria.</td></tr>
+                            <tr><td>Freno a formularios públicos</td><td><code>PublicFormLimiter</code> + campo trampa</td><td>Por IP y hora: contacto 5, alta de centro 5, registro 10, recuperar contraseña 5. El campo oculto lo rellenan los bots.</td></tr>
+                            <tr><td>Sesiones</td><td><code>PasswordChangeSessions</code>, <code>JdbcRememberMeTokenRepository</code></td><td>Cambiar o restablecer la contraseña cierra las demás sesiones y olvida los dispositivos recordados.</td></tr>
+                            <tr><td>Correo verificado</td><td><code>users.email_verified</code>, <code>UserService.registerClient</code></td><td>Si alguien se registra con el correo de un cliente dado de alta a mano, no se queda la cuenta: llega un enlace a ese correo.</td></tr>
+                            <tr><td>Cabeceras</td><td><code>SecurityConfig.contentSecurityPolicy</code></td><td><code>script-src 'self'</code> y <code>style-src 'self'</code>: sin scripts ni estilos en línea. HSTS y cookies <code>Secure</code> en prod.</td></tr>
+                            <tr><td>Errores</td><td><code>application-prod.properties</code></td><td>Sin trazas, nombres de excepción ni rutas en las respuestas.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ============================================================ -->
+            <section class="doc-section" id="aislamiento">
+                <div class="section-header">
+                    <div class="section-header-title">
+                        <div class="section-icon">🧱</div>
+                        <div>
+                            <h2>Aislamiento entre centros</h2>
+                            <p style="margin: 0; font-size: 0.95rem;">La regla más importante del backend</p>
+                        </div>
+                    </div>
+                </div>
+
+                <figure class="diagram">
+                    <div class="diagram-scroll">
+                        <svg class="dg" viewBox="0 0 1100 250" role="img" aria-label="El centro siempre sale de la sesión; un recurso de otro centro da 404">
+                            <rect x="20" y="40" width="230" height="90" rx="10" class="bx b-worker"/>
+                            <text x="135" y="70" text-anchor="middle" class="tt c-worker">Lucía (Centro Histórico)</text>
+                            <text x="135" y="92" text-anchor="middle" class="ts">POST /worker/appointments/</text>
+                            <text x="135" y="110" text-anchor="middle" class="ts">57/cancel</text>
+                            <rect x="310" y="40" width="250" height="90" rx="10" class="bx b-admin"/>
+                            <text x="435" y="70" text-anchor="middle" class="tt c-admin">Sesión</text>
+                            <text x="435" y="92" text-anchor="middle" class="ts">AppUserDetails.centerId = 1</text>
+                            <text x="435" y="110" text-anchor="middle" class="tm">nunca de la URL ni del formulario</text>
+                            <rect x="620" y="40" width="460" height="90" rx="10" class="bx b-infra"/>
+                            <text x="850" y="70" text-anchor="middle" class="tt">findByIdAndCenterId(57, 1)</text>
+                            <text x="850" y="92" text-anchor="middle" class="ts">la cita 57 es de Plaza Norte (centro 2)</text>
+                            <text x="850" y="110" text-anchor="middle" class="ts">→ no aparece → ResourceNotFoundException</text>
+                            <line x1="250" y1="85" x2="306" y2="85" class="ar" marker-end="url(#dga)"/>
+                            <line x1="560" y1="85" x2="616" y2="85" class="ar" marker-end="url(#dga)"/>
+                            <rect x="620" y="160" width="460" height="64" rx="10" class="bx b-bad"/>
+                            <text x="850" y="188" text-anchor="middle" class="tt c-bad">404 · igual que si no existiera</text>
+                            <text x="850" y="208" text-anchor="middle" class="ts">no se distingue «no es tuyo» de «no existe»: no se filtran ids</text>
+                            <line x1="850" y1="130" x2="850" y2="156" class="ar bad" marker-end="url(#dga-bad)"/>
+                            <rect x="20" y="160" width="540" height="64" rx="10" class="bx b-client"/>
+                            <text x="290" y="188" text-anchor="middle" class="tt c-client">Clientes: igual con su id</text>
+                            <text x="290" y="208" text-anchor="middle" class="ts">findByIdAndClientId · la cita de otro cliente → 404</text>
+                        </svg>
+                    </div>
+                    <p class="swipe-hint">Desliza el dibujo hacia los lados para verlo entero →</p>
+                    <figcaption><strong>En cada endpoint nuevo:</strong> el centro sale de la sesión, la consulta lleva el centro, y se añade un caso a <code>CenterIsolationTests</code> que pida el recurso de otro centro y espere 404. Las únicas cosas que cruzan de un centro a otro son el catálogo general de productos y la API de productos.</figcaption>
+                </figure>
+            </section>
+
+            <!-- ============================================================ -->
+            <section class="doc-section" id="enlaces">
+                <div class="section-header">
+                    <div class="section-header-title">
+                        <div class="section-icon">🔑</div>
+                        <div>
+                            <h2>Enlaces de un solo uso</h2>
+                            <p style="margin: 0; font-size: 0.95rem;">Todos siguen el mismo patrón (<code>SecureTokens</code>)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <ol class="flow">
+                    <li><strong>Se genera</strong><span>un token aleatorio largo</span></li>
+                    <li><strong>Se guarda la huella</strong><span>SHA-256 en la BD, nunca el token</span></li>
+                    <li><strong>Se envía</strong><span>el token va solo en el correo</span></li>
+                    <li><strong>Se usa</strong><span>se busca por huella, se comprueba caducidad</span></li>
+                    <li><strong>Se gasta</strong><span>vale una vez; pedir otro anula el anterior</span></li>
+                </ol>
+
+                <div class="table-responsive">
+                    <table class="doc-table">
+                        <thead><tr><th>Enlace</th><th>Ruta</th><th>Caduca</th><th>Dónde</th></tr></thead>
+                        <tbody>
+                            <tr><td>Invitación al equipo (crear contraseña o «Unirme»)</td><td><code>/invitation/{token}</code></td><td>7 días</td><td><code>InvitationService</code>, <code>account_invitations</code></td></tr>
+                            <tr><td>Recuperar contraseña</td><td><code>/reset-password/{token}</code></td><td>1 hora</td><td><code>PasswordResetService</code>, <code>password_resets</code></td></tr>
+                            <tr><td>Publicar o rechazar un centro</td><td><code>/register-center/approve/{token}</code></td><td>30 días</td><td><code>CenterRegistrationService</code>, <code>centers.approval_token_hash</code></td></tr>
+                            <tr><td>Activar la cuenta de un cliente dado de alta a mano</td><td>por correo al registrarse</td><td>7 días (es una invitación: <code>InvitationService.reinvite</code>)</td><td><code>UserService.registerClient</code></td></tr>
+                            <tr><td>«Recordar mi sesión»</td><td>cookie</td><td>14 días</td><td><code>persistent_logins</code> (no dependen de la contraseña)</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <figure class="diagram">
+                    <div class="diagram-title">Alta de un centro: del formulario a publicado</div>
+                    <div class="diagram-scroll">
+                        <svg class="dg" viewBox="0 0 1100 230" role="img" aria-label="Flujo del alta de un centro">
+                            <rect x="20" y="30" width="190" height="80" rx="10" class="bx b-client"/>
+                            <text x="115" y="58" text-anchor="middle" class="tt c-client">/alta-centro</text>
+                            <text x="115" y="78" text-anchor="middle" class="ts">asistente de 6 pasos</text>
+                            <text x="115" y="95" text-anchor="middle" class="tm">register-center.html</text>
+                            <rect x="240" y="30" width="230" height="80" rx="10" class="bx b-owner"/>
+                            <text x="355" y="58" text-anchor="middle" class="tt c-owner">CenterRegistrationService</text>
+                            <text x="355" y="78" text-anchor="middle" class="ts">centro oculto + responsable</text>
+                            <text x="355" y="95" text-anchor="middle" class="ts">y equipo sin contraseña</text>
+                            <rect x="500" y="20" width="270" height="44" rx="10" class="bx b-admin"/>
+                            <text x="635" y="47" text-anchor="middle" class="lb">correo a administración (enlace 30 días)</text>
+                            <rect x="500" y="76" width="270" height="44" rx="10" class="bx b-worker"/>
+                            <text x="635" y="103" text-anchor="middle" class="lb">invitación a cada trabajador (7 días)</text>
+                            <rect x="800" y="10" width="130" height="44" rx="10" class="bx b-ok"/>
+                            <text x="865" y="37" text-anchor="middle" class="lb">Publicar</text>
+                            <rect x="950" y="10" width="130" height="44" rx="10" class="bx b-bad"/>
+                            <text x="1015" y="37" text-anchor="middle" class="lb">Rechazar</text>
+                            <rect x="800" y="76" width="280" height="44" rx="10" class="bx b-worker"/>
+                            <text x="940" y="103" text-anchor="middle" class="lb">pone su contraseña o entra con Google</text>
+                            <line x1="210" y1="70" x2="236" y2="70" class="ar" marker-end="url(#dga)"/>
+                            <path d="M470,60 H485 V42 H496" class="ar" marker-end="url(#dga)"/>
+                            <path d="M485,60 V98 H496" class="ar" marker-end="url(#dga)"/>
+                            <line x1="770" y1="32" x2="796" y2="32" class="ar ok" marker-end="url(#dga-ok)"/>
+                            <path d="M770,42 C860,70 940,70 1000,56" class="ar bad dash" marker-end="url(#dga-bad)"/>
+                            <line x1="770" y1="98" x2="796" y2="98" class="ar" marker-end="url(#dga)"/>
+                            <rect x="20" y="150" width="1060" height="60" rx="10" class="bx b-off"/>
+                            <text x="550" y="176" text-anchor="middle" class="tt">Mientras está oculto (published = false)</text>
+                            <text x="550" y="196" text-anchor="middle" class="ts">fuera del buscador y del mapa · /client/centers/{slug} da 404 · BookingService no reserva · la foto solo la ven su equipo y administración</text>
+                        </svg>
+                    </div>
+                    <p class="swipe-hint">Desliza el dibujo hacia los lados para verlo entero →</p>
+                    <figcaption>Rechazar borra el centro sin publicar, las cuentas de su equipo y lo que hayan preparado. Sin SMTP configurado, <code>LoggingEmailGateway</code> escribe los enlaces de cada correo en la consola: así se prueba en local.</figcaption>
+                </figure>
+            </section>
+
+            <!-- ============================================================ -->
+            <section class="doc-section" id="productos">
+                <div class="section-header">
+                    <div class="section-header-title">
+                        <div class="section-icon">🏷️</div>
+                        <div>
+                            <h2>API de productos</h2>
+                            <p style="margin: 0; font-size: 0.95rem;">Carpeta <code>product-api/</code>: una app Spring Boot aparte, en su contenedor</p>
+                        </div>
+                    </div>
+                </div>
+
+                <figure class="diagram">
+                    <div class="diagram-title">Qué pasa al escanear un código de barras en «Añadir Producto»</div>
+                    <div class="diagram-scroll">
+                        <svg class="dg" viewBox="0 0 1100 260" role="img" aria-label="Búsqueda de un código de barras: inventario, catálogo, API de productos y Open Beauty Facts">
+                            <rect x="20" y="90" width="170" height="80" rx="10" class="bx b-client"/>
+                            <text x="105" y="120" text-anchor="middle" class="tt c-client">Cámara / lector</text>
+                            <text x="105" y="140" text-anchor="middle" class="ts">barcode-camera.js</text>
+                            <text x="105" y="157" text-anchor="middle" class="tm">GET …/inventory/barcode</text>
+                            <rect x="240" y="20" width="200" height="56" rx="10" class="bx b-info"/>
+                            <text x="340" y="44" text-anchor="middle" class="lb">1 · ¿En su inventario?</text>
+                            <text x="340" y="62" text-anchor="middle" class="lbs">«ya lo tienes»</text>
+                            <rect x="240" y="100" width="200" height="56" rx="10" class="bx b-info"/>
+                            <text x="340" y="124" text-anchor="middle" class="lb">2 · ¿En el catálogo?</text>
+                            <text x="340" y="142" text-anchor="middle" class="lbs">general o del centro</text>
+                            <rect x="240" y="180" width="200" height="56" rx="10" class="bx b-worker"/>
+                            <text x="340" y="204" text-anchor="middle" class="lb">3 · product-api</text>
+                            <text x="340" y="222" text-anchor="middle" class="lbs">ProductApiClient</text>
+                            <path d="M190,130 H215 V48 H236" class="ar" marker-end="url(#dga)"/>
+                            <line x1="215" y1="128" x2="236" y2="128" class="ar" marker-end="url(#dga)"/>
+                            <path d="M215,130 V208 H236" class="ar" marker-end="url(#dga)"/>
+                            <rect x="520" y="160" width="250" height="90" rx="10" class="bx b-worker"/>
+                            <text x="645" y="188" text-anchor="middle" class="tt c-worker">product-api</text>
+                            <text x="645" y="208" text-anchor="middle" class="ts">esquema productos</text>
+                            <text x="645" y="225" text-anchor="middle" class="ts">¿lo aportó otro centro?</text>
+                            <line x1="440" y1="208" x2="516" y2="208" class="ar info" marker-end="url(#dga-info)"/>
+                            <rect x="850" y="160" width="230" height="90" rx="10" class="bx b-off"/>
+                            <text x="965" y="188" text-anchor="middle" class="tt">Open Beauty Facts</text>
+                            <text x="965" y="208" text-anchor="middle" class="ts">si nadie lo tiene; se guarda</text>
+                            <text x="965" y="225" text-anchor="middle" class="ts">(datos ODbL, fotos CC BY-SA)</text>
+                            <line x1="770" y1="205" x2="846" y2="205" class="ar dash" marker-end="url(#dga)"/>
+                            <rect x="520" y="30" width="560" height="96" rx="10" class="bx b-owner"/>
+                            <text x="800" y="58" text-anchor="middle" class="tt c-owner">El trabajador revisa y guarda</text>
+                            <text x="800" y="80" text-anchor="middle" class="ts">nombre, marca, categoría y foto propuestos · él pone precio y stock</text>
+                            <text x="800" y="100" text-anchor="middle" class="ts">al guardar → ProductSharedEvent → la API rellena los huecos que le falten</text>
+                            <text x="800" y="117" text-anchor="middle" class="tm">lo que aporta un centro nunca pisa un nombre o una foto que ya hay</text>
+                        </svg>
+                    </div>
+                    <p class="swipe-hint">Desliza el dibujo hacia los lados para verlo entero →</p>
+                    <figcaption>Sin <code>PRODUCT_API_URL</code> (modo 1, dev), Cuquora consulta Open Beauty Facts directamente y no comparte nada. Endpoints, límites y cómo corregir un producto a mano (<code>docker/corregir-producto.sh</code>): <code>product-api/README.md</code>.</figcaption>
+                </figure>
+            </section>
+
+            <!-- ============================================================ -->
+            <section class="doc-section" id="correo">
+                <div class="section-header">
+                    <div class="section-header-title">
+                        <div class="section-icon">✉️</div>
+                        <div>
+                            <h2>Correo</h2>
+                            <p style="margin: 0; font-size: 0.95rem;">Un único punto de salida: <code>EmailGateway</code></p>
+                        </div>
+                    </div>
+                </div>
+
+                <figure class="diagram">
+                    <div class="diagram-scroll">
+                        <svg class="dg" viewBox="0 0 1100 200" role="img" aria-label="Servicios de correo, plantillas y pasarela SMTP o consola">
+                            <rect x="20" y="20" width="300" height="160" rx="10" class="bx b-owner"/>
+                            <text x="170" y="48" text-anchor="middle" class="tt c-owner">Quién escribe</text>
+                            <text x="40" y="78" class="ts">• AppointmentMailService</text>
+                            <text x="56" y="96" class="tm">solicitud, confirmación, cambio, propuesta,</text>
+                            <text x="56" y="112" class="tm">anulación, recordatorio</text>
+                            <text x="40" y="136" class="ts">• CenterOnboardingMailService</text>
+                            <text x="56" y="154" class="tm">alta, publicación, invitaciones</text>
+                            <text x="40" y="172" class="ts">• InquiryMailService (contacto)</text>
+                            <rect x="380" y="20" width="300" height="160" rx="10" class="bx b-info"/>
+                            <text x="530" y="48" text-anchor="middle" class="tt c-worker">templates/email/*.html</text>
+                            <text x="530" y="74" text-anchor="middle" class="ts">Thymeleaf + layout.html</text>
+                            <text x="530" y="94" text-anchor="middle" class="ts">estilos en línea (excepción a la CSP)</text>
+                            <text x="530" y="114" text-anchor="middle" class="ts">HtmlToText genera la versión</text>
+                            <text x="530" y="132" text-anchor="middle" class="ts">en texto plano de cada correo</text>
+                            <text x="530" y="158" text-anchor="middle" class="tm">Reply-To del cliente → dueño del centro</text>
+                            <rect x="740" y="20" width="340" height="70" rx="10" class="bx b-cf"/>
+                            <text x="910" y="48" text-anchor="middle" class="tt c-cf">SmtpEmailGateway</text>
+                            <text x="910" y="68" text-anchor="middle" class="ts">con MAIL_HOST (Brevo, 300 al día)</text>
+                            <rect x="740" y="110" width="340" height="70" rx="10" class="bx b-off"/>
+                            <text x="910" y="138" text-anchor="middle" class="tt">LoggingEmailGateway</text>
+                            <text x="910" y="158" text-anchor="middle" class="ts">sin MAIL_HOST: escribe el correo en consola</text>
+                            <line x1="320" y1="100" x2="376" y2="100" class="ar" marker-end="url(#dga)"/>
+                            <path d="M680,100 H710 V55 H736" class="ar" marker-end="url(#dga)"/>
+                            <path d="M710,100 V145 H736" class="ar dash" marker-end="url(#dga)"/>
+                        </svg>
+                    </div>
+                    <p class="swipe-hint">Desliza el dibujo hacia los lados para verlo entero →</p>
+                    <figcaption>Para un correo nuevo: una plantilla en <code>templates/email/</code> que use <code>layout.html</code>, un método en el servicio de su área que llame a <code>EmailGateway</code> y, si sale de un cambio de cita, que lo dispare el listener (no el controlador). En los tests, <code>EmailPlainTextTests</code> comprueba la versión en texto plano.</figcaption>
+                </figure>
+            </section>
+
+            <!-- ============================================================ -->
+            <section class="doc-section" id="frontend">
+                <div class="section-header">
+                    <div class="section-header-title">
+                        <div class="section-icon">🎨</div>
+                        <div>
+                            <h2>Interfaz (front)</h2>
+                            <p style="margin: 0; font-size: 0.95rem;">Cómo se arma una página y las reglas que impone la CSP</p>
+                        </div>
+                    </div>
+                </div>
+
+                <figure class="diagram">
+                    <div class="diagram-scroll">
+                        <svg class="dg" viewBox="0 0 1100 300" role="img" aria-label="Piezas de una página: head, navbar, contenido, footer, CSS y JS">
+                            <rect x="20" y="20" width="560" height="260" rx="12" class="bx b-zone"/>
+                            <text x="40" y="44" class="tz">UNA PÁGINA (worker/inventory.html)</text>
+                            <rect x="40" y="58" width="520" height="38" rx="8" class="bx b-off"/>
+                            <text x="300" y="82" text-anchor="middle" class="lb">fragments/head :: meta('Inventario') + inventario.css</text>
+                            <rect x="40" y="104" width="520" height="38" rx="8" class="bx b-off"/>
+                            <text x="300" y="128" text-anchor="middle" class="lb">fragments/navbar (según rol; campana)</text>
+                            <rect x="40" y="150" width="520" height="70" rx="8" class="bx b-owner"/>
+                            <text x="300" y="178" text-anchor="middle" class="lb">contenido · .main-container--wide · .list-toolbar</text>
+                            <text x="300" y="198" text-anchor="middle" class="lbs">fragmentos: modals, product-sale, alerts :: ownerOnly…</text>
+                            <rect x="40" y="228" width="520" height="38" rx="8" class="bx b-off"/>
+                            <text x="300" y="252" text-anchor="middle" class="lb">fragments/footer (aviso de cookies, «¿Qué tal tu cita?»)</text>
+
+                            <rect x="640" y="20" width="440" height="120" rx="12" class="bx b-info"/>
+                            <text x="860" y="46" text-anchor="middle" class="tt c-worker">CSS</text>
+                            <text x="860" y="70" text-anchor="middle" class="ts">tokens.css → colores y medidas (modo oscuro, AA)</text>
+                            <text x="860" y="90" text-anchor="middle" class="ts">common.css → botones, tarjetas, modales, pct-0…100</text>
+                            <text x="860" y="110" text-anchor="middle" class="ts">uno por área → inventario.css, calendar.css…</text>
+                            <text x="860" y="128" text-anchor="middle" class="tm">ningún color en hex fuera de tokens.css</text>
+                            <rect x="640" y="160" width="440" height="120" rx="12" class="bx b-client"/>
+                            <text x="860" y="186" text-anchor="middle" class="tt c-client">JS</text>
+                            <text x="860" y="210" text-anchor="middle" class="ts">app.js → Cuquora.confirm/alert, CSRF en fetch,</text>
+                            <text x="860" y="228" text-anchor="middle" class="ts">vistas Tarjetas/Lista, campanas, escapeHtml</text>
+                            <text x="860" y="248" text-anchor="middle" class="ts">componentes → sheets.js, booking-picker.js…</text>
+                            <text x="860" y="266" text-anchor="middle" class="ts">pages/inventory.js → lo propio de la página</text>
+                            <line x1="580" y1="80" x2="636" y2="80" class="ar" marker-end="url(#dga)"/>
+                            <line x1="580" y1="220" x2="636" y2="220" class="ar" marker-end="url(#dga)"/>
+                        </svg>
+                    </div>
+                    <p class="swipe-hint">Desliza el dibujo hacia los lados para verlo entero →</p>
+                    <figcaption>CSS y JS se sirven con una huella del contenido en la URL: tras un despliegue no hace falta forzar la recarga.</figcaption>
+                </figure>
+
+                <div class="compare">
+                    <div class="cmp-team yes">
+                        <h4>🚫 Lo bloquea la CSP o lo prohíben las reglas</h4>
+                        <ul>
+                            <li><code>style=</code>, <code>th:style</code> y <code>&lt;script&gt;</code> dentro de la plantilla (los scripts los vigila <code>InlineScriptsTests</code>).</li>
+                            <li><code>onclick</code> y demás atributos de evento.</li>
+                            <li><code>alert()</code> / <code>confirm()</code> del navegador.</li>
+                            <li><code>!important</code> (salvo <code>[hidden]</code> y movimiento reducido).</li>
+                            <li>Cargar algo de una CDN (Lucide de la CDN sale vacío: allí las clases son <code>icon-…</code>).</li>
+                        </ul>
+                    </div>
+                    <div class="cmp-owner yes">
+                        <h4>✅ Cómo se hace en su lugar</h4>
+                        <ul>
+                            <li>Valores que dependen de los datos: clases de escala <code>pct-N</code>, <code>stars--hN</code>, <code>bar-chart--cols-N</code>.</li>
+                            <li>Posiciones calculadas: variables CSS que pone el JS (<code>--top</code>, <code>--height</code>).</li>
+                            <li>Datos para el JS: un bloque <code>&lt;script type="application/json"&gt;</code> (no se ejecuta).</li>
+                            <li>Diálogos: <code>Cuquora.confirm</code>, <code>data-confirm="…"</code>, <code>.ui-modal-overlay</code>.</li>
+                            <li>Texto del servidor en <code>innerHTML</code>: siempre con <code>Cuquora.escapeHtml</code>.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="callout callout-info">
+                    <div class="callout-icon">📐</div>
+                    <div class="callout-content">
+                        <strong>Anchos que hay que probar:</strong>
+                        <p>1920, 1440, 1100, 960, 768 y 390 px. Media pantalla (≈960-1365 px) es habitual: nada se sale y los textos saltan de línea en vez de cortarse con «…». Detalle de cada pantalla en <code>.claude/docs/pantallas.md</code>; estilo, movimiento y textos en el skill <code>interfaz-cuquora</code>.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================================ -->
+            <section class="doc-section" id="migraciones">
+                <div class="section-header">
+                    <div class="section-header-title">
+                        <div class="section-icon">🧬</div>
+                        <div>
+                            <h2>Migraciones</h2>
+                            <p style="margin: 0; font-size: 0.95rem;">Flyway, <code>ddl-auto=validate</code>: el esquema solo cambia con un fichero nuevo</p>
+                        </div>
+                    </div>
+                </div>
+
+                <figure class="diagram">
+                    <div class="diagram-scroll">
+                        <svg class="dg" viewBox="0 0 1100 250" role="img" aria-label="Las 35 migraciones agrupadas por etapa">
+                            <line x1="30" y1="60" x2="1070" y2="60" class="ar" marker-end="url(#dga)"/>
+                            <circle cx="110" cy="60" r="8" class="bx b-client"/>
+                            <circle cx="290" cy="60" r="8" class="bx b-worker"/>
+                            <circle cx="470" cy="60" r="8" class="bx b-owner"/>
+                            <circle cx="650" cy="60" r="8" class="bx b-ok"/>
+                            <circle cx="830" cy="60" r="8" class="bx b-admin"/>
+                            <circle cx="1000" cy="60" r="8" class="bx b-info"/>
+                            <text x="110" y="40" text-anchor="middle" class="tt">V1–V5</text>
+                            <text x="290" y="40" text-anchor="middle" class="tt">V6–V10</text>
+                            <text x="470" y="40" text-anchor="middle" class="tt">V11–V18</text>
+                            <text x="650" y="40" text-anchor="middle" class="tt">V19–V25</text>
+                            <text x="830" y="40" text-anchor="middle" class="tt">V26–V30</text>
+                            <text x="1000" y="40" text-anchor="middle" class="tt">V31–V35</text>
+                            <rect x="30" y="85" width="160" height="150" rx="10" class="bx b-client"/>
+                            <text x="110" y="108" text-anchor="middle" class="lb">La base</text>
+                            <text x="42" y="132" class="lbs">esquema inicial</text>
+                            <text x="42" y="150" class="lbs">sin invitados</text>
+                            <text x="42" y="168" class="lbs">usuarios Google</text>
+                            <text x="42" y="186" class="lbs">sesiones recordadas</text>
+                            <text x="42" y="204" class="lbs">Google Calendar</text>
+                            <rect x="210" y="85" width="160" height="150" rx="10" class="bx b-worker"/>
+                            <text x="290" y="108" text-anchor="middle" class="lb">Agenda y negocio</text>
+                            <text x="222" y="132" class="lbs">zona horaria</text>
+                            <text x="222" y="150" class="lbs">agenda flexible</text>
+                            <text x="222" y="168" class="lbs">resumen tratamiento</text>
+                            <text x="222" y="186" class="lbs">ventas de productos</text>
+                            <text x="222" y="204" class="lbs">fidelización</text>
+                            <rect x="390" y="85" width="160" height="150" rx="10" class="bx b-owner"/>
+                            <text x="470" y="108" text-anchor="middle" class="lb">Centros completos</text>
+                            <text x="402" y="128" class="lbs">alta de centros · foto</text>
+                            <text x="402" y="146" class="lbs">Calendar del cliente</text>
+                            <text x="402" y="164" class="lbs">precio de la cita</text>
+                            <text x="402" y="182" class="lbs">ofertas · auto-aceptar</text>
+                            <text x="402" y="200" class="lbs">horario y dueño</text>
+                            <text x="402" y="218" class="lbs">no presentado</text>
+                            <rect x="570" y="85" width="160" height="150" rx="10" class="bx b-ok"/>
+                            <text x="650" y="108" text-anchor="middle" class="lb">Clientes y equipo</text>
+                            <text x="582" y="128" class="lbs">profesional al reservar</text>
+                            <text x="582" y="146" class="lbs">reseñas verificadas</text>
+                            <text x="582" y="164" class="lbs">horario por profesional</text>
+                            <text x="582" y="182" class="lbs">avisos descartados</text>
+                            <text x="582" y="200" class="lbs">aviso «valorar» (×2)</text>
+                            <text x="582" y="218" class="lbs">foto del profesional</text>
+                            <rect x="750" y="85" width="160" height="150" rx="10" class="bx b-admin"/>
+                            <text x="830" y="108" text-anchor="middle" class="lb">Seguridad y RGPD</text>
+                            <text x="762" y="132" class="lbs">slug, productos propios,</text>
+                            <text x="762" y="150" class="lbs">correo verificado</text>
+                            <text x="762" y="168" class="lbs">V27 (Java): teléfonos</text>
+                            <text x="762" y="186" class="lbs">recuperar contraseña</text>
+                            <text x="762" y="204" class="lbs">fotos/vídeos de cita</text>
+                            <text x="762" y="222" class="lbs">borrar cuenta</text>
+                            <rect x="930" y="85" width="150" height="150" rx="10" class="bx b-info"/>
+                            <text x="1005" y="108" text-anchor="middle" class="lb">Inventario y carta</text>
+                            <text x="942" y="132" class="lbs">fotos y códigos</text>
+                            <text x="942" y="150" class="lbs">crédito de fotos</text>
+                            <text x="942" y="168" class="lbs">unirse al equipo,</text>
+                            <text x="942" y="186" class="lbs">caducidad del alta</text>
+                            <text x="942" y="204" class="lbs">editar carta/stock</text>
+                            <text x="942" y="222" class="lbs">redes del centro</text>
+                        </svg>
+                    </div>
+                    <p class="swipe-hint">Desliza el dibujo hacia los lados para verlo entero →</p>
+                    <figcaption>Ficheros SQL en <code>src/main/resources/db/migration/</code>; la <code>V27</code> está en Java (<code>src/main/java/db/migration/</code>) porque reutiliza las reglas de <code>PhoneNumbers</code>. <strong>La siguiente libre es <code>V36</code>.</strong> La API de productos tiene sus propias migraciones (V1-V3) en su esquema.</figcaption>
+                </figure>
+
+                <ul class="tasks">
+                    <li><span>Nombre</span><span><code>V36__descripcion_en_espanol.sql</code>, con un comentario arriba que explique cada columna y el porqué.</span></li>
+                    <li><span>SQL</span><span>Compatible con H2 y PostgreSQL a la vez (los tests van en H2, producción en PostgreSQL).</span></li>
+                    <li><span>Nunca</span><span>Editar una migración ya aplicada: Flyway compara la suma de comprobación y la app no arrancaría.</span></li>
+                    <li><span>Columnas nuevas en tablas con datos</span><span>Nulables o con <code>DEFAULT</code>, y rellenar las filas viejas en la misma migración.</span></li>
+                </ul>
+            </section>
+
+            <!-- ============================================================ -->
+            <section class="doc-section" id="tests">
+                <div class="section-header">
+                    <div class="section-header-title">
+                        <div class="section-icon">✅</div>
+                        <div>
+                            <h2>Tests</h2>
+                            <p style="margin: 0; font-size: 0.95rem;">457 tests en 52 clases (21 nov 2026), todos contra H2 con los datos demo</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid-3">
+                    <div class="card-feature">
+                        <div class="card-feature-header"><span class="card-badge badge-admin">Seguridad</span></div>
+                        <p><code>CenterIsolationTests</code>, <code>CenterOwnershipTests</code>, <code>SecurityIntegrationTests</code>, <code>SecurityFixesTests</code>, <code>SecurityHardeningTests</code>, <code>PasswordChangeSessionsTests</code>, <code>PasswordResetTests</code>, <code>GoogleLoginTests</code>, <code>InlineScriptsTests</code>, <code>ProductionChecksTests</code>.</p>
+                    </div>
+                    <div class="card-feature">
+                        <div class="card-feature-header"><span class="card-badge badge-worker">Agenda y citas</span></div>
+                        <p><code>BookingServiceTests</code>, <code>AgendaTests</code>, <code>AutoAcceptBookingTests</code>, <code>ProfessionalAndRescheduleTests</code>, <code>WorkerHoursTests</code>, <code>NoShowAndRebookTests</code>, <code>OpenNowTests</code>, <code>CenterTimeZoneTests</code>, <code>FirstSlotAndShortLinkTests</code>, <code>TreatmentSummaryTests</code>, <code>AppointmentMediaTests</code>.</p>
+                    </div>
+                    <div class="card-feature">
+                        <div class="card-feature-header"><span class="card-badge badge-client">Centro, clientes y productos</span></div>
+                        <p><code>CenterRegistrationTests</code>, <code>CenterRejectionTests</code>, <code>TeamTests</code>, <code>ReviewTests</code>, <code>ProductSaleAndLoyaltyTests</code>, <code>ProductBarcodeTests</code>, <code>ProductApiClientTests</code>, <code>EditCatalogTests</code>, <code>AnalyticsTests</code>, <code>AccountPrivacyTests</code>, <code>PageRenderingTests</code>…</p>
+                    </div>
+                </div>
+
+                <div class="callout callout-success">
+                    <div class="callout-icon">▶️</div>
+                    <div class="callout-content">
+                        <strong>Cómo lanzarlos</strong>
+                        <p><code>./mvnw test</code> (todos) o <code>./mvnw -Dtest=CenterIsolationTests test</code> (uno). En el Linux de Alex: <code>JAVA_HOME=/home/alejandro/.jdks/ms-25.0.4.1 mvn test</code>. Usuarios de prueba en <code>TestUsers</code>, horarios en <code>TestHours</code>. Google Calendar (<code>GoogleCalendarGateway</code>), el correo (<code>EmailGateway</code>) y la búsqueda de productos (<code>ProductDatabase</code>) se sustituyen con <code>@MockitoBean</code>. A 21 nov 2026 falla uno, <code>WorkerPanelTests.visitSummaryCountsCompletedVisitsAndPurchases</code>, porque depende del reloj real (detalle en <code>PENDIENTES.md</code>).</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================================ -->
+            <section class="doc-section" id="nueva">
+                <div class="section-header">
+                    <div class="section-header-title">
+                        <div class="section-icon">🧭</div>
+                        <div>
+                            <h2>Añadir una funcionalidad</h2>
+                            <p style="margin: 0; font-size: 0.95rem;">El orden que evita olvidos (es el skill <code>nueva-funcionalidad</code>)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <ol class="flow">
+                    <li><strong>Migración</strong><span><code>V36__…sql</code>, H2 + PostgreSQL</span></li>
+                    <li><strong>Entidad y repo</strong><span>consultas con <code>centerId</code>, <code>@EntityGraph</code></span></li>
+                    <li><strong>Servicio</strong><span>reglas, <code>BusinessRuleException</code> en español</span></li>
+                    <li><strong>Controlador</strong><span>record de <code>forms/</code>; ¿<code>@CenterOwnerOnly</code>?</span></li>
+                    <li><strong>Pantalla</strong><span>fragmentos, tokens, sin inline, 6 anchos</span></li>
+                    <li><strong>Tests</strong><span>aislamiento, dueño, render</span></li>
+                    <li><strong>Docs</strong><span>CLAUDE.md, CHANGELOG, esta web</span></li>
+                </ol>
+
+                <div class="faq">
+                    <details>
+                        <summary>¿Es solo del dueño?</summary>
+                        <div><p>Si cambia la configuración del centro, la carta, el catálogo, el equipo o enseña cifras de negocio, sí: <code>@CenterOwnerOnly</code> en el método del controlador, un caso en <code>CenterOwnershipTests</code> y, en la vista, el botón escondido con <code>isCenterOwner</code> y el aviso <code>fragments/alerts :: ownerOnly</code>. La agenda, los clientes, las ventas y el stock son de todo el equipo.</p></div>
+                    </details>
+                    <details>
+                        <summary>¿Devuelve JSON?</summary>
+                        <div><p>Marca el método con <code>@ApiEndpoint</code> para que los errores salgan en JSON, y llámalo desde el JS con <code>fetch</code> (el token CSRF lo añade <code>app.js</code>). Si cambia una cita, que lo haga <code>BookingService</code>.</p></div>
+                    </details>
+                    <details>
+                        <summary>¿Necesita una variable de entorno?</summary>
+                        <div><p>Léela en <code>application.properties</code> con un valor por defecto seguro, añádela a <code>.env.example</code> con su comentario y, si es obligatoria en producción, a <code>ProductionChecks</code> y al <code>docker-compose.yml</code> con <code>${VAR:?mensaje}</code>.</p></div>
+                    </details>
+                    <details>
+                        <summary>¿Hay que enseñar totales o medias?</summary>
+                        <div><p>Calcúlalos en el servicio y pásalos al modelo. Nada de proyecciones de colección en Thymeleaf (<code>lista.![campo]</code>, <code>lista.?[cond]</code>): IntelliJ las marca como error.</p></div>
+                    </details>
+                </div>
+            </section>
+
+            <!-- ============================================================ -->
+            <section class="doc-section" id="donde">
+                <div class="section-header">
+                    <div class="section-header-title">
+                        <div class="section-icon">🔎</div>
+                        <div>
+                            <h2>¿Dónde está…?</h2>
+                            <p style="margin: 0; font-size: 0.95rem;">Atajos para no leer ficheros enteros</p>
+                        </div>
+                    </div>
+                </div>
+
+                <ul class="tasks">
+                    <li><span>Qué rutas son públicas</span><span><code>SecurityConfig.PUBLIC_PAGES</code></span></li>
+                    <li><span>Qué endpoints son solo del dueño</span><span><code>grep -rn "@CenterOwnerOnly" src/main/java</code></span></li>
+                    <li><span>Si cabe una cita</span><span><code>booking/AgendaSnapshot</code>, cargado por <code>AgendaAvailabilityService</code></span></li>
+                    <li><span>El horario de un centro</span><span><code>OpeningHoursService.forCenter</code> → <code>booking/OpeningHours</code> (<code>stateAt</code>, <code>describe</code>)</span></li>
+                    <li><span>«Ahora» en un centro</span><span><code>CenterClock.now(clock, center)</code></span></li>
+                    <li><span>Los avisos de la campana</span><span><code>NotificationService</code> (trabajador), <code>ClientNotificationService</code> (cliente), <code>NotificationDismissalService</code></span></li>
+                    <li><span>Qué ve una vista sobre el usuario</span><span><code>CurrentUserModelAdvice</code> (usuario, <code>isCenterOwner</code>, <code>ownerName</code>), <code>SiteModelAdvice</code> (URL del sitio, titular)</span></li>
+                    <li><span>Los datos demo</span><span><code>DatabaseSeeder</code>, <code>DemoHistory</code>, <code>DemoReviews</code></span></li>
+                    <li><span>Qué revisa producción al arrancar</span><span><code>config/ProductionChecks</code></span></li>
+                    <li><span>Las cifras del análisis</span><span><code>AnalyticsService</code> (en memoria, sin tablas propias), <code>AnalyticsCsv</code></span></li>
+                    <li><span>Pendientes y auditoría de seguridad</span><span><code>PENDIENTES.md</code></span></li>
+                    <li><span>Desplegar en el NAS</span><span><code>docker/DESPLIEGUE.md</code></span></li>
+                </ul>
+            </section>
+
+            <!-- ============================================================ -->
+            <section class="doc-section" id="trampas">
+                <div class="section-header">
+                    <div class="section-header-title">
+                        <div class="section-icon">🪤</div>
+                        <div>
+                            <h2>Trampas conocidas</h2>
+                            <p style="margin: 0; font-size: 0.95rem;">Cosas que ya han hecho perder tiempo</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq">
+                    <details>
+                        <summary>No compila: Lombok falla con <code>EndPosTable</code></summary>
+                        <div><p>Es el JDK 27 por defecto de Arch. Usa <code>JAVA_HOME=/home/alejandro/.jdks/ms-25.0.4.1</code> (el proyecto pide Java 21).</p></div>
+                    </details>
+                    <details>
+                        <summary>IntelliJ dice <code>docker: command not found</code> y la terminal no</summary>
+                        <div><p>IntelliJ instalado como Flatpak no ve los programas del sistema. Hace falta un <code>docker</code> que reenvíe con <code>flatpak-spawn --host</code> y el permiso <code>--talk-name=org.freedesktop.Flatpak</code> (ver <code>.claude/docs/configuracion.md</code>), o instalar IntelliJ fuera de Flatpak.</p></div>
+                    </details>
+                    <details>
+                        <summary>He cambiado un CSS o una plantilla y no se ve</summary>
+                        <div><p>Con <code>mvn spring-boot:run</code> la app sirve desde <code>target/classes</code>: ejecuta <code>mvn -o resources:resources</code>. En IntelliJ se copian solos. El perfil <code>dev</code> ya desactiva las cachés.</p></div>
+                    </details>
+                    <details>
+                        <summary>Los datos de dev han desaparecido</summary>
+                        <div><p>Es lo esperado: H2 en memoria se borra en cada reinicio, también los de devtools al compilar. Para que duren, usa el entorno 2 (contenedores).</p></div>
+                    </details>
+                    <details>
+                        <summary>Un estilo o un script no hace nada</summary>
+                        <div><p>Casi siempre es la CSP: un <code>style=</code> o un <code>&lt;script&gt;</code> en la plantilla se bloquea en silencio. Mira la consola del navegador y muévelo a su fichero.</p></div>
+                    </details>
+                    <details>
+                        <summary>Un icono sale vacío</summary>
+                        <div><p>El nombre no existe en Lucide 0.321.0 (por ejemplo <code>edit-3</code>; se usa <code>pen-line</code>). Búscalo en <code>static/css/lucide-icons.css</code>.</p></div>
+                    </details>
+                    <details>
+                        <summary><code>docker compose</code> dice que falta una variable</summary>
+                        <div><p>Compara tu <code>.env</code> con <code>.env.example</code>: las obligatorias están marcadas con <code>${VAR:?…}</code> en <code>docker-compose.yml</code>. Las contraseñas de <code>cuquora_app</code> y <code>productos_api</code> las aplica <code>db-setup</code> en cada <code>up</code>, así que se pueden cambiar en cualquier momento.</p></div>
+                    </details>
+                    <details>
+                        <summary>El 8080 está ocupado</summary>
+                        <div><p>Probablemente es la copia de IntelliJ. No la pares: arranca otra con <code>-Dspring-boot.run.arguments=--server.port=8091</code>.</p></div>
+                    </details>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <footer class="doc-footer">
+        <ul class="footer-nav">
+            <li><a href="index.html">Portal General</a></li>
+            <li><a href="guia-roles.html">Guía de Uso por Roles</a></li>
+            <li><a href="manual-acciones.html">Manual de Acciones</a></li>
+            <li><a href="desarrolladores.html">Guía para Desarrolladores</a></li>
+            <li><a href="evolucion-proyecto.html">Evolución & Commits</a></li>
+        </ul>
+        <p>© 2026 Cuquora CRM — Plataforma de Gestión para Centros de Estética y Bienestar.</p>
+        <p class="text-muted" style="font-size: 0.8rem;">Guía para desarrolladores al día del 21 de noviembre de 2026 (0.9.0-beta + cambios sin publicar), en HTML sin dependencias, dentro del repositorio CRM_CBelleza.</p>
+    </footer>
+
+</body>
+</html>

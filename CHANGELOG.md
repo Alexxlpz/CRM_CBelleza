@@ -23,6 +23,7 @@ Al sacar una versión:
 
 ### Añadido
 
+- **Guía para desarrolladores** (`documentación/desarrolladores.html`): contenedores, entornos, recorrido de una petición, paquetes, modelo de datos, ciclo de vida de una cita, eventos, seguridad, API de productos, migraciones, tests y trampas conocidas, con un diagrama en cada apartado. Documentación, `CLAUDE.md` y `PENDIENTES.md` revisados contra el código el 21 nov 2026.
 - **Redes sociales del centro**: el dueño pone Instagram, TikTok, Facebook y su web en Ajustes > Centro (vale el usuario o el enlace entero; solo se aceptan enlaces de esa red). Salen como botones redondos junto a «Cómo llegar» en la ficha del centro, también en la pública, y Google las recibe en los datos de la ficha.
 - Editar los tratamientos de la carta: el dueño pulsa «Editar» en cada tratamiento y cambia el nombre, la categoría, la descripción, el precio y la duración. Las citas que ya están pedidas no cambian: guardan su precio y, desde ahora, también su duración, así que alargar un tratamiento no pisa la agenda que ya hay. El precio de carta no puede quedar por debajo de su oferta.
 - Ocultar y borrar tratamientos: desde «Editar», «Ocultar de la carta» lo quita de la carta del centro (también la pública), de la reserva y de «Nueva cita» en la agenda, sin tocar sus citas ni el análisis; el filtro «Ocultos» de la carta los enseña al dueño con «Mostrar en la carta». «Borrar» solo está si el tratamiento nunca ha tenido citas; si las tiene, se explica cuántas y se ofrece ocultarlo. Migración V34.

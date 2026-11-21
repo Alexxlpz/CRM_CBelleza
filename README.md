@@ -81,6 +81,8 @@ docker compose -p cuquora-local -f docker-compose.yml -f docker-compose.local.ym
 
 Queda en <http://localhost:8090>, con el selector de perfiles y los datos de ejemplo, y no choca con los contenedores de producción. Hace falta `PRODUCT_API_KEY` (`openssl rand -hex 32`) y `PRODUCT_API_DB_PASSWORD` y `APP_DB_PASSWORD` (`openssl rand -hex 24` cada una) en el `.env`.
 
+Para **ejecutar o depurar la app desde IntelliJ** con PostgreSQL y la API de productos en Docker, usa «Cuquora (dev + contenedores)» (carpeta `.run/`): antes de arrancar enciende los contenedores (`db`, `db-setup` y `product-api`, configuración «Solo BD y API de productos (sin la app)», que no arranca la app por sí sola) y luego lanza la app con los perfiles `dev,containers`. Queda en <http://localhost:8080> con el selector de perfiles en `/login`; la base de datos es la misma que la de «Cuquora en Docker» y no se borra al reiniciar. Necesita las mismas tres variables en el `.env`. Para apagar los contenedores, «Cuquora en Docker (parar)».
+
 ## Desplegar con Docker
 
 ```bash

@@ -37,6 +37,7 @@
                 <li class="nav-link-item"><a href="index.html">Portal General</a></li>
                 <li class="nav-link-item"><a href="guia-roles.html">Guía por Roles</a></li>
                 <li class="nav-link-item"><a href="manual-acciones.html">Manual de Acciones</a></li>
+                <li class="nav-link-item"><a href="desarrolladores.html">Desarrolladores</a></li>
                 <li class="nav-link-item active"><a href="evolucion-proyecto.html">Evolución & Commits</a></li>
             </ul>
         </nav>
@@ -76,6 +77,7 @@
                 <ul class="sidebar-nav">
                     <li><a href="guia-roles.html">📖 Guía de Uso por Roles</a></li>
                     <li><a href="manual-acciones.html">⚡ Manual de Acciones & APIs</a></li>
+                    <li><a href="desarrolladores.html">🧩 Guía para Desarrolladores</a></li>
                 </ul>
             </div>
         </aside>
@@ -97,7 +99,7 @@
                     </div>
                     <div class="hero-meta-item">
                         <span>Commits Registrados:</span>
-                        <strong>74 commits (hasta el 3 nov 2026, versión 0.9.0-beta)</strong>
+                        <strong>90 commits (hasta el 19 nov 2026; 0.9.0-beta + cambios sin publicar)</strong>
                     </div>
                     <div class="hero-meta-item">
                         <span>Metodología:</span>
@@ -120,10 +122,10 @@
                 </div>
 
                 <div class="stats">
-                    <div><b>74</b><span>commits</span></div>
+                    <div><b>90</b><span>commits</span></div>
                     <div><b>10</b><span>fases</span></div>
-                    <div><b>27</b><span>migraciones de base de datos</span></div>
-                    <div><b>353</b><span>tests en verde</span></div>
+                    <div><b>35</b><span>migraciones de base de datos</span></div>
+                    <div><b>457</b><span>tests (21 nov)</span></div>
                     <div><b>0.9.0</b><span>beta, en cuquora.com</span></div>
                 </div>
 
@@ -1337,7 +1339,7 @@
                         <div class="timeline-dot"></div>
                         <div class="timeline-content">
                             <div class="timeline-header">
-                                <span class="commit-hash">—</span>
+                                <span class="commit-hash">f4bd22b</span>
                                 <span class="commit-date">📅 11 de Noviembre, 2026</span>
                                 <span class="commit-author">👤 alejandro</span>
                             </div>
@@ -1349,6 +1351,63 @@
                                 <li>Revisión de seguridad: solo comparten los centros publicados (60 al día), 150 búsquedas por hora y centro, fotos leídas con tope de 5 MB y la API solo accesible con clave por la red interna de Docker.</li>
                                 <li>Botón «Cuquora en Docker» en IntelliJ (<code>.run/</code> y <code>docker-compose.local.yml</code>): levanta todo en local en <code>http://localhost:8090</code> con el perfil dev.</li>
                                 <li>Tests: <code>ProductBarcodeTests</code>, <code>ProductApiClientTests</code> y 9 en la API; 388 en Cuquora.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- 12-13 nov: API de productos y vender escaneando -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="commit-hash">0777992 · 6583725</span>
+                                <span class="commit-date">📅 12 y 13 de Noviembre, 2026</span>
+                                <span class="commit-author">👤 alejandro</span>
+                            </div>
+                            <h4>API de productos más segura y vender escaneando el código</h4>
+                            <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.88rem;">
+                                <li>La API de productos apunta qué centro aportó cada dato (migración V3 de la API) y entra en PostgreSQL con su propio usuario <code>productos_api</code>, que prepara el servicio nuevo <code>db-setup</code>.</li>
+                                <li>Fotos guardadas a 800 px en JPEG y <code>docker/corregir-producto.sh</code> para arreglar un producto a mano. Crédito a Open Beauty Facts bajo sus fotos (<code>V32</code>).</li>
+                                <li>«Vender producto» busca por código de barras (cámara, lector USB o a mano) o por nombre, con el mismo escáner que «Añadir Producto».</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- 16-17 nov: Hoy, seguridad -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="commit-hash">d67c199 · 83f505f · e6f4d57</span>
+                                <span class="commit-date">📅 16 y 17 de Noviembre, 2026</span>
+                                <span class="commit-author">👤 alejandro</span>
+                            </div>
+                            <h4>«Hoy» y «Por aprobar» en el panel, «Cómo llegar» y más seguridad</h4>
+                            <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.88rem;">
+                                <li>Panel del trabajador con «Por aprobar» (aceptar o rechazar sin pasar por la agenda) y «Hoy» (las citas del día, «Las mías» / «Todo el centro»). Resumen arriba en la ficha del cliente y «Darle cita». Alergias de la ficha en el aviso de la cita.</li>
+                                <li>«Cómo llegar» en la ficha del centro, en las citas y en los correos; tarjeta con la próxima cita del cliente y fechas amables («Mañana, lun 16 nov · 09:00»).</li>
+                                <li>La app entra en PostgreSQL como <code>cuquora_app</code> (sin ser superusuario; variable <code>APP_DB_PASSWORD</code>). Cambiar la contraseña cierra las demás sesiones. Sin scripts en línea: la CSP ya no tiene <code>'unsafe-inline'</code>.</li>
+                                <li>Nadie entra en un equipo sin aceptar la invitación (<code>V33</code>) y el enlace «Publicar centro» caduca a los 30 días. Stock con tope de 999 y ±10 por ajuste.</li>
+                                <li>Spring Boot 4.1.2, recordatorio más claro y la app dibujada bajo la Dynamic Island del iPhone.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- 18-19 nov: carta editable y redes -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="commit-hash">d24b497 · 6ec0648</span>
+                                <span class="commit-date">📅 18 y 19 de Noviembre, 2026</span>
+                                <span class="commit-author">👤 alejandro</span>
+                            </div>
+                            <h4>Carta y productos editables, aviso de stock a medida y redes del centro</h4>
+                            <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.88rem;">
+                                <li>El dueño edita, oculta o borra tratamientos; las citas ya pedidas guardan su precio y su duración (<code>appointments.duration_minutes</code>, <code>V34</code>).</li>
+                                <li>Productos propios editables, aviso de «Stock bajo» elegido por producto (apagado por defecto) y datos de contacto editables en clientes dados de alta por el centro.</li>
+                                <li>Instagram, TikTok, Facebook y web del centro en Ajustes &gt; Centro, como botones junto a «Cómo llegar» (<code>V35</code>).</li>
+                                <li>Tests: <code>EditCatalogTests</code>, <code>CenterSocialLinksTests</code>.</li>
                             </ul>
                         </div>
                     </div>
@@ -1525,8 +1584,8 @@
                     <div class="step-card">
                         <div class="step-num">6</div>
                         <div class="step-body">
-                            <h4>Vender Escaneando el Código de Barras</h4>
-                            <p>Igual que al dar de alta un producto, que en «Vender producto» se pueda escanear el código para elegir el producto del inventario sin buscarlo en la lista.</p>
+                            <h4>Lista de Espera, Bonos y Varios Tratamientos por Cita</h4>
+                            <p>Vender escaneando el código ya está (13 nov). Lo siguiente de la comparativa con la competencia: avisar al cliente si se libera un hueco, varios tratamientos en una misma cita y bonos o tarjetas regalo.</p>
                         </div>
                     </div>
                 </div>
@@ -1541,6 +1600,7 @@
             <li><a href="index.html">Portal General</a></li>
             <li><a href="guia-roles.html">Guía de Uso por Roles</a></li>
             <li><a href="manual-acciones.html">Manual de Acciones</a></li>
+            <li><a href="desarrolladores.html">Guía para Desarrolladores</a></li>
             <li><a href="evolucion-proyecto.html">Evolución & Commits</a></li>
         </ul>
         <p>© 2026 Cuquora — Plataforma de Gestión para Centros de Estética y Bienestar · Documentación de la versión 0.9.0-beta.</p>

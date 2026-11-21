@@ -893,6 +893,19 @@ pre code {
     .doc-section { padding: 1.25rem; }
     h1 { font-size: 1.8rem; }
     h2 { font-size: 1.45rem; }
+    /* Títulos con palabras largas («desarrolladores») cabían recortados en 390 px */
+    .doc-hero h1 { font-size: 1.75rem; overflow-wrap: break-word; hyphens: auto; }
+}
+
+/* Cinco documentos en la barra (21 nov 2026): en anchos medios cada enlace en una línea, sin la versión ni el
+   subtítulo, y si aun así no caben, la barra de enlaces se desliza en lugar de partirse en varias líneas */
+.nav-link-item a { white-space: nowrap; }
+@media (max-width: 1365px) and (min-width: 681px) {
+    .doc-navbar { gap: 1rem; padding: 0.75rem 1.25rem; }
+    .doc-navbar > div:last-child, .brand-subtitle { display: none; }
+    .doc-navbar nav { min-width: 0; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .nav-links { gap: 0.2rem; }
+    .nav-link-item a { padding: 0.5rem 0.7rem; font-size: 0.88rem; }
 }
 
 /* «En 30 segundos»: lo esencial de una sección antes del detalle */
@@ -1000,7 +1013,7 @@ pre code {
 .shot-frame.browser::before {
     content: "";
     position: absolute; top: 0; left: 0; right: 0; height: 22px;
-    background: #2a2f38 radial-gradient(circle at 12px 11px, #e27171 4px, transparent 4.5px),
+    background: radial-gradient(circle at 12px 11px, #e27171 4px, transparent 4.5px),
                 radial-gradient(circle at 26px 11px, #e0ad52 4px, transparent 4.5px),
                 radial-gradient(circle at 40px 11px, #67b889 4px, transparent 4.5px);
     background-color: #2a2f38;

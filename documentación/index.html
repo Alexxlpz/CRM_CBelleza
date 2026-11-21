@@ -37,6 +37,7 @@
                 <li class="nav-link-item active"><a href="index.html">Portal General</a></li>
                 <li class="nav-link-item"><a href="guia-roles.html">Guía por Roles</a></li>
                 <li class="nav-link-item"><a href="manual-acciones.html">Manual de Acciones</a></li>
+                <li class="nav-link-item"><a href="desarrolladores.html">Desarrolladores</a></li>
                 <li class="nav-link-item"><a href="evolucion-proyecto.html">Evolución & Commits</a></li>
             </ul>
         </nav>
@@ -71,6 +72,7 @@
                 <ul class="sidebar-nav">
                     <li><a href="guia-roles.html">📖 Guía de Uso por Roles</a></li>
                     <li><a href="manual-acciones.html">⚡ Manual de Acciones & APIs</a></li>
+                    <li><a href="desarrolladores.html">🧩 Guía para Desarrolladores</a></li>
                     <li><a href="evolucion-proyecto.html">🚀 Historia de Commits & Figma</a></li>
                 </ul>
             </div>
@@ -89,7 +91,7 @@
                 <div class="hero-meta-row">
                     <div class="hero-meta-item">
                         <span>Versión:</span>
-                        <strong>0.9.0-beta · documentación del 4 de noviembre de 2026 · en cuquora.com</strong>
+                        <strong>0.9.0-beta + cambios sin publicar · documentación del 21 de noviembre de 2026 · en cuquora.com</strong>
                     </div>
                     <div class="hero-meta-item">
                         <span>Tecnología:</span>
@@ -161,6 +163,14 @@
                         </a>
                     </div>
                 </div>
+
+                <div class="callout callout-info" style="margin-top: 1.5rem;">
+                    <div class="callout-icon">🧩</div>
+                    <div class="callout-content">
+                        <strong>Nuevo: Guía para Desarrolladores.</strong>
+                        <p>Para quien va a tocar el código: contenedores, perfiles, recorrido de una petición, paquetes, modelo de datos, ciclo de vida de una cita, eventos en segundo plano, seguridad, API de productos, migraciones, tests y trampas conocidas, con un diagrama en cada apartado. <a href="desarrolladores.html" style="font-weight: 600;">Abrir la guía para desarrolladores →</a></p>
+                    </div>
+                </div>
             </section>
 
             <!-- Arquitectura Técnica -->
@@ -209,7 +219,7 @@
 
                             <rect x="20" y="438" width="700" height="64" rx="10" class="bx b-infra"/>
                             <text x="370" y="465" text-anchor="middle" class="tt">PostgreSQL 16 (H2 en desarrollo)</text>
-                            <text x="370" y="485" text-anchor="middle" class="ts">esquema versionado con Flyway: migraciones V1 a V27</text>
+                            <text x="370" y="485" text-anchor="middle" class="ts">esquema versionado con Flyway: migraciones V1 a V35</text>
 
                             <line x1="370" y1="84" x2="370" y2="106" class="ar" marker-end="url(#dga)"/>
                             <line x1="370" y1="166" x2="370" y2="188" class="ar" marker-end="url(#dga)"/>
@@ -288,7 +298,7 @@
                             <tr>
                                 <td><strong>Persistencia & Datos</strong></td>
                                 <td><code>PostgreSQL 16</code> (Docker) o <code>H2</code> en memoria (desarrollo y tests)</td>
-                                <td>Esquema creado por <strong>Flyway</strong> (<code>db/migration/V1</code> a <code>V27</code>; la V27 está en Java, en <code>src/main/java/db/migration</code>) con <code>ddl-auto=validate</code>; datos demo solo con <code>crm.seed-demo-data=true</code>.</td>
+                                <td>Esquema creado por <strong>Flyway</strong> (<code>db/migration/V1</code> a <code>V35</code>; la V27 está en Java, en <code>src/main/java/db/migration</code>) con <code>ddl-auto=validate</code>; datos demo solo con <code>crm.seed-demo-data=true</code>.</td>
                             </tr>
                         </tbody>
                     </table>
@@ -928,10 +938,11 @@ mvn test</code></pre>
             <li><a href="index.html">Portal General</a></li>
             <li><a href="guia-roles.html">Guía de Uso por Roles</a></li>
             <li><a href="manual-acciones.html">Manual de Acciones</a></li>
+            <li><a href="desarrolladores.html">Guía para Desarrolladores</a></li>
             <li><a href="evolucion-proyecto.html">Evolución & Commits</a></li>
         </ul>
         <p>© 2026 Cuquora CRM — Plataforma de Gestión para Centros de Estética y Bienestar.</p>
-        <p class="text-muted" style="font-size: 0.8rem;">Documentación de la versión 0.9.0-beta (3 de noviembre de 2026), en HTML sin dependencias, dentro del repositorio CRM_CBelleza.</p>
+        <p class="text-muted" style="font-size: 0.8rem;">Documentación de la versión 0.9.0-beta y los cambios sin publicar (21 de noviembre de 2026), en HTML sin dependencias, dentro del repositorio CRM_CBelleza.</p>
     </footer>
 
 </body>
