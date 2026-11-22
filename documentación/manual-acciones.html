@@ -254,7 +254,7 @@
                                 <td><code>/register-center/approve/{token}, /{token}/reject</code></td>
                                 <td><span class="http-get">GET</span> <span class="http-post">POST</span></td>
                                 <td>Revisar un centro nuevo (enlace del correo a administración) y «Publicar centro» o «Rechazar registro» (<code>/reject</code>); <code>/photo</code> enseña su foto</td>
-                                <td>✅ Con el enlace</td>
+                                <td>🔒 Enlace + sesión de administración (<code>CRM_ADMIN_EMAIL</code>); otra cuenta, 404</td>
                                 <td>✅ Con el enlace</td>
                                 <td>✅ Con el enlace</td>
                             </tr>
@@ -817,7 +817,7 @@
                     <p>Crea una cuenta de cliente. La cuenta nueva entra al momento, con el correo sin comprobar.</p>
                     <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.9rem;">
                         <li><strong>Datos:</strong> nombre, correo, teléfono con prefijo de país (ver <a href="#formato-datos">Formato de los datos</a>), contraseña y confirmación.</li>
-                        <li><strong>Contraseña:</strong> 8 caracteres como mínimo y ninguna de las más usadas (<code>PasswordPolicy</code>).</li>
+                        <li><strong>Contraseña:</strong> de 8 a 32 caracteres, solo letras, números y símbolos del teclado, y ninguna de las más usadas (<code>PasswordPolicy</code>).</li>
                         <li><strong>Correo ya conocido:</strong> si es de un cliente dado de alta a mano, no pone la contraseña: manda a ese correo un enlace de activación. Si es de una cuenta solo de Google, avisa y propone «Continuar con Google». No se aceptan correos internos <code>@cbelleza.local</code>.</li>
                         <li><strong>Límite:</strong> 10 registros por conexión y hora.</li>
                     </ul>
@@ -1402,7 +1402,7 @@
                             </ul>
                         </li>
                         <li><strong>Invitaciones</strong> (<code>/invitation/{token}</code>): el responsable recibe su enlace al momento y el resto del equipo cuando se publica el centro. Cada enlace sirve una vez, dura 7 días y es para crear la contraseña; si caduca, se pide otro en la misma página. También se puede entrar con Google. Si el dueño invita a un trabajador que ya tiene cuenta y está sin centro, la invitación es para unirse (<code>account_invitations.center_id</code>): no entra en el equipo hasta que pulsa «Unirme a …» (<code>POST /invitation/{token}/join</code>) o crea su contraseña si aún no tenía.</li>
-                        <li><strong>Revisión</strong> (<code>/register-center/approve/{token}</code>): administración (<code>CRM_ADMIN_EMAIL</code>) recibe el enlace por correo, revisa los datos y elige. El enlace caduca a los 30 días (<code>centers.approval_requested_at</code>); después la página dice «Enlace caducado» y «Enviar un enlace nuevo» (<code>POST /{token}/renew</code>) manda otro a <code>CRM_ADMIN_EMAIL</code>, nunca a quien lo pide:
+                        <li><strong>Revisión</strong> (<code>/register-center/approve/{token}</code>): administración (<code>CRM_ADMIN_EMAIL</code>) recibe el enlace por correo, inicia sesión con esa cuenta (sin ella el enlace no deja ver ni decidir nada), revisa los datos y elige. Al decidir, el enlace deja de valer. El enlace caduca a los 30 días (<code>centers.approval_requested_at</code>); después la página dice «Enlace caducado» y «Enviar un enlace nuevo» (<code>POST /{token}/renew</code>) manda otro a <code>CRM_ADMIN_EMAIL</code>, nunca a quien lo pide:
                             <ul style="margin: 0.3rem 0 0 1.2rem;">
                                 <li><strong>«Publicar centro»</strong>: sale en el buscador y el mapa, admite reservas, el dueño recibe un aviso y el equipo su invitación.</li>
                                 <li><strong>«Rechazar registro»</strong> (<code>POST /{token}/reject</code>, pide confirmación): borra el centro, las cuentas de su equipo y todo lo que hayan preparado (tratamientos, inventario, agenda, fichas…). Los clientes con cuenta se quedan; los apuntados a mano solo se borran si no salen en otro centro. No se puede deshacer, no manda ningún correo y el enlace deja de valer.</li>
@@ -1634,8 +1634,8 @@
                             </tr>
                             <tr>
                                 <td><strong>Contraseña débil o sin la actual</strong></td>
-                                <td>8 caracteres como mínimo, ninguna de las más usadas; para cambiarla se pide la actual.</td>
-                                <td>«La contraseña debe tener al menos 8 caracteres.» / «Esa contraseña es de las más usadas…» / «La contraseña actual no es correcta.»</td>
+                                <td>De 8 a 32 caracteres (letras, números y símbolos del teclado), ninguna de las más usadas; para cambiarla se pide la actual.</td>
+                                <td>«La contraseña debe tener al menos 8 caracteres.» / «La contraseña puede tener como mucho 32 caracteres.» / «Usa solo letras, números y símbolos del teclado…» / «Esa contraseña es de las más usadas…» / «La contraseña actual no es correcta.»</td>
                             </tr>
                             <tr>
                                 <td><strong>Demasiados intentos de login</strong></td>

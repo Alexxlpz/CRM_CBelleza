@@ -8,6 +8,14 @@
     const panel = document.getElementById('hoy');
     if (!panel) return;
 
+    const list = panel.querySelector('.today-list--scroll');
+    // La fila empieza en la cita en curso o la siguiente, no en las de quien no vino esta mañana
+    function scrollToCurrent() {
+        const current = list?.querySelector('.today-item.is-now:not([hidden]), .today-item.is-next:not([hidden])');
+        if (list) list.scrollLeft = current ? current.offsetLeft : 0;
+    }
+    scrollToCurrent();
+
     const me = panel.dataset.me;
     const buttons = panel.querySelectorAll('[data-today-filter]');
     const items = panel.querySelectorAll('.today-item');
@@ -28,6 +36,7 @@
         empty.hidden = visible > 0;
         if (emptyMine) emptyMine.hidden = filter !== 'mine';
         if (emptyAll) emptyAll.hidden = filter === 'mine';
+        scrollToCurrent();
     }
 
     buttons.forEach(btn => btn.addEventListener('click', () => show(btn.dataset.todayFilter)));

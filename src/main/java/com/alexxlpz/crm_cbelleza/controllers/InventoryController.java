@@ -1,6 +1,5 @@
 package com.alexxlpz.crm_cbelleza.controllers;
 
-import com.alexxlpz.crm_cbelleza.security.CenterOwnerOnly;
 import com.alexxlpz.crm_cbelleza.dto.ClientSummaryDTO;
 import com.alexxlpz.crm_cbelleza.entities.Inventory;
 import com.alexxlpz.crm_cbelleza.entities.Product;
@@ -93,7 +92,6 @@ public class InventoryController {
      * Alta en el inventario. Un producto nuevo puede llevar foto: la que se sube o, si no, la que encontró la búsqueda
      * por código de barras. Si la foto falla, el producto se queda igualmente (se le puede poner luego desde «Ver Info»).
      */
-    @CenterOwnerOnly
     @PostMapping("/worker/inventory/add")
     public String add(@AuthenticationPrincipal AppUserDetails worker,
                       @ModelAttribute InventoryItemForm form,
@@ -123,7 +121,6 @@ public class InventoryController {
     }
 
     /** Pone o cambia la foto de un producto creado por el centro (desde «Ver Info»). */
-    @CenterOwnerOnly
     @PostMapping("/worker/inventory/{id}/photo")
     public String photo(@AuthenticationPrincipal AppUserDetails worker,
                         @PathVariable Long id,
@@ -138,7 +135,6 @@ public class InventoryController {
         return "redirect:/worker/inventory";
     }
 
-    @CenterOwnerOnly
     @PostMapping("/worker/inventory/{id}/photo/delete")
     public String removePhoto(@AuthenticationPrincipal AppUserDetails worker,
                               @PathVariable Long id,
@@ -153,7 +149,6 @@ public class InventoryController {
     }
 
     /** Nombre, categoría, precio y descripción de un producto creado por el centro (desde «Ver Info»). */
-    @CenterOwnerOnly
     @PostMapping("/worker/inventory/{id}/edit")
     public String edit(@AuthenticationPrincipal AppUserDetails worker,
                        @PathVariable Long id,
@@ -170,7 +165,6 @@ public class InventoryController {
     }
 
     /** Aviso de stock bajo de un producto: unidades a partir de las que avisa, o vacío para no avisar. */
-    @CenterOwnerOnly
     @PostMapping("/worker/inventory/{id}/low-stock")
     public String lowStock(@AuthenticationPrincipal AppUserDetails worker,
                            @PathVariable Long id,
@@ -188,7 +182,6 @@ public class InventoryController {
         return "redirect:/worker/inventory";
     }
 
-    @CenterOwnerOnly
     @PostMapping("/worker/inventory/{id}/delete")
     public String delete(@AuthenticationPrincipal AppUserDetails worker,
                          @PathVariable Long id,

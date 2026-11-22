@@ -2,7 +2,6 @@ package com.alexxlpz.crm_cbelleza.controllers;
 
 import com.alexxlpz.crm_cbelleza.booking.CenterClock;
 import com.alexxlpz.crm_cbelleza.entities.Center;
-import com.alexxlpz.crm_cbelleza.security.CenterOwnerOnly;
 import com.alexxlpz.crm_cbelleza.security.AppUserDetails;
 import com.alexxlpz.crm_cbelleza.services.AnalyticsCsv;
 import com.alexxlpz.crm_cbelleza.services.AnalyticsService;
@@ -89,7 +88,6 @@ public class WorkerDashboardController {
         model.addAttribute("pendingRequests", dashboardService.pendingFor(center));
     }
 
-    @CenterOwnerOnly
     @GetMapping("/worker/analytics")
     public String analytics(@AuthenticationPrincipal AppUserDetails worker,
                             @RequestParam(name = "meses", required = false) Integer months,
@@ -105,7 +103,6 @@ public class WorkerDashboardController {
     }
 
     /** La misma vista de «Análisis» (?meses= o ?anio=) en CSV para Excel. */
-    @CenterOwnerOnly
     @GetMapping("/worker/analytics/export")
     public ResponseEntity<byte[]> export(@AuthenticationPrincipal AppUserDetails worker,
                                          @RequestParam(name = "meses", required = false) Integer months,

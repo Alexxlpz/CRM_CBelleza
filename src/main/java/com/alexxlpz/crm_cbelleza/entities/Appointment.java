@@ -231,9 +231,18 @@ public class Appointment {
      * la guarda así el {@code AppointmentStatusScheduler} cada minuto; aquí no se cambia el campo al cargarla.
      */
     public AppointmentStatus getStatus() {
+        return statusAt(centerNow());
+    }
+
+    /**
+     * El estado tal como se lee en el instante {@code now} (hora local del centro): una cita confirmada que ya ha
+     * terminado a esa hora es COMPLETED. Para cálculos que reciben «ahora» de fuera ({@code CenterClock}) y así no
+     * dependen del reloj del sistema.
+     */
+    public AppointmentStatus statusAt(LocalDateTime now) {
         if (this.status == AppointmentStatus.CONFIRMED && this.dateTime != null) {
             LocalDateTime end = getEndDateTime();
-            if (end != null && !centerNow().isBefore(end)) {
+            if (end != null && !now.isBefore(end)) {
                 return AppointmentStatus.COMPLETED;
             }
         }

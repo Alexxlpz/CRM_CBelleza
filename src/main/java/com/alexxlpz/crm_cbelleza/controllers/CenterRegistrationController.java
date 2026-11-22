@@ -11,6 +11,7 @@ import com.alexxlpz.crm_cbelleza.forms.CenterRegistrationForm;
 import com.alexxlpz.crm_cbelleza.forms.PhoneNumbers;
 import com.alexxlpz.crm_cbelleza.forms.PasswordPolicy;
 import com.alexxlpz.crm_cbelleza.mail.CenterOnboardingMailService;
+import com.alexxlpz.crm_cbelleza.security.AdminAccess;
 import com.alexxlpz.crm_cbelleza.security.AppUserDetails;
 import com.alexxlpz.crm_cbelleza.security.PublicFormLimiter;
 import com.alexxlpz.crm_cbelleza.services.CenterPhotoService;
@@ -26,6 +27,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -59,6 +61,7 @@ public class CenterRegistrationController {
     private final OpeningHoursService openingHours;
     private final TeamService team;
     private final PublicFormLimiter limiter;
+    private final AdminAccess adminAccess;
 
     public CenterRegistrationController(CenterRegistrationService registrationService,
                                         InvitationService invitationService,
@@ -68,7 +71,9 @@ public class CenterRegistrationController {
                                         UserService userService,
                                         OpeningHoursService openingHours,
                                         TeamService team,
-                                        PublicFormLimiter limiter) {
+                                        PublicFormLimiter limiter,
+                                        AdminAccess adminAccess) {
+        this.adminAccess = adminAccess;
         this.openingHours = openingHours;
         this.team = team;
         this.limiter = limiter;
@@ -126,7 +131,8 @@ public class CenterRegistrationController {
     }
 
     @GetMapping("/register-center/approve/{token}")
-    public String approvalPage(@PathVariable String token, Model model) {
+    public String approvalPage(@PathVariable String token, Model model, @AuthenticationPrincipal AppUserDetails viewer) {
+        adminAccess.require(viewer);
         model.addAttribute("token", token);
         try {
             return approvalView(registrationService.pendingCenter(token), model);
@@ -137,7 +143,8 @@ public class CenterRegistrationController {
 
     /** Enlace caducado: se manda uno nuevo, siempre al correo de administración (CRM_ADMIN_EMAIL). */
     @PostMapping("/register-center/approve/{token}/renew")
-    public String renewApproval(@PathVariable String token, Model model) {
+    public String renewApproval(@PathVariable String token, Model model, @AuthenticationPrincipal AppUserDetails viewer) {
+        adminAccess.require(viewer);
         CenterRegistrationService.ApprovalRenewal renewal;
         try {
             renewal = registrationService.renewApproval(token);
@@ -150,7 +157,8 @@ public class CenterRegistrationController {
     }
 
     @PostMapping("/register-center/approve/{token}")
-    public String approve(@PathVariable String token, Model model) {
+    public String approve(@PathVariable String token, Model model, @AuthenticationPrincipal AppUserDetails viewer) {
+        adminAccess.require(viewer);
         Center center;
         try {
             center = registrationService.publish(token);
@@ -167,7 +175,8 @@ public class CenterRegistrationController {
 
     /** Rechaza el alta: el centro y las cuentas de su equipo se borran. */
     @PostMapping("/register-center/approve/{token}/reject")
-    public String reject(@PathVariable String token, Model model) {
+    public String reject(@PathVariable String token, Model model, @AuthenticationPrincipal AppUserDetails viewer) {
+        adminAccess.require(viewer);
         try {
             model.addAttribute("rejectedCenter", registrationService.reject(token));
         } catch (ApprovalLinkExpiredException e) {

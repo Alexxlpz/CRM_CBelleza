@@ -13,6 +13,8 @@
     </th:block>
     <script th:if="${section == 'reservas'}" th:src="@{/js/loyalty-settings.js}" defer></script>
     <script th:if="${section == 'centro' or section == 'cuenta'}" th:src="@{/js/photo-picker.js}" defer></script>
+    <script th:if="${section == 'cuenta'}" th:src="@{/js/form-validation.js}" defer></script>
+    <script th:if="${section == 'cuenta'}" th:src="@{/js/password-change.js}" defer></script>
 </head>
 <body>
     <div th:replace="~{fragments/navbar :: worker(${notifications})}"></div>

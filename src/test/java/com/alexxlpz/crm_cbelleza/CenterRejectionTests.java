@@ -1,6 +1,9 @@
 package com.alexxlpz.crm_cbelleza;
 
 import com.alexxlpz.crm_cbelleza.entities.Center;
+import com.alexxlpz.crm_cbelleza.entities.Role;
+import com.alexxlpz.crm_cbelleza.entities.User;
+import com.alexxlpz.crm_cbelleza.security.AppUserDetails;
 import com.alexxlpz.crm_cbelleza.entities.Treatment;
 import com.alexxlpz.crm_cbelleza.entities.TreatmentType;
 import com.alexxlpz.crm_cbelleza.forms.CenterRegistrationForm;
@@ -15,6 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.mock.web.MockHttpSession;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,10 +33,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/** Rechazar un alta desde el enlace de administración: se borra el centro con su equipo y lo que hayan preparado. */
+/**
+ * Rechazar un alta desde el enlace de administración: se borra el centro con su equipo y lo que hayan preparado.
+ * Solo con la sesión de administración (AdminAccess, seguridad #17).
+ */
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
@@ -58,10 +68,13 @@ class CenterRejectionTests {
     @Autowired
     private JdbcTemplate jdbc;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @Test
     void approvalPageOffersToReject() throws Exception {
         var registration = register();
-        mvc.perform(get("/register-center/approve/" + registration.approvalToken()))
+        mvc.perform(get("/register-center/approve/" + registration.approvalToken()).with(TestUsers.asAdmin(users)))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("/register-center/approve/" + registration.approvalToken() + "/reject")))
                 .andExpect(content().string(containsString("Rechazar registro")));
@@ -69,6 +82,7 @@ class CenterRejectionTests {
 
     @Test
     void rejectingDeletesTheCenterItsTeamAndWhatTheyPrepared() throws Exception {
+        var admin = TestUsers.asAdmin(users); // antes de contar: la cuenta de administración no es del centro
         long centersBefore = centers.count();
         long usersBefore = users.count();
         var registration = register();
@@ -91,7 +105,7 @@ class CenterRejectionTests {
         Long sofia = TestUsers.details(users, TestUsers.CLIENT).getId();
         jdbc.update("INSERT INTO client_cards (center_id, client_id) VALUES (?, ?)", centerId, sofia);
 
-        mvc.perform(post("/register-center/approve/" + registration.approvalToken() + "/reject").with(csrf()))
+        mvc.perform(post("/register-center/approve/" + registration.approvalToken() + "/reject").with(admin).with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Registro rechazado")))
                 .andExpect(content().string(containsString("Estudio Alba")));
@@ -111,9 +125,9 @@ class CenterRejectionTests {
         assertEquals(0, jdbc.queryForObject("SELECT COUNT(*) FROM account_invitations WHERE user_id = ?", Integer.class, ownerId));
 
         // El enlace ya no vale: ni para verlo, ni para publicarlo, ni para rechazarlo otra vez
-        mvc.perform(get("/register-center/approve/" + registration.approvalToken())).andExpect(status().isNotFound());
-        mvc.perform(post("/register-center/approve/" + registration.approvalToken()).with(csrf())).andExpect(status().isNotFound());
-        mvc.perform(post("/register-center/approve/" + registration.approvalToken() + "/reject").with(csrf()))
+        mvc.perform(get("/register-center/approve/" + registration.approvalToken()).with(TestUsers.asAdmin(users))).andExpect(status().isNotFound());
+        mvc.perform(post("/register-center/approve/" + registration.approvalToken()).with(TestUsers.asAdmin(users)).with(csrf())).andExpect(status().isNotFound());
+        mvc.perform(post("/register-center/approve/" + registration.approvalToken() + "/reject").with(TestUsers.asAdmin(users)).with(csrf()))
                 .andExpect(status().isNotFound());
     }
 
@@ -121,7 +135,7 @@ class CenterRejectionTests {
     void aPublishedCenterCannotBeRejected() throws Exception {
         var registration = register();
         registrationService.publish(registration.approvalToken());
-        mvc.perform(post("/register-center/approve/" + registration.approvalToken() + "/reject").with(csrf()))
+        mvc.perform(post("/register-center/approve/" + registration.approvalToken() + "/reject").with(TestUsers.asAdmin(users)).with(csrf()))
                 .andExpect(status().isNotFound());
         assertTrue(centers.existsById(registration.centerId()));
     }
@@ -129,8 +143,56 @@ class CenterRejectionTests {
     @Test
     void aWrongLinkRejectsNothing() throws Exception {
         long before = centers.count();
-        mvc.perform(post("/register-center/approve/no-es-un-token/reject").with(csrf())).andExpect(status().isNotFound());
+        mvc.perform(post("/register-center/approve/no-es-un-token/reject").with(TestUsers.asAdmin(users)).with(csrf())).andExpect(status().isNotFound());
         assertEquals(before, centers.count());
+    }
+
+    // Seguridad #17: el enlace solo lleva a la página; publicar o rechazar pide la sesión de administración
+
+    @Test
+    void withoutASessionTheLinkAsksToLogInAndComesBackAfterwards() throws Exception {
+        var registration = register();
+        String approve = "/register-center/approve/" + registration.approvalToken();
+        users.save(User.builder().name("Administración").email(TestUsers.ADMIN_EMAIL)
+                .password(passwordEncoder.encode("Admin-Cuquora-1")).role(Role.CLIENT).build());
+
+        MockHttpSession session = new MockHttpSession();
+        mvc.perform(get(approve).session(session)).andExpect(redirectedUrl("/login"));
+        mvc.perform(post(approve + "/reject").with(csrf())).andExpect(redirectedUrl("/login"));
+        mvc.perform(post(approve).with(csrf())).andExpect(redirectedUrl("/login"));
+        assertTrue(centers.existsById(registration.centerId()));
+        assertFalse(centers.findById(registration.centerId()).orElseThrow().isPublished());
+
+        // Tras iniciar sesión vuelve a la página del centro
+        mvc.perform(post("/login").session(session).with(csrf())
+                        .param("identifier", TestUsers.ADMIN_EMAIL).param("password", "Admin-Cuquora-1"))
+                .andExpect(redirectedUrl("http://localhost" + approve));
+    }
+
+    @Test
+    void anyOtherAccountGetsNotFound() throws Exception {
+        var registration = register();
+        String approve = "/register-center/approve/" + registration.approvalToken();
+        for (var viewer : List.of(TestUsers.as(users, TestUsers.CLIENT), TestUsers.as(users, TestUsers.WORKER_CENTER_1))) {
+            mvc.perform(get(approve).with(viewer)).andExpect(status().isNotFound());
+            mvc.perform(get(approve + "/photo").with(viewer)).andExpect(status().isNotFound());
+            mvc.perform(post(approve + "/reject").with(viewer).with(csrf())).andExpect(status().isNotFound());
+            mvc.perform(post(approve).with(viewer).with(csrf())).andExpect(status().isNotFound());
+        }
+        assertTrue(centers.existsById(registration.centerId()));
+        assertFalse(centers.findById(registration.centerId()).orElseThrow().isPublished());
+    }
+
+    @Test
+    void anUnverifiedAccountWithTheAdminEmailIsNotAdmin() throws Exception {
+        var registration = register();
+        // Como si alguien se registrara con el correo de administración sin poder abrir su buzón
+        User impostor = users.save(User.builder().name("Impostor").email(TestUsers.ADMIN_EMAIL)
+                .password(passwordEncoder.encode("Impostor-1")).role(Role.CLIENT).emailVerified(false).build());
+        mvc.perform(post("/register-center/approve/" + registration.approvalToken() + "/reject")
+                        .with(user(AppUserDetails.from(impostor))).with(csrf()))
+                .andExpect(status().isNotFound());
+        assertTrue(centers.existsById(registration.centerId()));
     }
 
     private CenterRegistrationService.Registration register() {

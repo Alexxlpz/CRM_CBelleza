@@ -3,7 +3,6 @@ package com.alexxlpz.crm_cbelleza.controllers;
 import com.alexxlpz.crm_cbelleza.entities.Review;
 import com.alexxlpz.crm_cbelleza.exceptions.BusinessRuleException;
 import com.alexxlpz.crm_cbelleza.security.AppUserDetails;
-import com.alexxlpz.crm_cbelleza.security.CenterOwnerOnly;
 import com.alexxlpz.crm_cbelleza.services.ReviewService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -44,7 +43,6 @@ public class WorkerReviewController {
         return "worker/reviews";
     }
 
-    @CenterOwnerOnly
     @PostMapping("/worker/reviews/{id}/reply")
     public String reply(@AuthenticationPrincipal AppUserDetails worker,
                         @PathVariable Long id,

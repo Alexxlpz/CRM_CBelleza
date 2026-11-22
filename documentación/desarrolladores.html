@@ -363,7 +363,7 @@
                             <text x="415" y="226" text-anchor="middle" class="ts">centro? si no, cierra sesión</text>
                             <rect x="560" y="162" width="250" height="74" rx="10" class="bx b-owner"/>
                             <text x="685" y="190" text-anchor="middle" class="tt c-owner">CenterOwner</text>
-                            <text x="685" y="210" text-anchor="middle" class="ts">/worker/** · @CenterOwnerOnly</text>
+                            <text x="685" y="210" text-anchor="middle" class="ts">/worker/** · TeamRoutes</text>
                             <text x="685" y="226" text-anchor="middle" class="ts">sin ser dueño = aviso o 403</text>
                             <rect x="830" y="162" width="250" height="74" rx="10" class="bx b-client"/>
                             <text x="955" y="190" text-anchor="middle" class="tt c-client">DeletedAccount</text>
@@ -444,7 +444,7 @@
                             <rect x="20" y="36" width="250" height="80" rx="10" class="bx b-admin"/>
                             <text x="145" y="62" text-anchor="middle" class="tt c-admin">security/</text>
                             <text x="145" y="82" text-anchor="middle" class="ts">login, Google, interceptores,</text>
-                            <text x="145" y="99" text-anchor="middle" class="ts">freno al login, @CenterOwnerOnly</text>
+                            <text x="145" y="99" text-anchor="middle" class="ts">freno al login, TeamRoutes</text>
                             <rect x="290" y="36" width="250" height="80" rx="10" class="bx b-worker"/>
                             <text x="415" y="62" text-anchor="middle" class="tt c-worker">controllers/</text>
                             <text x="415" y="82" text-anchor="middle" class="ts">28 controladores, uno por área</text>
@@ -992,7 +992,7 @@
 
                             <rect x="665" y="30" width="200" height="190" rx="12" class="bx b-owner"/>
                             <text x="765" y="60" text-anchor="middle" class="tt c-owner">Dueño</text>
-                            <text x="765" y="80" text-anchor="middle" class="tm">centers.owner_id · @CenterOwnerOnly</text>
+                            <text x="765" y="80" text-anchor="middle" class="tm">centers.owner_id · TeamRoutes</text>
                             <text x="680" y="112" class="ts">• + datos, horario, foto</text>
                             <text x="680" y="132" class="ts">• + equipo y ceder centro</text>
                             <text x="680" y="152" class="ts">• + carta, ofertas, productos</text>
@@ -1011,14 +1011,14 @@
                         </svg>
                     </div>
                     <p class="swipe-hint">Desliza el dibujo hacia los lados para verlo entero →</p>
-                    <figcaption><strong>El dueño es un trabajador más</strong> con permisos de más. Las acciones solo del dueño llevan <code>@CenterOwnerOnly</code>; las frena <code>CenterOwnerInterceptor</code> (formulario → vuelve con <code>errorMessage</code>; fetch → 403 JSON). Las vistas usan <code>isCenterOwner</code> y <code>ownerName</code> (de <code>CurrentUserModelAdvice</code>) para esconder botones. Un trabajador no puede usar el área de cliente: desde un centro ve un aviso con enlace a su panel.</figcaption>
+                    <figcaption><strong>El dueño es un trabajador más</strong> con permisos de más. En <code>/worker/**</code> todo es solo del dueño salvo lo que lista <code>TeamRoutes</code> (cerrado por defecto: un endpoint que se olvide apuntar no queda abierto); lo frena <code>CenterOwnerInterceptor</code> (formulario → vuelve con <code>errorMessage</code>; fetch → 403 JSON). Las vistas usan <code>isCenterOwner</code> y <code>ownerName</code> (de <code>CurrentUserModelAdvice</code>) para esconder botones. Un trabajador no puede usar el área de cliente: desde un centro ve un aviso con enlace a su panel.</figcaption>
                 </figure>
 
                 <div class="table-responsive">
                     <table class="doc-table">
                         <thead><tr><th>Defensa</th><th>Dónde</th><th>Qué hace</th></tr></thead>
                         <tbody>
-                            <tr><td>Contraseñas</td><td><code>PasswordPolicy</code></td><td>BCrypt. Mínimo 8 caracteres, ni las más usadas ni un carácter repetido. Cambiarla pide la actual. <strong>Falta el máximo de 72 bytes</strong> (pendiente #15).</td></tr>
+                            <tr><td>Contraseñas</td><td><code>PasswordPolicy</code></td><td>BCrypt. De 8 a 32 caracteres, solo letras, números y símbolos del teclado (así nunca pasa de los 72 bytes de BCrypt), ni las más usadas ni un carácter repetido. Cambiarla pide la actual.</td></tr>
                             <tr><td>Freno al login</td><td><code>LoginAttemptService</code>, <code>LoginThrottleFilter</code></td><td>5 fallos con una cuenta desde una IP, 20 desde una IP o 50 con una cuenta desde cualquier IP: 15 min sin comprobar la contraseña. Cuenta por lo escrito en <code>identifier</code>, exista o no. En memoria.</td></tr>
                             <tr><td>Freno a formularios públicos</td><td><code>PublicFormLimiter</code> + campo trampa</td><td>Por IP y hora: contacto 5, alta de centro 5, registro 10, recuperar contraseña 5. El campo oculto lo rellenan los bots.</td></tr>
                             <tr><td>Sesiones</td><td><code>PasswordChangeSessions</code>, <code>JdbcRememberMeTokenRepository</code></td><td>Cambiar o restablecer la contraseña cierra las demás sesiones y olvida los dispositivos recordados.</td></tr>
@@ -1099,7 +1099,7 @@
                         <tbody>
                             <tr><td>Invitación al equipo (crear contraseña o «Unirme»)</td><td><code>/invitation/{token}</code></td><td>7 días</td><td><code>InvitationService</code>, <code>account_invitations</code></td></tr>
                             <tr><td>Recuperar contraseña</td><td><code>/reset-password/{token}</code></td><td>1 hora</td><td><code>PasswordResetService</code>, <code>password_resets</code></td></tr>
-                            <tr><td>Publicar o rechazar un centro</td><td><code>/register-center/approve/{token}</code></td><td>30 días</td><td><code>CenterRegistrationService</code>, <code>centers.approval_token_hash</code></td></tr>
+                            <tr><td>Publicar o rechazar un centro</td><td><code>/register-center/approve/{token}</code></td><td>30 días; además pide la sesión de administración (<code>AdminAccess</code>)</td><td><code>CenterRegistrationService</code>, <code>centers.approval_token_hash</code></td></tr>
                             <tr><td>Activar la cuenta de un cliente dado de alta a mano</td><td>por correo al registrarse</td><td>7 días (es una invitación: <code>InvitationService.reinvite</code>)</td><td><code>UserService.registerClient</code></td></tr>
                             <tr><td>«Recordar mi sesión»</td><td>cookie</td><td>14 días</td><td><code>persistent_logins</code> (no dependen de la contraseña)</td></tr>
                         </tbody>
@@ -1463,7 +1463,7 @@
                     <li><strong>Migración</strong><span><code>V36__…sql</code>, H2 + PostgreSQL</span></li>
                     <li><strong>Entidad y repo</strong><span>consultas con <code>centerId</code>, <code>@EntityGraph</code></span></li>
                     <li><strong>Servicio</strong><span>reglas, <code>BusinessRuleException</code> en español</span></li>
-                    <li><strong>Controlador</strong><span>record de <code>forms/</code>; ¿<code>@CenterOwnerOnly</code>?</span></li>
+                    <li><strong>Controlador</strong><span>record de <code>forms/</code>; ¿en <code>TeamRoutes</code>?</span></li>
                     <li><strong>Pantalla</strong><span>fragmentos, tokens, sin inline, 6 anchos</span></li>
                     <li><strong>Tests</strong><span>aislamiento, dueño, render</span></li>
                     <li><strong>Docs</strong><span>CLAUDE.md, CHANGELOG, esta web</span></li>
@@ -1472,7 +1472,7 @@
                 <div class="faq">
                     <details>
                         <summary>¿Es solo del dueño?</summary>
-                        <div><p>Si cambia la configuración del centro, la carta, el catálogo, el equipo o enseña cifras de negocio, sí: <code>@CenterOwnerOnly</code> en el método del controlador, un caso en <code>CenterOwnershipTests</code> y, en la vista, el botón escondido con <code>isCenterOwner</code> y el aviso <code>fragments/alerts :: ownerOnly</code>. La agenda, los clientes, las ventas y el stock son de todo el equipo.</p></div>
+                        <div><p>Si cambia la configuración del centro, la carta, el catálogo, el equipo o enseña cifras de negocio, no hagas nada: los endpoints de <code>/worker/**</code> nacen solo para el dueño. Si es para todo el equipo, apúntalo en <code>TeamRoutes</code> (lo vigila <code>TeamRoutesTests</code>). Añade un caso en <code>CenterOwnershipTests</code> y, en la vista, el botón escondido con <code>isCenterOwner</code> y el aviso <code>fragments/alerts :: ownerOnly</code>. La agenda, los clientes, las ventas y el stock son de todo el equipo.</p></div>
                     </details>
                     <details>
                         <summary>¿Devuelve JSON?</summary>
@@ -1503,7 +1503,7 @@
 
                 <ul class="tasks">
                     <li><span>Qué rutas son públicas</span><span><code>SecurityConfig.PUBLIC_PAGES</code></span></li>
-                    <li><span>Qué endpoints son solo del dueño</span><span><code>grep -rn "@CenterOwnerOnly" src/main/java</code></span></li>
+                    <li><span>Qué endpoints son solo del dueño</span><span>todo lo que no esté en <code>security/TeamRoutes.java</code></span></li>
                     <li><span>Si cabe una cita</span><span><code>booking/AgendaSnapshot</code>, cargado por <code>AgendaAvailabilityService</code></span></li>
                     <li><span>El horario de un centro</span><span><code>OpeningHoursService.forCenter</code> → <code>booking/OpeningHours</code> (<code>stateAt</code>, <code>describe</code>)</span></li>
                     <li><span>«Ahora» en un centro</span><span><code>CenterClock.now(clock, center)</code></span></li>

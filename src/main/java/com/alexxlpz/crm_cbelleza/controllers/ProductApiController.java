@@ -4,7 +4,6 @@ import com.alexxlpz.crm_cbelleza.entities.ProductPhoto;
 import com.alexxlpz.crm_cbelleza.exceptions.ApiEndpoint;
 import com.alexxlpz.crm_cbelleza.exceptions.ResourceNotFoundException;
 import com.alexxlpz.crm_cbelleza.security.AppUserDetails;
-import com.alexxlpz.crm_cbelleza.security.CenterOwnerOnly;
 import com.alexxlpz.crm_cbelleza.services.ProductLookupService;
 import com.alexxlpz.crm_cbelleza.services.ProductPhotoService;
 import org.springframework.http.CacheControl;
@@ -34,14 +33,12 @@ public class ProductApiController {
     }
 
     /** Qué se sabe del producto con ese código: si ya está en el inventario, en el catálogo o en Open Beauty Facts. */
-    @CenterOwnerOnly
     @GetMapping("/worker/inventory/barcode")
     public ProductLookupService.Result find(@AuthenticationPrincipal AppUserDetails worker, @RequestParam String code) {
         return lookup.lookup(worker.getCenterId(), code);
     }
 
     /** Vista previa de la foto encontrada por el código, antes de guardar el producto. */
-    @CenterOwnerOnly
     @GetMapping("/worker/inventory/barcode/photo")
     public ResponseEntity<byte[]> foundPhoto(@RequestParam String code) {
         byte[] jpeg = lookup.foundPhoto(code).orElseThrow(() -> new ResourceNotFoundException("No hay foto para ese código."));

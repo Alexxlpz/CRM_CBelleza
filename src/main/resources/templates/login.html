@@ -53,7 +53,8 @@
                     </div>
                     <div class="password-wrapper">
                         <input type="password" id="passwordInput" name="password" class="form-control"
-                               autocomplete="current-password" placeholder="Tu contraseña">
+                               autocomplete="current-password" placeholder="Tu contraseña"
+                               th:maxlength="${T(com.alexxlpz.crm_cbelleza.forms.PasswordPolicy).MAX_LENGTH}" data-password-limit>
                         <button type="button" class="password-toggle-btn" tabindex="-1" data-toggle-password="passwordInput"
                                 aria-label="Mostrar u ocultar contraseña" aria-pressed="false">
                             <i class="lucide-eye" aria-hidden="true"></i>

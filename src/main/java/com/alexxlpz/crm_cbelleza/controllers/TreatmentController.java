@@ -1,6 +1,5 @@
 package com.alexxlpz.crm_cbelleza.controllers;
 
-import com.alexxlpz.crm_cbelleza.security.CenterOwnerOnly;
 import com.alexxlpz.crm_cbelleza.entities.Treatment;
 import com.alexxlpz.crm_cbelleza.entities.TreatmentType;
 import com.alexxlpz.crm_cbelleza.exceptions.BusinessRuleException;
@@ -62,7 +61,6 @@ public class TreatmentController {
         return "worker/treatments";
     }
 
-    @CenterOwnerOnly
     @PostMapping("/worker/treatments/add")
     public String add(@AuthenticationPrincipal AppUserDetails worker,
                       @ModelAttribute TreatmentForm form,
@@ -76,7 +74,6 @@ public class TreatmentController {
         return "redirect:/worker/treatments";
     }
 
-    @CenterOwnerOnly
     @PostMapping("/worker/treatments/{id}/edit")
     public String edit(@AuthenticationPrincipal AppUserDetails worker,
                        @PathVariable Long id,
@@ -92,7 +89,6 @@ public class TreatmentController {
         return "redirect:/worker/treatments";
     }
 
-    @CenterOwnerOnly
     @PostMapping("/worker/treatments/{id}/hide")
     public String hide(@AuthenticationPrincipal AppUserDetails worker, @PathVariable Long id, RedirectAttributes redirect) {
         Treatment treatment = treatmentService.setHidden(worker.getCenterId(), id, true);
@@ -101,7 +97,6 @@ public class TreatmentController {
         return "redirect:/worker/treatments";
     }
 
-    @CenterOwnerOnly
     @PostMapping("/worker/treatments/{id}/show")
     public String show(@AuthenticationPrincipal AppUserDetails worker, @PathVariable Long id, RedirectAttributes redirect) {
         Treatment treatment = treatmentService.setHidden(worker.getCenterId(), id, false);
@@ -109,7 +104,6 @@ public class TreatmentController {
         return "redirect:/worker/treatments";
     }
 
-    @CenterOwnerOnly
     @PostMapping("/worker/treatments/{id}/delete")
     public String delete(@AuthenticationPrincipal AppUserDetails worker, @PathVariable Long id, RedirectAttributes redirect) {
         try {
@@ -121,7 +115,6 @@ public class TreatmentController {
         return "redirect:/worker/treatments";
     }
 
-    @CenterOwnerOnly
     @PostMapping("/worker/treatments/{id}/workers")
     public String saveWorkers(@AuthenticationPrincipal AppUserDetails worker,
                               @PathVariable Long id,
@@ -134,7 +127,6 @@ public class TreatmentController {
         return "redirect:/worker/treatments";
     }
 
-    @CenterOwnerOnly
     @PostMapping("/worker/treatments/{id}/offer")
     public String saveOffer(@AuthenticationPrincipal AppUserDetails worker,
                             @PathVariable Long id,
@@ -149,7 +141,6 @@ public class TreatmentController {
         return "redirect:/worker/treatments";
     }
 
-    @CenterOwnerOnly
     @PostMapping("/worker/treatments/{id}/offer/delete")
     public String removeOffer(@AuthenticationPrincipal AppUserDetails worker,
                               @PathVariable Long id,

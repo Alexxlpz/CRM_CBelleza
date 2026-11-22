@@ -37,6 +37,12 @@ Al sacar una versión:
 - Teléfonos que se pulsan para llamar: el del centro en «Mis reservas» y en la ficha del centro, y el del cliente en la agenda, en «Hoy», en «Por aprobar» y en su ficha.
 - Alergias en el aviso amarillo de la cita, en la agenda y en «Hoy»: salen de la ficha técnica del cliente, de cualquier campo cuyo nombre hable de alergias (como «Alergias o Sensibilidades» de la plantilla).
 
+- Contraseñas de 8 a 32 caracteres, solo letras (también ñ y tildes), números y símbolos del teclado. Al escribir una contraseña nueva, un contador «12/32» dentro del campo y, si se teclea o se pega algo que no vale (un espacio, un emoji, «€»), no entra y se explica debajo. Antes, una contraseña muy larga daba una página de error. Las contraseñas que ya existen siguen valiendo. Si se envía una contraseña nueva de menos de 8 caracteres, el campo se pone en rojo hasta que llega a 8; no avisa mientras se escribe ni al salir del campo. También en «Mi perfil» y «Mi cuenta», que antes solo avisaban al volver del servidor.
+- Publicar o rechazar un centro nuevo pide iniciar sesión con la cuenta de administración: el enlace del correo ya no basta, así que reenviarlo no deja decidir a nadie más. Con otra cuenta, el enlace no lleva a ninguna parte. Al decidir, el enlace deja de valer.
+- «Hoy» en el panel del trabajador ya no enseña las citas completadas, solo lo que queda del día, y va en una fila que se desliza de lado en vez de una lista que empuja hacia abajo el resto del panel. Al abrir el panel, la fila empieza en la cita en curso o la siguiente.
+- La contraseña del login también admite como mucho 32 caracteres, con el mismo contador. Aquí no se filtran caracteres, para que las contraseñas antiguas con espacios u otros símbolos sigan entrando.
+- Permisos del dueño cerrados por defecto: lo que puede hacer todo el equipo está en una sola lista (`TeamRoutes`) y todo lo demás de `/worker/**` es solo del dueño, también lo que se añada en el futuro.
+
 ### Cambiado
 
 - Antes, cualquier producto con 3 unidades o menos salía como «Bajo Stock» y avisaba en la campana; ahora solo avisan los que tienen aviso puesto (ver arriba).

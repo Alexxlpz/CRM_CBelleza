@@ -2,7 +2,6 @@ package com.alexxlpz.crm_cbelleza.controllers;
 
 import com.alexxlpz.crm_cbelleza.config.SiteModelAdvice;
 import com.alexxlpz.crm_cbelleza.mail.CenterOnboardingMailService;
-import com.alexxlpz.crm_cbelleza.security.CenterOwnerOnly;
 import com.alexxlpz.crm_cbelleza.booking.CenterTimeZones;
 import com.alexxlpz.crm_cbelleza.booking.OpeningHours;
 import com.alexxlpz.crm_cbelleza.entities.Center;
@@ -176,7 +175,6 @@ public class WorkerCenterController {
     }
 
     /** Datos públicos del centro (apartado Centro). */
-    @CenterOwnerOnly
     @PostMapping("/worker/center")
     public String update(@AuthenticationPrincipal AppUserDetails worker,
                          @ModelAttribute WorkerCenterForm form,
@@ -195,7 +193,6 @@ public class WorkerCenterController {
     }
 
     /** Redes sociales del centro (apartado Centro): salen en la ficha que ven los clientes. */
-    @CenterOwnerOnly
     @PostMapping("/worker/center/social")
     public String updateSocial(@AuthenticationPrincipal AppUserDetails worker,
                                @ModelAttribute CenterSocialForm form,
@@ -228,7 +225,6 @@ public class WorkerCenterController {
     }
 
     /** Horario de un profesional del equipo: todo el del centro o uno propio (solo el dueño lo cambia). */
-    @CenterOwnerOnly
     @GetMapping("/worker/center/team/{workerId}/horario")
     public String workerHoursForm(@AuthenticationPrincipal AppUserDetails worker,
                                   @PathVariable Long workerId, Model model) {
@@ -249,7 +245,6 @@ public class WorkerCenterController {
         return "worker/worker_hours";
     }
 
-    @CenterOwnerOnly
     @PostMapping("/worker/center/team/{workerId}/horario")
     public String updateWorkerHours(@AuthenticationPrincipal AppUserDetails worker,
                                     @PathVariable Long workerId,
@@ -271,7 +266,6 @@ public class WorkerCenterController {
         }
     }
 
-    @CenterOwnerOnly
     @PostMapping("/worker/center/hours")
     public String updateHours(@AuthenticationPrincipal AppUserDetails worker,
                               @ModelAttribute OpeningHoursForm form,
@@ -287,7 +281,6 @@ public class WorkerCenterController {
         return "redirect:/worker/center/centro#horario";
     }
 
-    @CenterOwnerOnly
     @PostMapping("/worker/center/owner")
     public String transferOwnership(@AuthenticationPrincipal AppUserDetails worker,
                                     @RequestParam(required = false) Long newOwnerId,
@@ -304,7 +297,6 @@ public class WorkerCenterController {
         }
     }
 
-    @CenterOwnerOnly
     @PostMapping("/worker/center/team")
     public String invite(@AuthenticationPrincipal AppUserDetails worker,
                          @RequestParam(required = false) String name,
@@ -339,7 +331,6 @@ public class WorkerCenterController {
         return "redirect:/worker/center/equipo";
     }
 
-    @CenterOwnerOnly
     @PostMapping("/worker/center/team/{workerId}/resend")
     public String resendInvitation(@AuthenticationPrincipal AppUserDetails worker,
                                    @PathVariable Long workerId,
@@ -357,7 +348,6 @@ public class WorkerCenterController {
         return "redirect:/worker/center/equipo";
     }
 
-    @CenterOwnerOnly
     @PostMapping("/worker/center/team/{workerId}/remove")
     public String removeFromTeam(@AuthenticationPrincipal AppUserDetails worker,
                                  @PathVariable Long workerId,
@@ -373,7 +363,6 @@ public class WorkerCenterController {
         return "redirect:/worker/center/equipo";
     }
 
-    @CenterOwnerOnly
     @PostMapping("/worker/center/loyalty")
     public String updateLoyalty(@AuthenticationPrincipal AppUserDetails worker,
                                 @ModelAttribute LoyaltySettingsForm form,
@@ -399,7 +388,6 @@ public class WorkerCenterController {
         return "redirect:/worker/center/reservas#puntos";
     }
 
-    @CenterOwnerOnly
     @PostMapping("/worker/center/bookings")
     public String updateBookings(@AuthenticationPrincipal AppUserDetails worker,
                                  @RequestParam boolean autoAccept,
@@ -411,7 +399,6 @@ public class WorkerCenterController {
         return "redirect:/worker/center/reservas";
     }
 
-    @CenterOwnerOnly
     @PostMapping("/worker/center/reschedule")
     public String updateClientReschedule(@AuthenticationPrincipal AppUserDetails worker,
                                          @RequestParam int hours,
@@ -423,7 +410,6 @@ public class WorkerCenterController {
         return "redirect:/worker/center/reservas";
     }
 
-    @CenterOwnerOnly
     @PostMapping("/worker/center/photo")
     public String updatePhoto(@AuthenticationPrincipal AppUserDetails worker,
                               @RequestParam(required = false) MultipartFile photo,
@@ -439,7 +425,6 @@ public class WorkerCenterController {
         return "redirect:/worker/center/centro#foto";
     }
 
-    @CenterOwnerOnly
     @PostMapping("/worker/center/photo/delete")
     public String removePhoto(@AuthenticationPrincipal AppUserDetails worker, RedirectAttributes redirect) {
         photoService.remove(worker.getCenterId());

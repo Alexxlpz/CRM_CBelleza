@@ -1,6 +1,5 @@
 package com.alexxlpz.crm_cbelleza.controllers;
 
-import com.alexxlpz.crm_cbelleza.security.CenterOwnerOnly;
 import com.alexxlpz.crm_cbelleza.dto.ClientSummaryDTO;
 import com.alexxlpz.crm_cbelleza.entities.Appointment;
 import com.alexxlpz.crm_cbelleza.entities.AppointmentStatus;
@@ -108,7 +107,7 @@ public class ClientCardController {
         model.addAttribute("sales", sales);
         model.addAttribute("salesTotal", sales.stream().mapToDouble(ProductSale::getTotal).sum());
         model.addAttribute("visitSummary", ClientVisitSummary.of(appointments, sales,
-                summaryService.centerNow(worker.getCenterId()).toLocalDate()));
+                summaryService.centerNow(worker.getCenterId())));
         model.addAttribute("saleItems", inventoryService.getInventoryByCenter(worker.getCenterId()));
         model.addAttribute("loyalty", loyaltyService.cardFor(centerService.getCenterById(worker.getCenterId()), view.client()));
         return "worker/client_detail";
@@ -163,14 +162,12 @@ public class ClientCardController {
         }
     }
 
-    @CenterOwnerOnly
     @GetMapping("/template")
     public String template(@AuthenticationPrincipal AppUserDetails worker, Model model) {
         model.addAttribute("fields", templateService.getFields(worker.getCenterId()));
         return "worker/client_card_template";
     }
 
-    @CenterOwnerOnly
     @PostMapping("/template")
     public String saveTemplate(@AuthenticationPrincipal AppUserDetails worker,
                                @RequestParam(value = "fieldIds", required = false) List<String> ids,

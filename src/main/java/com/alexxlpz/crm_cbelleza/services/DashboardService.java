@@ -27,9 +27,13 @@ import java.util.stream.Collectors;
 public class DashboardService {
 
     private static final Set<AppointmentStatus> ATTENDED = Set.of(AppointmentStatus.CONFIRMED, AppointmentStatus.COMPLETED);
-    /** Lo que sale en «Hoy»: lo que ocupa la agenda del día y las solicitudes que aún hay que contestar. */
+    /**
+     * Lo que sale en «Hoy»: lo que queda del día y las solicitudes que aún hay que contestar. Las completadas no (una
+     * confirmada que ya ha terminado se lee como completada, así que sale de la lista sola); las de quien no se
+     * presentó, sí, para poder deshacerlo si llega tarde.
+     */
     private static final Set<AppointmentStatus> TODAY_LIST = Set.of(AppointmentStatus.PENDING, AppointmentStatus.CONFIRMED,
-            AppointmentStatus.COMPLETED, AppointmentStatus.NO_SHOW);
+            AppointmentStatus.NO_SHOW);
 
     private final AppointmentRepository appointmentRepository;
     private final InventoryRepository inventoryRepository;

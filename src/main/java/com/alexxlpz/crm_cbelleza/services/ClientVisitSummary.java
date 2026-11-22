@@ -23,10 +23,15 @@ import java.util.stream.Collectors;
 public record ClientVisitSummary(int visits, double totalSpent, LocalDateTime lastVisit, long daysSinceLastVisit,
                                  String favoriteTreatment, int favoriteCount) {
 
-    /** @param appointments citas del cliente en el centro; {@code today} es el día de hoy en la hora local del centro */
-    public static ClientVisitSummary of(List<Appointment> appointments, List<ProductSale> sales, LocalDate today) {
+    /**
+     * @param appointments citas del cliente en el centro
+     * @param now          «ahora» en la hora local del centro: decide qué citas confirmadas ya cuentan como visita y
+     *                     cuántos días hace de la última (no se usa el reloj del sistema)
+     */
+    public static ClientVisitSummary of(List<Appointment> appointments, List<ProductSale> sales, LocalDateTime now) {
+        LocalDate today = now.toLocalDate();
         List<Appointment> visits = appointments.stream()
-                .filter(a -> a.getStatus() == AppointmentStatus.COMPLETED)
+                .filter(a -> a.statusAt(now) == AppointmentStatus.COMPLETED)
                 .toList();
         double spent = visits.stream().mapToDouble(a -> a.getPrice() != null ? a.getPrice() : 0).sum()
                 + sales.stream().mapToDouble(ProductSale::getTotal).sum();

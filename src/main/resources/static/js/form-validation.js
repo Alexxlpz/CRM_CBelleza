@@ -1,7 +1,9 @@
 /*
  * Validación en vivo de formularios (login, registro, contacto y alta de centro).
  * El botón de envío queda "deshabilitado" (clase .disabled) hasta que el formulario es válido;
- * si se pulsa igualmente, se marcan los campos con error.
+ * si se pulsa igualmente, se marcan los campos con error. El error se quita en cuanto el campo es válido y no vuelve
+ * hasta el siguiente envío. Los demás campos también lo avisan al salir de ellos; las contraseñas nuevas
+ * ([data-password-rules]) solo al enviar, para no regañar mientras se piensa la contraseña.
  *
  * Uso:
  *   Cuquora.validateForm(document.getElementById('loginForm'), {
@@ -41,13 +43,14 @@
 
     function container(el) {
         return el.closest('.form-group, .form-item-field, .form-group-item, .terms-check-row')
-            || el.closest('.phone-input')?.parentNode || el.parentNode;
+            || el.closest('.phone-input')?.parentNode || el.closest('.password-wrapper')?.parentNode || el.parentNode;
     }
 
     function clearError(el) {
         el.classList.remove('has-error', 'shake-field');
         el.removeAttribute('aria-invalid');
-        container(el).querySelector('.field-error-msg')?.remove();
+        // Solo el mensaje propio: en el mismo bloque puede estar el aviso de caracteres de app.js
+        container(el).querySelector('.field-error-msg[data-field-error]')?.remove();
     }
 
     function showError(el, message) {
@@ -58,6 +61,7 @@
         el.classList.add('shake-field');
         const msg = document.createElement('div');
         msg.className = 'field-error-msg';
+        msg.dataset.fieldError = '';
         msg.setAttribute('role', 'alert');
         msg.innerHTML = ERROR_ICON;
         const text = document.createElement('span');
@@ -129,7 +133,7 @@
             f.el.addEventListener('input', onInput);
             f.el.addEventListener('change', onInput);
             f.el.addEventListener('blur', () => {
-                if (!(f.el.value || '').trim()) return;
+                if (!(f.el.value || '').trim() || f.el.hasAttribute('data-password-rules')) return;
                 const message = errorOf(f);
                 message ? showError(f.el, message) : clearError(f.el);
             });

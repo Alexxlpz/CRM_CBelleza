@@ -109,6 +109,20 @@ class WorkerPanelTests {
         }
     }
 
+    /** «Hoy» enseña lo que queda del día: las completadas salen; las de quien no vino se quedan (se puede deshacer). */
+    @Test
+    void todayLeavesOutCompletedAppointments() {
+        User carlos = worker(TestUsers.WORKER_CENTER_1);
+        Appointment completed = save(newClient(), carlos, todayAt(0, 0), AppointmentStatus.COMPLETED);
+        Appointment noShow = save(newClient(), carlos, todayAt(0, 30), AppointmentStatus.NO_SHOW);
+        Appointment later = save(newClient(), carlos, todayAt(23, 30), AppointmentStatus.CONFIRMED);
+
+        List<TodayAppointment> list = dashboardService.todayFor(carlos.getCenter());
+        assertTrue(list.stream().noneMatch(a -> a.id().equals(completed.getId())));
+        assertTrue(list.stream().anyMatch(a -> a.id().equals(noShow.getId())));
+        assertTrue(list.stream().anyMatch(a -> a.id().equals(later.getId())));
+    }
+
     /** La trabajadora estándar empieza viendo solo las suyas; el dueño, todo el centro. */
     @Test
     void standardWorkerStartsWithHerOwnAppointments() throws Exception {
@@ -133,7 +147,7 @@ class WorkerPanelTests {
                 .andExpect(content().string(containsString("data-today-filter=\"mine\"")))
                 .andExpect(content().string(containsString("data-today-filter=\"all\"")))
                 .andExpect(content().string(containsString("<p class=\"today-empty\">")))
-                .andExpect(content().string(containsString("<span class=\"today-empty-mine\">Hoy no tienes citas.")))
+                .andExpect(content().string(containsString("<span class=\"today-empty-mine\">Hoy no te quedan citas.")))
                 .andExpect(content().string(containsString("<span class=\"today-empty-all\" hidden=\"hidden\">")));
     }
 
@@ -207,14 +221,16 @@ class WorkerPanelTests {
                 visit(facial, today.plusDays(3), AppointmentStatus.CONFIRMED, 50.0));
         List<ProductSale> sales = List.of(ProductSale.builder().quantity(2).unitPrice(10.0).build());
 
-        ClientVisitSummary summary = ClientVisitSummary.of(history, sales, today);
+        // «Ahora» fijo: la cita confirmada del 17 nov sigue por delante aunque el test se pase después de esa fecha
+        LocalDateTime now = today.atTime(12, 0);
+        ClientVisitSummary summary = ClientVisitSummary.of(history, sales, now);
         assertEquals(3, summary.visits());
         assertEquals(128.0, summary.totalSpent(), 0.001);
         assertEquals("Hace 5 días", summary.lastVisitLabel());
         assertEquals("Manicura", summary.favoriteTreatment());
         assertEquals(2, summary.favoriteCount());
 
-        ClientVisitSummary once = ClientVisitSummary.of(history.subList(1, 2), List.of(), today);
+        ClientVisitSummary once = ClientVisitSummary.of(history.subList(1, 2), List.of(), now);
         assertNull(once.favoriteTreatment(), "con una sola visita no hay «lo que más repite»");
         assertEquals("Hace 2 semanas", once.lastVisitLabel());
     }

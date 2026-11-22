@@ -3,6 +3,7 @@ package com.alexxlpz.crm_cbelleza.controllers;
 import com.alexxlpz.crm_cbelleza.entities.CenterPhoto;
 import com.alexxlpz.crm_cbelleza.entities.UserPhoto;
 import com.alexxlpz.crm_cbelleza.exceptions.ResourceNotFoundException;
+import com.alexxlpz.crm_cbelleza.security.AdminAccess;
 import com.alexxlpz.crm_cbelleza.security.AppUserDetails;
 import com.alexxlpz.crm_cbelleza.services.CenterPhotoService;
 import com.alexxlpz.crm_cbelleza.services.CenterRegistrationService;
@@ -24,9 +25,11 @@ public class CenterPhotoController {
     private final CenterPhotoService photoService;
     private final CenterRegistrationService registrationService;
     private final WorkerPhotoService workerPhotos;
+    private final AdminAccess adminAccess;
 
     public CenterPhotoController(CenterPhotoService photoService, CenterRegistrationService registrationService,
-                                 WorkerPhotoService workerPhotos) {
+                                 WorkerPhotoService workerPhotos, AdminAccess adminAccess) {
+        this.adminAccess = adminAccess;
         this.photoService = photoService;
         this.registrationService = registrationService;
         this.workerPhotos = workerPhotos;
@@ -45,7 +48,8 @@ public class CenterPhotoController {
 
     /** Para que administración vea la foto al revisar un alta, antes de publicar el centro. */
     @GetMapping("/register-center/approve/{token}/photo")
-    public ResponseEntity<byte[]> pendingPhoto(@PathVariable String token) {
+    public ResponseEntity<byte[]> pendingPhoto(@PathVariable String token, @AuthenticationPrincipal AppUserDetails viewer) {
+        adminAccess.require(viewer);
         Long centerId = registrationService.pendingCenter(token).getId();
         CenterPhoto photo = photoService.findPhoto(centerId)
                 .orElseThrow(() -> new ResourceNotFoundException("La foto no existe."));

@@ -16,6 +16,8 @@
  *     de abajo enseñe el color del pie y el de arriba el de la cabecera (common.css).
  * 12. Botón del ojo (data-toggle-password="idDelInput"): muestra u oculta lo escrito en un campo de contraseña.
  * 13. «Cómo llegar» (enlaces [data-directions] a Google Maps): en iPhone, iPad y Mac deja elegir Apple Maps o Google Maps.
+ * 14. Contraseñas (input[data-password-rules] las nuevas, input[data-password-limit] la del login): contador «12/32»;
+ *     en las nuevas, además, solo los caracteres que admite PasswordPolicy.
  */
 (function () {
     'use strict';
@@ -505,6 +507,88 @@
         if (icon) icon.className = show ? 'lucide-eye-off' : 'lucide-eye';
     });
 
+    /* ---------- 14. Contraseñas: contador y caracteres ---------- */
+    // Lo mismo que PasswordPolicy.ALLOWED: letras (con ñ, tildes y ü), números y símbolos del teclado, sin espacios.
+    // La regla de verdad está en el servidor; aquí solo se evita escribir algo que luego se rechazaría.
+    const PASSWORD_CHAR = /^[!-~ñÑáéíóúÁÉÍÓÚüÜ]$/;
+
+    function initPasswordRules() {
+        document.querySelectorAll('input[data-password-rules], input[data-password-limit]').forEach(input => {
+            const max = input.maxLength > 0 ? input.maxLength : 32;
+            // En el login no se filtra: una contraseña antigua con espacios o «€» tiene que poder escribirse para entrar
+            const filtered = input.hasAttribute('data-password-rules');
+            const wrapper = input.closest('.password-wrapper');
+            const counter = document.createElement('span');
+            counter.className = 'password-counter';
+            counter.setAttribute('aria-hidden', 'true');
+            wrapper?.classList.add('password-wrapper--counted');
+            wrapper?.insertBefore(counter, input.nextSibling);
+
+            const message = document.createElement('p');
+            message.className = 'field-error-msg';
+            message.id = input.id + 'Rules';
+            message.setAttribute('role', 'alert');
+            message.hidden = true;
+            (wrapper || input).after(message);
+            input.setAttribute('aria-describedby', message.id);
+
+            const allowed = c => !filtered || PASSWORD_CHAR.test(c);
+            const badChar = text => [...text].find(c => !allowed(c));
+            const warn = text => {
+                message.textContent = text;
+                message.hidden = false;
+            };
+            const warnChar = c => warn(/\s/.test(c)
+                ? 'La contraseña no puede llevar espacios.'
+                : '«' + c + '» no vale: usa letras, números y símbolos del teclado.');
+            const update = () => {
+                const length = [...input.value].length;
+                counter.textContent = length + '/' + max;
+                counter.classList.toggle('is-full', length >= max);
+            };
+
+            input.addEventListener('beforeinput', e => {
+                if (e.isComposing || !e.inputType.startsWith('insert')) return;
+                const text = (e.data ?? e.dataTransfer?.getData('text/plain') ?? '').normalize('NFC');
+                const bad = badChar(text);
+                if (bad !== undefined) {
+                    e.preventDefault();
+                    warnChar(bad);
+                    return;
+                }
+                // Lo pegado no se recorta: una contraseña cortada a escondidas no coincidiría con la que se guardó
+                if (e.inputType === 'insertFromPaste') {
+                    const kept = input.value.length - (input.selectionEnd - input.selectionStart);
+                    if (kept + text.length > max) {
+                        e.preventDefault();
+                        warn('La contraseña que has pegado tiene ' + text.length + ' caracteres; como mucho son ' + max + '.');
+                        return;
+                    }
+                }
+                if (text) message.hidden = true;
+            });
+
+            // Lo que no pasa por beforeinput (autocompletar, letras con acento compuestas, navegadores antiguos)
+            const clean = () => {
+                // En el login se deja tal cual: normalizar podría cambiar una contraseña antigua escrita con tildes
+                const value = filtered ? input.value.normalize('NFC') : input.value;
+                const bad = badChar(value);
+                const kept = [...value].filter(allowed).join('').slice(0, max);
+                if (kept !== input.value) {
+                    input.value = kept;
+                }
+                if (bad !== undefined) warnChar(bad);
+                else message.hidden = true;
+                update();
+            };
+            input.addEventListener('input', e => {
+                if (!e.isComposing) clean();
+            });
+            input.addEventListener('compositionend', clean);
+            update();
+        });
+    }
+
     /* ---------- 11. Color al estirar más allá del principio o del final ---------- */
     function initOverscrollColor() {
         const root = document.documentElement;
@@ -574,6 +658,7 @@
         initCopyButtons();
         initShareButtons();
         initDirections();
+        initPasswordRules();
         initMobileNav();
         initNotifications();
         initViewToggles();

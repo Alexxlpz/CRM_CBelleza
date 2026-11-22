@@ -11,13 +11,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.support.RequestContextUtils;
 
 import java.io.IOException;
 
 /**
- * Frena las acciones marcadas con {@link CenterOwnerOnly} si quien las pide no es el dueño de su centro.
- * Los formularios vuelven a su pantalla con el aviso; las peticiones fetch reciben un 403 en JSON.
+ * Cerrado por defecto: en {@code /worker/**} solo el dueño del centro puede usar lo que no esté en
+ * {@link TeamRoutes#FOR_WHOLE_TEAM}. Al resto del equipo se le frena la acción. Los formularios vuelven a su pantalla con el aviso; las peticiones fetch reciben un 403 en JSON.
  * Se consulta la base de datos en cada petición: si el dueño cede el centro, vale al momento.
  */
 @Component
@@ -31,7 +32,11 @@ public class CenterOwnerInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
-        if (!(handler instanceof HandlerMethod method) || !method.hasMethodAnnotation(CenterOwnerOnly.class)) {
+        if (!(handler instanceof HandlerMethod method)) {
+            return true; // recursos estáticos y rutas que no existen (404)
+        }
+        Object pattern = request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
+        if (pattern != null && TeamRoutes.allows(request.getMethod(), pattern.toString())) {
             return true;
         }
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();

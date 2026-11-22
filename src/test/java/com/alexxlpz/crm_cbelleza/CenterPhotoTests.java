@@ -199,9 +199,9 @@ class CenterPhotoTests {
         mvc.perform(get(center.getPhotoUrl()).with(TestUsers.as(users, "lirio@estudiolirio.es")))
                 .andExpect(status().isOk())
                 .andExpect(header().string("Cache-Control", containsString("private")));
-        mvc.perform(get("/register-center/approve/" + registration.approvalToken() + "/photo"))
+        mvc.perform(get("/register-center/approve/" + registration.approvalToken() + "/photo").with(TestUsers.asAdmin(users)))
                 .andExpect(status().isOk());
-        mvc.perform(get("/register-center/approve/" + registration.approvalToken()))
+        mvc.perform(get("/register-center/approve/" + registration.approvalToken()).with(TestUsers.asAdmin(users)))
                 .andExpect(content().string(containsString("/register-center/approve/" + registration.approvalToken() + "/photo")));
     }
 

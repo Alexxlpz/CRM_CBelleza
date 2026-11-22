@@ -114,7 +114,7 @@ class PageRenderingTests {
     void legalPagesRenderWithoutLogin(String path) throws Exception {
         mvc.perform(get(path))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("cuquora@hotmail.com")));
+                .andExpect(content().string(containsString("admin@cuquora.test")));
     }
 
     @Test

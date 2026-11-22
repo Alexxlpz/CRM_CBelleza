@@ -5,12 +5,25 @@ import org.springframework.stereotype.Component;
 
 import java.util.Locale;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 /** Reglas únicas para contraseñas nuevas (registro, invitaciones y cambio de contraseña). */
 @Component
 public class PasswordPolicy {
 
     public static final int MIN_LENGTH = 8;
+
+    /**
+     * Máximo de caracteres. BCrypt solo admite 72 bytes (con más, Spring Security lanza un error y salía una página
+     * 500); con los caracteres de {@link #ALLOWED}, que ocupan 1 o 2 bytes, 32 caracteres son 64 bytes como mucho.
+     */
+    public static final int MAX_LENGTH = 32;
+
+    /**
+     * Caracteres admitidos: letras (también ñ, vocales con tilde y ü), números y los símbolos del teclado, sin espacios.
+     * {@code password-field.js} filtra lo mismo al escribir; esta es la regla que vale.
+     */
+    public static final Pattern ALLOWED = Pattern.compile("[!-~ñÑáéíóúÁÉÍÓÚüÜ]+");
 
     /**
      * Las más usadas (listas públicas de filtraciones, también en español): son lo primero que se prueba al adivinar
@@ -50,6 +63,12 @@ public class PasswordPolicy {
     private void validate(String password, String confirmation) {
         if (password.length() < MIN_LENGTH) {
             throw new BusinessRuleException("La contraseña debe tener al menos " + MIN_LENGTH + " caracteres.");
+        }
+        if (password.length() > MAX_LENGTH) {
+            throw new BusinessRuleException("La contraseña puede tener como mucho " + MAX_LENGTH + " caracteres.");
+        }
+        if (!ALLOWED.matcher(password).matches()) {
+            throw new BusinessRuleException("Usa solo letras, números y símbolos del teclado, sin espacios ni emojis.");
         }
         if (isCommon(password) || password.chars().distinct().count() == 1) {
             throw new BusinessRuleException("Esa contraseña es de las más usadas y se adivina enseguida. Elige otra.");

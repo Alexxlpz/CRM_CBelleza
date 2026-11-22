@@ -382,6 +382,64 @@ a.today-client:hover {
     gap: 8px;
 }
 
+/* «Hoy» en una fila con imán: la siguiente tarjeta asoma por la derecha para que se note que hay más */
+.today-list--scroll {
+    position: relative;
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    overscroll-behavior-x: contain;
+    padding-bottom: 8px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-soft) transparent;
+}
+
+.today-list--scroll:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 4px;
+    border-radius: var(--border-radius-md);
+}
+
+.today-list--scroll .today-item {
+    flex: 0 0 min(86%, 320px);
+    scroll-snap-align: start;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: 1fr auto;
+    align-items: start;
+    gap: 12px;
+}
+
+/* En una tarjeta estrecha la profesional va en su propia línea, sin el «·» que si no quedaría al principio */
+.today-list--scroll .today-worker {
+    display: block;
+    white-space: normal;
+}
+
+.today-list--scroll .today-sep {
+    display: none;
+}
+
+/* Estado y ficha abajo, a lo ancho: las tarjetas de la fila quedan alineadas aunque unas lleven avisos y otras no */
+.today-list--scroll .today-side {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* En pantallas táctiles se desliza con el dedo: sin barra */
+@media (pointer: coarse) {
+    .today-list--scroll {
+        scrollbar-width: none;
+        padding-bottom: 2px;
+    }
+
+    .today-list--scroll::-webkit-scrollbar {
+        display: none;
+    }
+}
+
 .today-empty {
     display: flex;
     align-items: center;

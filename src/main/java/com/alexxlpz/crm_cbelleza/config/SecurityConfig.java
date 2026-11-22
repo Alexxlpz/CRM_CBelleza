@@ -58,9 +58,8 @@ public class SecurityConfig {
             "/register-center", "/alta-centro", "/contact", "/contacto",
             "/terms", "/terminos", "/cookies", "/politica-cookies", "/privacy", "/privacidad",
             "/login", "/register", "/error",
-            // Enlaces de los correos del alta de centros: el secreto va en la propia ruta
-            "/register-center/approve/*", "/register-center/approve/*/photo", "/register-center/approve/*/reject",
-            "/register-center/approve/*/renew",
+            // Enlaces de invitación de los correos del alta: el secreto va en la propia ruta. Los de publicar o
+            // rechazar un centro (/register-center/approve/**) piden además la sesión de administración (AdminAccess)
             "/invitation/*", "/invitation/*/renew", "/invitation/*/join",
             // «¿Olvidaste tu contraseña?» (PasswordResetController)
             "/forgot-password", "/reset-password/*",

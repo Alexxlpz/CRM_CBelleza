@@ -226,7 +226,7 @@ class SecurityFixesTests {
                 .map(m -> Pattern.compile("/register-center/approve/([A-Za-z0-9_-]+)").matcher(m.htmlBody()))
                 .filter(Matcher::find).map(m -> m.group()).findFirst().orElseThrow();
 
-        mvc.perform(post(approvalUrl).with(csrf())).andExpect(status().isOk());
+        mvc.perform(post(approvalUrl).with(TestUsers.asAdmin(users)).with(csrf())).andExpect(status().isOk());
 
         verify(emailGateway, timeout(5000).atLeastOnce()).send(argThat(m -> "nerea@estudioalba.es".equals(m.to())
                 && m.subject().startsWith("Te han dado de alta en Estudio Alba")));
