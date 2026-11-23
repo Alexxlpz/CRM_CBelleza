@@ -123,7 +123,7 @@
                     <div><b>50</b><span>servicios</span></div>
                     <div><b>28</b><span>entidades JPA</span></div>
                     <div><b>35</b><span>migraciones (V1–V35)</span></div>
-                    <div><b>468</b><span>tests (+9 en la API)</span></div>
+                    <div><b>477</b><span>tests (+9 en la API)</span></div>
                 </div>
             </section>
 
@@ -1157,6 +1157,65 @@
                 </div>
 
                 <figure class="diagram">
+                    <div class="diagram-title">Cómo hablan Cuquora y la API de productos</div>
+                    <div class="diagram-scroll">
+                        <svg class="dg" viewBox="0 0 1100 520" role="img" aria-label="La app de Cuquora pide un producto a product-api por la red interna de Docker con la clave X-Api-Key; la API mira su esquema en PostgreSQL y, si no lo tiene, lo trae de Open Beauty Facts; al guardar, la app le comparte nombre, categoría y foto">
+                            <rect x="250" y="40" width="610" height="460" rx="14" class="bx b-zone"/>
+                            <text x="555" y="66" text-anchor="middle" class="tz">RED INTERNA DE DOCKER</text>
+                            <text x="555" y="84" text-anchor="middle" class="tm">product-api no tiene puertos abiertos: solo la app llega a ella</text>
+
+                            <rect x="20" y="200" width="190" height="100" rx="12" class="bx b-client"/>
+                            <text x="115" y="232" text-anchor="middle" class="tt c-client">Navegador</text>
+                            <text x="115" y="253" text-anchor="middle" class="ts">«Añadir Producto»</text>
+                            <text x="115" y="271" text-anchor="middle" class="tm">cámara o lector USB</text>
+
+                            <rect x="270" y="200" width="190" height="100" rx="12" class="bx b-owner"/>
+                            <text x="365" y="232" text-anchor="middle" class="tt c-owner">App de Cuquora</text>
+                            <text x="365" y="253" text-anchor="middle" class="ts">ProductApiClient</text>
+                            <text x="365" y="271" text-anchor="middle" class="ts">ProductSharingService</text>
+
+                            <rect x="640" y="200" width="200" height="100" rx="12" class="bx b-info"/>
+                            <text x="740" y="232" text-anchor="middle" class="tt c-worker">product-api</text>
+                            <text x="740" y="253" text-anchor="middle" class="ts">Spring Boot · puerto 8081</text>
+                            <text x="740" y="271" text-anchor="middle" class="tm">pide la cabecera X-Api-Key</text>
+
+                            <rect x="640" y="390" width="200" height="90" rx="12" class="bx b-infra"/>
+                            <text x="740" y="420" text-anchor="middle" class="tt">PostgreSQL</text>
+                            <text x="740" y="441" text-anchor="middle" class="ts">esquema productos</text>
+                            <text x="740" y="459" text-anchor="middle" class="tm">usuario productos_api</text>
+
+                            <rect x="900" y="200" width="180" height="100" rx="12" class="bx b-off"/>
+                            <text x="990" y="232" text-anchor="middle" class="tt">Open Beauty Facts</text>
+                            <text x="990" y="253" text-anchor="middle" class="ts">base pública</text>
+                            <text x="990" y="271" text-anchor="middle" class="tm">datos ODbL, fotos CC BY-SA</text>
+
+                            <line x1="210" y1="228" x2="266" y2="228" class="ar info" marker-end="url(#dga-info)"/>
+                            <text x="240" y="218" text-anchor="middle" class="lb">1</text>
+                            <line x1="270" y1="276" x2="214" y2="276" class="ar ok" marker-end="url(#dga-ok)"/>
+                            <text x="240" y="296" text-anchor="middle" class="lb">5</text>
+
+                            <line x1="460" y1="228" x2="636" y2="228" class="ar info" marker-end="url(#dga-info)"/>
+                            <text x="550" y="218" text-anchor="middle" class="lb">2 · GET</text>
+                            <text x="550" y="254" text-anchor="middle" class="lbs">/api/products/{código}</text>
+                            <line x1="640" y1="276" x2="464" y2="276" class="ar ok" marker-end="url(#dga-ok)"/>
+                            <text x="550" y="296" text-anchor="middle" class="lbs">datos y foto</text>
+
+                            <line x1="740" y1="300" x2="740" y2="386" class="ar info" marker-end="url(#dga-info)"/>
+                            <text x="750" y="348" class="lb">3 · ¿lo tiene?</text>
+
+                            <line x1="840" y1="250" x2="896" y2="250" class="ar dash" marker-end="url(#dga)"/>
+                            <text x="868" y="240" text-anchor="middle" class="lb">4</text>
+
+                            <path d="M365,200 V150 H740 V196" class="ar wait" marker-end="url(#dga-wait)"/>
+                            <text x="552" y="116" text-anchor="middle" class="lb">6 · al guardar: POST /api/products/{código}</text>
+                            <text x="552" y="136" text-anchor="middle" class="lbs">nombre, categoría, descripción, foto y centro · nunca precio ni stock</text>
+                        </svg>
+                    </div>
+                    <p class="swipe-hint">Desliza el dibujo hacia los lados para verlo entero →</p>
+                    <figcaption><strong>1</strong> el trabajador escanea un código. <strong>2</strong> la app lo pide a la API por la red interna, con la clave <code>PRODUCT_API_KEY</code>. <strong>3</strong> la API mira si algún centro lo dio de alta. <strong>4</strong> si nadie lo tiene, lo trae de Open Beauty Facts y lo guarda. <strong>5</strong> la app propone nombre, marca, categoría y foto; el precio y el stock los pone el centro. <strong>6</strong> al guardar el producto, la app comparte con la API lo que le falte, en segundo plano, y apunta qué centro lo aportó. Lo que aporta un centro nunca pisa un nombre o una foto que ya existen.</figcaption>
+                </figure>
+
+                <figure class="diagram">
                     <div class="diagram-title">Qué pasa al escanear un código de barras en «Añadir Producto»</div>
                     <div class="diagram-scroll">
                         <svg class="dg" viewBox="0 0 1100 260" role="img" aria-label="Búsqueda de un código de barras: inventario, catálogo, API de productos y Open Beauty Facts">
@@ -1418,7 +1477,7 @@
                         <div class="section-icon">✅</div>
                         <div>
                             <h2>Tests</h2>
-                            <p style="margin: 0; font-size: 0.95rem;">468 tests en 54 clases (22 nov 2026), todos contra H2 con los datos demo</p>
+                            <p style="margin: 0; font-size: 0.95rem;">477 tests en 56 clases (23 nov 2026), todos contra H2 con los datos demo</p>
                         </div>
                     </div>
                 </div>
@@ -1557,6 +1616,10 @@
                     <details>
                         <summary><code>docker compose</code> dice que falta una variable</summary>
                         <div><p>Compara tu <code>.env</code> con <code>.env.example</code>: las obligatorias están marcadas con <code>${VAR:?…}</code> en <code>docker-compose.yml</code>. Las contraseñas de <code>cuquora_app</code> y <code>productos_api</code> las aplica <code>db-setup</code> en cada <code>up</code>, así que se pueden cambiar en cualquier momento.</p></div>
+                    </details>
+                    <details>
+                        <summary>Error 500 «cannot execute INSERT in a read-only transaction» solo en PostgreSQL</summary>
+                        <div><p>Un método con <code>@Transactional(readOnly = true)</code> (o una clase entera, como <code>DashboardService</code>) llama a otro servicio que guarda algo. H2 no hace cumplir el modo de solo lectura y los tests pasan; PostgreSQL lo rechaza. Lo que se lee desde pantallas no debe guardar nada «por si acaso»: devuelve un valor por defecto y guarda solo en la acción de guardar (así quedó <code>ClientCardTemplateService.getFields</code>, 23 nov 2026). En los tests, comprueba que no se ha escrito la fila.</p></div>
                     </details>
                     <details>
                         <summary>El 8080 está ocupado</summary>

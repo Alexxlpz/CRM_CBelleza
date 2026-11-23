@@ -23,6 +23,7 @@ Al sacar una versión:
 
 ### Añadido
 
+- **Primeros pasos para un centro nuevo**: mientras el centro está en revisión o no tiene nada en la carta, el panel del dueño enseña tres dibujos con muñequitos: «Crea tu carta», «Pon tu foto» y «Tus clientas reservan» (con «En revisión» o «Ya sales en el buscador»). Cada uno lleva a su pantalla y se marca en verde cuando está hecho; la tarjeta se va sola al publicarse el centro con algún tratamiento. El resto del equipo solo ve si el centro ya está publicado. La carta vacía enseña el mismo dibujo y un botón «Añadir tratamiento» (antes pedía pulsar un botón que en el móvil no existe).
 - **Guía para desarrolladores** (`documentación/desarrolladores.html`): contenedores, entornos, recorrido de una petición, paquetes, modelo de datos, ciclo de vida de una cita, eventos, seguridad, API de productos, migraciones, tests y trampas conocidas, con un diagrama en cada apartado. Documentación, `CLAUDE.md` y `PENDIENTES.md` revisados contra el código el 21 nov 2026.
 - **Redes sociales del centro**: el dueño pone Instagram, TikTok, Facebook y su web en Ajustes > Centro (vale el usuario o el enlace entero; solo se aceptan enlaces de esa red). Salen como botones redondos junto a «Cómo llegar» en la ficha del centro, también en la pública, y Google las recibe en los datos de la ficha.
 - Editar los tratamientos de la carta: el dueño pulsa «Editar» en cada tratamiento y cambia el nombre, la categoría, la descripción, el precio y la duración. Las citas que ya están pedidas no cambian: guardan su precio y, desde ahora, también su duración, así que alargar un tratamiento no pisa la agenda que ya hay. El precio de carta no puede quedar por debajo de su oferta.
@@ -45,6 +46,7 @@ Al sacar una versión:
 
 ### Arreglado
 
+- Un centro recién dado de alta ya no ve «Algo no ha ido bien» (error 500) al entrar en el panel o en la agenda. Mientras el dueño no guarda su plantilla de ficha técnica, se usa la de por defecto sin guardarla; antes se intentaba guardar dentro de una consulta de solo lectura y PostgreSQL lo rechazaba. También afectaba a la ficha del cliente y a «Descargar mis datos» en centros sin plantilla.
 - La trabajadora que no es dueña vuelve a poder quitar avisos de su campana (la «x» y «Limpiar todas»): con los permisos cerrados por defecto del 22 nov se había quedado fuera de la lista del equipo.
 - El resumen de la ficha del cliente (visitas, gasto, última visita) cuenta como visita una cita confirmada que ya terminó según la hora del centro, no la del servidor: en un servidor con otra zona horaria podía faltar o sobrar la cita de hace un rato.
 

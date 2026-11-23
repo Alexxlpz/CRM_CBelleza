@@ -4,6 +4,7 @@
     <th:block th:replace="~{fragments/head :: meta('Panel de Control - Cuquora CRM')}"></th:block>
     <link rel="stylesheet" th:href="@{/css/worker.css}">
     <link rel="stylesheet" th:href="@{/css/analytics.css}">
+    <link rel="stylesheet" th:href="@{/css/illustrations.css}" th:if="${firstSteps != null}">
     <script th:src="@{/js/worker-today.js}" defer></script>
     <script th:src="@{/js/worker-requests.js}" defer></script>
 </head>
@@ -22,6 +23,11 @@
             </header>
 
             <div th:replace="~{fragments/alerts :: flash}"></div>
+
+            <!-- Centro recién dado de alta: qué falta, con dibujos. Se va solo al publicarlo con algo en la carta -->
+            <th:block th:if="${firstSteps != null}">
+                <section th:replace="~{worker/fragments/first-steps :: card(${firstSteps}, ${isCenterOwner})}"></section>
+            </th:block>
 
             <!-- «Por aprobar»: solicitudes de clientes que esperan respuesta; se aceptan o rechazan sin ir a la agenda -->
             <section class="today-panel requests-panel glass-panel" id="porAprobar" aria-labelledby="requestsTitle"

@@ -18,6 +18,9 @@ public interface TreatmentRepository extends JpaRepository<Treatment, Long> {
 
     long countByCenterId(Long centerId);
 
+    /** Tratamientos que salen en la carta (sin los ocultos). */
+    long countByCenterIdAndHiddenFalse(Long centerId);
+
     /** Tratamientos con oferta y en la carta (también vencidas: quien llama decide con el «hoy» de cada centro). */
     @Query("SELECT t FROM Treatment t WHERE t.offerPrice IS NOT NULL AND t.hidden = false")
     List<Treatment> findByOfferPriceIsNotNull();

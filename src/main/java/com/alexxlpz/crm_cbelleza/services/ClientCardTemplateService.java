@@ -39,8 +39,16 @@ public class ClientCardTemplateService {
         this.json = json;
     }
 
+    /**
+     * Campos de la ficha del centro. Sin plantilla guardada (un centro nuevo hasta que el dueño la edita) devuelve la de
+     * por defecto sin escribir nada: la llaman pantallas de solo lectura (panel, agenda, ficha del cliente, descarga de
+     * datos) y en PostgreSQL un INSERT dentro de una transacción readOnly da error.
+     */
+    @Transactional(readOnly = true)
     public List<ClientCardFieldDTO> getFields(Long centerId) {
-        List<ClientCardFieldDTO> fields = json.readFields(getOrCreate(centerId).getFieldsJson());
+        List<ClientCardFieldDTO> fields = templateRepository.findByCenterId(centerId)
+                .map(template -> json.readFields(template.getFieldsJson()))
+                .orElse(List.of());
         return fields.isEmpty() ? json.readFields(DEFAULT_FIELDS_JSON) : fields;
     }
 

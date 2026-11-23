@@ -3,6 +3,7 @@
 <head>
     <th:block th:replace="~{fragments/head :: meta('Tratamientos del Centro - Cuquora CRM')}"></th:block>
     <link rel="stylesheet" th:href="@{/css/treatments.css}">
+    <link rel="stylesheet" th:href="@{/css/illustrations.css}">
     <script th:src="@{/js/sheets.js}" defer></script>
     <script th:src="@{/js/treatment-offer.js}" defer></script>
     <script th:src="@{/js/treatment-workers.js}" defer></script>
@@ -162,9 +163,12 @@
                     </th:block>
                 </div>
 
-                <div class="no-appointments-box glass-panel" th:if="${#lists.isEmpty(treatments)}">
-                    <i class="lucide-sparkles" aria-hidden="true"></i>
-                    <p th:text="${isCenterOwner} ? 'No se han registrado tratamientos en este centro. Pulsa «Añadir Tratamiento» para crear el primero.' : 'Todavía no hay tratamientos en la carta del centro.'">No se han registrado tratamientos en este centro. Pulsa «Añadir Tratamiento» para crear el primero.</p>
+                <div class="no-appointments-box empty-art-box glass-panel" th:if="${#lists.isEmpty(treatments)}">
+                    <div class="fs-art-wrap" th:insert="~{worker/fragments/first-steps :: art('carta')}"></div>
+                    <p th:text="${isCenterOwner} ? 'Tu carta está vacía. Añade el primer tratamiento para que tus clientas puedan reservar.' : 'Todavía no hay tratamientos en la carta del centro.'">Tu carta está vacía.</p>
+                    <button type="button" class="btn btn-primary" data-sheet-open="addTreatmentSheet" th:if="${isCenterOwner}">
+                        <i class="lucide-plus" aria-hidden="true"></i> Añadir tratamiento
+                    </button>
                 </div>
             </section>
         </div>

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<!--
+  Dibujos con muñequitos para explicar de un vistazo lo que se hace en el panel (SVG propio, colores en illustrations.css,
+  también en modo oscuro). art(escena): 'carta', 'foto' o 'reservas'.
+  card(steps, owner): tarjeta «Primeros pasos» del panel de un centro recién dado de alta (DashboardService.FirstSteps).
+-->
+<body>
+
+<th:block th:fragment="art(scene)" th:switch="${scene}">
+<th:block th:case="'carta'">
+<svg class="fs-art" viewBox="0 0 160 120" aria-hidden="true" focusable="false">
+  <ellipse class="fs-blob" cx="80" cy="64" rx="66" ry="50"/>
+  <ellipse class="fs-shadow" cx="80" cy="110" rx="52" ry="5"/>
+  <!-- carta -->
+  <rect class="fs-paper" x="78" y="20" width="56" height="74" rx="8"/>
+  <rect class="fs-accent" x="88" y="30" width="26" height="5" rx="2.5"/>
+  <circle class="fs-dot" cx="91" cy="47" r="3"/><rect class="fs-line" x="98" y="45" width="20" height="4" rx="2"/><rect class="fs-line-soft" x="121" y="45" width="6" height="4" rx="2"/>
+  <circle class="fs-dot" cx="91" cy="60" r="3"/><rect class="fs-line" x="98" y="58" width="16" height="4" rx="2"/><rect class="fs-line-soft" x="121" y="58" width="6" height="4" rx="2"/>
+  <circle class="fs-dot" cx="91" cy="73" r="3"/><rect class="fs-line" x="98" y="71" width="18" height="4" rx="2"/><rect class="fs-line-soft" x="121" y="71" width="6" height="4" rx="2"/>
+  <!-- muñequita -->
+  <path class="fs-hair" d="M36 34c0-11 8-17 17-17s17 6 17 17v14H36z"/>
+  <circle class="fs-skin" cx="53" cy="36" r="12"/>
+  <path class="fs-hair" d="M41 32c3-7 9-10 16-9 5 1 8 3 10 7-6-1-11 0-15 3-3-2-7-2-11-1z"/>
+  <circle class="fs-eye" cx="49" cy="37" r="1.4"/><circle class="fs-eye" cx="57" cy="37" r="1.4"/><path class="fs-smile" d="M50 42q3 2.5 6 0"/>
+  <path class="fs-top" d="M31 108c0-32 9-50 22-50s22 18 22 50z"/>
+  <rect class="fs-skin" x="49" y="46" width="8" height="12" rx="3"/>
+  <path class="fs-arm" d="M66 74l14-8"/>
+  <circle class="fs-skin" cx="82" cy="66" r="4.5"/>
+  <!-- lápiz -->
+  <path class="fs-pencil" d="M84 64l14-14 4 4-14 14-6 2z"/>
+  <path class="fs-spark" d="M140 14l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/>
+</svg>
+</th:block>
+<th:block th:case="'foto'">
+<svg class="fs-art" viewBox="0 0 160 120" aria-hidden="true" focusable="false">
+  <ellipse class="fs-blob" cx="80" cy="64" rx="66" ry="50"/>
+  <ellipse class="fs-shadow" cx="80" cy="110" rx="52" ry="5"/>
+  <!-- tienda -->
+  <rect class="fs-paper" x="74" y="40" width="62" height="68" rx="4"/>
+  <path class="fs-awning" d="M70 30h70l-4 16H74z"/>
+  <path class="fs-awning-stripe" d="M84 30h10l-1 16h-10zM104 30h10l1 16h-10zM124 30h10l3 16h-10z"/>
+  <rect class="fs-window" x="82" y="56" width="22" height="20" rx="3"/>
+  <rect class="fs-door" x="110" y="62" width="18" height="46" rx="3"/>
+  <circle class="fs-dot" cx="124" cy="86" r="2"/>
+  <!-- muñequito con móvil -->
+  <path class="fs-hair" d="M30 36c0-10 7-16 16-16s16 6 16 15v3H30z"/>
+  <circle class="fs-skin" cx="46" cy="38" r="12"/>
+  <path class="fs-top2" d="M24 108c0-32 9-50 22-50s22 18 22 50z"/>
+  <rect class="fs-skin" x="42" y="48" width="8" height="12" rx="3"/>
+  <circle class="fs-eye" cx="42" cy="39" r="1.4"/><circle class="fs-eye" cx="50" cy="39" r="1.4"/><path class="fs-smile" d="M43 44q3 2.5 6 0"/>
+  <path class="fs-arm2" d="M60 74l7-14"/>
+  <rect class="fs-phone" x="60" y="44" width="14" height="22" rx="3"/>
+  <circle class="fs-lens" cx="67" cy="51" r="3"/>
+  <!-- destello de la foto -->
+  <path class="fs-flash" d="M80 46l6-4M80 52h7M80 58l6 4"/>
+</svg>
+</th:block>
+<th:block th:case="*">
+<svg class="fs-art" viewBox="0 0 160 120" aria-hidden="true" focusable="false">
+  <ellipse class="fs-blob" cx="80" cy="64" rx="66" ry="50"/>
+  <ellipse class="fs-shadow" cx="80" cy="110" rx="52" ry="5"/>
+  <!-- móvil grande con calendario -->
+  <rect class="fs-phone-big" x="84" y="16" width="48" height="86" rx="9"/>
+  <rect class="fs-screen" x="89" y="24" width="38" height="68" rx="4"/>
+  <rect class="fs-accent" x="94" y="30" width="28" height="5" rx="2.5"/>
+  <g class="fs-cal">
+    <rect x="94" y="40" width="7" height="7" rx="2"/><rect x="104.5" y="40" width="7" height="7" rx="2"/><rect x="115" y="40" width="7" height="7" rx="2"/>
+    <rect x="94" y="51" width="7" height="7" rx="2"/><rect x="115" y="51" width="7" height="7" rx="2"/>
+    <rect x="94" y="62" width="7" height="7" rx="2"/><rect x="104.5" y="62" width="7" height="7" rx="2"/><rect x="115" y="62" width="7" height="7" rx="2"/>
+  </g>
+  <rect class="fs-pick" x="104.5" y="51" width="7" height="7" rx="2"/>
+  <rect class="fs-btn" x="94" y="76" width="28" height="9" rx="4.5"/>
+  <!-- clienta -->
+  <path class="fs-hair" d="M28 40c-2-13 6-21 17-21s19 8 17 21l2 20H26z"/>
+  <circle class="fs-skin" cx="45" cy="38" r="12"/>
+  <path class="fs-top" d="M23 108c0-32 9-50 22-50s22 18 22 50z"/>
+  <rect class="fs-skin" x="41" y="48" width="8" height="12" rx="3"/>
+  <circle class="fs-eye" cx="41" cy="38" r="1.4"/><circle class="fs-eye" cx="49" cy="38" r="1.4"/><path class="fs-smile" d="M42 43q3 2.5 6 0"/>
+  <path class="fs-arm" d="M60 78l20-6"/>
+  <circle class="fs-skin" cx="82" cy="73" r="4.5"/>
+  <!-- corazón -->
+  <path class="fs-heart" d="M68 22c-3-5-11-3-10 3 1 4 10 9 10 9s9-5 10-9c1-6-7-8-10-3z"/>
+</svg>
+</th:block>
+</th:block>
+
+<section th:fragment="card(steps, owner)" class="first-steps glass-panel" aria-labelledby="firstStepsTitle">
+    <header class="first-steps-header">
+        <h2 id="firstStepsTitle" th:text="${owner} ? 'Primeros pasos' : 'Tu centro'">Primeros pasos</h2>
+        <p th:if="${owner}">Tres pasos y tus clientas ya pueden reservar.</p>
+    </header>
+    <ol class="first-steps-list" th:classappend="${owner} ? '' : 'first-steps-list--single'">
+        <li class="first-step" th:if="${owner}" th:classappend="${steps.hasTreatments()} ? 'is-done'">
+            <a class="first-step-link" th:href="@{/worker/treatments}">
+                <span class="first-step-art" th:insert="~{:: art('carta')}"></span>
+                <span class="first-step-text">
+                    <span class="first-step-title"><span class="first-step-num" aria-hidden="true">1</span> Crea tu carta</span>
+                    <span class="first-step-state" th:if="${steps.hasTreatments()}"><i class="lucide-check" aria-hidden="true"></i> Hecho</span>
+                    <span class="first-step-go" th:unless="${steps.hasTreatments()}">Añadir tratamientos <i class="lucide-arrow-right" aria-hidden="true"></i></span>
+                </span>
+            </a>
+        </li>
+        <li class="first-step" th:if="${owner}" th:classappend="${steps.hasPhoto()} ? 'is-done'">
+            <a class="first-step-link" th:with="photoUrl=@{/worker/center/centro}" th:href="${photoUrl + '#foto'}">
+                <span class="first-step-art" th:insert="~{:: art('foto')}"></span>
+                <span class="first-step-text">
+                    <span class="first-step-title"><span class="first-step-num" aria-hidden="true">2</span> Pon tu foto</span>
+                    <span class="first-step-state" th:if="${steps.hasPhoto()}"><i class="lucide-check" aria-hidden="true"></i> Hecho</span>
+                    <span class="first-step-go" th:unless="${steps.hasPhoto()}">Subir foto <i class="lucide-arrow-right" aria-hidden="true"></i></span>
+                </span>
+            </a>
+        </li>
+        <li class="first-step" th:classappend="${steps.published()} ? 'is-done'">
+            <div class="first-step-link">
+                <span class="first-step-art" th:insert="~{:: art('reservas')}"></span>
+                <span class="first-step-text">
+                    <span class="first-step-title"><span class="first-step-num" aria-hidden="true" th:if="${owner}">3</span> Tus clientas reservan</span>
+                    <span class="first-step-state" th:if="${steps.published()}"><i class="lucide-check" aria-hidden="true"></i> Ya sales en el buscador</span>
+                    <span class="first-step-review" th:unless="${steps.published()}"><i class="lucide-hourglass" aria-hidden="true"></i> En revisión: te avisamos por correo</span>
+                </span>
+            </div>
+        </li>
+    </ol>
+</section>
+
+</body>
+</html>

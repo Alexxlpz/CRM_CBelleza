@@ -61,6 +61,11 @@ public class WorkerDashboardController {
         model.addAttribute("rating", reviewService.rating(worker.getCenterId()));
         model.addAttribute("unansweredReviews", reviewService.countUnanswered(worker.getCenterId()));
         addToday(model, center, worker.getId(), owner);
+        // Centro recién dado de alta: «Primeros pasos» con dibujos (el equipo solo ve si ya sale en el buscador)
+        DashboardService.FirstSteps steps = dashboardService.firstStepsFor(center);
+        if (!steps.done() && (owner || !steps.published())) {
+            model.addAttribute("firstSteps", steps);
+        }
         // Resumen del mes en el panel: las tres primeras cifras del análisis (ingresos, visitas y clientes nuevos).
         // Las cifras del negocio solo las ve el dueño del centro
         if (owner) {

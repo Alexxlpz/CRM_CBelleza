@@ -1356,6 +1356,7 @@
                     <ul>
                         <li>El alta de un centro es un asistente de 6 pasos; el centro <strong>nace oculto</strong>.</li>
                         <li>Administración recibe un correo y elige «Publicar centro» o «Rechazar registro».</li>
+                        <li>Mientras tanto, el panel del dueño enseña <strong>«Primeros pasos»</strong> con dibujos: crear la carta, poner la foto y si el centro ya está publicado.</li>
                         <li>Más abajo: el formato de cada dato (teléfono, CIF, CP) y el mapa de los 9 correos.</li>
                     </ul>
                 </div>
@@ -1422,6 +1423,7 @@
                             </ul>
                         </li>
                     </ol>
+                    <p><strong>«Primeros pasos» en el panel</strong> (<code>worker/fragments/first-steps.html</code>): mientras el centro no esté publicado o no tenga ningún tratamiento visible en la carta, el dueño ve arriba del panel tres dibujos con muñequitos: «Crea tu carta» (lleva a Tratamientos), «Pon tu foto» (lleva a Ajustes &gt; Centro, opcional) y «Tus clientas reservan» («En revisión» o «Ya sales en el buscador»). Cada paso hecho se marca en verde. El resto del equipo solo ve el tercero. La tarjeta desaparece sola al publicarse con algo en la carta. La carta vacía enseña el mismo dibujo y un botón «Añadir tratamiento».</p>
                     <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.9rem; margin-bottom: 0.8rem;">
                         <li><strong>Contacto</strong> (<code>/contact</code> o <code>/contacto</code>): <code>name</code>, <code>email</code>, <code>phone</code>, <code>subject</code> y <code>message</code>. Llega a administración y quien escribe recibe un acuse (asunto y texto fijos, no repite lo escrito).</li>
                         <li><strong>Freno a robots:</strong> contacto (5), alta de centro (5) y registro (10) envíos por conexión y hora (<code>PublicFormLimiter</code>), y un campo trampa oculto (<code>website</code>) en contacto y alta: si llega relleno, se descarta.</li>

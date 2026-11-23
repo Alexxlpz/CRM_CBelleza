@@ -8,6 +8,7 @@ import com.alexxlpz.crm_cbelleza.entities.User;
 import com.alexxlpz.crm_cbelleza.repositories.AppointmentRepository;
 import com.alexxlpz.crm_cbelleza.repositories.CenterRepository;
 import com.alexxlpz.crm_cbelleza.repositories.InventoryRepository;
+import com.alexxlpz.crm_cbelleza.repositories.TreatmentRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,17 +40,20 @@ public class DashboardService {
     private final InventoryRepository inventoryRepository;
     private final ClientAllergyService allergyService;
     private final CenterRepository centerRepository;
+    private final TreatmentRepository treatmentRepository;
     private final Clock clock;
 
     public DashboardService(AppointmentRepository appointmentRepository,
                             InventoryRepository inventoryRepository,
                             ClientAllergyService allergyService,
                             CenterRepository centerRepository,
+                            TreatmentRepository treatmentRepository,
                             Clock clock) {
         this.appointmentRepository = appointmentRepository;
         this.inventoryRepository = inventoryRepository;
         this.allergyService = allergyService;
         this.centerRepository = centerRepository;
+        this.treatmentRepository = treatmentRepository;
         this.clock = clock;
     }
 
@@ -158,6 +162,19 @@ public class DashboardService {
                 .filter(a -> a.getDateTime().toLocalDate().isEqual(date))
                 .filter(a -> ATTENDED.contains(a.getStatus()))
                 .count();
+    }
+
+    /** «Primeros pasos» de un centro recién dado de alta: carta, foto y si ya sale en el buscador. */
+    public FirstSteps firstStepsFor(Center center) {
+        return new FirstSteps(treatmentRepository.countByCenterIdAndHiddenFalse(center.getId()) > 0,
+                center.getPhotoUrl() != null, center.isPublished());
+    }
+
+    /** La tarjeta del panel se va sola cuando el centro está publicado y tiene algo en la carta (la foto es opcional). */
+    public record FirstSteps(boolean hasTreatments, boolean hasPhoto, boolean published) {
+        public boolean done() {
+            return published && hasTreatments;
+        }
     }
 
     public record DashboardStats(int todayAppointments, int tomorrowAppointments,
