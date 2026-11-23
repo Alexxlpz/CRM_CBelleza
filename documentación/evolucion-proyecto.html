@@ -99,7 +99,7 @@
                     </div>
                     <div class="hero-meta-item">
                         <span>Commits Registrados:</span>
-                        <strong>90 commits (hasta el 19 nov 2026; 0.9.0-beta + cambios sin publicar)</strong>
+                        <strong>92 commits (hasta el 22 nov 2026; 0.9.0-beta + cambios sin publicar)</strong>
                     </div>
                     <div class="hero-meta-item">
                         <span>Metodología:</span>
@@ -122,7 +122,7 @@
                 </div>
 
                 <div class="stats">
-                    <div><b>90</b><span>commits</span></div>
+                    <div><b>92</b><span>commits</span></div>
                     <div><b>10</b><span>fases</span></div>
                     <div><b>35</b><span>migraciones de base de datos</span></div>
                     <div><b>457</b><span>tests (21 nov)</span></div>
@@ -1408,6 +1408,26 @@
                                 <li>Productos propios editables, aviso de «Stock bajo» elegido por producto (apagado por defecto) y datos de contacto editables en clientes dados de alta por el centro.</li>
                                 <li>Instagram, TikTok, Facebook y web del centro en Ajustes &gt; Centro, como botones junto a «Cómo llegar» (<code>V35</code>).</li>
                                 <li>Tests: <code>EditCatalogTests</code>, <code>CenterSocialLinksTests</code>.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- 21-22 nov: guía de desarrolladores, contraseñas y permisos cerrados por defecto -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-header">
+                                <span class="commit-hash">0c85c9e · f651061</span>
+                                <span class="commit-date">📅 21 y 22 de Noviembre, 2026</span>
+                                <span class="commit-author">👤 alejandro</span>
+                            </div>
+                            <h4>Guía para desarrolladores, contraseñas de 8 a 32 y permisos del dueño cerrados por defecto</h4>
+                            <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.88rem;">
+                                <li>Nueva <a href="desarrolladores.html">guía para desarrolladores</a> y configuraciones de IntelliJ para arrancar la app contra PostgreSQL y la API de productos en Docker (perfil <code>containers</code>).</li>
+                                <li>Contraseñas de 8 a 32 caracteres (letras, números y símbolos del teclado) con contador «12/32» en el campo; el error de «demasiado corta» sale al enviar, no mientras se escribe.</li>
+                                <li>En <code>/worker/**</code> todo es del dueño salvo lo que lista <code>TeamRoutes</code> (sustituye a <code>@CenterOwnerOnly</code>). Publicar o rechazar un centro pide la sesión de administración (<code>AdminAccess</code>).</li>
+                                <li>«Hoy» del panel sin las citas completadas, en una fila que se desliza de lado. El resumen de la ficha del cliente usa la hora del centro.</li>
+                                <li>Tests: <code>TeamRoutesTests</code>, <code>PasswordLimitsTests</code>, <code>CenterRejectionTests</code> ampliado.</li>
                             </ul>
                         </div>
                     </div>

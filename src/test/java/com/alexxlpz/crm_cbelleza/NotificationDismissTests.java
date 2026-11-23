@@ -121,6 +121,19 @@ class NotificationDismissTests {
     }
 
     @Test
+    void aStandardWorkerCanDismissHerOwnNotifications() throws Exception {
+        // Lucía no es la dueña: quitar avisos de su campana es de todo el equipo (TeamRoutes)
+        String key = soldOutItem().key();
+        mvc.perform(post("/worker/notifications/dismiss").param("key", key)
+                        .with(TestUsers.as(users, LUCIA)).with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.dismissed").value(1));
+
+        assertTrue(bellOf(lucia).stream().noneMatch(n -> n.key().equals(key)));
+        assertTrue(bellOf(carlos).stream().anyMatch(n -> n.key().equals(key)));
+    }
+
+    @Test
     void clearAllEmptiesTheBell() throws Exception {
         List<String> keys = bellOf(carlos).stream().map(NotificationItem::key).toList();
         assertFalse(keys.isEmpty());

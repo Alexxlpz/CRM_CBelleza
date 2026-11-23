@@ -43,6 +43,11 @@ Al sacar una versión:
 - La contraseña del login también admite como mucho 32 caracteres, con el mismo contador. Aquí no se filtran caracteres, para que las contraseñas antiguas con espacios u otros símbolos sigan entrando.
 - Permisos del dueño cerrados por defecto: lo que puede hacer todo el equipo está en una sola lista (`TeamRoutes`) y todo lo demás de `/worker/**` es solo del dueño, también lo que se añada en el futuro.
 
+### Arreglado
+
+- La trabajadora que no es dueña vuelve a poder quitar avisos de su campana (la «x» y «Limpiar todas»): con los permisos cerrados por defecto del 22 nov se había quedado fuera de la lista del equipo.
+- El resumen de la ficha del cliente (visitas, gasto, última visita) cuenta como visita una cita confirmada que ya terminó según la hora del centro, no la del servidor: en un servidor con otra zona horaria podía faltar o sobrar la cita de hace un rato.
+
 ### Cambiado
 
 - Antes, cualquier producto con 3 unidades o menos salía como «Bajo Stock» y avisaba en la campana; ahora solo avisan los que tienen aviso puesto (ver arriba).

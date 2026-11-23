@@ -67,6 +67,9 @@ public final class TeamRoutes {
             "POST /worker/center/my-photo",
             "POST /worker/center/my-photo/delete",
 
+            // La campana: cada uno quita sus propios avisos (se guarda por usuario)
+            "POST /worker/notifications/dismiss",
+
             // Su propio Google Calendar
             "POST /worker/google-calendar/connect",
             "GET /worker/google-calendar/callback",

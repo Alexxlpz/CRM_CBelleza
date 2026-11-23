@@ -436,7 +436,7 @@
                     <details><summary>¿Por qué no me deja pedir una cita a esa hora?</summary><div><p>Porque ya tienes otra cita que se pisa con ella, en ese centro o en otro. El aviso te dice cuál: elige otra hora o anula la que tenías desde «Mis citas».</p></div></details>
                     <details><summary>¿Por qué no aparece el botón «Cambiar hora»?</summary><div><p>El centro decide hasta cuántas horas antes puedes cambiarla tú (nunca, 2, 12, 24 o 48 h). Pasado ese plazo, la tarjeta te da el teléfono del centro.</p></div></details>
                     <details><summary>¿Qué pasa si no contesto a una propuesta?</summary><div><p>Caduca a las 48 h, o 2 h antes de la primera hora propuesta si eso llega antes, y la cita queda anulada. Te llega un correo avisando.</p></div></details>
-                    <details><summary>¿Mi contraseña está segura?</summary><div><p>Se guarda cifrada (BCrypt), necesita al menos 8 caracteres y no puede ser de las más usadas. Tras varios intentos fallidos el acceso se cierra 15 minutos. Con «Recordar mi sesión» el dispositivo te mantiene dentro 14 días. Si cambias la contraseña, se cierra la sesión en todos tus otros dispositivos.</p></div></details>
+                    <details><summary>¿Mi contraseña está segura?</summary><div><p>Se guarda cifrada (BCrypt), lleva de 8 a 32 caracteres (letras, números y símbolos del teclado; un contador dentro del campo dice cuántos llevas) y no puede ser de las más usadas. Tras varios intentos fallidos el acceso se cierra 15 minutos. Con «Recordar mi sesión» el dispositivo te mantiene dentro 14 días. Si cambias la contraseña, se cierra la sesión en todos tus otros dispositivos.</p></div></details>
                 </div>
             </section>
 
@@ -487,7 +487,7 @@
                     </figure>
                     <div class="grid-2" style="margin-top: 1.25rem;">
                         <ol class="pin-legend">
-                            <li><b>1</b><span><strong>Cuatro cifras:</strong> citas de hoy, citas de mañana, solicitudes pendientes y productos con stock bajo (3 o menos).</span></li>
+                            <li><b>1</b><span><strong>Cuatro cifras:</strong> citas de hoy, citas de mañana, solicitudes pendientes y productos agotados o por debajo del aviso que el dueño puso a cada uno.</span></li>
                             <li><b>2</b><span><strong>Accesos:</strong> Agenda, Inventario, Tratamientos, Clientes y Reseñas. Cada uno avisa con una etiqueta si tiene algo pendiente.</span></li>
                         </ol>
                         <ol class="pin-legend">
@@ -497,7 +497,7 @@
                     </div>
                     <ul style="margin-top: 1rem;">
                         <li><strong>Por aprobar:</strong> encima de «Hoy», las solicitudes que esperan respuesta, con Aceptar y Rechazar (pide confirmación y avisa al cliente). Si no tiene profesional, al aceptarla queda a tu nombre. Sin solicitudes no sale.</li>
-                        <li><strong>Hoy:</strong> debajo de las cifras, las citas del día por hora, con el cliente, el tratamiento, quién la hace, si alguna vez no se presentó y un botón a su ficha, con su teléfono (se pulsa para llamar) y sus alergias si la ficha técnica las apunta. Marca la que está «Ahora» y la «Siguiente», y las que ya pasaron salen más claras. Con «Las mías» / «Todo el centro» se elige qué ver: la trabajadora empieza con las suyas y el dueño con todo el centro.</li>
+                        <li><strong>Hoy:</strong> debajo de las cifras, lo que queda del día por hora (las completadas ya no salen), en una fila que se desliza de lado y empieza en la cita en curso o la siguiente, con el cliente, el tratamiento, quién la hace, si alguna vez no se presentó y un botón a su ficha, con su teléfono (se pulsa para llamar) y sus alergias si la ficha técnica las apunta. Marca la que está «Ahora» y la «Siguiente»; las de quien no se presentó siguen ahí, más claras, por si llega tarde y hay que deshacerlo. Con «Las mías» / «Todo el centro» se elige qué ver: la trabajadora empieza con las suyas y el dueño con todo el centro.</li>
                         <li><strong>Barra de arriba:</strong> en todo el panel lleva Agenda, Clientes, Tratamientos e Inventario (en el móvil, en el menú), en vez de los enlaces de la web pública.</li>
                     </ul>
                 </div>
@@ -741,7 +741,8 @@
                     <div class="card-feature">
                         <div class="card-feature-header"><span>🔐</span><strong>Seguridad, en corto</strong></div>
                         <ul style="margin-left: 1.1rem; color: var(--text-secondary); font-size: 0.92rem;">
-                            <li>Contraseñas cifradas, mínimo 8 caracteres y fuera las más usadas.</li>
+                            <li>Contraseñas cifradas, de 8 a 32 caracteres y fuera las más usadas.</li>
+                            <li>Publicar o rechazar un centro nuevo pide entrar con la cuenta de administración: reenviar el enlace del correo no deja decidir a nadie más.</li>
                             <li>5 fallos con una cuenta desde la misma conexión, 20 desde una conexión o 50 con una cuenta desde cualquier sitio cierran el login 15 minutos.</li>
                             <li>«Recordar mi sesión» se borra al cerrar sesión o cambiar la contraseña.</li>
                             <li>Al cambiar o restablecer la contraseña se cierra la sesión en los demás navegadores donde estuviera abierta.</li>
@@ -836,7 +837,7 @@
             <li><a href="desarrolladores.html">Guía para Desarrolladores</a></li>
             <li><a href="evolucion-proyecto.html">Evolución & Commits</a></li>
         </ul>
-        <p>© 2026 Cuquora — Plataforma de Gestión para Centros de Estética y Bienestar · Documentación de la versión 0.9.0-beta y los cambios sin publicar (21 de noviembre de 2026).</p>
+        <p>© 2026 Cuquora — Plataforma de Gestión para Centros de Estética y Bienestar · Documentación de la versión 0.9.0-beta y los cambios sin publicar (23 de noviembre de 2026).</p>
     </footer>
 
 </body>
