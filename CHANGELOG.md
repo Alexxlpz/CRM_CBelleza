@@ -17,9 +17,11 @@ Al sacar una versión:
 
 1. Pasa lo de «Sin publicar» a una sección nueva con su número y la fecha.
 2. Pon el mismo número en `<version>` de `pom.xml`.
-3. Haz el commit y una etiqueta: `git tag -a v0.9.1-beta -m "Cuquora 0.9.1-beta"`.
+3. Haz el commit y una etiqueta: `git tag -a v0.10.1-beta -m "Cuquora 0.10.1-beta"`.
 
 ## [Sin publicar]
+
+## [0.10.0-beta] - 2026-11-24
 
 ### Añadido
 
@@ -31,31 +33,24 @@ Al sacar una versión:
 - Editar productos del inventario: en «Ver Info», el dueño cambia el nombre, la categoría, el precio y la descripción de los productos que creó el centro (los del catálogo general no). Las ventas ya hechas guardan su precio.
 - Aviso de stock bajo a medida: en «Ver Info» de cada producto, el dueño elige «Avisarme cuando queden N ud o menos». Ese límite lo usan la campana, el contador del panel, la etiqueta «Bajo Stock» y el mensaje al vender. Vacío no avisa, y así empiezan todos los productos, también los que ya había; «Agotado» avisa siempre.
 - «Editar datos» en la ficha del cliente: cualquier trabajadora corrige el nombre, el teléfono y el correo de un cliente que dio de alta el centro y que aún no tiene cuenta (ni contraseña ni Google, y que no es cliente de otro centro). Si el correo ya lo usa otra cuenta, se guarda lo demás y se avisa.
-
 - «Por aprobar» en el panel del trabajador, encima de «Hoy»: las solicitudes de cita que esperan respuesta, con el cliente, el tratamiento, quién la haría (o «Sin asignar: al aceptarla, contigo»), su teléfono y los botones Aceptar y Rechazar, sin pasar por la agenda. Rechazar pide confirmación y avisa al cliente. Al responder, la fila se va y bajan los contadores de solicitudes; sin solicitudes, el bloque no sale.
 - Tu próxima cita arriba de «Centros» para el cliente: día y hora, tratamiento, centro y profesional, con «Cómo llegar» y «Mis citas (N)». Sin próximas citas, o sin cuenta de cliente, no sale.
 - Recién reservada: al pedir una cita se vuelve a «Mis reservas» con un aviso verde con título («Solicitud enviada» o «¡Cita confirmada!») y la cita nueva la primera de «Próximas citas», con borde verde y la etiqueta «Acabas de pedirla».
 - Teléfonos que se pulsan para llamar: el del centro en «Mis reservas» y en la ficha del centro, y el del cliente en la agenda, en «Hoy», en «Por aprobar» y en su ficha.
 - Alergias en el aviso amarillo de la cita, en la agenda y en «Hoy»: salen de la ficha técnica del cliente, de cualquier campo cuyo nombre hable de alergias (como «Alergias o Sensibilidades» de la plantilla).
-
 - Contraseñas de 8 a 32 caracteres, solo letras (también ñ y tildes), números y símbolos del teclado. Al escribir una contraseña nueva, un contador «12/32» dentro del campo y, si se teclea o se pega algo que no vale (un espacio, un emoji, «€»), no entra y se explica debajo. Antes, una contraseña muy larga daba una página de error. Las contraseñas que ya existen siguen valiendo. Si se envía una contraseña nueva de menos de 8 caracteres, el campo se pone en rojo hasta que llega a 8; no avisa mientras se escribe ni al salir del campo. También en «Mi perfil» y «Mi cuenta», que antes solo avisaban al volver del servidor.
 - Publicar o rechazar un centro nuevo pide iniciar sesión con la cuenta de administración: el enlace del correo ya no basta, así que reenviarlo no deja decidir a nadie más. Con otra cuenta, el enlace no lleva a ninguna parte. Al decidir, el enlace deja de valer.
 - «Hoy» en el panel del trabajador ya no enseña las citas completadas, solo lo que queda del día, y va en una fila que se desliza de lado en vez de una lista que empuja hacia abajo el resto del panel. Al abrir el panel, la fila empieza en la cita en curso o la siguiente.
 - La contraseña del login también admite como mucho 32 caracteres, con el mismo contador. Aquí no se filtran caracteres, para que las contraseñas antiguas con espacios u otros símbolos sigan entrando.
 - Permisos del dueño cerrados por defecto: lo que puede hacer todo el equipo está en una sola lista (`TeamRoutes`) y todo lo demás de `/worker/**` es solo del dueño, también lo que se añada en el futuro.
 
-### Arreglado
-
-- Un centro recién dado de alta ya no ve «Algo no ha ido bien» (error 500) al entrar en el panel o en la agenda. Mientras el dueño no guarda su plantilla de ficha técnica, se usa la de por defecto sin guardarla; antes se intentaba guardar dentro de una consulta de solo lectura y PostgreSQL lo rechazaba. También afectaba a la ficha del cliente y a «Descargar mis datos» en centros sin plantilla.
-- La trabajadora que no es dueña vuelve a poder quitar avisos de su campana (la «x» y «Limpiar todas»): con los permisos cerrados por defecto del 22 nov se había quedado fuera de la lista del equipo.
-- El resumen de la ficha del cliente (visitas, gasto, última visita) cuenta como visita una cita confirmada que ya terminó según la hora del centro, no la del servidor: en un servidor con otra zona horaria podía faltar o sobrar la cita de hace un rato.
-
 ### Cambiado
 
 - **Portada pensada para quien quiere pedir cita**: arriba dice «Pide cita en tu centro de belleza», con «Buscar un centro» como botón principal y «Tengo un centro» al lado (iniciar sesión queda en una línea debajo). Las cifras inventadas (+82 %, 98,6 %…) dejan sitio a tres dibujos con muñequitos: «Busca tu centro», «Elige día y hora» y «Te confirman la cita». Fuera el «CENTRO EJEMPLO» con tratamientos y profesionales de mentira, y los textos ya no hablan de «motor», «bloqueo dinámico» ni «insumos», ni prometen cosas que Cuquora no hace (varias sedes, aparatología, «100 % garantizado»). En el móvil la página pasa de unos 12.500 a 9.000 px.
 - **Botones y campos iguales en toda la app**: un solo juego de botones (primario, secundario, suave, peligro, de texto y solo icono, en tres tamaños) que se ve igual en cualquier pantalla; fuera unas 30 clases sueltas que repetían lo mismo con pequeñas diferencias. Los campos de la ficha y del alta de cliente usan el mismo estilo que el resto. Botones y campos ya no salen en Arial: heredan la letra de la página.
 - **El aviso «¿Qué tal tu…?» ya no tapa la reserva**: solo sale en «Mis reservas», el buscador de centros y la portada. Mientras la clienta elige día y hora o rellena un formulario no aparece, y queda pendiente para la siguiente de esas pantallas.
-- **Distancias en el buscador**: «A 350 m», «A 1,2 km» o «A 23 km» en vez de «A 0.0 km»; a más de 100 km no se pone (el orden por cercanía no cambia).
+- **Distancias en el buscador**: «A 350 m», «A 1,2 km» o «A 23 km» en vez de «A 0.0 km»; a más de 100 km dice «A más de 100 km» (el orden por cercanía no cambia).
+- **«Editar tratamiento» en el móvil**: sube desde abajo como los paneles del inventario, con asa, y se desplaza hacia abajo si no cabe; mientras está abierto, la página de detrás no se mueve. Con el teclado abierto, el modal se encaja en lo que queda visible encima y se puede desplazar hasta cualquier campo; el campo que se toca se pone a la vista. Lo mismo para los paneles del inventario y la ficha de producto. Antes «Ocultar de la carta» se salía del recuadro. Lo mismo para «Quién lo hace» y «Poner en oferta».
 - **«Mis reservas»**: primero las próximas citas, luego el historial plegado y al final «Mis puntos». En pantallas anchas los puntos van en la columna de la izquierda.
 - **Inventario y carta en el móvil**: «Añadir producto» y «Añadir tratamiento» son botones con texto arriba, como en el ordenador. Se quita el «+» flotante, que tapaba la papelera y la etiqueta de stock de la última fila.
 - Antes, cualquier producto con 3 unidades o menos salía como «Bajo Stock» y avisaba en la campana; ahora solo avisan los que tienen aviso puesto (ver arriba).
@@ -68,11 +63,9 @@ Al sacar una versión:
 - «Las mías» / «Todo el centro» en «Hoy» también se puede cambiar cuando no hay citas: cada vista dice lo suyo («Hoy no tienes citas.» o «Hoy no hay citas en el centro.»).
 - La trabajadora sin rol de dueño ya no ve el total de las compras del cliente en su ficha, solo cuántas son (igual que el gasto total).
 - Fuera la flecha de volver que salía a la izquierda del logo en la cabecera del panel (Clientes, Agenda, Ajustes…): para moverse ya están los apartados de arriba, «Mi Panel» y la miga de pan de cada pantalla.
-
 - «Hoy» en el panel del trabajador: debajo de las cifras, las citas del día por hora con el cliente, el tratamiento, quién la hace, si alguna vez no se presentó y un botón a su ficha. Marca la que está en curso y la siguiente, y aclara las que ya pasaron. «Las mías» / «Todo el centro» elige qué ver: la trabajadora empieza con las suyas y el dueño con todo el centro.
 - La barra de arriba del panel lleva Agenda, Clientes, Tratamientos e Inventario (también en el menú del móvil) en vez de los enlaces de la web pública.
 - Ficha del cliente: resumen arriba con visitas, gasto total (solo lo ve el dueño; el resto del equipo ve «*****,** €»), última visita y el tratamiento que más repite, y botón «Darle cita», que abre «Nueva cita» de la agenda con ese cliente ya elegido (solo clientes de la cartera del centro).
-
 - «Cómo llegar» abre la ruta hasta el centro en el mapa: un botón al lado de «Compartir» en la ficha del centro (también la pública, sin cuenta), otro a la derecha de «Anular cita» en cada cita próxima de «Mis citas» y un enlace en los correos de cita confirmada, de cambio de hora y de recordatorio. Abre Google Maps; en iPhone, iPad y Mac sale antes una hoja para elegir Apple Maps o Google Maps. Usa las coordenadas del centro y, si no las tiene, la dirección; sin ninguna de las dos no sale. Es solo un enlace: la página no carga nada de Google. Sin migración.
 - «Vender producto» (inventario y ficha del cliente) busca el producto por su código de barras: con «Escanear» se abre la cámara dentro del modal y, al leer el código, elige el producto y pasa a la cantidad. También vale un lector USB o escribir el código, y escribir parte del nombre reduce la lista (Intro elige si solo queda uno). Avisa si el código no está en el inventario o el producto está agotado. La cámara no se enciende sola. La cámara es la misma que en «Añadir Producto» (`barcode-camera.js`, común a los dos).
 - La API de productos apunta qué centro aporta cada dato: al compartir un producto, Cuquora manda el número del centro (nada más de él) y la API guarda en un registro qué huecos rellenó y cuándo. Así se puede ver quién metió un dato malo y borrar de una vez lo que haya aportado un centro (SQL en `product-api/README.md`). Migración V3 de la API.
@@ -86,6 +79,35 @@ Al sacar una versión:
 - «¿Olvidaste tu contraseña?» en el inicio de sesión: llega un enlace al correo para poner una contraseña nueva. Vale una hora y una sola vez; al guardarla se entra directamente en la cuenta y se cierran las sesiones recordadas. Si la cuenta aún no tenía contraseña, llega el enlace para crearla.
 - Botón «Rechazar registro» al revisar un centro nuevo: borra el centro sin publicar, las cuentas de su equipo y lo que hayan preparado.
 - Botón «Cuquora en Docker» en IntelliJ (`.run/` y `docker-compose.local.yml`): levanta la app, la API de productos y PostgreSQL en http://localhost:8090 con el perfil dev (selector de perfiles y datos de ejemplo), sin chocar con los contenedores de producción.
+- Tope de memoria de la app en Docker: 1 GB (`mem_limit` en `docker-compose.yml`). Java usa como mucho el 75 %, unos 768 MB; así no se come la RAM del NAS ni deja sin memoria a los demás programas.
+- Fuera los avisos azules «esto lo hace el dueño del centro» que veía un trabajador que no es el dueño en Inventario, Tratamientos y Reseñas. Los botones que no puede usar siguen sin aparecer.
+- El healthcheck de la API de productos (`/health`) comprueba la base de datos: si no responde en 2 segundos dice «DOWN» y Docker marca el contenedor como «unhealthy». Antes decía «UP» siempre.
+- Reconstruir las imágenes de Docker es mucho más rápido: los dos `Dockerfile` bajan las dependencias de Maven en una capa aparte que se reutiliza mientras no cambie el `pom.xml` (en las pruebas, la app pasó de 81 a 19 segundos y la API de productos de 49 a 10).
+- «Mi Centro» pasa a llamarse «Ajustes», y la trabajadora que no es dueña ya no ve el aviso de dueño.
+- Documentación: API de productos, código de barras y fotos de productos en el manual, la guía por roles, la evolución del proyecto y el README.
+- Teléfono con el prefijo de país en su propia lista y el número agrupado al escribir, en el alta de centros, el registro de clientes y «Mi Centro»; se guarda como «+34 612 345 678». La migración V27 pone así los teléfonos de centros ya guardados.
+- Alta de centros: se comprueba la letra o el dígito de control del CIF/NIF/NIE y las direcciones españolas tienen que llevar código postal. Una sola regla para los correos en el navegador y en el servidor.
+- En los formularios, el tabulador pasa solo de un campo a otro y al botón de enviar; se salta el ojo de la contraseña, los enlaces entre campos, los «Cancelar», las ✕ de quitar filas y los botones del mapa, que siguen funcionando con ratón o dedo.
+- Botón del ojo para ver la contraseña en todos los campos de contraseña (nueva contraseña, invitación, perfil del cliente y «Mi cuenta»).
+- Si un cliente contesta a un correo de su cita, la respuesta le llega al dueño del centro (antes iba al buzón de Cuquora).
+- Los correos llevan también una versión en texto plano, salen a nombre de «Cuquora» (antes «Cuquora CRM») y el aviso de centro nuevo al admin ya no lleva «[Cuquora Auditoría]» en el asunto, para que caigan menos en spam.
+- Documentación: diagrama de los correos que envía la app (Cuquora, Brevo y Cloudflare, y un apartado por cada tipo de correo).
+- Documentación al día con la 0.9.0-beta: producción en cuquora.com (NAS y túnel de Cloudflare), correo, formato de los datos del alta y «Rechazar registro»; textos más cortos y términos unificados.
+- Documentación más visual para entenderla a la primera: 25 capturas de la app (escritorio y móvil) con marcas numeradas, dibujos de cómo se habla con el centro, la vida de una cita, el alta de un centro, el mapa de la web, la arquitectura, el modelo de datos, el despliegue y la línea de tiempo del proyecto; resumen «En 30 segundos» en cada apartado, preguntas frecuentes y tablas largas plegadas. En el móvil la barra superior sigue enseñando los cuatro documentos.
+
+### Corregido
+
+- Un centro recién dado de alta ya no ve «Algo no ha ido bien» (error 500) al entrar en el panel o en la agenda. Mientras el dueño no guarda su plantilla de ficha técnica, se usa la de por defecto sin guardarla; antes se intentaba guardar dentro de una consulta de solo lectura y PostgreSQL lo rechazaba. También afectaba a la ficha del cliente y a «Descargar mis datos» en centros sin plantilla.
+- La trabajadora que no es dueña vuelve a poder quitar avisos de su campana (la «x» y «Limpiar todas»): con los permisos cerrados por defecto del 22 nov se había quedado fuera de la lista del equipo.
+- El resumen de la ficha del cliente (visitas, gasto, última visita) cuenta como visita una cita confirmada que ya terminó según la hora del centro, no la del servidor: en un servidor con otra zona horaria podía faltar o sobrar la cita de hace un rato.
+- Una clienta ya no puede pedir dos citas que se pisan (pasaba al pulsar dos veces o al pedir la misma hora en otro centro): al reservar y al cambiar la hora se comprueba que no tenga otra cita pendiente, con propuesta o confirmada a esa hora, en ese centro o en otro, y si la tiene se le dice cuál. Se compara en hora real, porque cada centro guarda sus citas en su hora local.
+- El logo de la cabecera decía «COQUORA»: ahora dice «CUQUORA» (`big_icon.png`, también en la documentación).
+- Centros fuera de la hora de España (Canarias, Portugal, América): las citas se marcaban como completadas antes de tiempo (en Canarias una cita de 30 minutos, antes de empezar; en México, horas antes) y los recordatorios de 24 h se contaban con la hora de España. Ahora se usa la hora local de cada centro para completar citas, enviar recordatorios, decidir si una cita ya ha pasado, en «Mis reservas» y en los contadores de hoy y mañana del panel y de la campana.
+- Copia de seguridad (`docker/backup-db.sh`): si `pg_dump` fallaba se guardaba un archivo vacío como si fuera una copia buena y se seguían borrando las de más de 30 días. Ahora comprueba que la copia está completa, sale con error si no lo está y no borra nada; siempre conserva las 7 más recientes y puede dejar una segunda copia en otra carpeta (`BACKUP_COPY_DIR`).
+- Solicitudes que nadie contestó a tiempo: cuando pasaba su hora seguían contando como pendientes en el contador del panel, en la campana (que llevaba a un día ya pasado) y en la agenda, aunque «Por aprobar» no las enseñaba; y aún se podían aceptar o proponerles otra hora. Ahora no cuentan, no se pueden aceptar ni proponer, y en la agenda, en la ficha del cliente y en el historial de «Mis reservas» salen como «Sin respuesta».
+- Al aceptar una de las horas que propone el centro se comprueba, como al reservar, que la clienta no tenga otra cita a esa hora (en ese centro o en otro).
+- Inventario: el botón «+1» se apaga al llegar a 999 unidades en vez de dar error.
+- Anular una venta devuelve las unidades bloqueando el producto, como vender y ajustar: un ajuste a la vez ya no se pierde.
 
 ### Seguridad
 
@@ -99,35 +121,6 @@ Al sacar una versión:
 - Fuera `SPRING_FLYWAY_BASELINE_ON_MIGRATE=true` del `docker-compose.yml`: solo hacía falta para bases de datos de antes de Flyway. Si un día faltase el historial de Flyway, la app no arranca en vez de dar por hechas migraciones que no se han aplicado.
 - La API de productos entra en PostgreSQL con su propio usuario (`productos_api`), dueño solo del esquema `productos` y sin ningún permiso sobre las tablas de Cuquora. Antes usaba `POSTGRES_USER`, que es superusuario. Lo prepara el servicio nuevo `db-setup` del `docker-compose.yml` en cada arranque. Nueva variable `PRODUCT_API_DB_PASSWORD` en el `.env`.
 - Librerías al día con sus parches de seguridad: Spring Boot pasa de 4.1.0 a 4.1.2 en la app y en la API de productos, lo que trae Tomcat 11.0.27 (corrige, entre otros, saltos de las restricciones de seguridad CVE-2026-65182 y CVE-2026-76183, respuestas cruzadas entre peticiones CVE-2026-86350 y CVE-2026-101356 y varios cuelgues por HTTP/2 y WebSocket), Spring Framework 7.0.10 (CVE-2026-59281, XSS en mensajes de error), Spring Security 7.1.2 y el driver de PostgreSQL 42.7.14 (CVE-2026-54291). La librería de códigos de barras zxing pasa de 3.5.3 a 3.5.4.
-
-### Cambiado
-
-- Tope de memoria de la app en Docker: 1 GB (`mem_limit` en `docker-compose.yml`). Java usa como mucho el 75 %, unos 768 MB; así no se come la RAM del NAS ni deja sin memoria a los demás programas.
-- Fuera los avisos azules «esto lo hace el dueño del centro» que veía un trabajador que no es el dueño en Inventario, Tratamientos y Reseñas. Los botones que no puede usar siguen sin aparecer.
-- El healthcheck de la API de productos (`/health`) comprueba la base de datos: si no responde en 2 segundos dice «DOWN» y Docker marca el contenedor como «unhealthy». Antes decía «UP» siempre.
-- Reconstruir las imágenes de Docker es mucho más rápido: los dos `Dockerfile` bajan las dependencias de Maven en una capa aparte que se reutiliza mientras no cambie el `pom.xml` (en las pruebas, la app pasó de 81 a 19 segundos y la API de productos de 49 a 10).
-- «Mi Centro» pasa a llamarse «Ajustes», y la trabajadora que no es dueña ya no ve el aviso de dueño.
-- Documentación: API de productos, código de barras y fotos de productos en el manual, la guía por roles, la evolución del proyecto y el README.
-- Teléfono con el prefijo de país en su propia lista y el número agrupado al escribir, en el alta de centros, el registro de clientes y «Mi Centro»; se guarda como «+34 612 345 678». La migración V27 pone así los teléfonos de centros ya guardados.
-- Alta de centros: se comprueba la letra o el dígito de control del CIF/NIF/NIE y las direcciones españolas tienen que llevar código postal. Una sola regla para los correos en el navegador y en el servidor.
-- En los formularios, el tabulador pasa solo de un campo a otro y al botón de enviar; se salta el ojo de la contraseña, los enlaces entre campos, los «Cancelar», las ✕ de quitar filas y los botones del mapa, que siguen funcionando con ratón o dedo.
-- Botón del ojo para ver la contraseña en todos los campos de contraseña (nueva contraseña, invitación, perfil del cliente y «Mi cuenta»).
-
-- Si un cliente contesta a un correo de su cita, la respuesta le llega al dueño del centro (antes iba al buzón de Cuquora).
-- Los correos llevan también una versión en texto plano, salen a nombre de «Cuquora» (antes «Cuquora CRM») y el aviso de centro nuevo al admin ya no lleva «[Cuquora Auditoría]» en el asunto, para que caigan menos en spam.
-- Documentación: diagrama de los correos que envía la app (Cuquora, Brevo y Cloudflare, y un apartado por cada tipo de correo).
-- Documentación al día con la 0.9.0-beta: producción en cuquora.com (NAS y túnel de Cloudflare), correo, formato de los datos del alta y «Rechazar registro»; textos más cortos y términos unificados.
-- Documentación más visual para entenderla a la primera: 25 capturas de la app (escritorio y móvil) con marcas numeradas, dibujos de cómo se habla con el centro, la vida de una cita, el alta de un centro, el mapa de la web, la arquitectura, el modelo de datos, el despliegue y la línea de tiempo del proyecto; resumen «En 30 segundos» en cada apartado, preguntas frecuentes y tablas largas plegadas. En el móvil la barra superior sigue enseñando los cuatro documentos.
-### Corregido
-
-- Una clienta ya no puede pedir dos citas que se pisan (pasaba al pulsar dos veces o al pedir la misma hora en otro centro): al reservar y al cambiar la hora se comprueba que no tenga otra cita pendiente, con propuesta o confirmada a esa hora, en ese centro o en otro, y si la tiene se le dice cuál. Se compara en hora real, porque cada centro guarda sus citas en su hora local.
-- El logo de la cabecera decía «COQUORA»: ahora dice «CUQUORA» (`big_icon.png`, también en la documentación).
-- Centros fuera de la hora de España (Canarias, Portugal, América): las citas se marcaban como completadas antes de tiempo (en Canarias una cita de 30 minutos, antes de empezar; en México, horas antes) y los recordatorios de 24 h se contaban con la hora de España. Ahora se usa la hora local de cada centro para completar citas, enviar recordatorios, decidir si una cita ya ha pasado, en «Mis reservas» y en los contadores de hoy y mañana del panel y de la campana.
-- Copia de seguridad (`docker/backup-db.sh`): si `pg_dump` fallaba se guardaba un archivo vacío como si fuera una copia buena y se seguían borrando las de más de 30 días. Ahora comprueba que la copia está completa, sale con error si no lo está y no borra nada; siempre conserva las 7 más recientes y puede dejar una segunda copia en otra carpeta (`BACKUP_COPY_DIR`).
-- Solicitudes que nadie contestó a tiempo: cuando pasaba su hora seguían contando como pendientes en el contador del panel, en la campana (que llevaba a un día ya pasado) y en la agenda, aunque «Por aprobar» no las enseñaba; y aún se podían aceptar o proponerles otra hora. Ahora no cuentan, no se pueden aceptar ni proponer, y en la agenda, en la ficha del cliente y en el historial de «Mis reservas» salen como «Sin respuesta».
-- Al aceptar una de las horas que propone el centro se comprueba, como al reservar, que la clienta no tenga otra cita a esa hora (en ese centro o en otro).
-- Inventario: el botón «+1» se apaga al llegar a 999 unidades en vez de dar error.
-- Anular una venta devuelve las unidades bloqueando el producto, como vender y ajustar: un ajuste a la vez ya no se pierde.
 
 ## [0.9.0-beta] - 2026-11-03
 
@@ -202,5 +195,6 @@ Primera versión numerada. Recoge todo lo hecho desde el 17 de julio de 2026
   tope de correos por centro, CSP y cabeceras de seguridad, cookies `HttpOnly`/`SameSite`/`Secure`.
 - Secretos solo en `.env`, nunca en el código.
 
-[Sin publicar]: https://github.com/Alexxlpz/CRM_CBelleza/compare/v0.9.0-beta...HEAD
+[Sin publicar]: https://github.com/Alexxlpz/CRM_CBelleza/compare/v0.10.0-beta...HEAD
+[0.10.0-beta]: https://github.com/Alexxlpz/CRM_CBelleza/compare/v0.9.0-beta...v0.10.0-beta
 [0.9.0-beta]: https://github.com/Alexxlpz/CRM_CBelleza/releases/tag/v0.9.0-beta

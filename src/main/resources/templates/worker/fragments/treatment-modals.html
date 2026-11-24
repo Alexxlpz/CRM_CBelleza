@@ -11,7 +11,7 @@
             <form th:action="@{/worker/treatments/add}" method="post">
                 <div class="form-group">
                     <label class="form-label" for="treatmentName">Nombre del Tratamiento</label>
-                    <input type="text" name="name" id="treatmentName" class="form-control" 
+                    <input type="text" name="name" id="treatmentName" class="form-control" autocomplete="off" 
                            placeholder="Ej. Pedicura Spa, Limpieza Facial..." required>
                 </div>
 
@@ -64,14 +64,14 @@
 
     <!-- Editar un tratamiento. treatment-edit.js rellena el formulario con el tratamiento pulsado. Desde aquí también
          se oculta de la carta o se borra (solo si nunca ha tenido citas). -->
-    <div th:fragment="editModal" class="ui-modal-overlay" id="treatmentEditModal" hidden>
-        <div class="ui-modal ui-modal--form" role="dialog" aria-modal="true" aria-labelledby="treatmentEditTitle">
+    <div th:fragment="editModal" class="ui-modal-overlay ui-modal-overlay--sheet" id="treatmentEditModal" hidden>
+        <div class="ui-modal ui-modal--form ui-modal--sheet" role="dialog" aria-modal="true" aria-labelledby="treatmentEditTitle">
             <button type="button" class="ui-modal-close" data-modal-close aria-label="Cerrar"><i class="lucide-x" aria-hidden="true"></i></button>
             <h2 class="ui-modal-title" id="treatmentEditTitle"><i class="lucide-pen-line" aria-hidden="true"></i> Editar tratamiento</h2>
             <form id="treatmentEditForm" th:action="@{/worker/treatments/0/edit}" method="post" class="treatment-edit-form">
                 <div class="form-group">
                     <label class="form-label" for="editTreatmentName">Nombre del Tratamiento</label>
-                    <input type="text" name="name" id="editTreatmentName" class="form-control" maxlength="120" required>
+                    <input type="text" name="name" id="editTreatmentName" class="form-control" autocomplete="off" maxlength="120" required>
                 </div>
                 <div class="form-group">
                     <label class="form-label" for="editTreatmentType">Categoría / Tipo</label>
@@ -124,8 +124,8 @@
     </div>
 
     <!-- Quién hace un tratamiento. treatment-workers.js marca a los del tratamiento pulsado. -->
-    <div th:fragment="workersModal(team)" class="ui-modal-overlay" id="treatmentWorkersModal" hidden>
-        <div class="ui-modal ui-modal--form" role="dialog" aria-modal="true" aria-labelledby="treatmentWorkersTitle">
+    <div th:fragment="workersModal(team)" class="ui-modal-overlay ui-modal-overlay--sheet" id="treatmentWorkersModal" hidden>
+        <div class="ui-modal ui-modal--form ui-modal--sheet" role="dialog" aria-modal="true" aria-labelledby="treatmentWorkersTitle">
             <button type="button" class="ui-modal-close" data-modal-close aria-label="Cerrar"><i class="lucide-x" aria-hidden="true"></i></button>
             <h2 class="ui-modal-title" id="treatmentWorkersTitle"><i class="lucide-users" aria-hidden="true"></i> Quién lo hace</h2>
             <p class="ui-modal-text" id="treatmentWorkersContext">Masaje relajante</p>
@@ -143,8 +143,8 @@
     </div>
 
     <!-- Oferta de un tratamiento. treatment-offer.js rellena el formulario con el tratamiento pulsado. -->
-    <div th:fragment="offerModal(today)" class="ui-modal-overlay" id="treatmentOfferModal" hidden>
-        <div class="ui-modal ui-modal--form" role="dialog" aria-modal="true" aria-labelledby="treatmentOfferTitle">
+    <div th:fragment="offerModal(today)" class="ui-modal-overlay ui-modal-overlay--sheet" id="treatmentOfferModal" hidden>
+        <div class="ui-modal ui-modal--form ui-modal--sheet" role="dialog" aria-modal="true" aria-labelledby="treatmentOfferTitle">
             <button type="button" class="ui-modal-close" data-modal-close aria-label="Cerrar"><i class="lucide-x" aria-hidden="true"></i></button>
             <h2 class="ui-modal-title" id="treatmentOfferTitle"><i class="lucide-tag" aria-hidden="true"></i> Poner en oferta</h2>
             <p class="ui-modal-text" id="treatmentOfferContext">Masaje relajante · precio de carta 42,00 €</p>

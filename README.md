@@ -8,7 +8,7 @@ Un centro de estética suele llevar las citas en una libreta o en WhatsApp, las 
 
 Tiene dos lados. El equipo del centro entra a su panel y gestiona el día a día; los clientes buscan centros, ven los huecos libres y reservan sin llamar por teléfono.
 
-La aplicación está en español y en beta (0.9.0). La 1.0 llegará cuando se abra al público en cuquora.com.
+La aplicación está en español y en beta (0.10.0). La 1.0 llegará cuando se abra al público en cuquora.com.
 
 ## Para el centro
 

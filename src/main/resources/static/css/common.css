@@ -1910,6 +1910,47 @@ body.modal-open {
     overflow: hidden;
 }
 
+/* Con un modal o panel abierto la página de detrás no se mueve. Hace falta también en html: como lleva
+   overflow-x: clip, el overflow del body no pasa a la ventana y la página seguía haciendo scroll. */
+html:has(body.modal-open) {
+    overflow: hidden;
+    overscroll-behavior: none;
+}
+
+/* Con el teclado del móvil abierto (app.js pone --vv-top y --vv-height mientras hay un modal): el fondo del modal
+   ocupa solo lo que se ve encima del teclado y el contenido hace scroll dentro. Sin teclado las variables valen
+   lo mismo que la pantalla y no cambia nada. */
+:root {
+    --vv-top: 0px;
+    --vv-height: 100vh;
+}
+
+body.modal-open .ui-modal-overlay.is-open,
+body.modal-open .sheet-overlay.is-open,
+body.modal-open .info-modal-overlay.is-open {
+    top: var(--vv-top);
+    bottom: auto;
+    height: min(var(--vv-height), 100%);
+}
+
+body.modal-open .ui-modal-overlay.is-open .ui-modal {
+    max-height: min(90vh, calc(var(--vv-height) - 40px));
+}
+
+body.modal-open .info-modal-overlay.is-open .info-modal-card {
+    max-height: min(88vh, calc(var(--vv-height) - 48px));
+}
+
+@media (max-width: 600px) {
+    body.modal-open .ui-modal-overlay.is-open .ui-modal--sheet {
+        max-height: min(88dvh, calc(var(--vv-height) - 12px));
+    }
+
+    body.modal-open .sheet-overlay.is-open .sheet-content {
+        max-height: min(85vh, calc(var(--vv-height) - 12px));
+    }
+}
+
 /* ---------- Alertas ---------- */
 .alert {
     display: flex;
@@ -2804,15 +2845,40 @@ body.modal-open {
     display: flex;
 }
 
+/* Móvil (≤600 px): .ui-modal-overlay--sheet + .ui-modal--sheet suben desde abajo como los paneles del inventario,
+   con asa, ancho completo y scroll vertical dentro si el contenido no cabe (p. ej. «Editar tratamiento»). */
 @media (max-width: 600px) {
     .ui-modal-overlay--sheet {
         align-items: flex-end;
-        padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
+        padding: 0;
     }
 
     .ui-modal--sheet {
         max-width: none;
-        border-radius: 20px;
+        max-height: 88vh;
+        max-height: 88dvh;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        touch-action: pan-y;
+        padding: 10px 22px calc(24px + env(safe-area-inset-bottom));
+        border-bottom: none;
+        border-radius: 28px 28px 0 0;
+        animation: sheetSlideUp var(--dur-slow) var(--ease-out);
+    }
+
+    /* Asa, como en los paneles del inventario */
+    .ui-modal--sheet::before {
+        content: '';
+        display: block;
+        width: 44px;
+        height: 5px;
+        margin: 0 auto 16px;
+        border-radius: var(--radius-pill);
+        background: rgba(var(--primary-rgb), 0.35);
+    }
+
+    .ui-modal--sheet .ui-modal-close {
+        top: 16px;
     }
 }
 

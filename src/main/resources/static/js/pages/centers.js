@@ -120,11 +120,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /**
      * Distancia para leer de un vistazo: «A 350 m» (de 50 en 50), «A 1,2 km» hasta 10 km y «A 23 km» hasta 100 km.
-     * Más lejos no se pone (un «A 10.692 km» no ayuda a elegir); el orden por cercanía no cambia.
+     * Más lejos dice «A más de 100 km» (un «A 10.692 km» no ayuda a elegir); el orden por cercanía no cambia.
      */
     const MAX_DISTANCE_KM = 100;
     function distanceLabel(km) {
-        if (km === null || km === undefined || Number.isNaN(km) || km > MAX_DISTANCE_KM) return '';
+        if (km === null || km === undefined || Number.isNaN(km)) return '';
+        if (km > MAX_DISTANCE_KM) return `A más de ${MAX_DISTANCE_KM} km`;
         const meters = Math.max(50, Math.round(km * 1000 / 50) * 50);
         if (meters < 1000) return `A ${meters} m`;
         return `A ${km.toLocaleString('es-ES', { maximumFractionDigits: km < 9.95 ? 1 : 0 })} km`;

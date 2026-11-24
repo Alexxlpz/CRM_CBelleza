@@ -246,6 +246,59 @@
         else trapFocus(open, e);
     });
 
+    /* ---------- 6b. Modales y paneles con el teclado del móvil abierto ----------
+       En iPhone el teclado tapa la parte de abajo sin encoger la página, así que un modal pegado abajo quedaba
+       detrás del teclado y, con la página bloqueada, no había forma de llegar a los campos. Mientras hay un modal
+       abierto, --vv-top y --vv-height dicen qué parte de la pantalla se ve; el CSS encaja el fondo del modal
+       ahí y el modal hace scroll por dentro. El campo con el foco se lleva a la vista. */
+    const vv = window.visualViewport;
+    if (vv) {
+        const root = document.documentElement;
+        let frame = 0;
+        let lastHeight = 0;
+        let reveal = false;
+        // Lleva el campo al centro moviendo solo el modal, nunca la página: en iPhone mover la página hace que
+        // el teclado vuelva a mover la vista y el usuario ya no podía desplazarse.
+        const revealField = () => {
+            const field = document.activeElement;
+            if (!field?.matches?.('input, textarea, select')) return;
+            const box = field.closest('.ui-modal, .sheet-content, .info-modal-card');
+            if (!box || !box.closest('.is-open')) return;
+            const f = field.getBoundingClientRect();
+            const r = box.getBoundingClientRect();
+            if (f.top >= r.top + 8 && f.bottom <= r.bottom - 8) return; // ya se ve: no se toca
+            box.scrollTop += (f.top + f.height / 2) - (r.top + r.height / 2);
+        };
+        const fit = () => {
+            frame = 0;
+            if (!document.body.classList.contains('modal-open')) {
+                root.style.removeProperty('--vv-top');
+                root.style.removeProperty('--vv-height');
+                lastHeight = 0;
+                return;
+            }
+            root.style.setProperty('--vv-top', vv.offsetTop + 'px');
+            root.style.setProperty('--vv-height', vv.height + 'px');
+            // Solo al tocar un campo o cuando el teclado sale o cambia de tamaño, no mientras el usuario se desplaza
+            if (reveal || Math.abs(vv.height - lastHeight) > 60) requestAnimationFrame(revealField);
+            reveal = false;
+            lastHeight = vv.height;
+        };
+        const schedule = () => { if (!frame) frame = requestAnimationFrame(fit); };
+        vv.addEventListener('resize', schedule);
+        vv.addEventListener('scroll', schedule);
+        document.addEventListener('focusin', e => {
+            if (e.target.matches?.('input, textarea, select')) reveal = true;
+            schedule();
+        });
+        new MutationObserver(schedule).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+        // Si salta la barra o el panel de contraseñas de iOS, o se cierra el teclado, a veces no llega ningún
+        // aviso de la vista: se vuelve a medir al recuperar la ventana y un poco después de soltar el campo.
+        window.addEventListener('resize', schedule);
+        window.addEventListener('focus', () => setTimeout(schedule, 300));
+        document.addEventListener('focusout', () => setTimeout(schedule, 350));
+    }
+
     /* ---------- 7. Campana de notificaciones ---------- */
     function initNotifications() {
         // Campana del trabajador o del cliente: el botón apunta a su desplegable con aria-controls
