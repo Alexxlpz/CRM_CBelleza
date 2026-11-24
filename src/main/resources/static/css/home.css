@@ -33,7 +33,11 @@
 }
 
 .landing-logo {
-    font-size: 64px;
+    font-size: 52px;
+    line-height: 1.1;
+    max-width: 760px;
+    margin-left: auto;
+    margin-right: auto;
     margin-bottom: 14px;
     font-family: 'Plus Jakarta Sans', sans-serif;
     font-weight: 800;
@@ -77,6 +81,17 @@
 .hero-trust-row i {
     color: var(--success-strong);
     font-size: 16px;
+}
+
+.hero-login-line {
+    margin-top: 18px;
+    font-size: 15px;
+    color: var(--text-muted);
+}
+
+.hero-login-line a {
+    color: var(--primary-text);
+    font-weight: 700;
 }
 
 .landing-cta-group {
@@ -162,14 +177,21 @@
     }
 
     .landing-logo {
-        font-size: 38px;
+        font-size: 32px;
+        letter-spacing: -0.8px;
     }
 
     .landing-subtitle {
         font-size: 14.5px;
     }
 
-    .btn-hero-cta {
+    .hero-trust-row {
+        gap: 8px 18px;
+        margin-top: 22px;
+    }
+
+    .btn-hero-cta,
+    .btn-hero-secondary {
         width: 100%;
         justify-content: center;
     }
@@ -228,56 +250,99 @@
     box-shadow: 0 10px 24px rgba(var(--primary-rgb), 0.25);
 }
 
-/* Metrics / Proof Bar */
-.metrics-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-around;
+/* Portada: «Así de fácil», tres dibujos con muñequitos (illustrations.css) */
+.landing-steps {
+    margin-top: 8px;
+}
+
+.landing-steps .section-header-block {
+    margin-bottom: 24px;
+}
+
+.landing-steps-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.landing-step {
+    text-align: center;
     background: var(--surface);
     border: 1px solid var(--border-soft);
-    border-radius: 16px;
-    padding: 24px 32px;
-    margin: 32px 0 48px 0;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+    border-radius: 20px;
+    padding: 20px 20px 24px;
 }
 
-.metric-item {
-    text-align: center;
-    flex: 1;
-}
-
-.metric-value {
+.landing-step-art {
     display: block;
-    font-size: 32px;
-    font-weight: 800;
-    color: var(--primary-text);
-    letter-spacing: -0.5px;
-    line-height: 1.1;
+    max-width: 200px;
+    margin: 0 auto 12px;
+}
+
+.landing-step h3 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 18px;
     margin-bottom: 4px;
 }
 
-.metric-label {
-    display: block;
-    font-size: 13px;
+.landing-step p {
     color: var(--text-muted);
-    font-weight: 500;
+    font-size: 15px;
+    margin: 0;
 }
 
-.metric-divider {
-    width: 1px;
-    height: 40px;
-    background: var(--border-soft);
+.landing-step-num {
+    display: inline-grid;
+    place-items: center;
+    flex: 0 0 26px;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--brand-solid);
+    color: var(--on-primary);
+    font-size: 14px;
+    font-weight: 700;
 }
 
 @media (max-width: 768px) {
-    .metrics-bar {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 20px;
-        padding: 20px;
+    .landing-steps-list {
+        grid-template-columns: 1fr;
+        gap: 12px;
     }
-    .metric-divider {
-        display: none;
+
+    /* En móvil, dibujo a la izquierda y texto a la derecha: los tres pasos caben en una pantalla */
+    .landing-step {
+        display: grid;
+        grid-template-columns: 104px 1fr;
+        grid-template-rows: auto auto;
+        column-gap: 14px;
+        align-items: center;
+        text-align: left;
+        padding: 10px 14px 10px 10px;
+        border-radius: 16px;
+    }
+
+    .landing-step-art {
+        grid-row: 1 / span 2;
+        margin: 0;
+        width: 104px;
+    }
+
+    .landing-step h3 {
+        justify-content: flex-start;
+        align-self: end;
+        font-size: 16px;
+    }
+
+    .landing-step p {
+        align-self: start;
+        font-size: 14px;
     }
 }
 
@@ -810,219 +875,6 @@
     opacity: 1;
     transform: translateX(0);
 }
-/* Example Center Showcase Section */
-.example-center-card {
-    background: var(--surface);
-    border: 1px solid var(--border-soft);
-    border-radius: 20px;
-    padding: 36px 32px;
-    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.03);
-}
-
-.example-center-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 24px;
-    padding-bottom: 24px;
-    border-bottom: 1px solid var(--border-soft);
-    margin-bottom: 28px;
-    flex-wrap: wrap;
-}
-
-.example-center-pill {
-    font-size: 11px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.6px;
-    color: var(--primary-text);
-    background: var(--surface-muted);
-    border: 1px solid var(--border-soft);
-    padding: 3px 10px;
-    border-radius: 20px;
-    display: inline-block;
-    margin-bottom: 8px;
-}
-
-.example-center-main h3 {
-    font-size: 22px;
-    font-weight: 700;
-    color: var(--text-main);
-    margin: 0 0 6px 0;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-}
-
-.example-center-loc {
-    font-size: 13.5px;
-    color: var(--text-muted);
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.example-center-badges {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-}
-
-.center-badge-item {
-    background: var(--surface-muted);
-    border: 1px solid var(--border-soft);
-    border-radius: 12px;
-    padding: 10px 16px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
-    text-align: center;
-}
-
-.badge-num {
-    font-size: 16px;
-    font-weight: 800;
-    color: var(--text-main);
-    font-family: 'Plus Jakarta Sans', sans-serif;
-}
-
-.badge-txt {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text-muted);
-}
-
-/* Example Services Grid (3 Columns) */
-.example-services-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 22px;
-    margin-bottom: 24px;
-    width: 100%;
-    box-sizing: border-box;
-}
-
-.example-services-grid > * {
-    min-width: 0;
-    box-sizing: border-box;
-}
-
-.service-category-column {
-    background: var(--surface-muted);
-    border: 1px solid var(--border-soft);
-    border-radius: 16px;
-    padding: 20px 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-}
-
-.category-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: var(--primary-text);
-    padding-bottom: 10px;
-    border-bottom: 1px solid var(--border-soft);
-}
-
-.category-header h4 {
-    font-size: 14.5px;
-    font-weight: 700;
-    color: var(--text-main);
-    margin: 0;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-}
-
-.service-row-card {
-    background: var(--surface);
-    border: 1px solid var(--border-soft);
-    border-radius: 12px;
-    padding: 14px 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
-    transition: transform var(--dur-fast) ease, border-color var(--dur-fast) ease;
-}
-
-.service-row-card:hover {
-    border-color: var(--primary);
-}
-
-.service-title-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 8px;
-}
-
-.service-name {
-    font-size: 13.5px;
-    font-weight: 700;
-    color: var(--text-main);
-}
-
-.service-price {
-    font-size: 13.5px;
-    font-weight: 800;
-    color: var(--primary-text);
-    white-space: nowrap;
-}
-
-.service-meta-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 11.5px;
-    color: var(--text-muted);
-}
-
-.service-duration {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-weight: 600;
-}
-
-.service-assign {
-    color: var(--text-muted);
-}
-
-.service-desc {
-    font-size: 12px;
-    color: var(--text-muted);
-    line-height: 1.45;
-    margin: 0;
-}
-
-.example-center-footer {
-    background: var(--surface-muted);
-    border-radius: 12px;
-    padding: 14px 18px;
-    border: 1px solid var(--border-soft);
-}
-
-.footer-note {
-    font-size: 12.5px;
-    color: var(--text-muted);
-    line-height: 1.5;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.footer-note i {
-    color: var(--primary-text);
-    flex-shrink: 0;
-}
-
-@media (max-width: 1080px) {
-    .example-services-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
 /* Cabin Availability & Anonymized Operational Panel */
 
 /* =========================================================

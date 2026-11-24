@@ -2,7 +2,7 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <!--
   Dibujos con muñequitos para explicar de un vistazo lo que se hace en el panel (SVG propio, colores en illustrations.css,
-  también en modo oscuro). art(escena): 'carta', 'foto' o 'reservas'.
+  también en modo oscuro). art(escena): 'carta', 'foto', 'reservas', 'buscar' o 'confirmada' (las dos últimas, en la portada).
   card(steps, owner): tarjeta «Primeros pasos» del panel de un centro recién dado de alta (DashboardService.FirstSteps).
 -->
 <body>
@@ -54,6 +54,52 @@
   <circle class="fs-lens" cx="67" cy="51" r="3"/>
   <!-- destello de la foto -->
   <path class="fs-flash" d="M80 46l6-4M80 52h7M80 58l6 4"/>
+</svg>
+</th:block>
+<th:block th:case="'buscar'">
+<svg class="fs-art" viewBox="0 0 160 120" aria-hidden="true" focusable="false">
+  <ellipse class="fs-blob" cx="80" cy="64" rx="66" ry="50"/>
+  <ellipse class="fs-shadow" cx="80" cy="110" rx="52" ry="5"/>
+  <!-- mapa con centros -->
+  <rect class="fs-paper" x="78" y="22" width="60" height="70" rx="8"/>
+  <path class="fs-road" d="M78 62c18-6 30 8 60-4M100 22c-4 22 8 44 2 70"/>
+  <path class="fs-pin" d="M118 34c-6 0-10 4-10 9 0 7 10 16 10 16s10-9 10-16c0-5-4-9-10-9z"/>
+  <circle class="fs-lens" cx="118" cy="43" r="3.5"/>
+  <circle class="fs-dot" cx="92" cy="76" r="3.5"/><circle class="fs-dot" cx="124" cy="78" r="3.5"/>
+  <!-- clienta con lupa -->
+  <path class="fs-hair" d="M28 40c-2-13 6-21 17-21s19 8 17 21l2 20H26z"/>
+  <circle class="fs-skin" cx="45" cy="38" r="12"/>
+  <path class="fs-top" d="M23 108c0-32 9-50 22-50s22 18 22 50z"/>
+  <rect class="fs-skin" x="41" y="48" width="8" height="12" rx="3"/>
+  <circle class="fs-eye" cx="41" cy="38" r="1.4"/><circle class="fs-eye" cx="49" cy="38" r="1.4"/><path class="fs-smile" d="M42 43q3 2.5 6 0"/>
+  <path class="fs-arm" d="M60 76l14-12"/>
+  <circle class="fs-skin" cx="76" cy="62" r="4.5"/>
+  <!-- lupa -->
+  <path class="fs-handle" d="M78 60l8-8"/>
+  <circle class="fs-glass" cx="94" cy="44" r="11"/>
+</svg>
+</th:block>
+<th:block th:case="'confirmada'">
+<svg class="fs-art" viewBox="0 0 160 120" aria-hidden="true" focusable="false">
+  <ellipse class="fs-blob" cx="80" cy="64" rx="66" ry="50"/>
+  <ellipse class="fs-shadow" cx="80" cy="110" rx="52" ry="5"/>
+  <!-- móvil con la cita confirmada -->
+  <rect class="fs-phone-big" x="84" y="16" width="48" height="86" rx="9"/>
+  <rect class="fs-screen" x="89" y="24" width="38" height="68" rx="4"/>
+  <circle class="fs-ok" cx="108" cy="48" r="13"/>
+  <path class="fs-ok-check" d="M101 48l5 5 9-10"/>
+  <rect class="fs-line" x="96" y="68" width="24" height="4" rx="2"/>
+  <rect class="fs-line-soft" x="99" y="77" width="18" height="4" rx="2"/>
+  <!-- clienta contenta saludando -->
+  <path class="fs-hair" d="M28 40c-2-13 6-21 17-21s19 8 17 21l2 20H26z"/>
+  <circle class="fs-skin" cx="45" cy="38" r="12"/>
+  <path class="fs-top" d="M23 108c0-32 9-50 22-50s22 18 22 50z"/>
+  <rect class="fs-skin" x="41" y="48" width="8" height="12" rx="3"/>
+  <circle class="fs-eye" cx="41" cy="38" r="1.4"/><circle class="fs-eye" cx="49" cy="38" r="1.4"/><path class="fs-smile" d="M41 42q4 4 8 0"/>
+  <path class="fs-arm" d="M62 70l10-22"/>
+  <circle class="fs-skin" cx="73" cy="45" r="4.5"/>
+  <path class="fs-spark" d="M140 14l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/>
+  <path class="fs-heart" d="M74 24c-3-5-11-3-10 3 1 4 10 9 10 9s9-5 10-9c1-6-7-8-10-3z"/>
 </svg>
 </th:block>
 <th:block th:case="*">

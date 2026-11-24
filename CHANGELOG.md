@@ -52,6 +52,9 @@ Al sacar una versión:
 
 ### Cambiado
 
+- **Portada pensada para quien quiere pedir cita**: arriba dice «Pide cita en tu centro de belleza», con «Buscar un centro» como botón principal y «Tengo un centro» al lado (iniciar sesión queda en una línea debajo). Las cifras inventadas (+82 %, 98,6 %…) dejan sitio a tres dibujos con muñequitos: «Busca tu centro», «Elige día y hora» y «Te confirman la cita». Fuera el «CENTRO EJEMPLO» con tratamientos y profesionales de mentira, y los textos ya no hablan de «motor», «bloqueo dinámico» ni «insumos», ni prometen cosas que Cuquora no hace (varias sedes, aparatología, «100 % garantizado»). En el móvil la página pasa de unos 12.500 a 9.000 px.
+- **«Mis reservas»**: primero las próximas citas, luego el historial plegado y al final «Mis puntos». En pantallas anchas los puntos van en la columna de la izquierda.
+- **Inventario y carta en el móvil**: «Añadir producto» y «Añadir tratamiento» son botones con texto arriba, como en el ordenador. Se quita el «+» flotante, que tapaba la papelera y la etiqueta de stock de la última fila.
 - Antes, cualquier producto con 3 unidades o menos salía como «Bajo Stock» y avisaba en la campana; ahora solo avisan los que tienen aviso puesto (ver arriba).
 - La ficha del cliente ya no enseña el correo interno (`cliente_…@cbelleza.local`) de los clientes dados de alta sin correo.
 - Recordatorio de cita por correo, más claro y sin correos de más: el título dice «Mañana tienes cita» o «Hoy tienes cita», el asunto empieza por el día y la hora («Recordatorio: mañana a las 10:00, Manicura en Centro Histórico») y el botón pasa a «Ver o anular mi cita». Ya no llega justo después del correo de «Cita confirmada» o «Tu cita ha cambiado»: si a la clienta se le avisó de la cita hace menos de 12 horas, espera, y si faltan menos de 2 horas para la cita no se manda. Sin migración.

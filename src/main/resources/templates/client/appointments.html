@@ -17,7 +17,40 @@
         <div th:replace="~{fragments/alerts :: flash}"></div>
 
         <div class="appointments-layout" th:classappend="${!loyaltyCards.isEmpty()} ? 'has-points'">
-            <!-- Tarjetas de puntos de los centros que la tienen activada -->
+            <div class="appointments-list">
+                <!-- Próximas: lo que el cliente tiene que mirar o hacer. La más cercana, destacada; justo después de
+                     reservar, la recién pedida va la primera y en verde -->
+                <section class="appointments-block" aria-labelledby="upcomingTitle">
+                    <h2 class="appointments-block-title" id="upcomingTitle">Próximas citas
+                        <span class="appointments-block-count" th:if="${!appointments.upcoming().isEmpty()}"
+                              th:text="${appointments.upcoming().size()}">9</span></h2>
+                    <div class="appointments-grid" th:if="${!appointments.upcoming().isEmpty()}">
+                        <th:block th:each="app, stat : ${appointments.upcoming()}">
+                            <div th:replace="~{fragments/appointment-card :: card(${app}, ${app.id == nextAppointmentId}, ${justBookedId != null and app.id == justBookedId})}"></div>
+                        </th:block>
+                    </div>
+                    <div class="no-appointments-box glass-panel" th:if="${appointments.upcoming().isEmpty()}">
+                        <i class="lucide-calendar-off" aria-hidden="true"></i>
+                        <p th:if="${appointments.history().isEmpty()}">Todavía no tienes citas. <a href="/centers">Busca un centro</a> y reserva tu primera cita.</p>
+                        <p th:unless="${appointments.history().isEmpty()}">No tienes citas próximas. Repite un tratamiento desde el historial o <a href="/centers">busca un centro</a>.</p>
+                    </div>
+                </section>
+
+                <!-- Historial: plegado y en filas compactas; se abre solo si no hay próximas -->
+                <details class="appointments-history" th:if="${!appointments.history().isEmpty()}"
+                         th:open="${appointments.upcoming().isEmpty()}">
+                    <summary class="appointments-block-title">Historial
+                        <span class="appointments-block-count" th:text="${appointments.history().size()}">22</span></summary>
+                    <ul class="history-rows">
+                        <th:block th:each="app : ${appointments.history()}">
+                            <li th:replace="~{fragments/appointment-card :: historyRow(${app}, ${reviewRatings.get(app.id)}, ${reviewableIds.contains(app.id)})}"></li>
+                        </th:block>
+                    </ul>
+                </details>
+            </div>
+
+            <!-- Tarjetas de puntos de los centros que la tienen activada. En móvil van después de las citas y del
+                 historial (lo primero es la próxima cita); en escritorio, en la columna de la izquierda (citas.css) -->
             <section class="client-loyalty" th:if="${!loyaltyCards.isEmpty()}" aria-labelledby="clientLoyaltyTitle">
                 <h2 class="client-loyalty-title" id="clientLoyaltyTitle"><i class="lucide-gift" aria-hidden="true"></i> Mis puntos
                     <span class="client-loyalty-count" th:if="${loyaltyCards.size() > 1}" th:text="${loyaltyCards.size() + ' centros'}">6 centros</span></h2>
@@ -60,38 +93,6 @@
                             th:classappend="${stat.first} ? 'is-active'" th:attr="data-index=${stat.index},aria-label=${'Ver puntos de ' + item.centerName()}"></button>
                 </div>
             </section>
-
-            <div class="appointments-list">
-                <!-- Próximas: lo que el cliente tiene que mirar o hacer. La más cercana, destacada; justo después de
-                     reservar, la recién pedida va la primera y en verde -->
-                <section class="appointments-block" aria-labelledby="upcomingTitle">
-                    <h2 class="appointments-block-title" id="upcomingTitle">Próximas citas
-                        <span class="appointments-block-count" th:if="${!appointments.upcoming().isEmpty()}"
-                              th:text="${appointments.upcoming().size()}">9</span></h2>
-                    <div class="appointments-grid" th:if="${!appointments.upcoming().isEmpty()}">
-                        <th:block th:each="app, stat : ${appointments.upcoming()}">
-                            <div th:replace="~{fragments/appointment-card :: card(${app}, ${app.id == nextAppointmentId}, ${justBookedId != null and app.id == justBookedId})}"></div>
-                        </th:block>
-                    </div>
-                    <div class="no-appointments-box glass-panel" th:if="${appointments.upcoming().isEmpty()}">
-                        <i class="lucide-calendar-off" aria-hidden="true"></i>
-                        <p th:if="${appointments.history().isEmpty()}">Todavía no tienes citas. <a href="/centers">Busca un centro</a> y reserva tu primera cita.</p>
-                        <p th:unless="${appointments.history().isEmpty()}">No tienes citas próximas. Repite un tratamiento desde el historial o <a href="/centers">busca un centro</a>.</p>
-                    </div>
-                </section>
-
-                <!-- Historial: plegado y en filas compactas; se abre solo si no hay próximas -->
-                <details class="appointments-history" th:if="${!appointments.history().isEmpty()}"
-                         th:open="${appointments.upcoming().isEmpty()}">
-                    <summary class="appointments-block-title">Historial
-                        <span class="appointments-block-count" th:text="${appointments.history().size()}">22</span></summary>
-                    <ul class="history-rows">
-                        <th:block th:each="app : ${appointments.history()}">
-                            <li th:replace="~{fragments/appointment-card :: historyRow(${app}, ${reviewRatings.get(app.id)}, ${reviewableIds.contains(app.id)})}"></li>
-                        </th:block>
-                    </ul>
-                </details>
-            </div>
         </div>
     </main>
 

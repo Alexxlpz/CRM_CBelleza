@@ -32,6 +32,12 @@
 .fs-flash { fill: none; stroke: var(--primary); stroke-width: 2.5; stroke-linecap: round; }
 .fs-screen { fill: #ffffff; }
 .fs-cal rect { fill: rgba(var(--primary-rgb), 0.25); }
+.fs-road { fill: none; stroke: rgba(var(--primary-rgb), 0.3); stroke-width: 5; stroke-linecap: round; }
+.fs-pin { fill: var(--primary-text); }
+.fs-handle { fill: none; stroke: #2b2825; stroke-width: 5; stroke-linecap: round; }
+.fs-glass { fill: rgba(255, 255, 255, 0.55); stroke: #2b2825; stroke-width: 4; }
+.fs-ok { fill: var(--success-strong); }
+.fs-ok-check { fill: none; stroke: #ffffff; stroke-width: 3.5; stroke-linecap: round; stroke-linejoin: round; }
 
 /* ---------- Tarjeta «Primeros pasos» ---------- */
 

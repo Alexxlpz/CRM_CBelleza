@@ -140,10 +140,6 @@
             <i class="lucide-package-x" aria-hidden="true"></i>
             <p>No hay existencias en stock. Comienza añadiendo productos desde el catálogo.</p>
         </div>
-
-        <button type="button" class="fab-add-btn" data-sheet-open="addProductModal" aria-label="Añadir producto" th:if="${isCenterOwner}">
-            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-        </button>
     </main>
 
     <div th:replace="~{worker/fragments/inventory-modals :: addProductSheet(${catalogProducts}, ${maxPhotoMb})}"></div>

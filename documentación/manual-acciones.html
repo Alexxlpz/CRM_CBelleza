@@ -242,7 +242,7 @@
                             <tr>
                                 <td><code>/, /home, /features, /centers</code></td>
                                 <td><span class="http-get">GET</span></td>
-                                <td>Páginas públicas: inicio (con «Más funcionalidades»; <code>/features</code> redirige a <code>/home#funcionalidades</code>) y buscador de centros con mapa</td>
+                                <td>Páginas públicas: inicio (para clientes: «Buscar un centro» y «Tengo un centro», tres dibujos de cómo se pide cita y «Más funcionalidades»; <code>/features</code> redirige a <code>/home#funcionalidades</code>) y buscador de centros con mapa</td>
                                 <td>✅ Permitido</td>
                                 <td>✅ Permitido</td>
                                 <td>✅ Permitido</td>
@@ -1002,7 +1002,7 @@
                         <strong>/client/appointments</strong>
                         <span class="card-badge badge-client">CLIENT</span>
                     </div>
-                    <p>«Mis reservas», separada en «Próximas citas» (la primera destacada como «Tu próxima cita»; justo tras reservar, la nueva va primera con borde verde, por el atributo flash <code>justBookedId</code>, y el aviso lleva título con <code>successTitle</code>; fechas amables con <code>FriendlyDates</code>, teléfono del centro como enlace <code>tel:</code> con <code>PhoneNumbers.telHref</code>) e «Historial» con «Volver a reservar» (abre el centro con el tratamiento ya elegido, <code>?tratamiento=</code>) y, arriba, «Mis puntos» (<code>LoyaltyService.cardsOfClient</code>: centros con la tarjeta activada donde tiene citas o puntos). Desde cada tarjeta:</p>
+                    <p>«Mis reservas», separada en «Próximas citas» (la primera destacada como «Tu próxima cita»; justo tras reservar, la nueva va primera con borde verde, por el atributo flash <code>justBookedId</code>, y el aviso lleva título con <code>successTitle</code>; fechas amables con <code>FriendlyDates</code>, teléfono del centro como enlace <code>tel:</code> con <code>PhoneNumbers.telHref</code>) e «Historial» (plegado) con «Volver a reservar» (abre el centro con el tratamiento ya elegido, <code>?tratamiento=</code>) y, después de las citas, «Mis puntos» (<code>LoyaltyService.cardsOfClient</code>: centros con la tarjeta activada donde tiene citas o puntos; en pantallas anchas, en la columna izquierda). Desde cada tarjeta:</p>
                     <ul class="text-secondary" style="margin-left: 1.5rem; font-size: 0.9rem;">
                         <li><code>POST /client/appointments/{id}/accept-proposal</code> (<code>proposalId</code>): elige una hora propuesta y la cita queda confirmada.</li>
                         <li><code>POST /client/appointments/{id}/decline-proposal</code>: ninguna hora le viene bien; se avisa al centro.</li>

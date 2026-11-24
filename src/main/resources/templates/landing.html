@@ -1,51 +1,52 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <th:block th:replace="~{fragments/head :: meta('Cuquora CRM - Software de Gestión para Centros de Estética y Spas')}"></th:block>
+    <th:block th:replace="~{fragments/head :: meta('Cuquora · Pide cita en tu centro de belleza')}"></th:block>
     <link rel="stylesheet" th:href="@{/css/home.css}">
+    <link rel="stylesheet" th:href="@{/css/illustrations.css}">
 </head>
 <body>
     <div th:replace="~{fragments/navbar :: brand(true)}"></div>
 
-    <!-- Desktop Left Rail: Full-Height Luxury Interactive Index -->
+    <!-- Índice lateral de escritorio -->
     <aside class="desktop-left-rail" id="desktopIndexRail" aria-label="Navegación de secciones">
         <div class="rail-header">
             <h4 class="rail-title">Índice</h4>
         </div>
         <nav class="rail-nav">
-            <a href="#flujo" class="rail-link active" data-target="flujo">
+            <a href="#como-reservar" class="rail-link active" data-target="como-reservar">
                 <span class="rail-num">01</span>
-                <span class="rail-text">Flujo Operativo</span>
+                <span class="rail-text">Pedir cita</span>
+                <svg class="rail-chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </a>
+            <a href="#flujo" class="rail-link" data-target="flujo">
+                <span class="rail-num">02</span>
+                <span class="rail-text">Para tu centro</span>
                 <svg class="rail-chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
             </a>
             <a href="#citas-online" class="rail-link" data-target="citas-online">
-                <span class="rail-num">02</span>
-                <span class="rail-text">Gestión de Agenda</span>
+                <span class="rail-num">03</span>
+                <span class="rail-text">Agenda</span>
                 <svg class="rail-chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
             </a>
             <a href="#inventario" class="rail-link" data-target="inventario">
-                <span class="rail-num">03</span>
-                <span class="rail-text">Control de Stock</span>
-                <svg class="rail-chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
-            </a>
-            <a href="#centro-servicios" class="rail-link" data-target="centro-servicios">
                 <span class="rail-num">04</span>
-                <span class="rail-text">Centro y Servicios</span>
+                <span class="rail-text">Productos</span>
                 <svg class="rail-chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
             </a>
             <a href="#roles" class="rail-link" data-target="roles">
                 <span class="rail-num">05</span>
-                <span class="rail-text">Solución por Perfil</span>
+                <span class="rail-text">Para quién es</span>
                 <svg class="rail-chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
             </a>
             <a href="#faq" class="rail-link" data-target="faq">
                 <span class="rail-num">06</span>
-                <span class="rail-text">Preguntas Frecuentes</span>
+                <span class="rail-text">Preguntas frecuentes</span>
                 <svg class="rail-chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
             </a>
             <a href="#funcionalidades" class="rail-link" data-target="funcionalidades">
                 <span class="rail-num">07</span>
-                <span class="rail-text">Más funcionalidades</span>
+                <span class="rail-text">Más funciones</span>
                 <svg class="rail-chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
             </a>
         </nav>
@@ -53,63 +54,66 @@
 
     <!-- Main Container -->
     <main class="main-container landing-main-container">
-        
-        <!-- Hero Section: Centered Presentation -->
+
+        <!-- Portada: primero para quien quiere pedir cita, luego para los centros -->
         <section class="landing-hero">
-            <h1 class="landing-logo">Cuquora</h1>
+            <h1 class="landing-logo">Pide cita en tu centro de belleza</h1>
             <p class="landing-subtitle">
-                El software de gestión integral para centros de estética, salones y spas. Automatiza tu agenda de citas online 24/7, supervisa el inventario de cabina en tiempo real, coordina a tus especialistas y ofrece una experiencia sin fricciones a cada cliente.
+                Busca un centro cerca de ti, mira sus tratamientos y precios y elige el día y la hora que te vengan bien. Sin llamar por teléfono.
             </p>
             <div class="landing-cta-group">
-                <a href="/login" class="btn btn-primary btn-hero-cta" th:if="${sessionRole == null}">
-                    Iniciar sesión
+                <a href="/centers" class="btn btn-primary btn-hero-cta" th:if="${sessionRole == null}">
+                    <i class="lucide-search" aria-hidden="true"></i> Buscar un centro
                 </a>
-                <a href="/register" class="btn btn-hero-secondary" th:if="${sessionRole == null}">
-                    Registrarse
+                <a href="/register-center" class="btn btn-hero-secondary" th:if="${sessionRole == null}">
+                    <i class="lucide-store" aria-hidden="true"></i> Tengo un centro
                 </a>
                 <a href="/centers" class="btn btn-primary btn-hero-cta" th:if="${sessionRole == 'CLIENT'}">
-                    Explorar centros y reservar
+                    <i class="lucide-search" aria-hidden="true"></i> Buscar un centro
                 </a>
                 <a href="/worker/dashboard" class="btn btn-primary btn-hero-cta" th:if="${sessionRole == 'WORKER'}">
-                    Acceder a mi panel de control
+                    Ir a mi panel
                 </a>
             </div>
+            <p class="hero-login-line" th:if="${sessionRole == null}">¿Ya tienes cuenta? <a href="/login">Inicia sesión</a></p>
             <div class="hero-trust-row">
-                <span><i class="lucide-shield-check" aria-hidden="true"></i> Privacidad y RGPD 100% garantizado</span>
-                <span><i class="lucide-check" aria-hidden="true"></i> Citas online 24/7</span>
-                <span><i class="lucide-check" aria-hidden="true"></i> Gestión integral de cabinas</span>
+                <span><i class="lucide-check" aria-hidden="true"></i> Gratis para clientes</span>
+                <span><i class="lucide-check" aria-hidden="true"></i> Reserva a cualquier hora</span>
+                <span><i class="lucide-shield-check" aria-hidden="true"></i> Privacidad y RGPD</span>
             </div>
         </section>
 
-        <!-- Social Proof / Business Metrics Bar: Highlighting Operational Efficiency -->
-        <section class="metrics-bar" aria-label="Métricas de eficiencia y rendimiento">
-            <div class="metric-item">
-                <span class="metric-value">+82%</span>
-                <span class="metric-label">Puntualidad y citas confirmadas</span>
-            </div>
-            <div class="metric-divider"></div>
-            <div class="metric-item">
-                <span class="metric-value">24/7</span>
-                <span class="metric-label">Reservas online automatizadas</span>
-            </div>
-            <div class="metric-divider"></div>
-            <div class="metric-item">
-                <span class="metric-value">98.6%</span>
-                <span class="metric-label">Eficiencia operativa global</span>
-            </div>
-            <div class="metric-divider"></div>
-            <div class="metric-item">
-                <span class="metric-value">0</span>
-                <span class="metric-label">Solapamientos en cabina</span>
-            </div>
-        </section>
-
-        <!-- Operational Workflow Pipeline (4 Steps) -->
-        <section class="saas-section" id="flujo" aria-label="Flujo operativo del sistema">
+        <!-- Así de fácil: tres dibujos en lugar de cifras -->
+        <section class="saas-section landing-steps" id="como-reservar" aria-labelledby="comoReservarTitle">
             <div class="section-header-block">
-                <span class="eyebrow">Flujo operativo sincronizado</span>
+                <span class="eyebrow">Así de fácil</span>
+                <h2 id="comoReservarTitle">Tu cita en tres pasos</h2>
+            </div>
+            <ol class="landing-steps-list">
+                <li class="landing-step">
+                    <span class="landing-step-art" th:insert="~{worker/fragments/first-steps :: art('buscar')}"></span>
+                    <h3><span class="landing-step-num" aria-hidden="true">1</span> Busca tu centro</h3>
+                    <p>Por cercanía o por tipo de tratamiento.</p>
+                </li>
+                <li class="landing-step">
+                    <span class="landing-step-art" th:insert="~{worker/fragments/first-steps :: art('reservas')}"></span>
+                    <h3><span class="landing-step-num" aria-hidden="true">2</span> Elige día y hora</h3>
+                    <p>Solo ves las horas que están libres.</p>
+                </li>
+                <li class="landing-step">
+                    <span class="landing-step-art" th:insert="~{worker/fragments/first-steps :: art('confirmada')}"></span>
+                    <h3><span class="landing-step-num" aria-hidden="true">3</span> Te confirman la cita</h3>
+                    <p>Te llega un aviso y la tienes en «Mis reservas».</p>
+                </li>
+            </ol>
+        </section>
+
+        <!-- Para centros: cómo va una cita de principio a fin -->
+        <section class="saas-section" id="flujo" aria-label="Cómo funciona para tu centro">
+            <div class="section-header-block">
+                <span class="eyebrow">Para tu centro</span>
                 <h2>Cómo funciona Cuquora en tu día a día</h2>
-                <p>Una arquitectura unificada para que la reserva del cliente, la disponibilidad de cabinas y el inventario de insumos funcionen en perfecta coordinación.</p>
+                <p>Las reservas, la agenda del equipo, las fichas de tus clientes y los productos, en el mismo sitio.</p>
             </div>
 
             <div class="saas-pipeline-grid">
@@ -118,352 +122,188 @@
                         <span class="pipeline-step-num">01</span>
                         <span class="pipeline-step-tag">Cliente</span>
                     </div>
-                    <h3>Reserva Online 24/7</h3>
-                    <p>El cliente selecciona centro, servicio y especialista. La plataforma muestra tarifas transparentes, duraciones estimadas y turnos disponibles en tiempo real, desde cualquier dispositivo móvil o web.</p>
+                    <h3>Pide cita cuando quiere</h3>
+                    <p>Desde el móvil o el ordenador, a cualquier hora. Ve tu carta con precios y duraciones y elige el hueco que le viene bien.</p>
                     <div class="pipeline-step-footer">
-                        <span>Sin llamadas telefónicas</span>
+                        <span>Menos llamadas</span>
                     </div>
                 </div>
 
                 <div class="pipeline-step">
                     <div class="pipeline-step-header">
                         <span class="pipeline-step-num">02</span>
-                        <span class="pipeline-step-tag">Motor</span>
+                        <span class="pipeline-step-tag">Agenda</span>
                     </div>
-                    <h3>Bloqueo Dinámico</h3>
-                    <p>El algoritmo valida la duración exacta del servicio (30 a 90 minutos) y comprueba la disponibilidad simultánea de especialista y cabina, bloqueando el intervalo y descartando horas pasadas.</p>
+                    <h3>Solo horas libres</h3>
+                    <p>Cuquora tiene en cuenta lo que dura cada tratamiento, el horario del centro, quién trabaja ese día y cuántas cabinas tienes.</p>
                     <div class="pipeline-step-footer">
-                        <span>Cero dobles reservas</span>
+                        <span>Sin citas pisadas</span>
                     </div>
                 </div>
 
                 <div class="pipeline-step">
                     <div class="pipeline-step-header">
                         <span class="pipeline-step-num">03</span>
-                        <span class="pipeline-step-tag">Cabina</span>
+                        <span class="pipeline-step-tag">Equipo</span>
                     </div>
-                    <h3>Atención y Ficha Técnica</h3>
-                    <p>El especialista accede desde su móvil o tablet a las notas clínicas del paciente, revisa sensibilidades dérmicas, tratamientos previos y anota observaciones específicas de la sesión realizada.</p>
+                    <h3>La ficha a mano</h3>
+                    <p>Antes de atender, el equipo ve en el móvil las alergias, los tratamientos anteriores y las notas de cada cliente.</p>
                     <div class="pipeline-step-footer">
-                        <span>Historial centralizado</span>
+                        <span>Todo en la ficha</span>
                     </div>
                 </div>
 
                 <div class="pipeline-step">
                     <div class="pipeline-step-header">
                         <span class="pipeline-step-num">04</span>
-                        <span class="pipeline-step-tag">Almacén</span>
+                        <span class="pipeline-step-tag">Productos</span>
                     </div>
-                    <h3>Trazabilidad de Insumos</h3>
-                    <p>Los consumibles utilizados se descuentan del almacén correspondiente. El semáforo de existencias mínimas emite alertas antes de que se produzca una rotura de stock en cabina.</p>
+                    <h3>Stock al día</h3>
+                    <p>Cada venta descuenta del inventario y te avisamos cuando un producto se está acabando.</p>
                     <div class="pipeline-step-footer">
-                        <span>Control de mermas</span>
+                        <span>Sin quedarte sin nada</span>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Deep Dive 1: Agenda & Citas -->
+        <!-- Agenda -->
         <section class="saas-detail-section" id="citas-online">
             <div class="saas-detail-media">
-                <img src="/images/beauty_salon_hero.webp" loading="lazy" decoding="async" alt="Instalaciones profesionales de un centro de estética">
+                <img src="/images/beauty_salon_hero.webp" loading="lazy" decoding="async" alt="Interior de un centro de estética">
             </div>
             <div class="saas-detail-content">
-                <span class="eyebrow">Gestión de agenda y turnos</span>
-                <h2>Optimiza los tiempos de cabina y reduce cancelaciones</h2>
+                <span class="eyebrow">Agenda</span>
+                <h2>Una agenda que se llena sola y sin solapes</h2>
                 <p>
-                    El motor de asignación calcula de manera matemática la duración requerida para cada servicio (desde manicuras de 50 minutos hasta tratamientos dérmicos profundos de 60 minutos). La agenda bloquea únicamente los tramos necesarios, garantizando puntualidad y cero retrasos.
+                    Cada tratamiento tiene su duración y la agenda reserva justo ese tiempo. Tú decides si aceptas cada solicitud o si propones otra hora.
                 </p>
                 <ul class="saas-check-list">
-                    <li><strong>Filtrado dinámico de franjas horarias:</strong> Ocultación automática de intervalos que ya han transcurrido en el día en curso.</li>
-                    <li><strong>Asignación por especialista cualificado:</strong> Cada tratamiento se vincula únicamente a los terapeutas autorizados para realizarlo.</li>
-                    <li><strong>Cuenta de cliente unificada:</strong> Registro rápido para gestionar citas, consultar el estado de reservas y disponer de ficha técnica personalizada.</li>
-                    <li><strong>Panel diario para terapeutas:</strong> Vista cronológica para que cada especialista prepare su cabina con anticipación.</li>
+                    <li><strong>Horas que ya han pasado, fuera:</strong> el cliente solo ve huecos en los que todavía se puede ir.</li>
+                    <li><strong>Cada tratamiento con quien lo hace:</strong> solo se ofrece a las personas del equipo que lo saben hacer.</li>
+                    <li><strong>Cuenta para cada cliente:</strong> ve sus citas, puede cambiarlas y recibe los avisos.</li>
+                    <li><strong>Panel de hoy:</strong> cada persona del equipo ve sus citas del día en orden.</li>
                 </ul>
             </div>
         </section>
 
-        <!-- Deep Dive 2: Inventario -->
+        <!-- Productos -->
         <section class="saas-detail-section saas-detail-reverse" id="inventario">
             <div class="saas-detail-media">
-                <img src="/images/face_serum.webp" loading="lazy" decoding="async" alt="Productos profesionales y cosméticos organizados en inventario">
+                <img src="/images/face_serum.webp" loading="lazy" decoding="async" alt="Productos de cosmética ordenados en una estantería">
             </div>
             <div class="saas-detail-content">
-                <span class="eyebrow">Inventario profesional y logística</span>
-                <h2>Supervisa los suministros de cabina sin roturas de stock</h2>
+                <span class="eyebrow">Productos</span>
+                <h2>Sabe qué te queda antes de que se acabe</h2>
                 <p>
-                    Quedarse sin producto a mitad de un tratamiento interrumpe el servicio y perjudica la imagen del negocio. Cuquora diferencia con exactitud los insumos de cabina de los productos retail destinados a la venta al público, alertando a tiempo ante cualquier disminución.
+                    Lleva el stock de los productos que vendes y de los que usas en tus tratamientos. Cuando algo baja del mínimo que tú eliges, te avisamos.
                 </p>
                 <ul class="saas-check-list">
-                    <li><strong>Semáforo preventivo de existencias:</strong> Estados visuales claros para niveles óptimos, stock de reposición urgente y agotado.</li>
-                    <li><strong>Ajustes rápidos en un clic:</strong> Incremento y deducción de existencias con registro inmediato de movimientos.</li>
-                    <li><strong>Categorización completa:</strong> Organización sistemática por rostro, capilar, cuerpo, uñas y aparatología.</li>
-                    <li><strong>Gestión independiente por almacén:</strong> Cada centro mantiene su propio stock aislado, evitando confusiones entre sedes.</li>
+                    <li><strong>De un vistazo:</strong> cada producto dice si está bien, si queda poco o si se ha acabado.</li>
+                    <li><strong>Sumar y restar con un toque:</strong> o escaneando el código de barras con el móvil.</li>
+                    <li><strong>Por categorías:</strong> rostro, cabello, uñas y cuerpo.</li>
+                    <li><strong>Cada centro, su stock:</strong> lo de un centro no se mezcla con lo de otro.</li>
                 </ul>
             </div>
         </section>
 
-        <!-- Example Center & Services Showcase: CENTRO EJEMPLO -->
-        <section class="saas-section" id="centro-servicios" aria-label="CENTRO EJEMPLO y catálogo de servicios">
+        <!-- Para quién es -->
+        <section class="saas-section" id="roles" aria-label="Para quién es Cuquora">
             <div class="section-header-block">
-                <span class="eyebrow">Estructura Demostrativa</span>
-                <h2>Estructura de CENTRO EJEMPLO y Catálogo de Servicios</h2>
-                <p>Configuración ilustrativa para centros de estética, salones y spas. Cada centro parametriza sus cabinas físicas, especialistas asignados y catálogo de tratamientos con duraciones exactas y tarifas transparentes.</p>
-            </div>
-
-            <div class="example-center-card">
-                <!-- Center Header -->
-                <div class="example-center-header">
-                    <div class="example-center-main">
-                        <span class="example-center-pill">Modelo Demostrativo</span>
-                        <h3>CENTRO EJEMPLO</h3>
-                        <p class="example-center-loc"><i class="lucide-map-pin" aria-hidden="true"></i> Plantilla demostrativa de servicios para centros de estética y bienestar</p>
-                    </div>
-                    <div class="example-center-badges">
-                        <div class="center-badge-item">
-                            <span class="badge-num">4</span>
-                            <span class="badge-txt">Cabinas físicas</span>
-                        </div>
-                        <div class="center-badge-item">
-                            <span class="badge-num">3</span>
-                            <span class="badge-txt">Especialistas</span>
-                        </div>
-                        <div class="center-badge-item">
-                            <span class="badge-num">L-S</span>
-                            <span class="badge-txt">09:30 - 20:30</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Services Categories Grid -->
-                <div class="example-services-grid">
-                    
-                    <!-- Category 1 -->
-                    <div class="service-category-column">
-                        <div class="category-header">
-                            <i class="lucide-sparkles" aria-hidden="true"></i>
-                            <h4>Tratamientos Faciales</h4>
-                        </div>
-                        <div class="service-row-card">
-                            <div class="service-title-row">
-                                <span class="service-name">Limpieza Facial Profunda</span>
-                                <span class="service-price">45,00 €</span>
-                            </div>
-                            <div class="service-meta-row">
-                                <span class="service-duration"><i class="lucide-clock" aria-hidden="true"></i> 60 min</span>
-                                <span class="service-assign">Cabina 1 · Laura Gómez</span>
-                            </div>
-                            <p class="service-desc">Extracción de impurezas, vapor de ozono y mascarilla calmante purificante.</p>
-                        </div>
-
-                        <div class="service-row-card">
-                            <div class="service-title-row">
-                                <span class="service-name">Higiene con Punta de Diamante</span>
-                                <span class="service-price">38,00 €</span>
-                            </div>
-                            <div class="service-meta-row">
-                                <span class="service-duration"><i class="lucide-clock" aria-hidden="true"></i> 45 min</span>
-                                <span class="service-assign">Cabina 1 · Laura Gómez</span>
-                            </div>
-                            <p class="service-desc">Microdermoabrasión para renovación celular e hidratación profunda.</p>
-                        </div>
-
-                        <div class="service-row-card">
-                            <div class="service-title-row">
-                                <span class="service-name">Tratamiento Antiedad Global</span>
-                                <span class="service-price">55,00 €</span>
-                            </div>
-                            <div class="service-meta-row">
-                                <span class="service-duration"><i class="lucide-clock" aria-hidden="true"></i> 60 min</span>
-                                <span class="service-assign">Cabina 2 · Elena Ruiz</span>
-                            </div>
-                            <p class="service-desc">Ampolla de ácido hialurónico, estimulación dérmica y velo de colágeno.</p>
-                        </div>
-                    </div>
-
-                    <!-- Category 2 -->
-                    <div class="service-category-column">
-                        <div class="category-header">
-                            <i class="lucide-heart-pulse" aria-hidden="true"></i>
-                            <h4>Masajes y Bienestar</h4>
-                        </div>
-                        <div class="service-row-card">
-                            <div class="service-title-row">
-                                <span class="service-name">Masaje Relajante con Aromaterapia</span>
-                                <span class="service-price">50,00 €</span>
-                            </div>
-                            <div class="service-meta-row">
-                                <span class="service-duration"><i class="lucide-clock" aria-hidden="true"></i> 50 min</span>
-                                <span class="service-assign">Cabina 3 · Carlos Martínez</span>
-                            </div>
-                            <p class="service-desc">Ritual corporal con aceites esenciales botánicos de lavanda y romero.</p>
-                        </div>
-
-                        <div class="service-row-card">
-                            <div class="service-title-row">
-                                <span class="service-name">Drenaje Linfático Manual</span>
-                                <span class="service-price">60,00 €</span>
-                            </div>
-                            <div class="service-meta-row">
-                                <span class="service-duration"><i class="lucide-clock" aria-hidden="true"></i> 60 min</span>
-                                <span class="service-assign">Cabina 3 · Carlos Martínez</span>
-                            </div>
-                            <p class="service-desc">Técnica circulatoria descongestiva para reducción de retención de líquidos.</p>
-                        </div>
-
-                        <div class="service-row-card">
-                            <div class="service-title-row">
-                                <span class="service-name">Masaje Descontracturante</span>
-                                <span class="service-price">42,00 €</span>
-                            </div>
-                            <div class="service-meta-row">
-                                <span class="service-duration"><i class="lucide-clock" aria-hidden="true"></i> 40 min</span>
-                                <span class="service-assign">Cabina 3 · Carlos Martínez</span>
-                            </div>
-                            <p class="service-desc">Presión profunda en espalda y cervicales con bálsamo térmico.</p>
-                        </div>
-                    </div>
-
-                    <!-- Category 3 -->
-                    <div class="service-category-column">
-                        <div class="category-header">
-                            <i class="lucide-flower-2" aria-hidden="true"></i>
-                            <h4>Manicura, Pedicura & Estética</h4>
-                        </div>
-                        <div class="service-row-card">
-                            <div class="service-title-row">
-                                <span class="service-name">Manicura Spa con Exfoliación</span>
-                                <span class="service-price">28,00 €</span>
-                            </div>
-                            <div class="service-meta-row">
-                                <span class="service-duration"><i class="lucide-clock" aria-hidden="true"></i> 45 min</span>
-                                <span class="service-assign">Cabina 4 · Elena Ruiz</span>
-                            </div>
-                            <p class="service-desc">Cuidado de cutículas, peeling de albaricoque y esmaltado semipermanente.</p>
-                        </div>
-
-                        <div class="service-row-card">
-                            <div class="service-title-row">
-                                <span class="service-name">Pedicura Spa con Parafina</span>
-                                <span class="service-price">35,00 €</span>
-                            </div>
-                            <div class="service-meta-row">
-                                <span class="service-duration"><i class="lucide-clock" aria-hidden="true"></i> 55 min</span>
-                                <span class="service-assign">Cabina 4 · Elena Ruiz</span>
-                            </div>
-                            <p class="service-desc">Tratamiento intensivo con baño de parafina nutritiva y masaje de pies.</p>
-                        </div>
-                    </div>
-
-                </div>
-
-                <!-- Bottom operational notice -->
-                <div class="example-center-footer">
-                    <span class="footer-note">
-                        <i class="lucide-info" aria-hidden="true"></i>
-                        Cada tratamiento tiene asignados sus tiempos reales de atención y consumibles de cabina, permitiendo al sistema calcular intervalos precisos en la agenda y registrar mermas automáticamente.
-                    </span>
-                </div>
-            </div>
-        </section>
-
-        <!-- Role-Based Solutions (AgendaPro & Clientify style) -->
-        <section class="saas-section" id="roles" aria-label="Solución adaptada por perfiles de usuario">
-            <div class="section-header-block">
-                <span class="eyebrow">Solución adaptada por perfil</span>
-                <h2>Una herramienta pensada para todo el equipo</h2>
-                <p>Cuquora ofrece interfaces y permisos optimizados según las responsabilidades de cada miembro en el negocio.</p>
+                <span class="eyebrow">Para quién es</span>
+                <h2>Cada uno ve lo que necesita</h2>
+                <p>Quien lleva el centro, quien atiende y quien pide cita entran a su propia pantalla.</p>
             </div>
 
             <div class="saas-roles-grid">
                 <div class="role-box">
                     <div class="role-box-header">
                         <div>
-                            <h3>Directores y Propietarios</h3>
-                            <span class="role-subtitle">Control integral del negocio</span>
+                            <h3>Quien lleva el centro</h3>
+                            <span class="role-subtitle">Dueñas y dueños</span>
                         </div>
                     </div>
                     <ul class="role-features-list">
-                        <li>Supervisión de agendas multi-centro desde un único acceso.</li>
-                        <li>Auditoría continua de existencias de almacén y avisos de stock mínimo.</li>
-                        <li>Configuración de cartas de servicios, duraciones y asignación de personal.</li>
-                        <li>Reducción verificable de inasistencias gracias a reservas transparentes.</li>
+                        <li>La agenda de todo el equipo de un vistazo.</li>
+                        <li>Stock de productos y aviso cuando algo se acaba.</li>
+                        <li>La carta de tratamientos, el horario y quién hace cada cosa.</li>
+                        <li>Análisis de citas, ventas y ocupación, con descarga en CSV.</li>
                     </ul>
                 </div>
 
                 <div class="role-box">
                     <div class="role-box-header">
                         <div>
-                            <h3>Especialistas y Terapeutas</h3>
-                            <span class="role-subtitle">Eficiencia y enfoque en cabina</span>
+                            <h3>Quien atiende</h3>
+                            <span class="role-subtitle">El equipo del centro</span>
                         </div>
                     </div>
                     <ul class="role-features-list">
-                        <li>Agenda cronológica personal visible en cualquier smartphone o tablet.</li>
-                        <li>Notas clínicas del paciente con alergias, fórmulas y preferencias registradas.</li>
-                        <li>Tiempos de preparación de cabina respetados sin prisas ni solapes.</li>
-                        <li>Gestión rápida del estado de las citas en tiempo real.</li>
+                        <li>Sus citas del día en el móvil o la tablet.</li>
+                        <li>La ficha de cada cliente con alergias, notas y preferencias.</li>
+                        <li>Huecos que respetan lo que dura cada tratamiento.</li>
+                        <li>Aceptar, mover o completar una cita con un toque.</li>
                     </ul>
                 </div>
 
                 <div class="role-box">
                     <div class="role-box-header">
                         <div>
-                            <h3>Clientes y Pacientes</h3>
-                            <span class="role-subtitle">Autonomía y comodidad de reserva</span>
+                            <h3>Quien pide cita</h3>
+                            <span class="role-subtitle">Clientes</span>
                         </div>
                     </div>
                     <ul class="role-features-list">
-                        <li>Agendamiento online 24/7 en menos de 2 minutos sin llamar por teléfono.</li>
-                        <li>Elección libre de profesional favorito, horario exacto y centro cercano.</li>
-                        <li>Cuenta de cliente personalizada para consultar y gestionar el historial de reservas.</li>
-                        <li>Precios y duraciones detallados de cada servicio antes de confirmar.</li>
+                        <li>Pide cita a cualquier hora sin llamar por teléfono.</li>
+                        <li>Elige centro, tratamiento, día y hora.</li>
+                        <li>Sus citas y su historial en «Mis reservas».</li>
+                        <li>Precio y duración de cada tratamiento antes de pedirlo.</li>
                     </ul>
                 </div>
             </div>
         </section>
 
-        <!-- Operational FAQs (Real SaaS details) -->
+        <!-- Preguntas frecuentes -->
         <section class="saas-section" id="faq" aria-label="Preguntas frecuentes">
             <div class="section-header-block">
-                <span class="eyebrow">Resolución de dudas</span>
-                <h2>Preguntas frecuentes sobre la plataforma</h2>
-                <p>Respuestas claras a las dudas operativas más comunes sobre reservas, inventario y seguridad del sistema.</p>
+                <span class="eyebrow">Dudas</span>
+                <h2>Preguntas frecuentes</h2>
+                <p>Lo que más nos preguntan sobre reservas, productos y datos.</p>
             </div>
 
             <div class="saas-faq-list">
                 <div class="faq-item">
-                    <h3 class="faq-question">¿Cómo evita el sistema los solapamientos de citas en una misma cabina o con un mismo especialista?</h3>
+                    <h3 class="faq-question">¿Se pueden juntar dos citas a la misma hora?</h3>
                     <p class="faq-answer">
-                        Nuestro motor de agendamiento valida en tiempo real la disponibilidad en base de datos. Cada tratamiento tiene asignada una duración específica (de 30 a 90 minutos). Al seleccionar una hora, el sistema bloquea matemáticamente todos los tramos que componen la sesión para el especialista y cabina asignados, impidiendo cualquier doble reserva simultánea.
+                        No. Cada tratamiento tiene su duración y, al pedir una hora, Cuquora comprueba que quede una cabina y alguien del equipo libres durante todo ese tiempo. Si no, esa hora no se ofrece.
                     </p>
                 </div>
 
                 <div class="faq-item">
-                    <h3 class="faq-question">¿Cómo se gestiona el acceso de los clientes para reservar?</h3>
+                    <h3 class="faq-question">¿Hace falta instalar una aplicación?</h3>
                     <p class="faq-answer">
-                        Cuquora es 100% web responsiva y funciona de forma fluida en cualquier navegador móvil, tablet u ordenador. Todos los clientes disponen de una cuenta personal protegida, lo que les permite agendar en cualquier centro, revisar sus citas en tiempo real y tener un historial técnico garantizado con total privacidad.
+                        No. Cuquora funciona en el navegador del móvil, la tablet o el ordenador. Los clientes crean una cuenta para pedir cita en cualquier centro y ver sus reservas.
                     </p>
                 </div>
 
                 <div class="faq-item">
-                    <h3 class="faq-question">¿Cómo se gestiona el inventario cuando se tienen múltiples sucursales?</h3>
+                    <h3 class="faq-question">¿Cómo se lleva el stock de los productos?</h3>
                     <p class="faq-answer">
-                        Cada centro dispone de su propio almacén aislado. Las existencias, los umbrales de stock mínimo y las alertas preventivas se gestionan de manera independiente por sede, evitando confusiones y permitiendo a cada encargado supervisar exclusivamente los insumos de su salón.
+                        Cada centro tiene su propio inventario. Tú pones el mínimo de cada producto y, cuando baja de ahí, sale un aviso en el panel y en la campana.
                     </p>
                 </div>
 
                 <div class="faq-item">
-                    <h3 class="faq-question">¿Qué información puede consultar un terapeuta antes de recibir al cliente en cabina?</h3>
+                    <h3 class="faq-question">¿Qué ve el equipo antes de atender a un cliente?</h3>
                     <p class="faq-answer">
-                        Los especialistas tienen acceso al historial de citas previas del cliente y a las notas técnicas registradas en visitas anteriores, donde se especifican sensibilidades dérmicas, tratamientos realizados, preferencias o recomendaciones de cuidado domiciliario.
+                        Sus citas anteriores y la ficha con lo que se ha apuntado en otras visitas: alergias, sensibilidades, tratamientos hechos, preferencias o consejos para casa.
                     </p>
                 </div>
 
                 <div class="faq-item">
-                    <h3 class="faq-question">¿Cómo ayuda Cuquora a reducir las cancelaciones y tiempos muertos?</h3>
+                    <h3 class="faq-question">¿Qué pasa si un cliente quiere cambiar la hora?</h3>
                     <p class="faq-answer">
-                        Al permitir que el cliente escoja el tramo exacto que mejor se acomoda a su horario y confirmar de inmediato los detalles de su cita, la tasa de puntualidad aumenta sensiblemente. Asimismo, el cálculo exacto de duraciones evita desfases entre servicios consecutivos.
+                        Puede cambiarla desde «Mis reservas» dentro del plazo que pone cada centro. Pasado ese plazo, llama al centro. El centro también puede proponerle otra hora.
                     </p>
                 </div>
             </div>
@@ -473,7 +313,7 @@
             <div class="section-header-block">
                 <span class="eyebrow">Más funcionalidades</span>
                 <h2>Lo que también incluye Cuquora</h2>
-                <p>Herramientas que se usan cada día en recepción, en cabina y desde el móvil del cliente.</p>
+                <p>Cosas que se usan cada día en recepción, en cabina y desde el móvil del cliente.</p>
             </div>
 
             <div class="saas-roles-grid">
@@ -540,7 +380,7 @@
     <!-- Footer -->
     <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora CRM. Software de gestión para centros de estética, salones y spas.')}"></div>
 
-    <!-- ScrollSpy Script for Dynamic Animated Left Rail -->
+    <!-- Índice lateral que sigue el scroll -->
     <script th:src="@{/js/scroll-index.js}" defer></script>
 
 </body>

@@ -35,12 +35,19 @@
         align-items: stretch;
     }
 
+    /* Móvil: «Vender producto» y «Añadir producto» en una fila, mitad y mitad, como en Clientes */
     .inventory-header-actions {
-        flex-direction: column;
+        flex-direction: row;
     }
 
+    /* Los dos botones en una fila: menos relleno para que el texto quepa en una línea */
     .inventory-page-header .inventory-header-actions .btn {
-        width: 100%;
+        flex: 1 1 0;
+        min-width: 0;
+        padding-left: 10px;
+        padding-right: 10px;
+        gap: 6px;
+        font-size: 14px;
     }
 
     .inventory-page-header .btn-add-label {
@@ -282,17 +289,6 @@
     cursor: not-allowed;
 }
 
-/* Floating Action Button (FAB) Mobile */
-
-.fab-add-btn:focus-visible {
-    outline: none;
-    box-shadow: var(--focus-ring), 0 8px 24px rgba(163, 130, 88, 0.45);
-}
-
-.fab-add-btn:active {
-    transform: scale(0.9);
-}
-
 /* Product Info Modal (Centered, Soft Blur Backdrop, Larger Size & Full Image) */
 .info-modal-overlay {
     position: fixed;
@@ -477,16 +473,6 @@
    MOBILE SPECIFIC OVERRIDES (< 600px): Bottom Sheets & Thumb Zone
    ------------------------------------------------------------- */
 @media (max-width: 600px) {
-
-    /* Show circular FAB in mobile only */
-    .fab-add-btn {
-        display: flex;
-    }
-
-    /* Hide top header add button on mobile */
-    .btn-add-product {
-        display: none;
-    }
 
     /* Hide close buttons in mobile mode (Bottom Sheets use handle or backdrop) */
     .info-modal-footer {

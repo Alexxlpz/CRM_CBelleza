@@ -333,8 +333,9 @@
 }
 
 /* ===== Mis puntos ===== */
+/* Móvil: debajo de las citas y del historial */
 .client-loyalty {
-    margin-bottom: 28px;
+    margin-top: 28px;
 }
 
 .client-loyalty-title {
@@ -477,12 +478,20 @@
         align-items: start;
     }
 
+    /* En el HTML los puntos van después de las citas (orden del móvil); aquí pasan a la columna de la izquierda */
+    .appointments-layout.has-points .appointments-list {
+        grid-column: 2;
+        grid-row: 1;
+    }
+
     .appointments-layout.has-points .client-loyalty {
+        grid-column: 1;
+        grid-row: 1;
         position: sticky;
         top: 104px;
         max-height: calc(100vh - 128px);
         overflow-y: auto;
-        margin-bottom: 0;
+        margin: 0;
     }
 
     /* Escritorio: columna compacta. Centro y saldo en una línea y menos relleno,

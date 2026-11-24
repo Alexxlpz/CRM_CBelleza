@@ -3572,26 +3572,6 @@ body.media-viewer-open {
     flex-shrink: 0;
 }
 
-.fab-add-btn {
-    display: none;
-    position: fixed;
-    bottom: 24px;
-    right: 20px;
-    width: 58px;
-    height: 58px;
-    border-radius: 50%;
-    background: var(--brand-gradient);
-    color: var(--on-primary);
-    border: none;
-    box-shadow: 0 8px 24px rgba(163, 130, 88, 0.45);
-    z-index: 99;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    cursor: pointer;
-    transition: var(--transition);
-}
-
 .no-appointments-box {
     text-align: center;
     padding: 30px 15px;
@@ -4351,11 +4331,6 @@ body > footer {
         left: calc(12px + env(safe-area-inset-left));
         right: calc(12px + env(safe-area-inset-right));
     }
-}
-
-.fab-add-btn {
-    bottom: calc(24px + env(safe-area-inset-bottom));
-    right: calc(20px + env(safe-area-inset-right));
 }
 
 .media-viewer {
