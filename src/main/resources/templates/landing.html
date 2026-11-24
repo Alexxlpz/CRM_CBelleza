@@ -62,16 +62,16 @@
                 Busca un centro cerca de ti, mira sus tratamientos y precios y elige el día y la hora que te vengan bien. Sin llamar por teléfono.
             </p>
             <div class="landing-cta-group">
-                <a href="/centers" class="btn btn-primary btn-hero-cta" th:if="${sessionRole == null}">
+                <a href="/centers" class="btn btn-primary btn-lg btn-pill" th:if="${sessionRole == null}">
                     <i class="lucide-search" aria-hidden="true"></i> Buscar un centro
                 </a>
-                <a href="/register-center" class="btn btn-hero-secondary" th:if="${sessionRole == null}">
+                <a href="/register-center" class="btn btn-secondary btn-lg btn-pill" th:if="${sessionRole == null}">
                     <i class="lucide-store" aria-hidden="true"></i> Tengo un centro
                 </a>
-                <a href="/centers" class="btn btn-primary btn-hero-cta" th:if="${sessionRole == 'CLIENT'}">
+                <a href="/centers" class="btn btn-primary btn-lg btn-pill" th:if="${sessionRole == 'CLIENT'}">
                     <i class="lucide-search" aria-hidden="true"></i> Buscar un centro
                 </a>
-                <a href="/worker/dashboard" class="btn btn-primary btn-hero-cta" th:if="${sessionRole == 'WORKER'}">
+                <a href="/worker/dashboard" class="btn btn-primary btn-lg btn-pill" th:if="${sessionRole == 'WORKER'}">
                     Ir a mi panel
                 </a>
             </div>
@@ -368,7 +368,7 @@
                     <p>Da de alta tu centro y a tu equipo. Lo revisamos y, cuando esté publicado, tus clientes podrán reservar.</p>
                 </div>
                 <div class="lead-box-action">
-                    <a href="/register-center" class="btn btn-primary btn-hero-cta">
+                    <a href="/register-center" class="btn btn-primary btn-lg btn-pill">
                         <i class="lucide-store" aria-hidden="true"></i> Dar de alta mi centro
                     </a>
                 </div>

@@ -118,12 +118,24 @@ document.addEventListener('DOMContentLoaded', () => {
             </p>`;
     }
 
+    /**
+     * Distancia para leer de un vistazo: «A 350 m» (de 50 en 50), «A 1,2 km» hasta 10 km y «A 23 km» hasta 100 km.
+     * Más lejos no se pone (un «A 10.692 km» no ayuda a elegir); el orden por cercanía no cambia.
+     */
+    const MAX_DISTANCE_KM = 100;
+    function distanceLabel(km) {
+        if (km === null || km === undefined || Number.isNaN(km) || km > MAX_DISTANCE_KM) return '';
+        const meters = Math.max(50, Math.round(km * 1000 / 50) * 50);
+        if (meters < 1000) return `A ${meters} m`;
+        return `A ${km.toLocaleString('es-ES', { maximumFractionDigits: km < 9.95 ? 1 : 0 })} km`;
+    }
+
     /** Globo que aparece al tocar un centro en el mapa: primero se ve qué centro es y luego se decide entrar. */
     function centerPopup(center) {
         const el = document.createElement('div');
         el.className = 'map-popup';
-        const distance = center.distanceKm !== null && center.distanceKm !== undefined
-            ? `<span class="map-popup-distance">A ${center.distanceKm.toFixed(1)} km</span>` : '';
+        const label = distanceLabel(center.distanceKm);
+        const distance = label ? `<span class="map-popup-distance">${label}</span>` : '';
         const offers = center.offers.length
             ? `<span class="map-popup-offers"><i class="lucide-tag" aria-hidden="true"></i> ${offersLabel(center.offers.length)}</span>` : '';
         el.innerHTML = `
@@ -294,8 +306,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function centerCard(center) {
         const card = document.createElement('article');
         card.className = 'center-card glass-panel';
-        const distance = center.distanceKm !== null
-            ? `<span class="center-distance-badge">A ${center.distanceKm.toFixed(1)} km</span>`
+        const label = distanceLabel(center.distanceKm);
+        const distance = label
+            ? `<span class="center-distance-badge">${label}</span>`
             : '<i class="lucide-map-pin center-meta-icon" aria-hidden="true"></i>';
         // Sin foto, las iniciales ocupan el mismo hueco: todas las tarjetas miden lo mismo
         const photo = center.photoUrl

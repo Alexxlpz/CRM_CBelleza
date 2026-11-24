@@ -204,7 +204,7 @@ class ReviewFixesTests {
             String html = mvc.perform(get("/worker/inventory").with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
                     .andExpect(status().isOk())
                     .andReturn().getResponse().getContentAsString();
-            int button = html.indexOf("class=\"btn-adjust btn-increment\" data-id=\"" + item.getId() + "\"");
+            int button = html.indexOf("class=\"btn btn-soft btn-icon btn-adjust btn-increment\" data-id=\"" + item.getId() + "\"");
             assertTrue(button > 0);
             assertTrue(html.substring(button, html.indexOf('>', button)).contains("disabled"));
 

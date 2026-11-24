@@ -46,14 +46,14 @@
                     <div class="template-field-row" th:each="field, stat : ${fields}">
                         <div>
                             <label class="field-label">Nombre del Campo / Pregunta</label>
-                            <input type="text" name="fieldLabels" class="field-input" aria-label="Nombre del campo" required
+                            <input type="text" name="fieldLabels" class="form-control" aria-label="Nombre del campo" required
                                    th:value="${field.label}" placeholder="Ej. Tipo de Piel, Alergias, etc.">
                             <input type="hidden" name="fieldIds" th:value="${field.id}">
                         </div>
 
                         <div>
                             <label class="field-label">Tipo de Dato</label>
-                            <select name="fieldTypes" class="field-select" aria-label="Tipo de dato">
+                            <select name="fieldTypes" class="form-control" aria-label="Tipo de dato">
                                 <option value="text" th:selected="${field.type == 'text'}">Texto Corto</option>
                                 <option value="number" th:selected="${field.type == 'number'}">Número</option>
                                 <option value="textarea" th:selected="${field.type == 'textarea'}">Área de Texto (Notas)</option>
@@ -62,12 +62,12 @@
 
                         <div class="template-field-help">
                             <label class="field-label">Texto de Ayuda / Placeholder</label>
-                            <input type="text" name="fieldPlaceholders" class="field-input" aria-label="Texto de ayuda"
+                            <input type="text" name="fieldPlaceholders" class="form-control" aria-label="Texto de ayuda"
                                    th:value="${field.placeholder}" placeholder="Ej. Sensible, atópica...">
                         </div>
 
                         <div class="template-field-actions">
-                            <button type="button" class="btn-remove-field" data-remove-field tabindex="-1">
+                            <button type="button" class="btn btn-danger-soft btn-sm" data-remove-field tabindex="-1">
                                 <i class="lucide-trash-2" aria-hidden="true"></i>
                                 <span>Eliminar</span>
                             </button>
@@ -76,12 +76,12 @@
                 </div>
 
                 <div class="template-form-footer">
-                    <button type="button" class="btn-add-field" id="btnAddField">
+                    <button type="button" class="btn btn-soft" id="btnAddField">
                         <i class="lucide-plus" aria-hidden="true"></i>
                         <span>Añadir Otra Variable a la Ficha</span>
                     </button>
 
-                    <button type="submit" class="btn-save-ficha btn-save-ficha--inline" id="btnSaveTemplate">
+                    <button type="submit" class="btn btn-primary" id="btnSaveTemplate">
                         <i class="lucide-check" aria-hidden="true"></i>
                         <span>Guardar Plantilla del Centro</span>
                     </button>
@@ -97,15 +97,15 @@
             <h2 class="ui-modal-title" id="unsavedTitle">¿Guardar cambios antes de salir?</h2>
             <p class="ui-modal-text" id="unsavedText">Has realizado modificaciones en la estructura de la plantilla de ficha del centro. Si sales ahora sin guardar, se perderán las variables y ajustes configurados.</p>
             <div class="modal-unsaved-actions">
-                <button type="button" class="btn-save-and-exit" data-unsaved="save">
+                <button type="button" class="btn btn-primary btn-block" data-unsaved="save">
                     <i class="lucide-save" aria-hidden="true"></i>
                     <span>Guardar y salir</span>
                 </button>
-                <button type="button" class="btn-discard-and-exit" data-unsaved="discard">
+                <button type="button" class="btn btn-danger-soft btn-block" data-unsaved="discard">
                     <i class="lucide-log-out" aria-hidden="true"></i>
                     <span>Salir sin guardar</span>
                 </button>
-                <button type="button" class="btn-stay-editing" data-unsaved="stay">
+                <button type="button" class="btn btn-secondary btn-block" data-unsaved="stay">
                     <i class="lucide-pen-line" aria-hidden="true"></i>
                     <span>Seguir editando</span>
                 </button>
@@ -119,12 +119,12 @@
         <div class="template-field-row">
             <div>
                 <label class="field-label">Nombre del Campo / Pregunta</label>
-                <input type="text" name="fieldLabels" class="field-input" aria-label="Nombre del campo" required placeholder="Ej. Sensibilidad al amoníaco">
+                <input type="text" name="fieldLabels" class="form-control" aria-label="Nombre del campo" required placeholder="Ej. Sensibilidad al amoníaco">
                 <input type="hidden" name="fieldIds" value="">
             </div>
             <div>
                 <label class="field-label">Tipo de Dato</label>
-                <select name="fieldTypes" class="field-select" aria-label="Tipo de dato">
+                <select name="fieldTypes" class="form-control" aria-label="Tipo de dato">
                     <option value="text">Texto Corto</option>
                     <option value="number">Número</option>
                     <option value="textarea">Área de Texto (Notas)</option>
@@ -132,10 +132,10 @@
             </div>
             <div class="template-field-help">
                 <label class="field-label">Texto de Ayuda / Placeholder</label>
-                <input type="text" name="fieldPlaceholders" class="field-input" aria-label="Texto de ayuda" placeholder="Ej. Alta / Media / Ninguna">
+                <input type="text" name="fieldPlaceholders" class="form-control" aria-label="Texto de ayuda" placeholder="Ej. Alta / Media / Ninguna">
             </div>
             <div class="template-field-actions">
-                <button type="button" class="btn-remove-field" data-remove-field tabindex="-1">
+                <button type="button" class="btn btn-danger-soft btn-sm" data-remove-field tabindex="-1">
                     <i class="lucide-trash-2" aria-hidden="true"></i>
                     <span>Eliminar</span>
                 </button>

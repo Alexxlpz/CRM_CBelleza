@@ -123,7 +123,7 @@
                     <div><b>50</b><span>servicios</span></div>
                     <div><b>28</b><span>entidades JPA</span></div>
                     <div><b>35</b><span>migraciones (V1–V35)</span></div>
-                    <div><b>481</b><span>tests (+9 en la API)</span></div>
+                    <div><b>482</b><span>tests (+9 en la API)</span></div>
                 </div>
             </section>
 
@@ -1373,6 +1373,25 @@
                     </div>
                 </div>
 
+                <h3>Botones y campos</h3>
+                <p>Un solo juego en <code>common.css</code>: un botón primario se ve igual en cualquier pantalla. Se monta con <code>.btn</code> + una variante + (si hace falta) un tamaño. Las reglas de cada página solo colocan el botón (ancho, margen, <code>flex</code>, orden); nunca cambian su color, letra o forma. No se crean clases <code>btn-algo</code> nuevas: si falta una variante, se añade al juego.</p>
+                <div class="table-responsive">
+                    <table class="doc-table">
+                        <thead><tr><th>Clase</th><th>Para qué</th><th>Ejemplo</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>.btn-primary</code></td><td>La acción principal de la zona (una por zona)</td><td>Darle cita, Guardar, Buscar un centro</td></tr>
+                            <tr><td><code>.btn-secondary</code></td><td>Alternativa con borde</td><td>Cancelar, Tengo un centro, Mis Citas</td></tr>
+                            <tr><td><code>.btn-soft</code></td><td>Acción secundaria con fondo suave</td><td>Configurar plantilla, Añadir campo, −1 / +1</td></tr>
+                            <tr><td><code>.btn-danger</code></td><td>Destructiva que pide confirmación</td><td>Borrar mi cuenta, Rechazar registro</td></tr>
+                            <tr><td><code>.btn-danger-soft</code></td><td>Destructiva menos fuerte</td><td>Descartar cambios, Eliminar campo, Rechazar solicitud</td></tr>
+                            <tr><td><code>.btn-ghost</code> / <code>.btn-ghost-danger</code></td><td>Solo texto, dentro de una tarjeta</td><td>Ver Info, papelera, Anular cita</td></tr>
+                            <tr><td><code>.btn-sm</code> · normal · <code>.btn-lg</code></td><td>Alto 36, 44 o 52 px</td><td><code>.btn-lg</code> en la portada y en «Solicitar cita»</td></tr>
+                            <tr><td><code>.btn-icon</code>, <code>.btn-block</code>, <code>.btn-pill</code></td><td>Cuadrado solo icono (con <code>aria-label</code>), ancho completo, redondo</td><td>Papelera, botones del menú móvil, barra superior</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p>Los campos de formulario llevan <code>.form-control</code> (input, select y textarea; <code>.field-textarea-auto</code> añade el crecimiento automático de la ficha). <code>button</code>, <code>input</code>, <code>select</code> y <code>textarea</code> heredan la letra de la página con <code>font: inherit</code>: sin eso el navegador les pone Arial.</p>
+
                 <div class="callout callout-info">
                     <div class="callout-icon">📐</div>
                     <div class="callout-content">
@@ -1477,7 +1496,7 @@
                         <div class="section-icon">✅</div>
                         <div>
                             <h2>Tests</h2>
-                            <p style="margin: 0; font-size: 0.95rem;">481 tests en 57 clases (24 nov 2026), todos contra H2 con los datos demo</p>
+                            <p style="margin: 0; font-size: 0.95rem;">482 tests en 57 clases (24 nov 2026), todos contra H2 con los datos demo</p>
                         </div>
                     </div>
                 </div>

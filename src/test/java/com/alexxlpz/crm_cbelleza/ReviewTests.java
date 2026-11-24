@@ -345,6 +345,27 @@ class ReviewTests {
     }
 
     @Test
+    void thePromptWaitsWhileTheClientIsBookingAndShowsUpInMyBookings() throws Exception {
+        appointments.findByClientIdOrderByDateTimeDesc(sofia.getId()).forEach(app -> app.setReviewPromptedAt(LocalDateTime.now()));
+        Appointment done = appointment(AppointmentStatus.COMPLETED, LocalDateTime.now().minusDays(1));
+
+        // Reservando o en su perfil no sale (tapaba las horas en el móvil) y sigue pendiente
+        mvc.perform(get("/client/centers/" + centerService.shortSlug(center)).with(TestUsers.as(users, TestUsers.CLIENT)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(not(containsString("id=\"reviewPrompt\""))));
+        mvc.perform(get("/client/profile").with(TestUsers.as(users, TestUsers.CLIENT)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(not(containsString("id=\"reviewPrompt\""))));
+        assertNull(appointments.findById(done.getId()).orElseThrow().getReviewPromptedAt());
+
+        // En «Mis reservas» y en la portada, sí
+        mvc.perform(get("/client/appointments").with(TestUsers.as(users, TestUsers.CLIENT)))
+                .andExpect(content().string(containsString("id=\"reviewPrompt\"")));
+        mvc.perform(get("/home").with(TestUsers.as(users, TestUsers.CLIENT)))
+                .andExpect(content().string(containsString("id=\"reviewPrompt\"")));
+    }
+
+    @Test
     void noMostrarMasStopsThePromptForEveryAppointment() throws Exception {
         appointments.findByClientIdOrderByDateTimeDesc(sofia.getId()).forEach(app -> app.setReviewPromptedAt(LocalDateTime.now()));
         appointment(AppointmentStatus.COMPLETED, LocalDateTime.now().minusDays(2));

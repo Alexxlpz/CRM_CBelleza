@@ -63,7 +63,7 @@
                 <form th:action="@{/client/appointments/{id}/decline-proposal(id=${app.id})}" method="post"
                       data-confirm="Avisaremos al centro de que ninguna hora te viene bien y la solicitud quedará anulada."
                       data-confirm-title="¿Ninguna hora te viene bien?" data-confirm-button="Ninguna me viene bien">
-                    <button type="submit" class="btn-link-danger"><i class="lucide-calendar-x" aria-hidden="true"></i> Ninguna me viene bien</button>
+                    <button type="submit" class="btn btn-ghost-danger btn-sm"><i class="lucide-calendar-x" aria-hidden="true"></i> Ninguna me viene bien</button>
                 </form>
             </div>
         </div>
@@ -83,7 +83,7 @@
                       th:attr="data-confirm=${app.status.name() == 'PENDING'} ? 'Se retirará tu solicitud y avisaremos al centro.' : 'Avisaremos al centro de que no vas a ir y el hueco quedará libre para otra persona.'"
                       th:data-confirm-title="${app.status.name() == 'PENDING'} ? '¿Retirar la solicitud?' : '¿Anular la cita?'"
                       data-confirm-button="Anular">
-                    <button type="submit" class="btn-link-danger">
+                    <button type="submit" class="btn btn-ghost-danger btn-sm">
                         <i class="lucide-ban" aria-hidden="true"></i>
                         <span th:text="${app.status.name() == 'PENDING'} ? 'Retirar solicitud' : 'Anular cita'">Anular cita</span>
                     </button>

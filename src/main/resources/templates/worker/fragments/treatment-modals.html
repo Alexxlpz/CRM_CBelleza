@@ -116,7 +116,7 @@
                 <form id="treatmentDeleteForm" th:action="@{/worker/treatments/0/delete}" method="post"
                       data-confirm="Se borra para siempre, con su oferta. No tiene citas, así que no se pierde nada del historial."
                       data-confirm-title="¿Borrar el tratamiento?" data-confirm-button="Borrar">
-                    <button type="submit" class="btn btn-secondary btn-sm btn-delete-treatment" tabindex="-1"><i class="lucide-trash-2" aria-hidden="true"></i> Borrar</button>
+                    <button type="submit" class="btn btn-danger-soft btn-sm" tabindex="-1"><i class="lucide-trash-2" aria-hidden="true"></i> Borrar</button>
                 </form>
                 <p class="form-hint treatment-edit-note" id="treatmentDeleteNote" hidden></p>
             </div>

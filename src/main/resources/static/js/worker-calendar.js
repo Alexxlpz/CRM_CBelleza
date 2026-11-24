@@ -243,7 +243,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const newClient = app.isNewClient
             ? '<span class="badge-new-client"><i class="lucide-sparkles" aria-hidden="true"></i> Nuevo Cliente</span>' : '';
         const clientCardLink = (app.status === 'CONFIRMED' || app.status === 'COMPLETED' || app.status === 'NO_SHOW') && client.id ? `
-            <a href="/worker/clients/${encodeURIComponent(client.id)}" class="btn-template-config btn-template-config--sm">
+            <a href="/worker/clients/${encodeURIComponent(client.id)}" class="btn btn-soft btn-sm">
                 <i class="lucide-file-text" aria-hidden="true"></i> Ficha del Cliente
             </a>` : '';
         const note = app.workerMessage ? `
@@ -296,13 +296,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 <label class="form-label agenda-note-label" for="worker-${app.id}">La atiende:${app.workerChosenByClient && app.worker ? ` <span class="agenda-worker-asked">el cliente ha pedido a ${Cuquora.escapeHtml(app.worker.name || '')}</span>` : ''}</label>
                 <select id="worker-${app.id}" class="approval-msg-input agenda-worker-select">${workerOptions(app.worker?.id ?? ME)}</select>
                 <div class="agenda-card-actions agenda-card-actions--three">
-                    <button type="button" class="btn-agenda-action reject" data-action="reject">
+                    <button type="button" class="btn btn-danger-soft btn-sm btn-agenda-action reject" data-action="reject">
                         <i class="lucide-x agenda-action-icon" aria-hidden="true"></i> Rechazar
                     </button>
-                    <button type="button" class="btn-agenda-action propose" data-action="propose">
+                    <button type="button" class="btn btn-secondary btn-sm btn-agenda-action propose" data-action="propose">
                         <i class="lucide-calendar-clock agenda-action-icon" aria-hidden="true"></i> Otra hora
                     </button>
-                    <button type="button" class="btn-agenda-action approve" data-action="approve">
+                    <button type="button" class="btn btn-primary btn-sm btn-agenda-action approve" data-action="approve">
                         <i class="lucide-check agenda-action-icon" aria-hidden="true"></i> Aceptar
                     </button>
                 </div>
@@ -310,34 +310,34 @@ document.addEventListener('DOMContentLoaded', function () {
         } else if (app.status === 'PROPOSED') {
             actions = `
             <div class="agenda-card-actions">
-                <button type="button" class="btn-agenda-action reject" data-action="reject">
+                <button type="button" class="btn btn-danger-soft btn-sm btn-agenda-action reject" data-action="reject">
                     <i class="lucide-x agenda-action-icon" aria-hidden="true"></i> Rechazar
                 </button>
-                <button type="button" class="btn-agenda-action neutral" data-action="withdraw">
+                <button type="button" class="btn btn-soft btn-sm btn-agenda-action neutral" data-action="withdraw">
                     <i class="lucide-undo-2 agenda-action-icon" aria-hidden="true"></i> Retirar propuesta
                 </button>
             </div>`;
         } else if (app.status === 'CONFIRMED' && isFuture(app)) {
             actions = `
             <div class="agenda-card-actions">
-                <button type="button" class="btn-agenda-action reject" data-action="cancel">
+                <button type="button" class="btn btn-danger-soft btn-sm btn-agenda-action reject" data-action="cancel">
                     <i class="lucide-ban agenda-action-icon" aria-hidden="true"></i> Anular
                 </button>
-                <button type="button" class="btn-agenda-action neutral" data-action="reschedule">
+                <button type="button" class="btn btn-soft btn-sm btn-agenda-action neutral" data-action="reschedule">
                     <i class="lucide-calendar-clock agenda-action-icon" aria-hidden="true"></i> Cambiar hora
                 </button>
             </div>`;
         } else if ((app.status === 'CONFIRMED' || app.status === 'COMPLETED') && client.id) {
             actions = `
             <div class="agenda-card-actions">
-                <button type="button" class="btn-agenda-action neutral" data-action="no-show">
+                <button type="button" class="btn btn-soft btn-sm btn-agenda-action neutral" data-action="no-show">
                     <i class="lucide-user-x agenda-action-icon" aria-hidden="true"></i> No se presentó
                 </button>
             </div>`;
         } else if (app.status === 'NO_SHOW') {
             actions = `
             <div class="agenda-card-actions">
-                <button type="button" class="btn-agenda-action neutral" data-action="undo-no-show">
+                <button type="button" class="btn btn-soft btn-sm btn-agenda-action neutral" data-action="undo-no-show">
                     <i class="lucide-undo-2 agenda-action-icon" aria-hidden="true"></i> Sí vino: deshacer
                 </button>
             </div>`;
@@ -445,7 +445,7 @@ document.addEventListener('DOMContentLoaded', function () {
             <h3 class="agenda-item-treatment">${esc(blockWho(part.block))}</h3>
             ${part.block.reason ? `<div class="agenda-item-detail"><i class="lucide-message-square" aria-hidden="true"></i><span>${esc(part.block.reason)}</span></div>` : ''}
             <div class="agenda-card-actions">
-                <button type="button" class="btn-agenda-action neutral" data-remove-block>
+                <button type="button" class="btn btn-soft btn-sm btn-agenda-action neutral" data-remove-block>
                     <i class="lucide-unlock agenda-action-icon" aria-hidden="true"></i> Quitar bloqueo
                 </button>
             </div>`;

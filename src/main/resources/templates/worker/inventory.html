@@ -103,13 +103,13 @@
                     <p class="product-description-short" th:text="${item.product.description}">Descripción del producto...</p>
 
                     <div class="inventory-card-actions">
-                        <button type="button" class="btn-card-action" th:attr="data-sheet-open='detailModal_' + ${item.id}">
+                        <button type="button" class="btn btn-ghost btn-sm" th:attr="data-sheet-open='detailModal_' + ${item.id}">
                             <i class="lucide-info" aria-hidden="true"></i> Ver Info
                         </button>
                         <form th:action="@{/worker/inventory/{id}/delete(id=${item.id})}" method="post" class="delete-form" th:if="${isCenterOwner}"
                               data-confirm="El producto se retirará del inventario de tu centro, pero se conservará en el catálogo general."
                               data-confirm-title="¿Eliminar este producto?" data-confirm-button="Eliminar">
-                            <button type="submit" class="btn-card-action btn-delete" th:aria-label="'Eliminar ' + ${item.product.name} + ' del inventario'">
+                            <button type="submit" class="btn btn-ghost-danger btn-sm btn-icon" th:aria-label="'Eliminar ' + ${item.product.name} + ' del inventario'">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
                             </button>
                         </form>
@@ -122,9 +122,9 @@
                         <span class="stock-count-val" th:text="${item.stock}" aria-live="polite">0</span>
                     </div>
                     <div class="stock-adjust-actions">
-                        <button type="button" class="btn-adjust btn-decrement" th:data-id="${item.id}" data-change="-1"
+                        <button type="button" class="btn btn-soft btn-icon btn-adjust btn-decrement" th:data-id="${item.id}" data-change="-1"
                                 th:disabled="${item.stock == 0}" th:aria-label="'Restar una unidad de ' + ${item.product.name}">-1</button>
-                        <button type="button" class="btn-adjust btn-increment" th:data-id="${item.id}" data-change="1"
+                        <button type="button" class="btn btn-soft btn-icon btn-adjust btn-increment" th:data-id="${item.id}" data-change="1"
                                 th:disabled="${item.stock >= maxStock}" th:aria-label="'Sumar una unidad de ' + ${item.product.name}">+1</button>
                     </div>
                     <span class="badge badge-pill badge-micro stock-badge"

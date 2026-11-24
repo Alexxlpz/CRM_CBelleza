@@ -1020,7 +1020,7 @@
                         <span class="card-badge badge-client">CLIENT · JSON</span>
                     </div>
                     <p>La campana del cliente (<code>ClientNotificationService</code>) muestra sus citas de hoy y mañana y los cambios hechos por el centro en los últimos 7 días. Al abrirla, este endpoint guarda la hora en <code>notifications_seen_at</code>. Cada aviso se quita con <code>POST /client/notifications/dismiss</code> (<code>key</code> repetido; «Limpiar todas» manda todas): se guarda su huella en <code>notification_dismissals</code> y vuelve a salir si el texto cambia.</p>
-                    <p style="font-size: 0.9rem;">Aviso «¿Qué tal tu cita?»: tras una cita completada en los últimos 7 días sin reseña sale una vez; <code>POST /client/appointments/{id}/review-prompt/seen</code> lo marca al enseñarlo y <code>POST /client/review-prompts/off</code> («No mostrar más») lo apaga para todas.</p>
+                    <p style="font-size: 0.9rem;">Aviso «¿Qué tal tu cita?»: tras una cita completada en los últimos 7 días sin reseña sale una vez, solo en «Mis reservas», el buscador o la portada (nunca mientras reserva o rellena un formulario; <code>CurrentUserModelAdvice.showsReviewPrompt</code>); <code>POST /client/appointments/{id}/review-prompt/seen</code> lo marca al enseñarlo y <code>POST /client/review-prompts/off</code> («No mostrar más») lo apaga para todas.</p>
                 </div>
             </section>
 

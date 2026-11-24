@@ -102,31 +102,6 @@
     flex-wrap: wrap;
 }
 
-.btn-hero-cta {
-    padding: 15px 32px;
-    font-size: 15px;
-    font-weight: 700;
-    border-radius: 30px;
-    box-shadow: 0 10px 28px rgba(var(--primary-rgb), 0.38);
-    transition: var(--transition);
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.btn-hero-cta:hover {
-    box-shadow: 0 16px 36px rgba(var(--primary-rgb), 0.48);
-}
-
-.btn-hero-cta:focus-visible {
-    outline: none;
-    box-shadow: var(--focus-ring), 0 10px 28px rgba(var(--primary-rgb), 0.38);
-}
-
-.btn-hero-cta:active {
-    transform: scale(0.97);
-}
-
 /* Feature Cards Grid (Upper Section) */
 
 /* Floating pill tag inside card */
@@ -185,71 +160,15 @@
         font-size: 14.5px;
     }
 
+    .landing-cta-group .btn {
+        width: 100%;
+    }
+
     .hero-trust-row {
         gap: 8px 18px;
         margin-top: 22px;
     }
-
-    .btn-hero-cta,
-    .btn-hero-secondary {
-        width: 100%;
-        justify-content: center;
-    }
 }
-
-/* Login Card Layout - Lux & Glassmorphic Style */
-
-/* ==========================================================================
-   Credentials Login Styles (Lux Salon / CRM Aesthetic)
-   ========================================================================== */
-
-/* Alerts: Error & Success Messages */
-
-/* Input Fields with Contextual Icons */
-
-/* Password Toggle Visibility Button */
-
-/* Options Row: Remember Me & Forgot Password */
-
-/* Divider */
-
-/* Guest Direct Access Button */
-
-/* Quick Demo Accounts Helper Pills */
-
-/* ==========================================================================
-   DEBUG BUTTON: Botón de depuración al antiguo inicio de sesión
-   Fácil de comentar/desactivar en producción
-   ========================================================================== */
-
-/* Real-World SaaS Landing Page Styles */
-
-.btn-hero-secondary {
-    padding: 15px 32px;
-    font-size: 15px;
-    font-weight: 700;
-    border-radius: 30px;
-    background: rgba(var(--surface-rgb), 0.85);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    color: var(--text-main);
-    border: 1px solid rgba(var(--primary-rgb), 0.45);
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    box-shadow: 0 4px 16px rgba(var(--primary-rgb), 0.12);
-    transition: var(--transition);
-}
-
-.btn-hero-secondary:hover {
-    background: rgba(var(--surface-rgb), 0.95);
-    border-color: var(--primary-dark);
-    color: var(--primary-text);
-    box-shadow: 0 10px 24px rgba(var(--primary-rgb), 0.25);
-}
-
 /* Portada: «Así de fácil», tres dibujos con muñequitos (illustrations.css) */
 .landing-steps {
     margin-top: 8px;

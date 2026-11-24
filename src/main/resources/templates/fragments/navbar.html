@@ -66,20 +66,20 @@
                 <div th:replace="~{fragments/notifications :: clientMenu(${clientNotifications})}"></div>
             </th:block>
             <th:block th:if="${role == 'CLIENT'}">
-                <a href="/client/appointments" class="nav-auth-btn nav-auth-register" title="Mis Citas"><i class="lucide-calendar-days" aria-hidden="true"></i> <span class="nav-btn-label">Mis Citas</span></a>
-                <a href="/client/profile" class="nav-auth-btn nav-auth-register" title="Mi Perfil"><i class="lucide-user" aria-hidden="true"></i> <span class="nav-btn-label">Mi Perfil</span></a>
+                <a href="/client/appointments" class="btn btn-secondary btn-sm btn-pill nav-auth-btn nav-auth-register" title="Mis Citas"><i class="lucide-calendar-days" aria-hidden="true"></i> <span class="nav-btn-label">Mis Citas</span></a>
+                <a href="/client/profile" class="btn btn-secondary btn-sm btn-pill nav-auth-btn nav-auth-register" title="Mi Perfil"><i class="lucide-user" aria-hidden="true"></i> <span class="nav-btn-label">Mi Perfil</span></a>
             </th:block>
             <th:block th:if="${role == 'WORKER'}">
-                <a href="/worker/dashboard" class="nav-auth-btn nav-auth-register" title="Mi Panel"><i class="lucide-layout-dashboard" aria-hidden="true"></i> <span class="nav-btn-label">Mi Panel</span></a>
-                <a href="/worker/center" class="nav-auth-btn nav-auth-register" title="Ajustes"><i class="lucide-settings" aria-hidden="true"></i> <span class="nav-btn-label">Ajustes</span></a>
+                <a href="/worker/dashboard" class="btn btn-secondary btn-sm btn-pill nav-auth-btn nav-auth-register" title="Mi Panel"><i class="lucide-layout-dashboard" aria-hidden="true"></i> <span class="nav-btn-label">Mi Panel</span></a>
+                <a href="/worker/center" class="btn btn-secondary btn-sm btn-pill nav-auth-btn nav-auth-register" title="Ajustes"><i class="lucide-settings" aria-hidden="true"></i> <span class="nav-btn-label">Ajustes</span></a>
             </th:block>
             <form th:action="@{/logout}" method="post" class="nav-logout-form">
                 <button type="submit" class="nav-logout" title="Cerrar sesión"><i class="lucide-log-out" aria-hidden="true"></i> <span class="nav-btn-label">Cerrar sesión</span></button>
             </form>
         </div>
         <div class="nav-session-info nav-auth-duo" th:if="${role == null and (showSession == null or showSession != false)}">
-            <a href="/login" class="nav-auth-btn nav-auth-login">Iniciar Sesión</a>
-            <a href="/register" class="nav-auth-btn nav-auth-register">Registrarse</a>
+            <a href="/login" class="btn btn-primary btn-sm btn-pill nav-auth-btn">Iniciar Sesión</a>
+            <a href="/register" class="btn btn-secondary btn-sm btn-pill nav-auth-btn nav-auth-register">Registrarse</a>
         </div>
     </th:block>
 
@@ -158,8 +158,8 @@
                     </form>
 
                     <div class="mobile-drawer-actions" th:if="${role == null and (showSession == null or showSession != false)}">
-                        <a href="/register" class="mobile-btn-primary"><i class="lucide-user-plus" aria-hidden="true"></i> Registrarse Gratis</a>
-                        <a href="/login" class="mobile-btn-outline"><i class="lucide-log-in" aria-hidden="true"></i> Iniciar Sesión</a>
+                        <a href="/register" class="btn btn-primary btn-block"><i class="lucide-user-plus" aria-hidden="true"></i> Registrarse Gratis</a>
+                        <a href="/login" class="btn btn-secondary btn-block"><i class="lucide-log-in" aria-hidden="true"></i> Iniciar Sesión</a>
                     </div>
                 </div>
             </div>

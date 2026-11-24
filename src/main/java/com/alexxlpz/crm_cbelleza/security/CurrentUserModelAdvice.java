@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Añade a todas las vistas los datos del usuario autenticado que usan la navbar y los fragmentos
@@ -75,8 +76,12 @@ public class CurrentUserModelAdvice {
             }
         } else if ("GET".equalsIgnoreCase(request.getMethod())) {
             model.addAttribute("clientNotifications", clientNotificationService.forClient(user.getId()));
-            // «¿Qué tal tu cita?»: una vez por cita completada, en la primera página que abra después
-            model.addAttribute("reviewPrompt", reviewService.toPrompt(user.getId()).orElse(null));
+            // «¿Qué tal tu cita?»: una vez por cita completada, en la primera página tranquila que abra después.
+            // Mientras reserva o rellena un formulario no sale (tapaba las horas y «Solicitar cita» en el móvil);
+            // como solo se da por visto al enseñarse, sigue pendiente para la siguiente de estas páginas.
+            if (showsReviewPrompt(request.getRequestURI())) {
+                model.addAttribute("reviewPrompt", reviewService.toPrompt(user.getId()).orElse(null));
+            }
         }
     }
 
@@ -85,6 +90,13 @@ public class CurrentUserModelAdvice {
      * Todas las pantallas de gestión (agenda, inventario, clientes...) cuelgan de "Mi Panel".
      */
     /** Apartado del panel en la barra de arriba del trabajador (Agenda, Clientes, Tratamientos, Inventario). */
+    /** Páginas en las que puede salir «¿Qué tal tu cita?»: «Mis reservas», el buscador de centros y la portada. */
+    static boolean showsReviewPrompt(String uri) {
+        return REVIEW_PROMPT_PAGES.contains(uri);
+    }
+
+    private static final Set<String> REVIEW_PROMPT_PAGES = Set.of("/client/appointments", "/centers", "/home", "/");
+
     static String workerSection(String uri) {
         if (uri == null || !uri.startsWith("/worker/")) {
             return null;

@@ -170,28 +170,6 @@
     margin-left: auto;
 }
 
-.btn-link-danger {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 0 3px;
-    border: none;
-    /* Subrayado continuo bajo icono y texto (text-decoration se corta en el hueco entre los dos) */
-    border-bottom: 1px solid transparent;
-    border-radius: 0;
-    background: none;
-    color: var(--error);
-    font: inherit;
-    font-size: 13.5px;
-    font-weight: 700;
-    cursor: pointer;
-}
-
-.btn-link-danger:hover,
-.btn-link-danger:focus-visible {
-    border-bottom-color: currentColor;
-}
-
 /* ===== Próximas citas e historial ===== */
 .appointments-block {
     margin-bottom: 28px;

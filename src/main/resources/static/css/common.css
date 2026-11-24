@@ -23,6 +23,12 @@
     display: none !important;
 }
 
+/* Botones y campos usan la letra de la página (el navegador les pone Arial o la del sistema) */
+button, input, select, textarea, optgroup {
+    font: inherit;
+    letter-spacing: inherit;
+}
+
 html, body {
     width: 100%;
     overflow-x: clip; /* Enforce zero horizontal scroll while preserving sticky */
@@ -141,47 +147,9 @@ h1, h2, h3, h4, h5, h6 {
     gap: 8px;
 }
 
+/* Accesos de la barra: .btn .btn-sm .btn-pill (primario o secundario); aquí solo su colocación */
 .nav-auth-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 7px;
-    height: 38px;
-    padding: 0 18px;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 13.5px;
-    font-weight: 700;
-    border-radius: 20px;
-    text-decoration: none;
-    transition: var(--transition);
     white-space: nowrap;
-    letter-spacing: 0.1px;
-}
-
-.nav-auth-login {
-    background: var(--brand-gradient);
-    border: 1px solid transparent;
-    color: var(--on-primary);
-    box-shadow: 0 4px 14px rgba(var(--primary-rgb), 0.32);
-}
-
-.nav-auth-login:hover {
-    box-shadow: 0 6px 18px rgba(var(--primary-rgb), 0.45);
-    filter: brightness(1.03);
-}
-
-.nav-auth-register {
-    background: var(--surface);
-    border: 1px solid rgba(var(--primary-rgb), 0.45);
-    color: var(--text-main);
-    box-shadow: 0 2px 8px rgba(var(--primary-rgb), 0.08);
-}
-
-.nav-auth-register:hover {
-    background: var(--surface-muted);
-    border-color: var(--primary-dark);
-    color: var(--primary-text);
-    box-shadow: 0 4px 14px rgba(var(--primary-rgb), 0.18);
 }
 
 .nav-right-group {
@@ -237,10 +205,6 @@ h1, h2, h3, h4, h5, h6 {
     border-radius: 3px;
 }
 
-.nav-auth-btn:active {
-    transform: scale(0.97);
-}
-
 /* Align navbar links to begin where the vertical index rail ends only on large displays where rail fits */
 @media (min-width: 1200px) {
     .navbar {
@@ -288,7 +252,6 @@ h1, h2, h3, h4, h5, h6 {
     }
     .nav-auth-duo .nav-auth-btn {
         padding: 0 13px;
-        font-size: 13px;
     }
 }
 
@@ -609,63 +572,6 @@ h1, h2, h3, h4, h5, h6 {
     padding-top: 4px;
 }
 
-.mobile-btn-primary {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    width: 100%;
-    padding: 13px 18px;
-    background: var(--brand-gradient);
-    color: var(--on-primary);
-    font-weight: 700;
-    font-size: 14.5px;
-    border-radius: 14px;
-    text-decoration: none;
-    box-shadow: 0 4px 14px rgba(var(--primary-rgb), 0.35);
-    transition: var(--transition);
-    text-align: center;
-    border: none;
-}
-
-.mobile-btn-primary:hover {
-    box-shadow: 0 6px 18px rgba(var(--primary-rgb), 0.45);
-    filter: brightness(1.02);
-}
-
-.mobile-btn-primary:active {
-    transform: scale(0.98);
-}
-
-.mobile-btn-outline {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    width: 100%;
-    padding: 12px 18px;
-    background: var(--surface);
-    border: 1px solid rgba(var(--primary-rgb), 0.45);
-    color: var(--text-main);
-    font-weight: 700;
-    font-size: 14px;
-    border-radius: 14px;
-    text-decoration: none;
-    box-shadow: 0 2px 8px rgba(var(--primary-rgb), 0.08);
-    transition: var(--transition);
-    text-align: center;
-}
-
-.mobile-btn-outline:hover {
-    background: var(--surface-muted);
-    border-color: var(--primary-dark);
-    color: var(--primary-text);
-}
-
-.mobile-btn-outline:active {
-    transform: scale(0.98);
-}
-
 .mobile-user-badge {
     display: inline-flex;
     align-items: center;
@@ -738,10 +644,9 @@ html:has(body.mobile-nav-locked) {
     .nav-auth-duo {
         gap: 6px;
     }
-    .nav-auth-btn {
-        height: 34px;
-        padding: 0 10px;
-        font-size: 12px;
+    .nav-session-info .nav-auth-btn {
+        min-height: 34px;
+        padding: 0 12px;
     }
     /* On narrow screens, prioritize 'Iniciar Sesión' + Hamburger in top bar; full registration is in drawer */
     .nav-auth-duo .nav-auth-register {
@@ -1060,26 +965,53 @@ button.mobile-drawer-link {
 }
 
 /* Buttons */
+/* ==========================================================================
+   Botones: un solo juego para toda la app. Un primario es igual en cualquier pantalla.
+   Base .btn + una variante + (opcional) un tamaño:
+     variantes  .btn-primary   acción principal (una por zona)
+                .btn-secondary alternativa con borde
+                .btn-soft      acción secundaria con fondo suave (Configurar plantilla, Añadir campo, −1/+1)
+                .btn-danger    acción destructiva que confirma (Borrar cuenta, Rechazar)
+                .btn-danger-soft destructiva menos fuerte (Descartar, Quitar campo, Borrar tratamiento)
+                .btn-ghost     solo texto (acciones dentro de una tarjeta)
+                .btn-ghost-danger solo texto en rojo (Anular cita, papelera)
+     tamaños    .btn-sm (36 px) · normal (44 px) · .btn-lg (52 px) · .btn-icon (cuadrado, solo icono)
+     forma      .btn-block (ancho completo) · .btn-pill (redondo)
+   Las reglas de cada pantalla solo colocan el botón (ancho, margen, orden); nunca cambian color, letra ni forma.
+   ========================================================================== */
 .btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 12px 28px;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 22px;
+    font-family: inherit;
     font-size: 14px;
     font-weight: 700;
+    line-height: 1.2;
     border-radius: var(--border-radius-md);
-    border: none;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-main);
     cursor: pointer;
     transition: var(--transition);
-    gap: 8px;
     text-decoration: none;
     text-align: center;
+}
+
+.btn i {
+    font-size: 1.15em;
+    flex-shrink: 0;
 }
 
 .btn:focus-visible, a:focus-visible, button:focus-visible, input:focus-visible {
     outline: none;
     box-shadow: var(--focus-ring);
+}
+
+.btn:active:not(:disabled) {
+    transform: scale(0.98);
 }
 
 .btn-primary {
@@ -1088,32 +1020,115 @@ button.mobile-drawer-link {
     box-shadow: 0 4px 15px rgba(var(--primary-rgb), 0.2);
 }
 .btn-primary:hover {
+    color: var(--on-primary);
     box-shadow: 0 6px 20px rgba(var(--primary-rgb), 0.35);
 }
 
-.btn:active:not(:disabled) {
-    transform: scale(0.98);
-}
-
 .btn-secondary {
-    background: transparent;
+    background: var(--surface);
     color: var(--text-main);
-    border: 1px solid rgba(var(--primary-rgb), 0.3);
+    border-color: rgba(var(--primary-rgb), 0.35);
 }
 .btn-secondary:hover {
     background: rgba(var(--primary-rgb), 0.1);
     border-color: var(--primary);
+    color: var(--text-main);
+}
+
+.btn-soft {
+    background: rgba(var(--primary-rgb), 0.14);
+    color: var(--primary-text);
+    border-color: rgba(var(--primary-rgb), 0.3);
+}
+.btn-soft:hover:not(:disabled) {
+    background: var(--brand-solid);
+    color: var(--on-primary);
 }
 
 .btn-danger {
     background: var(--danger-gradient);
     color: var(--on-primary);
 }
+.btn-danger:hover {
+    color: var(--on-primary);
+    box-shadow: 0 6px 18px rgba(179, 38, 30, 0.3);
+}
+
+.btn-danger-soft {
+    background: var(--danger-bg);
+    color: var(--danger-text);
+    border-color: var(--danger);
+}
+.btn-danger-soft:hover {
+    background: var(--error);
+    border-color: var(--error);
+    color: var(--on-primary);
+}
+
+.btn-ghost,
+.btn-ghost-danger {
+    background: transparent;
+    color: var(--text-muted);
+}
+.btn-ghost:hover {
+    background: rgba(var(--primary-rgb), 0.12);
+    color: var(--primary-text);
+}
+.btn-ghost-danger {
+    color: var(--danger-text);
+}
+.btn-ghost-danger:hover {
+    background: var(--danger-bg);
+    color: var(--danger-text);
+}
 
 .btn-sm {
-    padding: 8px 16px;
-    font-size: 12px;
+    min-height: 36px;
+    padding: 0 14px;
+    gap: 6px;
+    font-size: 13px;
     border-radius: var(--border-radius-sm);
+}
+
+.btn-lg {
+    min-height: 52px;
+    padding: 0 30px;
+    font-size: 16px;
+}
+
+.btn-icon {
+    width: 44px;
+    padding: 0;
+}
+.btn-icon.btn-sm {
+    width: 36px;
+}
+
+.btn-block {
+    width: 100%;
+}
+
+.btn-pill {
+    border-radius: var(--radius-pill);
+}
+
+.btn.disabled,
+.btn:disabled {
+    background: var(--disabled-bg);
+    color: var(--disabled-text);
+    border-color: transparent;
+    box-shadow: none;
+    transform: none;
+    cursor: not-allowed;
+}
+
+.btn.is-loading {
+    cursor: progress;
+    opacity: 0.85;
+}
+
+.btn.is-loading i {
+    animation: spin 0.8s linear infinite;
 }
 
 /* Badges */
@@ -1198,17 +1213,32 @@ button.mobile-drawer-link {
     text-align: left;
 }
 
+/* Campos: un solo estilo para input, select y textarea (los buscadores con icono son .clients-search-input) */
 .form-control {
     width: 100%;
     padding: 12px 16px;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 14px;
+    font-family: inherit;
+    font-size: 14.5px;
+    line-height: 1.5;
     color: var(--text-main);
     background: transparent;
     border: 1px solid rgba(var(--primary-rgb), 0.25);
     border-radius: var(--border-radius-md);
     outline: none;
     transition: var(--transition);
+}
+
+textarea.form-control {
+    min-height: 80px;
+    resize: vertical;
+    overflow-wrap: break-word;
+}
+
+/* Ficha del cliente: los textos crecen con lo que se escribe (client-detail.js) */
+textarea.form-control.field-textarea-auto {
+    min-height: 48px;
+    overflow-y: hidden;
+    resize: none;
 }
 
 .form-control:focus {
@@ -1494,9 +1524,7 @@ body > footer {
 }
 
 .cookie-banner-actions .btn {
-    gap: 8px;
     min-width: 170px;
-    padding: 0 26px;
 }
 
 @keyframes cookie-banner-in {
@@ -1880,45 +1908,6 @@ body > footer {
 
 body.modal-open {
     overflow: hidden;
-}
-
-/* ---------- Botones: modificadores ---------- */
-.btn-block {
-    width: 100%;
-}
-
-.btn-lg {
-    min-height: 48px;
-    font-size: 15.5px;
-    border-radius: 12px;
-}
-
-.btn-pill {
-    border-radius: var(--radius-pill);
-}
-
-.btn-sm-height {
-    min-height: 38px;
-    padding: 8px 18px;
-    font-size: 13px;
-}
-
-.btn.disabled,
-.btn:disabled {
-    background: var(--disabled-bg);
-    color: var(--disabled-text);
-    box-shadow: none;
-    transform: none;
-    cursor: not-allowed;
-}
-
-.btn.is-loading {
-    cursor: progress;
-    opacity: 0.85;
-}
-
-.btn.is-loading i {
-    animation: spin 0.8s linear infinite;
 }
 
 /* ---------- Alertas ---------- */
@@ -2802,8 +2791,6 @@ body.modal-open {
 
 .ui-modal-actions .btn {
     flex: 1 1 140px;
-    padding: 11px 20px;
-    border-radius: 12px;
 }
 
 /* Hoja de abajo en móvil (p. ej. «Cómo llegar» en iPhone); en pantallas anchas es un modal normal */
@@ -2815,11 +2802,6 @@ body.modal-open {
 
 .directions-options .btn {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    padding: 13px 20px;
-    border-radius: 12px;
 }
 
 @media (max-width: 600px) {
@@ -3176,31 +3158,6 @@ body.modal-open {
 }
 
 /* ---------- Componentes compartidos del panel (agenda, clientes, inventario, tratamientos) ---------- */
-.btn-template-config {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 11px 18px;
-    border-radius: 12px;
-    background: rgba(var(--primary-rgb), 0.14);
-    border: 1px solid rgba(var(--primary-rgb), 0.3);
-    color: var(--primary-text);
-    font-family: inherit;
-    font-size: 13.5px;
-    font-weight: 700;
-    line-height: 1.4;
-    text-decoration: none;
-    box-sizing: border-box;
-    transition: var(--transition);
-}
-
-.btn-template-config:hover {
-    background: var(--brand-solid);
-    color: var(--on-primary);
-    box-shadow: 0 4px 14px rgba(163, 135, 95, 0.25);
-}
-
 .badge-new-client {
     display: inline-flex;
     align-items: center;
@@ -3831,7 +3788,6 @@ body.media-viewer-open {
 .loyalty-move-points.is-negative {
     color: var(--text-main);
 }
-
 
 /* ---------- Ubicación del centro en el mapa (fragments/location-picker.html) ---------- */
 .location-picker-actions {

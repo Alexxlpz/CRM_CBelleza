@@ -168,50 +168,6 @@
     margin-bottom: 0;
 }
 
-.btn-card-action {
-    background: transparent;
-    border: none;
-    padding: 6px 12px;
-    color: var(--text-muted);
-    font-size: 12px;
-    font-weight: 700;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    text-decoration: none;
-    line-height: 1;
-    border-radius: var(--border-radius-sm);
-    transition: var(--transition);
-}
-
-.btn-card-action i {
-    font-size: 14px;
-    display: inline-flex;
-    align-items: center;
-}
-
-.btn-card-action:hover {
-    color: var(--primary-text);
-    background: rgba(var(--primary-rgb), 0.12);
-}
-
-.btn-card-action:active {
-    transform: scale(0.96);
-}
-
-.btn-card-action.btn-delete {
-    color: var(--danger-text);
-    padding: 6px 10px;
-    border-radius: var(--border-radius-sm);
-}
-
-.btn-card-action.btn-delete:hover {
-    color: var(--error);
-    background: rgba(217, 154, 154, 0.2);
-}
-
 /* Badges Lux Styling */
 .badge-pill {
     border-radius: 20px;
@@ -253,40 +209,6 @@
 .stock-adjust-actions {
     display: flex;
     gap: 6px;
-}
-
-.btn-adjust {
-    background: rgba(var(--primary-rgb), 0.15);
-    color: var(--primary-text);
-    border: 1px solid rgba(var(--primary-rgb), 0.25);
-    width: 34px;
-    height: 34px;
-    border-radius: var(--border-radius-sm);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 800;
-    font-size: 15px;
-    transition: var(--transition);
-    user-select: none;
-}
-
-.btn-adjust:hover:not(:disabled) {
-    background: var(--brand-solid);
-    color: var(--on-primary);
-    box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.35);
-}
-
-.btn-adjust:active:not(:disabled) {
-    transform: scale(0.92);
-}
-
-.btn-adjust:disabled {
-    background: rgba(0, 0, 0, 0.04);
-    color: rgba(0, 0, 0, 0.2);
-    border-color: transparent;
-    cursor: not-allowed;
 }
 
 /* Product Info Modal (Centered, Soft Blur Backdrop, Larger Size & Full Image) */
@@ -568,13 +490,6 @@
         gap: 12px;
     }
     
-    .btn-adjust {
-        width: 44px; /* Touch target >= 44px */
-        height: 44px;
-        font-size: 18px;
-        border-radius: var(--border-radius-md);
-    }
-    
     /* Card actions at row 3 */
     .inventory-card-actions {
         grid-column: 1 / span 2;
@@ -584,11 +499,6 @@
         padding-top: 10px;
         border-top: 1px solid rgba(var(--primary-rgb), 0.15);
         justify-content: space-between;
-    }
-
-    .btn-card-action {
-        padding: 8px 14px;
-        font-size: 13px;
     }
 }
 

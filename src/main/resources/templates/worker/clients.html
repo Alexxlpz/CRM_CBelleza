@@ -18,11 +18,11 @@
                 <p>Consulta las fichas técnicas personalizadas y el historial de citas de los clientes de este centro</p>
             </div>
             <div class="page-header-actions clients-action-group">
-                <button type="button" class="btn-create-client" data-modal-open="createClientModal">
+                <button type="button" class="btn btn-primary" data-modal-open="createClientModal">
                     <i class="lucide-user-plus" aria-hidden="true"></i>
                     <span>Nuevo Cliente</span>
                 </button>
-                <a href="/worker/clients/template" class="btn-template-config" th:if="${isCenterOwner}">
+                <a href="/worker/clients/template" class="btn btn-soft" th:if="${isCenterOwner}">
                     <i class="lucide-settings" aria-hidden="true"></i>
                     <span>Plantilla de Ficha</span>
                 </a>
@@ -142,7 +142,7 @@
 
                 <!-- Action Button -->
                 <a th:href="@{/worker/clients/{id}(id=${c.id})}"
-                   class="btn-view-client">
+                   class="btn btn-primary btn-sm btn-view-client">
                     <span>Ver Ficha e Historial</span>
                     <i class="lucide-arrow-right" aria-hidden="true"></i>
                 </a>
@@ -175,7 +175,7 @@
                         <label class="form-label" for="clientNameInput">
                             Nombre y Apellidos <span class="required-star">*</span>
                         </label>
-                        <input type="text" id="clientNameInput" name="name" class="field-input" required autofocus
+                        <input type="text" id="clientNameInput" name="name" class="form-control" required autofocus
                                placeholder="Ej. Carmen Fernández García" autocomplete="off">
                     </div>
 
@@ -183,7 +183,7 @@
                         <label class="form-label" for="clientPhoneInput">
                             Teléfono de Contacto <span class="required-star">*</span>
                         </label>
-                        <input type="tel" id="clientPhoneInput" name="phone" class="field-input" required
+                        <input type="tel" id="clientPhoneInput" name="phone" class="form-control" required
                                placeholder="Ej. 612 345 678" autocomplete="off">
                         <span class="field-hint">Se utilizará para identificar su ficha única y coordinar citas.</span>
                     </div>
@@ -192,7 +192,7 @@
                         <label class="form-label" for="clientEmailInput">
                             Correo Electrónico <span class="optional-tag">(Opcional)</span>
                         </label>
-                        <input type="email" id="clientEmailInput" name="email" class="field-input"
+                        <input type="email" id="clientEmailInput" name="email" class="form-control"
                                placeholder="cliente@ejemplo.com (dejar en blanco si no tiene email)">
                     </div>
 
@@ -200,15 +200,15 @@
                         <label class="form-label" for="clientNotesInput">
                             Observaciones Iniciales / Notas Técnicas <span class="optional-tag">(Opcional)</span>
                         </label>
-                        <textarea id="clientNotesInput" name="initialNotes" class="field-textarea"
+                        <textarea id="clientNotesInput" name="initialNotes" class="form-control"
                                   placeholder="Ej. Alérgica a tintes con amoníaco, prefiere base rubber tono nude..." rows="3"></textarea>
                     </div>
 
                     <div class="modal-footer">
-                        <button type="button" class="btn-modal-cancel" data-modal-close tabindex="-1">
+                        <button type="button" class="btn btn-secondary" data-modal-close tabindex="-1">
                             Cancelar
                         </button>
-                        <button type="submit" class="btn-save-ficha btn-save-ficha--inline">
+                        <button type="submit" class="btn btn-primary">
                             <i class="lucide-check" aria-hidden="true"></i>
                             <span>Crear y Abrir Ficha</span>
                         </button>

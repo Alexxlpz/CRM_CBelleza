@@ -142,8 +142,6 @@
 }
 
 .treatment-item-actions .btn {
-    gap: 6px;
-    padding: 6px 12px;
     white-space: nowrap;
 }
 
@@ -256,10 +254,6 @@
         padding: 16px 14px;
     }
 
-    .treatment-item-actions .btn {
-        padding-block: 8px;
-    }
-
     .treatment-item-header {
         gap: 10px;
         align-items: baseline;
@@ -348,17 +342,6 @@
     flex-basis: 100%;
     margin: 0;
     text-align: center;
-}
-
-.btn-delete-treatment {
-    color: var(--danger-text);
-    border-color: var(--danger);
-}
-
-.btn-delete-treatment:hover {
-    color: var(--danger-text);
-    background: var(--danger-bg);
-    border-color: var(--danger-dark);
 }
 
 /* Tratamiento oculto: atenuado y con su etiqueta */

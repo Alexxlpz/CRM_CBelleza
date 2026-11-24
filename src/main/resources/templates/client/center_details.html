@@ -97,7 +97,7 @@
                     <p class="booking-mode" th:unless="${center.autoAcceptBookings}">
                         <i class="lucide-hourglass" aria-hidden="true"></i> El centro revisará tu solicitud y te avisaremos cuando la confirme.
                     </p>
-                    <button type="submit" class="btn btn-primary btn-large-submit">
+                    <button type="submit" class="btn btn-primary btn-lg btn-block">
                         <i class="lucide-check-circle" aria-hidden="true"></i> <span th:text="${center.autoAcceptBookings} ? 'Reservar cita' : 'Solicitar cita'">Solicitar cita</span>
                     </button>
                 </div>

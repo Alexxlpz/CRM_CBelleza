@@ -52,7 +52,7 @@
                     <i class="lucide-pen-line" aria-hidden="true"></i>
                     <span>Editar datos</span>
                 </button>
-                <a href="/worker/clients/template" class="btn-template-config" th:if="${isCenterOwner}">
+                <a href="/worker/clients/template" class="btn btn-soft btn-sm" th:if="${isCenterOwner}">
                     <i class="lucide-sliders" aria-hidden="true"></i>
                     <span>Configurar Plantilla</span>
                 </a>
@@ -189,7 +189,7 @@
                         <textarea th:if="${field.type == 'text'}"
                                   th:id="${field.id}"
                                   th:name="${field.id}"
-                                  class="field-textarea field-textarea-auto"
+                                  class="form-control field-textarea-auto"
                                   rows="1"
                                   th:placeholder="${field.placeholder != null and !field.placeholder.isEmpty() ? field.placeholder : 'Escribe aquí...'}"
                                   th:data-real-value="${cardData[field.id] != null ? cardData[field.id] : ''}"
@@ -201,7 +201,7 @@
                                step="any"
                                th:id="${field.id}"
                                th:name="${field.id}"
-                               class="field-input"
+                               class="form-control"
                                th:placeholder="${field.placeholder != null and !field.placeholder.isEmpty() ? field.placeholder : '0'}"
                                th:data-real-value="${cardData[field.id] != null ? cardData[field.id] : ''}"
                                th:value="${cardData[field.id]}">
@@ -210,7 +210,7 @@
                         <textarea th:if="${field.type == 'textarea'}"
                                   th:id="${field.id}"
                                   th:name="${field.id}"
-                                  class="field-textarea field-textarea-auto"
+                                  class="form-control field-textarea-auto"
                                   rows="2"
                                   th:placeholder="${field.placeholder != null and !field.placeholder.isEmpty() ? field.placeholder : 'Escribe observaciones aquí...'}"
                                   th:data-real-value="${cardData[field.id] != null ? cardData[field.id] : ''}"
@@ -220,7 +220,7 @@
                         <select th:if="${field.type == 'select'}"
                                 th:id="${field.id}"
                                 th:name="${field.id}"
-                                class="field-select"
+                                class="form-control"
                                 th:data-real-value="${cardData[field.id] != null ? cardData[field.id] : ''}">
                             <option value="">-- Seleccionar --</option>
                             <option th:each="opt : ${#strings.arraySplit(field.options, ',')}"
@@ -234,14 +234,14 @@
                         <textarea th:if="${field.type != 'text' and field.type != 'number' and field.type != 'textarea' and field.type != 'select'}"
                                   th:id="${field.id}"
                                   th:name="${field.id}"
-                                  class="field-textarea field-textarea-auto"
+                                  class="form-control field-textarea-auto"
                                   rows="1"
                                   th:placeholder="${field.placeholder != null and !field.placeholder.isEmpty() ? field.placeholder : 'Escribe aquí...'}"
                                   th:data-real-value="${cardData[field.id] != null ? cardData[field.id] : ''}"
                                   th:text="${cardData[field.id]}"></textarea>
                     </div>
 
-                    <button type="submit" class="btn-save-ficha" id="btnSaveFicha">
+                    <button type="submit" class="btn btn-primary" id="btnSaveFicha">
                         <i class="lucide-save" aria-hidden="true"></i>
                         <span>Guardar Ficha del Cliente</span>
                     </button>
@@ -409,15 +409,15 @@
             <h2 class="ui-modal-title" id="unsavedTitle">¿Guardar cambios antes de salir?</h2>
             <p class="ui-modal-text" id="unsavedText">Has realizado modificaciones en la ficha técnica de este cliente. Si sales ahora sin guardar, se perderán las notas y cambios introducidos.</p>
             <div class="modal-unsaved-actions">
-                <button type="button" class="btn-save-and-exit" data-unsaved="save">
+                <button type="button" class="btn btn-primary btn-block" data-unsaved="save">
                     <i class="lucide-save" aria-hidden="true"></i>
                     <span>Guardar y salir</span>
                 </button>
-                <button type="button" class="btn-discard-and-exit" data-unsaved="discard">
+                <button type="button" class="btn btn-danger-soft btn-block" data-unsaved="discard">
                     <i class="lucide-log-out" aria-hidden="true"></i>
                     <span>Salir sin guardar</span>
                 </button>
-                <button type="button" class="btn-stay-editing" data-unsaved="stay">
+                <button type="button" class="btn btn-secondary btn-block" data-unsaved="stay">
                     <i class="lucide-pen-line" aria-hidden="true"></i>
                     <span>Seguir editando</span>
                 </button>

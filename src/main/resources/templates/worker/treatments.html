@@ -156,7 +156,7 @@
                                 <form th:if="${appointments == 0}" th:action="@{/worker/treatments/{id}/delete(id=${t.id})}" method="post"
                                       th:data-confirm="'Se borra «' + ${t.name} + '» para siempre, con su oferta. No tiene citas, así que no se pierde nada del historial.'"
                                       data-confirm-title="¿Borrar el tratamiento?" data-confirm-button="Borrar">
-                                    <button type="submit" class="btn btn-secondary btn-sm btn-delete-treatment"><i class="lucide-trash-2" aria-hidden="true"></i> Borrar</button>
+                                    <button type="submit" class="btn btn-danger-soft btn-sm"><i class="lucide-trash-2" aria-hidden="true"></i> Borrar</button>
                                 </form>
                             </div>
                         </article>
