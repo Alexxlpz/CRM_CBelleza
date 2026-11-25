@@ -9,6 +9,7 @@ import com.alexxlpz.crm_cbelleza.security.AppUserDetails;
 import com.alexxlpz.crm_cbelleza.services.AppointmentService;
 import com.alexxlpz.crm_cbelleza.services.BookingService;
 import com.alexxlpz.crm_cbelleza.services.CenterService;
+import com.alexxlpz.crm_cbelleza.services.ClientCardService;
 import com.alexxlpz.crm_cbelleza.services.LoyaltyService;
 import com.alexxlpz.crm_cbelleza.services.OpeningHoursService;
 import com.alexxlpz.crm_cbelleza.services.ReviewService;
@@ -46,6 +47,7 @@ public class ClientBookingController {
     private final LoyaltyService loyaltyService;
     private final ReviewService reviewService;
     private final CenterPageModel centerPage;
+    private final ClientCardService clientCards;
 
     public ClientBookingController(CenterService centerService,
                                    UserService userService,
@@ -54,8 +56,10 @@ public class ClientBookingController {
                                    OpeningHoursService openingHours,
                                    LoyaltyService loyaltyService,
                                    ReviewService reviewService,
-                                   CenterPageModel centerPage) {
+                                   CenterPageModel centerPage,
+                                   ClientCardService clientCards) {
         this.centerPage = centerPage;
+        this.clientCards = clientCards;
         this.reviewService = reviewService;
         this.loyaltyService = loyaltyService;
         this.centerService = centerService;
@@ -76,7 +80,8 @@ public class ClientBookingController {
      * el id). {@code tratamiento}: «Volver a reservar» lo deja ya elegido (si sigue en la carta).
      */
     @GetMapping("/client/centers/{slug}")
-    public String centerDetails(@PathVariable String slug,
+    public String centerDetails(@AuthenticationPrincipal AppUserDetails user,
+                                @PathVariable String slug,
                                 @RequestParam(name = "tratamiento", required = false) Long treatmentId,
                                 Model model) {
         Center center = centerService.getPublishedBySlug(slug);
@@ -88,6 +93,8 @@ public class ClientBookingController {
                 .orElse(null));
         model.addAttribute("workers", userService.getWorkersByCenter(center.getId()));
         model.addAttribute("selectedWorkerId", null);
+        // Casilla del consentimiento para la ficha técnica: solo la primera vez en cada centro
+        model.addAttribute("askHealthConsent", user != null && !clientCards.hasHealthConsent(center.getId(), user.getId()));
         return "client/center_details";
     }
 
@@ -109,9 +116,13 @@ public class ClientBookingController {
                        @RequestParam Long treatmentId,
                        @RequestParam(required = false) Long workerId,
                        @RequestParam("dateTime") String dateTime,
+                       @RequestParam(defaultValue = "false") boolean healthConsent,
                        RedirectAttributes redirect) {
         try {
             Appointment appointment = bookingService.requestBooking(client.getId(), centerId, treatmentId, workerId, parse(dateTime));
+            if (healthConsent) {
+                clientCards.recordConsentFromClient(centerId, client.getId());
+            }
             boolean confirmed = appointment.getStatus() == AppointmentStatus.CONFIRMED;
             String center = appointment.getCenter().getName();
             // «Mis reservas» la enseña la primera y resaltada (solo en esta visita: es un atributo flash)

@@ -255,6 +255,8 @@ public class AccountPrivacyService {
         Map<String, Object> item = new LinkedHashMap<>();
         item.put("centro", card.getCenter().getName());
         item.put("actualizada", card.getUpdatedAt() != null ? DATE_TIME.format(card.getUpdatedAt()) : null);
+        // Cuándo apuntó el centro que diste tu consentimiento para guardar la ficha (datos de salud)
+        item.put("consentimiento", card.getHealthConsentAt() != null ? DATE_TIME.format(card.getHealthConsentAt()) : null);
         item.put("datos", named);
         return item;
     }

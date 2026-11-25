@@ -570,3 +570,14 @@ a.request-time:hover {
 /* En «Por aprobar» quién la haría va en su propia línea: así el «·» nunca empieza una línea. */
 .request-item .today-worker { display: block; white-space: normal; }
 .request-item .today-sep { display: none; }
+
+/* Aviso del panel: falta aceptar el contrato de encargo (solo el dueño) */
+.dpa-pending p {
+    margin: 2px 0 10px;
+    font-weight: 500;
+}
+
+.dpa-pending a {
+    color: inherit;
+    font-weight: 700;
+}

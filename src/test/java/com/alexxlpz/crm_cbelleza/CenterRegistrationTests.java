@@ -124,6 +124,9 @@ class CenterRegistrationTests {
         assertEquals(LoyaltyMode.PER_EURO, center.getLoyaltyMode());
         assertEquals(200, center.getLoyaltyRewardPoints());
         assertEquals(owner.getId(), center.getOwnerId(), "Quien da de alta el centro es su dueño");
+        assertEquals(com.alexxlpz.crm_cbelleza.entities.DataProcessing.VERSION, center.getDpaVersion(), "Al darse de alta acepta el contrato de encargo");
+        assertEquals("alba@estudioalba.es", center.getDpaAcceptedBy());
+        assertNotNull(center.getDpaAcceptedAt());
         assertEquals(List.of("Martes: 09:30 - 14:00 y 16:00 - 20:30", "Sábado: 10:00 - 14:00"),
                 openingHours.forCenter(center.getId()).describe());
 

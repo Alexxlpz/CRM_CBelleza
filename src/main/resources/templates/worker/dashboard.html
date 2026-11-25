@@ -24,6 +24,19 @@
 
             <div th:replace="~{fragments/alerts :: flash}"></div>
 
+            <!-- Contrato de encargo (art. 28 RGPD): el dueño lo acepta una vez por versión; los centros antiguos lo ven aquí -->
+            <div class="alert alert-warning alert--titled dpa-pending" th:if="${dpaPending}" role="status">
+                <i class="lucide-file-text" aria-hidden="true"></i>
+                <div class="alert-body">
+                    <strong class="alert-title">Falta aceptar el contrato de encargo de datos</strong>
+                    <p>Cuquora guarda los datos de tus clientas por cuenta de tu centro. La ley pide un contrato entre los dos que diga para qué y cómo.
+                        <a th:href="@{/encargo}" target="_blank" rel="noopener">Leer el contrato</a></p>
+                    <form th:action="@{/worker/center/dpa}" method="post">
+                        <button type="submit" class="btn btn-primary btn-sm">Aceptar el contrato</button>
+                    </form>
+                </div>
+            </div>
+
             <!-- Centro recién dado de alta: qué falta, con dibujos. Se va solo al publicarlo con algo en la carta -->
             <th:block th:if="${firstSteps != null}">
                 <section th:replace="~{worker/fragments/first-steps :: card(${firstSteps}, ${isCenterOwner})}"></section>

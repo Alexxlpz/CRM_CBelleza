@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{fragments/head :: meta('Contrato de encargo del tratamiento - Cuquora')}"></th:block>
+    <link rel="stylesheet" th:href="@{/css/home.css}">
+    <link rel="stylesheet" th:href="@{/css/public.css}">
+    <link rel="stylesheet" th:href="@{/css/legal.css}">
+</head>
+<!--/* Contrato de encargo del tratamiento (art. 28 RGPD) entre cada centro y Cuquora. Lo acepta el centro al darse de
+       alta (casilla de términos) o desde el aviso de su panel. Si cambia algo importante, sube DataProcessing.VERSION y
+       VERSION_LABEL: los dueños lo volverán a ver para aceptarlo. Títulos del índice: PublicPagesController.DPA_SECTIONS */-->
+<body>
+    <div th:replace="~{fragments/navbar :: brand(true)}"></div>
+
+    <aside class="desktop-left-rail" aria-label="Índice del contrato">
+        <div class="rail-header">
+            <h4 class="rail-title">Índice</h4>
+        </div>
+        <nav class="rail-nav">
+            <a th:each="item, it : ${sections}"
+               th:href="${'#encargo-' + it.count}" th:attr="data-target=${'encargo-' + it.count}"
+               class="rail-link" th:classappend="${it.first} ? ' active'">
+                <span class="rail-num" th:text="${#numbers.formatInteger(it.count, 2)}">01</span>
+                <span class="rail-text" th:text="${item}">Partes y objeto</span>
+                <svg class="rail-chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </a>
+        </nav>
+    </aside>
+
+    <main class="public-page-container legal-page-container">
+        <header class="page-hero">
+            <h1>Contrato de encargo del tratamiento</h1>
+            <p>Lo que Cuquora hace con los datos de los clientes de tu centro, siempre por tu cuenta y siguiendo tus instrucciones (artículo 28 del Reglamento General de Protección de Datos).</p>
+            <span class="legal-updated"><i class="lucide-calendar-check" aria-hidden="true"></i> <th:block th:text="|Versión del ${versionLabel}|">Versión del 25 de noviembre de 2026</th:block></span>
+        </header>
+
+        <div class="legal-document">
+            <nav class="legal-toc-inline" aria-label="Índice del contrato">
+                <h2><i class="lucide-list" aria-hidden="true"></i> En esta página</h2>
+                <ol>
+                    <li th:each="item, it : ${sections}">
+                        <a th:href="${'#encargo-' + it.count}" th:text="${item}">Partes y objeto</a>
+                    </li>
+                </ol>
+            </nav>
+
+            <section class="legal-section" id="encargo-1">
+                <h2><span class="legal-section-num">01</span> Partes y objeto</h2>
+                <p><strong>Responsable del tratamiento:</strong> el centro de belleza que usa Cuquora (en adelante, «el centro»), que acepta este contrato al darse de alta o desde su panel.</p>
+                <p><strong>Encargado del tratamiento:</strong> Cuquora<th:block th:if="${!legalOwner.name.isEmpty()}">, cuyo titular es <strong th:text="${legalOwner.name}">Nombre</strong></th:block><th:block th:if="${!legalOwner.nif.isEmpty()}">, NIF <span th:text="${legalOwner.nif}">00000000X</span></th:block><th:block th:if="${!legalOwner.address.isEmpty()}">, con domicilio en <span th:text="${legalOwner.address}">Calle</span></th:block>. Contacto: <a th:href="|mailto:${contactEmail}|" th:text="${contactEmail}">cuquora@hotmail.com</a>.</p>
+                <p>Este contrato forma parte de los <a href="/terms">términos y condiciones</a>. Regula cómo trata Cuquora, por cuenta del centro, los datos personales que el centro registra en la plataforma para gestionar sus citas, sus clientes y su equipo. El servicio dura lo mismo que el uso de Cuquora por el centro.</p>
+            </section>
+
+            <section class="legal-section" id="encargo-2">
+                <h2><span class="legal-section-num">02</span> Qué datos y de quién</h2>
+                <ul>
+                    <li><strong>Clientes del centro:</strong> nombre, teléfono, correo, citas (fecha, tratamiento, profesional, precio y estado), notas y resúmenes de cada cita con sus fotos y vídeos, compras de productos, puntos de fidelidad y la ficha técnica.</li>
+                    <li><strong>Datos de salud</strong> que el centro decida anotar en la ficha técnica o en los resúmenes: alergias, sensibilidades, contraindicaciones, estado de la piel… Son una categoría especial de datos (artículo 9 RGPD).</li>
+                    <li><strong>Equipo del centro:</strong> nombre, correo, teléfono, foto, horario y las citas que atiende cada persona.</li>
+                </ul>
+                <p>La finalidad es solo prestar al centro el servicio de Cuquora: agenda, reservas, avisos por correo, fichas, inventario, ventas y análisis del propio centro. Cuquora no usa estos datos para nada más, ni los cruza con los de otros centros.</p>
+                <p>Los datos de la <strong>cuenta</strong> de un cliente en Cuquora (los que pone él al registrarse y sus citas en el buscador) son responsabilidad de Cuquora y se rigen por la <a href="/privacy">política de privacidad</a>.</p>
+            </section>
+
+            <section class="legal-section" id="encargo-3">
+                <h2><span class="legal-section-num">03</span> Instrucciones del centro</h2>
+                <p>Cuquora trata los datos solo siguiendo las instrucciones del centro, que son las que da al usar la plataforma (dar de alta un cliente, rellenar una ficha, borrar un dato…) y las que envíe por escrito. Si una instrucción le parece contraria a la ley, Cuquora avisará al centro.</p>
+                <p>Si la ley obligara a Cuquora a tratar los datos de otra forma (por ejemplo, un requerimiento judicial), se lo dirá antes al centro, salvo que la propia ley lo prohíba.</p>
+            </section>
+
+            <section class="legal-section" id="encargo-4">
+                <h2><span class="legal-section-num">04</span> Confidencialidad</h2>
+                <p>Las personas de Cuquora que puedan acceder a los datos tienen un compromiso de confidencialidad, también después de dejar de trabajar en Cuquora. Solo acceden cuando hace falta para el servicio, por ejemplo para resolver una incidencia que pide el centro.</p>
+            </section>
+
+            <section class="legal-section" id="encargo-5">
+                <h2><span class="legal-section-num">05</span> Medidas de seguridad</h2>
+                <ul>
+                    <li>Toda la web va cifrada (HTTPS) y la base de datos no es accesible desde internet.</li>
+                    <li>Cada centro solo ve sus propios datos; dentro del centro, lo que es solo del dueño (análisis del negocio, ajustes) está cerrado al resto del equipo.</li>
+                    <li>Las contraseñas se guardan con un cifrado que no se puede revertir; el inicio de sesión se frena tras varios intentos fallidos y cambiar la contraseña cierra las demás sesiones.</li>
+                    <li>Las fotos y vídeos de los resúmenes de cita solo los ve el equipo del centro.</li>
+                    <li>Copia de seguridad diaria de la base de datos, comprobada y guardada varios días.</li>
+                    <li>Las librerías de la plataforma se mantienen al día con sus parches de seguridad.</li>
+                </ul>
+                <p>El centro, por su parte, se encarga de dar acceso al panel solo a su personal, de quitarlo cuando alguien deja el centro y de que cada persona use su propia cuenta.</p>
+            </section>
+
+            <section class="legal-section" id="encargo-6">
+                <h2><span class="legal-section-num">06</span> Subencargados</h2>
+                <p>El centro autoriza a Cuquora a usar estos proveedores, que firman con Cuquora las mismas obligaciones de este contrato:</p>
+                <ul>
+                    <li><strong>Alojamiento</strong> de la plataforma y de las copias de seguridad.</li>
+                    <li><strong>Cloudflare</strong>: conexión segura y protección de la web.</li>
+                    <li><strong>Brevo</strong>: envío de los correos de las citas.</li>
+                    <li><strong>Google</strong>: solo si alguien del equipo conecta su Google Calendar o entra con Google.</li>
+                </ul>
+                <p>Si Cuquora añade o cambia un proveedor, lo avisará al centro con antelación en este contrato o por correo, y el centro podrá oponerse dejando de usar el servicio.</p>
+            </section>
+
+            <section class="legal-section" id="encargo-7">
+                <h2><span class="legal-section-num">07</span> Transferencias internacionales</h2>
+                <p>Algunos de estos proveedores tienen sede en Estados Unidos. Las transferencias se amparan en el Marco de Privacidad de Datos UE-EE. UU. o en las cláusulas contractuales tipo de la Comisión Europea.</p>
+            </section>
+
+            <section class="legal-section" id="encargo-8">
+                <h2><span class="legal-section-num">08</span> Derechos de las personas</h2>
+                <p>Si un cliente o una persona del equipo pide a Cuquora acceder a sus datos, corregirlos, borrarlos u otro derecho sobre datos que son del centro, Cuquora se lo trasladará al centro en cuanto pueda y le ayudará a responder. Muchas de estas peticiones las puede atender el propio centro desde el panel (corregir datos, vaciar una ficha). Desde su perfil, el cliente puede descargar sus datos o borrar su cuenta, lo que también borra su ficha y los resúmenes de sus citas en los centros.</p>
+            </section>
+
+            <section class="legal-section" id="encargo-9">
+                <h2><span class="legal-section-num">09</span> Brechas de seguridad</h2>
+                <p>Si Cuquora detecta una brecha que afecte a los datos del centro, se lo comunicará sin dilación indebida y, como tarde, en 48 horas desde que la conozca, con la información disponible: qué ha pasado, qué datos y cuántas personas, y qué se está haciendo. Así el centro puede avisar a la Agencia Española de Protección de Datos en el plazo de 72 horas y, si hace falta, a las personas afectadas. Cuquora le ayudará con lo que necesite.</p>
+            </section>
+
+            <section class="legal-section" id="encargo-10">
+                <h2><span class="legal-section-num">10</span> Datos de salud</h2>
+                <p>El centro es quien decide qué anota en las fichas técnicas. Si anota datos de salud, necesita el <strong>consentimiento explícito</strong> de la persona y tiene que informarle de para qué los usa. En la ficha de cada cliente hay una casilla para dejar constancia de ese consentimiento: Cuquora guarda quién del centro la marcó y cuándo, y no deja guardar una ficha con datos sin ella.</p>
+                <p>El centro se compromete a anotar solo lo necesario para hacer bien sus tratamientos.</p>
+            </section>
+
+            <section class="legal-section" id="encargo-11">
+                <h2><span class="legal-section-num">11</span> Fin del servicio</h2>
+                <p>Cuando el centro deje de usar Cuquora, puede pedir por escrito que le devolvamos sus datos en un formato electrónico de uso común. Después, Cuquora los borrará, también de las copias de seguridad cuando caduquen, salvo lo que la ley obligue a conservar, que se guardará bloqueado el tiempo que marque.</p>
+            </section>
+
+            <section class="legal-section" id="encargo-12">
+                <h2><span class="legal-section-num">12</span> Auditoría y cambios</h2>
+                <p>Cuquora pondrá a disposición del centro la información necesaria para demostrar que cumple este contrato y permitirá las auditorías razonables que pida el centro o un auditor que este designe, avisando con antelación.</p>
+                <p>Si este contrato cambia, el dueño del centro verá un aviso en su panel para leer y aceptar la versión nueva.</p>
+                <div class="legal-callout">
+                    <i class="lucide-mail" aria-hidden="true"></i>
+                    <p>¿Dudas sobre este contrato? Escríbenos desde la página de <a href="/contact">contacto</a>.</p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <div th:replace="~{fragments/footer :: footer('© 2026 Cuquora. Software de gestión para centros de estética, salones y spas.')}"></div>
+    <script th:src="@{/js/scroll-index.js}" defer></script>
+</body>
+</html>

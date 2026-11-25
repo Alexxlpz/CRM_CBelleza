@@ -241,6 +241,30 @@
                                   th:text="${cardData[field.id]}"></textarea>
                     </div>
 
+                    <!--/* Consentimiento de la clienta (art. 9 RGPD): sin él la ficha no se guarda con datos.
+                         app.js (data-consent-fields) no deja enviar con algún campo relleno y la casilla sin marcar. */-->
+                    <!--/* Clienta sin cuenta (dada de alta en el centro): da su consentimiento en el propio centro, sin casilla */-->
+                    <div class="alert alert-warning consent-missing" role="status"
+                         th:if="${client.hasAccount() and card.hasData() and !card.hasHealthConsent()}">
+                        <i class="lucide-shield-alert" aria-hidden="true"></i>
+                        <span>Esta ficha tiene datos pero no consta el consentimiento de la clienta. Pídeselo y márcalo abajo; si no lo da, vacía los campos.</span>
+                    </div>
+                    <div class="consent-box" th:if="${client.hasAccount()}">
+                        <label class="checkbox-row consent-check">
+                            <input type="checkbox" name="healthConsent" value="true" id="healthConsentInput"
+                                   data-consent-fields="#fichaForm .field-group [name]"
+                                   data-consent-message="Marca esta casilla para guardar la ficha: la clienta tiene que dar su consentimiento."
+                                   th:checked="${card.hasHealthConsent()}">
+                            <span>La clienta ha dado su consentimiento explícito para guardar su ficha técnica</span>
+                        </label>
+                        <p class="consent-help">
+                            Puede llevar datos de salud, como alergias o contraindicaciones. Solo los ve el equipo del centro y ella puede pedir que se borren.
+                            <th:block th:if="${card.hasHealthConsent()}">
+                                Consentimiento apuntado el <strong th:text="${#temporals.format(card.healthConsentAt, 'dd/MM/yyyy')}">25/11/2026</strong><span th:if="${card.healthConsentBy != null}" th:text="${card.healthConsentBy.id == card.client.id} ? ' por ella misma al reservar' : ' por ' + ${card.healthConsentBy.name}"> por Lucía</span>.
+                            </th:block>
+                        </p>
+                    </div>
+
                     <button type="submit" class="btn btn-primary" id="btnSaveFicha">
                         <i class="lucide-save" aria-hidden="true"></i>
                         <span>Guardar Ficha del Cliente</span>

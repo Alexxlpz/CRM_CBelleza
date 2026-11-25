@@ -42,4 +42,25 @@ public class ClientCard {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "updated_by_id")
     private User updatedBy;
+
+    /**
+     * Consentimiento explícito de la clienta para guardar su ficha técnica, que puede llevar datos de salud como
+     * alergias (V36, art. 9 RGPD): cuándo y quién del centro lo apuntó. Nulo = sin consentimiento; sin él la ficha no
+     * se puede guardar con datos.
+     */
+    @Column(name = "health_consent_at")
+    private LocalDateTime healthConsentAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "health_consent_by_id")
+    private User healthConsentBy;
+
+    public boolean hasHealthConsent() {
+        return healthConsentAt != null;
+    }
+
+    /** ¿Tiene algún campo relleno? ({@code "{}"} o nada = vacía) */
+    public boolean hasData() {
+        return dataJson != null && dataJson.strip().length() > 2;
+    }
 }

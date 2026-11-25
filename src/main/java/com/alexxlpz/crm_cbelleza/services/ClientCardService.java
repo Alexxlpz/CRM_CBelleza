@@ -89,20 +89,92 @@ public class ClientCardService {
                 .orElseThrow(() -> new ResourceNotFoundException("Cliente no encontrado."));
     }
 
-    /** Datos que necesita la vista de detalle de un cliente. */
+    /**
+     * Datos que necesita la vista de detalle de un cliente. Solo lee: si aún no tiene ficha, se enseña una en blanco
+     * sin guardarla (antes abrirla la creaba y salía «Última edición: ahora» en una ficha que nadie había tocado).
+     */
+    @Transactional(readOnly = true)
     public ClientCardView getCardView(Long centerId, Long clientId) {
         User client = requireClientOfCenter(centerId, clientId);
-        ClientCard card = getOrCreateCard(centerId, client);
+        ClientCard card = clientCardRepository.findByCenterIdAndClientId(centerId, client.getId())
+                .orElseGet(() -> blankCard(null, client));
         return new ClientCardView(client, card, templateService.getFields(centerId), json.readData(card.getDataJson()));
     }
 
-    public void saveCardData(Long centerId, Long clientId, Map<String, String> values, Long workerId) {
+    /** Mensaje si se intenta guardar la ficha con datos sin el consentimiento de la clienta. */
+    public static final String CONSENT_REQUIRED = "Para guardar la ficha técnica marca «La clienta ha dado su consentimiento»: "
+            + "puede llevar datos de salud, como alergias. Si no lo da, deja los campos vacíos.";
+
+    /**
+     * Guarda la ficha técnica. Solo se guardan los campos de la plantilla del centro con algo escrito. Como puede
+     * llevar datos de salud (alergias, contraindicaciones: art. 9 RGPD), con algún campo relleno hace falta
+     * {@code consent}: la clienta ha dado su consentimiento explícito. Se apunta quién lo marcó y cuándo; si se
+     * desmarca con la ficha vacía, se quita. Una clienta sin cuenta (dada de alta por el centro) lo da en el propio
+     * centro: no hace falta la casilla.
+     */
+    public void saveCardData(Long centerId, Long clientId, Map<String, String> values, boolean consent, Long workerId) {
         User client = requireClientOfCenter(centerId, clientId);
+        Map<String, String> data = new LinkedHashMap<>();
+        templateService.getFields(centerId).forEach(field -> {
+            String value = values.get(field.getId());
+            if (!FormText.isBlank(value)) {
+                data.put(field.getId(), value.strip());
+            }
+        });
+        boolean consented = consent || !client.hasAccount();
+        if (!data.isEmpty() && !consented) {
+            throw new BusinessRuleException(CONSENT_REQUIRED);
+        }
         ClientCard card = getOrCreateCard(centerId, client);
-        card.setDataJson(json.write(values));
+        recordConsent(card, consented, workerId);
+        card.setDataJson(json.write(data));
         card.setUpdatedAt(LocalDateTime.now(clock));
         card.setUpdatedBy(workerId != null ? userRepository.getReferenceById(workerId) : null);
         clientCardRepository.save(card);
+    }
+
+    /** Si la clienta ya ha dado su consentimiento a este centro (al reservar no se le vuelve a preguntar). */
+    @Transactional(readOnly = true)
+    public boolean hasHealthConsent(Long centerId, Long clientId) {
+        return clientCardRepository.findByCenterIdAndClientId(centerId, clientId).map(ClientCard::hasHealthConsent).orElse(false);
+    }
+
+    /**
+     * La propia clienta da su consentimiento al reservar (casilla opcional, una vez por centro): el equipo ya no
+     * tiene que pedírselo. Si no tiene ficha se crea vacía, sin fecha de edición (nadie ha escrito nada todavía).
+     */
+    public void recordConsentFromClient(Long centerId, Long clientId) {
+        User client = userRepository.findById(clientId)
+                .orElseThrow(() -> new ResourceNotFoundException("Cliente no encontrado."));
+        ClientCard card = clientCardRepository.findByCenterIdAndClientId(centerId, clientId)
+                .orElseGet(() -> blankCard(center(centerId), client));
+        if (!card.hasHealthConsent()) {
+            card.setHealthConsentAt(LocalDateTime.now(clock));
+            card.setHealthConsentBy(client);
+            clientCardRepository.save(card);
+        }
+    }
+
+    /** Centros con su consentimiento, para «Tu ficha en los centros» del perfil. */
+    @Transactional(readOnly = true)
+    public List<ConsentGiven> consentsOfClient(Long clientId) {
+        return clientCardRepository.findByClientIdAndHealthConsentAtIsNotNullOrderByHealthConsentAtDesc(clientId).stream()
+                .map(card -> new ConsentGiven(card.getCenter().getId(), card.getCenter().getName(), card.getHealthConsentAt()))
+                .toList();
+    }
+
+    /** Un centro al que la clienta ha dado su consentimiento y desde cuándo. */
+    public record ConsentGiven(Long centerId, String centerName, LocalDateTime since) {
+    }
+
+    private void recordConsent(ClientCard card, boolean consent, Long workerId) {
+        if (consent && !card.hasHealthConsent()) {
+            card.setHealthConsentAt(LocalDateTime.now(clock));
+            card.setHealthConsentBy(workerId != null ? userRepository.getReferenceById(workerId) : null);
+        } else if (!consent) {
+            card.setHealthConsentAt(null);
+            card.setHealthConsentBy(null);
+        }
     }
 
     @Transactional(readOnly = true)
@@ -173,10 +245,13 @@ public class ClientCardService {
         }
 
         ClientCard card = getOrCreateCard(centerId, client);
-        if (!FormText.isBlank(form.initialNotes())) {
+        // Las notas iniciales: la clienta está en el centro y da allí su consentimiento
+        boolean withNotes = !FormText.isBlank(form.initialNotes());
+        if (withNotes) {
             Map<String, String> data = json.readData(card.getDataJson());
             data.put(notesFieldId(centerId), form.initialNotes().trim());
             card.setDataJson(json.write(data));
+            recordConsent(card, true, workerId);
         }
         card.setUpdatedAt(LocalDateTime.now(clock));
         card.setUpdatedBy(workerId != null ? userRepository.getReferenceById(workerId) : null);
@@ -281,16 +356,25 @@ public class ClientCardService {
                 .orElse(DEFAULT_NOTES_FIELD);
     }
 
+    /** La ficha del cliente en el centro; si no tiene, se crea (solo al guardar algo: alta del cliente o «Guardar»). */
     private ClientCard getOrCreateCard(Long centerId, User client) {
         return clientCardRepository.findByCenterIdAndClientId(centerId, client.getId())
-                .orElseGet(() -> clientCardRepository.save(ClientCard.builder()
-                        .center(center(centerId))
-                        .client(client)
-                        .guestName(client.getName())
-                        .guestPhone(client.getPhone())
-                        .dataJson("{}")
-                        .updatedAt(LocalDateTime.now(clock))
-                        .build()));
+                .orElseGet(() -> {
+                    ClientCard card = blankCard(center(centerId), client);
+                    card.setUpdatedAt(LocalDateTime.now(clock));
+                    return clientCardRepository.save(card);
+                });
+    }
+
+    /** Ficha vacía sin guardar ni fecha de edición (la vista enseña «Ficha nueva sin guardar»). */
+    private static ClientCard blankCard(Center center, User client) {
+        return ClientCard.builder()
+                .center(center)
+                .client(client)
+                .guestName(client.getName())
+                .guestPhone(client.getPhone())
+                .dataJson("{}")
+                .build();
     }
 
     private Center center(Long centerId) {

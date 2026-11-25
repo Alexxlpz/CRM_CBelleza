@@ -56,7 +56,7 @@ public class SecurityConfig {
     private static final String[] PUBLIC_PAGES = {
             "/", "/home", "/features", "/funcionalidades", "/centers",
             "/register-center", "/alta-centro", "/contact", "/contacto",
-            "/terms", "/terminos", "/cookies", "/politica-cookies", "/privacy", "/privacidad",
+            "/terms", "/terminos", "/cookies", "/politica-cookies", "/privacy", "/privacidad", "/encargo",
             "/login", "/register", "/error",
             // Enlaces de invitación de los correos del alta: el secreto va en la propia ruta. Los de publicar o
             // rechazar un centro (/register-center/approve/**) piden además la sesión de administración (AdminAccess)

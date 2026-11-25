@@ -126,6 +126,24 @@ public class Center {
     @Column(length = SocialLinks.MAX_WEBSITE)
     private String website;
 
+    /**
+     * Contrato de encargo del tratamiento (V36, art. 28 RGPD) que aceptó el centro: versión ({@code DataProcessing.VERSION}),
+     * cuándo y el correo de quien lo aceptó. Nulo = aún no lo ha aceptado (centros de antes de la V36).
+     */
+    @Column(name = "dpa_version", length = 20)
+    private String dpaVersion;
+
+    @Column(name = "dpa_accepted_at")
+    private LocalDateTime dpaAcceptedAt;
+
+    @Column(name = "dpa_accepted_by")
+    private String dpaAcceptedBy;
+
+    /** ¿Ha aceptado la versión vigente del contrato de encargo? */
+    public boolean hasAcceptedCurrentDpa() {
+        return DataProcessing.VERSION.equals(dpaVersion);
+    }
+
     /** Un botón de red social de la ficha: la clave (para el icono), el nombre y el enlace. */
     public record SocialLink(String network, String label, String url) {
     }

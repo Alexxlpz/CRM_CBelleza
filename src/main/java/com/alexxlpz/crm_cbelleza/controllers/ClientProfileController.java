@@ -8,6 +8,7 @@ import com.alexxlpz.crm_cbelleza.security.AppUserDetails;
 import com.alexxlpz.crm_cbelleza.security.AuthenticationSessionService;
 import com.alexxlpz.crm_cbelleza.services.AccountPrivacyService;
 import com.alexxlpz.crm_cbelleza.services.AppointmentService;
+import com.alexxlpz.crm_cbelleza.services.ClientCardService;
 import com.alexxlpz.crm_cbelleza.services.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -42,6 +43,7 @@ public class ClientProfileController {
     private final GoogleCalendarService googleCalendar;
     private final AccountPrivacyService privacy;
     private final RememberMeServices rememberMeServices;
+    private final ClientCardService clientCards;
     private final SecurityContextLogoutHandler sessionLogout = new SecurityContextLogoutHandler();
 
     public ClientProfileController(UserService userService,
@@ -49,7 +51,9 @@ public class ClientProfileController {
                                    AuthenticationSessionService authSession,
                                    GoogleCalendarService googleCalendar,
                                    AccountPrivacyService privacy,
-                                   RememberMeServices rememberMeServices) {
+                                   RememberMeServices rememberMeServices,
+                                   ClientCardService clientCards) {
+        this.clientCards = clientCards;
         this.userService = userService;
         this.appointmentService = appointmentService;
         this.authSession = authSession;
@@ -67,6 +71,7 @@ public class ClientProfileController {
         model.addAttribute("appointmentsCount", appointmentService.countClientAppointments(user.getId()));
         model.addAttribute("calendarSync", googleCalendar.status(user.getId()));
         model.addAttribute("confirmationWord", AccountPrivacyService.CONFIRMATION_WORD);
+        model.addAttribute("healthConsents", clientCards.consentsOfClient(user.getId()));
         model.addAttribute("activePage", "profile");
         return "client/profile";
     }

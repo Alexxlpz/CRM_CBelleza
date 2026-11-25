@@ -21,6 +21,20 @@ Al sacar una versión:
 
 ## [Sin publicar]
 
+### Añadido
+
+- **Consentimiento para la ficha técnica** (datos de salud, art. 9 RGPD). La clienta con cuenta lo da ella misma al reservar por primera vez en un centro, con una casilla opcional con el nombre del centro; no se le vuelve a preguntar allí. Si no lo ha dado, en su ficha el equipo ve la casilla «La clienta ha dado su consentimiento» y sin marcarla no se guarda nada escrito (lo frena el navegador y también el servidor). Se apunta quién y cuándo («por ella misma al reservar» o el nombre de quien la atiende). Las clientas sin cuenta, dadas de alta por el centro, lo dan en el propio centro y no llevan casilla. Su perfil enseña «Tu ficha en los centros» con los centros a los que se lo ha dado; para retirarlo o borrar datos se habla con el centro (no hay botón, para que nada se borre por error). Las fichas antiguas con datos y sin consentimiento de clientas con cuenta enseñan un aviso, sin borrar nada. «Descargar mis datos» incluye la fecha del consentimiento.
+- **Contrato de encargo del tratamiento** (art. 28 RGPD) en `/encargo`, público y enlazado desde los términos y la privacidad: qué datos guarda Cuquora por cuenta del centro, subencargados, seguridad, brechas, datos de salud y fin del servicio. El centro lo acepta al darse de alta (se guarda la versión, la fecha y quién). Los centros que ya existían ven en el panel del dueño un aviso «Falta aceptar el contrato de encargo» con el botón para aceptarlo.
+
+### Cambiado
+
+- **El buscador lleva a la ficha pública**: quien busca sin haber iniciado sesión pasa a `/c/<nombre>` (información, carta, reseñas y «Solicitar cita», que pide entrar) en vez de chocar con la pantalla de inicio de sesión. Con sesión sigue yendo a la ficha con el calendario para reservar.
+- **Los tests usan PostgreSQL 16 de verdad** (Testcontainers, el mismo que producción) en vez de H2. Hace falta tener Docker Desktop abierto al pasar los tests.
+
+### Arreglado
+
+- **Abrir la ficha de una clienta ya no la guarda vacía**: antes, solo con mirarla se creaba una ficha en blanco con «Última edición: ahora». Ahora solo se guarda al pulsar «Guardar», y la base de datos impide dos fichas de la misma clienta en el mismo centro (migración V36, que junta las repetidas quedándose con la que tiene datos).
+
 ## [0.10.0-beta] - 2026-11-24
 
 ### Añadido

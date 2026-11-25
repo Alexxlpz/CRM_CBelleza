@@ -244,7 +244,7 @@ class ExperienceTests {
         ClientCardFieldDTO allergyField = cardTemplates.getFields(centerId).stream()
                 .filter(f -> f.getLabel() != null && f.getLabel().toLowerCase().contains("alergia"))
                 .findFirst().orElseThrow();
-        clientCards.saveCardData(centerId, client.getId(), Map.of(allergyField.getId(), "Látex"), carlos.getId());
+        clientCards.saveCardData(centerId, client.getId(), Map.of(allergyField.getId(), "Látex"), true, carlos.getId());
 
         assertEquals("Látex", allergyService.of(centerId, client.getId()));
         assertEquals("Látex", allergyService.byClient(centerId).get(client.getId()));

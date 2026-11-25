@@ -706,8 +706,30 @@
         }));
     }
 
+    /* ---------- 15. Consentimiento de la clienta en la ficha técnica ---------- */
+    /* Casilla con data-consent-fields="<selector>": si algún campo de ese selector tiene algo escrito, la casilla es
+       obligatoria (la ficha puede llevar datos de salud). Se usa la validación del navegador, así que ni el botón
+       de guardar ni «Guardar y salir» (unsaved-changes.js comprueba la validez) envían sin ella. */
+    function initConsentChecks() {
+        document.querySelectorAll('input[type="checkbox"][data-consent-fields]').forEach(box => {
+            const form = box.form;
+            if (!form) return;
+            const message = box.dataset.consentMessage || 'Marca esta casilla para guardar.';
+            const update = () => {
+                const filled = [...document.querySelectorAll(box.dataset.consentFields)]
+                    .some(field => field !== box && (field.value || '').trim() !== '');
+                box.setCustomValidity(filled && !box.checked ? message : '');
+            };
+            form.addEventListener('input', update);
+            form.addEventListener('change', update);
+            form.addEventListener('reset', () => setTimeout(update));
+            update();
+        });
+    }
+
     function init() {
         initOverscrollColor();
+        initConsentChecks();
         initCopyButtons();
         initShareButtons();
         initDirections();

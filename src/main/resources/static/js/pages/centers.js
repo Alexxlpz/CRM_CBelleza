@@ -35,13 +35,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /* ---- Acceso a un centro ---- */
     /*
-     * Acceso a la ficha de un centro (/client/centers/{nombre}):
+     * Acceso a la ficha de un centro:
      *  - Trabajador: no puede consultar otros centros → aviso y no se navega.
-     *  - Sin sesión: se navega igualmente; el servidor redirige al inicio de sesión
-     *    y, tras entrar, devuelve al usuario al centro que eligió.
-     *  - Cliente: navega directamente.
+     *  - Sin sesión: ficha pública /c/{nombre} (carta, horario y opiniones, sin calendario). Al pulsar
+     *    «Solicitar cita» allí se pide iniciar sesión y después vuelve al centro con el tratamiento elegido.
+     *  - Cliente: su ficha /client/centers/{nombre}, con el calendario para reservar.
      */
-    const centerUrl = center => `/client/centers/${encodeURIComponent(center.slug)}`;
+    const centerUrl = center => (currentSessionRole ? '/client/centers/' : '/c/') + encodeURIComponent(center.slug);
 
     async function showWorkerRestriction() {
         const goToPanel = await Cuquora.confirm(
@@ -50,17 +50,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (goToPanel) window.location.href = '/worker/dashboard';
     }
 
-    /** Botón «Ver tratamientos» del globo del mapa: sin sesión se avisa antes de mandar al inicio de sesión. */
-    async function openCenterFromMap(center) {
+    /** Botón «Ver tratamientos» del globo del mapa: lleva a la misma ficha que la tarjeta. */
+    function openCenterFromMap(center) {
         if (currentSessionRole === 'WORKER') {
             showWorkerRestriction();
             return;
-        }
-        if (!currentSessionRole) {
-            const goToLogin = await Cuquora.confirm(
-                'Para ver los tratamientos y reservar en ' + center.name + ' tienes que iniciar sesión. Después volverás directamente a este centro.',
-                { title: 'Inicia sesión para continuar', confirmText: 'Iniciar sesión', cancelText: 'Ahora no', tone: 'default' });
-            if (!goToLogin) return;
         }
         window.location.href = centerUrl(center);
     }
@@ -326,7 +320,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ${ratingBlock(center, 'center-rating')}
             ${offersBlock(center.offers)}
             <div class="center-card-footer">
-                <a href="/client/centers/${encodeURIComponent(center.slug)}" class="btn btn-primary center-select-btn">
+                <a href="${centerUrl(center)}" class="btn btn-primary center-select-btn">
                     <i class="lucide-calendar-plus" aria-hidden="true"></i> Ver Tratamientos y Reservar
                 </a>
             </div>`;

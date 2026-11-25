@@ -29,7 +29,7 @@
         <header class="page-hero">
             <h1>Política de privacidad</h1>
             <p>Qué datos personales tratamos, para qué, con quién los compartimos y cómo puedes ejercer tus derechos. Sin letra pequeña.</p>
-            <span class="legal-updated"><i class="lucide-calendar-check" aria-hidden="true"></i> Última actualización: 11 de octubre de 2026</span>
+            <span class="legal-updated"><i class="lucide-calendar-check" aria-hidden="true"></i> Última actualización: 25 de noviembre de 2026</span>
         </header>
 
         <div class="legal-document">
@@ -46,7 +46,7 @@
                 <h2><span class="legal-section-num">01</span> Responsable</h2>
                 <p>El responsable de los datos de tu cuenta es <strong th:text="${legalOwner.name}">Cuquora</strong><th:block th:if="${!legalOwner.nif.isEmpty()}">, NIF <span th:text="${legalOwner.nif}">00000000X</span></th:block><th:block th:if="${!legalOwner.address.isEmpty()}">, con domicilio en <span th:text="${legalOwner.address}">Calle</span></th:block>.</p>
                 <p>Para cualquier cuestión sobre tus datos escríbenos a <a th:href="|mailto:${contactEmail}|" th:text="${contactEmail}">cuquora@hotmail.com</a>.</p>
-                <p>Los datos que cada centro de belleza registra sobre sus clientes (citas atendidas, fichas técnicas) son responsabilidad de ese centro: Cuquora los trata por cuenta del centro, como encargado del tratamiento (ver <a href="#privacidad-4">fichas técnicas</a>).</p>
+                <p>Los datos que cada centro de belleza registra sobre sus clientes (citas atendidas, fichas técnicas) son responsabilidad de ese centro: Cuquora los trata por cuenta del centro, como encargado del tratamiento (ver <a href="#privacidad-4">fichas técnicas</a> y el <a href="/encargo">contrato de encargo</a> que firma cada centro).</p>
             </section>
 
             <section class="legal-section" id="privacidad-2">
@@ -99,7 +99,7 @@
 
             <section class="legal-section" id="privacidad-4">
                 <h2><span class="legal-section-num">04</span> Fichas técnicas</h2>
-                <p>Las fichas las crea y rellena cada centro, que decide qué anota y es el responsable de esos datos. Si incluyen información de salud, el centro debe contar con tu consentimiento explícito.</p>
+                <p>Las fichas las crea y rellena cada centro, que decide qué anota y es el responsable de esos datos. Si incluyen información de salud (alergias, sensibilidades, contraindicaciones…), el centro necesita tu consentimiento explícito: tiene que pedírtelo y dejar constancia en tu ficha, y sin él Cuquora no le deja guardarla con datos. Puedes retirarlo cuando quieras pidiéndole al centro que vacíe tu ficha.</p>
                 <p>Cuquora solo las guarda y las muestra al personal de ese centro: nunca a otros centros ni a otros clientes. Para acceder a tu ficha, corregirla o borrarla, dirígete al centro; si nos escribes a nosotros, le trasladaremos tu petición.</p>
             </section>
 

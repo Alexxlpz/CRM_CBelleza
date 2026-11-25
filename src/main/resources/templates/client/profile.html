@@ -122,6 +122,25 @@
             </div>
         </section>
 
+        <!-- Centros a los que ha dado su consentimiento para la ficha técnica: plegado, una sola línea hasta que se abre.
+             Para retirarlo o borrar datos se habla con el centro (sin botón, para que nada se borre por error). -->
+        <section class="settings-card settings-card--compact" id="tu-ficha" th:if="${not #lists.isEmpty(healthConsents)}">
+            <details class="consent-centers">
+                <summary>
+                    <i class="lucide-shield-check" aria-hidden="true"></i>
+                    <span>Ver centros que tienen tu ficha</span>
+                    <i class="lucide-chevron-down consent-centers-chevron" aria-hidden="true"></i>
+                </summary>
+                <p class="consent-centers-help">Pueden apuntar datos de salud que les cuentes, como alergias. Si cambias de idea o quieres que borren algo, díselo al centro.</p>
+                <ul class="consent-list">
+                    <li th:each="consent : ${healthConsents}">
+                        <strong th:text="${consent.centerName}">Centro Histórico</strong>
+                        <small th:text="'Desde el ' + ${#temporals.format(consent.since, 'dd/MM/yyyy')}">Desde el 25/11/2026</small>
+                    </li>
+                </ul>
+            </details>
+        </section>
+
         <section class="settings-card" id="tus-datos">
             <h2 class="settings-section-title"><i class="lucide-file-down" aria-hidden="true"></i> Descargar mis datos</h2>
             <p class="settings-section-text">

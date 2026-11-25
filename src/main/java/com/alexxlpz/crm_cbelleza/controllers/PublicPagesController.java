@@ -1,6 +1,7 @@
 package com.alexxlpz.crm_cbelleza.controllers;
 
 import com.alexxlpz.crm_cbelleza.config.LegalOwner;
+import com.alexxlpz.crm_cbelleza.entities.DataProcessing;
 import com.alexxlpz.crm_cbelleza.security.AppUserDetails;
 import com.alexxlpz.crm_cbelleza.security.RoleHomes;
 import com.alexxlpz.crm_cbelleza.services.AppointmentService;
@@ -25,6 +26,12 @@ public class PublicPagesController {
     private static final List<String> COOKIES_SECTIONS = List.of(
             "Qué son", "Cookies que usamos", "Almacenamiento local", "Servicios externos",
             "Por qué no pedimos permiso", "Cómo borrarlas");
+
+    /** Títulos del contrato de encargo (templates/encargo.html), en el orden de sus id encargo-1…12. */
+    private static final List<String> DPA_SECTIONS = List.of(
+            "Partes y objeto", "Qué datos y de quién", "Instrucciones del centro", "Confidencialidad",
+            "Medidas de seguridad", "Subencargados", "Transferencias internacionales", "Derechos de las personas",
+            "Brechas de seguridad", "Datos de salud", "Fin del servicio", "Auditoría y cambios");
 
     private static final List<String> PRIVACY_SECTIONS = List.of(
             "Responsable", "Qué datos tratamos", "Para qué y con qué base", "Fichas técnicas",
@@ -79,6 +86,18 @@ public class PublicPagesController {
         model.addAttribute("pageDescription", "Condiciones de uso de Cuquora para clientes y centros de belleza.");
         model.addAttribute("sections", TERMS_SECTIONS);
         return "terms";
+    }
+
+    /** Contrato de encargo del tratamiento (art. 28 RGPD) que acepta cada centro. */
+    @GetMapping("/encargo")
+    public String dataProcessing(Model model) {
+        model.addAttribute("contactEmail", contactEmail);
+        model.addAttribute("legalOwner", legalOwner);
+        model.addAttribute("versionLabel", DataProcessing.VERSION_LABEL);
+        model.addAttribute("pageDescription",
+                "Contrato de encargo del tratamiento entre los centros de belleza y Cuquora (artículo 28 del RGPD).");
+        model.addAttribute("sections", DPA_SECTIONS);
+        return "encargo";
     }
 
     @GetMapping({"/cookies", "/politica-cookies"})

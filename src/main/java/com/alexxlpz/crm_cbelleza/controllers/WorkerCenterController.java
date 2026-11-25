@@ -281,6 +281,14 @@ public class WorkerCenterController {
         return "redirect:/worker/center/centro#horario";
     }
 
+    /** El dueño acepta el contrato de encargo del tratamiento desde el aviso del panel (solo el dueño: TeamRoutes). */
+    @PostMapping("/worker/center/dpa")
+    public String acceptDataProcessing(@AuthenticationPrincipal AppUserDetails worker, RedirectAttributes redirect) {
+        centerService.acceptDataProcessing(worker.getCenterId(), worker.getUsername());
+        redirect.addFlashAttribute("successMessage", "Contrato de encargo aceptado. Puedes volver a leerlo cuando quieras en el pie de los términos.");
+        return "redirect:/worker/dashboard";
+    }
+
     @PostMapping("/worker/center/owner")
     public String transferOwnership(@AuthenticationPrincipal AppUserDetails worker,
                                     @RequestParam(required = false) Long newOwnerId,

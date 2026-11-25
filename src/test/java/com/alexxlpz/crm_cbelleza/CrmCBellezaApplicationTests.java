@@ -1,5 +1,6 @@
 package com.alexxlpz.crm_cbelleza;
 
+import com.alexxlpz.crm_cbelleza.config.H2PoolConfig;
 import com.alexxlpz.crm_cbelleza.dto.ClientSummaryDTO;
 import com.alexxlpz.crm_cbelleza.entities.Appointment;
 import com.alexxlpz.crm_cbelleza.entities.AppointmentStatus;
@@ -39,9 +40,27 @@ class CrmCBellezaApplicationTests {
     }
 
     @Test
+    void testsRunOnPostgreSql() throws Exception {
+        // Los tests usan PostgreSQL (Testcontainers), como producción: con H2 se colaban fallos que solo da PostgreSQL
+        try (var connection = dataSource.getConnection()) {
+            assertEquals("PostgreSQL", connection.getMetaData().getDatabaseProductName());
+        }
+    }
+
+    @Test
     void inMemoryH2PoolNeverRetiresConnections() {
-        // H2 ata los CHECK a la conexión que usó Flyway: si Hikari la renovara, los UPDATE fallarían (H2PoolConfig)
-        assertEquals(0, ((HikariDataSource) dataSource).getMaxLifetime());
+        // H2 ata los CHECK a la conexión que usó Flyway: si Hikari la renovara, los UPDATE fallarían (H2PoolConfig).
+        // Solo afecta a H2 en memoria (perfil dev sin Docker): con otra base de datos el pool no se toca.
+        HikariDataSource h2 = new HikariDataSource();
+        h2.setJdbcUrl("jdbc:h2:mem:pool_test");
+        new H2PoolConfig().postProcessAfterInitialization(h2, "dataSource");
+        assertEquals(0, h2.getMaxLifetime());
+
+        HikariDataSource postgres = new HikariDataSource();
+        postgres.setJdbcUrl("jdbc:postgresql://db:5432/cuquora");
+        long before = postgres.getMaxLifetime();
+        new H2PoolConfig().postProcessAfterInitialization(postgres, "dataSource");
+        assertEquals(before, postgres.getMaxLifetime());
     }
 
     @Test

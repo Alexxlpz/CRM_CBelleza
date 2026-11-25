@@ -40,7 +40,7 @@ import java.util.Set;
 public class ClientCardController {
 
     /** Parámetros del formulario que no son campos de la ficha. */
-    private static final Set<String> NON_FIELD_PARAMS = Set.of("clientId", "redirectAfter");
+    private static final Set<String> NON_FIELD_PARAMS = Set.of("clientId", "redirectAfter", "healthConsent");
 
     private final ClientCardService clientCardService;
     private final ClientCardTemplateService templateService;
@@ -141,7 +141,14 @@ public class ClientCardController {
                 values.put(key, value);
             }
         });
-        clientCardService.saveCardData(worker.getCenterId(), clientId, values, worker.getId());
+        try {
+            clientCardService.saveCardData(worker.getCenterId(), clientId, values,
+                    "true".equals(params.get("healthConsent")), worker.getId());
+        } catch (BusinessRuleException e) {
+            // La página lo evita antes de enviar; esto es por si llega sin JavaScript
+            redirect.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/worker/clients/" + clientId;
+        }
         redirect.addFlashAttribute("successMessage", "Ficha técnica guardada.");
         return redirectAfter(params.get("redirectAfter"), "/worker/clients/" + clientId);
     }

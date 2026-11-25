@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
         latitude: [V.required('Marca en el mapa dónde está el centro.')],
         contactName: [V.required('Escribe tu nombre.'), V.minLength(2, 'Tu nombre tiene que tener al menos 2 caracteres.')],
         email: [V.required('Escribe tu correo.'), V.email()],
-        terms: [V.required('Confirma la actividad legal del centro y acepta los términos para continuar.')]
+        terms: [V.required('Confirma la actividad legal del centro y acepta los términos y el contrato de encargo para continuar.')]
     }, {
         submitButton: submitBtn,
         onSubmit: () => {

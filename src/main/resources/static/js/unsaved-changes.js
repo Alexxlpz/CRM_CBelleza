@@ -27,6 +27,10 @@
             .map(el => [el.name, (el.value || '').trim()]));
     }
 
+    /** El formulario no es válido: ya se ha señalado el campo, no hay que enviarlo de otra forma. */
+    class InvalidFormError extends Error {
+    }
+
     function guardUnsavedChanges(options) {
         const { form, modalId, exitUrl, saveButton, successMessage, onSaved } = options;
         if (!form) return;
@@ -68,6 +72,12 @@
         }
 
         async function save(extra) {
+            // Campos obligatorios o casillas que faltan (p. ej. el consentimiento de la ficha): se dice dónde y no se envía
+            if (!form.checkValidity()) {
+                if (modalOpen()) Cuquora.closeModal(modalId);
+                form.reportValidity();
+                throw new InvalidFormError();
+            }
             const body = new URLSearchParams(new FormData(form));
             Object.entries(extra || {}).forEach(([k, v]) => body.set(k, v));
             const response = await fetch(form.action, {
@@ -106,6 +116,13 @@
                     setTimeout(() => { saveButton.disabled = false; saveButton.innerHTML = original; }, 2000);
                 }
             } catch (err) {
+                if (err instanceof InvalidFormError) {
+                    if (saveButton) {
+                        saveButton.disabled = false;
+                        saveButton.innerHTML = original;
+                    }
+                    return;
+                }
                 // Sin conexión o error inesperado: envío clásico para que el servidor muestre el resultado.
                 console.warn('Guardado asíncrono fallido, se usa el envío normal', err);
                 leaving = true;
@@ -177,6 +194,7 @@
             } catch (err) {
                 button.disabled = false;
                 button.innerHTML = original;
+                if (err instanceof InvalidFormError) return;
                 Cuquora.alert(err.message, 'No se han podido guardar los cambios');
             }
         });

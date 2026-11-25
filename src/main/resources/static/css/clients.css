@@ -502,6 +502,11 @@
     gap: 8px;
 }
 
+/* Ficha técnica: aviso de consentimiento que falta (la casilla .consent-box está en common.css) */
+.consent-missing {
+    margin-bottom: 0;
+}
+
 .field-label {
     font-size: 13.5px;
     font-weight: 700;

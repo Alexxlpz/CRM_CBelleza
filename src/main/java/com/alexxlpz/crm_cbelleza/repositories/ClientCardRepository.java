@@ -11,7 +11,7 @@ import java.util.Optional;
 @Repository
 public interface ClientCardRepository extends JpaRepository<ClientCard, Long> {
 
-    @EntityGraph(attributePaths = {"updatedBy"})
+    @EntityGraph(attributePaths = {"updatedBy", "healthConsentBy"})
     Optional<ClientCard> findByCenterIdAndClientId(Long centerId, Long clientId);
 
     boolean existsByCenterIdAndClientId(Long centerId, Long clientId);
@@ -22,4 +22,8 @@ public interface ClientCardRepository extends JpaRepository<ClientCard, Long> {
     /** Fichas de un cliente en todos los centros, con el centro (descargar sus datos o borrar su cuenta). */
     @EntityGraph(attributePaths = {"center"})
     List<ClientCard> findByClientId(Long clientId);
+
+    /** Centros a los que el cliente ha dado consentimiento para su ficha técnica (su perfil lo enseña para retirarlo). */
+    @EntityGraph(attributePaths = {"center"})
+    List<ClientCard> findByClientIdAndHealthConsentAtIsNotNullOrderByHealthConsentAtDesc(Long clientId);
 }

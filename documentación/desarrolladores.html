@@ -99,7 +99,7 @@
                     <div class="hero-meta-item"><span>Estado:</span><strong>0.10.0-beta · 23 nov 2026 · en cuquora.com</strong></div>
                     <div class="hero-meta-item"><span>Backend:</span><strong>Java 21 · Spring Boot 4.1 · JPA · Flyway</strong></div>
                     <div class="hero-meta-item"><span>Front:</span><strong>Thymeleaf + CSS propio + JS sin framework</strong></div>
-                    <div class="hero-meta-item"><span>Datos:</span><strong>PostgreSQL 16 (H2 en dev y tests)</strong></div>
+                    <div class="hero-meta-item"><span>Datos:</span><strong>PostgreSQL 16 (H2 en dev; tests en PostgreSQL con Testcontainers)</strong></div>
                 </div>
             </section>
 
@@ -302,7 +302,7 @@
                             <tr><td><code>application-dev.properties</code></td><td>Perfil <code>dev</code></td><td>Datos demo, historial (<code>crm.seed-demo-history</code>), consola H2, sin cachés de Thymeleaf ni de recursos. Lee el <code>.env</code> en UTF-8 (<code>DotEnvPropertySourceLoader</code>).</td></tr>
                             <tr><td><code>application-containers.properties</code></td><td>Perfil <code>containers</code> (con dev)</td><td>PostgreSQL en <code>127.0.0.1:5433</code> como <code>cuquora_app</code> y la API de productos en <code>:8092</code>.</td></tr>
                             <tr><td><code>application-prod.properties</code></td><td>Perfil <code>prod</code> (lo activa <code>docker-compose.yml</code>)</td><td>Cookies seguras, cabeceras reenviadas, errores sin trazas, gzip, Flyway sin <code>clean</code>. <code>ProductionChecks</code> revisa la configuración al arrancar.</td></tr>
-                            <tr><td><code>src/test/resources/config/application.properties</code></td><td>Tests</td><td>H2 y datos demo (sin historial).</td></tr>
+                            <tr><td><code>src/test/resources/config/application.properties</code></td><td>Tests</td><td>PostgreSQL 16 de verdad con Testcontainers (<code>jdbc:tc:postgresql:16-alpine</code>) y datos demo (sin historial). Hace falta Docker Desktop abierto.</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -1483,7 +1483,7 @@
 
                 <ul class="tasks">
                     <li><span>Nombre</span><span><code>V36__descripcion_en_espanol.sql</code>, con un comentario arriba que explique cada columna y el porqué.</span></li>
-                    <li><span>SQL</span><span>Compatible con H2 y PostgreSQL a la vez (los tests van en H2, producción en PostgreSQL).</span></li>
+                    <li><span>SQL</span><span>Compatible con H2 y PostgreSQL a la vez (H2 en el perfil dev; tests y producción en PostgreSQL).</span></li>
                     <li><span>Nunca</span><span>Editar una migración ya aplicada: Flyway compara la suma de comprobación y la app no arrancaría.</span></li>
                     <li><span>Columnas nuevas en tablas con datos</span><span>Nulables o con <code>DEFAULT</code>, y rellenar las filas viejas en la misma migración.</span></li>
                 </ul>
@@ -1496,7 +1496,7 @@
                         <div class="section-icon">✅</div>
                         <div>
                             <h2>Tests</h2>
-                            <p style="margin: 0; font-size: 0.95rem;">482 tests en 57 clases (24 nov 2026), todos contra H2 con los datos demo</p>
+                            <p style="margin: 0; font-size: 0.95rem;">491 tests en 58 clases (25 nov 2026), contra PostgreSQL 16 en Docker (Testcontainers) con los datos demo</p>
                         </div>
                     </div>
                 </div>
@@ -1520,7 +1520,7 @@
                     <div class="callout-icon">▶️</div>
                     <div class="callout-content">
                         <strong>Cómo lanzarlos</strong>
-                        <p><code>./mvnw test</code> (todos) o <code>./mvnw -Dtest=CenterIsolationTests test</code> (uno). En el Linux de Alex: <code>JAVA_HOME=/home/alejandro/.jdks/ms-25.0.4.1 mvn test</code>. Usuarios de prueba en <code>TestUsers</code>, horarios en <code>TestHours</code>. Google Calendar (<code>GoogleCalendarGateway</code>), el correo (<code>EmailGateway</code>) y la búsqueda de productos (<code>ProductDatabase</code>) se sustituyen con <code>@MockitoBean</code>. A 21 nov 2026 falla uno, <code>WorkerPanelTests.visitSummaryCountsCompletedVisitsAndPurchases</code>, porque depende del reloj real (detalle en <code>PENDIENTES.md</code>).</p>
+                        <p>Con Docker Desktop abierto (sin él no arranca ningún test): <code>./mvnw test</code> (todos) o <code>./mvnw -Dtest=CenterIsolationTests test</code> (uno). En el Linux de Alex: <code>JAVA_HOME=/home/alejandro/.jdks/ms-25.0.4.1 mvn test</code>. Usuarios de prueba en <code>TestUsers</code>, horarios en <code>TestHours</code>. Google Calendar (<code>GoogleCalendarGateway</code>), el correo (<code>EmailGateway</code>) y la búsqueda de productos (<code>ProductDatabase</code>) se sustituyen con <code>@MockitoBean</code>. A 21 nov 2026 falla uno, <code>WorkerPanelTests.visitSummaryCountsCompletedVisitsAndPurchases</code>, porque depende del reloj real (detalle en <code>PENDIENTES.md</code>).</p>
                     </div>
                 </div>
             </section>
@@ -1638,7 +1638,7 @@
                     </details>
                     <details>
                         <summary>Error 500 «cannot execute INSERT in a read-only transaction» solo en PostgreSQL</summary>
-                        <div><p>Un método con <code>@Transactional(readOnly = true)</code> (o una clase entera, como <code>DashboardService</code>) llama a otro servicio que guarda algo. H2 no hace cumplir el modo de solo lectura y los tests pasan; PostgreSQL lo rechaza. Lo que se lee desde pantallas no debe guardar nada «por si acaso»: devuelve un valor por defecto y guarda solo en la acción de guardar (así quedó <code>ClientCardTemplateService.getFields</code>, 23 nov 2026). En los tests, comprueba que no se ha escrito la fila.</p></div>
+                        <div><p>Un método con <code>@Transactional(readOnly = true)</code> (o una clase entera, como <code>DashboardService</code>) llama a otro servicio que guarda algo. H2 no hace cumplir el modo de solo lectura; PostgreSQL lo rechaza (desde el 25 nov 2026 los tests van en PostgreSQL y lo detectan). Lo que se lee desde pantallas no debe guardar nada «por si acaso»: devuelve un valor por defecto y guarda solo en la acción de guardar (así quedó <code>ClientCardTemplateService.getFields</code>, 23 nov 2026). En los tests, comprueba que no se ha escrito la fila.</p></div>
                     </details>
                     <details>
                         <summary>El 8080 está ocupado</summary>

@@ -2,6 +2,7 @@ package com.alexxlpz.crm_cbelleza.services;
 
 import com.alexxlpz.crm_cbelleza.booking.CenterTimeZones;
 import com.alexxlpz.crm_cbelleza.entities.Center;
+import com.alexxlpz.crm_cbelleza.entities.DataProcessing;
 import com.alexxlpz.crm_cbelleza.exceptions.BusinessRuleException;
 import com.alexxlpz.crm_cbelleza.exceptions.ResourceNotFoundException;
 import com.alexxlpz.crm_cbelleza.forms.CenterForm;
@@ -13,6 +14,8 @@ import com.alexxlpz.crm_cbelleza.repositories.CenterRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Clock;
+import java.time.LocalDateTime;
 import java.text.Normalizer;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -32,9 +35,23 @@ public class CenterService {
     public static final int MAX_CABINS = 50;
 
     private final CenterRepository centerRepository;
+    private final Clock clock;
 
-    public CenterService(CenterRepository centerRepository) {
+    public CenterService(CenterRepository centerRepository, Clock clock) {
         this.centerRepository = centerRepository;
+        this.clock = clock;
+    }
+
+    /**
+     * El dueño acepta la versión vigente del contrato de encargo del tratamiento ({@link DataProcessing}): se guarda la
+     * versión, cuándo y con qué correo. Los centros nuevos lo aceptan ya en el alta.
+     */
+    public void acceptDataProcessing(Long centerId, String acceptedBy) {
+        Center center = getCenterById(centerId);
+        center.setDpaVersion(DataProcessing.VERSION);
+        center.setDpaAcceptedAt(LocalDateTime.now(clock));
+        center.setDpaAcceptedBy(acceptedBy);
+        centerRepository.save(center);
     }
 
     @Transactional(readOnly = true)

@@ -99,7 +99,7 @@ class AccountPrivacyTests {
                 LocalDateTime.now().minusDays(10).withHour(10).withMinute(0).withSecond(0).withNano(0),
                 "Enrojecimiento leve en la mejilla izquierda");
         String fieldId = cardTemplates.getFields(carlos.getCenter().getId()).getFirst().getId();
-        clientCards.saveCardData(carlos.getCenter().getId(), marta.getId(), Map.of(fieldId, "Piel sensible"), carlos.getId());
+        clientCards.saveCardData(carlos.getCenter().getId(), marta.getId(), Map.of(fieldId, "Piel sensible"), true, carlos.getId());
         return past;
     }
 

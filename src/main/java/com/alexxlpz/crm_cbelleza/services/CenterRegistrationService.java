@@ -2,6 +2,7 @@ package com.alexxlpz.crm_cbelleza.services;
 
 import com.alexxlpz.crm_cbelleza.booking.CenterTimeZones;
 import com.alexxlpz.crm_cbelleza.booking.OpeningHours;
+import com.alexxlpz.crm_cbelleza.entities.DataProcessing;
 import com.alexxlpz.crm_cbelleza.entities.Center;
 import com.alexxlpz.crm_cbelleza.entities.LoyaltyMode;
 import com.alexxlpz.crm_cbelleza.entities.Role;
@@ -118,7 +119,7 @@ public class CenterRegistrationService {
             throw new BusinessRuleException("La información para la revisión no puede pasar de " + MAX_NOTES + " caracteres.");
         }
         if (!Boolean.TRUE.equals(form.terms())) {
-            throw new BusinessRuleException("Confirma que el centro tiene actividad legal y acepta los términos para continuar.");
+            throw new BusinessRuleException("Confirma que el centro tiene actividad legal y acepta los términos y el contrato de encargo para continuar.");
         }
 
         List<Member> team = new ArrayList<>();
@@ -154,6 +155,10 @@ public class CenterRegistrationService {
                 .approvalTokenHash(SecureTokens.hash(approvalToken))
                 .approvalRequestedAt(now)
                 .registeredAt(now)
+                // La misma casilla acepta los términos y el contrato de encargo del tratamiento (art. 28 RGPD)
+                .dpaVersion(DataProcessing.VERSION)
+                .dpaAcceptedAt(now)
+                .dpaAcceptedBy(cleanTeam.getFirst().email())
                 .build());
         // El enlace corto se fija ya: si se calculase al vuelo, otro centro podría quitárselo (CenterService.shortSlug)
         centerService.assignSlug(center);

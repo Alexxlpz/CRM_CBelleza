@@ -3266,6 +3266,32 @@ body.modal-open .info-modal-overlay.is-open .info-modal-card {
     accent-color: var(--primary-dark);
 }
 
+/* Consentimiento para la ficha técnica (datos de salud): en la ficha, en el alta de clientas y al reservar */
+.consent-box {
+    padding: 14px 16px;
+    border-radius: 14px;
+    border: 1px solid var(--border-soft);
+    background: var(--surface-muted);
+}
+
+.consent-check {
+    display: flex;
+    align-items: flex-start;
+    line-height: 1.4;
+}
+
+.consent-check input {
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.consent-help {
+    margin: 8px 0 0 26px;
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--text-muted);
+}
+
 /* Resumen del tratamiento: bloque en la cita (agenda y ficha) y avisos del cliente */
 .summary-textarea {
     resize: vertical;
@@ -4358,4 +4384,67 @@ body > footer {
 .media-viewer {
     padding: calc(56px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right))
              calc(16px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left));
+}
+
+/* «Ver centros que tienen tu ficha» (perfil del cliente): una línea plegada; al abrirla, la lista de centros */
+.settings-card--compact {
+    padding-top: 6px;
+    padding-bottom: 6px;
+}
+
+.consent-centers summary {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 0;
+    font-weight: 700;
+    cursor: pointer;
+    list-style: none;
+}
+
+.consent-centers summary::-webkit-details-marker {
+    display: none;
+}
+
+.consent-centers-chevron {
+    margin-left: auto;
+    transition: transform 0.2s ease;
+}
+
+.consent-centers[open] .consent-centers-chevron {
+    transform: rotate(180deg);
+}
+
+.consent-centers-help {
+    margin: 0 0 10px;
+    font-size: 13.5px;
+    color: var(--text-muted);
+}
+
+.consent-list {
+    list-style: none;
+    margin: 0 0 12px;
+    padding: 0;
+    display: grid;
+    gap: 6px;
+}
+
+.consent-list li {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    border: 1px solid var(--border-soft);
+}
+
+.consent-list small {
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+.booking-consent {
+    margin-bottom: 14px;
+    text-align: left;
 }

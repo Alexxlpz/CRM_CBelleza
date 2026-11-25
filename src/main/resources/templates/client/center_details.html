@@ -97,6 +97,15 @@
                     <p class="booking-mode" th:unless="${center.autoAcceptBookings}">
                         <i class="lucide-hourglass" aria-hidden="true"></i> El centro revisará tu solicitud y te avisaremos cuando la confirme.
                     </p>
+                    <!--/* Consentimiento para la ficha técnica (art. 9 RGPD): opcional, una sola vez por centro. Si lo marca,
+                         el equipo ya no tiene que pedírselo. Para retirarlo o borrar datos, habla con el centro. */-->
+                    <div class="consent-box booking-consent" th:if="${askHealthConsent}">
+                        <label class="checkbox-row consent-check">
+                            <input type="checkbox" name="healthConsent" value="true">
+                            <span th:text="'Permito que ' + ${center.name} + ' apunte en mi ficha datos de salud que le cuente, como alergias, para atenderme con seguridad'">Permito que el centro apunte en mi ficha datos de salud que le cuente, como alergias, para atenderme con seguridad</span>
+                        </label>
+                        <p class="consent-help">Es opcional y solo te lo preguntamos una vez en cada centro. Si cambias de idea, díselo al centro.</p>
+                    </div>
                     <button type="submit" class="btn btn-primary btn-lg btn-block">
                         <i class="lucide-check-circle" aria-hidden="true"></i> <span th:text="${center.autoAcceptBookings} ? 'Reservar cita' : 'Solicitar cita'">Solicitar cita</span>
                     </button>

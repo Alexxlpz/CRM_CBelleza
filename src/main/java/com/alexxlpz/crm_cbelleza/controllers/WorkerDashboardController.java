@@ -61,6 +61,8 @@ public class WorkerDashboardController {
         model.addAttribute("rating", reviewService.rating(worker.getCenterId()));
         model.addAttribute("unansweredReviews", reviewService.countUnanswered(worker.getCenterId()));
         addToday(model, center, worker.getId(), owner);
+        // Contrato de encargo del tratamiento (art. 28 RGPD): el dueño lo acepta una vez por versión
+        model.addAttribute("dpaPending", owner && !center.hasAcceptedCurrentDpa());
         // Centro recién dado de alta: «Primeros pasos» con dibujos (el equipo solo ve si ya sale en el buscador)
         DashboardService.FirstSteps steps = dashboardService.firstStepsFor(center);
         if (!steps.done() && (owner || !steps.published())) {

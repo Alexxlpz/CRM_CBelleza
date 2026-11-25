@@ -129,6 +129,13 @@
             <artifactId>spring-boot-starter-security-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- Los tests usan un PostgreSQL 16 de verdad en Docker (el mismo que producción), no H2:
+             src/test/resources/config/application.properties. Hace falta Docker abierto al pasar los tests. -->
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers-postgresql</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
