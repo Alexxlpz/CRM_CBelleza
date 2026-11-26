@@ -110,7 +110,7 @@
                         <li><strong>Un monolito Spring Boot</strong> que pinta las páginas en el servidor (Thymeleaf). El JavaScript solo añade interactividad: no hay SPA ni API pública general.</li>
                         <li><strong>Dos tipos de usuario</strong>: clientes (buscan centros y piden cita) y trabajadores (gestionan su centro). Entre los trabajadores, el <strong>dueño</strong> tiene permisos de más.</li>
                         <li><strong>Todo cuelga de un centro.</strong> Un trabajador solo ve lo de su centro; lo de otro centro responde 404 aunque adivine el id.</li>
-                        <li><strong>Las reglas viven en los servicios</strong>, nunca en controladores ni plantillas. Los errores para el usuario son <code>BusinessRuleException</code> con el texto en español.</li>
+                        <li><strong>Las reglas viven en los servicios</strong>, nunca en controladores ni plantillas. Los errores para el usuario son <code>BusinessRuleException</code> con el texto en español. Si el error es de un campo concreto, <code>FieldException</code> (hija de la anterior) dice cuál; el controlador lo pasa con <code>FormErrors.flash</code> y la página lo pinta en rojo debajo del campo, con lo escrito de vuelta (<code>fragments/alerts :: flash</code> + <code>app.js</code>). Lo usan «Ajustes → Centro», «Mi cuenta» y «Mi perfil».</li>
                         <li><strong>Todo cambio de cita pasa por <code>BookingService</code></strong> y publica un evento; correos y Google Calendar reaccionan después del commit, en segundo plano.</li>
                         <li><strong>Un segundo servicio pequeño</strong>, <code>product-api</code>, guarda productos por código de barras que comparten todos los centros.</li>
                     </ul>

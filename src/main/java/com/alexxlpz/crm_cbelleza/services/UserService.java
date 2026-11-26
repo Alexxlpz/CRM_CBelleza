@@ -4,10 +4,12 @@ import com.alexxlpz.crm_cbelleza.entities.Center;
 import com.alexxlpz.crm_cbelleza.entities.Role;
 import com.alexxlpz.crm_cbelleza.entities.User;
 import com.alexxlpz.crm_cbelleza.exceptions.BusinessRuleException;
+import com.alexxlpz.crm_cbelleza.exceptions.FieldException;
 import com.alexxlpz.crm_cbelleza.exceptions.ResourceNotFoundException;
 import com.alexxlpz.crm_cbelleza.forms.Emails;
 import com.alexxlpz.crm_cbelleza.forms.FormText;
 import com.alexxlpz.crm_cbelleza.forms.PasswordPolicy;
+import com.alexxlpz.crm_cbelleza.forms.PhoneNumbers;
 import com.alexxlpz.crm_cbelleza.forms.ProfileForm;
 import com.alexxlpz.crm_cbelleza.forms.RegistrationForm;
 import com.alexxlpz.crm_cbelleza.repositories.UserRepository;
@@ -180,24 +182,39 @@ public class UserService {
                 .build());
     }
 
+    /**
+     * Nombre, teléfono y contraseña desde el perfil (cliente) o «Mi cuenta» (equipo). El teléfono se guarda como en el
+     * registro («+34 612 345 678»; vacío lo quita). Si un dato no vale se lanza {@link FieldException} con el campo.
+     */
     public User updateProfile(Long userId, ProfileForm form) {
-        passwordPolicy.validateOptional(form.newPassword(), form.confirmPassword());
+        try {
+            passwordPolicy.validateOptional(form.newPassword(), form.confirmPassword());
+        } catch (FieldException e) {
+            throw e;
+        } catch (BusinessRuleException e) {
+            throw new FieldException("newPassword", e.getMessage());
+        }
         User user = getUser(userId);
         boolean changesPassword = !FormText.isBlank(form.newPassword());
         // Así, quien encuentre la sesión abierta en otro dispositivo no puede quedarse la cuenta
         if (changesPassword && user.getPassword() != null && (form.currentPassword() == null
                 || !passwordEncoder.matches(form.currentPassword(), user.getPassword()))) {
-            throw new BusinessRuleException("La contraseña actual no es correcta.");
+            throw new FieldException("currentPassword", "La contraseña actual no es correcta.");
         }
-        if (!FormText.isBlank(form.name())) {
+        if (form.name() != null) {
             String name = FormText.collapseSpaces(form.name().trim());
             if (name.length() < 2 || name.length() > MAX_NAME) {
-                throw new BusinessRuleException("El nombre tiene que tener entre 2 y " + MAX_NAME + " caracteres.");
+                throw new FieldException("name", "El nombre tiene que tener entre 2 y " + MAX_NAME + " caracteres.");
             }
             user.setName(name);
         }
         if (form.phone() != null) {
-            user.setPhone(FormText.trimToNull(form.phone()));
+            try {
+                user.setPhone(FormText.isBlank(form.phone()) ? null
+                        : PhoneNumbers.normalize(PhoneNumbers.DEFAULT_COUNTRY, form.phone()));
+            } catch (BusinessRuleException e) {
+                throw new FieldException("phone", e.getMessage());
+            }
         }
         if (changesPassword) {
             user.setPassword(passwordEncoder.encode(form.newPassword()));

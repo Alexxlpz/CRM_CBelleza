@@ -335,7 +335,7 @@ public class CenterRegistrationService {
                 : "Añade el código postal a la dirección (5 cifras, ej.: Calle Mayor 12, 28013 Madrid).");
     }
 
-    private static boolean validCoordinates(Double latitude, Double longitude) {
+    static boolean validCoordinates(Double latitude, Double longitude) {
         return latitude != null && longitude != null
                 && latitude >= -90 && latitude <= 90 && longitude >= -180 && longitude <= 180
                 && !(latitude == 0 && longitude == 0);

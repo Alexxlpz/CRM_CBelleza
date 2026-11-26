@@ -4,7 +4,8 @@ package com.alexxlpz.crm_cbelleza.forms;
 public record WorkerCenterForm(String centerName, String centerAddress, String centerPhoneCountry, String centerPhone,
                                String centerEmail,
                                Double latitude, Double longitude, String timeZone, Integer cabins,
-                               String workerName, String workerPhone, String currentPassword, String newPassword,
+                               String workerName, String workerPhoneCountry, String workerPhone, String currentPassword,
+                               String newPassword,
                                String confirmPassword) {
 
     public CenterForm center() {
@@ -13,6 +14,7 @@ public record WorkerCenterForm(String centerName, String centerAddress, String c
     }
 
     public ProfileForm worker() {
-        return new ProfileForm(workerName, workerPhone, currentPassword, newPassword, confirmPassword);
+        return new ProfileForm(workerName, PhoneNumbers.withCountry(workerPhoneCountry, workerPhone), currentPassword,
+                newPassword, confirmPassword);
     }
 }

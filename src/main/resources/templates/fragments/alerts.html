@@ -10,9 +10,14 @@
             <span th:text="${successMessage}">Te avisaremos en cuanto el centro la confirme.</span>
         </div>
     </div>
-    <div class="alert alert-error" role="alert" th:if="${errorMessage != null}">
+    <div class="alert alert-error" role="alert" th:if="${errorMessage != null}"
+         th:attr="data-server-field-banner=${errorField != null ? 'true' : null}">
         <i class="lucide-alert-circle" aria-hidden="true"></i>
         <span th:text="${errorMessage}">Ha ocurrido un error.</span>
     </div>
+    <!--/* Error de un campo (FieldException, controllers/FormErrors): app.js lo pone debajo del campo, en rojo, y quita
+         el aviso de arriba. Lo que se había escrito vuelve al formulario (el servidor no guardó nada). */-->
+    <span hidden th:if="${errorField != null}" th:attr="data-server-field-error=${errorField}" th:text="${errorMessage}"></span>
+    <input type="hidden" th:each="saved : ${submittedValues}" th:attr="data-restore-field=${saved.key}" th:value="${saved.value}">
 </th:block>
 

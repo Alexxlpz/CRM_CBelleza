@@ -102,6 +102,12 @@ public class WorkerCenterController {
     static final String ACCOUNT = "cuenta";
     private static final Map<String, String> SECTION_TITLES = Map.of(
             CENTER, "Centro", BOOKINGS, "Reservas", TEAM, "Equipo", ACCOUNT, "Mi cuenta");
+    /** Campo que no vale ({@link com.alexxlpz.crm_cbelleza.exceptions.FieldException}) → id del input en la página. */
+    private static final Map<String, String> CENTER_FIELDS = Map.of("name", "centerName", "address", "centerAddress",
+            "phone", "centerPhone", "email", "centerEmail", "location", "centerAddress", "cabins", "cabins",
+            "timeZone", "timeZone");
+    private static final Map<String, String> ACCOUNT_FIELDS = Map.of("name", "workerName", "phone", "workerPhone",
+            "currentPassword", "currentPassword", "newPassword", "newPassword");
 
     /**
      * Entrada de «Mi Centro». En escritorio abre el primer apartado (Centro al dueño, Mi cuenta al resto); en el móvil
@@ -168,6 +174,12 @@ public class WorkerCenterController {
             default -> {
                 model.addAttribute("calendarSync", googleCalendar.status(worker.getId()));
                 model.addAttribute("maxPhotoMb", CenterPhotoService.MAX_UPLOAD_MB);
+                // Su teléfono con el prefijo aparte, como el del centro
+                PhoneNumbers.Parts workerPhone = PhoneNumbers.split(userService.getUser(worker.getId()).getPhone(),
+                        PhoneNumbers.countryForTimeZone(center.getTimeZone()));
+                model.addAttribute("workerPhone", workerPhone);
+                model.addAttribute("phoneCountries", PhoneNumbers.countriesWith(workerPhone.country()));
+                model.addAttribute("callingCodes", PhoneNumbers.callingCodesText());
             }
         }
         model.addAttribute("worker", userService.getUser(worker.getId()));
@@ -187,7 +199,10 @@ public class WorkerCenterController {
             authSession.refresh(userService.getUser(worker.getId()), request, response);
             redirect.addFlashAttribute("successMessage", "Datos del centro guardados.");
         } catch (BusinessRuleException e) {
-            redirect.addFlashAttribute("errorMessage", e.getMessage());
+            FormErrors.flash(redirect, e, CENTER_FIELDS, FormErrors.pairs("centerName", form.centerName(),
+                    "centerAddress", form.centerAddress(), "centerPhoneCountry", form.centerPhoneCountry(),
+                    "centerPhone", form.centerPhone(), "centerEmail", form.centerEmail(),
+                    "cabins", form.cabins() != null ? form.cabins().toString() : null, "timeZone", form.timeZone()));
         }
         return "redirect:/worker/center/" + CENTER;
     }
@@ -219,7 +234,8 @@ public class WorkerCenterController {
             authSession.refresh(userService.getUser(updatedWorker.getId()), request, response);
             redirect.addFlashAttribute("successMessage", "Datos de tu cuenta guardados.");
         } catch (BusinessRuleException e) {
-            redirect.addFlashAttribute("errorMessage", e.getMessage());
+            FormErrors.flash(redirect, e, ACCOUNT_FIELDS, FormErrors.pairs("workerName", form.workerName(),
+                    "workerPhoneCountry", form.workerPhoneCountry(), "workerPhone", form.workerPhone()));
         }
         return "redirect:/worker/center/" + ACCOUNT;
     }

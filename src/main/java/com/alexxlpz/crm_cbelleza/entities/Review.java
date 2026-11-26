@@ -53,9 +53,12 @@ public class Review {
     @Column(name = "replied_at")
     private LocalDateTime repliedAt;
 
-    /** «Sofía M.»: el nombre y la inicial del apellido, que es lo que se enseña en público. */
+    /**
+     * «Sofía M.»: el nombre y la inicial del apellido, que es lo que se enseña en público. Si ha borrado su cuenta, solo
+     * «Cliente» (la reseña se queda, sin su nombre: lo dice la política de privacidad).
+     */
     public String getAuthorName() {
-        String name = client != null && client.getName() != null ? client.getName().trim() : "";
+        String name = client != null && client.getName() != null && !client.isDeleted() ? client.getName().trim() : "";
         if (name.isEmpty()) {
             return "Cliente";
         }

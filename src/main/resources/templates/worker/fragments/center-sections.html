@@ -19,7 +19,7 @@
     <div class="settings-columns">
         <div class="settings-main">
             <section class="settings-card" id="datos">
-                <form th:action="@{/worker/center}" method="post">
+                <form th:action="@{/worker/center}" method="post" id="centerDataForm" novalidate>
                     <h2 class="settings-section-title"><i class="lucide-building-2" aria-hidden="true"></i> Datos del centro</h2>
                     <div class="settings-grid">
                         <div class="span-full">
@@ -28,7 +28,7 @@
                         </div>
                         <div class="span-full">
                             <label for="centerAddress" class="form-label">Dirección completa</label>
-                            <input type="text" id="centerAddress" name="centerAddress" class="form-control" maxlength="255" th:value="${center.address}" placeholder="Calle, número, código postal y ciudad">
+                            <input type="text" id="centerAddress" name="centerAddress" class="form-control" minlength="5" maxlength="255" th:value="${center.address}" placeholder="Calle, número, código postal y ciudad">
                         </div>
                         <div>
                             <!--/* th:for: el id lo pone el fragmento phone-input y IntelliJ no lo ve */--><label th:for="${'centerPhone'}" class="form-label">Teléfono para clientes</label>
@@ -37,7 +37,8 @@
                         </div>
                         <div>
                             <label for="centerEmail" class="form-label">Correo de contacto</label>
-                            <input type="email" id="centerEmail" name="centerEmail" class="form-control" th:value="${center.email}" placeholder="info@tucentro.com">
+                            <input type="email" id="centerEmail" name="centerEmail" class="form-control" th:value="${center.email}" placeholder="info@tucentro.com"
+                                   maxlength="254" spellcheck="false" required>
                         </div>
                         <div class="span-full">
                             <span class="form-label">Ubicación en el mapa</span>
@@ -409,8 +410,9 @@
                             <input type="text" id="workerName" name="workerName" class="form-control" minlength="2" maxlength="100" th:value="${worker.name}" required autocomplete="name">
                         </div>
                         <div>
-                            <label for="workerPhone" class="form-label">Teléfono</label>
-                            <input type="tel" id="workerPhone" name="workerPhone" class="form-control" th:value="${worker.phone}" placeholder="Ej: 600 000 000" autocomplete="tel">
+                            <!--/* th:for: el id lo pone el fragmento phone-input y IntelliJ no lo ve */--><label th:for="${'workerPhone'}" class="form-label">Teléfono</label>
+                            <div th:replace="~{fragments/phone-input :: input('workerPhone', 'workerPhone', 'workerPhoneCountry', ${workerPhone.country()},
+                                    ${workerPhone.number()}, 'Ej: 612 345 678', 'form-control', false, null)}"></div>
                         </div>
                         <div class="span-full">
                             <label for="workerEmail" class="form-label">Correo para entrar</label>

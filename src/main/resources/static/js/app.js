@@ -727,7 +727,34 @@
         });
     }
 
+    /* ---------- 16. Error de un campo que devuelve el servidor (fragments/alerts :: flash) ---------- */
+    /* Vuelve a poner lo que se había escrito (el servidor no guardó nada) y marca en rojo el campo que no vale, con el
+       mensaje debajo, como la validación en vivo. Si encuentra el campo, quita el aviso de arriba para no repetirlo. */
+    function initServerFieldError() {
+        document.querySelectorAll('[data-restore-field]').forEach(saved => {
+            const field = document.getElementById(saved.dataset.restoreField);
+            if (field && !field.disabled && field.type !== 'password') field.value = saved.value;
+        });
+        const error = document.querySelector('[data-server-field-error]');
+        const field = error && document.getElementById(error.dataset.serverFieldError);
+        if (!field) return;
+        const message = error.textContent.trim();
+        if (window.Cuquora?.fieldError) {
+            Cuquora.fieldError.show(field, message);
+        } else {
+            field.classList.add('has-error');
+            field.setAttribute('aria-invalid', 'true');
+        }
+        document.querySelector('[data-server-field-banner]')?.remove();
+        field.scrollIntoView({ behavior: Cuquora.scrollBehavior ? Cuquora.scrollBehavior() : 'auto', block: 'center' });
+        field.focus({ preventScroll: true });
+    }
+
     function init() {
+        // Cuando ya han cargado todos los scripts de la página (form-validation.js, phone-input.js…), no antes:
+        // app.js va el primero y con defer se ejecuta antes que ellos
+        if (document.readyState === 'complete') initServerFieldError();
+        else document.addEventListener('DOMContentLoaded', initServerFieldError);
         initOverscrollColor();
         initConsentChecks();
         initCopyButtons();

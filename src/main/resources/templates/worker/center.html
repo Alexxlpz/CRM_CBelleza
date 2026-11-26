@@ -8,12 +8,16 @@
         <link rel="stylesheet" th:href="@{/vendor/leaflet/leaflet.css}">
         <script th:src="@{/vendor/leaflet/leaflet.js}" defer></script>
         <script th:src="@{/js/location-picker.js}" defer></script>
-        <script th:src="@{/js/phone-input.js}" defer></script>
         <script th:src="@{/js/opening-hours.js}" defer></script>
     </th:block>
+    <!--/* Avisos en rojo debajo de cada campo: form-validation.js antes que phone-input.js (que le añade la regla del teléfono) */-->
+    <th:block th:if="${section == 'centro' or section == 'cuenta'}">
+        <script th:src="@{/js/form-validation.js}" defer></script>
+        <script th:src="@{/js/phone-input.js}" defer></script>
+    </th:block>
+    <script th:if="${section == 'centro'}" th:src="@{/js/center-settings.js}" defer></script>
     <script th:if="${section == 'reservas'}" th:src="@{/js/loyalty-settings.js}" defer></script>
     <script th:if="${section == 'centro' or section == 'cuenta'}" th:src="@{/js/photo-picker.js}" defer></script>
-    <script th:if="${section == 'cuenta'}" th:src="@{/js/form-validation.js}" defer></script>
     <script th:if="${section == 'cuenta'}" th:src="@{/js/password-change.js}" defer></script>
 </head>
 <body>

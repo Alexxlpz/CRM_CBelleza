@@ -3,6 +3,7 @@
 <head>
     <th:block th:replace="~{fragments/head :: meta('Mi Perfil - Cuquora CRM')}"></th:block>
     <script th:src="@{/js/form-validation.js}" defer></script>
+    <script th:src="@{/js/phone-input.js}" defer></script>
     <script th:src="@{/js/password-change.js}" defer></script>
 </head>
 <body>
@@ -27,8 +28,9 @@
                         <input type="text" id="name" name="name" class="form-control" minlength="2" maxlength="100" th:value="${client.name}" required autocomplete="name">
                     </div>
                     <div>
-                        <label for="phone" class="form-label">Teléfono de Contacto</label>
-                        <input type="tel" id="phone" name="phone" class="form-control" th:value="${client.phone}" placeholder="Ej: 612 345 678" autocomplete="tel">
+                        <!--/* th:for: el id lo pone el fragmento phone-input y IntelliJ no lo ve */--><label th:for="${'phone'}" class="form-label">Teléfono de Contacto</label>
+                        <div th:replace="~{fragments/phone-input :: input('phone', 'phone', 'phoneCountry', ${phoneParts.country()},
+                                ${phoneParts.number()}, 'Ej: 612 345 678', 'form-control', false, null)}"></div>
                     </div>
                     <div class="span-full">
                         <label for="email" class="form-label">Correo Electrónico (Identificador)</label>

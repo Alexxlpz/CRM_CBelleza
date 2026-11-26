@@ -4,9 +4,11 @@ import com.alexxlpz.crm_cbelleza.booking.CenterTimeZones;
 import com.alexxlpz.crm_cbelleza.entities.Center;
 import com.alexxlpz.crm_cbelleza.entities.DataProcessing;
 import com.alexxlpz.crm_cbelleza.exceptions.BusinessRuleException;
+import com.alexxlpz.crm_cbelleza.exceptions.FieldException;
 import com.alexxlpz.crm_cbelleza.exceptions.ResourceNotFoundException;
 import com.alexxlpz.crm_cbelleza.forms.CenterForm;
 import com.alexxlpz.crm_cbelleza.forms.CenterSocialForm;
+import com.alexxlpz.crm_cbelleza.forms.Emails;
 import com.alexxlpz.crm_cbelleza.forms.SocialLinks;
 import com.alexxlpz.crm_cbelleza.forms.FormText;
 import com.alexxlpz.crm_cbelleza.forms.PhoneNumbers;
@@ -220,41 +222,66 @@ public class CenterService {
         return centerRepository.save(center);
     }
 
-    /** Actualiza solo los campos informados; un nombre vacío no borra el actual. */
+    /**
+     * Actualiza los campos informados (nulos se quedan como están). Cada dato se comprueba como en el alta del centro;
+     * si uno no vale se lanza {@link FieldException} con el campo, para marcarlo en el formulario, y no se guarda nada.
+     */
     public Center updateCenter(Long centerId, CenterForm form) {
         Center center = getCenterById(centerId);
-        if (!FormText.isBlank(form.name())) {
+        if (form.name() != null) {
             String name = FormText.collapseSpaces(form.name().trim());
             if (name.length() < 2 || name.length() > CenterRegistrationService.MAX_CENTER_NAME) {
-                throw new BusinessRuleException("El nombre del centro tiene que tener entre 2 y "
+                throw new FieldException("name", "El nombre del centro tiene que tener entre 2 y "
                         + CenterRegistrationService.MAX_CENTER_NAME + " caracteres.");
             }
             center.setName(name);
         }
         if (form.address() != null) {
-            String address = form.address().trim();
+            String address = FormText.collapseSpaces(form.address().trim());
+            if (address.length() < 5) {
+                throw new FieldException("address", "Escribe la dirección del centro: calle, número, código postal y ciudad.");
+            }
             if (address.length() > CenterRegistrationService.MAX_ADDRESS) {
-                throw new BusinessRuleException("La dirección no puede pasar de " + CenterRegistrationService.MAX_ADDRESS + " caracteres.");
+                throw new FieldException("address", "La dirección no puede pasar de " + CenterRegistrationService.MAX_ADDRESS + " caracteres.");
             }
             center.setAddress(address);
         }
-        if (form.phone() != null) {
-            // Vacío lo quita; si no, con su prefijo y en grupos, como en el alta («+34 612 345 678»)
-            center.setPhone(FormText.isBlank(form.phone()) ? null
-                    : PhoneNumbers.normalize(PhoneNumbers.countryForTimeZone(center.getTimeZone()), form.phone()));
-        }
-        if (form.email() != null) center.setEmail(form.email().trim());
-        if (form.latitude() != null) center.setLatitude(form.latitude());
-        if (form.longitude() != null) center.setLongitude(form.longitude());
         if (form.timeZone() != null) {
             if (!CenterTimeZones.isValid(form.timeZone())) {
-                throw new BusinessRuleException("Elige una zona horaria de la lista.");
+                throw new FieldException("timeZone", "Elige una zona horaria de la lista.");
             }
             center.setTimeZone(form.timeZone());
         }
+        if (form.phone() != null) {
+            // Vacío lo quita; si no, con su prefijo y en grupos, como en el alta («+34 612 345 678»)
+            try {
+                center.setPhone(FormText.isBlank(form.phone()) ? null
+                        : PhoneNumbers.normalize(PhoneNumbers.countryForTimeZone(center.getTimeZone()), form.phone()));
+            } catch (BusinessRuleException e) {
+                throw new FieldException("phone", e.getMessage());
+            }
+        }
+        if (form.email() != null) {
+            // Es adonde llegan los avisos de reservas: hace falta y tiene que ser un correo
+            String email = Emails.normalize(form.email());
+            if (email == null) {
+                throw new FieldException("email", "Escribe el correo del centro: ahí te llegan los avisos de las reservas.");
+            }
+            if (!Emails.isValid(email)) {
+                throw new FieldException("email", "Revisa el correo: tiene que ser como info@tucentro.com.");
+            }
+            center.setEmail(email);
+        }
+        if (form.latitude() != null || form.longitude() != null) {
+            if (!CenterRegistrationService.validCoordinates(form.latitude(), form.longitude())) {
+                throw new FieldException("location", "Marca en el mapa dónde está tu centro para que los clientes puedan encontrarlo.");
+            }
+            center.setLatitude(form.latitude());
+            center.setLongitude(form.longitude());
+        }
         if (form.cabins() != null) {
             if (form.cabins() < 1 || form.cabins() > MAX_CABINS) {
-                throw new BusinessRuleException("El número de cabinas tiene que estar entre 1 y " + MAX_CABINS + ".");
+                throw new FieldException("cabins", "El número de cabinas tiene que estar entre 1 y " + MAX_CABINS + ".");
             }
             center.setCabins(form.cabins());
         }

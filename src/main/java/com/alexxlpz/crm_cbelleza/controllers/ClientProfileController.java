@@ -2,6 +2,7 @@ package com.alexxlpz.crm_cbelleza.controllers;
 
 import com.alexxlpz.crm_cbelleza.entities.User;
 import com.alexxlpz.crm_cbelleza.exceptions.BusinessRuleException;
+import com.alexxlpz.crm_cbelleza.forms.PhoneNumbers;
 import com.alexxlpz.crm_cbelleza.forms.ProfileForm;
 import com.alexxlpz.crm_cbelleza.googlecalendar.GoogleCalendarService;
 import com.alexxlpz.crm_cbelleza.security.AppUserDetails;
@@ -32,10 +33,15 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.util.Map;
 
 /** Perfil del cliente. */
 @Controller
 public class ClientProfileController {
+
+    /** Campo que no vale → id del input en «Mi perfil». */
+    private static final Map<String, String> PROFILE_FIELDS = Map.of("name", "name", "phone", "phone",
+            "currentPassword", "currentPassword", "newPassword", "newPassword");
 
     private final UserService userService;
     private final AppointmentService appointmentService;
@@ -72,6 +78,11 @@ public class ClientProfileController {
         model.addAttribute("calendarSync", googleCalendar.status(user.getId()));
         model.addAttribute("confirmationWord", AccountPrivacyService.CONFIRMATION_WORD);
         model.addAttribute("healthConsents", clientCards.consentsOfClient(user.getId()));
+        // Teléfono con el prefijo aparte, como en el registro
+        PhoneNumbers.Parts phone = PhoneNumbers.split(client.getPhone(), PhoneNumbers.DEFAULT_COUNTRY);
+        model.addAttribute("phoneParts", phone);
+        model.addAttribute("phoneCountries", PhoneNumbers.countriesWith(phone.country()));
+        model.addAttribute("callingCodes", PhoneNumbers.callingCodesText());
         model.addAttribute("activePage", "profile");
         return "client/profile";
     }
@@ -79,15 +90,19 @@ public class ClientProfileController {
     @PostMapping("/client/profile")
     public String update(@AuthenticationPrincipal AppUserDetails user,
                          @ModelAttribute ProfileForm form,
+                         @RequestParam(value = "phoneCountry", required = false) String phoneCountry,
                          HttpServletRequest request,
                          HttpServletResponse response,
                          RedirectAttributes redirect) {
         try {
-            User updated = userService.updateProfile(user.getId(), form);
+            User updated = userService.updateProfile(user.getId(), new ProfileForm(form.name(),
+                    PhoneNumbers.withCountry(phoneCountry, form.phone()), form.currentPassword(), form.newPassword(),
+                    form.confirmPassword()));
             authSession.refresh(updated, request, response);
             redirect.addFlashAttribute("successMessage", "Tus datos personales se han actualizado correctamente.");
         } catch (BusinessRuleException e) {
-            redirect.addFlashAttribute("errorMessage", e.getMessage());
+            FormErrors.flash(redirect, e, PROFILE_FIELDS, FormErrors.pairs("name", form.name(),
+                    "phoneCountry", phoneCountry, "phone", form.phone()));
         }
         return "redirect:/client/profile";
     }

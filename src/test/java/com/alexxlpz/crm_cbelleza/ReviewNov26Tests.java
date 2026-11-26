@@ -3,9 +3,11 @@ package com.alexxlpz.crm_cbelleza;
 import com.alexxlpz.crm_cbelleza.entities.Appointment;
 import com.alexxlpz.crm_cbelleza.entities.Center;
 import com.alexxlpz.crm_cbelleza.entities.Inventory;
+import com.alexxlpz.crm_cbelleza.entities.Review;
 import com.alexxlpz.crm_cbelleza.entities.User;
 import com.alexxlpz.crm_cbelleza.exceptions.BusinessRuleException;
 import com.alexxlpz.crm_cbelleza.exceptions.DuplicateClientException;
+import com.alexxlpz.crm_cbelleza.exceptions.FieldException;
 import com.alexxlpz.crm_cbelleza.exceptions.ResourceNotFoundException;
 import com.alexxlpz.crm_cbelleza.forms.CenterForm;
 import com.alexxlpz.crm_cbelleza.forms.NewClientForm;
@@ -47,6 +49,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
+import static org.hamcrest.Matchers.hasEntry;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -250,5 +253,62 @@ class ReviewNov26Tests {
         assertTrue(email.getMessage().startsWith("Revisa el correo"));
         assertThrows(BusinessRuleException.class, () -> newClient("Lola Gil", "12", null));
         assertThrows(BusinessRuleException.class, () -> newClient("Lola Gil", "llámame", null));
+    }
+
+    /* ---------- Ajustes y perfil: datos que no valen, con el campo marcado ---------- */
+
+    @Test
+    void centerSettingsRejectBadDataPerField() throws Exception {
+        Long centerId = centerId();
+        Center before = centerService.getCenterById(centerId);
+        assertEquals("email", assertThrows(FieldException.class, () -> centerService.updateCenter(centerId,
+                new CenterForm(null, null, null, "no-es-un-correo", null, null, null, null))).getField());
+        assertEquals("email", assertThrows(FieldException.class, () -> centerService.updateCenter(centerId,
+                new CenterForm(null, null, null, "  ", null, null, null, null))).getField());
+        assertEquals("location", assertThrows(FieldException.class, () -> centerService.updateCenter(centerId,
+                new CenterForm(null, null, null, null, 999.0, 2.0, null, null))).getField());
+        assertEquals("phone", assertThrows(FieldException.class, () -> centerService.updateCenter(centerId,
+                new CenterForm(null, null, "+34 123", null, null, null, null, null))).getField());
+        Center after = centerService.getCenterById(centerId);
+        assertEquals(before.getEmail(), after.getEmail());
+        assertEquals(before.getLatitude(), after.getLatitude());
+
+        // Desde Ajustes: vuelve con el campo marcado y lo escrito, para corregirlo sin perder lo demás
+        mvc.perform(post("/worker/center").param("centerName", "Nombre Nuevo Sin Guardar").param("centerEmail", "correo@mal")
+                        .with(csrf()).with(TestUsers.as(users, TestUsers.WORKER_CENTER_1)))
+                .andExpect(flash().attribute("errorField", "centerEmail"))
+                .andExpect(flash().attribute("submittedValues", hasEntry("centerName", "Nombre Nuevo Sin Guardar")));
+        assertEquals(before.getName(), centerService.getCenterById(centerId).getName());
+    }
+
+    @Test
+    void profilePhoneIsSavedLikeRegistrationOrMarked() throws Exception {
+        User sofia = users.findByNameIgnoreCase(TestUsers.CLIENT).orElseThrow();
+        String original = sofia.getPhone();
+        try {
+            mvc.perform(post("/client/profile").param("name", sofia.getName()).param("phoneCountry", "34")
+                            .param("phone", "612345678").with(csrf()).with(TestUsers.as(users, sofia.getEmail())))
+                    .andExpect(flash().attributeExists("successMessage"));
+            assertEquals("+34 612 345 678", users.findById(sofia.getId()).orElseThrow().getPhone());
+
+            mvc.perform(post("/client/profile").param("name", sofia.getName()).param("phoneCountry", "34")
+                            .param("phone", "12").with(csrf()).with(TestUsers.as(users, sofia.getEmail())))
+                    .andExpect(flash().attribute("errorField", "phone"));
+            assertEquals("+34 612 345 678", users.findById(sofia.getId()).orElseThrow().getPhone());
+        } finally {
+            User restore = users.findById(sofia.getId()).orElseThrow();
+            restore.setPhone(original);
+            users.save(restore);
+        }
+    }
+
+    /* ---------- Reseña de quien ha borrado su cuenta ---------- */
+
+    @Test
+    void reviewOfDeletedClientShowsNoName() {
+        User client = User.builder().name("Cliente eliminado").deletedAt(LocalDateTime.now()).build();
+        assertEquals("Cliente", Review.builder().client(client).build().getAuthorName());
+        User active = User.builder().name("Sofía Martínez").build();
+        assertEquals("Sofía M.", Review.builder().client(active).build().getAuthorName());
     }
 }
