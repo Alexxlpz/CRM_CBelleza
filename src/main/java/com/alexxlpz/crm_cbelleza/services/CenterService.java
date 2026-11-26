@@ -224,9 +224,20 @@ public class CenterService {
     public Center updateCenter(Long centerId, CenterForm form) {
         Center center = getCenterById(centerId);
         if (!FormText.isBlank(form.name())) {
-            center.setName(form.name().trim());
+            String name = FormText.collapseSpaces(form.name().trim());
+            if (name.length() < 2 || name.length() > CenterRegistrationService.MAX_CENTER_NAME) {
+                throw new BusinessRuleException("El nombre del centro tiene que tener entre 2 y "
+                        + CenterRegistrationService.MAX_CENTER_NAME + " caracteres.");
+            }
+            center.setName(name);
         }
-        if (form.address() != null) center.setAddress(form.address().trim());
+        if (form.address() != null) {
+            String address = form.address().trim();
+            if (address.length() > CenterRegistrationService.MAX_ADDRESS) {
+                throw new BusinessRuleException("La dirección no puede pasar de " + CenterRegistrationService.MAX_ADDRESS + " caracteres.");
+            }
+            center.setAddress(address);
+        }
         if (form.phone() != null) {
             // Vacío lo quita; si no, con su prefijo y en grupos, como en el alta («+34 612 345 678»)
             center.setPhone(FormText.isBlank(form.phone()) ? null

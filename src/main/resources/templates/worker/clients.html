@@ -31,6 +31,30 @@
 
         <div th:replace="~{fragments/alerts :: flash}"></div>
 
+        <!-- Alta con el teléfono o el correo de alguien de la cartera: abrir su ficha o darlo de alta igualmente -->
+        <div class="alert alert-warning alert--titled duplicate-client" role="alert" th:if="${duplicate != null}">
+            <i class="lucide-users" aria-hidden="true"></i>
+            <div class="alert-body">
+                <strong class="alert-title" th:text="'Ya tienes a ' + ${duplicate.name} + ' con ese ' + (${duplicate.samePhone} ? 'teléfono' : 'correo')">Ya tienes a Sofía Martínez con ese teléfono</strong>
+                <span>No se ha dado de alta a nadie. Si es la misma persona, abre su ficha; si es otra (por ejemplo, alguien de su familia con el mismo teléfono), dale de alta igualmente.</span>
+                <div class="duplicate-client-actions">
+                    <a class="btn btn-primary btn-sm" th:href="@{/worker/clients/{id}(id=${duplicate.id})}">
+                        <i class="lucide-file-text" aria-hidden="true"></i> <span>Abrir su ficha</span>
+                    </a>
+                    <form th:action="@{/worker/clients/create}" method="post">
+                        <input type="hidden" name="name" th:value="${duplicateForm.name}">
+                        <input type="hidden" name="phone" th:value="${duplicateForm.phone}">
+                        <input type="hidden" name="email" th:value="${duplicateForm.email}">
+                        <input type="hidden" name="initialNotes" th:value="${duplicateForm.initialNotes}">
+                        <input type="hidden" name="confirmDuplicate" value="true">
+                        <button type="submit" class="btn btn-secondary btn-sm">
+                            <i class="lucide-user-plus" aria-hidden="true"></i> <span>Dar de alta igualmente</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
         <!-- Buscador -->
         <div class="clients-toolbar">
             <form th:action="@{/worker/clients}" method="get" class="clients-search-box" role="search">
@@ -175,7 +199,7 @@
                         <label class="form-label" for="clientNameInput">
                             Nombre y Apellidos <span class="required-star">*</span>
                         </label>
-                        <input type="text" id="clientNameInput" name="name" class="form-control" required autofocus
+                        <input type="text" id="clientNameInput" name="name" class="form-control" maxlength="120" required autofocus
                                placeholder="Ej. Carmen Fernández García" autocomplete="off">
                     </div>
 
@@ -192,7 +216,7 @@
                         <label class="form-label" for="clientEmailInput">
                             Correo Electrónico <span class="optional-tag">(Opcional)</span>
                         </label>
-                        <input type="email" id="clientEmailInput" name="email" class="form-control"
+                        <input type="email" id="clientEmailInput" name="email" class="form-control" maxlength="254"
                                placeholder="cliente@ejemplo.com (dejar en blanco si no tiene email)">
                     </div>
 

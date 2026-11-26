@@ -5,6 +5,7 @@ import com.alexxlpz.crm_cbelleza.entities.Appointment;
 import com.alexxlpz.crm_cbelleza.entities.AppointmentStatus;
 import com.alexxlpz.crm_cbelleza.entities.ProductSale;
 import com.alexxlpz.crm_cbelleza.exceptions.BusinessRuleException;
+import com.alexxlpz.crm_cbelleza.exceptions.DuplicateClientException;
 import com.alexxlpz.crm_cbelleza.forms.NewClientForm;
 import com.alexxlpz.crm_cbelleza.security.AppUserDetails;
 import com.alexxlpz.crm_cbelleza.services.AppointmentService;
@@ -156,13 +157,20 @@ public class ClientCardController {
     @PostMapping("/create")
     public String create(@AuthenticationPrincipal AppUserDetails worker,
                          @ModelAttribute NewClientForm form,
+                         @RequestParam(value = "confirmDuplicate", defaultValue = "false") boolean confirmDuplicate,
                          RedirectAttributes redirect) {
         try {
-            var created = clientCardService.createClientManually(worker.getCenterId(), form, worker.getId());
+            var created = clientCardService.createClientManually(worker.getCenterId(), form, worker.getId(), confirmDuplicate);
             redirect.addFlashAttribute("successMessage", created.emailSkipped()
                     ? "Cliente dado de alta sin correo: ese correo no se puede usar para un cliente nuevo. Ya puedes rellenar su ficha técnica."
                     : "Cliente dado de alta. Ya puedes consultar o rellenar su ficha técnica.");
             return "redirect:/worker/clients/" + created.clientId();
+        } catch (DuplicateClientException e) {
+            // Se pregunta: abrir la ficha de quien ya está o darlo de alta igualmente (con lo que había escrito)
+            redirect.addFlashAttribute("duplicate", Map.of("id", e.getClientId(), "name", e.getClientName(),
+                    "samePhone", e.isSamePhone()));
+            redirect.addFlashAttribute("duplicateForm", form);
+            return "redirect:/worker/clients";
         } catch (BusinessRuleException e) {
             redirect.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/worker/clients";

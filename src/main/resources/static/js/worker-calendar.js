@@ -242,7 +242,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const newClient = app.isNewClient
             ? '<span class="badge-new-client"><i class="lucide-sparkles" aria-hidden="true"></i> Nuevo Cliente</span>' : '';
-        const clientCardLink = (app.status === 'CONFIRMED' || app.status === 'COMPLETED' || app.status === 'NO_SHOW') && client.id ? `
+        const clientCardLink = (app.status === 'CONFIRMED' || app.status === 'COMPLETED' || app.status === 'NO_SHOW') && client.id && !client.deleted ? `
             <a href="/worker/clients/${encodeURIComponent(client.id)}" class="btn btn-soft btn-sm">
                 <i class="lucide-file-text" aria-hidden="true"></i> Ficha del Cliente
             </a>` : '';
@@ -291,7 +291,7 @@ document.addEventListener('DOMContentLoaded', function () {
             actions = `
             <div class="approval-message-box">
                 <label class="form-label agenda-note-label" for="message-${app.id}">Nota opcional para el cliente:</label>
-                <textarea id="message-${app.id}" class="approval-msg-input" rows="2"
+                <textarea id="message-${app.id}" class="approval-msg-input" rows="2" maxlength="500"
                           placeholder="Ej. Por favor ven 5 minutos antes o motivo del rechazo..."></textarea>
                 <label class="form-label agenda-note-label" for="worker-${app.id}">La atiende:${app.workerChosenByClient && app.worker ? ` <span class="agenda-worker-asked">el cliente ha pedido a ${Cuquora.escapeHtml(app.worker.name || '')}</span>` : ''}</label>
                 <select id="worker-${app.id}" class="approval-msg-input agenda-worker-select">${workerOptions(app.worker?.id ?? ME)}</select>

@@ -31,6 +31,9 @@ import java.util.List;
 @Service
 public class AgendaBlockService {
 
+    /** Largo máximo del motivo de un bloqueo (columna {@code reason}). */
+    public static final int MAX_REASON = 255;
+
     private final AgendaBlockRepository blocks;
     private final AppointmentRepository appointments;
     private final CenterRepository centers;
@@ -79,6 +82,10 @@ public class AgendaBlockService {
         if (start.plusDays(366).isBefore(end)) {
             throw new BusinessRuleException("Un bloqueo no puede durar más de un año.");
         }
+        String why = FormText.trimToNull(reason);
+        if (why != null && why.length() > MAX_REASON) {
+            throw new BusinessRuleException("El motivo no puede pasar de " + MAX_REASON + " caracteres.");
+        }
         User worker = wholeCenter ? null : workerOfCenter(centerId, workerId != null ? workerId : creatorId);
         if ((worker == null || !worker.getId().equals(creatorId)) && !access.isOwner(centerId, creatorId)) {
             throw new BusinessRuleException(wholeCenter
@@ -101,7 +108,7 @@ public class AgendaBlockService {
                 .worker(worker)
                 .startsAt(start)
                 .endsAt(end)
-                .reason(FormText.trimToNull(reason))
+                .reason(why)
                 .createdBy(users.getReferenceById(creatorId))
                 .build());
     }

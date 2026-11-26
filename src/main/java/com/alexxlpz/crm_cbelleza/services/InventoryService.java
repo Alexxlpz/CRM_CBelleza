@@ -116,15 +116,16 @@ public class InventoryService {
         return product;
     }
 
-    /** Pone o quita (nulo) el aviso de stock bajo de un producto del inventario del centro. */
-    public Inventory setLowStockAlert(Long centerId, Long inventoryId, Integer units) {
+    /** Pone o quita (nulo) el aviso de stock bajo de un producto del inventario del centro. Devuelve el nombre del producto. */
+    public String setLowStockAlert(Long centerId, Long inventoryId, Integer units) {
         if (units != null && (units < 1 || units > MAX_LOW_STOCK_ALERT)) {
             throw new BusinessRuleException("El aviso tiene que ser de 1 a " + MAX_LOW_STOCK_ALERT
                     + " unidades. Déjalo vacío para no recibir avisos.");
         }
         Inventory item = findInCenter(centerId, inventoryId);
         item.setLowStockAlert(units);
-        return item;
+        // El nombre se lee aquí, con la transacción abierta: el producto se carga perezoso y el controlador ya no puede
+        return item.getProduct().getName();
     }
 
     /** Añade el producto al inventario y devuelve el producto (nuevo o del catálogo). */

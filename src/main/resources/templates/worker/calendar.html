@@ -158,7 +158,7 @@
                     <div class="agenda-client-new agenda-grid" data-client-mode="new" hidden>
                         <div>
                             <label class="form-label" for="newClientName">Nombre</label>
-                            <input type="text" id="newClientName" name="newClientName" class="form-control" autocomplete="off">
+                            <input type="text" id="newClientName" name="newClientName" class="form-control" maxlength="120" autocomplete="off">
                         </div>
                         <div>
                             <label class="form-label" for="newClientPhone">Teléfono</label>
@@ -166,7 +166,7 @@
                         </div>
                         <div class="span-full">
                             <label class="form-label" for="newClientEmail">Correo <span class="settings-optional">(opcional, para avisarle)</span></label>
-                            <input type="email" id="newClientEmail" name="newClientEmail" class="form-control" autocomplete="off">
+                            <input type="email" id="newClientEmail" name="newClientEmail" class="form-control" maxlength="254" autocomplete="off">
                         </div>
                     </div>
                 </fieldset>
@@ -189,7 +189,7 @@
                     </div>
                     <div class="span-full">
                         <label class="form-label" for="newMessage">Nota para el cliente <span class="settings-optional">(opcional)</span></label>
-                        <textarea id="newMessage" name="message" class="form-control" rows="2" placeholder="Ej. Ven 5 minutos antes"></textarea>
+                        <textarea id="newMessage" name="message" class="form-control" maxlength="500" rows="2" placeholder="Ej. Ven 5 minutos antes"></textarea>
                     </div>
                 </div>
                 <p class="agenda-form-error" role="alert" hidden></p>
@@ -242,7 +242,7 @@
                 </button>
                 <div class="form-group agenda-top-gap">
                     <label class="form-label" for="proposeMessage">Mensaje para el cliente <span class="settings-optional">(opcional)</span></label>
-                    <textarea id="proposeMessage" class="form-control" rows="2" placeholder="Ej. Esa hora la tengo ocupada, ¿te viene bien alguna de estas?"></textarea>
+                    <textarea id="proposeMessage" class="form-control" maxlength="500" rows="2" placeholder="Ej. Esa hora la tengo ocupada, ¿te viene bien alguna de estas?"></textarea>
                 </div>
                 <p class="agenda-form-error" role="alert" hidden></p>
                 <div class="ui-modal-actions">

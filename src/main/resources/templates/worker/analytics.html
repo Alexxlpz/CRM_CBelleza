@@ -134,7 +134,7 @@
                     </dl>
                     <ul class="changes-list" th:unless="${ch.lostTopClients.isEmpty()}" aria-label="Clientes que no han vuelto">
                         <li th:each="c : ${ch.lostTopClients}">
-                            <a class="changes-list-name" th:href="@{/worker/clients/{id}(id=${c.id})}" th:text="${c.name}">Rosa Pérez</a>
+                            <a class="changes-list-name" th:href="${c.id != null ? '/worker/clients/' + c.id : null}" th:text="${c.name}">Rosa Pérez</a>
                             <span class="changes-list-meta" th:text="${c.visits} + (${c.visits == 1} ? ' visita' : ' visitas') + ' · ' + ${#numbers.formatDecimal(c.spent, 1, 'POINT', 0, 'COMMA')} + ' € en ' + ${report.previousSeriesLabel}">4 visitas · 160 €</span>
                         </li>
                     </ul>
@@ -368,7 +368,7 @@
                 <p class="analytics-panel-empty" th:if="${report.topClients.isEmpty()}">Ninguna visita en el periodo.</p>
                 <ol class="client-rank" th:unless="${report.topClients.isEmpty()}">
                     <li th:each="c, stat : ${report.topClients}">
-                        <a class="client-rank-row" th:href="@{/worker/clients/{id}(id=${c.id})}">
+                        <a class="client-rank-row" th:href="${c.id != null ? '/worker/clients/' + c.id : null}">
                             <span class="client-rank-pos" th:text="${stat.count}">1</span>
                             <span class="client-rank-main">
                                 <span class="client-rank-name" th:text="${c.name}">Sofía Martínez</span>

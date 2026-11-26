@@ -441,7 +441,7 @@ public class AnalyticsService {
         List<ClientRow> lost = previousClients.values().stream()
                 .filter(c -> !currentClients.contains(c.client.getId()))
                 .sorted(Comparator.comparingDouble((ClientAccumulator c) -> c.spent).reversed())
-                .map(c -> new ClientRow(c.client.getId(), c.client.getName(), c.visits, c.spent,
+                .map(c -> new ClientRow(cardId(c.client), c.client.getName(), c.visits, c.spent,
                         c.lastVisit.toLocalDate(), null, null))
                 .toList();
         int gained = (int) currentClients.stream().filter(id -> !previousClients.containsKey(id)).count();
@@ -487,6 +487,11 @@ public class AnalyticsService {
         return counts;
     }
 
+    /** Id para enlazar a la ficha, o nulo si el cliente ha borrado su cuenta (sigue contando, pero sin enlace). */
+    private static Long cardId(User client) {
+        return client.isDeleted() ? null : client.getId();
+    }
+
     private static List<ClientRow> topClients(List<Appointment> periodVisits, List<ProductSale> periodSales) {
         Map<Long, ClientAccumulator> byClient = new HashMap<>();
         for (Appointment visit : periodVisits) {
@@ -505,7 +510,7 @@ public class AnalyticsService {
                 .sorted(Comparator.comparingInt((ClientAccumulator c) -> c.visits).reversed()
                         .thenComparing(Comparator.comparingDouble((ClientAccumulator c) -> c.spent).reversed()))
                 .limit(CLIENT_LIST_SIZE)
-                .map(c -> new ClientRow(c.client.getId(), c.client.getName(), c.visits, c.spent,
+                .map(c -> new ClientRow(cardId(c.client), c.client.getName(), c.visits, c.spent,
                         c.lastVisit.toLocalDate(), null, null))
                 .toList();
     }
@@ -530,7 +535,8 @@ public class AnalyticsService {
         }
         List<ClientRow> rows = new ArrayList<>();
         byClient.forEach((clientId, clientVisits) -> {
-            if (clientVisits.size() < 2 || withUpcoming.contains(clientId)) {
+            // Quien ha borrado su cuenta no se puede recuperar: ya no hay forma de llamarle
+            if (clientVisits.size() < 2 || withUpcoming.contains(clientId) || clientVisits.getFirst().getClient().isDeleted()) {
                 return;
             }
             LocalDateTime first = clientVisits.getFirst().getDateTime();
@@ -889,7 +895,10 @@ public class AnalyticsService {
         }
     }
 
-    /** {@code daysAway} y {@code usualGapDays} solo se rellenan en «clientes a recuperar». */
+    /**
+     * {@code daysAway} y {@code usualGapDays} solo se rellenan en «clientes a recuperar». {@code id} es nulo si el cliente
+     * ha borrado su cuenta: sale como «Cliente eliminado», sin enlace a la ficha.
+     */
     public record ClientRow(Long id, String name, int visits, double spent, LocalDate lastVisit,
                             Long daysAway, Long usualGapDays) {
 

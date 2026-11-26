@@ -24,11 +24,11 @@
                     <div class="settings-grid">
                         <div class="span-full">
                             <label for="centerName" class="form-label">Nombre del centro</label>
-                            <input type="text" id="centerName" name="centerName" class="form-control" th:value="${center.name}" required>
+                            <input type="text" id="centerName" name="centerName" class="form-control" minlength="2" maxlength="120" th:value="${center.name}" required>
                         </div>
                         <div class="span-full">
                             <label for="centerAddress" class="form-label">Dirección completa</label>
-                            <input type="text" id="centerAddress" name="centerAddress" class="form-control" th:value="${center.address}" placeholder="Calle, número, código postal y ciudad">
+                            <input type="text" id="centerAddress" name="centerAddress" class="form-control" maxlength="255" th:value="${center.address}" placeholder="Calle, número, código postal y ciudad">
                         </div>
                         <div>
                             <!--/* th:for: el id lo pone el fragmento phone-input y IntelliJ no lo ve */--><label th:for="${'centerPhone'}" class="form-label">Teléfono para clientes</label>
@@ -406,7 +406,7 @@
                     <div class="settings-grid">
                         <div>
                             <label for="workerName" class="form-label">Nombre</label>
-                            <input type="text" id="workerName" name="workerName" class="form-control" th:value="${worker.name}" required autocomplete="name">
+                            <input type="text" id="workerName" name="workerName" class="form-control" minlength="2" maxlength="100" th:value="${worker.name}" required autocomplete="name">
                         </div>
                         <div>
                             <label for="workerPhone" class="form-label">Teléfono</label>

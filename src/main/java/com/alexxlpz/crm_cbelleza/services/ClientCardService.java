@@ -9,10 +9,12 @@ import com.alexxlpz.crm_cbelleza.entities.ClientCard;
 import com.alexxlpz.crm_cbelleza.entities.Role;
 import com.alexxlpz.crm_cbelleza.entities.User;
 import com.alexxlpz.crm_cbelleza.exceptions.BusinessRuleException;
+import com.alexxlpz.crm_cbelleza.exceptions.DuplicateClientException;
 import com.alexxlpz.crm_cbelleza.exceptions.ResourceNotFoundException;
 import com.alexxlpz.crm_cbelleza.forms.Emails;
 import com.alexxlpz.crm_cbelleza.forms.FormText;
 import com.alexxlpz.crm_cbelleza.forms.NewClientForm;
+import com.alexxlpz.crm_cbelleza.forms.PhoneNumbers;
 import com.alexxlpz.crm_cbelleza.repositories.AppointmentRepository;
 import com.alexxlpz.crm_cbelleza.repositories.CenterRepository;
 import com.alexxlpz.crm_cbelleza.repositories.ClientCardRepository;
@@ -77,7 +79,11 @@ public class ClientCardService {
         this.clock = clock;
     }
 
-    /** Lanza {@link ResourceNotFoundException} si el cliente no pertenece a la cartera del centro. */
+    /**
+     * Lanza {@link ResourceNotFoundException} si el cliente no pertenece a la cartera del centro o ha borrado su
+     * cuenta: lo que queda de él (citas pasadas como «Cliente eliminado») ya no se puede abrir, ni venderle, ni darle
+     * cita, ni guardarle una ficha.
+     */
     @Transactional(readOnly = true)
     public User requireClientOfCenter(Long centerId, Long clientId) {
         boolean belongs = clientCardRepository.existsByCenterIdAndClientId(centerId, clientId)
@@ -85,8 +91,12 @@ public class ClientCardService {
         if (!belongs) {
             throw new ResourceNotFoundException("Este cliente no forma parte de la cartera de tu centro.");
         }
-        return userRepository.findById(clientId)
+        User client = userRepository.findById(clientId)
                 .orElseThrow(() -> new ResourceNotFoundException("Cliente no encontrado."));
+        if (client.isDeleted()) {
+            throw new ResourceNotFoundException("Este cliente ha borrado su cuenta.");
+        }
+        return client;
     }
 
     /**
@@ -217,32 +227,51 @@ public class ClientCardService {
         return result.stream().filter(matches(searchQuery)).toList();
     }
 
-    /**
-     * Alta manual de un cliente desde la cartera (o desde la agenda al crear una cita).
-     * Solo reutiliza clientes que ya son de este centro (con ficha o citas aquí) con el mismo teléfono o correo;
-     * si no, crea un cliente nuevo sin cuenta. Nunca enlaza cuentas de otros centros: no se revela si un
-     * correo o teléfono existe en la plataforma ni se da acceso a sus datos.
-     */
+    /** Como {@link #createClientManually(Long, NewClientForm, Long, boolean)} sin dar de alta duplicados. */
     public NewClient createClientManually(Long centerId, NewClientForm form, Long workerId) {
+        return createClientManually(centerId, form, workerId, false);
+    }
+
+    /**
+     * Alta manual de un cliente desde la cartera (o desde la agenda al crear una cita): siempre un cliente nuevo sin
+     * cuenta. El teléfono se guarda con el formato del registro («+34 612 345 678», con el prefijo del país del centro
+     * si no trae otro) y el correo tiene que ser válido. Si ya hay alguien en la cartera del centro con ese teléfono o
+     * correo se lanza {@link DuplicateClientException}, salvo con {@code allowDuplicate} (quien lo da de alta ha visto
+     * el aviso y es otra persona). Nunca mira cuentas de otros centros: no se revela si un correo o teléfono existe en
+     * la plataforma ni se da acceso a sus datos.
+     */
+    public NewClient createClientManually(Long centerId, NewClientForm form, Long workerId, boolean allowDuplicate) {
         if (FormText.isBlank(form.name()) || FormText.isBlank(form.phone())) {
             throw new BusinessRuleException("El nombre y el teléfono son obligatorios para dar de alta a un cliente.");
         }
-        String name = form.name().trim();
-        String phone = form.phone().trim();
-        String email = FormText.trimToNull(form.email());
-
-        Optional<User> existing = findClientOfCenter(centerId, phone, email);
-        boolean emailSkipped = false;
-        User client;
-        if (existing.isPresent()) {
-            client = existing.get();
-        } else {
-            // Un correo que ya usa otra cuenta no se puede repetir: el cliente se guarda sin él
-            emailSkipped = email != null && userRepository.findByEmailIgnoreCase(email).isPresent();
-            String storedEmail = email != null && !emailSkipped ? email : placeholderEmail(phone);
-            // Sin contraseña: la cuenta no puede iniciar sesión hasta que el cliente se registre.
-            client = userService.createUser(name, storedEmail, phone, null, Role.CLIENT, null);
+        String name = FormText.collapseSpaces(form.name().trim());
+        if (name.length() < 2 || name.length() > MAX_NAME) {
+            throw new BusinessRuleException("El nombre tiene que tener entre 2 y " + MAX_NAME + " caracteres.");
         }
+        String country = centerRepository.findById(centerId)
+                .map(center -> PhoneNumbers.countryForTimeZone(center.getTimeZone()))
+                .orElse(PhoneNumbers.DEFAULT_COUNTRY);
+        String phone = PhoneNumbers.normalize(country, form.phone());
+        String email = FormText.trimToNull(form.email());
+        if (email != null) {
+            email = Emails.normalize(email);
+            if (!Emails.isValid(email) || email.endsWith(User.PLACEHOLDER_EMAIL_DOMAIN)) {
+                throw new BusinessRuleException("Revisa el correo: tiene que ser como usuario@gmail.com. Si no tiene, déjalo en blanco.");
+            }
+        }
+
+        if (!allowDuplicate) {
+            Optional<User> samePhone = findClientOfCenter(centerId, country, phone, null);
+            Optional<User> existing = samePhone.isPresent() ? samePhone : findClientOfCenter(centerId, country, null, email);
+            if (existing.isPresent()) {
+                throw new DuplicateClientException(existing.get().getId(), existing.get().getName(), samePhone.isPresent());
+            }
+        }
+        // Un correo que ya usa otra cuenta no se puede repetir: el cliente se guarda sin él
+        boolean emailSkipped = email != null && userRepository.findByEmailIgnoreCase(email).isPresent();
+        String storedEmail = email != null && !emailSkipped ? email : placeholderEmail(phone);
+        // Sin contraseña: la cuenta no puede iniciar sesión hasta que el cliente se registre.
+        User client = userService.createUser(name, storedEmail, phone, null, Role.CLIENT, null);
 
         ClientCard card = getOrCreateCard(centerId, client);
         // Las notas iniciales: la clienta está en el centro y da allí su consentimiento
@@ -259,8 +288,11 @@ public class ClientCardService {
         return new NewClient(client.getId(), emailSkipped);
     }
 
-    /** Cliente de este centro (con ficha o con citas aquí) con ese teléfono o correo. */
-    private Optional<User> findClientOfCenter(Long centerId, String phone, String email) {
+    /**
+     * Cliente de este centro (con ficha o con citas aquí, sin borrar) con ese teléfono o correo. Los teléfonos guardados
+     * antes sin formato se comparan ya con él («612345678» es el mismo que «+34 612 345 678»).
+     */
+    private Optional<User> findClientOfCenter(Long centerId, String country, String phone, String email) {
         String digits = digits(phone);
         List<User> clientsOfCenter = new ArrayList<>();
         clientCardRepository.findByCenterId(centerId).stream()
@@ -272,7 +304,9 @@ public class ClientCardService {
                 .filter(Objects::nonNull)
                 .forEach(clientsOfCenter::add);
         return clientsOfCenter.stream()
-                .filter(c -> (!digits.isEmpty() && digits.equals(digits(c.getPhone())))
+                .filter(c -> !c.isDeleted())
+                .filter(c -> (!digits.isEmpty() && c.getPhone() != null
+                                && digits.equals(digits(PhoneNumbers.tryNormalize(country, c.getPhone()).orElse(c.getPhone()))))
                         || (email != null && email.equalsIgnoreCase(c.getEmail())))
                 .findFirst();
     }

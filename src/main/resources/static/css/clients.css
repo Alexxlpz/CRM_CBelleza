@@ -1018,3 +1018,15 @@
     color: var(--text-muted);
     letter-spacing: 1px;
 }
+
+/* Aviso de alta duplicada: «Abrir su ficha» y «Dar de alta igualmente» en una fila (se apilan si no caben) */
+.duplicate-client-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.duplicate-client-actions form {
+    margin: 0;
+}

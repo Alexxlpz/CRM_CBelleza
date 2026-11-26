@@ -24,7 +24,7 @@
                 <div class="settings-grid">
                     <div>
                         <label for="name" class="form-label">Nombre Completo</label>
-                        <input type="text" id="name" name="name" class="form-control" th:value="${client.name}" required autocomplete="name">
+                        <input type="text" id="name" name="name" class="form-control" minlength="2" maxlength="100" th:value="${client.name}" required autocomplete="name">
                     </div>
                     <div>
                         <label for="phone" class="form-label">Teléfono de Contacto</label>

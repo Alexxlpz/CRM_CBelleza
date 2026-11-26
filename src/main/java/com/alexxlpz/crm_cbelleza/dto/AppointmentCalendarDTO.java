@@ -81,6 +81,8 @@ public class AppointmentCalendarDTO {
         private Long id;
         private String name;
         private String phone;
+        /** Ha borrado su cuenta: sale como «Cliente eliminado» y su ficha ya no se puede abrir. */
+        private boolean deleted;
     }
 
     @Data

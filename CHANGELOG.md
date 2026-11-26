@@ -34,6 +34,10 @@ Al sacar una versión:
 ### Arreglado
 
 - **Abrir la ficha de una clienta ya no la guarda vacía**: antes, solo con mirarla se creaba una ficha en blanco con «Última edición: ahora». Ahora solo se guarda al pulsar «Guardar», y la base de datos impide dos fichas de la misma clienta en el mismo centro (migración V36, que junta las repetidas quedándose con la que tiene datos).
+- **Poner el aviso de stock bajo ya no da error**: se guardaba, pero la página respondía con un error 500 en vez del mensaje «avisará cuando queden…».
+- **Textos demasiado largos**: el nombre y la dirección del centro, el nombre del perfil (cliente y equipo), el nombre en el alta manual de clientes, la nota al aprobar, rechazar, proponer o anular una cita y el motivo de un bloqueo tienen un tope (120, 255, 100, 120, 500 y 255 caracteres). Antes un texto más largo daba un error 500; ahora sale un mensaje y los campos no dejan escribir más.
+- **Clientes que han borrado su cuenta**: su ficha ya no se puede abrir desde el panel (ni guardarle una ficha, venderle, canjear puntos o «Darle cita»). Sus citas pasadas siguen saliendo como «Cliente eliminado», sin el botón «Ficha del Cliente», y en análisis y reseñas su nombre ya no enlaza a la ficha. Tampoco sale en «Clientes a recuperar».
+- **Alta manual con el teléfono o el correo de alguien de la cartera**: antes abría la ficha de esa otra persona diciendo «Cliente dado de alta». Ahora avisa «Ya tienes a … con ese teléfono» con «Abrir su ficha» o «Dar de alta igualmente» (por si es otra persona de la familia con el mismo número). Desde «Nueva cita» de la agenda pide elegirla en el buscador. Además, el teléfono se guarda con el formato del registro (+34 612 345 678, con el prefijo del país del centro) y el correo tiene que ser válido.
 
 ## [0.10.0-beta] - 2026-11-24
 

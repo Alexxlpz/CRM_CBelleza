@@ -71,6 +71,7 @@ public class AppointmentCalendarMapper {
                 .id(client.getId())
                 .name(client.getName())
                 .phone(client.getPhone())
+                .deleted(client.isDeleted())
                 .build();
     }
 

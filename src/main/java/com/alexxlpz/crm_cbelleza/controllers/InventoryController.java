@@ -171,10 +171,10 @@ public class InventoryController {
                            @RequestParam(required = false) Integer units,
                            RedirectAttributes redirect) {
         try {
-            Inventory item = inventoryService.setLowStockAlert(worker.getCenterId(), id, units);
+            String product = inventoryService.setLowStockAlert(worker.getCenterId(), id, units);
             redirect.addFlashAttribute("successMessage", units == null
-                    ? "«" + item.getProduct().getName() + "»: sin aviso de stock bajo (solo avisa al agotarse)."
-                    : "«" + item.getProduct().getName() + "»: avisará cuando queden " + units
+                    ? "«" + product + "»: sin aviso de stock bajo (solo avisa al agotarse)."
+                    : "«" + product + "»: avisará cuando queden " + units
                       + (units == 1 ? " unidad" : " unidades") + " o menos.");
         } catch (BusinessRuleException e) {
             redirect.addFlashAttribute("errorMessage", e.getMessage());

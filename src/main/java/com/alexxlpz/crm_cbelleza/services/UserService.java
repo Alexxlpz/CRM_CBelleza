@@ -190,7 +190,11 @@ public class UserService {
             throw new BusinessRuleException("La contraseña actual no es correcta.");
         }
         if (!FormText.isBlank(form.name())) {
-            user.setName(form.name().trim());
+            String name = FormText.collapseSpaces(form.name().trim());
+            if (name.length() < 2 || name.length() > MAX_NAME) {
+                throw new BusinessRuleException("El nombre tiene que tener entre 2 y " + MAX_NAME + " caracteres.");
+            }
+            user.setName(name);
         }
         if (form.phone() != null) {
             user.setPhone(FormText.trimToNull(form.phone()));

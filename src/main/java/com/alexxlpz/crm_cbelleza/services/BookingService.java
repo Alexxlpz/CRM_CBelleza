@@ -59,6 +59,8 @@ public class BookingService {
      * podría llenar la agenda entera del centro.
      */
     public static final int MAX_UPCOMING_BOOKINGS = 10;
+    /** Largo máximo de la nota del centro al cliente (columna {@code worker_message}). */
+    public static final int MAX_MESSAGE = 500;
 
     private final AppointmentRepository appointmentRepository;
     private final CenterRepository centerRepository;
@@ -377,7 +379,7 @@ public class BookingService {
 
         appointment.setStatus(AppointmentStatus.CONFIRMED);
         appointment.setWorker(worker);
-        appointment.setWorkerMessage(message);
+        appointment.setWorkerMessage(note(message));
         clearProposal(appointment);
         appointment.recordChange(AppointmentChange.CONFIRMED, LocalDateTime.now(clock));
         save(appointment, AppointmentChange.CONFIRMED);
@@ -391,8 +393,9 @@ public class BookingService {
         if (!appointment.getStatus().isOpen()) {
             throw new BusinessRuleException("Esta cita ya no está pendiente.");
         }
+        String note = note(message);
         appointment.setStatus(AppointmentStatus.REJECTED);
-        appointment.setWorkerMessage(message);
+        appointment.setWorkerMessage(note);
         clearProposal(appointment);
         appointment.recordChange(AppointmentChange.REJECTED, LocalDateTime.now(clock));
         save(appointment, AppointmentChange.REJECTED);
@@ -422,6 +425,7 @@ public class BookingService {
         if (times.isEmpty() || times.size() > MAX_PROPOSALS) {
             throw new BusinessRuleException("Propón entre 1 y " + MAX_PROPOSALS + " horas.");
         }
+        String note = note(message);
         LocalDateTime now = CenterClock.now(clock, center);
         User worker = workerOfCenter(centerId, appointment.getWorker() != null ? appointment.getWorker().getId() : proposerId);
         int duration = duration(appointment);
@@ -450,7 +454,7 @@ public class BookingService {
         appointment.setWorker(worker);
         appointment.setStatus(AppointmentStatus.PROPOSED);
         appointment.setProposalExpiresAt(expires);
-        appointment.setWorkerMessage(message);
+        appointment.setWorkerMessage(note);
         appointment.recordChange(AppointmentChange.PROPOSED, LocalDateTime.now(clock));
         save(appointment, AppointmentChange.PROPOSED);
     }
@@ -486,6 +490,7 @@ public class BookingService {
             throw new BusinessRuleException("Ese tratamiento está oculto en la carta. Vuelve a mostrarlo para darle cita.");
         }
         LocalDateTime start = parse(form.dateTime());
+        String note = note(form.message());
         User worker = workerOfCenter(centerId, form.workerId() != null ? form.workerId() : creatorId);
         checkSchedule(center, now, start, treatment.getDuration(), worker.getId(), null, form.outsideHoursAllowed());
         User client = clientFor(centerId, creatorId, form);
@@ -498,7 +503,7 @@ public class BookingService {
                 .worker(worker)
                 .price(treatment.priceOn(now.toLocalDate()))
                 .status(AppointmentStatus.CONFIRMED)
-                .workerMessage(FormText.trimToNull(form.message()))
+                .workerMessage(note)
                 .createdAt(LocalDateTime.now(clock))
                 .build();
         appointment.recordChange(AppointmentChange.CREATED_BY_CENTER, LocalDateTime.now(clock));
@@ -549,9 +554,10 @@ public class BookingService {
         if (appointment.getStatus() != AppointmentStatus.CONFIRMED || !appointment.getDateTime().isAfter(now)) {
             throw new BusinessRuleException("Solo se pueden anular citas confirmadas que aún no han empezado.");
         }
+        String note = note(message);
         appointment.setStatus(AppointmentStatus.CANCELLED);
-        if (!FormText.isBlank(message)) {
-            appointment.setWorkerMessage(message.trim());
+        if (note != null) {
+            appointment.setWorkerMessage(note);
         }
         appointment.recordChange(AppointmentChange.CANCELLED_BY_CENTER, LocalDateTime.now(clock));
         save(appointment, AppointmentChange.CANCELLED_BY_CENTER);
@@ -736,6 +742,15 @@ public class BookingService {
         Appointment saved = appointmentRepository.save(appointment);
         events.publishEvent(new AppointmentChangedEvent(saved.getId(), change));
         return saved;
+    }
+
+    /** La nota del centro al cliente, sin espacios de sobra (nula si está vacía); falla si pasa de {@link #MAX_MESSAGE}. */
+    private static String note(String message) {
+        String note = FormText.trimToNull(message);
+        if (note != null && note.length() > MAX_MESSAGE) {
+            throw new BusinessRuleException("La nota para el cliente no puede pasar de " + MAX_MESSAGE + " caracteres.");
+        }
+        return note;
     }
 
     private static void clearProposal(Appointment appointment) {
