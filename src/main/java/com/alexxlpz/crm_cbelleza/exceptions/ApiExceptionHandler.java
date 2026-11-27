@@ -25,6 +25,12 @@ public class ApiExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("message", ex.getMessage(), "code", "OUTSIDE_HOURS"));
     }
 
+    /** La agenda reconoce el código y pregunta si se bloquea igualmente, rechazando las solicitudes del periodo. */
+    @ExceptionHandler(com.alexxlpz.crm_cbelleza.services.AgendaBlockService.OpenRequestsException.class)
+    public ResponseEntity<Map<String, String>> openRequests(BusinessRuleException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("message", ex.getMessage(), "code", "OPEN_REQUESTS"));
+    }
+
     @ExceptionHandler(BusinessRuleException.class)
     public ResponseEntity<Map<String, String>> businessRule(BusinessRuleException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("message", ex.getMessage()));

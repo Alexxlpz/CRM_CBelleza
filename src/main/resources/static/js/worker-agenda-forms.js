@@ -5,6 +5,7 @@
  *  - Proponer al cliente de 1 a 3 horas alternativas.
  *  - Bloquear horario (vacaciones, descansos o cierre del centro).
  * Fuera del horario de reservas el servidor responde 409 con code OUTSIDE_HOURS y se pregunta si guardar igualmente.
+ * Si un bloqueo tapa solicitudes sin responder u horas propuestas, responde OPEN_REQUESTS y se pregunta si bloquear igualmente.
  * worker-calendar.js abre estos formularios y recarga la agenda cuando se guardan (AgendaForms.init({ reload })).
  */
 (function () {
@@ -79,7 +80,7 @@
      * POST con parámetros de formulario. Si la hora queda fuera del horario de reservas, pregunta
      * y repite la petición con allowOutsideHours=true. Devuelve { ok, data, message }.
      */
-    async function post(url, params, { askOutsideHours = false } = {}) {
+    async function post(url, params, { askOutsideHours = false, askOpenRequests = false } = {}) {
         const body = new URLSearchParams();
         Object.entries(params).forEach(([key, value]) => {
             if (Array.isArray(value)) value.forEach(v => body.append(key, v));
@@ -102,6 +103,15 @@
                 });
                 if (!go) return { ok: false, message: '' };
                 return post(url, { ...params, allowOutsideHours: 'true' });
+            }
+            if (askOpenRequests && payload.code === 'OPEN_REQUESTS') {
+                const go = await Cuquora.confirm(payload.message, {
+                    title: '¿Bloquear igualmente?',
+                    confirmText: 'Bloquear y avisar',
+                    tone: 'default'
+                });
+                if (!go) return { ok: false, message: '' };
+                return post(url, { ...params, releaseRequests: 'true' });
             }
             return { ok: false, message: payload.message || 'No se ha podido guardar. Revisa los datos e inténtalo de nuevo.' };
         } catch (err) {
@@ -405,7 +415,7 @@
             startsAt,
             endsAt,
             reason: document.getElementById('blockReason').value.trim()
-        });
+        }, { askOpenRequests: true });
         setBusy(blockForm, false);
         if (!result.ok) return showError(blockForm, result.message);
         Cuquora.closeModal('blockModal');

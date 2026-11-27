@@ -581,7 +581,7 @@
                             <tr>
                                 <td><code>/worker/agenda-blocks, /worker/agenda-blocks/{id}/delete</code></td>
                                 <td><span class="http-post">POST</span></td>
-                                <td>Crear o quitar un bloqueo de horario (JSON)</td>
+                                <td>Crear o quitar un bloqueo de horario (JSON). Si tapa solicitudes sin responder u horas propuestas responde 409 con <code>code: OPEN_REQUESTS</code>; con <code>releaseRequests=true</code> bloquea y las rechaza o les quita esas horas</td>
                                 <td>❌ Login</td>
                                 <td>❌ Bloqueado</td>
                                 <td>✅ Permitido</td>

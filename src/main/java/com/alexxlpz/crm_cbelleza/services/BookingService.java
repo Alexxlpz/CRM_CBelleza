@@ -33,6 +33,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -590,6 +591,71 @@ public class BookingService {
         }
         appointment.setStatus(AppointmentStatus.CONFIRMED);
         appointmentRepository.save(appointment);
+    }
+
+    /* =====================================================================
+       Bloqueos de agenda
+       ===================================================================== */
+
+    /**
+     * Qué les pasaría a las solicitudes sin responder y a las horas propuestas al bloquear [start, end)
+     * ({@code workerId} nulo = cierre de todo el centro): cuántas se rechazarían y cuántas propuestas
+     * perderían alguna hora pero seguirían abiertas.
+     */
+    public record BlockImpact(List<Appointment> rejected, List<Appointment> trimmed) {
+        public boolean isEmpty() {
+            return rejected.isEmpty() && trimmed.isEmpty();
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public BlockImpact blockImpact(Long centerId, Long workerId, LocalDateTime start, LocalDateTime end) {
+        List<Appointment> rejected = new ArrayList<>();
+        List<Appointment> trimmed = new ArrayList<>();
+        for (Appointment app : appointmentRepository.findByCenterIdAndStatusIn(centerId,
+                List.of(AppointmentStatus.PENDING, AppointmentStatus.PROPOSED))) {
+            if (workerId != null && (app.getWorker() == null || !app.getWorker().getId().equals(workerId))) {
+                continue;
+            }
+            if (app.getStatus() == AppointmentStatus.PENDING) {
+                // Las que ya han pasado se quedan como «Sin respuesta»: no se avisa de nada al cliente
+                if (app.overlaps(start, end) && app.getDateTime().isAfter(CenterClock.now(clock, app.getCenter()))) {
+                    rejected.add(app);
+                }
+                continue;
+            }
+            long inside = app.getProposals().stream().filter(p -> proposalOverlaps(app, p, start, end)).count();
+            if (inside > 0 && inside == app.getProposals().size()) {
+                rejected.add(app);
+            } else if (inside > 0) {
+                trimmed.add(app);
+            }
+        }
+        return new BlockImpact(rejected, trimmed);
+    }
+
+    /**
+     * Tras bloquear [start, end): rechaza las solicitudes que caen dentro (el cliente recibe el aviso con
+     * {@code message}) y quita de las propuestas las horas bloqueadas; si no le queda ninguna, también se rechaza.
+     */
+    @Transactional
+    public void releaseForBlock(Long centerId, Long workerId, LocalDateTime start, LocalDateTime end, String message) {
+        BlockImpact impact = blockImpact(centerId, workerId, start, end);
+        for (Appointment app : impact.rejected()) {
+            app.setStatus(AppointmentStatus.REJECTED);
+            app.setWorkerMessage(note(message));
+            clearProposal(app);
+            app.recordChange(AppointmentChange.REJECTED, LocalDateTime.now(clock));
+            save(app, AppointmentChange.REJECTED);
+        }
+        for (Appointment app : impact.trimmed()) {
+            app.getProposals().removeIf(p -> proposalOverlaps(app, p, start, end));
+            appointmentRepository.save(app);
+        }
+    }
+
+    private static boolean proposalOverlaps(Appointment app, AppointmentProposal proposal, LocalDateTime start, LocalDateTime end) {
+        return start.isBefore(proposal.getDateTime().plusMinutes(app.getDurationMinutes())) && end.isAfter(proposal.getDateTime());
     }
 
     /* =====================================================================

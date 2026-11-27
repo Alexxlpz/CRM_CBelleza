@@ -153,8 +153,9 @@ public class WorkerAppointmentApiController {
                                       @RequestParam(defaultValue = "false") boolean wholeCenter,
                                       @RequestParam String startsAt,
                                       @RequestParam String endsAt,
-                                      @RequestParam(required = false) String reason) {
-        return AgendaBlockDTO.of(blockService.create(worker.getCenterId(), worker.getId(), workerId, wholeCenter, startsAt, endsAt, reason));
+                                      @RequestParam(required = false) String reason,
+                                      @RequestParam(defaultValue = "false") boolean releaseRequests) {
+        return AgendaBlockDTO.of(blockService.create(worker.getCenterId(), worker.getId(), workerId, wholeCenter, startsAt, endsAt, reason, releaseRequests));
     }
 
     @PostMapping("/worker/agenda-blocks/{id}/delete")

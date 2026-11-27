@@ -1,6 +1,9 @@
 package com.alexxlpz.crm_cbelleza.services;
 
+import com.alexxlpz.crm_cbelleza.booking.CenterClock;
 import com.alexxlpz.crm_cbelleza.booking.CenterTimeZones;
+import com.alexxlpz.crm_cbelleza.entities.Appointment;
+import com.alexxlpz.crm_cbelleza.entities.AppointmentStatus;
 import com.alexxlpz.crm_cbelleza.entities.Center;
 import com.alexxlpz.crm_cbelleza.entities.DataProcessing;
 import com.alexxlpz.crm_cbelleza.exceptions.BusinessRuleException;
@@ -12,6 +15,7 @@ import com.alexxlpz.crm_cbelleza.forms.Emails;
 import com.alexxlpz.crm_cbelleza.forms.SocialLinks;
 import com.alexxlpz.crm_cbelleza.forms.FormText;
 import com.alexxlpz.crm_cbelleza.forms.PhoneNumbers;
+import com.alexxlpz.crm_cbelleza.repositories.AppointmentRepository;
 import com.alexxlpz.crm_cbelleza.repositories.CenterRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +23,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.text.Normalizer;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -37,10 +43,12 @@ public class CenterService {
     public static final int MAX_CABINS = 50;
 
     private final CenterRepository centerRepository;
+    private final AppointmentRepository appointmentRepository;
     private final Clock clock;
 
-    public CenterService(CenterRepository centerRepository, Clock clock) {
+    public CenterService(CenterRepository centerRepository, AppointmentRepository appointmentRepository, Clock clock) {
         this.centerRepository = centerRepository;
+        this.appointmentRepository = appointmentRepository;
         this.clock = clock;
     }
 
@@ -283,8 +291,43 @@ public class CenterService {
             if (form.cabins() < 1 || form.cabins() > MAX_CABINS) {
                 throw new FieldException("cabins", "El número de cabinas tiene que estar entre 1 y " + MAX_CABINS + ".");
             }
+            int current = center.getCabins() != null ? center.getCabins() : 1;
+            if (form.cabins() < current) {
+                ensureCabinsFit(center, form.cabins());
+            }
             center.setCabins(form.cabins());
         }
         return centerRepository.save(center);
     }
+
+    /**
+     * Al bajar las cabinas, ninguna cita confirmada por venir puede quedarse sin sitio: si en algún momento hay más
+     * citas a la vez que {@code cabins}, se avisa del primero para que mueva o anule alguna.
+     */
+    private void ensureCabinsFit(Center center, int cabins) {
+        LocalDateTime now = CenterClock.now(clock, center);
+        List<Appointment> upcoming = appointmentRepository.findByCenterIdAndStatusInAndDateTimeAfterOrderByDateTimeAsc(
+                        center.getId(), List.of(AppointmentStatus.CONFIRMED), now.minusDays(1)).stream()
+                .filter(app -> app.getEndDateTime().isAfter(now))
+                .toList();
+        // Recorre inicios (+1) y finales (-1) en orden; un final y un inicio a la misma hora no se solapan
+        List<Map.Entry<LocalDateTime, Integer>> edges = new ArrayList<>();
+        upcoming.forEach(app -> {
+            edges.add(Map.entry(app.getDateTime(), 1));
+            edges.add(Map.entry(app.getEndDateTime(), -1));
+        });
+        edges.sort(Map.Entry.<LocalDateTime, Integer>comparingByKey().thenComparing(Map.Entry.comparingByValue()));
+        int atOnce = 0;
+        for (Map.Entry<LocalDateTime, Integer> edge : edges) {
+            atOnce += edge.getValue();
+            if (atOnce > cabins) {
+                LocalDateTime moment = edge.getKey();
+                throw new FieldException("cabins", "El " + moment.format(BUSY_MOMENT) + " hay " + atOnce
+                        + " citas confirmadas a la vez. Para dejar " + cabins + (cabins == 1 ? " cabina" : " cabinas")
+                        + ", mueve o anula alguna antes.");
+            }
+        }
+    }
+
+    private static final DateTimeFormatter BUSY_MOMENT = DateTimeFormatter.ofPattern("d 'de' MMMM 'a las' HH:mm", Locale.forLanguageTag("es-ES"));
 }

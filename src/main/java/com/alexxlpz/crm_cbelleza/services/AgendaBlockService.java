@@ -16,6 +16,7 @@ import com.alexxlpz.crm_cbelleza.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.Serial;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
@@ -24,7 +25,8 @@ import java.util.List;
 /**
  * Bloqueos de agenda: vacaciones o descansos de un trabajador y cierres de todo el centro.
  * Mientras dura un bloqueo no se pueden poner citas a esa persona (o en el centro). No se puede bloquear
- * un periodo que ya tiene citas confirmadas: primero hay que moverlas o anularlas.
+ * un periodo que ya tiene citas confirmadas: primero hay que moverlas o anularlas. Las solicitudes sin responder
+ * y las horas propuestas que caen dentro se rechazan o se quitan al bloquear, después de que el trabajador lo confirme.
  * Cada trabajador bloquea y desbloquea su propia agenda; cerrar el centro o tocar la agenda de otra persona
  * es cosa del dueño del centro.
  */
@@ -39,6 +41,7 @@ public class AgendaBlockService {
     private final CenterRepository centers;
     private final UserRepository users;
     private final CenterAccess access;
+    private final BookingService booking;
     private final Clock clock;
 
     public AgendaBlockService(AgendaBlockRepository blocks,
@@ -46,8 +49,10 @@ public class AgendaBlockService {
                               CenterRepository centers,
                               UserRepository users,
                               CenterAccess access,
+                              BookingService booking,
                               Clock clock) {
         this.access = access;
+        this.booking = booking;
         this.blocks = blocks;
         this.appointments = appointments;
         this.centers = centers;
@@ -64,11 +69,19 @@ public class AgendaBlockService {
 
     /**
      * Crea un bloqueo. {@code wholeCenter} = cierre del centro; si no, es de {@code workerId}
-     * (por defecto, quien lo crea).
+     * (por defecto, quien lo crea). Si hay solicitudes sin responder u horas propuestas en ese periodo y no llega
+     * {@code releaseRequests}, lanza {@link OpenRequestsException} para que la agenda pregunte; con él, se rechazan
+     * (avisando al cliente) o pierden esas horas.
      */
     @Transactional
     public AgendaBlock create(Long centerId, Long creatorId, Long workerId, boolean wholeCenter,
                               String startsAt, String endsAt, String reason) {
+        return create(centerId, creatorId, workerId, wholeCenter, startsAt, endsAt, reason, false);
+    }
+
+    @Transactional
+    public AgendaBlock create(Long centerId, Long creatorId, Long workerId, boolean wholeCenter,
+                              String startsAt, String endsAt, String reason, boolean releaseRequests) {
         Center center = centers.findByIdForUpdate(centerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Centro no encontrado."));
         LocalDateTime start = parse(startsAt);
@@ -103,7 +116,13 @@ public class AgendaBlockService {
                     + " en ese periodo. Muévelas o anúlalas antes de bloquearlo.");
         }
 
-        return blocks.save(AgendaBlock.builder()
+        Long blockedWorkerId = worker != null ? worker.getId() : null;
+        BookingService.BlockImpact impact = booking.blockImpact(centerId, blockedWorkerId, start, end);
+        if (!impact.isEmpty() && !releaseRequests) {
+            throw new OpenRequestsException(impactMessage(impact));
+        }
+
+        AgendaBlock saved = blocks.save(AgendaBlock.builder()
                 .center(center)
                 .worker(worker)
                 .startsAt(start)
@@ -111,6 +130,43 @@ public class AgendaBlockService {
                 .reason(why)
                 .createdBy(users.getReferenceById(creatorId))
                 .build());
+        if (!impact.isEmpty()) {
+            booking.releaseForBlock(centerId, blockedWorkerId, start, end, worker == null
+                    ? "El centro estará cerrado a esa hora. Pide otra hora cuando quieras."
+                    : worker.getName() + " no estará disponible a esa hora. Pide otra hora o elige a otro profesional.");
+        }
+        return saved;
+    }
+
+    /** «Hay 2 solicitudes sin responder en ese periodo. Si lo bloqueas, se rechazarán y avisaremos a los clientes…». */
+    private static String impactMessage(BookingService.BlockImpact impact) {
+        StringBuilder text = new StringBuilder();
+        int rejected = impact.rejected().size();
+        int trimmed = impact.trimmed().size();
+        if (rejected > 0) {
+            text.append(rejected == 1
+                    ? "Hay 1 solicitud sin responder en ese periodo. Si lo bloqueas, se rechazará y avisaremos al cliente para que pida otra hora."
+                    : "Hay " + rejected + " solicitudes sin responder en ese periodo. Si lo bloqueas, se rechazarán y avisaremos a los clientes para que pidan otra hora.");
+        }
+        if (trimmed > 0) {
+            if (!text.isEmpty()) {
+                text.append(' ');
+            }
+            text.append(trimmed == 1
+                    ? "A 1 propuesta se le quitarán las horas que caen dentro; el cliente podrá elegir entre las demás."
+                    : "A " + trimmed + " propuestas se les quitarán las horas que caen dentro; los clientes podrán elegir entre las demás.");
+        }
+        return text.toString();
+    }
+
+    /** Hay solicitudes u horas propuestas en el periodo: la agenda pregunta antes de bloquear. */
+    public static class OpenRequestsException extends BusinessRuleException {
+        @Serial
+        private static final long serialVersionUID = 1L;
+
+        public OpenRequestsException(String message) {
+            super(message);
+        }
     }
 
     /** Quita un bloqueo: el suyo cualquier trabajador; un cierre del centro o el de otra persona, solo el dueño. */
