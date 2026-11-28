@@ -163,7 +163,7 @@ services:
   cloudflared:
     # Versión fija: con «latest» cada reconstrucción podría traer una versión nueva sin probar. Para actualizar, cambia
     # el número por uno de https://github.com/cloudflare/cloudflared/releases y vuelve a construir.
-    image: cloudflare/cloudflared:2026.10.7
+    image: cloudflare/cloudflared:2026.11.2
     container_name: crm_cbelleza_tunnel
     profiles: ["cloudflare"]
     command: tunnel --no-autoupdate run
