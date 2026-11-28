@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.7
 
 # --- Build Stage ---
-FROM maven:3.9.9-eclipse-temurin-21 AS build
+FROM maven:3.9-eclipse-temurin-26 AS build
 WORKDIR /workspace
 
 # Primero solo pom.xml y las dependencias: Docker guarda esta capa y, mientras pom.xml no cambie, cada
