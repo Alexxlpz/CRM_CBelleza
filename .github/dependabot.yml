@@ -1,0 +1,65 @@
+# Dependabot: cada lunes mira si hay versiones nuevas de las librerías y de las imágenes de Docker y abre un
+# pull request por grupo. Los avisos de seguridad (CVE) llegan además en cuanto se publican, sin esperar al lunes,
+# si en GitHub están activadas las «Dependabot security updates» (Settings > Code security).
+version: 2
+updates:
+  # App principal (pom.xml de la raíz)
+  - package-ecosystem: maven
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "07:00"
+      timezone: Europe/Madrid
+    open-pull-requests-limit: 5
+    groups:
+      # Parches y versiones menores juntos en un solo pull request para no llenar la lista
+      menores:
+        update-types: [minor, patch]
+    commit-message:
+      prefix: "deps"
+
+  # API de productos (product-api/pom.xml)
+  - package-ecosystem: maven
+    directory: /product-api
+    schedule:
+      interval: weekly
+      day: monday
+      time: "07:00"
+      timezone: Europe/Madrid
+    open-pull-requests-limit: 5
+    groups:
+      menores:
+        update-types: [minor, patch]
+    commit-message:
+      prefix: "deps(product-api)"
+
+  # Imágenes base de los Dockerfile (Maven + JDK 21 para compilar, JRE para ejecutar)
+  - package-ecosystem: docker
+    directories: [/, /product-api]
+    schedule:
+      interval: weekly
+      day: monday
+      time: "07:00"
+      timezone: Europe/Madrid
+    ignore:
+      # Cambiar de JDK (21 → 25) es una decisión aparte: el pom fija java.version=21
+      - dependency-name: "*"
+        update-types: [version-update:semver-major]
+    commit-message:
+      prefix: "deps(docker)"
+
+  # Imágenes de docker-compose.yml (PostgreSQL y cloudflared)
+  - package-ecosystem: docker-compose
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "07:00"
+      timezone: Europe/Madrid
+    ignore:
+      # PostgreSQL 16 → 17 no se puede hacer solo cambiando la imagen: hay que volcar y restaurar los datos
+      - dependency-name: postgres
+        update-types: [version-update:semver-major]
+    commit-message:
+      prefix: "deps(docker)"
